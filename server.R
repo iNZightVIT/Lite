@@ -680,7 +680,7 @@ shinyServer(function(input, output, session) {
     ##--------------------##
     ##  Visualize Module  ##
     ##--------------------##
-    source("server-elements/visualize-server-squared.R", local = TRUE)
+    source("server-elements/visualize-server.R", local = TRUE)
     source("gui-elements/visualize-gui.R", local = TRUE)
     output$visualize.module <- renderUI({
         input$selector

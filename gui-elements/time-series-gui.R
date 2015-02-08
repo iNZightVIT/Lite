@@ -107,7 +107,7 @@ ts.sidebarPanel <- function() {
         ##  y- axes labels. This is set to "No" by default to save screen
         ##  real estate.
         radioButtons(inputId = "customize_labels",
-                     label =  "Change Labels: ",
+                     label =  "Customize Labels: ",
                      choices =
                          c("No" = 1,
                            "Yes" = 2),

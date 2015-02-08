@@ -14,10 +14,16 @@
 
 library(iNZightTS)
 
+ts.data <- reactive({
+    input$selector
+    data
+    ts.data <- data
+})
+
 ##  Initial Data Handling.
 date_check <- function() {
     ##  Set of error checks.
-    if (is.null(data)) {
+    if (is.null(ts.data())) {
         return(FALSE)
         ## stop("Please load a dataset.")
     }
@@ -25,12 +31,12 @@ date_check <- function() {
         return(FALSE)
         ## stop("Your dataset must have suitable time variables.")
     }
-    if (!(input$select_timevars %in% names(data))) {
+    if (!(input$select_timevars %in% names(ts.data()))) {
         ## stop("Please enter a valid variable name.")
         return(FALSE)
     }
     ##  We obtain a subset of the data.
-    subdata <- data[, input$select_timevars]
+    subdata <- ts.data()[, input$select_timevars]
     ##  If any of the time series structures return an NA,
     ##  return TRUE. Else, return FALSE.
     if (any(is.na(iNZightTS:::get.ts.structure(subdata)))) {
@@ -46,7 +52,7 @@ date_check <- function() {
 ##  Validation Output  ##
 ##---------------------##
 output$validate <- renderText({
-    if (is.null(data)) {
+    if (is.null(ts.data())) {
         return()
     }
     if (is.null(input$select_variables)) {
@@ -62,6 +68,13 @@ output$validate <- renderText({
 })
 
 
+
+##  Variable Names
+variable.names <- reactive({
+    input$select_variables
+    variable.names <- which(names(ts.data()) %in% input$select_variables)
+})
+    
 ##-------------------------------------##
 ##  Plot Outputs: Single Series Plots  ##
 ##-------------------------------------##
@@ -71,8 +84,8 @@ output$timeseries_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         rawplot(
-            iNZightTS(data,
-                      var = which(names(data) %in% input$select_variables)),
+            iNZightTS(ts.data(),
+                      var = variable.names()),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season)
@@ -84,8 +97,8 @@ output$timeseries_plot <- renderPlot({
 ##     input$stop_animate
 ##     if (length(input$singleSeriesTabs) > 0) {
 ##         rawplot(
-##             iNZightTS(data,
-##                       var = which(names(data) %in% input$select_variables)),
+##             iNZightTS(ts.data(),
+##                       var = variable.names()),
 ##             xlab = input$provide_xlab,
 ##             ylab = input$provide_ylab,
 ##             multiplicative = input$choose_season)
@@ -110,8 +123,8 @@ output$timeseries_plot <- renderPlot({
 ##     input$start_animate
 ##     if (length(input$singleSeriesTabs) > 0) {
 ##         rawplot(
-##             iNZightTS(data,
-##                       var = which(names(data) %in% input$select_variables)),
+##             iNZightTS(ts.data(),
+##                       var = variable.names()),
 ##             xlab = input$provide_xlab,
 ##             ylab = input$provide_ylab,
 ##             multiplicative = input$choose_season,
@@ -139,8 +152,8 @@ output$seasonal_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         seasonplot(
-            iNZightTS(data,
-                      var = which(names(data) %in% input$select_variables)),
+            iNZightTS(ts.data(),
+                      var = variable.names()),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season)
@@ -152,8 +165,8 @@ output$decomposed_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         decompositionplot(
-            iNZightTS(data,
-                      var = which(names(data) %in% input$select_variables)),
+            iNZightTS(ts.data(),
+                      var = variable.names()),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season)
@@ -166,8 +179,8 @@ output$trSeasonal_plot <- renderPlot({
     if (length(input$singleSeriesTabs) > 0) {
         iNZightTS:::recompose(
             iNZightTS:::decompositionplot(
-                iNZightTS(data,
-                          var = which(names(data) %in% input$select_variables)),
+                iNZightTS(ts.data(),
+                          var = variable.names()),
                 xlab = input$provide_xlab,
                 ylab = input$provide_ylab,
                 multiplicative = input$choose_season),
@@ -180,8 +193,8 @@ output$forecast_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         forecastplot(
-            iNZightTS(data,
-                      var = which(names(data) %in% input$select_variables)),
+            iNZightTS(ts.data(),
+                      var = variable.names()),
             ## xlab = input$provide_xlab,
             ## ylab = input$provide_ylab,
             multiplicative = input$choose_season)
@@ -192,8 +205,8 @@ output$forecast_summary <- renderPrint({
     input$selctor
     if (length(input$singleSeriesTabs) > 0) {
         forecastplot(
-            iNZightTS(data,
-                      var = which(names(data) %in% input$select_variables)),
+            iNZightTS(ts.data(),
+                      var = variable.names()),
             multiplicative = input$choose_season,
             show = FALSE)
     }
@@ -208,23 +221,21 @@ output$multiple_single_plot <- renderPlot({
     input$selctor
     if (length(input$singleSeriesTabs) > 0) {
         iNZightTS:::compareplot(
-            iNZightTS(data,
-                      var = which(names(data) %in% input$select_variables)),
+            iNZightTS(ts.data(),
+                      var = variable.names()),
             multiplicative = input$choose_season)
     }
 })
 
-
 output$multipleSeries_single_layout <- renderUI({
     input$selctor
     if (length(input$multipleSeriesTabs) > 0) {
-        plotOutput("multiple_single_plot", height = "700px")
-        ## columns <- length(input$multi_series_vars)
-        ## if (columns <= 8) {
-        ##     plotOutput("multiple_single_plot", height = "600px")
-        ## } else {
-        ##     plotOutput("multiple_single_plot", height = "900px")
-        ## }
+        columns <- length(input$multi_series_vars)
+        if (columns <= 6) {
+            plotOutput("multiple_single_plot", height = "500px")
+        } else {
+            plotOutput("multiple_single_plot", height = "800px")
+        }
     }
 })
 
@@ -233,9 +244,9 @@ output$multiple_multi_plot <- renderPlot({
     input$selector
     if (length(input$multipleSeriesTabs) > 0) {
         multiseries(
-            iNZightTS(data,
-                      var = which(names(data) %in% input$select_variables)),
-            multiplicative = input$choose_season)
+            iNZightTS(ts.data(),
+                      var = which(names(ts.data() %in% input$select_variables)),
+            multiplicative = input$choose_season))
     }
 })
 
@@ -244,13 +255,12 @@ output$multiple_multi_plot <- renderPlot({
 output$multipleSeries_multi_layout <- renderUI({
     input$selector
     if (length(input$multipleSeriesTabs) > 0) {
-        plotOutput("multiple_multi_plot", height = "700px")
-        ## columns <- length(input$multi_series_vars)
-        ## if (columns <= 8) {
-        ##     plotOutput("multiple_multi_plot", height = "600px")
-        ## } else {
-        ##     plotOutput("multiple_multi_plot", height = "900px")
-        ## }
+        columns <- length(input$multi_series_vars)
+        if (columns <= 5) {
+            plotOutput("multiple_multi_plot", height = "500px")
+        } else {
+            plotOutput("multiple_multi_plot", height = "800px")
+        }
     }
 })
 
