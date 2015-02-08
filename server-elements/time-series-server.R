@@ -14,6 +14,7 @@
 
 library(iNZightTS)
 
+##  Reactive data
 ts.data <- reactive({
     input$selector
     data
