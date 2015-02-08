@@ -90,7 +90,7 @@ shinyUI(
 		       target = "_top">
 		      Contact Us
 		    </a>
-                    <br><br>
+                    <br>
                     &nbsp;© 2015 iNZight | All Rights Reserved 
 		  </span>
 		  <span style = "float:right;">
