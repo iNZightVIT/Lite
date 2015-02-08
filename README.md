@@ -46,8 +46,10 @@ Script for shiny server.
 - ui.R:
 Defines the main GUI.
 
-This repository will gradually be transformed into the following format throughout 2015:
+Note:
+-----
 
+This repository will gradually be changed into the following format throughout 2015:
 
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight *Lite*. 
@@ -58,12 +60,12 @@ Each panel has its own directory within 'panels', and each sub-panel has its own
 
 The file names adhere to the following guidelines:
 
-N_panel-name
-M_sub-panel-name
-1_panel-server.R
-2_panel-gui.R
-3_panel-help.R
-4_panel-other.R
+- N_panel-name
+- M_sub-panel-name
+- 1_panel-server.R
+- 2_panel-gui.R
+- 3_panel-help.R
+- 4_panel-other.R
 
 - www:
 This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
