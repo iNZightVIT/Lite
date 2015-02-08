@@ -1,0 +1,28 @@
+help.modify = function(){
+  helpModal('Modify data','transform_columns',inclMD("gui-elements/notes/transform.explanation.md"))
+}
+
+get.transform.sidebar =  function(){
+  list(selectInput("select.columns", "Select Columns", choices = c("",colnames(data)),multiple=T,selectize=T),br(),
+       selectInput("select.transform", "Select Transformation", 
+                   choices = c("", "convert to categorical", "change factor","add","subtract","multiply","divide","log","root","square","abs","center",
+                               "standardize","median split","reverse-coding","copy","change sign"),
+                   multiple=F,selectize=F),br(),
+       actionButton("transform","Transform"),br(),br(),textOutput("status"),br(),br(),help.modify(),"HELP",br())
+}
+
+transform.data.panel =function(){
+  if(is.null(data)){
+    sidebarLayout(
+      sidebarPanel(help.modify()),
+      mainPanel(
+        h1("Please select or import a data set.")
+      )
+    )
+  }else{
+    sidebarLayout(
+        sidebarPanel(get.transform.sidebar()),
+        mainPanel(dataTableOutput(outputId="table_part"))
+    )
+  }
+}

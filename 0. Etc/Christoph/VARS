@@ -1,0 +1,16 @@
+# This file stores all the variables which might be passed in when iNZight online is started.
+# Lines in this file which start with # or emty lines are ignored unless the function 'get.vars' in global.R is changed.
+# The format is <variable name>=<variable>
+# only specific variables can be passed in. Those varaibles are defined in global.R. Others can be specified 
+# there and added to the list in global.R. Just add the variables you use in the vars vector in global.R.
+
+######################################################################################################################
+# Data directory : specify a directory where the data set are located. The default is the "data" directory in 
+# iNZight-Online root directory.
+######################################################################################################################
+data.dir=
+
+######################################################################################################################
+# Version number : Specify a version number to be displayed in the about directory
+######################################################################################################################
+version=0.9

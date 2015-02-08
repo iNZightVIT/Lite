@@ -1,0 +1,57 @@
+export(vit)
+export(iNZightVIT)
+export(vitBugReport)
+export(updateVit)
+
+import(methods)
+import(grid)
+import(gWidgets)
+import(RGtk2)
+import(gWidgetsRGtk2)
+import(RODBC)
+
+# Just grabbing everything here *except* id, because
+# it breaks gWidgets::id
+importFrom(plyr, ., a_ply, aaply, adply, alply, amv_dimnames, arrange,
+                 as.quoted, catcolwise, colwise, compact, count,
+                 create_progress_bar, d_ply, daply, ddply, defaults, desc,
+                 dlply, each, empty, eval.quoted, failwith, idata.frame,
+                 is.discrete, is.formula, is.quoted, isplit2, join.keys,
+                 join, l_ply, laply, ldply, liply, llply, m_ply, maply,
+                 match_df, mdply, mlply, mutate, numcolwise, progress_none,
+                 progress_text, progress_tk, progress_win, quickdf, r_ply,
+                 raply, rbind.fill.matrix, rbind.fill, rdply, rename,
+                 rlply, round_any, splat, split_labels, strip_splits,
+                 summarise, summarize, true, try_default, tryapply, unrowname,
+                 vaggregate)
+
+S3method("drawDetails", "boxplot")
+S3method("editDetails", "boxplot")
+S3method("validDetails", "boxplot")
+
+S3method("drawDetails", "confint")
+S3method("editDetails", "confint")
+S3method("validDetails", "confint")
+
+S3method("drawDetails", "coldatatext")
+S3method("editDetails", "coldatatext")
+S3method("validDetails", "coldatatext")
+
+S3method("drawDetails", "datatext")
+S3method("editDetails", "datatext")
+S3method("validDetails", "datatext")
+
+S3method("drawDetails", "ghosts")
+S3method("editDetails", "ghosts")
+
+S3method("drawDetails", "hist")
+S3method("editDetails", "hist")
+S3method("validDetails", "hist")
+
+S3method("drawDetails", "kpropbar")
+S3method("editDetails", "kpropbar")
+S3method("validDetails", "kpropbar")
+
+S3method("drawDetails", "propbar")
+S3method("editDetails", "propbar")
+S3method("validDetails", "propbar")

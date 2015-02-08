@@ -1,0 +1,99 @@
+Package: vit
+License: GPL-2
+Version: 1.2.1
+Title: Visual Inference Tools
+LazyData: true
+Type: Package
+Authors@R: c(person("Garrett", "Grolemund", role = "aut",
+                    email = "grolemund@rice.edu"),
+             person("Simon", "Potter", role = c("aut", "cre"),
+                    email = "spot023@aucklanduni.ac.nz"),
+             person("Ben", "Stevenson", role = "aut",
+                    email = "bcs5@st-andrews.ac.uk"),
+             person("Vivian", "Li", role = "ctb"),
+             person("Danny", "Chang", role = "ctb"))
+Description: Traditional methods of teaching statistical inference
+    rely on concepts that are unfamiliar to students, such as
+    probability distributions. This may overwhelm a student's
+    cognitive load and hinder understanding. These tools simplify the
+    intuition behind inference to a visual level. They can be used to
+    develop a student's intuitions about inference before teaching
+    mathematical and probabilistic concepts.
+Enhances: iNZight
+Depends: R (>= 2.15), RGtk2
+Imports: methods, grid, gWidgets, gWidgetsRGtk2, plyr, RODBC
+Suggests: Acinonyx, png
+Collate:
+    'canvas-refclass.R'
+    'canvas-viewports.R'
+    'canvas-plotdata.R'
+    'data-methods-1d-categorical.R'
+    'data-methods-1d-numeric.R'
+    'data-methods-2d-categorical.R'
+    'data-methods-2d-mixed.R'
+    'data-methods-2d-numeric.R'
+    'error-checks.R'
+    'grob-boxplot.R'
+    'grob-ci.R'
+    'grob-coloureddatatext.R'
+    'grob-datatext.R'
+    'grob-ghosts.R'
+    'grob-hist.R'
+    'grob-kpropbar.R'
+    'grob-propbar.R'
+    'gui-bootstrap.R'
+    'gui-CI.R'
+    'gui-environment.R'
+    'gui-functions.R'
+    'gui-interface.R'
+    'gui-menus.R'
+    'gui-permutation.R'
+    'gui-permvar.R'
+    'gui-sampvar.R'
+    'helpers.R'
+    'load-functions.R'
+    'methods-bootstrapping-IQR.R'
+    'methods-bootstrapping-mean.R'
+    'methods-bootstrapping-mean-diff.R'
+    'methods-bootstrapping-median.R'
+    'methods-bootstrapping-median-diff.R'
+    'methods-bootstrapping-proportion.R'
+    'methods-bootstrapping-proportion-diff.R'
+    'methods-bootstrapping-LQ.R'
+    'methods-bootstrapping-LQ-diff.R'
+    'methods-bootstrapping-slope.R'
+    'methods-bootstrapping-UQ.R'
+    'methods-bootstrapping-UQ-diff.R'
+    'methods-CI-mean.R'
+    'methods-CI-median.R'
+    'methods-CI-proportion.R'
+    'methods-permvar-mean-ksample.R'
+    'methods-permvar-mean.R'
+    'methods-permvar-median-ksample.R'
+    'methods-permvar-median.R'
+    'methods-permvar-proportion.R'
+    'methods-permvar-proportion-ksample.R'
+    'methods-permutation-mean-ksample.R'
+    'methods-permutation-mean.R'
+    'methods-permutation-mean-paired.R'
+    'methods-permutation-median-ksample.R'
+    'methods-permutation-median.R'
+    'methods-permutation-median-paired.R'
+    'methods-permutation-proportion.R'
+    'methods-permutation-proportion-ksample.R'
+    'methods-permutation-slope.R'
+    'methods-sampvar-IQR.R'
+    'methods-sampvar-default.R'
+    'methods-sampvar-default-diff.R'
+    'methods-sampvar-mean.R'
+    'methods-sampvar-mean-diff.R'
+    'methods-sampvar-median.R'
+    'methods-sampvar-median-diff.R'
+    'methods-sampvar-LQ.R'
+    'methods-sampvar-LQ-diff.R'
+    'methods-sampvar-UQ.R'
+    'methods-sampvar-UQ-diff.R'
+    'methods-sampvar-proportion.R'
+    'methods-sampvar-proportion-diff.R'
+    'methods-sampvar-slope.R'
+    'stackPoints.R'

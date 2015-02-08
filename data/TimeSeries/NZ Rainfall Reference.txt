@@ -1,0 +1,14 @@
+New Zealand Rainfall:
+Reference and data description.	
+
+FILE: 	NZRainfall.csv
+SOURCE: http://www.niwa.co.nz/
+LOGIN: http://cliflo.niwa.co.nz/
+DESCRIPTION:	Monthly rainfall (mm)
+TIME FRAME: 	Monthly totals from January 2000 to October 2012
+VARIABLES:	
+Auckland	
+Christchurch	
+Dunedin	
+Hamilton	
+Wellington

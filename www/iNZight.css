@@ -1,0 +1,44 @@
+.btn {
+  color: blue;
+  background: #888888;
+}
+
+body, 
+.control-group.shiny-input-radiogroup,
+.well {
+    background-color: #cfcfcf !important;
+}
+
+.image-header{
+  padding: 5px 20px; width: '100%';
+  background-color: #cfcfcf !important;
+}
+
+.page-footer{
+  padding: 0px 0px; width: '100%';
+  background-color: #cfcfcf !important;
+}
+
+.page-spacer{
+  background-color: #C0C0C0 !important;
+  padding: 100px 20px; width: '100%';
+  border: 2px solid;
+  border-color: #888888;
+  border-radius: 25px;
+}
+
+.page-divider{
+  background-color: #C0C0C0 !important;
+  padding: 3px 20px; width: '100%';
+  border: 2px solid;
+  border-color: #888888;
+  border-radius: 25px;
+}
+
+.version {
+  color:red;
+}
+
+.horizontal-line {
+  color:red;
+}

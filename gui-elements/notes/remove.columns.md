@@ -1,0 +1,2 @@
+<h5>Remove columns</h5>
+The selected data set is displayed in the table on the left. When columns are selected those are removed from the data. Only when the "Remove columns" button is pressed the currently selected data set is changed. Be very careful with this feature. Accidently removed columns can only be added by repeating the work to obtain them. As long as the button was not pressed, columns can be readded by removing the selection in the dropdown menu. Set the curser behind the column which should be readded and press delete or backspace on your keyboard.
