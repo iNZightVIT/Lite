@@ -90,7 +90,8 @@ shinyUI(
 		       target = "_top">
 		      Contact Us
 		    </a>
-                    <br> &nbsp; © 2015 iNZight | All Rights Reserved 
+                    <br> &nbsp; 
+                      © 2015 iNZight | All Rights Reserved 
 		  </span>
 		  <span style = "float:right;">
                     <a href = "http://new.censusatschool.org.nz/">
