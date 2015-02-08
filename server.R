@@ -1,6 +1,7 @@
 library(iNZightPlots)
-library(gpairs)
 library(iNZightTS)
+library(markdown)
+library(gpairs)
 
 shinyServer(function(input, output, session) {
 
