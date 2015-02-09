@@ -9,8 +9,10 @@ This is the online version of iNZight, with two new modules:
 To do:
 ------
 - "Provide Time Information" needs to be linked to server.R
-- Add inferential markups to "Visualize"
-- Rearrange "Data" tabs.
+- Add inferential markups to "Visualize".
+- Transform "Quick Explore" into a TS-like format, under 1 tab.
+- Next "Quick Explore" and "Time Series" under "Advanced"
+- Add a "Help" tab for reporting bugs.
 
 
 Directories:
