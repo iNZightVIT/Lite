@@ -37,6 +37,16 @@ plot.par <- reactiveValues(
     largesample = FALSE
 )
 
+##  Listen for clicks.
+## observe({
+##     if (is.null(input$click)) {
+##         return()
+##     }
+##     isolate(plot.par$x <- c(plot.par$x, input$click$x))
+##     isolate(plot.par$y <- c(plot.par$y, input$click$y))
+## })
+
+
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par <- reactiveValues(
     alpha = 1,
@@ -47,7 +57,7 @@ graphical.par <- reactiveValues(
     ##  Bar
     bar.lwd = 1,
     bar.col = "gray60",
-    bar.fill = "lightskyblue3", # me.
+    bar.fill = "lightskyblue3",
     ##  Line
     lwd = 1,
     lty = 1,
@@ -70,7 +80,7 @@ graphical.par <- reactiveValues(
     jitter = "",
     rugs = "",
     trend = NULL,
-    ##  Others    
+    ##  Others
     cex = 1,
     quant.smooth = NULL,
     inference.type = NULL,
@@ -78,8 +88,8 @@ graphical.par <- reactiveValues(
     LOE = FALSE,
     join = FALSE,
     lines.by = FALSE,
-    trend.by = FALSE,    
-    smooth = 0,    
+    trend.by = FALSE,
+    smooth = 0,
     szsym = 1,
     tpsym = 1
 )
@@ -99,7 +109,7 @@ determine.class <- function(input) {
     input.class
 }
 
-##  Input Handling 
+##  Input Handling
 handle.input <- function(input, subs = FALSE) {
     if (is.null(input)) {
         return()
@@ -115,7 +125,7 @@ handle.input <- function(input, subs = FALSE) {
     } else {
         input.out <- NULL
         factor.levels <- NULL
-    }    
+    }
     list(input.out = input.out, factor.levels = factor.levels)
 }
 
@@ -189,7 +199,7 @@ vis.par <- reactive({
 
 ##  We write some UI outputs for variable selection and subsetting:
 ##
-##  Variable 1 
+##  Variable 1
 ##
 ##  Select variable 1.
 output$vari1_panel <- renderUI({
@@ -210,7 +220,7 @@ observe({
 ##  Subset variable 1.
 output$subs1_panel <- renderUI({
     selectInput(inputId = "subs1",
-                label = "Subset first variable:",
+                label = "Subset by:",
                 choices = c("none", rev(colnames(vis.data()))),
                 selected = plot.par$varnames$g1)
 })
@@ -226,7 +236,8 @@ observe({
 ##  Subset level (Slider) for variable 1.
 output$subs1_conditional <- renderUI({
     choices1 <- handle.input(input$subs1, subs = TRUE)$factor.levels
-    sliderInput(inputId = "sub1_level", label = "Subset Level:",
+    sliderInput(inputId = "sub1_level",
+                label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = 0, step = 1,
                 animate = TRUE)
 })
@@ -271,7 +282,7 @@ observe({
 ##  Subset variable 2.
 output$subs2_panel <- renderUI({
     selectInput(inputId = "subs2",
-                label = "Subset second variable:",
+                label = "Subset by:",
                 choices = c("none", rev(colnames(vis.data()))[-1]),
                 selected = plot.par$varnames$g2)
 })
@@ -287,7 +298,8 @@ observe({
 ##  Subset level (Slider) for variable 2.
 output$subs2_conditional <- renderUI({
     choices2 <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
-    sliderInput(inputId = "sub2_level", label = "Subset Level:",
+    sliderInput(inputId = "sub2_level",
+                label = paste0("Subset '", input$subs2, "':"),
                 min = 0, max = choices2, value = 0, step = 1,
                 animate = TRUE)
 })
@@ -708,7 +720,7 @@ observe({
 ##  "Add Inference" Tab  ##
 ##-----------------------##
 ##
-##  
+##
 
 
 
@@ -761,7 +773,7 @@ observe({
             updateSliderInput(session,
                               inputId = "sub2_level")
             updateRadioButtons(session,
-                               inputId = "customize_plot",                                      
+                               inputId = "customize_plot",
                                choices =
                                    c("No" = 1,
                                      "Yes" = 2),
@@ -792,7 +804,7 @@ observe({
                               value = 1)
             updateSliderInput(session,
                               inputId = "size",
-                              value = 0.5)     
+                              value = 0.5)
         })
     }
 })

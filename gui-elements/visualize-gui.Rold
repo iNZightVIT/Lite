@@ -35,18 +35,31 @@ vis.sidebarPanel <- function() {
         ##  Select the first variable.
         uiOutput("vari1_panel"),
 
-        ##  Select the second variable.
-        uiOutput("vari2_panel"),
-        hr(),
         ## Select desired subset for the first variable.
         uiOutput("subs1_panel"),
 
-        ##  Select desired subset for the second variable.
-        ## conditionalPanel(
-        ##     condition = "input.vari2 != 'none'",
-        uiOutput("subs2_panel"),
-        ## ),
         hr(),
+        conditionalPanel(
+            condition = "input.subs1 != 'none'",         
+            ##  Slider input GUI for the first variable.
+            uiOutput("subs1_conditional")
+        ),
+        ##  Select the second variable.
+        uiOutput("vari2_panel"),
+
+        ##  Select desired subset for the second variable.
+        conditionalPanel(
+            condition = "input.vari2 != 'none'",
+            uiOutput("subs2_panel"),
+            
+            ##  Slider input GUI for the second variable.
+            conditionalPanel(
+                condition = "input.subs2 != 'none'",
+                uiOutput("subs2_conditional")
+            ) 
+        ),
+        hr(),
+
         ##  Reset graphical parameters.
         radioButtons(inputId = "customize_plot",
                      label =  "Customize Plot: ",
@@ -74,29 +87,8 @@ vis.mainPanel <- function() {
                 tabPanel(
                     title = "Plot",
                     br(),
-                    column(
-                        width = 12,
-                        helpText("Plots for visualizing data."),
-                        plotOutput("visualize.plot")
-                    ),
-                    column(
-                        width = 6,
-                        conditionalPanel(
-                            condition = "input.subs1 != 'none'",
-                            ##  Slider input GUI for the first variable.
-                            br(),
-                            uiOutput("subs1_conditional")
-                        )
-                    ),
-                    column(
-                        width = 6,
-                        ##  Slider input GUI for the second variable.
-                        conditionalPanel(
-                            condition = "input.subs2 != 'none'",
-                            br(),
-                            uiOutput("subs2_conditional")
-                        )
-                    ),
+                    helpText("Plots for visualizing data."),
+                    plotOutput("visualize.plot"),
                     conditionalPanel(
                         condition = "input.customize_plot == 2",
                         helpText("Customize Plot (applies only to the",
@@ -116,7 +108,7 @@ vis.mainPanel <- function() {
                                 column(
                                     width = 6,
                                     uiOutput("colour.by")
-                                )
+                                )                                    
                             ),
                             ##  Add Inference
                             tabPanel(
@@ -126,7 +118,7 @@ vis.mainPanel <- function() {
                             ),
                             ##  Change Plot Appearance
                             tabPanel(
-                                title = "Add Flavour",
+                                title = "Add Flavour",                      
                                 column(
                                     width = 4,
                                     br(),
@@ -136,7 +128,7 @@ vis.mainPanel <- function() {
                                               label = "Label for x-axis:") ## ,
                                     ## textInput(inputId = "ylab",
                                     ##           label  ="Label for y-axis:")
-                                ),
+                                ),  
                                 column(
                                     width = 4,
                                     br(),
@@ -154,7 +146,7 @@ vis.mainPanel <- function() {
                                     conditionalPanel(
                                         condition = "input.choose_plot == 2",
                                         uiOutput("symbol_colour")
-                                    ),
+                                    ),                                     
                                     conditionalPanel(
                                         condition = "input.choose_plot == 3",
                                         uiOutput("box_colour")
@@ -174,13 +166,13 @@ vis.mainPanel <- function() {
                                         condition = "input.choose_plot == 3",
                                         ## uiOutput("box_width"),
                                         uiOutput("box_border")
-                                    )
+                                    )                                                 
                                 )
-                            )
+                            )                          
                         )
                     )
                 ),
-                ##  Summary Panel
+                ##  Summary Panel 
                 tabPanel(
                     title = "Summary",
                     br(),
