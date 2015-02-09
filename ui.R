@@ -31,7 +31,7 @@ shinyUI(
             ##  "About" tab.
             tabPanel("About",
                      uiOutput('about.panel')),
-            ##  "Data" tab.            
+            ##  "Data" tab.
             navbarMenu("Datasets",id = "data",
                        tabPanel("Import Dataset",
                                 uiOutput('load.data.panel')),
@@ -77,21 +77,21 @@ shinyUI(
         ),
         HTML(
           '  <div id = "wrapper">
-		<div id = "footer">            
+		<div id = "footer">
 		  <span style = "float:left;">
                   <br> &nbsp;
 		    <a href = "https://www.stat.auckland.ac.nz/~wild/iNZight/">
 		      iNZight Project
-		    </a> |		    
+		    </a> |
                     <a href = "https://github.com/iNZightVIT/Lite/">
-                      R Source Code 
+                      R Source Code
                     </a> |
 		    <a href = "mailto:cpar137@aucklanduni.ac.nz?Subject=iNZight-Lite%20Feedback"
 		       target = "_top">
 		      Contact Us
 		    </a>
-                    <br>  
-                      &nbsp; Copyright 2015 iNZight | All Rights Reserved 
+                    <br><br>
+                      &nbsp; Copyright 2015 iNZight | All Rights Reserved
 		  </span>
 		  <span style = "float:right;">
                     <a href = "http://new.censusatschool.org.nz/">
@@ -110,6 +110,6 @@ shinyUI(
 		  </span>
 		</div>
 	      </div>'
-        )       
+        )
     )
 )
