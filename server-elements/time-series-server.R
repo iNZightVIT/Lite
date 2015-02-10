@@ -182,8 +182,8 @@ output$trSeasonal_plot <- renderPlot({
             iNZightTS:::decompositionplot(
                 iNZightTS(ts.data(),
                           var = variable.names()),
-                xlab = input$provide_xlab,
-                ylab = input$provide_ylab,
+                ## xlab = input$provide_xlab,
+                ## ylab = input$provide_ylab,
                 multiplicative = input$choose_season),
             animate = FALSE)
     }
@@ -246,7 +246,7 @@ output$multiple_multi_plot <- renderPlot({
     if (length(input$multipleSeriesTabs) > 0) {
         multiseries(
             iNZightTS(ts.data(),
-                      var = which(names(ts.data()) %in% input$select_variables)),
+                      var = variable.names()),
             multiplicative = input$choose_season)
     }
 })
