@@ -14,6 +14,7 @@ For testers:
 
 options(repos = c(options()$repos, 
                   inzight = "http://docker.stat.auckland.ac.nz/R"))
+<br>
 install.packages(c("iNZightPlots", iNZightTS"), dependencies = TRUE)
 
 4. Run shiny::runApp("path-to-Lite-directory")
