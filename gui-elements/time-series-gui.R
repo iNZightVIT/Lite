@@ -245,7 +245,7 @@ ts.mainPanel <- function() {
         conditionalPanel(
             condition = "input.select_variables.length > 1",
             tabsetPanel(id = "multipleSeriesTabs",
-                        ## type = "pills", # Try type = "tabs" if you wish...
+                        type = "pills", # Try type = "tabs" if you wish...
                         ##  Tab 1:  Single Plot Layout
                         tabPanel(title = "Single Plot",
                                  helpText(

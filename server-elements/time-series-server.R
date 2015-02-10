@@ -75,7 +75,7 @@ variable.names <- reactive({
     input$select_variables
     variable.names <- which(names(ts.data()) %in% input$select_variables)
 })
-    
+
 ##-------------------------------------##
 ##  Plot Outputs: Single Series Plots  ##
 ##-------------------------------------##
@@ -246,7 +246,7 @@ output$multiple_multi_plot <- renderPlot({
     if (length(input$multipleSeriesTabs) > 0) {
         multiseries(
             iNZightTS(ts.data(),
-                      var = which(names(ts.data() %in% input$select_variables)),
+                      var = which(names(ts.data()) %in% input$select_variables),
             multiplicative = input$choose_season))
     }
 })
