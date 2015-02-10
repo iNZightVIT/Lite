@@ -19,6 +19,9 @@ install.packages(c("iNZightPlots", iNZightTS"), dependencies = TRUE)
 
 Finally, run shiny::runApp("path-to-Lite-directory") to run the app.
 
+Note: If you get an error message that says "ERROR: $ operator is invalid for atomic vectors", try updating/reinstalling the Shiny package. 
+
+
 To do/Known Issues:
 -------------------
 - [General] Plots in the "Visualize" module seem to have an ugly border around them for certain browsers - fix.
