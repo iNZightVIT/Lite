@@ -5,9 +5,21 @@ This is the online version of iNZight, with two new modules:
 - Visualize
 - Time Series
 
+For testers:
+------------
 
-To do:
-------
+1. Download the *Lite* repository as a Zip.
+2. Download the *gpairs*, *markdown*, and *shiny* packages from CRAN.
+3. Download the *iNZightPlots* and *iNZightTS* packages by running the following:
+
+options(repos = c(options()$repos, 
+                  inzight = "http://docker.stat.auckland.ac.nz/R"))
+install.packages(c("iNZightPlots", iNZightTS"), dependencies = TRUE)
+
+4. Run shiny::runApp("path-to-Lite-directory")
+
+To do/Known Issues:
+-------------------
 - [General] Plots in the "Visualize" module seem to have an ugly border around them for certain browsers - fix.
 - [General] Fix the "Datatables" bug
 - [General] Fix the footer/panel overlap bug.
