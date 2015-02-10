@@ -100,30 +100,30 @@ ts.sidebarPanel <- function() {
                  strong('Delete'),
                  "key)"),
 
-        hr(),
+        hr()
         ##  Section 4: Select Labels
         ##
         ##  We give the user the option of providing her own set of x- and
         ##  y- axes labels. This is set to "No" by default to save screen
         ##  real estate.
-        radioButtons(inputId = "customize_labels",
-                     label =  "Customize Labels: ",
-                     choices =
-                         c("No" = 1,
-                           "Yes" = 2),
-                     selected = 1),
-        hr(),
+        ## radioButtons(inputId = "customize_labels",
+        ##              label =  "Customize Labels: ",
+        ##              choices =
+        ##                  c("No" = 1,
+        ##                    "Yes" = 2),
+        ##              selected = 1),
+        ## hr(),
 
-        conditionalPanel(
-            condition = "input.customize_labels == 2",
-            textInput(inputId = "provide_xlab",
-                      label = "Label for the x-axis",
-                      value = ""),
-            textInput(inputId = "provide_ylab",
-                      label = "Label for the y-axis",
-                      value = ""),
-            hr()
-        )
+        ## conditionalPanel(
+        ##     condition = "input.customize_labels == 2",
+        ##     textInput(inputId = "provide_xlab",
+        ##               label = "Label for the x-axis",
+        ##               value = ""),
+        ##     textInput(inputId = "provide_ylab",
+        ##               label = "Label for the y-axis",
+        ##               value = ""),
+        ##     hr()
+        ## )
     )
 }
 

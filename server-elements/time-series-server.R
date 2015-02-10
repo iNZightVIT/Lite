@@ -87,9 +87,10 @@ output$timeseries_plot <- renderPlot({
         rawplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            xlab = input$provide_xlab,
-            ylab = input$provide_ylab,
-            multiplicative = input$choose_season)
+            ## xlab = input$provide_xlab,
+            ## ylab = input$provide_ylab,
+            multiplicative = input$choose_season
+        )
     }
 })
 
@@ -155,9 +156,10 @@ output$seasonal_plot <- renderPlot({
         seasonplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            xlab = input$provide_xlab,
-            ylab = input$provide_ylab,
-            multiplicative = input$choose_season)
+            ## xlab = input$provide_xlab,
+            ## ylab = input$provide_ylab,
+            multiplicative = input$choose_season
+        )
     }
 })
 
@@ -168,9 +170,10 @@ output$decomposed_plot <- renderPlot({
         decompositionplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            xlab = input$provide_xlab,
-            ylab = input$provide_ylab,
-            multiplicative = input$choose_season)
+            ## xlab = input$provide_xlab,
+            ## ylab = input$provide_ylab,
+            multiplicative = input$choose_season
+        )
     }
 })
 
@@ -184,8 +187,10 @@ output$trSeasonal_plot <- renderPlot({
                           var = variable.names()),
                 ## xlab = input$provide_xlab,
                 ## ylab = input$provide_ylab,
-                multiplicative = input$choose_season),
-            animate = FALSE)
+                multiplicative = input$choose_season
+            ),
+            animate = FALSE
+        )
     }
 })
 
@@ -198,7 +203,8 @@ output$forecast_plot <- renderPlot({
                       var = variable.names()),
             ## xlab = input$provide_xlab,
             ## ylab = input$provide_ylab,
-            multiplicative = input$choose_season)
+            multiplicative = input$choose_season
+        )
     }
 })
 
@@ -209,7 +215,8 @@ output$forecast_summary <- renderPrint({
             iNZightTS(ts.data(),
                       var = variable.names()),
             multiplicative = input$choose_season,
-            show = FALSE)
+            show = FALSE
+        )
     }
 })
 
@@ -224,7 +231,8 @@ output$multiple_single_plot <- renderPlot({
         iNZightTS:::compareplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            multiplicative = input$choose_season)
+            multiplicative = input$choose_season
+        )
     }
 })
 
@@ -247,7 +255,8 @@ output$multiple_multi_plot <- renderPlot({
         multiseries(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            multiplicative = input$choose_season)
+            multiplicative = input$choose_season
+        )
     }
 })
 
