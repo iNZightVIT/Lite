@@ -122,7 +122,6 @@ vis.mainPanel <- function() {
                             tabPanel(
                                 title = "Add Inference",
                                 br(),
-                                helpText("Inferential Markups to be added"),
                                 uiOutput("add.inference")
                             ),
                             ##  Change Plot Appearance
