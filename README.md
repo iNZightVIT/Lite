@@ -8,11 +8,17 @@ This is the online version of iNZight, with two new modules:
 
 To do:
 ------
-- "Provide Time Information" needs to be linked to server.R
-- Add inferential markups to "Visualize".
-- Transform "Quick Explore" into a TS-like format, under 1 tab.
-- Next "Quick Explore" and "Time Series" under "Advanced"
-- Add a "Help" tab for reporting bugs.
+- [General] Fix the "Datatables" bug
+- [General] Fix the sticky footer.
+- [Time Series] Change the way plots are drawn to how it was done in "Visualize".
+- [Time Series] "Provide Time Information" needs to be linked to server.R
+- [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
+- [Time Series] Make the "TS" panel conditional on the type of dataset loaded.
+- [Visualize] Add inferential markups.
+- [Visualize] Re-design the "Customize Plot" panel.
+- [Quick Explore] Merge into 1 tab.
+- [Advanced] Nest QE and TS under "Advanced".
+- [Help] Add a "Help" tab for reporting bugs and documentation
 
 
 Directories:
