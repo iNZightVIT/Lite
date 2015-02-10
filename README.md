@@ -41,7 +41,7 @@ Directories:
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight-Lite.
 
-- gui-elemenets:
+- gui-elements:
 This directory contains the gui functions for all the modules.
 
 - id-documentation:
