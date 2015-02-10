@@ -80,21 +80,24 @@ vis.mainPanel <- function() {
                         plotOutput("visualize.plot")
                     ),
                     column(
-                        width = 6,
-                        conditionalPanel(
-                            condition = "input.subs1 != 'none'",
-                            ##  Slider input GUI for the first variable.
-                            br(),
-                            uiOutput("subs1_conditional")
-                        )
-                    ),
-                    column(
-                        width = 6,
-                        ##  Slider input GUI for the second variable.
-                        conditionalPanel(
-                            condition = "input.subs2 != 'none'",
-                            br(),
-                            uiOutput("subs2_conditional")
+                        width = 12,
+                        column(
+                            width = 6,
+                            conditionalPanel(
+                                condition = "input.subs1 != 'none'",
+                                ##  Slider input GUI for the first variable.
+                                br(),
+                                uiOutput("subs1_conditional")
+                            )
+                        ),
+                        column(
+                            width = 6,
+                            ##  Slider input GUI for the second variable.
+                            conditionalPanel(
+                                condition = "input.subs2 != 'none'",
+                                br(),
+                                uiOutput("subs2_conditional")
+                            )
                         )
                     ),
                     conditionalPanel(
