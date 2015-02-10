@@ -17,7 +17,7 @@ options(repos = c(options()$repos,
 <br>
 install.packages(c("iNZightPlots", iNZightTS"), dependencies = TRUE)
 
-4. Run shiny::runApp("path-to-Lite-directory")
+Finally, run shiny::runApp("path-to-Lite-directory") to run the app.
 
 To do/Known Issues:
 -------------------
