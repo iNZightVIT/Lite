@@ -1,26 +1,9 @@
 iNZight *Lite* v.0.9.5 (More to come)
 ====================================
-This is the online version of iNZight, with two new modules:
+This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with two new modules:
 
 - Visualize
 - Time Series
-
-For testers:
-------------
-
-1. Download the *Lite* repository as a Zip.
-2. Download the *gpairs*, *markdown*, and *shiny* packages from CRAN.
-3. Download the *iNZightPlots* and *iNZightTS* packages by running the following:
-
-options(repos = c(options()$repos, 
-                  inzight = "http://docker.stat.auckland.ac.nz/R"))
-<br>
-install.packages(c("iNZightPlots", iNZightTS"), dependencies = TRUE)
-
-Finally, run shiny::runApp("path-to-Lite-directory") to run the app.
-
-Note: If you get an error message that says "ERROR: $ operator is invalid for atomic vectors", try updating/reinstalling the Shiny package. 
-
 
 To do/Known Issues:
 -------------------
