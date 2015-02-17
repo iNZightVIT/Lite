@@ -5,6 +5,12 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Visualize
 - Time Series
 
+Recent Updates:
+----------------
+- New 'slide' interface to come for advanced plot options in the "Visualize" module.
+- Add inferential markups to the "Visualize" module.
+- Add 'Help' documentation for both the "Time Series" and "Visualize" modules by the end of Feb 2015.
+
 To do/Known Issues:
 -------------------
 - [General] Plots in the "Visualize" module seem to have an ugly border around them for certain browsers - fix.
