@@ -1,0 +1,203 @@
+###---------------------------------------------###
+###  User Interface for the "Visualize" Module  ###
+###---------------------------------------------###
+###
+###  Date Created  : January 25, 2015.
+###  Last Modified : January 29, 2015.
+###
+###  The UI is divided into two panels:
+###
+###     1.  Sidebar Panel : contains all the user inputs.
+###     2.  Main Panel    : contains all the outputs.
+###
+###  Please consult the documentation for the Time Series module in
+###  "/documentation/time-series-module" before modifying any code.
+###
+###  If you have any questions and/or suggestions, drop me an e-mail:
+###  Chris Park <cpar137@aucklanduni.ac.nz>
+###
+###  Note: Thie file is to be sourced locally within "server.R".
+
+
+###-----------------###
+###  Sidebar Panel  ###
+###-----------------###
+###
+###  First, we set up the sidebar panel with "vis.sidebarPanel()".
+vis.sidebarPanel <- function() {
+    ##  Perform a routine data check.
+    if (is.null(data)) {
+        stop("Please load a suitable dataset!")
+    }
+    ##  Note the user of "hr()" (= horizontal rule) to separate sections.
+    sidebarPanelUI <- list(
+        hr(),
+        ##  Select the first variable.
+        uiOutput("vari1_panel"),
+
+        ## Select desired subset for the first variable.
+        uiOutput("subs1_panel"),
+
+        hr(),
+        conditionalPanel(
+            condition = "input.subs1 != 'none'",         
+            ##  Slider input GUI for the first variable.
+            uiOutput("subs1_conditional")
+        ),
+        ##  Select the second variable.
+        uiOutput("vari2_panel"),
+
+        ##  Select desired subset for the second variable.
+        conditionalPanel(
+            condition = "input.vari2 != 'none'",
+            uiOutput("subs2_panel"),
+            
+            ##  Slider input GUI for the second variable.
+            conditionalPanel(
+                condition = "input.subs2 != 'none'",
+                uiOutput("subs2_conditional")
+            ) 
+        ),
+        hr(),
+
+        ##  Reset graphical parameters.
+        radioButtons(inputId = "customize_plot",
+                     label =  "Customize Plot: ",
+                     choices =
+                         c("No" = 1,
+                           "Yes" = 2),
+                     selected = 1),
+        hr(),
+        actionButton(inputId = "reset.graphics",
+                     label = "Reset all")
+    )
+}
+
+
+##  Excuse the "stairway to heaven" style of code here - this is simply
+##  so that I can maintain the 80-character restriction per line of code.
+vis.mainPanel <- function() {
+    if (!is.null(data)) {
+        list(
+            br(),
+            tabsetPanel(
+                id = "plot_selector",
+                type = "pills",
+                ##  Plot Panel
+                tabPanel(
+                    title = "Plot",
+                    br(),
+                    helpText("Plots for visualizing data."),
+                    plotOutput("visualize.plot"),
+                    conditionalPanel(
+                        condition = "input.customize_plot == 2",
+                        helpText("Customize Plot (applies only to the",
+                                 strong("Plot"),
+                                 "tab)"),
+                        tabsetPanel(
+                            id = "add_selector",
+                            type = "pills",
+                            ##  Add to Plot
+                            tabPanel(
+                                title = "Add to Plot",
+                                br(),
+                                column(
+                                    width = 6,
+                                    uiOutput("resize.by")
+                                ),
+                                column(
+                                    width = 6,
+                                    uiOutput("colour.by")
+                                )                                    
+                            ),
+                            ##  Add Inference
+                            tabPanel(
+                                title = "Add Inference",
+                                br(),
+                                uiOutput("add.inference")
+                            ),
+                            ##  Change Plot Appearance
+                            tabPanel(
+                                title = "Add Flavour",                      
+                                column(
+                                    width = 4,
+                                    br(),
+                                    textInput(inputId = "title",
+                                              label = "Plot Title:"),
+                                    textInput(inputId = "xlab",
+                                              label = "Label for x-axis:") ## ,
+                                    ## textInput(inputId = "ylab",
+                                    ##           label  ="Label for y-axis:")
+                                ),  
+                                column(
+                                    width = 4,
+                                    br(),
+                                    uiOutput("background"),
+                                    uiOutput("plot_type")
+                                ),
+                                column(
+                                    width = 4,
+                                    br(),
+                                    ##  Choose Object Colour
+                                    conditionalPanel(
+                                        condition = "input.choose_plot == 1",
+                                        uiOutput("bar_colour")
+                                    ),
+                                    conditionalPanel(
+                                        condition = "input.choose_plot == 2",
+                                        uiOutput("symbol_colour")
+                                    ),                                     
+                                    conditionalPanel(
+                                        condition = "input.choose_plot == 3",
+                                        uiOutput("box_colour")
+                                    ),
+                                    ##  Object Options
+                                    conditionalPanel(
+                                        condition = "input.choose_plot == 1",
+                                        ## uiOutput("bar_width"),
+                                        uiOutput("bar_border")
+                                    ),
+                                    conditionalPanel(
+                                        condition = "input.choose_plot == 2",
+                                        ## uiOutput("symbol_transparency"),
+                                        uiOutput("symbol_size")
+                                    ),
+                                    conditionalPanel(
+                                        condition = "input.choose_plot == 3",
+                                        ## uiOutput("box_width"),
+                                        uiOutput("box_border")
+                                    )                                                 
+                                )
+                            )                          
+                        )
+                    )
+                ),
+                ##  Summary Panel 
+                tabPanel(
+                    title = "Summary",
+                    br(),
+                    helpText("Statistical Sumary for the data."),
+                    verbatimTextOutput("visualize.summary")
+                ),
+                ##  Inference Panel
+                tabPanel(
+                    title = "Inference",
+                    br(),
+                    helpText("Statistical Inference for the data."),
+                    verbatimTextOutput("visualize.inference")
+                )
+            )
+        )
+    } else {
+        list(h4("No data available, please select or import a data set."))
+    }
+}
+
+
+visualize_panel <- function() {
+    fluidRow(
+        column(2, vis.sidebarPanel()),
+        column(10, vis.mainPanel())
+    )
+}
+
