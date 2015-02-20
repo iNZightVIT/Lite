@@ -8,7 +8,6 @@
 ##
 ##  Note: This file is to be sourced locally within "server.R" *
 
-
 ##  And on the first day of February, God said "Let there be data":
 vis.data <- reactive({
     input$selector
@@ -769,69 +768,65 @@ output$add.inference <- renderUI({
 
 
 
-
-
-
-
 ##  Reset
 observe({
     if (!is.null(input$reset.graphics)) {
-        isolate({
-            updateSelectInput(session,
-                              inputId = "vari1",
-                              choices =
-                                  c(rev(colnames(vis.data()))))
-            updateSelectInput(session,
-                              inputId = "subs1",
-                              choices =
-                                  c("none", rev(colnames(vis.data()))))
-            updateSelectInput(session,
-                              inputId = "vari2",
-                              choices =
-                                  c("none", rev(colnames(vis.data()))[-1]))
-            updateSelectInput(session,
-                              inputId = "subs2",
-                              choices =
-                                  c("none", rev(colnames(vis.data()))[-1]))
-            updateSliderInput(session,
-                              inputId = "sub1_level")
-            updateSliderInput(session,
-                              inputId = "sub2_level")
-            updateRadioButtons(session,
-                               inputId = "customize_plot",
-                               choices =
-                                   c("Hide" = 1,
-                                     "Show" = 2),
-                               selected = 1)
-            updateSelectInput(session,
-                              inputId = "choose_bg",
-                              choices = rev(colour.choices))
-            updateSelectInput(session,
-                              inputId = "choose_symbol_col",
-                              choices = colour.choices)
-            updateSelectInput(session,
-                              inputId = "choose_box_col",
-                              choices = colour.choices)
-            updateSelectInput(session,
-                              inputId = "choose_bar_col",
-                              choices = colour.choices)
-            updateTextInput(session,
-                            inputId = "xlab",
-                            value = "")
-            updateTextInput(session,
-                            inputId = "ylab",
-                            value = "")
-            updateTextInput(session,
-                            inputId = "main",
-                            value = "")
-            updateSliderInput(session,
-                              inputId = "transparency",
-                              value = 1)
-            updateSliderInput(session,
-                              inputId = "size",
-                              value = 0.5)
-        })
-    }
+            isolate({
+                updateSelectInput(session,
+                                  inputId = "vari1",
+                                  choices =
+                                      c(rev(colnames(vis.data()))))
+                updateSelectInput(session,
+                                  inputId = "subs1",
+                                  choices =
+                                      c("none", rev(colnames(vis.data()))))
+                updateSelectInput(session,
+                                  inputId = "vari2",
+                                  choices =
+                                      c("none", rev(colnames(vis.data()))[-1]))
+                updateSelectInput(session,
+                                  inputId = "subs2",
+                                  choices =
+                                      c("none", rev(colnames(vis.data()))[-1]))
+                updateSliderInput(session,
+                                  inputId = "sub1_level")
+                updateSliderInput(session,
+                                  inputId = "sub2_level")
+                updateRadioButtons(session,
+                                   inputId = "customize_plot",
+                                   choices =
+                                       c("Hide" = 1,
+                                         "Show" = 2),
+                                   selected = 1)
+                updateSelectInput(session,
+                                  inputId = "choose_bg",
+                                  choices = rev(colour.choices))
+                updateSelectInput(session,
+                                  inputId = "choose_symbol_col",
+                                  choices = colour.choices)
+                updateSelectInput(session,
+                                  inputId = "choose_box_col",
+                                  choices = colour.choices)
+                updateSelectInput(session,
+                                  inputId = "choose_bar_col",
+                                  choices = colour.choices)
+                updateTextInput(session,
+                                inputId = "xlab",
+                                value = "")
+                updateTextInput(session,
+                                inputId = "ylab",
+                                value = "")
+                updateTextInput(session,
+                                inputId = "main",
+                                value = "")
+                updateSliderInput(session,
+                                  inputId = "transparency",
+                                  value = 1)
+                updateSliderInput(session,
+                                  inputId = "size",
+                                  value = 0.5)
+            })
+        }
 })
 
 ##  Other handling

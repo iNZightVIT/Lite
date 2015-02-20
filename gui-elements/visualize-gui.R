@@ -42,10 +42,10 @@ vis.sidebarPanel <- function() {
         uiOutput("subs1_panel"),
 
         ##  Select desired subset for the second variable.
-        ## conditionalPanel(
-        ##     condition = "input.vari2 != 'none'",
-        uiOutput("subs2_panel"),
-        ## ),
+        conditionalPanel(
+            condition = "input.subs1 != 'none'",
+            uiOutput("subs2_panel")
+        ),
         hr(),
         ##  Reset graphical parameters.
         radioButtons(inputId = "customize_plot",
@@ -55,7 +55,7 @@ vis.sidebarPanel <- function() {
                            "Show" = 2),
                      selected = 1),
         hr(),
-        actionButton(inputId = "reset.graphics",
+        actionLink(inputId = "reset.graphics",
                      label = "Reset all")
     )
 }
@@ -249,131 +249,8 @@ visualize.panel <- function() {
     fluidPage(
         fluidRow(
             column(2, vis.sidebarPanel()),
-            column(10, vis.mainPanel())## ,
-            ## column(2, vis.optionPanel())
+            column(10, vis.mainPanel())
         )
     )
 }
 
-
-##  Option 2
-## vis.mainPanel.2 <- function() {
-##     if (!is.null(data)) {
-##         list(
-##             br(),
-##             tabsetPanel(
-##                 id = "plot_selector",
-##                 type = "pills",
-##                 ##  Plot Panel
-##                 tabPanel(
-##                     title = "Plot",
-##                     br(),
-##                     helpText("Plots for visualizing data."),                     
-##                     fluidRow(
-##                         column(
-##                             width = 12,
-##                             plotOutput("visualize.plot"),
-##                             fluidRow(
-##                                 column(
-##                                     width = 6,
-##                                     conditionalPanel(
-##                                         condition = "input.subs1 != 'none'",
-##                                         ##  Slider input GUI for the first variable.
-##                                         br(),
-##                                         uiOutput("subs1_conditional")
-##                                     )
-##                                 ),
-##                                 column(
-##                                     width = 6,
-##                                     ##  Slider input GUI for the second variable.
-##                                     conditionalPanel(
-##                                         condition = "input.subs2 != 'none'",
-##                                         br(),
-##                                         uiOutput("subs2_conditional")
-##                                     )
-##                                 )
-##                             )
-##                         )
-##                     )
-##                 ),
-##                 ##  Plot Options
-##                 tabPanel(
-##                     title = "Options",
-##                     br(),
-##                     fluidRow(
-##                         column(
-##                             width = 8,
-    ##                             plotOutput("mini.plot")## ,
-                            ## fluidRow(
-                            ##     column(
-                            ##         width = 6,                                       
-                            ##         conditionalPanel(
-                            ##             condition = "input.subs1 != 'none'",
-                            ##             uiOutput("subs1_conditional_mini")
-                            ##         )
-                            ##     ),
-                            ##     column(
-                            ##         width = 6,
-                            ##         conditionalPanel(
-                            ##             condition = "input.subs2 != 'none'",
-                            ##             uiOutput("subs2_conditional_mini")
-                            ##         )
-                            ##     )
-                            ## )                         
-##                         ),
-##                         column(
-                    ##         width = 4,
-                    ##         fluidRow(
-                    ##             column(
-                    ##                 width = 6,
-                    ##                 uiOutput("resize.by")
-                    ##             ),
-                    ##             column(
-                    ##                 width = 6,
-                    ##                 uiOutput("colour.by")
-                    ##             )
-                    ##         ),
-                    ##         fluidRow(
-                    ##             column(
-                    ##                 width = 6,
-                    ##                 uiOutput("background")
-                    ##             ),
-                    ##             column(
-                    ##                 width = 6,
-                    ##                 uiOutput("plot_type")
-                    ##             )
-                    ##         )                            
-                    ##     )
-                    ## )
-##                 ),
-                
-##                 ##  Summary Panel
-##                 tabPanel(
-##                     title = "Summary",
-##                     br(),
-##                     helpText("Statistical Sumary for the data."),
-##                     verbatimTextOutput("visualize.summary")
-##                 ),
-##                 ##  Inference Panel
-##                 tabPanel(
-##                     title = "Inference",
-##                     br(),
-##                     helpText("Statistical Inference for the data."),
-##                     verbatimTextOutput("visualize.inference")
-##                 )
-##             )
-##         )
-##     } else {
-##         list(h4("No data available, please select or import a data set."))
-##     }
-## }
-
-## visualize.panel <- function() {
-##     fluidPage(
-##         fluidRow(
-##             column(2, vis.sidebarPanel()),
-##             column(10, vis.mainPanel.2())
-##         )
-##     )
-## }
-    
