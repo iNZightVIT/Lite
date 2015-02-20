@@ -1,13 +1,13 @@
 about.panel = function() {
     fixedPage(
         column(width = 10, offset = 1,
-               div(class="page-spacer",
+               div(class = "page-spacer",
                    includeMarkdown('gui-elements/notes/about.intro.md'),
                    br(),
                    br(),
                    br(),
                    br(),
-                   p(em('Last Updated: 03/02/15'),
+                   p(em('Last Updated: 12/02/15'),
                      style = 'color:gray',
                      align = 'right')
                    )
@@ -41,8 +41,7 @@ about.panel = function() {
                     <a href = "http://www.minedu.govt.nz/">
 		      <img src = "minedu_logo.png"/, height = 60, width = 170>
 		    </a> &nbsp; &nbsp;
-		    <a href = "http://stat.auckland.ac.nz">
-		      <!-- <img src = "statistics_logo.png", height = 75, width = 160> -->
+		    <a href = "http://stat.auckland.ac.nz">		      
                       <img src = "uoa_logo.png", height = 65>
                     </a> &nbsp;
 		  </span>

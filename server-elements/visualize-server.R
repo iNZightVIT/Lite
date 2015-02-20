@@ -242,6 +242,16 @@ output$subs1_conditional <- renderUI({
                 animate = TRUE)
 })
 
+
+output$subs1_conditional_mini <- renderUI({
+    choices1 <- handle.input(input$subs1, subs = TRUE)$factor.levels
+    sliderInput(inputId = "sub1_level",
+                label = paste0("Subset '", input$subs1, "':"),
+                min = 0, max = choices1, value = 0, step = 1,
+                animate = TRUE)
+})
+
+
 ##  Update plot$g1.level
 observe({
     g1_level <- input$sub1_level
@@ -304,6 +314,16 @@ output$subs2_conditional <- renderUI({
                 animate = TRUE)
 })
 
+##  Subset level (Slider) for variable 2.
+output$subs2_conditional_mini <- renderUI({
+    choices2 <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    sliderInput(inputId = "sub2_level",
+                label = paste0("Subset '", input$subs2, "':"),
+                min = 0, max = choices2, value = 0, step = 1,
+                animate = TRUE)
+})
+
+
 ##  Update plot.par$g2.level
 observe({
     g2_level <- input$sub2_level
@@ -334,6 +354,11 @@ output$visualize.plot <- renderPlot({
     }
 })
 
+output$mini.plot <- renderPlot({
+    if (!is.null(vis.par())) {
+        do.call(iNZightPlots:::iNZightPlot, vis.par())
+    }
+})
 
 
 output$visualize.inference <- renderPrint({
@@ -419,7 +444,7 @@ dot.choices <- c(
 ##  Choose plot type
 output$plot_type <- renderUI({
     selectInput(inputId = "choose_plot",
-                label = "Choose Object:",
+                label = "Graphical Object:",
                 choices =
                     c("Bar" = 1,
                       "Dot" = 2,
@@ -431,7 +456,7 @@ output$plot_type <- renderUI({
 ##  Adjust background colour: UI
 output$background <- renderUI({
     selectInput(inputId = "choose_bg",
-                label = "Choose Background Colour:",
+                label = "Background Colour:",
                 choices = rev(colour.choices),
                 selected = graphical.par$bg)
 })
@@ -669,7 +694,7 @@ observe({
 ##  "Resize by" UI
 output$resize.by <- renderUI({
     selectInput(inputId = "resize_by",
-                label = "Resize proportional to:",
+                label = "Resize relative to:",
                 choices =
                     c("none", rev(colnames(vis.data()))),
                 selected = plot.par$varnames$prop.size)
@@ -775,8 +800,8 @@ observe({
             updateRadioButtons(session,
                                inputId = "customize_plot",
                                choices =
-                                   c("No" = 1,
-                                     "Yes" = 2),
+                                   c("Hide" = 1,
+                                     "Show" = 2),
                                selected = 1)
             updateSelectInput(session,
                               inputId = "choose_bg",

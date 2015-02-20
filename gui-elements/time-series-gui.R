@@ -71,8 +71,6 @@ ts.sidebarPanel <- function() {
             actionButton(inputId = "provide_actionButton",
                          label = "Provide time information")
         ),
-        hr(),
-
         ##  Section 2: Seasonal Pattern
         ##
         ##  Next, we ask the user to specify a seasonal pattern. This can be
@@ -82,7 +80,6 @@ ts.sidebarPanel <- function() {
                      choices =
                          c("Multiplicative" = TRUE,
                            "Additive" = FALSE)),
-        hr(),
         ##  Section 3: Select Variables
         ##
         ##  We then ask the user to select the variables to plot in the
@@ -100,31 +97,30 @@ ts.sidebarPanel <- function() {
                  strong('Delete'),
                  "key)"),
 
-        hr()
         ##  Section 4: Select Labels
         ##
         ##  We give the user the option of providing her own set of x- and
         ##  y- axes labels. This is set to "No" by default to save screen
         ##  real estate.
-        ## radioButtons(inputId = "customize_labels",
-        ##              label =  "Customize Labels: ",
-        ##              choices =
-        ##                  c("No" = 1,
-        ##                    "Yes" = 2),
-        ##              selected = 1),
-        ## hr(),
-
-        ## conditionalPanel(
-        ##     condition = "input.customize_labels == 2",
-        ##     textInput(inputId = "provide_xlab",
-        ##               label = "Label for the x-axis",
-        ##               value = ""),
-        ##     textInput(inputId = "provide_ylab",
-        ##               label = "Label for the y-axis",
-        ##               value = ""),
-        ##     hr()
-        ## )
+        radioButtons(inputId = "customize_labels",
+                     label =  "Customize Labels: ",
+                     choices =
+                         c("No" = 1,
+                           "Yes" = 2),
+                     selected = 1),
+        hr(),
+        conditionalPanel(
+            condition = "input.customize_labels == 2",
+            textInput(inputId = "provide_xlab",
+                      label = "Label for the x-axis",
+                      value = ""),
+            textInput(inputId = "provide_ylab",
+                      label = "Label for the y-axis",
+                      value = "")
+        ),
+        hr()
     )
+    
 }
 
 
@@ -281,8 +277,8 @@ ts.mainPanel <- function() {
 ###
 ###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to complete
 ###  the UI for the Time Series module.
-time_series_panel <- function() {
-    fluidRow(
+time.series.panel <- function() {
+    fluidPage(
         column(2, ts.sidebarPanel()),
         column(10, ts.mainPanel())
     )

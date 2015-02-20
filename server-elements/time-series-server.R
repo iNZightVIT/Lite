@@ -87,8 +87,8 @@ output$timeseries_plot <- renderPlot({
         rawplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            ## xlab = input$provide_xlab,
-            ## ylab = input$provide_ylab,
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
     }
@@ -156,8 +156,8 @@ output$seasonal_plot <- renderPlot({
         seasonplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            ## xlab = input$provide_xlab,
-            ## ylab = input$provide_ylab,
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
     }
@@ -170,7 +170,7 @@ output$decomposed_plot <- renderPlot({
         decompositionplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            ## xlab = input$provide_xlab,
+            xlab = input$provide_xlab,
             ## ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
@@ -185,7 +185,7 @@ output$trSeasonal_plot <- renderPlot({
             iNZightTS:::decompositionplot(
                 iNZightTS(ts.data(),
                           var = variable.names()),
-                ## xlab = input$provide_xlab,
+                xlab = input$provide_xlab,
                 ## ylab = input$provide_ylab,
                 multiplicative = input$choose_season
             ),

@@ -49,10 +49,10 @@ vis.sidebarPanel <- function() {
         hr(),
         ##  Reset graphical parameters.
         radioButtons(inputId = "customize_plot",
-                     label =  "Customize Plot: ",
+                     label =  "Advanced Options: ",
                      choices =
-                         c("No" = 1,
-                           "Yes" = 2),
+                         c("Hide" = 1,
+                           "Show" = 2),
                      selected = 1),
         hr(),
         actionButton(inputId = "reset.graphics",
@@ -74,116 +74,148 @@ vis.mainPanel <- function() {
                 tabPanel(
                     title = "Plot",
                     br(),
-                    column(
-                        width = 12,
-                        helpText("Plots for visualizing data."),
-                        plotOutput("visualize.plot")
-                    ),
-                    column(
-                        width = 12,
+                    fluidRow(
                         column(
-                            width = 6,
-                            conditionalPanel(
-                                condition = "input.subs1 != 'none'",
-                                ##  Slider input GUI for the first variable.
-                                br(),
-                                uiOutput("subs1_conditional")
-                            )
-                        ),
-                        column(
-                            width = 6,
-                            ##  Slider input GUI for the second variable.
-                            conditionalPanel(
-                                condition = "input.subs2 != 'none'",
-                                br(),
-                                uiOutput("subs2_conditional")
-                            )
-                        )
-                    ),
-                    conditionalPanel(
-                        condition = "input.customize_plot == 2",
-                        helpText("Customize Plot (applies only to the",
-                                 strong("Plot"),
-                                 "tab)"),
-                        tabsetPanel(
-                            id = "add_selector",
-                            type = "pills",
-                            ##  Add to Plot
-                            tabPanel(
-                                title = "Add to Plot",
-                                br(),
-                                column(
-                                    width = 6,
-                                    uiOutput("resize.by")
-                                ),
-                                column(
-                                    width = 6,
-                                    uiOutput("colour.by")
+                            width = 12,                            
+                            fluidRow(
+                                conditionalPanel(
+                                    condition = "input.customize_plot == 1",
+                                    column(
+                                        width = 12,
+                                        helpText("Plots for visualizing data."),  
+                                        plotOutput("visualize.plot"),
+                                        fluidRow(
+                                            column(
+                                                width = 6,
+                                                conditionalPanel(
+                                                    condition = "input.subs1 != 'none'",
+                                                    ##  Slider input GUI for the first variable.
+                                                    br(),
+                                                    uiOutput("subs1_conditional")
+                                                )
+                                            ),
+                                            column(
+                                                width = 6,
+                                                ##  Slider input GUI for the second variable.
+                                                conditionalPanel(
+                                                    condition = "input.subs2 != 'none'",
+                                                    br(),
+                                                    uiOutput("subs2_conditional")
+                                                )
+                                            )
+                                        )
+                                    )
                                 )
                             ),
-                            ##  Add Inference
-                            tabPanel(
-                                title = "Add Inference",
-                                br(),
-                                helpText("Inferential Markups to be added"),
-                                uiOutput("add.inference")
-                            ),
-                            ##  Change Plot Appearance
-                            tabPanel(
-                                title = "Add Flavour",
+                            conditionalPanel(
+                                condition = "input.customize_plot == 2",
                                 column(
-                                    width = 4,
-                                    br(),
-                                    textInput(inputId = "title",
-                                              label = "Plot Title:"),
-                                    textInput(inputId = "xlab",
-                                              label = "Label for x-axis:") ## ,
-                                    ## textInput(inputId = "ylab",
-                                    ##           label  ="Label for y-axis:")
+                                    width = 8,
+                                    helpText("Plots for visualizing the data."),
+                                    plotOutput("mini.plot"),
+                                    fluidRow(
+                                        column(
+                                            width = 6,                                       
+                                            conditionalPanel(
+                                                condition = "input.subs1 != 'none'",
+                                                uiOutput("subs1_conditional_mini")
+                                            )
+                                        ),
+                                        column(
+                                            width = 6,
+                                            conditionalPanel(
+                                                condition = "input.subs2 != 'none'",
+                                                uiOutput("subs2_conditional_mini")
+                                            )
+                                        )
+                                    )
                                 ),
                                 column(
                                     width = 4,
+                                    helpText("Advanced Options"),
                                     br(),
-                                    uiOutput("background"),
-                                    uiOutput("plot_type")
-                                ),
-                                column(
-                                    width = 4,
-                                    br(),
-                                    ##  Choose Object Colour
-                                    conditionalPanel(
-                                        condition = "input.choose_plot == 1",
-                                        uiOutput("bar_colour")
+                                    fluidRow(
+                                        column(
+                                            width = 12,
+                                            selectInput(inputId = "advanced-options",
+                                                        label = "Options",
+                                                        choices =
+                                                            c("Plot Appearance",
+                                                              "Inferential Markups"),
+                                                        selected = "Plot Appearance")
+                                        )
+                                    ),                                            
+                                    fluidRow(
+                                        column(
+                                            width = 6,
+                                            textInput(inputId = "title", label = "Title:")
+                                        ),
+                                        column(
+                                            width = 6,
+                                            textInput(inputId = "xlab", label = "Axis Label:")
+                                        )
                                     ),
-                                    conditionalPanel(
-                                        condition = "input.choose_plot == 2",
-                                        uiOutput("symbol_colour")
+                                    fluidRow(
+                                        column(
+                                            width = 6,
+                                            uiOutput("resize.by")
+                                        ),
+                                        column(
+                                            width = 6,
+                                            uiOutput("colour.by")
+                                        )
                                     ),
-                                    conditionalPanel(
-                                        condition = "input.choose_plot == 3",
-                                        uiOutput("box_colour")
+                                    fluidRow(
+                                        column(
+                                            width = 6,
+                                            uiOutput("background")
+                                        ),
+                                        column(
+                                            width = 6,
+                                            uiOutput("plot_type")
+                                        )
                                     ),
-                                    ##  Object Options
-                                    conditionalPanel(
-                                        condition = "input.choose_plot == 1",
-                                        ## uiOutput("bar_width"),
-                                        uiOutput("bar_border")
-                                    ),
-                                    conditionalPanel(
-                                        condition = "input.choose_plot == 2",
-                                        ## uiOutput("symbol_transparency"),
-                                        uiOutput("symbol_size")
-                                    ),
-                                    conditionalPanel(
-                                        condition = "input.choose_plot == 3",
-                                        ## uiOutput("box_width"),
-                                        uiOutput("box_border")
+                                    fluidRow(
+                                        column(
+                                            width = 6,
+                                            ##  Choose Object Colour
+                                            conditionalPanel(
+                                                condition = "input.choose_plot == 1",
+                                                uiOutput("bar_colour")
+                                            ),
+                                            conditionalPanel(
+                                                condition = "input.choose_plot == 2",
+                                                uiOutput("symbol_colour")
+                                            ),
+                                            conditionalPanel(
+                                                condition = "input.choose_plot == 3",
+                                                uiOutput("box_colour")
+                                            )
+                                        ),
+                                        column(
+                                            width = 6,
+                                            conditionalPanel(
+                                                condition = "input.choose_plot == 1",
+                                                ## uiOutput("bar_width"),
+                                                uiOutput("bar_border")
+                                            ),
+                                            conditionalPanel(
+                                                condition = "input.choose_plot == 2",
+                                                ## uiOutput("symbol_transparency"),
+                                                uiOutput("symbol_size")
+                                            ),
+                                            conditionalPanel(
+                                                condition = "input.choose_plot == 3",
+                                                ## uiOutput("box_width"),
+                                                uiOutput("box_border")
+                                            )
+                                        )                     
                                     )
                                 )
                             )
                         )
                     )
-                ),
+                ),               
                 ##  Summary Panel
                 tabPanel(
                     title = "Summary",
@@ -206,10 +238,142 @@ vis.mainPanel <- function() {
 }
 
 
-visualize_panel <- function() {
-    fluidRow(
-        column(2, vis.sidebarPanel()),
-        column(10, vis.mainPanel())
+
+##  Option 1
+
+vis.optionPanel <- function() {
+    helpText("Advanced Options go here.")
+}
+
+visualize.panel <- function() {
+    fluidPage(
+        fluidRow(
+            column(2, vis.sidebarPanel()),
+            column(10, vis.mainPanel())## ,
+            ## column(2, vis.optionPanel())
+        )
     )
 }
 
+
+##  Option 2
+## vis.mainPanel.2 <- function() {
+##     if (!is.null(data)) {
+##         list(
+##             br(),
+##             tabsetPanel(
+##                 id = "plot_selector",
+##                 type = "pills",
+##                 ##  Plot Panel
+##                 tabPanel(
+##                     title = "Plot",
+##                     br(),
+##                     helpText("Plots for visualizing data."),                     
+##                     fluidRow(
+##                         column(
+##                             width = 12,
+##                             plotOutput("visualize.plot"),
+##                             fluidRow(
+##                                 column(
+##                                     width = 6,
+##                                     conditionalPanel(
+##                                         condition = "input.subs1 != 'none'",
+##                                         ##  Slider input GUI for the first variable.
+##                                         br(),
+##                                         uiOutput("subs1_conditional")
+##                                     )
+##                                 ),
+##                                 column(
+##                                     width = 6,
+##                                     ##  Slider input GUI for the second variable.
+##                                     conditionalPanel(
+##                                         condition = "input.subs2 != 'none'",
+##                                         br(),
+##                                         uiOutput("subs2_conditional")
+##                                     )
+##                                 )
+##                             )
+##                         )
+##                     )
+##                 ),
+##                 ##  Plot Options
+##                 tabPanel(
+##                     title = "Options",
+##                     br(),
+##                     fluidRow(
+##                         column(
+##                             width = 8,
+    ##                             plotOutput("mini.plot")## ,
+                            ## fluidRow(
+                            ##     column(
+                            ##         width = 6,                                       
+                            ##         conditionalPanel(
+                            ##             condition = "input.subs1 != 'none'",
+                            ##             uiOutput("subs1_conditional_mini")
+                            ##         )
+                            ##     ),
+                            ##     column(
+                            ##         width = 6,
+                            ##         conditionalPanel(
+                            ##             condition = "input.subs2 != 'none'",
+                            ##             uiOutput("subs2_conditional_mini")
+                            ##         )
+                            ##     )
+                            ## )                         
+##                         ),
+##                         column(
+                    ##         width = 4,
+                    ##         fluidRow(
+                    ##             column(
+                    ##                 width = 6,
+                    ##                 uiOutput("resize.by")
+                    ##             ),
+                    ##             column(
+                    ##                 width = 6,
+                    ##                 uiOutput("colour.by")
+                    ##             )
+                    ##         ),
+                    ##         fluidRow(
+                    ##             column(
+                    ##                 width = 6,
+                    ##                 uiOutput("background")
+                    ##             ),
+                    ##             column(
+                    ##                 width = 6,
+                    ##                 uiOutput("plot_type")
+                    ##             )
+                    ##         )                            
+                    ##     )
+                    ## )
+##                 ),
+                
+##                 ##  Summary Panel
+##                 tabPanel(
+##                     title = "Summary",
+##                     br(),
+##                     helpText("Statistical Sumary for the data."),
+##                     verbatimTextOutput("visualize.summary")
+##                 ),
+##                 ##  Inference Panel
+##                 tabPanel(
+##                     title = "Inference",
+##                     br(),
+##                     helpText("Statistical Inference for the data."),
+##                     verbatimTextOutput("visualize.inference")
+##                 )
+##             )
+##         )
+##     } else {
+##         list(h4("No data available, please select or import a data set."))
+##     }
+## }
+
+## visualize.panel <- function() {
+##     fluidPage(
+##         fluidRow(
+##             column(2, vis.sidebarPanel()),
+##             column(10, vis.mainPanel.2())
+##         )
+##     )
+## }
+    
