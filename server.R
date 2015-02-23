@@ -3,8 +3,12 @@ library(iNZightTS)
 library(markdown)
 library(gpairs)
 
-shinyServer(function(input, output, session) {
 
+
+shinyServer(function(input, output, session) {
+    ##  Turn errors and warnings off
+    ## options(warn = -1, show.error.messages = FALSE)
+    
     ##  Delete all imported files that are older than 1 day.
     delete.old.files(1) # global.R
 
@@ -685,9 +689,8 @@ shinyServer(function(input, output, session) {
     source("gui-elements/visualize-gui.R", local = TRUE)
     output$visualize.module <- renderUI({
         input$selector
-        visualize_panel()
+        visualize.panel()
     })
-
 
     ##----------------------##
     ##  Time Series Module  ##
@@ -696,13 +699,21 @@ shinyServer(function(input, output, session) {
     source("gui-elements/time-series-gui.R", local = TRUE)
     output$time.series.module <- renderUI({
         input$selector
-        time_series_panel()
+        time.series.panel()
     })
 
-    ##  On close (Not used in the moment) - code to execute when session ends
-    session$onSessionEnded(function() {
-        ## Also clean up the users directory file for this example
-        ##     unlink(user.dir,recursive=T)
+    ##---------------##
+    ##  Help Module  ##
+    ##---------------##
+    source("gui-elements/help-gui.R", local = TRUE)
+    output$help.module <- renderUI({
+        help.panel()
     })
+    
+    ##  On close (Not used in the moment) - code to execute when session ends
+    ## session$onSessionEnded(function() {
+        ## also clean up the users directory file for this example
+        ##     unlink(user.dir,recursive=T)
+    ## })
 
 })

@@ -1,8 +1,11 @@
-about.panel = function() {
+help.panel  = function() {
     fixedPage(
         column(width = 10, offset = 1,
-               div(class = "page-spacer",
-                   includeMarkdown('gui-elements/notes/about.intro.md'),
+               div(class = "help-module",
+                   includeMarkdown('gui-elements/notes/help.module.md'),
+                   br(),
+                   br(),
+                   br(),
                    br(),
                    br(),
                    br(),
