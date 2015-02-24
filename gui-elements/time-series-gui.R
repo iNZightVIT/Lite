@@ -71,6 +71,7 @@ ts.sidebarPanel <- function() {
             actionButton(inputId = "provide_actionButton",
                          label = "Provide time information")
         ),
+        hr(),
         ##  Section 2: Seasonal Pattern
         ##
         ##  Next, we ask the user to specify a seasonal pattern. This can be
@@ -95,7 +96,7 @@ ts.sidebarPanel <- function() {
                      multiple = TRUE),
         helpText("(Remove variables with the",
                  strong('Delete'),
-                 "key)") ## ,
+                 "key)"),
 
         ##  Section 4: Select Labels
         ##
@@ -118,7 +119,7 @@ ts.sidebarPanel <- function() {
         ##               label = "Label for the y-axis",
         ##               value = "")
         ## ),
-        ## hr()
+        hr()        
     )
     
 }
