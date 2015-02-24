@@ -87,8 +87,8 @@ output$timeseries_plot <- renderPlot({
         rawplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            xlab = input$provide_xlab,
-            ylab = input$provide_ylab,
+            ## xlab = input$provide_xlab,
+            ## ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
     }
