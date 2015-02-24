@@ -1,5 +1,5 @@
-iNZight *Lite* version 0.9.6 (More to come)
-==========================================
+iNZight *Lite* version 0.9.6
+============================
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with two new modules:
 
 - Visualize
