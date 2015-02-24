@@ -1,5 +1,5 @@
-Notes from Matiu Carr (February, 2015)
-=======================================
+Notes from Mat (February, 2015)
+===============================
 
 Script
 ------
