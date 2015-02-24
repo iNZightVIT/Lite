@@ -9,7 +9,7 @@ Authors@R: c(person("Chris", "Park", role = c("aut", "cre")
              email = "c.knapp@auckland.ac.nz"),
              person("Junjie", "Zeng", role = c("aut"),
              email = "jzen188@aucklanduni.ac.nz"))
-Description: A web application for simple data analysis.
+Description: A web implementation of iNZight, a simple data analysis tool designed for high school students in New Zealand.
 License: GPL-3
 Imports: gpairs, iNZightPlots, Markdown, Shiny
 Depends: R (>= 3.1.0)
