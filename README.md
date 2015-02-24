@@ -12,9 +12,7 @@ Recent Updates (24/02/15):
 
 To do/Known Issues:
 -------------------
-- [General] Plots in the "Visualize" module seem to have an ugly border around them for certain browsers - fix.
-- [General] Fix the "Datatables" bug
-- [General] Fix the footer/panel overlap bug.
+- [General] Fix the "Datatables" bug.
 - [Time Series] Change the way plots are drawn to how it was done in "Visualize".
 - [Time Series] "Provide Time Information" needs to be linked to server.R
 - [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
@@ -22,7 +20,6 @@ To do/Known Issues:
 - [Quick Explore] Merge into 1 tab.
 - [Visualize] Add inferential markups.
 - [Advanced] Nest QE and TS under "Advanced".
-- [Help] Add a "Help" tab for reporting bugs and documentation
 
 
 Directories:
@@ -38,7 +35,7 @@ This directory contains the gui functions for all the modules.
 This directory contains the documentation for the input and output ID's for the time series module.
 
 - server-elements: 
-This directory contains the server functions for the two new modules.
+This directory contains the server functions for the "Visualize" and "Time Series" modules.
 
 - www:
 This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
