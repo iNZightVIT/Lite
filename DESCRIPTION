@@ -1,0 +1,16 @@
+Package: iNZight-Lite
+Type: Shiny Application
+Title: iNZight Lite
+Version: 0.9.6
+Date: 2015-02-25
+Authors@R: c(person("Chris", "Park", role = c("aut", "cre")
+             email = "cpar137@aucklanduni.ac.nz"),
+             person("Christoph", "Knapp", role = c("aut"),
+             email = "c.knapp@auckland.ac.nz"),
+             person("Junjie", "Zeng", role = c("aut"),
+             email = "jzen188@aucklanduni.ac.nz"))
+Description: A web application for simple data analysis.
+License: GPL-3
+Imports: gpairs, iNZightPlots, Markdown, Shiny
+Depends: R (>= 3.1.0)
+Suggests: None
