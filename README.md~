@@ -5,10 +5,11 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Visualize
 - Time Series
 
-Recent Updates (23/02/15):
---------------------------
-- New side-panel layout for the "Visualize" module.
-- New "Help" module.
+Recent Updates:
+----------------
+- New 'slide' interface to come for advanced plot options in the "Visualize" module.
+- Add inferential markups to the "Visualize" module.
+- Add 'Help' documentation for both the "Time Series" and "Visualize" modules by the end of Feb 2015.
 
 To do/Known Issues:
 -------------------
@@ -21,6 +22,7 @@ To do/Known Issues:
 - [Time Series] Make the "TS" panel conditional on the type of dataset loaded.
 - [Quick Explore] Merge into 1 tab.
 - [Visualize] Add inferential markups.
+- [Visualize] Re-design the "Customize Plot" panel.
 - [Advanced] Nest QE and TS under "Advanced".
 - [Help] Add a "Help" tab for reporting bugs and documentation
 

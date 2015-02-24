@@ -10,7 +10,7 @@ help.panel  = function() {
                    br(),
                    br(),
                    br(),
-                   p(em('Last Updated: 12/02/15'),
+                   p(em('Last Updated: 24/02/15'),
                      style = 'color:gray',
                      align = 'right')
                    )
@@ -44,7 +44,7 @@ help.panel  = function() {
                     <a href = "http://www.minedu.govt.nz/">
 		      <img src = "minedu_logo.png"/, height = 60, width = 170>
 		    </a> &nbsp; &nbsp;
-		    <a href = "http://stat.auckland.ac.nz">		      
+		    <a href = "http://stat.auckland.ac.nz">
                       <img src = "uoa_logo.png", height = 65>
                     </a> &nbsp;
 		  </span>
