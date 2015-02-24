@@ -5,7 +5,7 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Visualize
 - Time Series
 
-Recent Updates (23/02/15):
+Recent Updates (24/02/15):
 --------------------------
 - New side-panel layout for the "Visualize" module.
 - New "Help" module.
