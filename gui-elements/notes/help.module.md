@@ -10,7 +10,7 @@
 <br>
 
 <form action="mailto:cpar137@aucklanduni.ac.nz?Subject=iNZight-Lite%20Feedback" method="post">
-<input type="submit" value = "Send Email"></form>
+<input type="submit" value = "Contact Us"></form>
 
 <br>
 
