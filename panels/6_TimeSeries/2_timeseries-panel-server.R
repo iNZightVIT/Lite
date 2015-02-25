@@ -86,7 +86,7 @@ variable.names <- reactive({
 output$timeseries_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
-        rawplot(
+        rawplot(            
             iNZightTS(ts.data(),
                       var = variable.names()),
             xlab = input$provide_xlab,
@@ -158,8 +158,8 @@ output$seasonal_plot <- renderPlot({
         seasonplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            xlab = input$provide_xlab,
             ylab = input$provide_ylab,
+            xlab = input$provide_xlab,
             multiplicative = input$choose_season
         )
     }

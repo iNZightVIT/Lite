@@ -121,12 +121,12 @@ ts.sidebarPanel <- function() {
                      selected = 1),
         ## hr(),
         conditionalPanel(
-            condition = "input.customize_labels == 2",
+            condition = "input.customize_labels == 2",            
             textInput(inputId = "provide_xlab",
-                      label = "Label for the x-axis",
+                      label = "Label for the x-axis:",
                       value = ""),
             textInput(inputId = "provide_ylab",
-                      label = "Label for the y-axis",
+                      label = "Label for the y-axis:",
                       value = "")
         ),
         hr(),
