@@ -172,7 +172,7 @@ output$decomposed_plot <- renderPlot({
         decompositionplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            xlab = input$provide_xlab,
+            ## xlab = input$provide_xlab,
             ## ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
