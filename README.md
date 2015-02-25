@@ -36,9 +36,6 @@ This directory contains the gui functions for all the modules.
 - panels:
 This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
 
-- server-elements: 
-This directory contains the server functions for the "Visualize" and "Time Series" modules.
-
 - www:
 This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
 
@@ -80,3 +77,4 @@ The file names adhere to the following guidelines:
 
 - www:
 This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
+
