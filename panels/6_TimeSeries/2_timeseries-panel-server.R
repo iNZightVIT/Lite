@@ -88,9 +88,9 @@ output$timeseries_plot <- renderPlot({
     if (length(input$singleSeriesTabs) > 0) {
         rawplot(            
             iNZightTS(ts.data(),
-                      var = variable.names()),
-            ylab = input$provide_ylab,
+                      var = variable.names()),            
             xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
     }

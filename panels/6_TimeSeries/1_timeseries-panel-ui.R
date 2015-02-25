@@ -53,19 +53,23 @@ ts.sidebarPanel <- function() {
         ##  of variables extracted from the dataset, or providing one
         ##  manually.
         hr(),
-        radioButtons(inputId = "time_info",
-                     label = "Time Information: ",
-                     choices =
-                         c("Select time variable" = 1,
-                           "Provide time manually" = 2),
-                     selected = 1),
+        radioButtons(
+            inputId = "time_info",
+            label = "Time Information: ",
+            choices =
+                c("Select time variable" = 1,
+                  "Provide time manually" = 2),
+            selected = 1
+        ),
         ##  If the user decides to select a variable, then load a panel
         ##  which contains the list of variables extracted from the dataset.
         conditionalPanel(
             condition = "input.time_info == 1",
-            selectInput(inputId = "select_timevars",
-                        label = "Select time variable: ",
-                        choices = colnames(data))
+            selectInput(
+                inputId = "select_timevars",
+                label = "Select time variable: ",
+                choices = colnames(data)
+            )
         ),
         ##  If the user chooses to provide time information manually, then
         ##  load a panel that allows the user to do so.
@@ -131,8 +135,7 @@ ts.sidebarPanel <- function() {
         ),
         hr(),
         ts.help(),
-        "HELP",
-        hr()
+        "HELP"
     )
     
 }
@@ -170,118 +173,140 @@ ts.mainPanel <- function() {
         ##  any output produced.
         conditionalPanel(
             condition = "input.select_variables.length == 1",
-            tabsetPanel(id = "singleSeriesTabs",
-                        type = "pills", # Try type = "tabs" is you wish...
-                        ##  Tab 1: Time Series Plot
-                        tabPanel(title = "Time",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Time Plot"),
-                                     "for",
-                                     strong("single"),
-                                     "series."),
-                                 plotOutput("timeseries_plot")),
-                                 ## uiOutput("timeseries_layout")),
-                                 ## actionButton(inputId = "start_animate",
-                                 ##              label = "Start Animation"),
-                                 ## actionButton(inputId = "stop_animate",
-                                 ##              label = "Stop Animation")
-                        ##  Tab 2: Seasonal Plot
-                        tabPanel(title = "Seasonal",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Seasonal Plot"),
-                                     "for",
-                                     strong("single"),
-                                     "series.",
-                                     br()),
-                                 plotOutput(outputId = "seasonal_plot")),
+            tabsetPanel(
+                id = "singleSeriesTabs",
+                type = "pills", # Try type = "tabs" is you wish...
+                ##  Tab 1: Time Series Plot
+                tabPanel(
+                    title = "Time",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Time Plot"),
+                        "for",
+                        strong("single"),
+                        "series."),
+                    plotOutput("timeseries_plot")
+                ),
+                ## uiOutput("timeseries_layout")),
+                ## actionButton(inputId = "start_animate",
+                ##              label = "Start Animation"),
+                ## actionButton(inputId = "stop_animate",
+                ##              label = "Stop Animation")
+                ##  Tab 2: Seasonal Plot
+                tabPanel(
+                    title = "Seasonal",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Seasonal Plot"),
+                        "for",
+                        strong("single"),
+                        "series.",
+                        br()),
+                    plotOutput(outputId = "seasonal_plot")
+                ),
 
-                        ##  Tab 3: Decomposed Plot
-                        tabPanel(title = "Decomposed",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Decomposed Plot"),
-                                     "for",
-                                     strong("single"),
-                                     "series.",
-                                     br(),
-                                     br()),
-                                 plotOutput(outputId = "decomposed_plot")),
+                ##  Tab 3: Decomposed Plot
+                tabPanel(
+                    title = "Decomposed",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Decomposed Plot"),
+                        "for",
+                        strong("single"),
+                        "series.",
+                        br(),
+                        br()),
+                    plotOutput(outputId = "decomposed_plot")
+                ),
+                
+                ##  Tab 4: Trend + Seasonal Plot
+                tabPanel(
+                    title = "Recomposed",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Recomposed Plot"),
+                        "for",
+                        strong("single"),
+                        "series.",
+                        br(),
+                        br()),
+                    plotOutput(outputId = "trSeasonal_plot")
+                ),
 
-                        ##  Tab 4: Trend + Seasonal Plot
-                        tabPanel(title = "Recomposed",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Recomposed Plot"),
-                                     "for",
-                                     strong("single"),
-                                     "series.",
-                                     br(),
-                                     br()),
-                                 plotOutput(outputId = "trSeasonal_plot")),
-
-                        ##  Tab 5: Forecast Plot
-                        tabPanel(title = "Forecast",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Forecast Plot"),
-                                     "for",
-                                     strong("single"),
-                                     "series.",
-                                     br(),
-                                     br()),
-                                 plotOutput(outputId = "forecast_plot")),
-                        ##  Tab 6: Forecast Summary
-                        tabPanel(title = "Summary",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Forecast Summary"),
-                                     "for",
-                                     strong("single"),
-                                     "series.",
-                                     br(),
-                                     br()),
-                                 verbatimTextOutput(outputId = "forecast_summary")))
-
+                ##  Tab 5: Forecast Plot
+                tabPanel(
+                    title = "Forecast",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Forecast Plot"),
+                        "for",
+                        strong("single"),
+                        "series.",
+                        br(),
+                        br()
+                    ),
+                    plotOutput(outputId = "forecast_plot")
+                ),
+                ##  Tab 6: Forecast Summary
+                tabPanel(
+                    title = "Summary",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Forecast Summary"),
+                        "for",
+                        strong("single"),
+                        "series.",
+                        br(),
+                        br()
+                    ),
+                    verbatimTextOutput(outputId = "forecast_summary")
+                )                
+            )
         ),
         ##  Section 3: Multiple Series Plots
         conditionalPanel(
             condition = "input.select_variables.length > 1",
-            tabsetPanel(id = "multipleSeriesTabs",
-                        type = "pills", # Try type = "tabs" if you wish...
-                        ##  Tab 1:  Single Plot Layout
-                        tabPanel(title = "Single Plot",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Single-Plot"),
-                                     "for",
-                                     strong("several"),
-                                     "series.",
-                                     br(),
-                                     br()),
-                                 uiOutput("multipleSeries_single_layout")),
-
-                        ##  Tab 2:  Multiple Plot Layout
-                        tabPanel(title = "Multiple Plot",
-                                 helpText(
-                                     br(),
-                                     "A",
-                                     strong("Multi-Plot"),
-                                     "for",
-                                     strong("several"),
-                                     "series.",
-                                     br(),
-                                     br()),
-                                 uiOutput("multipleSeries_multi_layout"))
-                        ))
+            tabsetPanel(
+                id = "multipleSeriesTabs",
+                type = "pills", # Try type = "tabs" if you wish...
+                ##  Tab 1:  Single Plot Layout
+                tabPanel(
+                    title = "Single Plot",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Single-Plot"),
+                        "for",
+                        strong("several"),
+                        "series.",
+                        br(),
+                        br()
+                    ),
+                    uiOutput("multipleSeries_single_layout")
+                ),
+                ##  Tab 2:  Multiple Plot Layout
+                tabPanel(
+                    title = "Multiple Plot",
+                    helpText(
+                        br(),
+                        "A",
+                        strong("Multi-Plot"),
+                        "for",
+                        strong("several"),
+                        "series.",
+                        br(),
+                        br()
+                    ),
+                    uiOutput("multipleSeries_multi_layout")
+                )
+            )
+        )
     )
 }
 

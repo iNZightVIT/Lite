@@ -75,8 +75,7 @@ vis.sidebarPanel <- function() {
         ),
         hr(),
         visualize.help(),
-        "HELP",
-        hr()       
+        "HELP"
     )
 }
 
