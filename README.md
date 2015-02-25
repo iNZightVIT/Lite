@@ -1,9 +1,10 @@
 iNZight *Lite* version 0.9.6
 ============================
-This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with two new modules:
-
+This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
+- About
 - Visualize
 - Time Series
+- Help
 
 Recent Updates (25/02/15):
 --------------------------
