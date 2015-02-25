@@ -5,10 +5,11 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Visualize
 - Time Series
 
-Recent Updates (24/02/15):
+Recent Updates (25/02/15):
 --------------------------
 - New side-panel layout for the "Visualize" module.
 - New "Help" module.
+- Restructured code - new panels have their own directory.
 
 To do/Known Issues:
 -------------------
@@ -31,8 +32,8 @@ This directory holds all the data. The data must be placed in sub-directories, w
 - gui-elements:
 This directory contains the gui functions for all the modules.
 
-- id-documentation:
-This directory contains the documentation for the input and output ID's for the time series module.
+- panels:
+This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
 
 - server-elements: 
 This directory contains the server functions for the "Visualize" and "Time Series" modules.
@@ -71,10 +72,10 @@ The file names adhere to the following guidelines:
 
 - N_panel-name
 - M_sub-panel-name
-- 1_panel-server.R
-- 2_panel-gui.R
-- 3_panel-help.R
-- 4_panel-other.R
+- 1_panelname-panel-gui.R
+- 2_panelname-panel-server.R
+- 3_panelname-panel-help.R
+- 4_panelname-panel-other.R
 
 - www:
 This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
