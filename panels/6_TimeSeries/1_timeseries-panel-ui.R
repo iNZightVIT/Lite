@@ -21,7 +21,17 @@
 ###  Sidebar Panel  ###
 ###-----------------###
 ###
-###  First, we set up the sidebar panel with "ts.sidebarPanel()".
+###  First, we set up the "help" functionality for this module.
+ts.help = function() {
+    helpModal(
+        "Time Series",
+        "Time Series Panel",
+        inclMD("panels/6_TimeSeries/3_timeseries-panel-help.md")
+    )
+}
+    
+
+###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
 ts.sidebarPanel <- function() {
     ##  Perform a routine data check.
     if (is.null(data)) {
@@ -102,23 +112,27 @@ ts.sidebarPanel <- function() {
         ##  We give the user the option of providing her own set of x- and
         ##  y- axes labels. This is set to "No" by default to save screen
         ##  real estate.
-        ## radioButtons(inputId = "customize_labels",
-        ##              label =  "Customize Labels: ",
-        ##              choices =
-        ##                  c("No" = 1,
-        ##                    "Yes" = 2),
-        ##              selected = 1),
+        hr(),
+        radioButtons(inputId = "customize_labels",
+                     label =  "Customize Labels: ",
+                     choices =
+                         c("No" = 1,
+                           "Yes" = 2),
+                     selected = 1),
         ## hr(),
-        ## conditionalPanel(
-        ##     condition = "input.customize_labels == 2",
-        ##     textInput(inputId = "provide_xlab",
-        ##               label = "Label for the x-axis",
-        ##               value = ""),
-        ##     textInput(inputId = "provide_ylab",
-        ##               label = "Label for the y-axis",
-        ##               value = "")
-        ## ),
-        hr()        
+        conditionalPanel(
+            condition = "input.customize_labels == 2",
+            textInput(inputId = "provide_xlab",
+                      label = "Label for the x-axis",
+                      value = ""),
+            textInput(inputId = "provide_ylab",
+                      label = "Label for the y-axis",
+                      value = "")
+        ),
+        hr(),
+        ts.help(),
+        "HELP",
+        hr()
     )
     
 }
@@ -159,11 +173,11 @@ ts.mainPanel <- function() {
             tabsetPanel(id = "singleSeriesTabs",
                         type = "pills", # Try type = "tabs" is you wish...
                         ##  Tab 1: Time Series Plot
-                        tabPanel(title = "Time Series",
+                        tabPanel(title = "Time",
                                  helpText(
                                      br(),
                                      "A",
-                                     strong("Time Series Plot"),
+                                     strong("Time Plot"),
                                      "for",
                                      strong("single"),
                                      "series."),

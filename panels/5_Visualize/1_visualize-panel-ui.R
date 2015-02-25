@@ -21,7 +21,16 @@
 ###  Sidebar Panel  ###
 ###-----------------###
 ###
-###  First, we set up the sidebar panel with "vis.sidebarPanel()".
+###  First, we set up the "help" functionality for this module.
+visualize.help = function() {
+    helpModal(
+        "Visualize",
+        "Visualize Panel",
+        inclMD("panels/5_Visualize/3_visualize-panel-help.md")
+    )
+}
+    
+###  Next, we set up the sidebar panel with "vis.sidebarPanel()".
 vis.sidebarPanel <- function() {
     ##  Perform a routine data check.
     if (is.null(data)) {
@@ -53,8 +62,21 @@ vis.sidebarPanel <- function() {
                            "Show" = 2),
                      selected = 1),
         hr(),
-        actionLink(inputId = "reset.graphics",
-                     label = "Reset all")
+        ## actionLink(inputId = "reset.graphics",
+        ##              label = "Reset all"),
+        ## hr(),
+        "Reset All:",
+        helpText(
+            "To reset all your graphical settings, press the",
+            strong("F5"),
+            "key and click on the",
+            strong("Visualize"),
+            "tab again."
+        ),
+        hr(),
+        visualize.help(),
+        "HELP",
+        hr()       
     )
 }
 
@@ -234,13 +256,7 @@ vis.mainPanel <- function() {
         list(h4("No data available, please select or import a data set."))
     }
 }
-
-
-
-##  Option 1
-vis.optionPanel <- function() {
-    helpText("Advanced Options go here.")
-}
+              
 
 visualize.panel.ui <- function() {
     fluidPage(
