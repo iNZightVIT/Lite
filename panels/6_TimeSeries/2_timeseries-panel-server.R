@@ -89,7 +89,7 @@ output$timeseries_plot <- renderPlot({
         rawplot(            
             iNZightTS(ts.data(),
                       var = variable.names()),            
-            xlab = input$provide_xlab,
+            ## xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
@@ -159,7 +159,7 @@ output$seasonal_plot <- renderPlot({
             iNZightTS(ts.data(),
                       var = variable.names()),
             ylab = input$provide_ylab,
-            ## xlab = input$provide_xlab,
+            xlab = input$provide_xlab,
             multiplicative = input$choose_season
         )
     }
