@@ -68,15 +68,15 @@ shinyUI(
 
             ##  "Explore data" tab.
             tabPanel("Visualize",
-                     uiOutput("visualize.module")),
+                     uiOutput("visualize.panel")),
 
             ## "Advanced" tab, incl. time series.
             ## navbarMenu("Advanced",
             tabPanel("Time Series",
-                     uiOutput("time.series.module")),
+                     uiOutput("timeseries.panel")),
             ##  "Help" tab.
             tabPanel("Help",
-                     uiOutput("help.module"))
+                     uiOutput("help.panel"))
         )
     )
 )

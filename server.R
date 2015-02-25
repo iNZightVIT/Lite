@@ -1,10 +1,24 @@
+###-------------------------------------###
+###  Server Functions for iNZight Lite  ###
+###-------------------------------------###
+###
+###  Date Created   :   January 10, 2015
+###  Last Modified  :   February 25, 2015 
+###
+###  Please consult the comments before editing any code.
+###  This file sources the ui files for each panel separately.
+###
+###  If you have any questions and/or suggestions, please drop me an
+###  e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
+
+###  We load the packages we require. This is done only ONCE per instance.
 library(iNZightPlots)
 library(iNZightTS)
 library(markdown)
 library(gpairs)
 
 
-
+###  We write the server function.
 shinyServer(function(input, output, session) {
     ##  Turn errors and warnings off
     ## options(warn = -1, show.error.messages = FALSE)
@@ -19,11 +33,14 @@ shinyServer(function(input, output, session) {
     sapply(filepaths, source)
 
 
-    ##  "About (Start page)"
+    ##---------------------##
+    ##  1. "About" Module  ##
+    ##---------------------##
+    source("panels/1_About/1_about-panel-ui.R")
     output$about.panel <- renderUI({
-        about.panel()
+        about.panel.ui()
     })
-
+    
     ##  "Current data" - presents currently selected data to user.
     output$current.text <- renderText({
         input$selector
@@ -685,35 +702,30 @@ shinyServer(function(input, output, session) {
     ##--------------------##
     ##  Visualize Module  ##
     ##--------------------##
-    source("server-elements/visualize-server.R", local = TRUE)
-    source("gui-elements/visualize-gui.R", local = TRUE)
-    output$visualize.module <- renderUI({
+    source("panels/5_Visualize/1_visualize-panel-ui.R", local = TRUE)
+    source("panels/5_Visualize/2_visualize-panel-server.R", local = TRUE)
+    output$visualize.panel <- renderUI({
         input$selector
-        visualize.panel()
+        visualize.panel.ui()
     })
 
     ##----------------------##
     ##  Time Series Module  ##
     ##----------------------##
-    source("server-elements/time-series-server.R", local = TRUE)
-    source("gui-elements/time-series-gui.R", local = TRUE)
-    output$time.series.module <- renderUI({
+    source("panels/6_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
+    source("panels/6_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
+    output$timeseries.panel <- renderUI({
         input$selector
-        time.series.panel()
+        timeseries.panel.ui()
     })
 
     ##---------------##
     ##  Help Module  ##
     ##---------------##
-    source("gui-elements/help-gui.R", local = TRUE)
-    output$help.module <- renderUI({
-        help.panel()
-    })
-    
-    ##  On close (Not used in the moment) - code to execute when session ends
-    ## session$onSessionEnded(function() {
-        ## also clean up the users directory file for this example
-        ##     unlink(user.dir,recursive=T)
-    ## })
+    source("panels/7_Help/1_help-panel-ui.R", local = TRUE)
+    output$help.panel <- renderUI({
+        input$selector
+        help.panel.ui()
+    }) 
 
 })

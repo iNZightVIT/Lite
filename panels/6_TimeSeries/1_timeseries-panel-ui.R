@@ -10,13 +10,12 @@
 ###     1.  Sidebar Panel : contains all the user inputs.
 ###     2.  Main Panel    : contains all the outputs.
 ###
-###  Please consult the documentation for the Time Series module in
-###  "/documentation/time-series-module" before modifying any code.
+###  Please consult the comments before editing any code.
 ###
-###  If you have any questions and/or suggestions, drop me an e-mail:
-###  Chris Park <cpar137@aucklanduni.ac.nz>
+###  If you have any questions and/or suggestions, drop me
+###  an e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
 ###
-###  Note: This file is to be sourced locally within "server.R".
+###  * Note: This is to be sourced within "server.R" *
 
 ###-----------------###
 ###  Sidebar Panel  ###
@@ -278,7 +277,7 @@ ts.mainPanel <- function() {
 ###
 ###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to complete
 ###  the UI for the Time Series module.
-time.series.panel <- function() {
+timeseries.panel.ui <- function() {
     fluidPage(
         column(2, ts.sidebarPanel()),
         column(10, ts.mainPanel())

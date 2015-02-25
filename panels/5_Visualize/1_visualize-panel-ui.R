@@ -3,21 +3,19 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : January 29, 2015.
+###  Last Modified : February 25, 2015.
 ###
 ###  The UI is divided into two panels:
 ###
 ###     1.  Sidebar Panel : contains all the user inputs.
 ###     2.  Main Panel    : contains all the outputs.
 ###
-###  Please consult the documentation for the Time Series module in
-###  "/documentation/time-series-module" before modifying any code.
+###  Please consult the comments before editing any code.
 ###
-###  If you have any questions and/or suggestions, drop me an e-mail:
-###  Chris Park <cpar137@aucklanduni.ac.nz>
+###  If you have any questions and/or suggestions, please drop me an
+###  e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
 ###
-###  Note: Thie file is to be sourced locally within "server.R".
-
+###  * Note: Thie file is to be sourced locally within "server.R" *
 
 ###-----------------###
 ###  Sidebar Panel  ###
@@ -240,12 +238,11 @@ vis.mainPanel <- function() {
 
 
 ##  Option 1
-
 vis.optionPanel <- function() {
     helpText("Advanced Options go here.")
 }
 
-visualize.panel <- function() {
+visualize.panel.ui <- function() {
     fluidPage(
         fluidRow(
             column(2, vis.sidebarPanel()),

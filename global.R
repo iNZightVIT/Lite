@@ -869,9 +869,10 @@ onlineplot <-
         }
     }
 
-vars = c("data.dir","version")
+
+vars = c("data.dir","Version")
 data.dir = "data"
-version = "1.0"
+lite.version = "0.9.6 - Last Updated 25/02/15"
 first.reorder = TRUE
 transform.text = ""
 rawdata = load.data()

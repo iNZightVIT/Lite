@@ -1,18 +1,20 @@
-##  Server Functions for the "Time Series" Module
-##
-##  Date Created: January 16, 2015.
-##
-##  Please consult the documentation for the Time Series module before
-##  editing any code. If you have any questions and/or suggestions,
-##  drop me an e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
-##
-##  * Note: This is to be sourced within "server.R" *
+###-------------------------------------------------###
+###  Server Functions for the "Time Series" Module  ###
+###-------------------------------------------------###
+###
+###  Date Created   :   January 16, 2015
+###  Last Modified  :   February 25, 2015
+###
+###  Please consult the comments before editing any code.
+###
+###  If you have any questions and/or suggestions, drop me
+###  an e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
+###
+###  * Note: This is to be sourced within "server.R" *
 
 ##--------------##
 ##  Data check  ##
 ##--------------##
-
-library(iNZightTS)
 
 ##  Reactive data
 ts.data <- reactive({

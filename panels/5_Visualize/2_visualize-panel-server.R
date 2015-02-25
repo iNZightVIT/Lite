@@ -1,14 +1,18 @@
-##  Server Functions for the "Visualize" Module
-##
-##  Date Created   : February 1, 2015.
-##
-##  Please consult the documentation for the Time Series module before
-##  editing any code. If you have any questions and/or suggestions,
-##  drop me an e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
-##
-##  Note: This file is to be sourced locally within "server.R" *
+###-----------------------------------------------###
+###  Server Functions for the "Visualize" Module  ###
+###-----------------------------------------------###
+###
+###  Date Created   :   February 1, 2015
+###  Last Modified  :   February 25, 2015
+###
+###  Please consult the comments before editing any code.
+###
+###  If you have any questions and/or suggestions, drop me an e-mail:
+###  Chris Park <cpar137@aucklanduni.ac.nz>
+###
+###  * Note: This file is to be sourced locally within "server.R" * 
 
-##  And on the first day of February, God said "Let there be data":
+###  And on the first day of February, God said "Let there be data":
 vis.data <- reactive({
     input$selector
     data
@@ -16,7 +20,8 @@ vis.data <- reactive({
 })
 
 
-##  Then on the second day, he said let there be parameters for iNZightPlot():
+###  Then on the second day, he said let there be parameters for
+###  iNZightPlot():
 plot.par <- reactiveValues(
     x = NULL,
     y = NULL,
