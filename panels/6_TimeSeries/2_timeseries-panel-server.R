@@ -73,7 +73,9 @@ output$validate <- renderText({
 
 ###  If no variables are selected, print an error message.
 output$variable_message <- renderPrint({
-    "Please choose one or more variables to plot"
+    if (length(input$select_variables) < 1) {
+        "Please choose one or more variables to plot"
+    }
 })
 
 
