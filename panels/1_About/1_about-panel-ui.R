@@ -31,8 +31,11 @@ about.panel.ui = function() {
             ##  "global.R" - this is because the version number is also
             ##  included in the "help" page, and it would take far too
             ##  much effort to update the version number more than once.
-            ##  Fortune favours the lazy.
-            p(em(paste0("Version ", lite.version)),
+            ##  Fortune favours the lazy. The same logic applies to
+            ##  "lite.update".
+            p(em(lite.version),
+              br(),
+              em(lite.update),
               style = 'color:gray',
               align = 'right')
         ),
