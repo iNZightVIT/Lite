@@ -1,13 +1,16 @@
-iNZight *Lite* version 0.9.6
+iNZight *Lite* version 0.9.7
 ============================
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
+
 - About
 - Visualize
 - Time Series
 - Help
 
-Recent Updates (25/02/15):
+Recent Updates (27/02/15):
 --------------------------
+- New help text for variable selection in the "Time Series" module.
+- Header only appears if window size is > 767px.
 - New side-panel layout for the "Visualize" module.
 - New "Help" module.
 - Restructured code - new panels have their own directory.

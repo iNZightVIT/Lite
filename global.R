@@ -490,8 +490,8 @@ get.quantiles = function(subx){
 
 vars = c("data.dir","Version")
 data.dir = "data"
-lite.version = "iNZight Lite Version 0.9.6"
-lite.update = "Last Updated: 26/02/15"
+lite.version = "iNZight Lite Version 0.9.7"
+lite.update = "Last Updated: 27/02/15"
 first.reorder = TRUE
 transform.text = ""
 rawdata = load.data()

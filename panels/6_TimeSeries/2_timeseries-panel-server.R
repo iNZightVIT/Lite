@@ -23,7 +23,7 @@ ts.data <- reactive({
     ts.data <- data
 })
 
-###  We write a function that handles data. 
+###  We write a function that handles data.
 date_check <- function() {
     ##  Set of error checks.
     if (is.null(ts.data())) {
@@ -50,6 +50,11 @@ date_check <- function() {
 ###---------------------###
 ###  Validation Output  ###
 ###---------------------###
+###
+###  If the dataset has no time variable defined, then print an error message.
+###  We need to replace this with a conditional panel that only offers the
+###  option to define one's own time variable.
+
 output$validate <- renderText({
     if (is.null(ts.data())) {
         return()
@@ -64,6 +69,11 @@ output$validate <- renderText({
          Please load an alternative dataset that has a well-defined
          TIME variable."
     }
+})
+
+###  If no variables are selected, print an error message.
+output$variable_message <- renderPrint({
+    "Please choose one or more variables to plot"
 })
 
 
@@ -82,11 +92,10 @@ variable.names <- reactive({
 output$timeseries_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
-        rawplot(            
+        rawplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            ##  Strange bug.
-            ## xlab = input$provide_xlab,
+            xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
@@ -170,8 +179,8 @@ output$decomposed_plot <- renderPlot({
         decompositionplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            ## xlab = input$provide_xlab,
-            ## ylab = input$provide_ylab,
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
     }
@@ -185,8 +194,8 @@ output$trSeasonal_plot <- renderPlot({
             iNZightTS:::decompositionplot(
                 iNZightTS(ts.data(),
                           var = variable.names()),
-                ## xlab = input$provide_xlab,
-                ## ylab = input$provide_ylab,
+                xlab = input$provide_xlab,
+                ylab = input$provide_ylab,
                 multiplicative = input$choose_season
             ),
             animate = FALSE
@@ -201,8 +210,6 @@ output$forecast_plot <- renderPlot({
         forecastplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
-            ## xlab = input$provide_xlab,
-            ## ylab = input$provide_ylab,
             multiplicative = input$choose_season
         )
     }
@@ -273,8 +280,3 @@ output$multipleSeries_multi_layout <- renderUI({
         }
     }
 })
-
-output$variable_message <- renderPrint({
-    print("Please choose one or more variables to plot")
-})
-

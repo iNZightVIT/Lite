@@ -29,7 +29,7 @@ ts.help = function() {
         inclMD("panels/6_TimeSeries/3_timeseries-panel-help.md")
     )
 }
-    
+
 
 ###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
 ts.sidebarPanel <- function() {
@@ -72,7 +72,7 @@ ts.sidebarPanel <- function() {
                 choices = colnames(data)
             )
         ),
-        ##  If the user chooses to provide time information manually, 
+        ##  If the user chooses to provide time information manually,
         ##  then load a panel that allows the user to do so.
         conditionalPanel(
             condition = "input.time_info == 2",
@@ -100,7 +100,7 @@ ts.sidebarPanel <- function() {
         ##  We then ask the user to select the variables to plot in the
         ##  main panel. This amounts to selecting the points to be plotted
         ##  on the y-axis. "rev()" is used so that a non-time variable is
-        ##  selected (since time is on the x-axis), since the time 
+        ##  selected (since time is on the x-axis), since the time
         ##  variable is often the first element of "colnames(data)".
         selectInput(inputId = "select_variables",
                     label = "Series Variables: ",
@@ -125,7 +125,7 @@ ts.sidebarPanel <- function() {
                      selected = 1),
         ## hr(),
         conditionalPanel(
-            condition = "input.customize_labels == 2",            
+            condition = "input.customize_labels == 2",
             textInput(inputId = "provide_xlab",
                       label = "Label for the x-axis:",
                       value = ""),
@@ -137,7 +137,7 @@ ts.sidebarPanel <- function() {
         ts.help(),
         "HELP"
     )
-    
+
 }
 
 
@@ -164,6 +164,7 @@ ts.mainPanel <- function() {
         ##
         ##  First, we add a data validation mechanism.
         h3(textOutput(outputId = "validate"), style = "color:red"),
+        h3(textOutput(outputId = "variable_message"), style = "color:red"),
 
         ##  Section 2: Single Series Plots
         ##
@@ -221,7 +222,7 @@ ts.mainPanel <- function() {
                         br()),
                     plotOutput(outputId = "decomposed_plot")
                 ),
-                
+
                 ##  Tab 4: Trend + Seasonal Plot
                 tabPanel(
                     title = "Recomposed",
@@ -252,7 +253,7 @@ ts.mainPanel <- function() {
                     ),
                     plotOutput(outputId = "forecast_plot")
                 ),
-                
+
                 ##  Tab 6: Forecast Summary
                 tabPanel(
                     title = "Summary",
@@ -267,7 +268,7 @@ ts.mainPanel <- function() {
                         br()
                     ),
                     verbatimTextOutput(outputId = "forecast_summary")
-                )                
+                )
             )
         ),
         ##  Section 3: Multiple Series Plots

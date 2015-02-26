@@ -18,14 +18,11 @@ help.panel.ui  = function() {
     ##  We manually set the page width to be 10 columns so that it looks
     ##  (rougly) centred.
     fixedPage(
-        column(width = 10, offset = 1,               
+        column(width = 10, offset = 1,
                ##  We include the markdown document that contains the
-               ##  text for the "About" module. 
+               ##  text for the "About" module.
                includeMarkdown('panels/7_Help/4_help-panel-text.md'),
                ##  We include some line breaks to space things out.
-               br(),
-               br(),
-               br(),
                br(),
                br(),
                br(),
@@ -88,5 +85,5 @@ help.panel.ui  = function() {
 	      </div>'
             )
         )
-    )    
+    )
 }
