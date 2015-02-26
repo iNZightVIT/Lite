@@ -3,7 +3,7 @@
 ###-------------------------------------------------###
 ###
 ###  Date Created   :   January 16, 2015
-###  Last Modified  :   February 25, 2015
+###  Last Modified  :   February 26, 2015
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -12,30 +12,27 @@
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
-##--------------##
-##  Data check  ##
-##--------------##
+###--------------###
+###  Data check  ###
+###--------------###
 
-##  Reactive data
+###  Let data be reactive.
 ts.data <- reactive({
     input$selector
     data
     ts.data <- data
 })
 
-##  Initial Data Handling.
+###  We write a function that handles data. 
 date_check <- function() {
     ##  Set of error checks.
     if (is.null(ts.data())) {
         return(FALSE)
-        ## stop("Please load a dataset.")
     }
     if (is.null(input$select_timevars) || input$select_timevars == "") {
         return(FALSE)
-        ## stop("Your dataset must have suitable time variables.")
     }
     if (!(input$select_timevars %in% names(ts.data()))) {
-        ## stop("Please enter a valid variable name.")
         return(FALSE)
     }
     ##  We obtain a subset of the data.
@@ -43,7 +40,6 @@ date_check <- function() {
     ##  If any of the time series structures return an NA,
     ##  return TRUE. Else, return FALSE.
     if (any(is.na(iNZightTS:::get.ts.structure(subdata)))) {
-        ## stop("Please load a valid dataset.")
         return(FALSE)
     } else {
         return(TRUE)
@@ -51,9 +47,9 @@ date_check <- function() {
 }
 
 
-##---------------------##
-##  Validation Output  ##
-##---------------------##
+###---------------------###
+###  Validation Output  ###
+###---------------------###
 output$validate <- renderText({
     if (is.null(ts.data())) {
         return()
@@ -72,23 +68,24 @@ output$validate <- renderText({
 
 
 
-##  Variable Names
+###  Variable Names
 variable.names <- reactive({
     input$select_variables
     variable.names <- which(names(ts.data()) %in% input$select_variables)
 })
 
-##-------------------------------------##
-##  Plot Outputs: Single Series Plots  ##
-##-------------------------------------##
-##
-##  Time Series Plot
+###-----------------------###
+###  Single Series Plots  ###
+###-----------------------###
+###
+###  Time Series Plot
 output$timeseries_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         rawplot(            
             iNZightTS(ts.data(),
-                      var = variable.names()),            
+                      var = variable.names()),
+            ##  Strange bug.
             ## xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season
@@ -96,6 +93,7 @@ output$timeseries_plot <- renderPlot({
     }
 })
 
+###  Animation stuff - too slow.
 
 ## output$timeseries_stop_animation <- renderPlot({
 ##     input$stop_animate
@@ -151,7 +149,7 @@ output$timeseries_plot <- renderPlot({
 ##     }
 ## })
 
-##  Seasonal Plot
+###  Seasonal Plot
 output$seasonal_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
@@ -165,7 +163,7 @@ output$seasonal_plot <- renderPlot({
     }
 })
 
-##  Decomposed Plot
+###  Decomposed Plot
 output$decomposed_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
@@ -179,7 +177,7 @@ output$decomposed_plot <- renderPlot({
     }
 })
 
-##  Trend + Seasonal Plot
+###  Trend + Seasonal Plot
 output$trSeasonal_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
@@ -196,7 +194,7 @@ output$trSeasonal_plot <- renderPlot({
     }
 })
 
-##  Forecast Plot
+###  Forecast Plot
 output$forecast_plot <- renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
@@ -223,10 +221,10 @@ output$forecast_summary <- renderPrint({
 })
 
 
-##---------------------------------------##
-##  plot Outputs: Multiple Series Plots  ##
-##---------------------------------------##
-##
+###-------------------------###
+###  Multiple Series Plots  ###
+###-------------------------###
+###
 output$multiple_single_plot <- renderPlot({
     input$selctor
     if (length(input$singleSeriesTabs) > 0) {

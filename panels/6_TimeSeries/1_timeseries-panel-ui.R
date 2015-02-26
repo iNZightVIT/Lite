@@ -37,7 +37,7 @@ ts.sidebarPanel <- function() {
     if (is.null(data)) {
         stop("Please load a suitable dataset!")
     }
-    ##  We set up the sidebar panel UI. The code is organised in 4 sections:
+    ##  We set up the sidebar panel UI. The code is in 4 sections:
     ##
     ##    -  Section 1: Time Information
     ##    -  Section 2: Seasonal Pattern
@@ -62,7 +62,8 @@ ts.sidebarPanel <- function() {
             selected = 1
         ),
         ##  If the user decides to select a variable, then load a panel
-        ##  which contains the list of variables extracted from the dataset.
+        ##  which contains the list of variables extracted from the
+        ##  dataset.
         conditionalPanel(
             condition = "input.time_info == 1",
             selectInput(
@@ -71,8 +72,8 @@ ts.sidebarPanel <- function() {
                 choices = colnames(data)
             )
         ),
-        ##  If the user chooses to provide time information manually, then
-        ##  load a panel that allows the user to do so.
+        ##  If the user chooses to provide time information manually, 
+        ##  then load a panel that allows the user to do so.
         conditionalPanel(
             condition = "input.time_info == 2",
             textInput(inputId = "provide_startdate",
@@ -87,8 +88,8 @@ ts.sidebarPanel <- function() {
         hr(),
         ##  Section 2: Seasonal Pattern
         ##
-        ##  Next, we ask the user to specify a seasonal pattern. This can be
-        ##  either additive or multiplicative.
+        ##  Next, we ask the user to specify a seasonal pattern.
+        ##  This can be either additive or multiplicative.
         radioButtons(inputId = "choose_season",
                      label = "Seasonal Pattern: ",
                      choices =
@@ -99,9 +100,8 @@ ts.sidebarPanel <- function() {
         ##  We then ask the user to select the variables to plot in the
         ##  main panel. This amounts to selecting the points to be plotted
         ##  on the y-axis. "rev()" is used so that a non-time variable is
-        ##  selected (since time is on the x-axis), since the time variable
-        ##  is often the first element of the vector "colnames(data)".
-        ##  If this sounds confusing, e-mail me: <cpar137@aucklanduni.ac.nz>.
+        ##  selected (since time is on the x-axis), since the time 
+        ##  variable is often the first element of "colnames(data)".
         selectInput(inputId = "select_variables",
                     label = "Series Variables: ",
                     choices =  rev(colnames(data)),
@@ -168,9 +168,9 @@ ts.mainPanel <- function() {
         ##  Section 2: Single Series Plots
         ##
         ##  Next, we create a tabset panel for Single Series Plots.
-        ##  This panel appears if the user selects only ONE variable to plot.
-        ##  Note that each tab (within a panel) has some help text preceding
-        ##  any output produced.
+        ##  This panel appears if the user selects only ONE variable to
+        ##  plot. Note that each tab (within a panel) has some help text
+        ##  preceding any output produced.
         conditionalPanel(
             condition = "input.select_variables.length == 1",
             tabsetPanel(
@@ -252,6 +252,7 @@ ts.mainPanel <- function() {
                     ),
                     plotOutput(outputId = "forecast_plot")
                 ),
+                
                 ##  Tab 6: Forecast Summary
                 tabPanel(
                     title = "Summary",
@@ -314,8 +315,8 @@ ts.mainPanel <- function() {
 ###  Time Series UI  ###
 ###------------------###
 ###
-###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to complete
-###  the UI for the Time Series module.
+###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to
+###  complete the UI for the Time Series module.
 timeseries.panel.ui <- function() {
     fluidPage(
         column(2, ts.sidebarPanel()),
