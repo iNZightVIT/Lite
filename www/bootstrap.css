@@ -59,6 +59,13 @@ background: #5ee;
     width: 100%;
 }
 
+@media (max-width: 767px) {
+	#footer { 
+        display : none; 
+        visibility : hidden; 
+    }
+}
+
 article,
 aside,
 details,
