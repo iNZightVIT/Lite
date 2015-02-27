@@ -80,8 +80,10 @@ vis.sidebarPanel <- function() {
 }
 
 
-##  Excuse the "stairway to heaven" style of code here - this is simply
-##  so that I can maintain the 80-character restriction per line of code.
+##  Excuse the "stairway to heaven" style of code here - and for the horrendous
+##  line lengths - but this was the only way to keep things in one place.
+##  I could have broken things up a bit but I thought that would confuse you
+##  (the reader). 
 vis.mainPanel <- function() {
     if (!is.null(data)) {
         list(
@@ -105,7 +107,7 @@ vis.mainPanel <- function() {
                                         plotOutput("visualize.plot"),
                                         fluidRow(
                                             column(
-                                                width = 6,
+                                                width = 5, offset = 1,
                                                 conditionalPanel(
                                                     condition = "input.subs1 != 'none'",
                                                     ##  Slider input GUI for the first variable.
@@ -114,7 +116,7 @@ vis.mainPanel <- function() {
                                                 )
                                             ),
                                             column(
-                                                width = 6,
+                                                width = 5, offset = 1,
                                                 ##  Slider input GUI for the second variable.
                                                 conditionalPanel(
                                                     condition = "input.subs2 != 'none'",
