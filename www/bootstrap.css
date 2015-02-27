@@ -60,9 +60,10 @@ background: #5ee;
 }
 
 @media (max-width: 767px) {
-	#footer { 
-        display : none; 
-        visibility : hidden; 
+    #footer { 
+        display : block;
+        position: static;
+        height: auto;
     }
 }
 
