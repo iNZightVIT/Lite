@@ -23,11 +23,11 @@
 ###
 ###  First, we set up the "help" functionality for this module.
 ts.help = function() {
-    helpModal(
-        "Time Series",
-        "Time Series Panel",
-        inclMD("panels/6_TimeSeries/3_timeseries-panel-help.md")
-    )
+    help.display(
+      "Time Series",
+      "Time_Series_panel",
+      "panels/6_TimeSeries/3_timeseries-panel-help.md"
+      )
 }
 
 

@@ -1,6 +1,6 @@
-help.load = function(){
-  helpModal('Load data','load_data',inclMD("gui-elements/notes/load.data.md"))
-}
+# help.load = function(){
+#   helpModal('Load data','load_data',inclMD("gui-elements/notes/load.data.md"))
+# }
 
 get.sidebar.load = function(){
   list(
@@ -8,7 +8,7 @@ get.sidebar.load = function(){
     helpText("The button below will import the data set and will make it available to other users of this instance."),
     br(),br(),
     actionButton(inputId="import_set",label="Import file",),
-    br(),br(),help.load(),"HELP"
+    br(),br(),help.display('Load data','load_data',"gui-elements/notes/load.data.md")
   )
 }
 

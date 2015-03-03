@@ -1,6 +1,6 @@
-help.switch = function(){
-  helpModal('Switch data','switch_data',inclMD("gui-elements/notes/switch.data.md"))
-}
+# help.switch = function(){
+#   helpModal('Switch data','switch_data',inclMD("gui-elements/notes/switch.data.md"))
+# }
 
 # puts together a list of shiny widgets to fill the sidebar
 get.sidebar.switch = function(data.select){
@@ -88,7 +88,9 @@ switch.data.panel = function(data.select){
   if(!is.null(data.select)){
     if(data.select%in%no.button){
       sidebarLayout(
-        sidebarPanel(sidebar.widgets,br(),br(),help.switch(),"HELP",br(),
+        sidebarPanel(sidebar.widgets,br(),br(),
+                     help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md")
+                     ,br(),
                      HTML("&nbsp;"),br()),
         mainPanel(get.switch.data.main(T))
       )
@@ -96,7 +98,9 @@ switch.data.panel = function(data.select){
       sidebarLayout(
         sidebarPanel(sidebar.widgets,
                      actionButton(inputId="change_set",label="Select Set"),
-                     br(),br(),help.switch(),"HELP",br(),HTML("&nbsp;"),br()),
+                     br(),br(),
+                     help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md"),
+                     br(),HTML("&nbsp;"),br()),
         mainPanel(get.switch.data.main(T))
       )
     }
