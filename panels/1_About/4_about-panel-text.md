@@ -19,8 +19,8 @@ There is help is available within most sections. Just look for the green questio
 
 <br>
 
+This project is led by <a href = "http://www.stat.auckland.ac.nz/~wild" target="_blank">Professor Chris Wild </a> and has been primarily supported by the Department of Statistics, University of Auckland, with additional support from Statistics New Zealand and the NZ Ministry of Education via Census at School. For more information, please visit our <a href = "http://www.stat.auckland.ac.nz/~wild/iNZight" target="_blank"> website </a>.
 
-This project is led by <a href = "http://stat.auckland.ac.nz/~wild">Professor Chris Wild </a> and has been primarily supported by the Department of Statistics, University of Auckland, with additional support from Statistics New Zealand and the NZ Ministry of Education via Census at School. For more information, please visit our <a href = "http://stat.auckland.ac.nz/~wild/iNZight"> website </a>.
 <br>
 <br>
 </font>
