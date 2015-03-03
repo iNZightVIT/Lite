@@ -7,10 +7,11 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Time Series
 - Help
 
-Recent Updates (27/02/15):
+Recent Updates (03/03/15):
 --------------------------
+- 404 Error fixed in "About" module (Christoph).
+- Footer appears at the bottom of the screen but sits below all of the content if window size is < 767px (Tom).
 - New help text for variable selection in the "Time Series" module.
-- Header only appears if window size is > 767px.
 - New side-panel layout for the "Visualize" module.
 - New "Help" module.
 - Restructured code - new panels have their own directory.
