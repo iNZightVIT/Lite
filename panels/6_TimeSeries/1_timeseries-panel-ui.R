@@ -135,7 +135,6 @@ ts.sidebarPanel <- function() {
         ),
         hr(),
         ts.help(),
-        "HELP"
     )
 
 }
