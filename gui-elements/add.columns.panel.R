@@ -1,6 +1,6 @@
-help.add = function(){
-  helpModal('Add a column','add_columns',inclMD("gui-elements/notes/add.columns.md"))
-}
+# help.add = function(){
+#   helpModal('Add a column','add_columns',inclMD("gui-elements/notes/add.columns.md"))
+# }
 
 get.sidebar.add = function(){
   list(
@@ -12,7 +12,7 @@ get.sidebar.add = function(){
              Therefore if there are commas inside your values use the second method."),
     tags$textarea(id="new.column", rows=3, cols=40, ""),
     actionButton(inputId="add_column",label="Add as column",),
-    br(),br(),help.add(),"HELP"
+    br(),br(),help.display('Add a column','add_columns',"gui-elements/notes/add.columns.md")
   )
 }
 

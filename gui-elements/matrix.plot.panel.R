@@ -1,6 +1,6 @@
-help.matrix.plots = function(){
-  helpModal('Pair matrix plot','pair_matrix_plot',inclMD("gui-elements/notes/matrix.plot.md"))
-}
+# help.matrix.plots = function(){
+#   helpModal('Pair matrix plot','pair_matrix_plot',inclMD("gui-elements/notes/matrix.plot.md"))
+# }
 
 get.matrix.sidebar =  function(){
   choices1 = c()
@@ -11,7 +11,7 @@ get.matrix.sidebar =  function(){
   }
   list(helpText("Select a column from the dropdown menu to display all posible pair combination plots."),
        selectInput("select.matrix.plot","Select Column",choices=choices1,multiple=T,selectize=T,selected=choices1[1]),
-       br(),br(),help.single.column.plots(),"HELP",br(),HTML(""))
+       br(),br(),help.display('Pair matrix plot','pair_matrix_plot',"gui-elements/notes/matrix.plot.md"),br(),HTML(""))
 }
 
 matrix.plot.panel =function(){

@@ -1,8 +1,8 @@
-help.single.column.plots <- function() {
-    helpModal('Single column plot',
-              'single_column_plot',
-              inclMD("gui-elements/notes/single.column.plot.md"))
-}
+# help.single.column.plots <- function() {
+#     helpModal('Single column plot',
+#               'single_column_plot',
+#               inclMD("gui-elements/notes/single.column.plot.md"))
+# }
 
 get.single.col.sidebar <- function(){
     choices1 = ""
@@ -18,8 +18,7 @@ get.single.col.sidebar <- function(){
                      selected = choices1[1]),
          br(),
          br(),
-         help.single.column.plots(),
-         "HELP",
+         help.display('Single column plot','single_column_plot',"gui-elements/notes/single.column.plot.md"),
          br(),
          HTML(""))
 }

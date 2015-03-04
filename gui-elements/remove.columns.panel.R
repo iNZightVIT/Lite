@@ -1,6 +1,6 @@
-help.add = function(){
-  helpModal('Remove columns','rem_columns',inclMD("gui-elements/notes/remove.columns.md"))
-}
+# help.add = function(){
+#   helpModal('Remove columns','rem_columns',inclMD("gui-elements/notes/remove.columns.md"))
+# }
 
 get.sidebar.remove= function(){
   choices = c()
@@ -13,7 +13,7 @@ get.sidebar.remove= function(){
              deleted anymore."),
     selectInput("select.remove.column","Select Column",choices=c("",choices),multiple=T,selectize=T,selected=""),br(),
     actionButton(inputId="rem_column",label="Remove columns",),
-    br(),br(),help.remove(),"HELP"
+    br(),br(),help.display('Remove columns','rem_columns',"gui-elements/notes/remove.columns.md")
   )
 }
 

@@ -1,6 +1,6 @@
-help.remove = function(){
-  helpModal('Remove data','remove_data',inclMD("gui-elements/notes/remove.data.md"))
-}
+# help.remove = function(){
+#   helpModal('Remove data','remove_data',inclMD("gui-elements/notes/remove.data.md"))
+# }
 
 # puts together a list of shiny widgets to fill the sidebar
 get.sidebar.imported = function(){
@@ -26,14 +26,15 @@ remove.data.panel = function(){
   }
   if("Imported"%in%no.button){
     sidebarLayout(
-      sidebarPanel(sidebar.widgets,br(),br(),help.remove(),"HELP",br(),HTML("&nbsp;")),
+      sidebarPanel(sidebar.widgets,br(),br(),help.display('Remove data','remove_data',"gui-elements/notes/remove.data.md"),br(),HTML("&nbsp;")),
       mainPanel(h1("No data set to delete!"))
     )
   }else{
     sidebarLayout(
       sidebarPanel(sidebar.widgets,
                    actionButton(inputId="remove_set",label="Remove Set"),
-                   br(),br(),help.remove(),"HELP",br(),HTML("&nbsp;")),
+                   br(),br(),help.display('Remove data','remove_data',"gui-elements/notes/remove.data.md")
+                   ,br(),HTML("&nbsp;")),
       mainPanel(
         dataTableOutput("removetable")
         )

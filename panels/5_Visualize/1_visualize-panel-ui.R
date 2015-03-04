@@ -23,11 +23,10 @@
 ###
 ###  First, we set up the "help" functionality for this module.
 visualize.help = function() {
-    helpModal(
-        "Visualize",
-        "Visualize Panel",
-        inclMD("panels/5_Visualize/3_visualize-panel-help.md")
-    )
+    help.display("Visualize Panel",
+                 "Visualize",
+                 "panels/5_Visualize/3_visualize-panel-help.md"
+                 )
 }
     
 ###  Next, we set up the sidebar panel with "vis.sidebarPanel()".
@@ -74,8 +73,7 @@ vis.sidebarPanel <- function() {
             "tab again."
         ),
         hr(),
-        visualize.help(),
-        "HELP"
+        visualize.help()
     )
 }
 

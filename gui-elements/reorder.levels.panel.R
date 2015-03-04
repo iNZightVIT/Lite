@@ -1,6 +1,6 @@
-help.reorder = function(){
-  helpModal('Reorder Levels','reorder_levels',inclMD("gui-elements/notes/reorder.levels.md"))
-}
+# help.reorder = function(){
+#   helpModal('Reorder Levels','reorder_levels',inclMD("gui-elements/notes/reorder.levels.md"))
+# }
 
 get.reorder.sidebar =  function(choices2=c(),selected1=""){
   choices1 = c()
@@ -15,7 +15,8 @@ get.reorder.sidebar =  function(choices2=c(),selected1=""){
                 \"HELP\" below for more information."),
        selectInput("select.column","Select Column",choices=c("",choices1),multiple=F,selectize=F,selected=selected1),br(),
        selectInput("select.item", "Select in new Order",choices=choices2,multiple=T,selectize=T),br(),
-       actionButton("reorder","Reorder"),br(),br(),help.reorder(),"HELP",br(),HTML(""))
+       actionButton("reorder","Reorder"),br(),br(),
+       help.display('Reorder Levels','reorder_levels',"gui-elements/notes/reorder.levels.md"),br(),HTML(""))
 }
 
 reorder.levels.panel =function(choices=c(),selected=""){

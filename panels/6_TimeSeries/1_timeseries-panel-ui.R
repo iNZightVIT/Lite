@@ -23,20 +23,20 @@
 ###
 ###  First, we set up the "help" functionality for this module.
 ts.help = function() {
-    helpModal(
-        "Time Series",
-        "Time Series Panel",
-        inclMD("panels/6_TimeSeries/3_timeseries-panel-help.md")
-    )
+    help.display(
+      "Time Series",
+      "Time_Series_panel",
+      "panels/6_TimeSeries/3_timeseries-panel-help.md"
+      )
 }
 
 
 ###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
 ts.sidebarPanel <- function() {
     ##  Perform a routine data check.
-    if (is.null(data)) {
-        stop("Please load a suitable dataset!")
-    }
+    ##  if (is.null(data)) {
+    ##      stop("Please load a suitable dataset!")
+    ##  }
     ##  We set up the sidebar panel UI. The code is in 4 sections:
     ##
     ##    -  Section 1: Time Information
@@ -135,7 +135,6 @@ ts.sidebarPanel <- function() {
         ),
         hr(),
         ts.help(),
-        "HELP"
     )
 
 }
