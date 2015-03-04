@@ -9,6 +9,7 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 
 Recent Updates (03/03/15):
 --------------------------
+- Fixed question mark error (Christoph).
 - 404 Error fixed in "About" module (Christoph).
 - Footer appears at the bottom of the screen but sits below all of the content if window size is < 767px (Tom).
 - New help text for variable selection in the "Time Series" module.
@@ -19,6 +20,7 @@ Recent Updates (03/03/15):
 To do/Known Issues:
 -------------------
 - [General] Fix the "Datatables" bug.
+- [TIme Series] Error handling using "validate".
 - [Time Series] Change the way plots are drawn to how it was done in "Visualize".
 - [Time Series] "Provide Time Information" needs to be linked to server.R
 - [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
