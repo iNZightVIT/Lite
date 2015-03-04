@@ -7,7 +7,7 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Time Series
 - Help
 
-Recent Updates (03/03/15):
+Recent Updates (04/03/15):
 --------------------------
 - Fixed question mark error (Christoph).
 - 404 Error fixed in "About" module (Christoph).
