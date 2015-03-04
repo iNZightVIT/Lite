@@ -34,9 +34,9 @@ ts.help = function() {
 ###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
 ts.sidebarPanel <- function() {
     ##  Perform a routine data check.
-    ##  if (is.null(data)) {
-    ##      stop("Please load a suitable dataset!")
-    ##  }
+    if (is.null(data)) {
+          stop("Please load a suitable dataset!")
+    }
     ##  We set up the sidebar panel UI. The code is in 4 sections:
     ##
     ##    -  Section 1: Time Information
