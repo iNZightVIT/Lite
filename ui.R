@@ -11,6 +11,16 @@ shinyUI(
                 tags$style(
                     type = "text/css",
                     ".nav {font-size:16px} ")),
+        ## This code fixes the DataTables warning coming up from time to time.
+        tags$head(tags$script("window.alert = (function() {
+          var nativeAlert = window.alert;
+          return function(message) {
+            //window.alert = nativeAlert;
+            message.indexOf('DataTables warning') === 0 ?
+            console.warn(message) :
+              nativeAlert(message);
+          }
+        })();")),
         ##  Load the "Lumen" Theme (from http://bootswatch.com).
         theme = "bootstrap.css",
         navbarPage(

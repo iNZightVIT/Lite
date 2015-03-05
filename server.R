@@ -163,7 +163,7 @@ shinyServer(function(input, output, session) {
             NULL
         }
     }, options = list(lengthMenu = c(5, 30, 50), pageLength = 5,
-           columns.defaultContent = "NA", scrollX = TRUE))
+                      columns.defaultContent = "NA", scrollX = TRUE))
 
     ##  Data -> load data (upload a data set)
     output$load.data.panel = renderUI({
