@@ -1,4 +1,5 @@
-<h5>Advanced plots</h5>
+<h5> Visualize Module </h5>
+
 Three sections are available for generating advanced plots. On the left the input parameters for changing the plot appearance. can be found. In the middle section the plot itself is shown, and on the right a menu enables to add inference lines and confidence intervals to the plot. All input menu wiggets will be explained. It is stronly recomended to follow the following tutorial to generate advanced plots.
 
 <h6>Select first variable<h6>

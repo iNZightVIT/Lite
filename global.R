@@ -351,43 +351,27 @@ delete.old.files = function(days){
     }
 }
 
-# helpModal <- function(title, link, content) {
-#     ## title: popup window head title
-#     ## link: HTML id attribution
-#     ## cotent: things inside
-#     html <- sprintf("<div id='%s' class='modal hide fade in' style='display: none; '>
-#                      <div class='modal-header'><a class='close' data-dismiss='modal' href='#'>&times;</a>
-#                        <h3>%s</h3>
-#                      </div>
-#                      <div class='modal-body'>%s</div>
-#                    </div>
-#                    <a title='Help' data-toggle='modal' href='#%s' class='icon-question-sign'>
-#                       <img src=\"images/question.png\" alt=\"HTML tutorial\" style=\"width:16px;height:16px;border:0\">
-#                    </a>", link, title, content, link)
-#     Encoding(html) <- 'UTF-8'
-#     HTML(html)
-# }
-# 
-# inclMD <- function(file){
-#     return(markdownToHTML(file=file, options = c(""), stylesheet="www/empty.css"))
-# }
+###  A function for displaying help messages.
 
-help.display = function(title,id,file){
-  HTML(paste("<div class='modal fade' id='",id,"' tabindex='-1' role='dialog' aria-labelledby='basicModal' aria-hidden='true'>
+help.display = function(title, id, file) {
+  HTML(paste("<div class='modal fade' id='", id, "' tabindex='-1' role='dialog' aria-labelledby='basicModal' aria-hidden='true'>
              <div class='modal-dialog'>
              <div class='modal-content'>
              <div class='modal-header'>
              <h4 class='modal-title' id='myModalLabel'>",title,"</h4>
              </div>
              <div class='modal-body'>",
-             markdownToHTML(file=file,options = c(""), stylesheet="www/empty.css"),
+             markdownToHTML(
+                 file = file,
+                 options = c(""),
+                 stylesheet = "www/empty.css"),
              "</div>
              <div class='modal-footer'>
              </div>
              </div>
              </div>
              </div>
-             <a href='#' class='btn btn-xs btn-success' data-toggle='modal' data-target='#",id,"'>Help</a>",sep=""))
+             <a href='#' class='btn btn-xs btn-success' data-toggle='modal' data-target='#", id, "'>Help</a>", sep = ""))
 }
 
 ## reads a data set from a filename in the data directory
