@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created  : January 16, 2015.
-###  Last Modified : January 20, 2015.
+###  Last Modified : March 6, 2015.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -24,16 +24,16 @@
 ###  First, we set up the "help" functionality for this module.
 ts.help = function() {
     help.display(
-      "Time Series",
-      "Time_Series_panel",
-      "panels/6_TimeSeries/3_timeseries-panel-help.md"
-      )
+        title = "Time Series",
+        id = "Time_Series_Panel",
+        file = "panels/6_TimeSeries/3_timeseries-panel-help.md"
+    )
 }
 
 
 ###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
-ts.sidebarPanel <- function() {
-    ##  Perform a routine data check.
+ts.sidebarPanel = function() {
+    ##  Perform a routine data check (to be replaced).
     if (is.null(data)) {
           stop("Please load a suitable dataset!")
     }
@@ -45,7 +45,7 @@ ts.sidebarPanel <- function() {
     ##    -  Section 4: Select Labels
     ##
     ##  Note the use of "hr()" (= horizontal rule) to separate sections.
-    sidebarPanelUI <- list(
+    sidebarPanelUI = list(
         ##  Section 1: Time Information
         ##
         ##  First, we ask the user to provide time information.
@@ -58,8 +58,7 @@ ts.sidebarPanel <- function() {
             label = "Time Information: ",
             choices =
                 c("Select time variable" = 1,
-                  "Provide time manually" = 2),
-            selected = 1
+                  "Provide time manually" = 2)
         ),
         ##  If the user decides to select a variable, then load a panel
         ##  which contains the list of variables extracted from the
@@ -94,7 +93,8 @@ ts.sidebarPanel <- function() {
                      label = "Seasonal Pattern: ",
                      choices =
                          c("Multiplicative" = TRUE,
-                           "Additive" = FALSE)),
+                           "Additive" = FALSE)
+                     ),
         ##  Section 3: Select Variables
         ##
         ##  We then ask the user to select the variables to plot in the
@@ -106,7 +106,7 @@ ts.sidebarPanel <- function() {
                     label = "Series Variables: ",
                     choices =  rev(colnames(data)),
                     selected = rev(colnames(data))[1],
-                     multiple = TRUE),
+                    multiple = TRUE),
         helpText("(Remove variables with the",
                  strong('Delete'),
                  "key)"),
@@ -134,9 +134,8 @@ ts.sidebarPanel <- function() {
                       value = "")
         ),
         hr(),
-        ts.help(),
+        ts.help()
     )
-
 }
 
 
@@ -145,7 +144,7 @@ ts.sidebarPanel <- function() {
 ###--------------###
 ###
 ###  We now set up the main panel with "ts.mainpanel()":
-ts.mainPanel <- function() {
+ts.mainPanel = function() {
     ##  Perform a routine data check.
     if (is.null(data)) {
         stop("Please load a non-empty dataset!")
@@ -158,7 +157,7 @@ ts.mainPanel <- function() {
     ##
     ##  Note the use of "br()" (= line break) for vertical spacing.
 
-    mainPanelUI <- list(
+    mainPanelUI = list(
         ##  Section 1: Data Validation
         ##
         ##  First, we add a data validation mechanism.
@@ -317,7 +316,7 @@ ts.mainPanel <- function() {
 ###
 ###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to
 ###  complete the UI for the Time Series module.
-timeseries.panel.ui <- function() {
+timeseries.panel.ui = function() {
     fluidPage(
         column(2, ts.sidebarPanel()),
         column(10, ts.mainPanel())
