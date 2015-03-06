@@ -7,6 +7,12 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Time Series
 - Help
 
+Underway (05/03/15):
+---------------------
+- Help documentation for the "Time Series" and "Visualize" modules.
+- Error handling in the "Time Series" and "Visualize" modules.
+- Datatables bug.
+- 
 Recent Updates (04/03/15):
 --------------------------
 - Fixed question mark error (Christoph).
@@ -19,8 +25,6 @@ Recent Updates (04/03/15):
 
 To do/Known Issues:
 -------------------
-- [General] Fix the "Datatables" bug.
-- [TIme Series] Error handling using "validate".
 - [Time Series] Change the way plots are drawn to how it was done in "Visualize".
 - [Time Series] "Provide Time Information" needs to be linked to server.R
 - [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
@@ -29,15 +33,13 @@ To do/Known Issues:
 - [Visualize] Add inferential markups.
 - [Advanced] Nest QE and TS under "Advanced".
 
-
 Directories:
 ------------
-
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight-Lite.
 
 - gui-elements:
-This directory contains the gui functions for all the modules.
+This directory contains the gui functions for all the old modules (from iNZight revamp). 
 
 - panels:
 This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
