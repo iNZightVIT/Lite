@@ -11,10 +11,11 @@ Underway (05/03/15):
 ---------------------
 - Help documentation for the "Time Series" and "Visualize" modules.
 - Error handling in the "Time Series" and "Visualize" modules.
-- Datatables bug.
-- 
+- Update documentation for all modules.
+
 Recent Updates (04/03/15):
 --------------------------
+- DataTables error message disabled - permanent fix to be explored (Christoph).
 - Fixed question mark error (Christoph).
 - 404 Error fixed in "About" module (Christoph).
 - Footer appears at the bottom of the screen but sits below all of the content if window size is < 767px (Tom).
