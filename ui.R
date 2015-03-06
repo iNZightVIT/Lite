@@ -1,8 +1,14 @@
-###  iNZight Online main UI
+###---------------------------------###
+### UI Functions for iNZight Lite   ###
+###---------------------------------###
 ###
-###  Date modified: January 13, 2015.
+###  Date Created : January 10, 2015
+###  Last Modified : March 6, 2015
 ###
-###  We define the UI for iNZight Online
+###  Please consult the comments before editing any code.
+###
+###  If you have any questions and/or suggestions, please drop me an
+###  e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
 
 shinyUI(
     fluidPage(
