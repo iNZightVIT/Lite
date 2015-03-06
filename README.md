@@ -50,7 +50,6 @@ This directory is used for web-related files such as .css and .gif/.jpeg/.png. I
 
 Main files:
 -----------
-
 - README:
 Documentation for iNZight *Lite*. Update as required.
 
@@ -65,26 +64,26 @@ Defines the main GUI.
 
 Note:
 -----
-
-This repository will gradually be changed into the following format throughout 2015:
+This repository will gradually (throughout 2015) be changed into the format described below:
 
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight *Lite*. 
 
-- panels:
-This directory contains the code and files that set up user selections. There is one sub-directory that contains all the .html and .md files.
-Each panel has its own directory within 'panels', and each sub-panel has its own directory within each parent panel.
+- www:
+This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
 
-The file names adhere to the following guidelines:
+- panels:
+This directory contains the code and files that set up each module. 
+
+Each panel will have its own directory within the 'panels' directory, and each sub-panel will also have its own directory within each parent panel, as follows:
 
 - N_panel-name
 - M_sub-panel-name
+
+The file names contained within each (sub-) panel directory will be of the following format:
 
 - 1_panelname-panel-gui.R
 - 2_panelname-panel-server.R
 - 3_panelname-panel-help.R
 - 4_panelname-panel-other.R
-
-- www:
-This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
 
