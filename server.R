@@ -20,6 +20,7 @@ library(gpairs)
 
 ###  We write the server function.
 shinyServer(function(input, output, session) {
+    
     ##  Turn errors and warnings off
     ## options(warn = -1, show.error.messages = FALSE)
     
