@@ -1,26 +1,37 @@
-###  iNZight Online main UI
+###---------------------------------###
+### UI Functions for iNZight Lite   ###
+###---------------------------------###
 ###
-###  Date modified: January 13, 2015.
+###  Date Created : January 10, 2015
+###  Last Modified : March 6, 2015
 ###
-###  We define the UI for iNZight Online
+###  Please consult the comments before editing any code.
+###
+###  If you have any questions and/or suggestions, please drop me an
+###  e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
 
 shinyUI(
     fluidPage(
         ##  Set Tabpanel font to be size 16.
         tags$head(
-                tags$style(
-                    type = "text/css",
-                    ".nav {font-size:16px} ")),
-        ## This code fixes the DataTables warning coming up from time to time.
-        tags$head(tags$script("window.alert = (function() {
-          var nativeAlert = window.alert;
-          return function(message) {
-            //window.alert = nativeAlert;
-            message.indexOf('DataTables warning') === 0 ?
-            console.warn(message) :
-              nativeAlert(message);
-          }
-        })();")),
+            tags$style(
+                type = "text/css",
+                ".nav {font-size:16px} ")),
+        ##  This code mutes the DataTables warning that came up when loading
+        ##  a dataset (for no apparent reason).
+        tags$head(
+            tags$script(
+                "window.alert = (function() {
+                 var nativeAlert = window.alert;
+                 return function(message) {
+                 // window.alert = nativeAlert;
+                 message.indexOf('DataTables warning') === 0 ?
+                 console.warn(message) :
+                 nativeAlert(message);
+                 }
+                 })();"
+            )
+        ),
         ##  Load the "Lumen" Theme (from http://bootswatch.com).
         theme = "bootstrap.css",
         navbarPage(
@@ -33,7 +44,6 @@ shinyUI(
                 <img src = 'pendred_transp.png', width = 125, height = 32,
                      alt = 'iNZight Lite'/></a>"
                 ),
-            ## footer = img(src = "pendred_footer.png"),
             ##  Set ID
             id = "selector",
             ##  Set custom colour and collapse options.

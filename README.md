@@ -7,13 +7,13 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Time Series
 - Help
 
-Underway (05/03/15):
+Underway (06/03/15):
 ---------------------
 - Help documentation for the "Time Series" and "Visualize" modules.
 - Error handling in the "Time Series" and "Visualize" modules.
 - Update documentation for all modules.
 
-Recent Updates (04/03/15):
+Recent Updates (06/03/15):
 --------------------------
 - DataTables error message disabled - permanent fix to be explored (Christoph).
 - Fixed question mark error (Christoph).
@@ -79,6 +79,7 @@ The file names adhere to the following guidelines:
 
 - N_panel-name
 - M_sub-panel-name
+
 - 1_panelname-panel-gui.R
 - 2_panelname-panel-server.R
 - 3_panelname-panel-help.R

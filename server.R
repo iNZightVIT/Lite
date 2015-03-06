@@ -3,7 +3,7 @@
 ###-------------------------------------###
 ###
 ###  Date Created   :   January 10, 2015
-###  Last Modified  :   February 25, 2015 
+###  Last Modified  :   March 6, 2015 
 ###
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
@@ -20,6 +20,7 @@ library(gpairs)
 
 ###  We write the server function.
 shinyServer(function(input, output, session) {
+    
     ##  Turn errors and warnings off
     ## options(warn = -1, show.error.messages = FALSE)
     
