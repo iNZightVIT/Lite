@@ -26,6 +26,7 @@ Recent Updates (06/03/15):
 
 To do/Known Issues:
 -------------------
+- [Data] Further extraction / manipulation tools to be added. Discuss with Tom.
 - [Time Series] Change the way plots are drawn to how it was done in "Visualize".
 - [Time Series] "Provide Time Information" needs to be linked to server.R
 - [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
