@@ -1,9 +1,9 @@
-iNZight *Lite* version 0.9.7
+iNZight **Lite** version 0.9.7
 ============================
 
-Last Updated: March 8, 2015.
+*Last Updated: March 8, 2015*
 
-*Lite* is the new online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
+**Lite** is the new online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
 - About
 - Visualize
