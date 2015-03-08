@@ -1,20 +1,23 @@
 iNZight *Lite* version 0.9.7
 ============================
-This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
+
+Last Updated: March 8, 2015.
+
+*Lite* is the new online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
 - About
 - Visualize
 - Time Series
 - Help
 
-Underway (06/03/15):
----------------------
+Underway:
+---------
 - Help documentation for the "Time Series" and "Visualize" modules.
 - Error handling in the "Time Series" and "Visualize" modules.
 - Update documentation for all modules.
 
-Recent Updates (06/03/15):
---------------------------
+Recent Updates:
+---------------
 - DataTables error message disabled - permanent fix to be explored (Christoph).
 - Fixed question mark error (Christoph).
 - 404 Error fixed in "About" module (Christoph).
