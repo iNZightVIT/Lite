@@ -3,29 +3,20 @@
 # }
 
 # puts together a list of shiny widgets to fill the sidebar
-get.sidebar.switch = function(data.select){
+get.sidebar.switch = function(){
   choices1=get.data.dirs()
-  if(is.null(data.select)){
-    ret = list(selectInput(inputId="data_select",
-                           label="Select Data set category",
-                           choices=basename(choices1),
-                           selected=basename(choices1[1])))
-  }else{
-    ret = list(selectInput(inputId="data_select",
-                           label="Select Data set category",
-                           choices=basename(choices1),
-                           selected=data.select)
-               )
-  }
+  ret = list(selectInput(inputId="data_select",
+                         label="Select Data set category",
+                         choices=basename(choices1),
+                         selected=basename(choices1[1])))
   for(i in 1:length(choices1)){
     radio.list = get.radio.list(choices1[i],"")
     if(!is.null(radio.list)){
       ret[[i+1]] = conditionalPanel(condition=paste0("input.data_select=='",basename(choices1[i]),"'"),
                                     radio.list)
-    }else{
-      ret[["no.button"]] = c(ret[["no.button"]],choices1[i])
     }
   }
+  ret[[length(ret)+1]] = actionButton(inputId="change_set",label="Select Set")
   ret
 }
 
@@ -78,36 +69,12 @@ get.switch.data.main = function(has.input){
 }
 
 #switch.data.panel creates reactive panel for input files
-switch.data.panel = function(data.select){
-  sidebar.widgets = get.sidebar.switch(data.select)
-  no.button = ""
-  if("no.button"%in%names(sidebar.widgets)){
-    no.button = basename(sidebar.widgets[["no.button"]])
-    sidebar.widgets[["no.button"]] = NULL
-  }
-  if(!is.null(data.select)){
-    if(data.select%in%no.button){
-      sidebarLayout(
-        sidebarPanel(sidebar.widgets,br(),br(),
-                     help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md")
-                     ,br(),
-                     HTML("&nbsp;"),br()),
-        mainPanel(get.switch.data.main(T))
-      )
-    }else{
-      sidebarLayout(
-        sidebarPanel(sidebar.widgets,
-                     actionButton(inputId="change_set",label="Select Set"),
-                     br(),br(),
-                     help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md"),
-                     br(),HTML("&nbsp;"),br()),
-        mainPanel(get.switch.data.main(T))
-      )
-    }
-  }else{
-    sidebarLayout(
-      sidebarPanel(sidebar.widgets),
-      mainPanel(get.switch.data.main(F))
-    )
-  }
+switch.data.panel = function(){
+  sidebar.widgets = get.sidebar.switch()
+  sidebarLayout(
+    sidebarPanel(sidebar.widgets,br(),br(),
+                 help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md")
+                 ,br(),
+                 HTML("&nbsp;"),br()),
+    mainPanel(get.switch.data.main(T)))
 }

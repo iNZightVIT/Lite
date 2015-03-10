@@ -8,8 +8,6 @@ get.sidebar.imported = function(){
   radio.list = get.radio.list("data/Imported","remove")
   if(!is.null(radio.list)){
     ret[[1]] = radio.list
-  }else{
-    ret[["no.button"]] = c(ret[["no.button"]],"Imported")
   }
   ret
 }
@@ -19,14 +17,9 @@ remove.data.panel = function(){
     dir.create("data/Imported",recursive=T)
   }
   sidebar.widgets = get.sidebar.imported()
-  no.button = ""
-  if("no.button"%in%names(sidebar.widgets)){
-    no.button = basename(sidebar.widgets[["no.button"]])
-    sidebar.widgets[["no.button"]] = NULL
-  }
-  if("Imported"%in%no.button){
+  if(length(sidebar.widgets)==0){
     sidebarLayout(
-      sidebarPanel(sidebar.widgets,br(),br(),help.display('Remove data','remove_data',"gui-elements/notes/remove.data.md"),br(),HTML("&nbsp;")),
+      sidebarPanel(help.display('Remove data','remove_data',"gui-elements/notes/remove.data.md"),br(),HTML("&nbsp;")),
       mainPanel(h1("No data set to delete!"))
     )
   }else{
