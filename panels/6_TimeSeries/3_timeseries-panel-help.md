@@ -1,6 +1,3 @@
-Time Series Module
-===================
-
 *Last Updated: March 10, 2015*
 
 Introduction

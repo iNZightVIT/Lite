@@ -1,6 +1,8 @@
 Time Series Module
 ===================
 
+*Last Updated: March 10, 2015*
+
 Introduction
 ------------
 In statistics, one often wishes to gain insight from data gathered over a period of time. *Time series* refer to data collected sequentially over time. Time series arise in a wide variety of fields, including:

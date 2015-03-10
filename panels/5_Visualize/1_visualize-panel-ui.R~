@@ -25,7 +25,8 @@
 visualize.help = function() {
     help.display("Visualize Module",
                  "Visualize",
-                 "panels/5_Visualize/3_visualize-panel-help.md")
+                 "panels/5_Visualize/3_visualize-panel-help.md"
+                 )
 }
     
 ###  Next, we set up the sidebar panel with "vis.sidebarPanel()".

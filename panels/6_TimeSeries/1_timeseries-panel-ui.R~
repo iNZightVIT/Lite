@@ -25,7 +25,7 @@
 ts.help = function() {
     help.display(
         title = "Time Series Module",
-        id = "Time_Series",
+        id = "Time_Series_Panel",
         file = "panels/6_TimeSeries/3_timeseries-panel-help.md")
 }
 
