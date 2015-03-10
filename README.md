@@ -1,5 +1,8 @@
 iNZight *Lite* version 0.9.7
 ============================
+
+*Last Updated: 10/03/15*
+
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
 - About
@@ -7,14 +10,14 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 - Time Series
 - Help
 
-Underway (10/03/15):
----------------------
+Underway:
+---------
 - Update help.md files for all modules.
 - Add proper error handling in the "Time Series" and "Visualize" modules, including linking "Provide Time Information" with server.R (i.e. make time series panel conditional on whether or not a time variable is defined).
 - Add inferential markups to the "Visualize" module once Tom finishes updating iNZightPlots().
 
-Recent Updates (10/03/15):
---------------------------
+Recent Updates:
+---------------
 - Updated help.md files for the "Time Series" and "Visualize" modules (Chris).
 - Fixed Datatables bug (Christoph).
 - Fixed question mark error (Christoph).
@@ -47,7 +50,6 @@ This directory is used for graphics and/or web-related files such as .css and .g
 
 Main files:
 -----------
-
 - README:
 Documentation for iNZight *Lite*. Update as required.
 
@@ -62,7 +64,6 @@ Defines the main GUI.
 
 Note:
 -----
-
 This repository will gradually be changed into the following format throughout 2015:
 
 - data:
