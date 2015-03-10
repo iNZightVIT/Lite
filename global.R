@@ -394,6 +394,9 @@ load.data = function(fileID=NULL,path=NULL){
                 ext = strsplit(fileID,".",fixed=T)[[1]]
                 ext = ext[length(ext)]
             }
+            if(!file.exists(full.name[indexes[1]])){
+              return(list(NULL,NULL))
+            }
             if(tolower(ext)%in%"rds"){
                 temp = readRDS(file=full.name[indexes[1]])
             }else if(tolower(ext)%in%"rda"|tolower(ext)%in%"rdata"){
@@ -421,7 +424,7 @@ get.data.dirs = function(){
 ## returns a radioButton widget, for every filename in the dir.lable directory.
 get.radio.list = function(dir.label,idlabel){
     files = c()
-    files = list.files(dir.label,recursive=T,full.name=T)[!(file.info(list.files(dir.label,full.names=T))[,"isdir"])]
+    files = list.files(dir.label,recursive=T,full.name=T)[!(file.info(list.files(dir.label,recursive=T,full.names=T))[,"isdir"])]
     temp.files = strsplit(files,"/")
     files = unlist(lapply(temp.files,
         function(x,label){

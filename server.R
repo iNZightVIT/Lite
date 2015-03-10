@@ -3,7 +3,7 @@
 ###-------------------------------------###
 ###
 ###  Date Created   :   January 10, 2015
-###  Last Modified  :   March 6, 2015 
+###  Last Modified  :   February 25, 2015 
 ###
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
@@ -20,7 +20,6 @@ library(gpairs)
 
 ###  We write the server function.
 shinyServer(function(input, output, session) {
-    
     ##  Turn errors and warnings off
     ## options(warn = -1, show.error.messages = FALSE)
     
@@ -65,11 +64,17 @@ shinyServer(function(input, output, session) {
 
     ##  "Switch data" - 'switches' to a different data set.
     set_to_change_reac <- reactive({
-        if (is.null(input[[input$data_select]])) {
-            "No data to select!"
-        } else {
-            paste0("Data selected: ", input[[input$data_select]])
+      if (is.null(input[[input$data_select]])){
+        "No data to select!"
+      } else {
+        temp = load.data(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
+                         [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
+        if(is.null(temp[[1]])&is.null(temp[[2]])) {
+          "No data to select!"
+        }else{
+          paste0("Data selected: ", input[[input$data_select]])  
         }
+      }
     })
 
     output$set_to_change <- renderText({
@@ -79,6 +84,7 @@ shinyServer(function(input, output, session) {
 
     col_names_show_reac <- reactive({
         input$change_set
+        input$selector
         if (!is.null(data) && !is.null(data.name)) {
             paste("Column names: ", paste(colnames(data), collapse = ", "))
         } else {
@@ -88,11 +94,13 @@ shinyServer(function(input, output, session) {
 
     output$col_names_show <- renderText({
         input$change_set
+        input$selector
         col_names_show_reac()
     })
 
     change_col_dim_reac <- reactive({
         input$change_set
+        input$selector
         if (!is.null(data) && !is.null(data.name)) {
             paste("Selected data number of columns is: ", dim(data)[2])
         } else {
@@ -102,11 +110,14 @@ shinyServer(function(input, output, session) {
 
     output$col_dimension_show <- renderText({
         input$change_set
+        input$selector
+        input$selector
         change_col_dim_reac()
     })
 
     change_row_dim_reac <- reactive({
         input$change_set
+        input$selector
         if (!is.null(data) && !is.null(data.name)) {
             paste("Selected data number of rows is: ", dim(data)[1])
         } else {
@@ -116,11 +127,13 @@ shinyServer(function(input, output, session) {
 
     output$row_dimension_show <- renderText({
         input$change_set
+        input$selector
         change_row_dim_reac()
     })
 
     change_data_name_reac <- reactive({
         input$change_set
+        input$selector
         if (!is.null(data) && !is.null(data.name)) {
             paste("Selected data set: ", data.name)
         } else {
@@ -130,107 +143,134 @@ shinyServer(function(input, output, session) {
 
     output$data_name_show <- renderText({
         input$change_set
+        input$selector
         change_data_name_reac()
     })
 
     observe({
-        if (!is.null(input$change_set)) {
-            isolate({
-                if (!is.null(input$data_select)
-                    && input$change_set > 0) {
-                    new.data =
-                        load.data(strsplit(input[[input$data_select]],
-                                           "==>", fixed = TRUE)[[1]]
-                                  [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
-                    data.name <<- new.data[[1]]
-                    new.data = new.data[[2]]
-                    data <<- new.data
-                    loaded <<- F
-                }
-            })
-        }
+      if (!is.null(input$change_set)) {
+        isolate({
+          if (!is.null(input[[input$data_select]])&&input$change_set > 0) {
+            new.data =
+                load.data(strsplit(input[[input$data_select]],
+                                   "==>", fixed = TRUE)[[1]]
+                          [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
+            data.name <<- new.data[[1]]
+            new.data = new.data[[2]]
+            data <<- new.data
+            loaded <<- F
+          }
+        })
+      }
     })
 
     ## loads and updates the switch data table Panel
     output$switch.data.panel = renderUI({
         input$selector
-        switch.data.panel(input$data_select)
+        input$remove_set
+        isolate({
+          switch.data.panel()
+        })
     })
 
     output$temp_table = renderDataTable({
-        if (!is.null(input[[input$data_select]])){
-            load.data(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
-        } else {
-            NULL
-        }
+      if (!is.null(input[[input$data_select]])){
+        load.data(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
+      } else {
+          NULL
+      }
     }, options = list(lengthMenu = c(5, 30, 50), pageLength = 5,
                       columns.defaultContent = "NA", scrollX = TRUE))
+    
+    observe({
+      if(!is.null(input$import_set)&&input$import_set>0){
+        isolate({
+          if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
+            data <<- load.data(fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
+            data.name <<- input$files[1, "name"]
+            if (!file.exists("data/Imported")) {
+              dir.create("data/Imported", recursive = TRUE)
+            }
+            saveRDS(data,file = paste0("data/Imported/", data.name, ".RDS"))
+          }
+        })
+      }
+    })
 
     ##  Data -> load data (upload a data set)
     output$load.data.panel = renderUI({
         input$selector
         input$import_set
-        if (loaded&&!is.null(input$import_set)&&input$import_set==1) {
-            loaded <<- F
-            if (!file.exists("data/Imported")) {
-                dir.create("data/Imported", recursive = TRUE)
-            }
-            name = change.file.ext(data.name, "RDS")
-            saveRDS(data,file = paste0("data/Imported/", name))
-        }
-        load.data.panel()
+        isolate({
+          load.data.panel()
+        })
     })
 
     output$filetable <- renderDataTable({
         input$selector
-        if (is.null(input$files)) {
-            ## If user hasn't uploaded a file yet
-            return(NULL)
-        }
-        if (is.null(data.name) || !temp.data%in%input$files[1, "name"]
-            || !data.name%in%temp.data) {
-            loaded <<- T
-            temp.data <<- input$files[1, "name"]
-            temp = load.data(fileID = input$files[1, "name"],
-                path = input$files[1, "datapath"])
-            data.name <<- temp[[1]]
-            data <<- temp[[2]]
-            temp.data <<- input$files[1, "name"]
-            data
-        } else {
-            NULL
-        }
+        input$files
+        isolate({
+          if (is.null(input$files)||!file.exists(input$files[1, "datapath"])) {
+              ## If user hasn't uploaded a file yet
+              return(NULL)
+          }
+          if (file.exists(input$files[1, "datapath"])) {
+            load.data(fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
+          } else {
+              NULL
+          }
+        })
     }, options =
         list(lengthMenu = c(5, 30, 50), pageLength = 5,
              columns.defaultContent="NA", scrollX = TRUE))
 
+    observe({
+      input$remove_set
+      isolate({
+        if(!is.null(input$remove_set)&&input$remove_set>0){
+          files = list.files(path = "data/Imported",
+                             pattern = input$Importedremove,
+                             full.names = TRUE)
+          if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
+            unlink(input$files[1, "datapath"])
+          }
+          for(f in files){
+            if (file.exists(f)) {
+                unlink(f)
+            }
+          }
+        }
+      })
+    })
+    
     ##  Data -> remove data (Remove an imported data set)
     output$remove.data.panel <- renderUI({
-        input$selector
-        if(!is.null(input$remove_set) && input$remove_set > 0) {
-            if(!is.null(data.name) && data.name==input$Importedremove) {
-                data.name = ""
-                data = NULL;
-            }
-            files =
-                list.files(path = "data/Imported",
-                           pattern = input$Importedremove,
-                           full.names = TRUE)
-            for(f in files){
-                if (file.exists(f)) {
-                    unlink(f)
-                }
-            }
-        }
+      input$selector
+      input$remove_set
+      isolate({
+#           if(!is.null(data.name) && data.name==input$Importedremove) {
+#               data.name = ""
+#               data = NULL;
+#           }
+#           files =
+#               list.files(path = "data/Imported",
+#                          pattern = input$Importedremove,
+#                          full.names = TRUE)
+#           for(f in files){
+#               if (file.exists(f)) {
+#                   unlink(f)
+#               }
+#           }
         remove.data.panel()
+      })
     })
 
     output$removetable <- renderDataTable({
-        if(!is.null(input$Importedremove)){
-            load.data(input$Importedremove)[[2]]
-        } else {
-            NULL
-        }
+      if(!is.null(input$Importedremove)){
+        load.data(input$Importedremove)[[2]]
+      } else {
+          NULL
+      }
     }, options =
         list(lengthMenu = c(5, 30, 50), pageLength = 5,
              columns.defaultContent = "NA", scrollX = TRUE))
@@ -530,36 +570,38 @@ shinyServer(function(input, output, session) {
     output$add.table = renderDataTable({
         input$selector
         input$new.column
-        temp=data
-        if(!is.null(data)&&!is.null(input$new.column)){
-            colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
-            if(length(colu)==1){
-                colu = strsplit(input$new.column,",",fixed=T)[[1]]
-            }
-            if(length(colu)<nrow(data)){
-                colu = rep(colu,length.out=nrow(data))
-            }
-            if(length(colu)>nrow(data)){
-                colu = colu[1:nrow(data)]
-            }
-            NAs = which(is.na(colu))
-            if(length(NAs)>0&&length(colu[-NAs])>0){
-                temp.colu = as.numeric(colu[-NAs])
-                if(!any(is.na(temp.colu))){
-                    colu = as.numeric(colu)
-                }
-            }
-            count = 1
-            name = "add.column1"
-            while(name%in%colnames(data)){
-                count =  count +1
-                name = paste0("add.column",count)
-            }
-            temp = cbind(data,temp.column=colu)
-            colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
-            temp
-        }
-        temp
+        isolate({
+          temp=data
+          if(!is.null(data)&&!is.null(input$new.column)){
+              colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
+              if(length(colu)==1){
+                  colu = strsplit(input$new.column,",",fixed=T)[[1]]
+              }
+              if(length(colu)<nrow(data)){
+                  colu = rep(colu,length.out=nrow(data))
+              }
+              if(length(colu)>nrow(data)){
+                  colu = colu[1:nrow(data)]
+              }
+              NAs = which(is.na(colu))
+              if(length(NAs)>0&&length(colu[-NAs])>0){
+                  temp.colu = as.numeric(colu[-NAs])
+                  if(!any(is.na(temp.colu))){
+                      colu = as.numeric(colu)
+                  }
+              }
+              count = 1
+              name = "add.column1"
+              while(name%in%colnames(data)){
+                  count =  count +1
+                  name = paste0("add.column",count)
+              }
+              temp = cbind(data,temp.column=colu)
+              colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
+              temp
+          }
+          temp
+        })
     },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
     output$add.columns = renderUI({
@@ -587,14 +629,16 @@ shinyServer(function(input, output, session) {
 
     output$rem.col.table = renderDataTable({
         input$selector
-        temp = data
-        if(!is.null(data)&&!is.null(input$select.remove.column)){
-            temp = as.data.frame(data[,-which(colnames(data)%in%input$select.remove.column)])
-            if(ncol(temp)==0){
-                temp=NULL
-            }
-        }
-        temp
+        isolate({
+          temp = data
+          if(!is.null(data)&&!is.null(input$select.remove.column)){
+              temp = as.data.frame(data[,-which(colnames(data)%in%input$select.remove.column)])
+              if(ncol(temp)==0){
+                  temp=NULL
+              }
+          }
+          temp
+        })
     },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
     output$remove.columns = renderUI({
