@@ -9,16 +9,17 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 
 Underway (10/03/15):
 ---------------------
-- Add proper error handling in the "Time Series" and "Visualize" modules, including linking "Provide Time Information" with server.R.
+- Update help.md files for all modules.
+- Add proper error handling in the "Time Series" and "Visualize" modules, including linking "Provide Time Information" with server.R (i.e. conditional panels).
 - Add inferential markups to the "Visualize" module once Tom finishes updating iNZightPlots().
 
 Recent Updates (10/03/15):
 --------------------------
+- Updated help.md files for the "Time Series" and "Visualize" modules.
 - Fixed Datatables bug (Christoph).
 - Fixed question mark error (Christoph).
 - 404 Error fixed in "About" module (Christoph).
 - Footer appears at the bottom but sits below the content if window $<$ 767px (Tom).
-- New help text for variable selection in the "Time Series" module (Chris).
 - New side-panel layout for the "Visualize" module (Chris).
 - New "Help" module (Chris).
 - Restructured code - new panels have their own directory (Chris).
