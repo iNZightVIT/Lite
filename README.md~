@@ -42,11 +42,11 @@ This directory holds all the data. The data must be placed in sub-directories, w
 - gui-elements:
 This directory contains the gui functions for all the old modules (from iNZight revamp). 
 
-- panels:
-This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
-
 - www:
 This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
+
+- panels:
+This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
 
 Main files:
 -----------
