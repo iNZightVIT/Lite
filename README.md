@@ -42,11 +42,11 @@ This directory holds all the data. The data must be placed in sub-directories, w
 - gui-elements:
 This directory contains the gui functions for all the old modules (from iNZight revamp). 
 
-- panels:
-This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
-
 - www:
 This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
+
+- panels:
+This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
 
 Main files:
 -----------
@@ -69,10 +69,12 @@ This repository will gradually be changed into the following format throughout 2
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight *Lite*. 
 
-- panels:
-This directory contains the gui, server, help, and other functions for each module. 
 
-The directory/file names will be of the form:
+- www:
+This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
+
+- panels:
+This directory contains the gui, server, help, and other functions for each module. The directory/file names will be of the form:
 
 - [Directory] N_panel-name
 - [Directory] M_sub-panel-name
@@ -81,6 +83,4 @@ The directory/file names will be of the form:
 - [File] 3_panelname-panel-help.R
 - [File] 4_panelname-panel-other.R
 
-- www:
-This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
 
