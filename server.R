@@ -248,19 +248,6 @@ shinyServer(function(input, output, session) {
       input$selector
       input$remove_set
       isolate({
-#           if(!is.null(data.name) && data.name==input$Importedremove) {
-#               data.name = ""
-#               data = NULL;
-#           }
-#           files =
-#               list.files(path = "data/Imported",
-#                          pattern = input$Importedremove,
-#                          full.names = TRUE)
-#           for(f in files){
-#               if (file.exists(f)) {
-#                   unlink(f)
-#               }
-#           }
         remove.data.panel()
       })
     })
@@ -277,6 +264,8 @@ shinyServer(function(input, output, session) {
 
     ##  Modify data -> transform columns (Perform column transformations)
     output$table_part <- renderDataTable({
+      input$select.columns
+      isolate({})
         temp = NULL
         temp2  = as.data.frame(data[, input$select.columns])
         colnames(temp2) = colnames(data)[which(colnames(data)%in%input$select.columns)]
@@ -308,7 +297,7 @@ shinyServer(function(input, output, session) {
             temp = as.data.frame(cbind(temp2,copy.transform(data[,input$select.columns],input$select.columns)))
         } else if (!is.null(input$select.columns)&input$select.transform%in%"change sign"){
             temp = as.data.frame(cbind(temp2,change.sign.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"change factor"){
+        } else if (!is.null(input$select.columns)&input$select.transform%in%"change to factor"){
             temp = as.data.frame(cbind(temp2,change.factor.transform(data[,input$select.columns],input$select.columns)))
         } else if (!is.null(input$select.columns)&input$select.transform%in%""){
             temp = data.frame(data[,input$select.columns])
@@ -380,7 +369,7 @@ shinyServer(function(input, output, session) {
 
     output$transform.columns =renderUI({
         input$selector
-        input$transform
+#         input$transform
         transform.data.panel()
     })
 

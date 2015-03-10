@@ -5,7 +5,7 @@
 get.transform.sidebar =  function(){
   list(selectInput("select.columns", "Select Columns", choices = c("",colnames(data)),multiple=T,selectize=T),br(),
        selectInput("select.transform", "Select Transformation", 
-                   choices = c("", "convert to categorical", "change factor","add","subtract","multiply","divide","log","root","square","abs","center",
+                   choices = c("", "change to factor","add","subtract","multiply","divide","log","root","square","abs","center",
                                "standardize","median split","reverse-coding","copy","change sign"),
                    multiple=F,selectize=F),br(),
        actionButton("transform","Transform"),br(),br(),textOutput("status"),br(),br(),
