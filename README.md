@@ -75,10 +75,10 @@ This directory is used for graphics and/or web-related files such as .css and .g
 
 - panels:
 This directory contains the gui, server, help, and other functions for each module. The directory/file names will be of the form:
-+ [Directory] N_(sub-)panel-name
-+ [File] 1_panelname-panel-gui.R
-+ [File] 2_panelname-panel-server.R
-+ [File] 3_panelname-panel-help.R
-+ [File] 4_panelname-panel-other.R
+  + [Directory] N_(sub-)panel-name
+  + [File] 1_panelname-panel-gui.R
+  + [File] 2_panelname-panel-server.R
+  + [File] 3_panelname-panel-help.R
+  + [File] 4_panelname-panel-other.R
 
 
