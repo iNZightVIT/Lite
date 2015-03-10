@@ -1,7 +1,6 @@
 *Last Updated: March 10, 2015*
 
-Introduction
-------------
+###### Introduction
 In statistics, one often wishes to gain insight from data gathered over a period of time. *Time series* refer to data collected sequentially over time. Time series arise in a wide variety of fields, including:
 
 - Financial forecasting
@@ -19,8 +18,7 @@ The module is divided up into two distinct vertical *panels*:
 - Panel 2: Statistical Output (Right)
 
 
-Panel 1: User Input
--------------------
+###### Panel 1: User Input
 This panel consists of a collection of user **inputs**:
 
 1. Time Information
@@ -36,8 +34,7 @@ Finally, you need to select variables to plot over time. If multiple variables a
 You can manually provide labels for the x and y axes if you wish.
 
 
-Panel 2: User Output
---------------------
+###### Panel 2: User Output
 This panel consists of a collection of tabs that display statistical output, either in graphical or text form:
 
 1. Time
@@ -58,5 +55,3 @@ This tab displays a Holt-Winters prediction plot for the variable(s) chosen in t
 
 6. Summary
 This tab displays a statistical summary (typically a confidence interval) of the chosen variable.
-
-E-mail *Chris Park* <cpar137@aucklanduni.ac.nz> 

@@ -1,7 +1,6 @@
 *Last Updated: March 10, 2015*
 
-Introduction
--------------
+###### Introduction
 The *visualize* module gives a basic plot of the variables chosen in the input panel (Panel 1 below). iNZight Lite automatically displays a plot tailored to the type of variable selected. For example, if you select two numeric variables (e.g. weight and height), it will display a scatterplot. On the other hand, if you select a numeric variable and a categorical variable (e.g. weight and nationality), it will display multiple box plots, depending on the number of categories in the categorial variable.
 
 The module is divided up into two distinct vertical *panels*:
@@ -9,8 +8,7 @@ The module is divided up into two distinct vertical *panels*:
 - Panel 1: User Input (Left)
 - Panel 2: Statistical Output (Right)
 
-Panel 1: User Input
--------------------
+###### Panel 1: User Input
 This panel consists of a collection of user **inputs**:
 
 1. Select first variable
@@ -28,8 +26,7 @@ If you are an advanced user, you can choose to customize the visual apperance of
 5. Reset All
 This button restores the default values of all the variables and graphical parameters used in generating the plot displayed.
 
-Panel 2: User Output
----------------------
+###### Panel 2: User Output
 This panel consists of a collection of tabs that display statistical output, either in graphical or text form:
 
 1. Plot
