@@ -10,12 +10,12 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 Underway (10/03/15):
 ---------------------
 - Update help.md files for all modules.
-- Add proper error handling in the "Time Series" and "Visualize" modules, including linking "Provide Time Information" with server.R (i.e. conditional panels).
+- Add proper error handling in the "Time Series" and "Visualize" modules, including linking "Provide Time Information" with server.R (i.e. make time series panel conditional on whether or not a time variable is defined).
 - Add inferential markups to the "Visualize" module once Tom finishes updating iNZightPlots().
 
 Recent Updates (10/03/15):
 --------------------------
-- Updated help.md files for the "Time Series" and "Visualize" modules.
+- Updated help.md files for the "Time Series" and "Visualize" modules (Chris).
 - Fixed Datatables bug (Christoph).
 - Fixed question mark error (Christoph).
 - 404 Error fixed in "About" module (Christoph).
@@ -43,7 +43,7 @@ This directory contains the gui functions for all the old modules (from iNZight 
 This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
 
 - www:
-This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
+This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
 
 Main files:
 -----------
@@ -69,18 +69,17 @@ This repository will gradually be changed into the following format throughout 2
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight *Lite*. 
 
 - panels:
-This directory contains the code and files that set up user selections. There is one sub-directory that contains all the .html and .md files.
-Each panel has its own directory within 'panels', and each sub-panel has its own directory within each parent panel.
+This directory contains the gui, server, help, and other functions for each module. 
 
-The file names adhere to the following guidelines:
+The directory/file names will be of the form:
 
-- N_panel-name
-- M_sub-panel-name
-- 1_panelname-panel-gui.R
-- 2_panelname-panel-server.R
-- 3_panelname-panel-help.R
-- 4_panelname-panel-other.R
+- [Directory] N_panel-name
+- [Directory] M_sub-panel-name
+- [File] 1_panelname-panel-gui.R
+- [File] 2_panelname-panel-server.R
+- [File] 3_panelname-panel-help.R
+- [File] 4_panelname-panel-other.R
 
 - www:
-This directory is used for web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
+This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
 
