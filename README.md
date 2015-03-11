@@ -1,7 +1,7 @@
 iNZight *Lite* version 0.9.7
 ============================
 
-*Last Updated: 10/03/15*
+*Last Updated: 11/03/15*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -18,6 +18,7 @@ Underway:
 
 Recent Updates:
 ---------------
+- Updated reset option for "Visualize" module (Chris).
 - Updated help.md files for the "Time Series" and "Visualize" modules (Chris).
 - Fixed Datatables bug (Christoph).
 - Fixed question mark error (Christoph).
