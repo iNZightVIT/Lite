@@ -427,19 +427,19 @@ output$add.inference <- renderUI({
 ##  Create a vector of colours.
 colour.choices <- c(
     ## "Light Blue" = "lightskyblue3",
-    "Light Blue" = "lightsteelblue1",
-    "Light Purple" = "thistle2",
-    "Light Orange" = "peachpuff1",
-    "Light Green" = "darkseagreen1",
-    "Light Gray" = "gray92",
+    "Blue" = "lightsteelblue1",
+    "Purple" = "thistle2",
+    "Orange" = "peachpuff1",
+    "Green" = "darkseagreen1",
+    "Gray" = "gray92",
     "Cream"  = "antiquewhite",
     "White" = "white"
 )
 
 dot.choices <- c(
     "Gray" = "gray60",
-    "Light Blue" = "lightskyblue3",
-    "Blue" = "darkblue",
+    "Blue 1" = "lightskyblue3",
+    "Blue 2" = "darkblue",
     "Purple" = "magenta",
     "Orange" = "orange",
     "Green" = "darkseagreen"
@@ -750,33 +750,17 @@ observe({
 ##-----------------------##
 ##
 ##
-
-
-
-
-
-
-
 output$add.inference <- renderUI({
     cat("boo")
 })
 
 
 
-
-
-
-
-
-
-
-
-
-
-##  Reset
+##  Reset variable selection and graphical parameters.
 observe({
-    if (!is.null(input$reset.graphics)) {
+    if (length(input$reset.graphics) > 0) {
             isolate({
+                ##  Variable Selections
                 updateSelectInput(session,
                                   inputId = "vari1",
                                   choices =
@@ -797,39 +781,94 @@ observe({
                                   inputId = "sub1_level")
                 updateSliderInput(session,
                                   inputId = "sub2_level")
+                
+
+                ###  Graphical Parameters
                 updateRadioButtons(session,
                                    inputId = "customize_plot",
                                    choices =
                                        c("Hide" = 1,
                                          "Show" = 2),
                                    selected = 1)
-                updateSelectInput(session,
-                                  inputId = "choose_bg",
-                                  choices = rev(colour.choices))
-                updateSelectInput(session,
-                                  inputId = "choose_symbol_col",
-                                  choices = colour.choices)
-                updateSelectInput(session,
-                                  inputId = "choose_box_col",
-                                  choices = colour.choices)
-                updateSelectInput(session,
-                                  inputId = "choose_bar_col",
-                                  choices = colour.choices)
-                updateTextInput(session,
-                                inputId = "xlab",
-                                value = "")
-                updateTextInput(session,
-                                inputId = "ylab",
-                                value = "")
-                updateTextInput(session,
-                                inputId = "main",
-                                value = "")
-                updateSliderInput(session,
-                                  inputId = "transparency",
-                                  value = 1)
-                updateSliderInput(session,
-                                  inputId = "size",
-                                  value = 0.5)
+
+                graphical.par$bg = "white"                
+                graphical.par$alpha = 1
+                graphical.par$bg = "white"
+                ##  Box
+                graphical.par$box.col = "gray60"
+                graphical.par$box.fill = "lightskyblue3"
+                ##  Bar
+                graphical.par$bar.lwd = 1
+                graphical.par$bar.col = "gray60"
+                graphical.par$bar.fill = "lightskyblue3"
+                ##  Line
+                graphical.par$lwd = 1
+                graphical.par$lty = 1
+                graphical.par$lwd.pt = 2
+                graphical.par$col.line = "blue"
+                ##  Point
+                graphical.par$cex.pt = .5
+                graphical.par$lwd.pt = .75
+                graphical.par$pch = 1
+                graphical.par$col.pt = "gray60"
+                graphical.par$fill.pt = "gray85"
+                ##  Colours
+                graphical.par$col.LOE = "black"
+                graphical.par$col.trend =
+                    list(linear = "",
+                         quadratic = "",
+                         cubic =  "")
+                graphical.par$col.smooth = ""
+                ##  Jitter, rugs, and trend.
+                graphical.par$jitter = ""
+                graphical.par$rugs = ""
+                graphical.par$trend = NULL
+                ##  Others
+                graphical.par$cex = 1
+                graphical.par$quant.smooth = NULL
+                graphical.par$inference.type = NULL
+                graphical.par$largesample = NULL
+                graphical.par$LOE = FALSE
+                graphical.par$join = FALSE
+                graphical.par$lines.by = FALSE
+                graphical.par$trend.by = FALSE
+                graphical.par$smooth = 0
+                graphical.par$szsym = 1
+                graphical.par$tpsym = 1                
+                ## updateSelectInput(session,
+                ##                   inputId = "choose_plot",
+                ##                   choices =
+                ##                       c("Bar" = 1,
+                ##                         "Dot" = 2,
+                ##                         "Box" = 3),
+                ##                   selected = 1)
+                ## updateSelectInput(session,
+                ##                   inputId = "choose_bg",
+                ##                   choices = rev(colour.choices))
+                ## updateSelectInput(session,
+                ##                   inputId = "choose_symb_col",
+                ##                   choices = colour.choices)
+                ## updateSelectInput(session,
+                ##                   inputId = "choose_box_col",
+                ##                   choices = colour.choices)
+                ## updateSelectInput(session,
+                ##                   inputId = "choose_bar_col",
+                ##                   choices = colour.choices)
+                ## updateTextInput(session,
+                ##                 inputId = "xlab",
+                ##                 value = "")
+                ## updateTextInput(session,
+                ##                 inputId = "ylab",
+                ##                 value = "")
+                ## updateTextInput(session,
+                ##                 inputId = "main",
+                ##                 value = "")
+                ## updateSliderInput(session,
+                ##                   inputId = "transparency",
+                ##                   value = 1)
+                ## updateSliderInput(session,
+                ##                   inputId = "size",
+                ##                   value = 0.5)
             })
         }
 })

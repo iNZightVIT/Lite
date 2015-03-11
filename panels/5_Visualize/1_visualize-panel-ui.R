@@ -60,17 +60,17 @@ vis.sidebarPanel <- function() {
                            "Show" = 2),
                      selected = 1),
         hr(),
-        ## actionLink(inputId = "reset.graphics",
-        ##              label = "Reset all"),
+        actionButton(inputId = "reset.graphics",
+                     label = "Reset all"),
         ## hr(),
-        "Reset All:",
-        helpText(
-            "To reset all your graphical settings, press the",
-            strong("F5"),
-            "key and click on the",
-            strong("Visualize"),
-            "tab again."
-        ),
+        ## "Reset All:",
+        ## helpText(
+        ##     "To reset all your graphical settings, press the",
+        ##     strong("F5"),
+        ##     "key and click on the",
+        ##     strong("Visualize"),
+        ##     "tab again."
+        ## ),
         hr(),
         visualize.help()
     )
