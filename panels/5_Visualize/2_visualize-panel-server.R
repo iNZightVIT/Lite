@@ -784,16 +784,14 @@ observe({
                 
 
                 ###  Graphical Parameters
-                updateRadioButtons(session,
-                                   inputId = "customize_plot",
-                                   choices =
-                                       c("Hide" = 1,
-                                         "Show" = 2),
-                                   selected = 1)
-
+                ## updateRadioButtons(session,
+                ##                    inputId = "customize_plot",
+                ##                    choices =
+                ##                        c("Hide" = 1,
+                ##                          "Show" = 2),
+                ##                    selected = 1)
                 graphical.par$bg = "white"                
                 graphical.par$alpha = 1
-                graphical.par$bg = "white"
                 ##  Box
                 graphical.par$box.col = "gray60"
                 graphical.par$box.fill = "lightskyblue3"
