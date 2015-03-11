@@ -1,4 +1,4 @@
-#### Introduction
+<h4> Introduction </h4>
 In statistics, one often wishes to gain insight from data gathered over a period of time. *Time series* refer to data collected sequentially over time. Time series arise in a wide variety of fields, including:
 
 - Financial forecasting
@@ -15,10 +15,12 @@ The module is divided up into two distinct vertical *panels*:
 - Panel 1: User Input (Left)
 - Panel 2: Statistical Output (Right)
 
-#### Panel 1: User Input
+<br>
+
+<h4> Panel 1: User Input </h4>
 This panel consists of a collection of user **inputs**:
 
-1. **Time Information**: You must either choose a time variable from a list of all the variables (or column names) from the selected dataset, or define one manually. For more information on how to define time information manually, please refer to https://www.stat.auckland.ac.nz/~wild/iNZight/faq.php#time-series.
+1. **Time Information**: You must either choose a time variable from a list of all the variables (or column names) from the selected dataset, or define one manually. If you time variable is not in the format the iNZight Lite recognises, then you must supply the time information manually (see https://www.stat.auckland.ac.nz/~wild/iNZight/faq.php#time-series).
 
 2. **Seasonal Pattern**: You must choose how you would like the seasonal pattern to be defined. It is standard to use the multiplicative scale here. For more detailed information on what seasonal patterns mean, please refer to the *Time series decomposition* section of https://www.otexts.org/fpp/6/1.
 
@@ -26,7 +28,9 @@ This panel consists of a collection of user **inputs**:
 
 4. **Customize Labels** (Optional): You can manually provide labels for the x and y axes if you wish.
 
-#### Panel 2: User Output
+<br>
+
+<h4> Panel 2: User Output </h4>
 This panel consists of a collection of tabs that display statistical output, either in graphical or text form:
 
 1. **Time** displays the time plot for the chosen variable(s), which is a simple line plot of the variables selected in 1.3 (on the y-axis) against the time variable (on the x-axis).
@@ -41,7 +45,8 @@ This panel consists of a collection of tabs that display statistical output, eit
 
 6. **Summary** displays a statistical summary (typically a confidence interval) of the chosen variable.
 
-If you find any errors / typos or have any suggestions, please e-mail them to Chris Park (<cpar137@aucklanduni.ac.nz>).
+<br>
 
-*Last Updated: March 10, 2015*
+If you have any queries or suggestions, please e-mail Chris Park (<cpar137@aucklanduni.ac.nz>).
 
+<em><p align = "right"> Last Updated: March 11, 2015 </p></em>

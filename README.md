@@ -12,27 +12,27 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 
 Underway:
 ---------
-- Update help.md files for all modules.
-- Add proper error handling in the "Time Series" and "Visualize" modules, including linking "Provide Time Information" with server.R (i.e. make time series panel conditional on whether or not a time variable is defined).
-- Add inferential markups to the "Visualize" module once Tom finishes updating iNZightPlots().
-
-Recent Updates:
----------------
-- Updated reset option for "Visualize" module (Chris).
-- Updated help.md files for the "Time Series" and "Visualize" modules (Chris).
-- Fixed Datatables bug (Christoph).
-- Fixed question mark error (Christoph).
-- 404 Error fixed in "About" module (Christoph).
-- Footer appears at the bottom but sits below the content if window $<$ 767px (Tom).
-- New side-panel layout for the "Visualize" module (Chris).
-- New "Help" module (Chris).
-- Restructured code - new panels have their own directory (Chris).
-
-To do/Known Issues:
--------------------
-- [Time Series] Change the way plots are drawn to how it was done in "Visualize".
+- [Wishlist] Adjust the size of the "Help" button so that it matches the size of the actionButton.	
+- [Manipulate] Go through the data extraction / manipulation options.
+- [Time Series] Fix "Provide Time Information".
 - [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
+
+Recent Updates (Most to least recent):
+----------------------------------------
+- [Time Series] Added shiny validation messages and modified the input panel so that only "Provide Time Information" is shown if the data set has no time variable defined in a format recognized by iNZightTS() (CP).
+- [Visualize] Fixed the "Reset All" button (CP).
+- [General] Updated help.md files for the "Time Series" and "Visualize" modules and created a template for use in other modules in */panels/0_Template/3_panelname-panel-help.md* (CP).
+- [General] Fixed Datatables bug (CK).
+- [General] Fixed question mark error (CK).
+- [General] 404 Error fixed in "About" module (CK).
+- [General] Footer appears at the bottom but sits below the content if window $<$ 767px (TE).
+- [Help] Added a new "Help" module (CP).
+- [General] Restructured code - new panels now have their own directory (CP).
+
+To do:
+------
 - [Quick Explore] Merge into 1 tab.
+- [Visualize]  Add inferential markups once Tom finishes updating iNZightPlots().
 - [Advanced] Nest QE and TS under "Advanced".
 
 Directories:

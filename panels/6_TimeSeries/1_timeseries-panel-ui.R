@@ -34,7 +34,7 @@ ts.help = function() {
 ts.sidebarPanel = function() {
     ##  Perform a routine data check (to be replaced).
     if (is.null(data)) {
-          stop("Please load a suitable dataset!")
+          stop("Please select a data set!")
     }
     ##  We set up the sidebar panel UI. The code is in 4 sections:
     ##
@@ -52,13 +52,14 @@ ts.sidebarPanel = function() {
         ##  of variables extracted from the dataset, or providing one
         ##  manually.
         hr(),
-        radioButtons(
-            inputId = "time_info",
-            label = "Time Information: ",
-            choices =
-                c("Select time variable" = 1,
-                  "Provide time manually" = 2)
-        ),
+        uiOutput("time_info"),
+        ## radioButtons(
+        ##     inputId = "time_info",
+        ##     label = "Time Information: ",
+        ##     choices =
+        ##         c("Select time variable" = 1,
+        ##           "Provide time manually" = 2)
+        ## ),
         ##  If the user decides to select a variable, then load a panel
         ##  which contains the list of variables extracted from the
         ##  dataset.
@@ -75,11 +76,11 @@ ts.sidebarPanel = function() {
         conditionalPanel(
             condition = "input.time_info == 2",
             textInput(inputId = "provide_startdate",
-                      label = "Specify start date: "),
-            textInput(inputId = "provide_season",
-                      label = "Specify season: "),
+                      label = "Start Date: "),
             textInput(inputId = "provide_frequency",
-                      label = "Specify frequency: "),
+                      label = "Frequency: "),
+            textInput(inputId = "provide_season",
+                      label = "Season Number: "),
             actionButton(inputId = "provide_actionButton",
                          label = "Provide time information")
         ),
@@ -144,10 +145,6 @@ ts.sidebarPanel = function() {
 ###
 ###  We now set up the main panel with "ts.mainpanel()":
 ts.mainPanel = function() {
-    ##  Perform a routine data check.
-    if (is.null(data)) {
-        stop("Please load a non-empty dataset!")
-    }
     ##  We set up the main panel UI. The code is organised in 3 sections:
     ##
     ##    -  Section 1: Data Validation
@@ -160,8 +157,8 @@ ts.mainPanel = function() {
         ##  Section 1: Data Validation
         ##
         ##  First, we add a data validation mechanism.
-        h3(textOutput(outputId = "validate"), style = "color:red"),
-        h3(textOutput(outputId = "variable_message"), style = "color:red"),
+        ## h3(textOutput(outputId = "validate"), style = "color:red"),
+        ## h3(textOutput(outputId = "variable_message"), style = "color:red"),
 
         ##  Section 2: Single Series Plots
         ##
@@ -317,6 +314,16 @@ ts.mainPanel = function() {
 ###  complete the UI for the Time Series module.
 timeseries.panel.ui = function() {
     fluidPage(
+        ##  Customize the validation output.
+        tags$head(
+            tags$style(HTML("
+                .shiny-output-error-validation {
+                    color: green;
+                    style: italic;
+                }
+            "))
+        ),
+        ##  Add panels.
         column(2, ts.sidebarPanel()),
         column(10, ts.mainPanel())
     )

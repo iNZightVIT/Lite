@@ -1,4 +1,4 @@
-#### Introduction
+<h4> Introduction </h4>
 The *visualize* module gives a basic plot of the variables chosen in the input panel (Panel 1 below). iNZight Lite automatically displays a plot tailored to the type of variable selected. For example, if you select two numeric variables (e.g. weight and height), it will display a scatterplot. On the other hand, if you select a numeric variable and a categorical variable (e.g. weight and nationality), it will display multiple box plots, depending on the number of categories in the categorial variable.
 
 The module is divided up into two distinct vertical *panels*:
@@ -6,7 +6,9 @@ The module is divided up into two distinct vertical *panels*:
 - Panel 1: User Input (Left)
 - Panel 2: Statistical Output (Right)
 
-#### Panel 1: User Input
+<br>
+
+<h4> Panel 1: User Input </h4>
 This panel consists of a collection of user **inputs**:
 
 1. **Select first variable** lets you choose a variable to plot. A variable is chosen here by default, but you can choose a different one if you wish. The plot generated will either be a box plot (for numeric variables) or a histogram (for categorial variables). 
@@ -18,7 +20,9 @@ This panel consists of a collection of user **inputs**:
 4. **Advanced Options** (*advanced users only*) allows you to customize the visual appearance or add inferential markups on top of the plot. 
 5. **Reset All** will reset all the variable selections and graphical parameters used to generate the plot to their default values.
 
-#### Panel 2: User Output
+<br>
+
+<h4> Panel 2: User Output </h4>
 This panel consists of a collection of tabs that display statistical output, either in graphical or text form:
 
 1. **Plot** displays the plot generated based on your selections in the input panel on the left hand side of the screen. If you chose to subset your variables by one or more variables, it will display one or more sliders that lets you adjust the subset levels.
@@ -27,6 +31,8 @@ This panel consists of a collection of tabs that display statistical output, eit
 
 3. **Inference** displays inferential information of the variable(s) chosen. This will typically be a 95% confidence interval as well as a chi-square test for equal probabilities for the variable(s).
 
-If you find any errors / typos or have any suggestions, please e-mail them to Chris Park (<cpar137@aucklanduni.ac.nz>).
+<br>
 
-*Last Updated: March 10, 2015*
+If you have any queries or suggestions, please e-mail Chris Park (<cpar137@aucklanduni.ac.nz>).
+
+<em><p align = "right"> Last Updated: March 11, 2015 </p></em>

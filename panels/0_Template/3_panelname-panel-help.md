@@ -1,7 +1,19 @@
-iNZight Lite
-=============
+<h4> Introduction </h4>
+Enter text here
 
-iNZight Lite is the online version of the iNZight data analysis system (https://www.stat.auckland.ac.nz/~wild/iNZight/).
+<br>
 
-It is currently being developed by Chris Park (cpar137@aucklanduni.ac.nz) and Christoph Knapp (c.knapp@auckland.ac.nz) at the University of Auckland.
+<h4> Panel 1 </h4>
+Enter description here
 
+<br>
+
+<h4> Panel 2 </h4>
+Enter description here
+
+<br>
+
+
+If you have any queries or suggestions, please e-mail Author (<author@mail.com>).
+
+<em><p align = "right"> Last Updated: Month Day, Year </p></em>

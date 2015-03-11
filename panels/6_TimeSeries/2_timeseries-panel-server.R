@@ -17,14 +17,29 @@
 ###--------------###
 
 ###  Let data be reactive.
-ts.data <- reactive({
-    input$selector
-    data
-    ts.data <- data
+###  If the dataset has no time variable defined, then print an error message.
+###  We need to replace this with a conditional panel that only offers the
+###  option to define one's own time variable.
+
+###  If no variables are selected, print an error message.
+## output$variable_message = renderPrint({
+##     if (length(input$select_variables) < 1) {
+##         "Please choose one or more variables to plot"
+##     }
+## })
+
+ts.data = reactive({
+    validate(
+        need(!is.null(data), "Please select a data set!"),
+        need(length(input$select_variables) >= 1,
+             "Please choose one or more variables!"),
+        errorClass = "myClass")
+    ts.data = data
 })
 
+
 ###  We write a function that handles data.
-date_check <- function() {
+date_check = function() {
     ##  Set of error checks.
     if (is.null(ts.data())) {
         return(FALSE)
@@ -36,7 +51,7 @@ date_check <- function() {
         return(FALSE)
     }
     ##  We obtain a subset of the data.
-    subdata <- ts.data()[, input$select_timevars]
+    subdata = ts.data()[, input$select_timevars]
     ##  If any of the time series structures return an NA,
     ##  return TRUE. Else, return FALSE.
     if (any(is.na(iNZightTS:::get.ts.structure(subdata)))) {
@@ -46,44 +61,42 @@ date_check <- function() {
     }
 }
 
-
-###---------------------###
-###  Validation Output  ###
-###---------------------###
-###
-###  If the dataset has no time variable defined, then print an error message.
-###  We need to replace this with a conditional panel that only offers the
-###  option to define one's own time variable.
-
-output$validate <- renderText({
-    if (is.null(ts.data())) {
-        return()
-    }
-    if (is.null(input$select_variables)) {
-        return()
-    }
+###  Time information panel - conditional on the type of dataset.
+output$time_info = renderUI({
     if (date_check()) {
-        ""
+        radioButtons(
+            inputId = "time_info",
+            label = "Time Information: ",
+            choices =
+                c("Select time variable" = 1,
+                  "Provide time manually" = 2)
+        )
     } else {
-        "This data is NOT valid for Time Series Analysis.\n
-         Please load an alternative dataset that has a well-defined
-         TIME variable."
-    }
+        radioButtons(
+            inputId = "time_info",
+            label = "Time Information: ",
+            choices = c("Provide time manually" = 2)
+        )
+    }                
 })
 
-###  If no variables are selected, print an error message.
-output$variable_message <- renderPrint({
-    if (length(input$select_variables) < 1) {
-        "Please choose one or more variables to plot"
-    }
-})
+## reactive({
+##     if (!is.null(input$provide_actionButton)) {
+##         season = input$provide_season
+##         start = c(input$provide_startdate, season)
+##         freq = input$provide_frequency
+##     } else {
+##         season = 1
+##         start = c(1, season)
+##         freq = 1
+##     }
+## })
 
-
-
+        
 ###  Variable Names
-variable.names <- reactive({
+variable.names = reactive({
     input$select_variables
-    variable.names <- which(names(ts.data()) %in% input$select_variables)
+    variable.names = which(names(ts.data()) %in% input$select_variables)
 })
 
 ###-----------------------###
@@ -91,12 +104,13 @@ variable.names <- reactive({
 ###-----------------------###
 ###
 ###  Time Series Plot
-output$timeseries_plot <- renderPlot({
+output$timeseries_plot = renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         rawplot(
             iNZightTS(ts.data(),
                       var = variable.names()),
+                      ## start = start),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season
@@ -104,64 +118,8 @@ output$timeseries_plot <- renderPlot({
     }
 })
 
-###  Animation stuff - too slow.
-
-## output$timeseries_stop_animation <- renderPlot({
-##     input$stop_animate
-##     if (length(input$singleSeriesTabs) > 0) {
-##         rawplot(
-##             iNZightTS(ts.data(),
-##                       var = variable.names()),
-##             xlab = input$provide_xlab,
-##             ylab = input$provide_ylab,
-##             multiplicative = input$choose_season)
-##     }
-## })
-
-## output$timeseries_start_animation <- renderImage({
-##     input$start_animate
-##     if (length(input$singleSeriesTabs) > 0) {
-##         return(list(
-##             src = "~/Desktop/ts/Time_Series.gif",
-##             contentType = "image/gif",
-##             alt = "GIF"
-##             ## width = 800,
-##             ## height = 350
-
-##         ))
-##     }
-## }, deleteFile = FALSE)
-
-## output$timeseries_start_animation <- renderImage({
-##     input$start_animate
-##     if (length(input$singleSeriesTabs) > 0) {
-##         rawplot(
-##             iNZightTS(ts.data(),
-##                       var = variable.names()),
-##             xlab = input$provide_xlab,
-##             ylab = input$provide_ylab,
-##             multiplicative = input$choose_season,
-##             animate = TRUE)
-##         currDir <- getwd()
-##         return(list(
-##             src = paste0(currDir, "/timeseries.gif"),
-##             contentType = "image/gif",
-##             alt = "Animation"))
-##     }
-## }, deleteFile = TRUE)
-
-## output$timeseries_layout <- renderUI({
-##     if (length(input$singleSeriesTabs) > 0) {
-##         if (input$start_animate[1] > input$stop_animate[1]) {
-##             imageOutput("timeseries_start_animation")
-##         } else {
-##             plotOutput("timeseries_stop_animation")
-##         }
-##     }
-## })
-
 ###  Seasonal Plot
-output$seasonal_plot <- renderPlot({
+output$seasonal_plot = renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         seasonplot(
@@ -175,7 +133,7 @@ output$seasonal_plot <- renderPlot({
 })
 
 ###  Decomposed Plot
-output$decomposed_plot <- renderPlot({
+output$decomposed_plot = renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         decompositionplot(
@@ -189,7 +147,7 @@ output$decomposed_plot <- renderPlot({
 })
 
 ###  Trend + Seasonal Plot
-output$trSeasonal_plot <- renderPlot({
+output$trSeasonal_plot = renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         iNZightTS:::recompose(
@@ -206,7 +164,7 @@ output$trSeasonal_plot <- renderPlot({
 })
 
 ###  Forecast Plot
-output$forecast_plot <- renderPlot({
+output$forecast_plot = renderPlot({
     input$selector
     if (length(input$singleSeriesTabs) > 0) {
         forecastplot(
@@ -217,7 +175,7 @@ output$forecast_plot <- renderPlot({
     }
 })
 
-output$forecast_summary <- renderPrint({
+output$forecast_summary = renderPrint({
     input$selctor
     if (length(input$singleSeriesTabs) > 0) {
         forecastplot(
@@ -234,7 +192,7 @@ output$forecast_summary <- renderPrint({
 ###  Multiple Series Plots  ###
 ###-------------------------###
 ###
-output$multiple_single_plot <- renderPlot({
+output$multiple_single_plot = renderPlot({
     input$selctor
     if (length(input$singleSeriesTabs) > 0) {
         iNZightTS:::compareplot(
@@ -245,10 +203,10 @@ output$multiple_single_plot <- renderPlot({
     }
 })
 
-output$multipleSeries_single_layout <- renderUI({
+output$multipleSeries_single_layout = renderUI({
     input$selctor
     if (length(input$multipleSeriesTabs) > 0) {
-        columns <- length(input$multi_series_vars)
+        columns = length(input$multi_series_vars)
         if (columns <= 6) {
             plotOutput("multiple_single_plot", height = "500px")
         } else {
@@ -258,7 +216,7 @@ output$multipleSeries_single_layout <- renderUI({
 })
 
 
-output$multiple_multi_plot <- renderPlot({
+output$multiple_multi_plot = renderPlot({
     input$selector
     if (length(input$multipleSeriesTabs) > 0) {
         multiseries(
@@ -271,10 +229,10 @@ output$multiple_multi_plot <- renderPlot({
 
 
 
-output$multipleSeries_multi_layout <- renderUI({
+output$multipleSeries_multi_layout = renderUI({
     input$selector
     if (length(input$multipleSeriesTabs) > 0) {
-        columns <- length(input$multi_series_vars)
+        columns = length(input$multi_series_vars)
         if (columns <= 5) {
             plotOutput("multiple_multi_plot", height = "500px")
         } else {

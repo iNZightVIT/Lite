@@ -60,19 +60,17 @@ vis.sidebarPanel <- function() {
                            "Show" = 2),
                      selected = 1),
         hr(),
-        actionButton(inputId = "reset.graphics",
-                     label = "Reset all"),
-        ## hr(),
-        ## "Reset All:",
-        ## helpText(
-        ##     "To reset all your graphical settings, press the",
-        ##     strong("F5"),
-        ##     "key and click on the",
-        ##     strong("Visualize"),
-        ##     "tab again."
-        ## ),
-        hr(),
-        visualize.help()
+        fluidRow(
+            column(
+                width = 7,
+                actionButton(inputId = "reset.graphics",
+                             label = "Reset All")
+            ),
+            column(
+                width = 5,
+                visualize.help()
+            )
+        )
     )
 }
 
@@ -81,7 +79,7 @@ vis.sidebarPanel <- function() {
 ##  line lengths - but this was the only way to keep things in one place.
 ##  I could have broken things up a bit but I thought that would confuse you
 ##  (the reader). 
-vis.mainPanel <- function() {
+vis.mainPanel = function() {
     if (!is.null(data)) {
         list(
             br(),
@@ -256,7 +254,7 @@ vis.mainPanel <- function() {
 }
               
 
-visualize.panel.ui <- function() {
+visualize.panel.ui = function() {
     fluidPage(
         fluidRow(
             column(2, vis.sidebarPanel()),

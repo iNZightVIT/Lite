@@ -46,13 +46,13 @@ plot.par <- reactiveValues(
 ##     if (is.null(input$click)) {
 ##         return()
 ##     }
-##     isolate(plot.par$x <- c(plot.par$x, input$click$x))
-##     isolate(plot.par$y <- c(plot.par$y, input$click$y))
+##     isolate(plot.par$x = c(plot.par$x, input$click$x))
+##     isolate(plot.par$y = c(plot.par$y, input$click$y))
 ## })
 
 
 ##  These are the list of parameters in inzPlotDefaults()
-graphical.par <- reactiveValues(
+graphical.par = reactiveValues(
     alpha = 1,
     bg = "white",
     ##  Box
@@ -99,50 +99,50 @@ graphical.par <- reactiveValues(
 )
 
 ##  Data handling
-determine.class <- function(input) {
+determine.class = function(input) {
     if (is.null(input)) {
         return(NULL)
     }
     if (class(input) == "integer") {
-        input.class <- "numeric"
+        input.class = "numeric"
     } else if (class(input) == "character") {
-        input.class <- "factor"
+        input.class = "factor"
     } else {
-        input.class <- class(input)
+        input.class = class(input)
     }
     input.class
 }
 
 ##  Input Handling
-handle.input <- function(input, subs = FALSE) {
+handle.input = function(input, subs = FALSE) {
     if (is.null(input)) {
         return()
     }
     if (input != "none" && input %in% names(vis.data())) {
         if (subs) {
-            input.out <- convert.to.factor(vis.data()[, input])
-            factor.levels <- nlevels(input.out)
+            input.out = convert.to.factor(vis.data()[, input])
+            factor.levels = nlevels(input.out)
         } else {
-            input.out <- vis.data()[, input]
-            factor.levels <- NULL
+            input.out = vis.data()[, input]
+            factor.levels = NULL
         }
     } else {
-        input.out <- NULL
-        factor.levels <- NULL
+        input.out = NULL
+        factor.levels = NULL
     }
     list(input.out = input.out, factor.levels = factor.levels)
 }
 
-x.class <- reactive({
+x.class = reactive({
     determine.class(plot.par$x)
 })
 
-y.class <- reactive({
+y.class = reactive({
     determine.class(plot.par$y)
 })
 
-determine.g <- reactive({
-    xy.class <- c(x.class(), y.class())
+determine.g = reactive({
+    xy.class = c(x.class(), y.class())
     ##  0: x, y == NULL
     if (is.null(x.class()) && is.null(y.class())) {
         return(0)
@@ -172,30 +172,30 @@ determine.g <- reactive({
         return(6)
     }
     ##  7: Special structure (e.g. "ts" object)
-    id <- !(xy.class %in% c("numeric", "factor"))
+    id = !(xy.class %in% c("numeric", "factor"))
     if (id) {
         return(c("x of incorrect class", "y of incorrect class")[id])
     }
 })
 
 ##  Then on the third, he declared the need for parameters for the "visualize" module:
-vis.par <- reactive({
-    vis.par <- reactiveValuesToList(plot.par)
+vis.par = reactive({
+    vis.par = reactiveValuesToList(plot.par)
     if (!is.null(vis.par$x) && plot.par$varnames$x != "") {
         validate(
             need(all(na.omit(vis.par$x) != ""),
                  "All values are empty.")
         )
         if (determine.g() == 6) {
-            temp <- list(x = NULL, y = NULL,
+            temp = list(x = NULL, y = NULL,
                          varnames = list(x = "", y = ""))
-            temp$x <- vis.par$x
-            temp$y <- vis.par$y
-            temp$varnames$x <- vis.par$varnames$x
-            temp$varnames$y <- vis.par$varnames$y
-            vis.par <- modifyList(vis.par, temp)
+            temp$x = vis.par$x
+            temp$y = vis.par$y
+            temp$varnames$x = vis.par$varnames$x
+            temp$varnames$y = vis.par$varnames$y
+            vis.par = modifyList(vis.par, temp)
         }
-        vis.par <- modifyList(reactiveValuesToList(graphical.par), vis.par)
+        vis.par = modifyList(reactiveValuesToList(graphical.par), vis.par)
     } else {
         NULL
     }
@@ -206,7 +206,7 @@ vis.par <- reactive({
 ##  Variable 1
 ##
 ##  Select variable 1.
-output$vari1_panel <- renderUI({
+output$vari1_panel = renderUI({
     selectInput(inputId = "vari1",
                 label = "Select first variable:",
                 choices = rev(colnames(vis.data())),
@@ -215,14 +215,14 @@ output$vari1_panel <- renderUI({
 
 ##  Update plot.par$x.
 observe({
-    vari1.par <- handle.input(input$vari1)$input.out
-    plot.par$x <- vari1.par
-    plot.par$varnames$x <- input$vari1
+    vari1.par = handle.input(input$vari1)$input.out
+    plot.par$x = vari1.par
+    plot.par$varnames$x = input$vari1
 })
 
 
 ##  Subset variable 1.
-output$subs1_panel <- renderUI({
+output$subs1_panel = renderUI({
     selectInput(inputId = "subs1",
                 label = "Subset by:",
                 choices = c("none", rev(colnames(vis.data()))),
@@ -231,15 +231,15 @@ output$subs1_panel <- renderUI({
 
 ##  Update plot.par$g1.
 observe({
-    subs1.par <- handle.input(input$subs1, subs = TRUE)$input.out
-    plot.par$g1 <- subs1.par
-    plot.par$varnames$g1 <- input$subs1
+    subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
+    plot.par$g1 = subs1.par
+    plot.par$varnames$g1 = input$subs1
 })
 
 
 ##  Subset level (Slider) for variable 1.
-output$subs1_conditional <- renderUI({
-    choices1 <- handle.input(input$subs1, subs = TRUE)$factor.levels
+output$subs1_conditional = renderUI({
+    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
     sliderInput(inputId = "sub1_level",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = 0, step = 1,
@@ -247,8 +247,8 @@ output$subs1_conditional <- renderUI({
 })
 
 
-output$subs1_conditional_mini <- renderUI({
-    choices1 <- handle.input(input$subs1, subs = TRUE)$factor.levels
+output$subs1_conditional_mini = renderUI({
+    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
     sliderInput(inputId = "sub1_level",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = 0, step = 1,
@@ -258,17 +258,17 @@ output$subs1_conditional_mini <- renderUI({
 
 ##  Update plot$g1.level
 observe({
-    g1_level <- input$sub1_level
+    g1_level = input$sub1_level
     if (is.null(g1_level) || g1_level == 0) {
-        g1_level <- NULL
+        g1_level = NULL
     }
-    plot.par$g1.level <- g1_level
+    plot.par$g1.level = g1_level
 })
 
 ##  Clean up slider every time the subset variables change.
 observe({
     input$subs1
-    plot.par$g1.level <- NULL
+    plot.par$g1.level = NULL
     updateSliderInput(session,
                       inputId = "subs1_level",
                       value = 0)
@@ -279,7 +279,7 @@ observe({
 ##  Variable 2  ##
 ##
 ##  Select variable 2.
-output$vari2_panel <- renderUI({
+output$vari2_panel = renderUI({
     selectInput(inputId = "vari2",
                 label = "Select second variable:",
                 choices = c("none", rev(colnames(vis.data()))[-1]),
@@ -288,13 +288,13 @@ output$vari2_panel <- renderUI({
 
 ##  Update plot.par$y
 observe({
-    vari2.par <- handle.input(input$vari2)$input.out
-    plot.par$y <- vari2.par
-    plot.par$varnames$y <- input$vari2
+    vari2.par = handle.input(input$vari2)$input.out
+    plot.par$y = vari2.par
+    plot.par$varnames$y = input$vari2
 })
 
 ##  Subset variable 2.
-output$subs2_panel <- renderUI({
+output$subs2_panel = renderUI({
     selectInput(inputId = "subs2",
                 label = "Subset by:",
                 choices = c("none", rev(colnames(vis.data()))[-1]),
@@ -304,14 +304,14 @@ output$subs2_panel <- renderUI({
 
 ##  Update plot.par$g2.
 observe({
-    subs2.par <- handle.input(input$subs2, subs = TRUE)$input.out
-    plot.par$g2 <- subs2.par
-    plot.par$varnames$g2 <- input$subs2
+    subs2.par = handle.input(input$subs2, subs = TRUE)$input.out
+    plot.par$g2 = subs2.par
+    plot.par$varnames$g2 = input$subs2
 })
 
 ##  Subset level (Slider) for variable 2.
-output$subs2_conditional <- renderUI({
-    choices2 <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+output$subs2_conditional = renderUI({
+    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
     sliderInput(inputId = "sub2_level",
                 label = paste0("Subset '", input$subs2, "':"),
                 min = 0, max = choices2, value = 0, step = 1,
@@ -319,8 +319,8 @@ output$subs2_conditional <- renderUI({
 })
 
 ##  Subset level (Slider) for variable 2.
-output$subs2_conditional_mini <- renderUI({
-    choices2 <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+output$subs2_conditional_mini = renderUI({
+    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
     sliderInput(inputId = "sub2_level",
                 label = paste0("Subset '", input$subs2, "':"),
                 min = 0, max = choices2, value = 0, step = 1,
@@ -330,46 +330,46 @@ output$subs2_conditional_mini <- renderUI({
 
 ##  Update plot.par$g2.level
 observe({
-    g2_level <- input$sub2_level
+    g2_level = input$sub2_level
     if (is.null(g2_level) || g2_level == 0) {
-        g2_level <- NULL
+        g2_level = NULL
     }
-    g2.level.check <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
     if (!is.null(g2_level) && g2_level == g2.level.check) {
-        g2_level <- "_MULTI"
+        g2_level = "_MULTI"
     }
-    plot.par$g2.level <- g2_level
+    plot.par$g2.level = g2_level
 })
 
 
 ##  Clean up slider every time the subset variables change.
 observe({
     input$subs2
-    plot.par$g2.level <- NULL
+    plot.par$g2.level = NULL
     updateSliderInput(session,
                       inputId = "subs2_level",
                       value = 0)
 })
 
 
-output$visualize.plot <- renderPlot({
+output$visualize.plot = renderPlot({
     if (!is.null(vis.par())) {
         do.call(iNZightPlots:::iNZightPlot, vis.par())
     }
 })
 
-output$mini.plot <- renderPlot({
+output$mini.plot = renderPlot({
     if (!is.null(vis.par())) {
         do.call(iNZightPlots:::iNZightPlot, vis.par())
     }
 })
 
 
-output$visualize.inference <- renderPrint({
+output$visualize.inference = renderPrint({
     if (is.null(plot.par$x)) {
         return(cat("Please select a variable"))
     }
-    values.list <- modifyList(reactiveValuesToList(plot.par),
+    values.list = modifyList(reactiveValuesToList(plot.par),
                               reactiveValuesToList(graphical.par))
     ## if (determine.g() == 6) {
     cat(do.call(iNZightPlots:::getPlotInference, values.list), sep = "\n")
@@ -378,27 +378,27 @@ output$visualize.inference <- renderPrint({
     ## }
 })
 
-output$visualize.summary <- renderPrint({
+output$visualize.summary = renderPrint({
     if (is.null(plot.par$x)) {
         return(cat("Please select a variable"))
     }
-    values.list <- modifyList(reactiveValuesToList(plot.par),
+    values.list = modifyList(reactiveValuesToList(plot.par),
                               reactiveValuesToList(graphical.par))
     cat(do.call(getPlotSummary, values.list), sep = "\n")
 })
 
-output$add.inference <- renderUI({
+output$add.inference = renderUI({
     ## if (!determine.g() %in% c(1, 4, 5, 6)) {
-    ##     choices.option <- c("Proportions" = "proportion")
-    ##     selected.option <- "proportion"
+    ##     choices.option = c("Proportions" = "proportion")
+    ##     selected.option = "proportion"
     ## }
     ## if (determine.g() %in% c(1, 4, 5)) {
-    ##     choices.option <- c("Medians" = "median",
+    ##     choices.option = c("Medians" = "median",
     ##                         "Means" = "mean")
-    ##     selected.option <- "mean"
+    ##     selected.option = "mean"
     ## }
     ## if (determine.g() == 6) {
-    choices.option <- c("Medians" = "median",
+    choices.option = c("Medians" = "median",
                         "Means" = "mean",
                         "Proportions" = "proportion")
     selected.option = "mean"
@@ -425,7 +425,7 @@ output$add.inference <- renderUI({
 })
 
 ##  Create a vector of colours.
-colour.choices <- c(
+colour.choices = c(
     ## "Light Blue" = "lightskyblue3",
     "Blue" = "lightsteelblue1",
     "Purple" = "thistle2",
@@ -436,7 +436,7 @@ colour.choices <- c(
     "White" = "white"
 )
 
-dot.choices <- c(
+dot.choices = c(
     "Gray" = "gray60",
     "Blue 1" = "lightskyblue3",
     "Blue 2" = "darkblue",
@@ -446,7 +446,7 @@ dot.choices <- c(
 )
 
 ##  Choose plot type
-output$plot_type <- renderUI({
+output$plot_type = renderUI({
     selectInput(inputId = "choose_plot",
                 label = "Graphical Object:",
                 choices =
@@ -458,7 +458,7 @@ output$plot_type <- renderUI({
 
 
 ##  Adjust background colour: UI
-output$background <- renderUI({
+output$background = renderUI({
     selectInput(inputId = "choose_bg",
                 label = "Background Colour:",
                 choices = rev(colour.choices),
@@ -470,14 +470,14 @@ observe({
     if (is.null(input$choose_bg) || input$choose_bg == "") {
         return()
     } else {
-        bg.col <- input$choose_bg
-        graphical.par$bg <- bg.col
+        bg.col = input$choose_bg
+        graphical.par$bg = bg.col
     }
 })
 
 
 ##  Adjust symbol colour: UI
-output$symbol_colour <- renderUI({
+output$symbol_colour = renderUI({
     selectInput(inputId = "choose_symb_col",
                 label = "Choose Dot Colour:",
                 choices = dot.choices,
@@ -489,14 +489,14 @@ observe({
     if (is.null(input$choose_symb_col) || input$choose_symb_col == "") {
         return()
     } else {
-        symbol.col <- input$choose_symb_col
-        graphical.par$col.pt <- symbol.col
+        symbol.col = input$choose_symb_col
+        graphical.par$col.pt = symbol.col
     }
 })
 
 
 ##  Adjust box colour: UI
-output$box_colour <- renderUI({
+output$box_colour = renderUI({
     selectInput(inputId = "choose_box_col",
                 label = "Choose Box Colour:",
                 choices =
@@ -510,13 +510,13 @@ observe({
     if (is.null(input$choose_box_col) || input$choose_box_col == "") {
         return()
     } else {
-        box.col <- input$choose_box_col
-        graphical.par$box.fill <- box.col
+        box.col = input$choose_box_col
+        graphical.par$box.fill = box.col
     }
 })
 
 ##  Adjust bar colour: UI
-output$bar_colour <- renderUI({
+output$bar_colour = renderUI({
     selectInput(inputId = "choose_bar_col",
                 label = "Choose Bar Colour:",
                 choices =
@@ -530,8 +530,8 @@ observe({
     if (is.null(input$choose_bar_col) || input$choose_bar_col == "") {
         return()
     } else {
-        bar.fill.col <- input$choose_bar_col
-        graphical.par$bar.fill <- bar.fill.col
+        bar.fill.col = input$choose_bar_col
+        graphical.par$bar.fill = bar.fill.col
     }
 })
 
@@ -542,9 +542,9 @@ observe({
         return()
     }
     if (input$xlab == "") {
-        plot.par$xlab <- NULL
+        plot.par$xlab = NULL
     } else {
-        plot.par$xlab <- input$xlab
+        plot.par$xlab = input$xlab
         updateTextInput(session,
                         inputId = "xlab",
                         value = plot.par$xlab)
@@ -556,9 +556,9 @@ observe({
         return()
     }
     if (input$xlab == "") {
-        plot.par$ylab <- NULL
+        plot.par$ylab = NULL
     } else {
-        plot.par$ylab <- input$ylab
+        plot.par$ylab = input$ylab
         updateTextInput(session,
                         inputId = "ylab",
                         value = plot.par$ylab)
@@ -571,9 +571,9 @@ observe({
         return()
     }
     if (input$title == "") {
-        plot.par$main <- NULL
+        plot.par$main = NULL
     } else {
-        plot.par$main <- input$title
+        plot.par$main = input$title
         updateTextInput(session,
                         inputId = "title",
                         value = plot.par$main)
@@ -581,7 +581,7 @@ observe({
 })
 
 ##  Adjust symbol transparency: UI.
-output$symbol_transparency <- renderUI({
+output$symbol_transparency = renderUI({
     sliderInput(inputId = "transparency",
                 label = "Transparency:",
                 min = 0.01, max = 1, step = 0.01,
@@ -593,12 +593,12 @@ observe({
     if (is.null(input$transparency)) {
         return()
     } else {
-        graphical.par$alpha <- input$transparency
+        graphical.par$alpha = input$transparency
     }
 })
 
 ##  Adjust symbol size: UI.
-output$symbol_size <- renderUI({
+output$symbol_size = renderUI({
     sliderInput(inputId = "size",
                 label  = "Dot Size:",
                 min = 0.25, max = 4, step = 0.25,
@@ -610,12 +610,12 @@ observe({
     if (is.null(input$size)) {
         return()
     } else {
-        graphical.par$cex.pt <- input$size
+        graphical.par$cex.pt = input$size
     }
 })
 
 ##  Adjust Bar Width: UI
-output$bar_width <- renderUI({
+output$bar_width = renderUI({
     sliderInput(inputId = "bar_line_width",
                 label  = "Bar Border Width:",
                 min = 0.1, max = 3, step = 0.1,
@@ -628,13 +628,13 @@ observe({
     if (is.null(input$bar_line_width)) {
         return()
     } else {
-        graphical.par$bar.lwd <- input$bar_line_width
+        graphical.par$bar.lwd = input$bar_line_width
     }
 })
 
 
 ##  Adjust Bar Border Colour: UI
-output$bar_border <- renderUI({
+output$bar_border = renderUI({
     selectInput(inputId = "bar_border_colour",
                 label  = "Bar Border Colour:",
                 choices = c("Light Gray" = "gray60", dot.choices),
@@ -646,8 +646,8 @@ observe({
     if (is.null(input$bar_border_colour) || input$bar_border_colour == "") {
         return()
     } else {
-        bar.border.col <- input$bar_border_colour
-        graphical.par$bar.col <- bar.border.col
+        bar.border.col = input$bar_border_colour
+        graphical.par$bar.col = bar.border.col
     }
 })
 
@@ -655,7 +655,7 @@ observe({
 
 
 ##  Adjust Box Width: UI
-output$bar_width <- renderUI({
+output$bar_width = renderUI({
     sliderInput(inputId = "box_line_width",
                 label  = "Box Border Width:",
                 min = 0.1, max = 3, step = 0.1,
@@ -668,13 +668,13 @@ observe({
     if (is.null(input$box_line_width)) {
         return()
     } else {
-        graphical.par$box.lwd <- input$bar_line_width
+        graphical.par$box.lwd = input$bar_line_width
     }
 })
 
 
 ##  Adjust Box Border Colour: UI
-output$box_border <- renderUI({
+output$box_border = renderUI({
     selectInput(inputId = "box_border_colour",
                 label  = "Box Border Colour:",
                 choices = c("Light Gray" = "gray60", dot.choices),
@@ -686,8 +686,8 @@ observe({
     if (is.null(input$box_border_colour) || input$box_border_colour == "") {
         return()
     } else {
-        box.border.col <- input$box_border_colour
-        graphical.par$box.col <- box.border.col
+        box.border.col = input$box_border_colour
+        graphical.par$box.col = box.border.col
     }
 })
 
@@ -696,7 +696,7 @@ observe({
 ##-------------------##
 ##
 ##  "Resize by" UI
-output$resize.by <- renderUI({
+output$resize.by = renderUI({
     selectInput(inputId = "resize_by",
                 label = "Resize relative to:",
                 choices =
@@ -711,16 +711,16 @@ observe({
     }
     if (input$resize_by != "none" &&
         input$resize_by %in% colnames(vis.data())) {
-        resize.input <- vis.data()[, input$resize_by]
+        resize.input = vis.data()[, input$resize_by]
     } else {
-        resize.input <- NULL
+        resize.input = NULL
     }
-    plot.par$prop.size <- resize.input
-    plot.par$varnames$prop.size <- input$resize_by
+    plot.par$prop.size = resize.input
+    plot.par$varnames$prop.size = input$resize_by
 })
 
 ##  "Colour By" UI
-output$colour.by <- renderUI({
+output$colour.by = renderUI({
     selectInput(inputId = "colour_by",
                 label = "Colour by:",
                 choices =
@@ -735,13 +735,13 @@ observe({
     }
     if (input$colour_by != "none" &&
         input$colour_by %in% colnames(vis.data())) {
-        colour.input <- vis.data()[, input$colour_by]
+        colour.input = vis.data()[, input$colour_by]
     } else {
-        colour.input <- NULL
+        colour.input = NULL
     }
 
-    plot.par$by <- colour.input
-    plot.par$varnames$by <- input$colour_by
+    plot.par$by = colour.input
+    plot.par$varnames$by = input$colour_by
 })
 
 
@@ -750,7 +750,7 @@ observe({
 ##-----------------------##
 ##
 ##
-output$add.inference <- renderUI({
+output$add.inference = renderUI({
     cat("boo")
 })
 
