@@ -68,7 +68,8 @@ ts.sidebarPanel = function() {
             selectInput(
                 inputId = "select_timevars",
                 label = "Select time variable: ",
-                choices = colnames(data)
+                choices = colnames(data),
+                selectize = FALSE
             )
         ),
         ##  If the user chooses to provide time information manually,
@@ -106,7 +107,8 @@ ts.sidebarPanel = function() {
                     label = "Series Variables: ",
                     choices =  rev(colnames(data)),
                     selected = rev(colnames(data))[1],
-                    multiple = TRUE),
+                    multiple = TRUE,
+                    selectize = FALSE),
         helpText("(Remove variables with the",
                  strong('Delete'),
                  "key)"),
