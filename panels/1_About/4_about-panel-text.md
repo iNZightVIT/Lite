@@ -13,7 +13,7 @@ You can import your own data set or explore one of the many example data sets; E
 
 <br>
 
-There is help is available within most modules. Just look for the green "help" button, usually located in the bottom left hand corner of the screen. If you don't see one for a particular module, please let us know by clicking 'Contact Us' at the bottom of this page or by clicking on the 'Help' tab.
+There is help available within most modules. Just look for the green "help" button, usually located in the bottom left hand corner of the screen. If you don't see one for a particular module, please let us know by clicking 'Contact Us' at the bottom of this page or by clicking on the 'Help' tab.
 
 <br>
 
