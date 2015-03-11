@@ -1,5 +1,3 @@
-*Last Updated: March 10, 2015*
-
 #### Introduction
 In statistics, one often wishes to gain insight from data gathered over a period of time. *Time series* refer to data collected sequentially over time. Time series arise in a wide variety of fields, including:
 
@@ -44,3 +42,6 @@ This panel consists of a collection of tabs that display statistical output, eit
 6. **Summary** displays a statistical summary (typically a confidence interval) of the chosen variable.
 
 If you find any errors / typos or have any suggestions, please e-mail them to Chris Park (<cpar137@aucklanduni.ac.nz>).
+
+*Last Updated: March 10, 2015*
+

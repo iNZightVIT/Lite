@@ -1,5 +1,3 @@
-*Last Updated: March 10, 2015*
-
 #### Introduction
 The *visualize* module gives a basic plot of the variables chosen in the input panel (Panel 1 below). iNZight Lite automatically displays a plot tailored to the type of variable selected. For example, if you select two numeric variables (e.g. weight and height), it will display a scatterplot. On the other hand, if you select a numeric variable and a categorical variable (e.g. weight and nationality), it will display multiple box plots, depending on the number of categories in the categorial variable.
 
@@ -30,3 +28,5 @@ This panel consists of a collection of tabs that display statistical output, eit
 3. **Inference** displays inferential information of the variable(s) chosen. This will typically be a 95% confidence interval as well as a chi-square test for equal probabilities for the variable(s).
 
 If you find any errors / typos or have any suggestions, please e-mail them to Chris Park (<cpar137@aucklanduni.ac.nz>).
+
+*Last Updated: March 10, 2015*
