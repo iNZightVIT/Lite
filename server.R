@@ -3,7 +3,7 @@
 ###-------------------------------------###
 ###
 ###  Date Created   :   January 10, 2015
-###  Last Modified  :   February 25, 2015 
+###  Last Modified  :   March 13, 2015
 ###
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
@@ -248,19 +248,6 @@ shinyServer(function(input, output, session) {
       input$selector
       input$remove_set
       isolate({
-#           if(!is.null(data.name) && data.name==input$Importedremove) {
-#               data.name = ""
-#               data = NULL;
-#           }
-#           files =
-#               list.files(path = "data/Imported",
-#                          pattern = input$Importedremove,
-#                          full.names = TRUE)
-#           for(f in files){
-#               if (file.exists(f)) {
-#                   unlink(f)
-#               }
-#           }
         remove.data.panel()
       })
     })
@@ -276,111 +263,56 @@ shinyServer(function(input, output, session) {
              columns.defaultContent = "NA", scrollX = TRUE))
 
     ##  Modify data -> transform columns (Perform column transformations)
+    
+    transform.temp.table = reactive({
+      input$select.columns
+      input$select.transform
+      isolate({
+        transform.tempTable(input$select.transform,input$select.columns)
+      })
+    })
+    
+    perform.transform = reactive({
+#       input$select.columns
+#       input$select.transform
+      isolate({
+        transform.perform(input$select.transform,input$select.columns)
+      })
+    })
+    
+    observe({
+      input$transform
+      isolate({
+        if(!is.null(input$transform)&&input$transform>0){
+          data <<- perform.transform()
+          updateSelectInput(session, inputId="select.columns", 
+                            choices=colnames(data), selected=input$select.columns)
+          dataHasChanged <<- T
+        }
+      })
+    })
+    
     output$table_part <- renderDataTable({
-        temp = NULL
-        temp2  = as.data.frame(data[, input$select.columns])
-        colnames(temp2) = colnames(data)[which(colnames(data)%in%input$select.columns)]
-        if (!is.null(temp2) && !is.null(input$select.columns) && input$select.transform%in%"log"){
-            temp = as.data.frame(cbind(temp2,log.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"add"){
-            temp = as.data.frame(cbind(temp2,add.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"subtract"){
-            temp = as.data.frame(cbind(temp2,subtract.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"multiply"){
-            temp = as.data.frame(cbind(temp2,multiply.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"divide"){
-            temp = as.data.frame(cbind(temp2,divide.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"root"){
-            temp = as.data.frame(cbind(temp2,root.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"square"){
-            temp = as.data.frame(cbind(temp2,square.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"abs"){
-            temp = as.data.frame(cbind(temp2,abs.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"center"){
-            temp = as.data.frame(cbind(temp2,center.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"standardize"){
-            temp = as.data.frame(cbind(temp2,standardize.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"median split"){
-            temp = as.data.frame(cbind(temp2,median.split.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"reverse-coding"){
-            temp = as.data.frame(cbind(temp2,reverse.coding.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"copy"){
-            temp = as.data.frame(cbind(temp2,copy.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"change sign"){
-            temp = as.data.frame(cbind(temp2,change.sign.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%"change factor"){
-            temp = as.data.frame(cbind(temp2,change.factor.transform(data[,input$select.columns],input$select.columns)))
-        } else if (!is.null(input$select.columns)&input$select.transform%in%""){
-            temp = data.frame(data[,input$select.columns])
-        }
-        if (!is.null(temp)&&ncol(temp)==1) {
-            colnames(temp) = input$select.columns
-            temp = cbind(row=as.character(1:nrow(temp)),temp)
-        }else if(!is.null(temp)){
-            temp = cbind(row=as.character(1:nrow(temp)),temp)
-        }
-        temp
+      transform.temp.table()
     },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
-
+    
     output$status = renderText({
         input$transform
+        input$select.columns
+        input$select.transform
         isolate({
-            if(!is.null(input$select.columns)&!input$select.transform%in%""){
-                tryCatch({
-                    if(input$select.transform%in%"log"){
-                        temp = as.data.frame(log.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"add"){
-                        temp = as.data.frame(add.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"subtract"){
-                        temp = as.data.frame(subtract.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"multiply"){
-                        temp = as.data.frame(multiply.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"divide"){
-                        temp = as.data.frame(divide.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"root"){
-                        temp = as.data.frame(root.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"square"){
-                        temp = as.data.frame(square.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"abs"){
-                        temp = as.data.frame(abs.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"center"){
-                        temp = as.data.frame(center.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"standardize"){
-                        temp = as.data.frame(standardize.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"median split"){
-                        temp = as.data.frame(median.split.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"reverse-code"){
-                        temp = as.data.frame(reverse.code.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"copy"){
-                        temp = as.data.frame(copy.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"change sign"){
-                        temp = as.data.frame(change.sign.transform(data[,input$select.columns]))
-                    }else if(input$select.transform%in%"change factor"){
-                        temp = as.data.frame(change.factor.transform(data[,input$select.columns]))
-                    }else{
-                        temp=NULL
-                    }
-                    if (!is.null(temp)&&dim(temp)[1] > 0 & dim(temp)[2]>0){
-                        data <<- as.data.frame(cbind(data,temp))
-                        transform.text <<- paste("The transformation (",input$select.transform, ")of selected data was successful.")
-                        paste("The transformation (",input$select.transform, ")of selected data was successful.")
-                    } else {
-                        transform.text <<- ""
-                        ""
-                    }
-                },
-                         error = function(cond) print(cond),
-                         warning = function(cond) print(cond),
-                         finally={})
-            }else{
-                transform.text
-            }
+          transform.text = ""
+          if(dataHasChanged){
+            transform.text = "The transformation  of the columns was successful."
+          }
+          dataHasChanged <<- F
+          transform.text
         })
     })
 
     output$transform.columns =renderUI({
         input$selector
-        input$transform
+#         input$transform
         transform.data.panel()
     })
 
@@ -534,42 +466,44 @@ shinyServer(function(input, output, session) {
     observe({
         input$add_column
         isolate({
-            temp=data
-            if(!is.null(data)&&!is.null(input$new.column)&&input$add_column>0){
-                colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
-                if(length(colu)==1){
-                    colu = strsplit(input$new.column,",",fixed=T)[[1]]
-                }
-                if(length(colu)<nrow(data)){
-                    colu = rep(colu,length.out=nrow(data))
-                }
-                if(length(colu)>nrow(data)){
-                    colu = colu[1:nrow(data)]
-                }
-                NAs = which(is.na(colu))
-                if(length(NAs)>0&&length(colu[-NAs])>0){
-                    temp.colu = as.numeric(colu[-NAs])
-                    if(!any(is.na(temp.colu))){
-                        colu = as.numeric(colu)
-                    }
-                }
-                count = 1
-                name = "add.column1"
-                while(name%in%colnames(data)){
-                    count =  count +1
-                    name = paste0("add.column",count)
-                }
-                temp = cbind(data,temp.column=colu)
-                colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
-                temp
-            }
-            data <<- temp
+          temp=data
+          if(!is.null(data)&&!is.null(input$new.column)&&input$add_column>0){
+              colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
+              if(length(colu)==1){
+                  colu = strsplit(input$new.column,",",fixed=T)[[1]]
+              }
+              if(length(colu)<nrow(data)){
+                  colu = rep(colu,length.out=nrow(data))
+              }
+              if(length(colu)>nrow(data)){
+                  colu = colu[1:nrow(data)]
+              }
+              NAs = which(is.na(colu))
+              if(length(NAs)>0&&length(colu[-NAs])>0){
+                  temp.colu = as.numeric(colu[-NAs])
+                  if(!any(is.na(temp.colu))){
+                      colu = as.numeric(colu)
+                  }
+              }
+              count = 1
+              name = "add.column1"
+              while(name%in%colnames(data)){
+                  count =  count +1
+                  name = paste0("add.column",count)
+              }
+              temp = cbind(data,temp.column=colu)
+              colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
+              temp
+          }
+          data <<- temp
+          updateTextInput(session, inputId="new.column", value="")
         })
     })
 
     output$add.table = renderDataTable({
         input$selector
         input$new.column
+        input$add_column
         isolate({
           temp=data
           if(!is.null(data)&&!is.null(input$new.column)){
@@ -629,6 +563,7 @@ shinyServer(function(input, output, session) {
 
     output$rem.col.table = renderDataTable({
         input$selector
+        input$rem_column
         isolate({
           temp = data
           if(!is.null(data)&&!is.null(input$select.remove.column)){
@@ -677,15 +612,61 @@ shinyServer(function(input, output, session) {
     })
 
     ##  Quick Explore -> Single column plot : Generate a plot of a single column in the data
+    
+    observe({
+      input$single.backward
+      isolate({
+        if(!is.null(input$single.backward)&&input$single.backward>0){
+          index=1
+          if(which(colnames(data)%in%input$select.column.plot)==1){
+            index=ncol(data)
+          }else{
+            index = which(colnames(data)%in%input$select.column.plot)-1
+          }
+          updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
+          updateSliderInput(session,inputId="single.play",value=index)
+        }
+      })
+    })
+
+    observe({
+      input$single.forward
+      isolate({
+        if(!is.null(input$single.forward)&&input$single.forward>0){
+          index=1
+          if(which(colnames(data)%in%input$select.column.plot)==ncol(data)){
+            index=1
+          }else{
+            index = which(colnames(data)%in%input$select.column.plot)+1
+          }
+          updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
+          updateSliderInput(session,inputId="single.play",value=index)
+        }
+      })
+    })
+
+    observe({
+      input$single.play
+      isolate({
+        if(!is.null(input$single.play)){
+          updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[input$single.play])
+        }
+      })
+    })
 
     output$column.plot = renderPlot({
+      input$select.column.plot
+      isolate({
         if(!is.null(data)&&!is.null(input$select.column.plot)){
-            temp = data[,which(colnames(data)%in%input$select.column.plot)]
-            if(is.character(temp)){
-                temp = as.factor(temp)
-            }
-            iNZightPlot(temp,xlab=input$select.column.plot,main=data.name)
+          index=which(colnames(data)%in%input$select.column.plot)
+          updateSliderInput(session,inputId="single.play",value=index)
+          temp = data[,which(colnames(data)%in%input$select.column.plot)]
+          if(is.character(temp)){
+              temp = as.factor(temp)
+          }
+          iNZightPlot(temp,xlab=input$select.column.plot,main=data.name)
         }
+      })
     })
 
     output$single.column.plot = renderUI({
