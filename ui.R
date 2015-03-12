@@ -11,8 +11,28 @@ shinyUI(
                 tags$style(
                     type = "text/css",
                     ".nav {font-size:16px}
-                    .action-button:hover {background-color: #00BAFA;}
-                    .action-button {background-color: #00A7E0}")),
+                    .btn.btn-default.action-button.shiny-bound-input:hover {
+                       background-color: #00BAFA;
+                       border-radius: 14px;
+                       border: solid #1f628d 1px;
+                       padding: 9px;}
+                    .btn.btn-default.action-button.shiny-bound-input {
+                       background-color: #00A7E0;
+                       border-radius: 14px;
+                       border: solid #1f628d 1px;
+                       padding: 9px;}
+                    .player {
+                       border: 1px solid;
+                       border-radius: 10px;
+                       margin-top: 10px;
+                       padding-top: 5px;
+                       padding-bottom: 5px;
+                       padding-left: 5px;
+                       padding-right: 5px;
+                       background-color: #A3E7FF;}
+                    .seper {
+                       background-color: #A3E7FF;
+                       padding-top: 25px}")),
         ## This code fixes the DataTables warning coming up from time to time.
         tags$head(tags$script("window.alert = (function() {
           var nativeAlert = window.alert;
@@ -60,8 +80,8 @@ shinyUI(
                                 uiOutput('transform.columns')),
                        tabPanel("Reorder Levels",
                                 uiOutput('reorder.levels')),
-                       tabPanel("Compare dates",
-                                uiOutput("compare.dates")),
+#                        tabPanel("Compare dates",
+#                                 uiOutput("compare.dates")),
                        tabPanel("Add columns",
                                 uiOutput("add.columns")),
                        tabPanel("Remove columns",
