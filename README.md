@@ -36,6 +36,7 @@ To do:
 - [Quick Explore] Merge into 1 tab.
 - [Visualize]  Add inferential markups once Tom finishes updating iNZightPlots().
 - [Advanced] Nest QE and TS under "Advanced".
+- [General] Find better place for "help" button.
 
 Directories:
 ------------
