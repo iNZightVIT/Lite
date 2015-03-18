@@ -39,7 +39,12 @@ shinyUI(
                        background-color: #A3E7FF;}
                     .seper {
                        background-color: #A3E7FF;
-                       padding-top: 25px}")),
+                       padding-top: 25px}
+                    .form-control.shiny-bound-input {
+                      background-color: #A3E7FF;
+                      border: 1px solid;
+                      border-radius: 10px;
+                      }")),
         ## This code fixes the DataTables warning coming up from time to time.
         tags$head(tags$script("window.alert = (function() {
           var nativeAlert = window.alert;
