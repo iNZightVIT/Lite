@@ -1,2 +1,4 @@
 <h5>Load data</h5>
-To load your own data press the browse button. A new window will appear which lets you select a file. After that is done the data will be presented to you as a table in the middle of the screen. This table is now set as the data set in use in iNZight online. Therfore it is possible to leave now. In case you switch to a different data set in the "Switch Data" panel the imported set is lost and needs to be reimported. If you do not want that you can store the file in iNZight online by pressing the "Import File" button. Now your data is available in the "Switch Data" panel under Imported for reselection. This data set is deleted after 24 hours. This is because iNZight online is not designed to store your data.     
+To load your own data press the "Choose File" button. A new window will appear which lets you select a file. After that is done the data will be presented to you as a table in the middle of the screen. If the file to import is located as a web resource at a URL, paste the URL in the blue text field. <br><br>
+
+In any case, press the "IMPORT FILE" button to finalize your choice.    
