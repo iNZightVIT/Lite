@@ -57,10 +57,9 @@ vis.sidebarPanel <- function() {
                      selected = 1),
         hr(),
         actionButton(inputId = "reset.graphics",
-                     label = "Reset All")
+                     label = "Reset All"),
         visualize.help()
     )
-                                )
 }
 
 
