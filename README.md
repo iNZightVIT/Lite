@@ -1,7 +1,7 @@
 iNZight *Lite* version 0.9.7
 ============================
 
-*Last Updated: 13/03/15*
+*Last Updated: 18/03/15*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -19,6 +19,7 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Data Import] URL support added (CK).
 - [Quick Explore] Single column plot update - player feature (CK).
 - [Time Series] Added shiny validation messages and modified the input panel so that only "Provide Time Information" is shown if the data set has no time variable defined in a format recognized by iNZightTS() (CP).
 - [Visualize] Fixed the "Reset All" button (CP).
