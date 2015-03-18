@@ -1,3 +1,26 @@
+#' Creates a widget for moving through plots quickly.
+#'
+#' @param ID.forward inputID for the forward button in the player widget
+#' @param ID.player inputID for the slider in the player widget
+#' @param ID.backward inputID for the backward button in the player widget
+#'
+#' @author Christoph Knapp
+get.player = function(ID.forward,ID.player,ID.backward,maxi){
+    fixedRow(column(width=8,offset=2,
+                div(class='player',
+                    fixedRow(
+                        column(width=1,offset=1,
+                        div(class="seper",
+                        actionButton(inputId=ID.backward,
+                                    label="",icon=icon("backward")))),
+                        column(width=6,offset=1,
+                            sliderInput(inputId=ID.player,label="",min=1,max=maxi,step=1,
+                                        animate=animationOptions(interval=500,loop=T,play=T),
+                                        width="100%",value=1,ticks=F)),
+                        column(width=1,offset=1,
+                            div(class="seper",actionButton(inputId=ID.forward,label="",icon=icon("forward"))))
+            ))))
+}
 
 change.factor.transform = function(temp,columns){
     temp = as.data.frame(temp)
@@ -549,7 +572,7 @@ get.quantiles = function(subx){
 vars = c("data.dir","Version")
 data.dir = "data"
 lite.version = "iNZight Lite Version 0.9.7"
-lite.update = "Last Updated: 13/03/15"
+lite.update = "Last Updated: 18/03/15"
 first.reorder = TRUE
 #transform.text = ""
 rawdata = load.data()
@@ -560,5 +583,6 @@ temp.data = ""
 loaded = FALSE
 get.vars()
 single.play = F
+button = F
 
 
