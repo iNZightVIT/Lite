@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   February 25, 2015
+###  Last Modified  :   March 18, 2015
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -114,6 +114,18 @@ determine.class = function(input) {
 }
 
 ##  Input Handling
+#' Tests whether the input of a variable is valid.
+#'
+#' Returns NULL if the input is not valid or a list of two elements.
+#' The elements are:
+#'
+#' input.out : return value of vis.data()[,input]
+#' factor.levels : the number of levels or NULL if not a factor.
+#'
+#' @param input A shiny input variable as input$...
+#' @param subs Whether (TRUE) the input variable is converted to
+#' factor or (FALSE) not.
+#' 
 handle.input = function(input, subs = FALSE) {
     if (is.null(input)) {
         return()
@@ -240,6 +252,8 @@ observe({
 ##  Subset level (Slider) for variable 1.
 output$subs1_conditional = renderUI({
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    if (is.null(choices1))
+        choices1 = 1
     sliderInput(inputId = "sub1_level",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = 0, step = 1,
@@ -249,6 +263,8 @@ output$subs1_conditional = renderUI({
 
 output$subs1_conditional_mini = renderUI({
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    if (is.null(choices1))
+        choices1 = 1
     sliderInput(inputId = "sub1_level",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = 0, step = 1,
@@ -311,7 +327,11 @@ observe({
 
 ##  Subset level (Slider) for variable 2.
 output$subs2_conditional = renderUI({
-    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
+    if (is.null(choices2))
+        choices2 = 2
+    else
+        choices2 = choices2 + 1
     sliderInput(inputId = "sub2_level",
                 label = paste0("Subset '", input$subs2, "':"),
                 min = 0, max = choices2, value = 0, step = 1,
@@ -320,7 +340,11 @@ output$subs2_conditional = renderUI({
 
 ##  Subset level (Slider) for variable 2.
 output$subs2_conditional_mini = renderUI({
-    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
+    if (is.null(choices2))
+        choices2 = 2
+    else
+        choices2 = choices2 + 1
     sliderInput(inputId = "sub2_level",
                 label = paste0("Subset '", input$subs2, "':"),
                 min = 0, max = choices2, value = 0, step = 1,
