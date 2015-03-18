@@ -1,3 +1,27 @@
+###---------------------------------------------###
+###  User Interface for the "Visualize" Module  ###
+###---------------------------------------------###
+###
+###  Date Created  : January 25, 2015.
+###  Last Modified : March 18, 2015.
+###
+###  The UI is divided into two panels:
+###
+###     1.  Sidebar Panel : contains all the user inputs.
+###     2.  Main Panel    : contains all the outputs.
+###
+###  Please consult the comments before editing any code.
+###
+###  If you have any questions and/or suggestions, please drop me an
+###  e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
+###
+###  * Note: Thie file is to be sourced locally within "server.R" *
+
+###-----------------###
+###  Sidebar Panel  ###
+###-----------------###
+###
+###  First, we set up the "help" functionality for this module.
 visualize.help = function() {
     help.display("Visualize Module",
                  "Visualize",
