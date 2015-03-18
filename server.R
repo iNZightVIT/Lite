@@ -807,4 +807,4 @@ shinyServer(function(input, output, session) {
         input$selector
         help.panel.ui()
     })
-}
+})
