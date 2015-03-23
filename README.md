@@ -1,7 +1,7 @@
 iNZight *Lite* version 0.9.7
 ============================
 
-*Last Updated: 18/03/15*
+*Last Updated: 22/03/15*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -15,10 +15,10 @@ Underway:
 - [Wishlist] Adjust the size of the "Help" button so that it matches the size of the actionButton.	
 - [Manipulate] Go through the data extraction / manipulation options.
 - [Time Series] Fix "Provide Time Information".
-- [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [General] A Markdown 'troubleshoot' document appears when no data set is loaded (CP).
 - [Data Import] URL support added (CK).
 - [Quick Explore] Single column plot update - player feature (CK).
 - [Time Series] Added shiny validation messages and modified the input panel so that only "Provide Time Information" is shown if the data set has no time variable defined in a format recognized by iNZightTS() (CP).
@@ -37,6 +37,7 @@ To do:
 - [Visualize]  Add inferential markups once Tom finishes updating iNZightPlots().
 - [Advanced] Nest QE and TS under "Advanced".
 - [General] Find better place for "help" button.
+- [Time Series] Alter "iNZightTS" so that it can handle datasets with the "DATE" columns in column 2+.
 
 Directories:
 ------------

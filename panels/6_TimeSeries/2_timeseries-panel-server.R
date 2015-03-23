@@ -7,8 +7,6 @@
 ###
 ###  Please consult the comments before editing any code.
 ###
-###  If you have any questions and/or suggestions, drop me
-###  an e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
 ###
 ###  * Note: This is to be sourced within "server.R" *
 

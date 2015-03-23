@@ -1,5 +1,5 @@
 <h4> Introduction </h4>
-The *visualize* module gives a basic plot of the variables chosen in the input panel (Panel 1 below). iNZight Lite automatically displays a plot tailored to the type of variable selected. For example, if you select two numeric variables (e.g. weight and height), it will display a scatterplot. On the other hand, if you select a numeric variable and a categorical variable (e.g. weight and nationality), it will display multiple box plots, depending on the number of categories in the categorial variable.
+The *visualize* module gives a basic plot of the variables chosen in the input panel (See below). iNZight Lite automatically displays a plot tailored to the type of variable selected. For example, if you select two numeric variables (e.g. weight and height), it will display a scatterplot. On the other hand, if you select a numeric variable and a categorical variable (e.g. weight and nationality), it will display multiple box plots, depending on the number of categories in the categorial variable.
 
 The module is divided up into two distinct vertical *panels*:
 

@@ -7,6 +7,4 @@
 ###
 ###  Please consult the comments before editing any code.
 ###
-###  If you have any questions and/or suggestions, drop me an e-mail:
-###  DEVELOPER NAME <DEVELOPER E-MAIL ADDRESS>
 

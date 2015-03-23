@@ -12,9 +12,6 @@
 ###
 ###  Please consult the comments before editing any code.
 ###
-###  If you have any questions and/or suggestions, drop me
-###  an e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
-###
 ###  * Note: This is to be sourced within "server.R" *
 
 ###-----------------###
@@ -314,20 +311,19 @@ ts.mainPanel = function() {
 ###
 ###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to
 ###  complete the UI for the Time Series module.
+
 timeseries.panel.ui = function() {
-    fluidPage(
-        ##  Customize the validation output.
-        tags$head(
-            tags$style(HTML("
-                .shiny-output-error-validation {
-                    color: green;
-                    style: italic;
-                }
-            "))
-        ),
-        ##  Add panels.
-        column(2, ts.sidebarPanel()),
-        column(10, ts.mainPanel())
+    fluidPage(  
+        if (is.null(data)) {
+            fluidRow(
+                includeMarkdown(
+                    "panels/6_TimeSeries/4_timeseries-panel-null.md")
+            )
+        } else {
+            fluidRow(
+                column(2, ts.sidebarPanel()),
+                column(10, ts.mainPanel())
+            )
+        }
     )
 }
-

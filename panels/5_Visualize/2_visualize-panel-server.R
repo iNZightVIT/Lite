@@ -7,9 +7,6 @@
 ###
 ###  Please consult the comments before editing any code.
 ###
-###  If you have any questions and/or suggestions, drop me an e-mail:
-###  Chris Park <cpar137@aucklanduni.ac.nz>
-###
 ###  * Note: This file is to be sourced locally within "server.R" * 
 
 ###  And on the first day of February, God said "Let there be data":
