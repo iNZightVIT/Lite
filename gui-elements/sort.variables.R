@@ -1,0 +1,42 @@
+num.select.panel = function(num.vars){
+  if(!is.convertable.numeric(num.vars)){
+    num.vars = 1
+  }
+  if(as.numeric(num.vars)>ncol(data)){
+    num.vars=ncol(data)
+  }
+  lapply(1:num.vars,function(index){
+    fixedRow(
+      column(8,selectInput(inputId=paste0("sort",index),
+                            choices=c("",colnames(data)),
+                            selected=1,
+                            label=paste("Variable",index))),
+      column(3,checkboxInput(inputId=paste0("increasing",index),
+                             label="Increasing"))
+    )
+  })
+}
+
+sort.variables.sidebar =  function(){
+  c(list(textInput(inputId="num_columns_sort",label="How many variables to sort on?",value="1")),
+    list(uiOutput("num.select.panel")),
+    list(actionButton("sort_vars","Sort variables"),br(),br(),
+         help.display('Sort data by variables','sort_vars_help',"gui-elements/notes/sort.variables.md"),
+         br()))
+}
+
+sort.variables =function(){
+  if(is.null(data)){
+    sidebarLayout(
+      sidebarPanel(help.display('Sort data by variables','sort_vars_help',"gui-elements/notes/sort.variables.md")),
+      mainPanel(
+        h1("Please select or import a data set.")
+      )
+    )
+  }else{
+    sidebarLayout(
+      sidebarPanel(sort.variables.sidebar()),
+      mainPanel(dataTableOutput("sort.table"))
+    )
+  }
+}

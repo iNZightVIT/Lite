@@ -23,7 +23,7 @@ Of all numeric columns from the selected column the absolute value is returned. 
 <h4>Center Transformation</h4>
 All columns (character, factor and numeric) are centered to mean 0. Such that from column X the mean of X is subtracted from X. Character and factor values are converted to numeric such that whith the order of the factors values from 1 to the nuber of unique factors are asigned to each value in the column.
 <h4>Standardize Transformation</h4>
-In a first step exactly tha same method is performed as described in "Center Transformation" above. As an additional step the result from the first step is divided by the standard deviation of the column.
+In a first step exactly the same method is performed as described in "Center Transformation" above. As an additional step the result from the first step is divided by the standard deviation of the column.
 <h4>Median Split Transformation</h4>
 All numeric selected columns are converted into a binary variable such that all values above the median are classified as "high" and all values below the median are classified as "low".
 <h4>Reverse-coding Transformation</h4>

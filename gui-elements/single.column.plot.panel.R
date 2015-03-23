@@ -1,3 +1,4 @@
+
 get.single.col.sidebar <- function(){
     choices1 = ""
     if (!is.null(data) && !is.null(ncol(data)) && ncol(data) > 0){
@@ -17,6 +18,19 @@ get.single.col.sidebar <- function(){
 }
 
 single.column.plot.panel =function(){
+  if(is.null(data)){
+    sidebarLayout(
+      sidebarPanel(get.single.col.sidebar()),
+      mainPanel(h1("Please select or import a data set."))
+    )
+  }else{
+    sidebarLayout(
+      sidebarPanel(get.single.col.sidebar()),
+      mainPanel(plotOutput("column.plot"),
+                
+      )
+    )
+  }
   if(is.null(data)){
     sidebarLayout(
         sidebarPanel(get.single.col.sidebar()),

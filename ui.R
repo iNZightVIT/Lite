@@ -1,18 +1,15 @@
-###-------------------------------------###
+###-----------------------###
 ###  UI for iNZight Lite  ###
-###-------------------------------------###
+###-----------------------###
 ###
 ###  Date Created   :   January 13, 2015
-###  Last Modified  :   March 18, 2015
+###  Last Modified  :   March 23, 2015
 ###
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
-###
-###  If you have any questions and/or suggestions, please drop me an
-###  e-mail: Chris Park <cpar137@aucklanduni.ac.nz>
-
 shinyUI(
     fluidPage(
+      #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet-pure-css.css")),
         ##  Set Tabpanel font to be size 16.
         tags$head(
                 tags$style(
@@ -32,19 +29,24 @@ shinyUI(
                        border: 1px solid;
                        border-radius: 10px;
                        margin-top: 10px;
-                       padding-top: 5px;
-                       padding-bottom: 5px;
-                       padding-left: 5px;
-                       padding-right: 5px;
                        background-color: #A3E7FF;}
                     .seper {
                        background-color: #A3E7FF;
                        padding-top: 25px}
-                    .form-control.shiny-bound-input {
-                      background-color: #A3E7FF;
-                      border: 1px solid;
-                      border-radius: 10px;
-                      }")),
+                    #numeric_input2,
+                    #numeric_input3,
+                    #URLtext,
+                    #provide_xlab,
+                    #provide_ylab,
+                    #provide_startdate,
+                    #provide_season,
+                    #provide_frequency,
+                    #numeric_input1 {
+                       background-color: #A3E7FF;
+                       border: 1px solid;
+                       border-radius: 10px;
+                    }
+                    ")),
         ## This code fixes the DataTables warning coming up from time to time.
         tags$head(tags$script("window.alert = (function() {
           var nativeAlert = window.alert;
@@ -76,18 +78,27 @@ shinyUI(
             tabPanel("About",
                      uiOutput('about.panel')),
             ##  "Data" tab.
-            navbarMenu("Datasets",id = "data",
+            navbarMenu("File",id = "data",
                        tabPanel("Import Dataset",
                                 uiOutput('load.data.panel')),
+                       tabPanel("Export Dataset",
+                                uiOutput('save.data.panel')),
                        tabPanel("Display Dataset",
                                 uiOutput('current.data')),
                        tabPanel("Remove Dataset",
                                 uiOutput("remove.data.panel")),
                        tabPanel("Dataset Examples",
                                 uiOutput('switch.data.panel'))),
-
+            ## Row operations tab
+            navbarMenu("Row operations",id="operations_row",
+                       tabPanel("Filter Dataset",
+                                uiOutput('filter.dataset')),
+                       tabPanel("Sort data by variables",
+                                uiOutput('sort.variables')),
+                       tabPanel("Restore data",
+                                uiOutput('restore.data'))),
             ##  "Modify Data" tab.
-            navbarMenu("Manipulate",
+            navbarMenu("Manipulate variables",
                        tabPanel("Transform columns",
                                 uiOutput('transform.columns')),
                        tabPanel("Reorder Levels",
@@ -100,24 +111,21 @@ shinyUI(
                                 uiOutput("remove.columns"))),
 
             ##  "Quick Explore" tab.
-            navbarMenu("Quick Explore",
-                       tabPanel("Data Summary",
-                                uiOutput("quick.summary")),
-                       tabPanel("Single column plot",
-                                uiOutput("single.column.plot")),
-                       tabPanel("Column Pair plot",
-                                uiOutput("column.pair.plot")),
-                       tabPanel("Compare pairs",
-                                uiOutput("matrix.plot"))),
-
-            ##  "Explore data" tab.
-            tabPanel("Visualize",
-                     uiOutput("visualize.panel")),
-
-            ## "Advanced" tab, incl. time series.
-            ## navbarMenu("Advanced",
-            tabPanel("Time Series",
-                     uiOutput("timeseries.panel")),
+            navbarMenu("Advanced",
+                       tabPanel("Visualize",
+                                uiOutput("visualize.panel")),
+                       tabPanel("Time Series",
+                                uiOutput("timeseries.panel"))),
+            navbarMenu("Quick explore",
+                      tabPanel("Data Summary",
+                               uiOutput("quick.summary")),
+                      tabPanel("Single column plot",
+                               uiOutput("single.column.plot")),
+                      tabPanel("Column Pair plot",
+                               uiOutput("column.pair.plot")),
+                      tabPanel("Compare pairs",
+                               uiOutput("matrix.plot"))
+                      ),      
             ##  "Help" tab.
             tabPanel("Help",
                      uiOutput("help.panel"))

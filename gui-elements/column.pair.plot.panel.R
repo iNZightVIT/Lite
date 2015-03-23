@@ -24,7 +24,9 @@ column.pair.plot.panel =function(){
   }else{
     sidebarLayout(
       sidebarPanel(get.pair.plot.sidebar()),
-      mainPanel(plotOutput("plot.column.pair"))#,width="100%",height="100%"))
+      mainPanel(plotOutput("plot.column.pair"),
+                get.player(ID.forward="pair.forward",ID.player="pair.player",ID.backward="pair.backward",maxi=ncol(data)*(ncol(data)-1)))
     )
   }
 }
+

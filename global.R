@@ -1,3 +1,186 @@
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' Sorts the df data frame after the input variables
+#' 
+#' Warnings will be given if the colnames in vars will not 
+#' match the column in df. This is a wrapper function for 
+#' sort. See \code{?sort} for more information.
+#' 
+#' @param vars The column names in the order the df data.frame
+#' should be sorted.
+#' @param sort.type A logical vector of the same length as 
+#' vars. If the element in the vector is TRUE the corresponding 
+#' element in vars will be sorted in increasing order.
+#' @ param The data.fram or matrix to sort.
+#' 
+#' @return An ordered data.frame
+#' 
+#' @author Christoph Knapp  
+sort.data = function(vars,sort.type,df){
+  if(any(!vars%in%colnames(df))){
+    warning("sort.data : Not all variables in vars could be 
+            matched to column names in df.")
+  }
+  if(length(vars)!=length(sort.type)){
+    stop("sort.data : vas and sort.type have different length")
+  }
+  z = lapply(1:length(vars),function(index,v,t,d){
+    vec = d[,which(colnames(d)%in%v[index])]
+    if(is.factor(vec)|is.character(vec)){
+      vec = xtfrm(as.character(vec))
+    }
+    if(!t[index]){
+      vec = -vec
+    }
+    vec
+  },vars,sort.type,df)
+  df[order.overwrite(z),]
+}
+
+#' version of the order function which lets you pass in a list of 
+#' vectors to order instead of the ... argument. It is shortened 
+#' and might be therefore not as stable as the original order 
+#' function.
+order.overwrite = function (z, na.last = TRUE, decreasing = FALSE) {
+  if (any(diff(l.z <- vapply(z, length, 1L)) != 0L)) 
+    stop("argument lengths differ")
+  ans <- vapply(z, is.na, rep.int(NA, l.z[1L]))
+  ok <- if (is.matrix(ans)) 
+    !apply(ans, 1, any)
+  else !any(ans)
+  if (all(!ok)) 
+    return(integer())
+  z[[1L]][!ok] <- NA
+  ans <- do.call("order", c(z, decreasing = decreasing))
+  keep <- seq_along(ok)[ok]
+  ans[ans %in% keep]
+}
+
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' Takes a sample of rows from a data.frame
+#' 
+#' This function samples rows from a data.frame with or 
+#' without replacment. 
+#' 
+#' @param df A data.frame the sample is taken from.
+#' @param sampleSize The size of the samples to be taken.
+#' @param numSample The number of samples to be taken.
+#' @param bootstrap TRUE if samples with replacement is 
+#' desired, FALSE if no replacement.
+#' 
+#' @return A data.frame with the samples merged together. 
+#' An additional column is added where the sampling 
+#' iteration is stored. 
+#' 
+#' @author Christoph Knapp
+#' 
+#' @export
+sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
+  if(sampleSize>nrow(df)){
+    stop(paste0("This sample is to large. Only ",nrow(df)," samples available."))
+  }
+  if(sampleSize*numSample>nrow(df)&!bootstrap){
+    stop(paste0("Not enough rows in data to sample that many times."))
+  }
+  colname = "num.sample"
+  if("num.sample"%in%colnames(df)){
+    count=1
+    while(paste0("num.sample",count)%in%colnames(df)){
+      count = count+1
+    }
+    colname = paste0("num.sample",count)
+  }
+  ret = NULL
+  if(bootstrap){
+    ret = do.call(rbind,lapply(1:numSample,function(index,d,size){
+      cbind(d[sample(1:nrow(d),size),],rep(index,size))
+    },df,sampleSize))
+  }else{
+    ret = do.call(rbind,lapply(1:numSample,function(index,d,size){
+      s = sample(1:nrow(d),size)
+      temp = cbind(d[s,],rep(index,size))
+      d <<- d[-s,]
+      temp
+    },df,sampleSize))
+  }
+  colnames(ret)[ncol(ret)] = colname
+  ret
+}
+
+#' Returns the names of all numeric columns in data 
+#' 
+#' @author Christoph Knapp
+get.numeric.column.names = function(){
+  colnames(data)[which(unlist(lapply(1:ncol(data),function(index,d){
+    is.numeric(as.data.frame(d)[,index])
+    },data)))]
+}
+
+#' Returns TRUE if x can be converted to a numeric 
+#' value, FALSE if not. 
+#' 
+#' @param x any oblect to be tested
+#' 
+#' @author Christoph Knapp
+is.convertable.numeric = function(x){
+  if(suppressWarnings(any(is.na(as.numeric(x))))){
+    F
+  }else{
+    T
+  }
+}
+
+#' Prints a summary of the currently selected data set.
+#' 
+#' @author Christoph Knapp
+data.summary = function(){  
+  if(!is.null(data)){
+    cat("Number of rows in data: ",nrow(data),"\n")
+    cat("Number of columns in data: ",ncol(data),"\n")
+    cat("\n")
+    for(col in 1:length(colnames(data))){
+      cat(colnames(data)[col],"\n")
+      print(summary(data[,col]))
+    }
+  }
+}
+
+
+#' Returns the column names of the currently selected data which
+#' can be converted into factors.
+#' 
+#' @author Christoph Knapp
+get.categorical.column.names = function(){
+  colnames(data)[which(unlist(lapply(1:ncol(data),function(index,d){
+    class(as.data.frame(d)[,index])%in%"factor"||class(as.data.frame(d)[,index])%in%"character"
+    },data)))]
+}
+
+#' Creates a widget for moving through plots quickly.
+#' 
+#' @param ID.forward inputID for the forward button in the player widget
+#' @param ID.player inputID for the slider in the player widget
+#' @param ID.backward inputID for the backward button in the player widget
+#' 
+#' @author Christoph Knapp
+get.player = function(ID.forward,ID.player,ID.backward,maxi){
+  fixedRow(column(width=8,offset=2,
+                  div(class='player',
+                      fixedRow(
+                        column(width=1,offset=1,
+                               div(class="seper",actionButton(inputId=ID.backward,label="",icon=icon("backward")))),
+                        column(width=6,offset=1,
+                               sliderInput(inputId=ID.player,label="",min=1,max=maxi,step=1,
+                                           animate=animationOptions(interval=500,loop=T,play=T),
+                                           width="100%",value=1,ticks=F)),
+                        column(width=1,offset=1,
+                               div(class="seper",actionButton(inputId=ID.forward,label="",icon=icon("forward"))))
+                      ))))
+}
 #' Creates a widget for moving through plots quickly.
 #'
 #' @param ID.forward inputID for the forward button in the player widget
@@ -571,7 +754,7 @@ get.quantiles = function(subx){
 
 vars = c("data.dir","Version")
 data.dir = "data"
-lite.version = "iNZight Lite Version 0.9.7"
+lite.version = "iNZight Lite Version 0.9.8"
 lite.update = "Last Updated: 23/03/15"
 first.reorder = TRUE
 #transform.text = ""
@@ -579,10 +762,10 @@ rawdata = load.data()
 dataHasChanged = F
 data.name = rawdata[[1]]
 data = rawdata[[2]]
+data.restore = rawdata[[2]]
 temp.data = ""
 loaded = FALSE
 get.vars()
 single.play = F
 button = F
-
 

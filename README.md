@@ -84,6 +84,7 @@ This directory contains the gui, server, help, and other functions for each modu
   + [File] 1_panelname-panel-gui.R
   + [File] 2_panelname-panel-server.R
   + [File] 3_panelname-panel-help.R
-  + [File] 4_panelname-panel-other.R
+  + [File] 4_panelname-panel-null.R
+  + [File] 5_panelname-panel-other.R
 
 
