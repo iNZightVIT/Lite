@@ -18,6 +18,7 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Row Operations] Row operations added (CK).
 - [General] A Markdown 'troubleshoot' document appears when no data set is loaded (CP).
 - [Data Import] URL support added (CK).
 - [Quick Explore] Single column plot update - player feature (CK).
