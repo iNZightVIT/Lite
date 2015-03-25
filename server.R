@@ -185,7 +185,8 @@ shinyServer(function(input, output, session) {
               dir.create("data/Imported", recursive = TRUE)
             }
             saveRDS(data,file = paste0("data/Imported/", data.name, ".RDS"))
-            unlink(input$files[1, "datapath"])
+            print(input$files[1, "datapath"])
+            #unlink(input$files[1, "datapath"])
           }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
             URL = input$URLtext
             name = strsplit(URL,"/")[[1]]
@@ -254,7 +255,7 @@ shinyServer(function(input, output, session) {
                              pattern = input$Importedremove,
                              full.names = TRUE)
           if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
-            unlink(input$files[1, "datapath"])
+            #unlink(input$files[1, "datapath"])
           }
           for(f in files){
             if (file.exists(f)) {
@@ -401,7 +402,6 @@ shinyServer(function(input, output, session) {
             }else if(input$select_operation1%in%"<="){
               indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]<=as.numeric(input$numeric_input1)))
             }else if(input$select_operation1%in%">="){
-              print("==")
               indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]>=as.numeric(input$numeric_input1)))
             }else if(input$select_operation1%in%"=="){
               indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]==as.numeric(input$numeric_input1)))
@@ -491,7 +491,7 @@ shinyServer(function(input, output, session) {
     })
   })
 
-  output$row.op.summary <- renderPrint({
+  output$filter.data.summary <- renderPrint({
     input$selector
     input$filter_data_perform
     isolate({
@@ -518,6 +518,18 @@ shinyServer(function(input, output, session) {
         sort.type = unlist(lapply(indexes2,function(i,nams){
           input[[nams[i]]]
         },names(input)))
+        if(anyDuplicated(vars)){
+          dups = which(duplicated(vars))
+          vars = vars[-dups]
+          sort.type =sort.type[-dups]
+        }
+        if(""%in%vars){
+          empties = which(vars%in%"")
+          vars = vars[-empties]
+          sort.type =sort.type[-empties]
+        }
+        print(vars)
+        print(sort.type)
         data <<- sort.data(vars,sort.type,data)
       }
     })
@@ -541,6 +553,81 @@ shinyServer(function(input, output, session) {
     isolate({
       num.select.panel(input$num_columns_sort)
     })
+  })
+
+  ##  Row operations (Perform row operations) --> Aggregate data
+
+  observe({
+    input$aggregate_vars
+    isolate({
+      if(!is.null(input$aggregate_vars)&&input$aggregate_vars>0){
+        vars = input$aggros
+        rem = which(vars%in%"")
+        if(length(rem)>0){
+          vars = vars[-rem]
+        }
+        methods = input$aggregate.method
+        rem  = which(methods%in%"")
+        if(length(rem)>0){
+          methods = methods[-rem]
+        }
+        if(length(vars)>0&length(methods)>0&!is.null(data)){
+          data <<- aggregate.data(aggregate.over=unique(vars),methods=methods,dafr=data)
+        }
+      }
+    })
+  })
+
+  output$aggregate.variable = renderUI({
+    input$selector
+    isolate({
+      aggregate.variable()
+    })
+  })
+
+  output$aggregate.table = renderDataTable({
+    input$aggregate_vars
+    input$selector
+    data
+  },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, 
+                 columns.defaultContent="NA",scrollX=T))
+
+  ##  Row operations (Perform row operations) --> Stack variables
+  
+  observe({
+    input$stack_vars
+    isolate({
+      if(!is.null(input$stack_vars)&&input$stack_vars>0){
+        data <<- stack.variables.perform(input$stack_vars_column,data)
+      }
+    })
+  })
+
+  observe({
+    input$stack_vars_which
+    isolate({
+      if(!is.null(input$stack_vars_which)&&!""%in%input$stack_vars_which){
+        if("categorical"%in%input$stack_vars_which){
+          updateSelectInput(session,inputId="stack_vars_column",
+                            choices=get.categorical.column.names(),
+                            selected=1)
+        }else{
+          updateSelectInput(session,inputId="stack_vars_column",
+                            choices=get.numeric.column.names(),
+                            selected=1)
+        }
+      }
+    })
+  })
+
+  output$stack.table = renderDataTable({
+    input$stack_vars
+    data
+  },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
+
+  output$stack.variables = renderUI({
+    input$selector
+    stack.variables()
   })
 
   ##  Row operations (Perform row operations) --> Restore data

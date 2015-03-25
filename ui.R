@@ -10,7 +10,7 @@
 shinyUI(
     fluidPage(
       #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet-pure-css.css")),
-        ##  Set Tabpanel font to be size 16.
+      ##  Set Tabpanel font to be size 16.
         tags$head(
                 tags$style(
                     type = "text/css",
@@ -33,6 +33,7 @@ shinyUI(
                     .seper {
                        background-color: #A3E7FF;
                        padding-top: 25px}
+                    #num_columns_sort,
                     #numeric_input2,
                     #numeric_input3,
                     #URLtext,
@@ -89,12 +90,18 @@ shinyUI(
                                 uiOutput("remove.data.panel")),
                        tabPanel("Dataset Examples",
                                 uiOutput('switch.data.panel'))),
+            tabPanel("Visualize",
+                     uiOutput("visualize.panel")),
             ## Row operations tab
             navbarMenu("Row operations",id="operations_row",
                        tabPanel("Filter Dataset",
                                 uiOutput('filter.dataset')),
                        tabPanel("Sort data by variables",
                                 uiOutput('sort.variables')),
+                       tabPanel("Aggregate data",
+                                uiOutput('aggregate.variable')),
+                       tabPanel("Stack variables",
+                                uiOutput('stack.variables')),
                        tabPanel("Restore data",
                                 uiOutput('restore.data'))),
             ##  "Modify Data" tab.
@@ -112,8 +119,6 @@ shinyUI(
 
             ##  "Quick Explore" tab.
             navbarMenu("Advanced",
-                       tabPanel("Visualize",
-                                uiOutput("visualize.panel")),
                        tabPanel("Time Series",
                                 uiOutput("timeseries.panel"))),
             navbarMenu("Quick explore",

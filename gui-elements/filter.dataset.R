@@ -45,7 +45,7 @@ get.row.op.sidebar =  function(){
 row.operations.panel =function(){
   if(is.null(data)){
     sidebarLayout(
-      sidebarPanel(help.display('Perform Row operation','row_op_help',"gui-elements/notes/row.operations.md")),
+      sidebarPanel(help.display('Filter datset','row_op_help',"gui-elements/notes/filter.dataset.md")),
       mainPanel(
         h1("Please select or import a data set.")
       )
@@ -53,7 +53,7 @@ row.operations.panel =function(){
   }else{
     sidebarLayout(
       sidebarPanel(get.row.op.sidebar()),
-      mainPanel(verbatimTextOutput("row.op.summary"))
+      mainPanel(verbatimTextOutput("filter.data.summary"))
     )
   }
 }

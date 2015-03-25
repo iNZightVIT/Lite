@@ -1,7 +1,7 @@
-iNZight *Lite* version 0.9.8
+iNZight *Lite* version 0.9.7.2
 ============================
 
-*Last Updated: 23/03/15*
+*Last Updated: 25/03/15*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -15,6 +15,7 @@ Underway:
 - [Wishlist] Adjust the size of the "Help" button so that it matches the size of the actionButton.	
 - [Manipulate] Go through the data extraction / manipulation options.
 - [Time Series] Fix "Provide Time Information".
+- [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
 
 Recent Updates (Most to least recent):
 ----------------------------------------

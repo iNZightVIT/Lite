@@ -1,0 +1,17 @@
+{
+    "contents" : "stack.variables.sidebar =  function(){\n  list(selectInput(inputId=\"stack_vars_which\",\n                label=\"Select categorical or numeric\",\n                choices=c(\"\",\"categorical\",\"numeric\"),\n                selected=1,\n                selectize=F),\n       selectInput(inputId=\"stack_vars_column\",\n                label=\"Select variables to stack\",\n                choices=\"\",\n                selected=1,\n                selectize=T,\n                multiple=T),\n       actionButton(\"stack_vars\",\"Stack variables\"),br(),br(),\n         help.display('Stack variables','stack_vars_help',\"gui-elements/notes/stack.variables.md\"),\n         br())\n}\n\nstack.variables =function(){\n  if(is.null(data)){\n    sidebarLayout(\n      sidebarPanel(help.display('Stack variables','stack_vars_help',\"gui-elements/notes/stack.variables.md\")),\n      mainPanel(\n        h1(\"Please select or import a data set.\")\n      )\n    )\n  }else{\n    sidebarLayout(\n      sidebarPanel(stack.variables.sidebar()),\n      mainPanel(dataTableOutput(\"stack.table\"))\n    )\n  }\n}",
+    "created" : 1427251670650.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4288717843",
+    "id" : "C5F1CBC6",
+    "lastKnownWriteTime" : 1427254171,
+    "path" : "~/git/Lite/gui-elements/stack.variables.R",
+    "project_path" : "gui-elements/stack.variables.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
