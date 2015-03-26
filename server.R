@@ -180,13 +180,17 @@ shinyServer(function(input, output, session) {
           if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
             data <<- load.data(fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
             data.restore <<- data
-            data.name <<- input$files[1, "name"]
+            temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
+            if(length(temp)>1){
+              temp = temp[1:(length(temp)-1)]
+            } 
+            data.name <<- paste(temp,collapse=".")
             if (!file.exists("data/Imported")) {
               dir.create("data/Imported", recursive = TRUE)
             }
             saveRDS(data,file = paste0("data/Imported/", data.name, ".RDS"))
-            print(input$files[1, "datapath"])
-            #unlink(input$files[1, "datapath"])
+#             print(input$files[1, "datapath"])
+#             unlink(input$files[1, "datapath"])
           }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
             URL = input$URLtext
             name = strsplit(URL,"/")[[1]]
@@ -254,8 +258,9 @@ shinyServer(function(input, output, session) {
           files = list.files(path = "data/Imported",
                              pattern = input$Importedremove,
                              full.names = TRUE)
-          if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
-            #unlink(input$files[1, "datapath"])
+          if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])&&
+               grepl(data.name,files[1, "name"])){
+            unlink(input$files[1, "datapath"])
           }
           for(f in files){
             if (file.exists(f)) {
@@ -915,12 +920,77 @@ shinyServer(function(input, output, session) {
         remove.columns.panel()
     })
 
-  ## Quick Explore -> Data summary : display a quick summary of the data
+#     output$quick.summary = renderUI({
+#         input$selector
+#         quick.summary.panel()
+#     })
+# 
+#     ##  Quick Explore -> Single column plot : Generate a plot of a single column in the data 
+# 
+#     output$single.column.plot = renderUI({
+#         input$selector
+#         single.column.plot.panel()
+#     })
+#     ##  Quick Explore -> Column pair plot : Generate a plot of all possible pairs of columns
+# 
+#     output$column.pair.plot = renderUI({
+#         input$selector
+#         column.pair.plot.panel()
+#     })
+# 
+#     ##  Quick Explore -> Compare pairs : Generate plots of all possible pairs of columns
+# 
+#     output$matrix.plot = renderUI({
+#         input$selector
+#         matrix.plot.panel()
+#     })
+
+    ##--------------------##
+    ##  Visualize Module  ##
+    ##--------------------##
+    source("panels/5_Visualize/1_visualize-panel-ui.R", local = TRUE)
+    source("panels/5_Visualize/2_visualize-panel-server.R", local = TRUE)
+    output$visualize.panel <- renderUI({
+        input$selector
+        visualize.panel.ui()
+    })
+
+#   Advanced --> Time Series
+
+    ##----------------------##
+    ##  Time Series Module  ##
+    ##----------------------##
+    source("panels/6_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
+    source("panels/6_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
+    output$timeseries.panel <- renderUI({
+        input$selector
+        timeseries.panel.ui()
+    })
+
+#   Advanced --> Quick explore
+
+  output$quick.explore = renderUI({
+    input$selector
+    quick.explore.panel()
+  })
+
+#   Advanced --> Quick explore --> Data summary
+
+  output$quick.summary.side = renderUI({
+    input$selector
+    get.quick.summary.sidebar()
+  })
+  
+  output$quick.summary.main = renderUI({
+    input$selector
+    get.quick.summary.main()
+  })
+
   output$all.summary = renderPrint({
     input$selector
     data.summary()
   })
-
+  
   output$column.summary = renderPrint({
     if(!is.null(input$select.column.sum)){
       temp = data[,which(colnames(data)%in%input$select.column.sum)]
@@ -936,126 +1006,137 @@ shinyServer(function(input, output, session) {
     }
   })
 
-    output$quick.summary = renderUI({
-        input$selector
-        quick.summary.panel()
-    })
+#   Advanced --> Quick explore --> Single Column plot
 
-    ##  Quick Explore -> Single column plot : Generate a plot of a single column in the data
-    
-    observe({
-      input$single.backward
-      isolate({
-        if(!is.null(input$single.backward)&&input$single.backward>0){
+  output$single.column.plot.side= renderUI({
+    input$selector
+    get.single.col.sidebar()
+  })
+
+  output$single.column.plot.main= renderUI({
+    input$selector
+    get.single.col.main()
+  })
+
+  observe({
+    input$single.backward
+    isolate({
+      if(!is.null(input$single.backward)&&input$single.backward>0){
+        index=1
+        if(which(colnames(data)%in%input$select.column.plot)==1){
+          index=ncol(data)
+        }else{
+          index = which(colnames(data)%in%input$select.column.plot)-1
+        }
+        updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
+        updateSliderInput(session,inputId="single.play",value=index)
+      }
+    })
+  })
+
+  observe({
+    input$single.forward
+    isolate({
+      if(!is.null(input$single.forward)&&input$single.forward>0){
+        index=1
+        if(which(colnames(data)%in%input$select.column.plot)==ncol(data)){
           index=1
-          if(which(colnames(data)%in%input$select.column.plot)==1){
-            index=ncol(data)
+        }else{
+          index = which(colnames(data)%in%input$select.column.plot)+1
+        }
+        updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
+        updateSliderInput(session,inputId="single.play",value=index)
+      }
+    })
+  })
+
+  observe({
+    input$single.play
+    isolate({
+      if(!is.null(input$single.play)){
+        updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[input$single.play])
+      }
+    })
+  })
+
+  output$column.plot = renderPlot({
+    input$select.column.plot
+    isolate({
+      if(!is.null(data)&&!is.null(input$select.column.plot)){
+        index=which(colnames(data)%in%input$select.column.plot)
+        if(length(index)==0){
+          index = 1
+        }
+        updateSliderInput(session,inputId="single.play",value=index)
+        temp = data[,index]
+        if(is.character(temp)){
+            temp = as.factor(temp)
+        }
+        iNZightPlot(temp,xlab=input$select.column.plot,main=data.name)
+      }
+    })
+  })
+
+#   Advanced --> Quick explore --> Column pair plot
+
+  output$column.pair.plot.side = renderUI({
+    input$selector
+    get.pair.plot.sidebar()
+  })
+
+  output$column.pair.plot.main = renderUI({
+    input$selector
+    get.pair.plot.main()
+  })
+
+  observe({
+    input$pair.player
+    isolate({
+      if(!is.null(input$pair.player)){
+        indMat = rbind(1:(ncol(data)*(ncol(data)-1)),
+                       rep(1:(ncol(data)-1),ncol(data)),
+                       ceiling(seq(from=0.1,to=ncol(data),by=1/(ncol(data)-1))))
+        index1 = indMat[3,input$pair.player]
+        index2 = indMat[2,input$pair.player]
+        button<<-T
+        updateSelectInput(session,inputId="select.column.plot1",selected=colnames(data)[index1],choices=colnames(data))
+        updateSelectInput(session,inputId="select.column.plot2",selected=colnames(data)[-index1][index2],
+                          choices=colnames(data)[-index1])
+      }
+    })
+  })
+
+  observe({
+    input$pair.backward
+    isolate({
+      if(!is.null(input$pair.backward)&&input$pair.backward>0){
+        index1 = which(colnames(data)%in%input$select.column.plot1)
+        index2 = which(colnames(data)[-index1]%in%input$select.column.plot2)
+        if(index2==1){
+          if(index1==1){
+            index1 = ncol(data)
           }else{
-            index = which(colnames(data)%in%input$select.column.plot)-1
+            index1 = index1-1
           }
-          updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
-          updateSliderInput(session,inputId="single.play",value=index)
-        }
-      })
-    })
-
-    observe({
-      input$single.forward
-      isolate({
-        if(!is.null(input$single.forward)&&input$single.forward>0){
-          index=1
-          if(which(colnames(data)%in%input$select.column.plot)==ncol(data)){
-            index=1
-          }else{
-            index = which(colnames(data)%in%input$select.column.plot)+1
-          }
-          updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
-          updateSliderInput(session,inputId="single.play",value=index)
-        }
-      })
-    })
-
-    observe({
-      input$single.play
-      isolate({
-        if(!is.null(input$single.play)){
-          updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[input$single.play])
-        }
-      })
-    })
-
-    output$column.plot = renderPlot({
-      input$select.column.plot
-      isolate({
-        if(!is.null(data)&&!is.null(input$select.column.plot)){
-          index=which(colnames(data)%in%input$select.column.plot)
-          if(length(index)==0){
-            index = 1
-          }
-          updateSliderInput(session,inputId="single.play",value=index)
-          temp = data[,index]
-          if(is.character(temp)){
-              temp = as.factor(temp)
-          }
-          iNZightPlot(temp,xlab=input$select.column.plot,main=data.name)
-        }
-      })
-    })
-
-    output$single.column.plot = renderUI({
-        input$selector
-        single.column.plot.panel()
-    })
-    ##  Quick Explore -> Column pair plot : Generate a plot of all possible pairs of columns
-    
-    observe({
-      input$pair.player
-      isolate({
-        if(!is.null(input$pair.player)){
-          indMat = rbind(1:(ncol(data)*(ncol(data)-1)),
-                         rep(1:(ncol(data)-1),ncol(data)),
-                         ceiling(seq(from=0.1,to=ncol(data),by=1/(ncol(data)-1))))
-          index1 = indMat[3,input$pair.player]
-          index2 = indMat[2,input$pair.player]
           button<<-T
           updateSelectInput(session,inputId="select.column.plot1",selected=colnames(data)[index1],choices=colnames(data))
-          updateSelectInput(session,inputId="select.column.plot2",selected=colnames(data)[-index1][index2],
-                            choices=colnames(data)[-index1])
+          index2 = ncol(data)-1
+        }else{
+          index2 = index2-1
         }
-      })
+        updateSelectInput(session,inputId="select.column.plot2",selected=colnames(data)[-index1][index2],
+                          choices=colnames(data)[-index1])
+        matInd = which(colnames(data)%in%colnames(data)[-index1][index2])
+        updateSliderInput(session,inputId="pair.player",
+                          value=matrix(c(unlist(lapply(seq(from=ncol(data),by=ncol(data),
+                                                           to=ncol(data)*(ncol(data)-1)),function(x,n){
+                                                             c(0,(x-(n-1)):x)
+                                                           },
+                                                       ncol(data))),0),nrow=ncol(data))[matInd,index1]
+                          )
+      }
     })
-
-    observe({
-      input$pair.backward
-      isolate({
-        if(!is.null(input$pair.backward)&&input$pair.backward>0){
-          index1 = which(colnames(data)%in%input$select.column.plot1)
-          index2 = which(colnames(data)[-index1]%in%input$select.column.plot2)
-          if(index2==1){
-            if(index1==1){
-              index1 = ncol(data)
-            }else{
-              index1 = index1-1
-            }
-            button<<-T
-            updateSelectInput(session,inputId="select.column.plot1",selected=colnames(data)[index1],choices=colnames(data))
-            index2 = ncol(data)-1
-          }else{
-            index2 = index2-1
-          }
-          updateSelectInput(session,inputId="select.column.plot2",selected=colnames(data)[-index1][index2],
-                            choices=colnames(data)[-index1])
-          matInd = which(colnames(data)%in%colnames(data)[-index1][index2])
-          updateSliderInput(session,inputId="pair.player",
-                            value=matrix(c(unlist(lapply(seq(from=ncol(data),by=ncol(data),
-                                                             to=ncol(data)*(ncol(data)-1)),function(x,n){
-                                                               c(0,(x-(n-1)):x)
-                                                             },
-                                                         ncol(data))),0),nrow=ncol(data))[matInd,index1]
-                            )
-        }
-      })
-    })
+  })
 
     observe({
       input$pair.forward
@@ -1132,58 +1213,41 @@ shinyServer(function(input, output, session) {
     }
   })
 
-    output$column.pair.plot = renderUI({
-        input$selector
-        column.pair.plot.panel()
-    })
+#   Advanced --> Quick explore --> Compare pairs
 
-    ##  Quick Explore -> Compare pairs : Generate plots of all possible pairs of columns
-    output$plot.matrix = renderPlot({
-        choices = input$select.matrix.plot
-        if(is.null(choices)||length(choices)==1){
-            plot(1, 1, type = "n", axes = FALSE, xlab = "" , ylab = "")
-            text(1, 1, "You have to select more than 1 variable", cex = 2)
-        }else{
-            choices.ind = which(colnames(data) %in% choices)
-            temp =
-                do.call(cbind,
-                        lapply(data[, choices.ind],
-                               function(x) {
-                                   if (is.character(x)) {
-                                       data.frame(factor(x, levels = unique(x)))
-                                   } else {
-                                       data.frame(x)
-                                   }
-                               }))
-            colnames(temp) = choices
-            gpairs(temp)
-        }
-    })
+  output$compare.pairs.main = renderUI({
+    input$selector
+    get.matrix.main()
+  })
 
-    output$matrix.plot = renderUI({
-        input$selector
-        matrix.plot.panel()
-    })
+  output$compare.pairs.side = renderUI({
+    input$selector
+    get.matrix.sidebar()
+  })
 
-    ##--------------------##
-    ##  Visualize Module  ##
-    ##--------------------##
-    source("panels/5_Visualize/1_visualize-panel-ui.R", local = TRUE)
-    source("panels/5_Visualize/2_visualize-panel-server.R", local = TRUE)
-    output$visualize.panel <- renderUI({
-        input$selector
-        visualize.panel.ui()
-    })
+  output$plot.matrix = renderPlot({
+      choices = input$select.matrix.plot
+      if(is.null(choices)||length(choices)==1){
+          plot(1, 1, type = "n", axes = FALSE, xlab = "" , ylab = "")
+          text(1, 1, "You have to select more than 1 variable", cex = 2)
+      }else{
+          choices.ind = which(colnames(data) %in% choices)
+          temp =
+              do.call(cbind,
+                      lapply(data[, choices.ind],
+                             function(x) {
+                                 if (is.character(x)) {
+                                     data.frame(factor(x, levels = unique(x)))
+                                 } else {
+                                     data.frame(x)
+                                 }
+                             }))
+          colnames(temp) = choices
+          gpairs(temp)
+      }
+  })
 
-    ##----------------------##
-    ##  Time Series Module  ##
-    ##----------------------##
-    source("panels/6_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
-    source("panels/6_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
-    output$timeseries.panel <- renderUI({
-        input$selector
-        timeseries.panel.ui()
-    })
+#   Help
 
     ##---------------##
     ##  Help Module  ##

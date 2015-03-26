@@ -1,7 +1,3 @@
-# help.load = function(){
-#   helpModal('Load data','load_data',inclMD("gui-elements/notes/load.data.md"))
-# }
-
 get.sidebar.load = function(){
   list(
     fileInput("files", "File data", multiple=F),
