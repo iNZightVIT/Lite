@@ -10,7 +10,7 @@ get.quick.summary.sidebar =  function(){
     choices2=c()
   }
   list(helpText("Select a column from the dropdown menu to display a short column summary."),
-       selectInput("select.column.sum","Select Column",choices=choices1,multiple=F,selectize=F,selected=choices1[1]),
+       selectInput("select.column.sum","Select Column",choices=choices1,multiple=F,selectize=T,selected=choices1[1]),
        br(),br(),help.display('Quick summary','quick_summary',"gui-elements/notes/quick.summary.md"),br(),HTML(""))
 }
 get.quick.summary.main = function(){

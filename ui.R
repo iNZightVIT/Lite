@@ -47,10 +47,12 @@ shinyUI(
                        border: 1px solid;
                        border-radius: 10px;
                     }
-                    .wraper {
-                       background-color: #A3E7FF;
-                       border: 1px solid;
+                    #categorical_variables_select,
+                    #quick_explore_select {
+                       background: #158CBA;
+                       color: #F8DCCD
                        border-radius: 10px;
+                       font-size: 150%;
                     }
                     ")),
         ## This code fixes the DataTables warning coming up from time to time.
@@ -111,10 +113,11 @@ shinyUI(
                                 uiOutput('restore.data'))),
             ##  "Modify Data" tab.
             navbarMenu("Manipulate variables",
-                       tabPanel("Transform columns",
+                       tabPanel("Categorical variables",
+                                  uiOutput('categorical.variables')),
+#                                 uiOutput('reorder.levels')),
+                       tabPanel("Numeric variables",
                                 uiOutput('transform.columns')),
-                       tabPanel("Reorder Levels",
-                                uiOutput('reorder.levels')),
 #                        tabPanel("Compare dates",
 #                                 uiOutput("compare.dates")),
                        tabPanel("Add columns",
@@ -127,7 +130,7 @@ shinyUI(
                        tabPanel("Quick explore",
                                 uiOutput("quick.explore")),
                        tabPanel("Time Series",
-                                uiOutput("timeseries.panel"))),
+                                uiOutput("timeseries.panel")))#,
 #             navbarMenu("Quick explore",
 #                       tabPanel("Data Summary",
 #                                uiOutput("quick.summary")),
@@ -139,8 +142,8 @@ shinyUI(
 #                                uiOutput("matrix.plot"))
 #                       ),      
             ##  "Help" tab.
-            tabPanel("Help",
-                     uiOutput("help.panel"))
+#             tabPanel("Help",
+#                      uiOutput("help.panel"))
         )
     )
 )

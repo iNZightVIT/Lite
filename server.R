@@ -20,7 +20,6 @@ shinyServer(function(input, output, session) {
     ## options(warn = -1, show.error.messages = FALSE)
     
     ##  Delete all imported files that are older than 1 day.
-    delete.old.files(1) # global.R
     ## Load all panels into memory.
     filepaths <- list.files(pattern = "[.]R$",
                             path = "gui-elements/",
@@ -384,7 +383,9 @@ shinyServer(function(input, output, session) {
     isolate({
       if(!is.null(input$filter_data_perform)&&input$filter_data_perform>0){
         if(input$select_filter%in%"levels of categorical variable"){
-          if(!input$select_categorical1%in%""){
+          print(input$select_categorical1)
+          print(input$levels1)
+          if(!is.null(input$select_categorical1)&&!input$select_categorical1%in%""){
             to.remove = which(data[,which(colnames(data)%in%input$select_categorical1)]%in%input$levels1)
             if(length(to.remove)>0){
               data <<- data[-to.remove,]
@@ -578,6 +579,8 @@ shinyServer(function(input, output, session) {
         }
         if(length(vars)>0&length(methods)>0&!is.null(data)){
           data <<- aggregate.data(aggregate.over=unique(vars),methods=methods,dafr=data)
+          updateSelectInput(session,"aggros",selected=0,choices=get.categorical.column.names())
+          updateSelectInput(session,"aggregate.method",selected=0)
         }
       }
     })
@@ -602,8 +605,13 @@ shinyServer(function(input, output, session) {
   observe({
     input$stack_vars
     isolate({
-      if(!is.null(input$stack_vars)&&input$stack_vars>0){
+      if(!is.null(input$stack_vars)&&input$stack_vars>0&&
+           !is.null(input$stack_vars_column)){
         data <<- stack.variables.perform(input$stack_vars_column,data)
+        updateSelectInput(session,"stack_vars_which",selected=0)
+        updateSelectInput(session,inputId="stack_vars_column",
+                          choices=get.categorical.column.names(),
+                          selected=0)
       }
     })
   })
@@ -656,54 +664,158 @@ shinyServer(function(input, output, session) {
     restore.data()
   })
 
-    ##  modify -> Reorder levels : reorder the levels of a column of factors
-    selection.changed = observe({
-        if(!is.null(input$select.column)){
-            choices=""
-            if(!"" %in% input$select.column){
-                if(is.factor(data[,input$select.column])){
-                    choices = levels(data[,input$select.column])
-                }else{
-                    choices = levels(as.factor(data[,input$select.column]))
-                }
-            }
-            updateSelectInput(session=session,inputId="select.item",selected="",choices=choices)
-        }
-    })
+  ## Manipulate variables
 
-    button.pressed = observe({
-        input$reorder
-        updateSelectInput(session=session,inputId="select.item",selected="",choices="")
-        updateSelectInput(session=session,inputId="select.column",selected="")
-        isolate({
-            items = input$select.item
-            if(!is.null(items)&!is.null(input$select.column)){
-                column = data[,input$select.column]
-                if(length(items)<length(column)){
-                    not.in = sort(unique(data[,input$select.column])[which(!unique(data[,input$select.column])%in%items)])
-                    levels.new = c(items,not.in)
-                }else{
-                    levels.new = c(items)
-                }
-                data[,input$select.column] <<- as.factor(data[,input$select.column])
-                levels(data[,input$select.column]) <<- levels.new
-            }
-        })
-    })
+  output$categorical.variables = renderUI({
+    input$selector
+    categorical.variables()
+  })
 
-    output$maintext.reorder = renderPrint({
-        text = ""
-        if(!is.null(input$select.column)&&!""%in%input$select.column){
-            print(table(data[,input$select.column]))
+  ## Manipulate variables --> Reorder levels
+
+  output$reorder.levels.side = renderUI({
+    input$selector
+    get.reorder.sidebar()
+  })
+
+  output$reorder.levels.main = renderUI({
+    input$selector
+    get.reorder.main()
+  })
+
+  observe({
+    input$reorder
+    updateSelectInput(session=session,inputId="select.item",selected="",choices="")
+    updateSelectInput(session=session,inputId="select.column",selected="")
+    isolate({
+      items = input$select.item
+      if(!is.null(items)&!is.null(input$select.column)){
+        column = data[,input$select.column]
+        if(length(items)<length(column)){
+          not.in = sort(unique(data[,input$select.column])[which(!unique(data[,input$select.column])%in%items)])
+          levels.new = c(items,not.in)
         }else{
-            print("Select a column!")
+          levels.new = c(items)
         }
+        data[,input$select.column] <<- as.factor(data[,input$select.column])
+        levels(data[,input$select.column]) <<- levels.new
+      }
     })
+  })
 
-    output$reorder.levels =renderUI({
-        input$selector
-        reorder.levels.panel()
+  output$maintext.reorder = renderPrint({
+      text = ""
+      if(!is.null(input$select.column)&&!""%in%input$select.column){
+          print(table(data[,input$select.column]))
+      }else{
+          print("Select a column!")
+      }
+  })
+  
+  observe({
+      if(!is.null(input$select.column)){
+          choices=""
+          if(!"" %in% input$select.column){
+              if(is.factor(data[,input$select.column])){
+                  choices = levels(data[,input$select.column])
+              }else{
+                  choices = levels(as.factor(data[,input$select.column]))
+              }
+          }
+          updateSelectInput(session=session,inputId="select.item",selected="",choices=choices)
+      }
+  })
+
+
+
+  ## Manipulate variables --> Collapse levels
+
+  output$collapse.levels.side = renderUI({
+    input$selector
+    get.collapse.sidebar()
+  })
+
+  output$collapse.levels.main = renderUI({
+    input$selector
+    get.collapse.main()
+  })
+
+  observe({
+    if(!is.null(input$select.collapse.column)){
+      choices=""
+      if(!"" %in% input$select.collapse.column){
+        if(is.factor(data[,input$select.collapse.column])){
+          choices = levels(data[,input$select.collapse.column])
+        }else{
+          choices = levels(as.factor(data[,input$select.collapse.column]))
+        }
+      }
+      updateSelectInput(session=session,inputId="select.collapse.item",selected="",choices=choices)
+    }
+  })
+
+  output$text.collapse.old = renderPrint({
+    input$collapse
+    if(!is.null(input$select.collapse.column)&&!""%in%input$select.collapse.column){
+      print(table(data[,input$select.collapse.column]))
+    }else{
+      print("Select a column!")
+    }
+  })
+
+  output$text.collapse.new = renderPrint({
+    input$collapse
+    if(!is.null(input$select.collapse.column)&&!""%in%input$select.collapse.column&&
+         !is.null(input$select.collapse.item)&&!""%in%input$select.collapse.item){
+      print(table(get.collapsed.column(data[,input$select.collapse.column],input$select.collapse.item)))
+    }else{
+      print("")
+    }
+  })
+
+  observe({
+    input$collapse
+    isolate({
+      if(!is.null(input$collapse)&&input$collapse>0&&input$select.collapse.column%in%colnames(data)){
+        if(any(input$select.collapse.item%in%data[,which(colnames(data)%in%input$select.collapse.column)])){
+          data[,which(colnames(data)%in%input$select.collapse.column)] <<- get.collapsed.column(
+            data[,which(colnames(data)%in%input$select.collapse.column)],
+            input$select.collapse.item)
+          updateSelectInput(session,"select.collapse.column",selected=1)
+        }
+      }
     })
+  })
+
+#     ##  modify -> Reorder levels : reorder the levels of a column of factors
+#     selection.changed = observe({
+#         if(!is.null(input$select.column)){
+#             choices=""
+#             if(!"" %in% input$select.column){
+#                 if(is.factor(data[,input$select.column])){
+#                     choices = levels(data[,input$select.column])
+#                 }else{
+#                     choices = levels(as.factor(data[,input$select.column]))
+#                 }
+#             }
+#             updateSelectInput(session=session,inputId="select.item",selected="",choices=choices)
+#         }
+#     })
+# 
+# 
+#     output$maintext.reorder = renderPrint({
+#         text = ""
+#         if(!is.null(input$select.column)&&!""%in%input$select.column){
+#             print(table(data[,input$select.column]))
+#         }else{
+#             print("Select a column!")
+#         }
+#     })
+# 
+#     output$reorder.levels =renderUI({
+#         input$selector
+#         reorder.levels.panel()
+#     })
 
     ## modify -> compare dates : reorder the levels of a column of factors
 
