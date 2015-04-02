@@ -3,7 +3,7 @@
 # }
 
 get.transform.sidebar =  function(){
-  list(selectInput("select.columns", "Select Columns", choices = c("",colnames(data)),multiple=T,selectize=T),br(),
+  list(selectInput("select.columns.transform", "Select Columns", choices = c("",colnames(data)),multiple=T,selectize=T),br(),
        selectInput("select.transform", "Select Transformation", 
                    choices = c("", "change to factor","add","subtract","multiply","divide","log","root","square","abs","center",
                                "standardize","median split","reverse-coding","copy","change sign"),

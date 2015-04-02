@@ -1,4 +1,4 @@
-get.collapse.sidebar =  function(){
+collapse.sidebar.panel =  function(){
   choices1 = c()
   choices2 = c()
   if(!is.null(data)&&!is.null(ncol(data))&&ncol(data)>0){
@@ -18,8 +18,8 @@ get.collapse.sidebar =  function(){
        help.display('Collapse Levels','collapse_levels',"gui-elements/notes/collapse.levels.md"),br(),HTML(""))
 }
 
-get.collapse.main = function(){
-  list(div(verbatimTextOutput("text.collapse.old")),br(),
+collapse.main.panel = function(){
+  list(div(verbatimTextOutput("text_collapse_1st")),br(),
        helpText("New levels after input is submitted"),
-       div(verbatimTextOutput("text.collapse.new")))
+       div(verbatimTextOutput("text_collapse_2nd")))
 }

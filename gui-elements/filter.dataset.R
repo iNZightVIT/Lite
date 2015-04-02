@@ -1,11 +1,6 @@
 
-get.row.op.sidebar =  function(){
+filter.data.sidebar =  function(){
   list(
-#     selectInput(inputId="select_operation", 
-#                    label="Select an operation to perform", 
-#                    choices = c("","Filter Dataset","Sort data by variables",
-#                                "Aggregate Data","Stack variables","Restore Dataset"),
-#                    multiple=F,selectize=T,selected=1),br(),
     selectInput(inputId="select_filter",
                 label="Select Filter to apply",
                 choices=c("","levels of categorical variable",
@@ -16,7 +11,7 @@ get.row.op.sidebar =  function(){
                                  label="Select a categorical variable to filter the data on",
                                  choices=c("",get.categorical.column.names()),
                                  selected=1,selectize=F),
-                     selectInput(inputId="levels1",label="Select levels which remain in data",
+                     selectInput(inputId="levels1",label="Select levels to remove from the data",
                                  choices="",selected=1,multiple=T)),
     conditionalPanel("input.select_filter=='numeric condition'",
                      selectInput(inputId="select_numeric1",
@@ -42,7 +37,7 @@ get.row.op.sidebar =  function(){
     help.display('Filter datset','row_op_help',"gui-elements/notes/filter.dataset.md"),br())
 }
 
-row.operations.panel =function(){
+filter.data.panel =function(){
   if(is.null(data)){
     sidebarLayout(
       sidebarPanel(help.display('Filter datset','row_op_help',"gui-elements/notes/filter.dataset.md")),
@@ -52,7 +47,7 @@ row.operations.panel =function(){
     )
   }else{
     sidebarLayout(
-      sidebarPanel(get.row.op.sidebar()),
+      sidebarPanel(filter.data.sidebar()),
       mainPanel(verbatimTextOutput("filter.data.summary"))
     )
   }

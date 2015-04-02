@@ -15,7 +15,7 @@ stack.variables.sidebar =  function(){
          br())
 }
 
-stack.variables =function(){
+stack.variables.panel =function(){
   if(is.null(data)){
     sidebarLayout(
       sidebarPanel(help.display('Stack variables','stack_vars_help',"gui-elements/notes/stack.variables.md")),

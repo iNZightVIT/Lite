@@ -15,15 +15,16 @@ get.categorical.variables =  function(){
               conditionalPanel("input.categorical_variables_select=='Reorder levels'",
                                uiOutput("reorder.levels.side")),
               conditionalPanel("input.categorical_variables_select=='Collapse levels'",
-                               uiOutput("collapse.levels.side"))),
-         list(conditionalPanel("input.categorical_variables_select=='Reorder levels'",
-                               uiOutput("reorder.levels.main")),
-              conditionalPanel("input.categorical_variables_select=='Collapse levels'",
-                               uiOutput("collapse.levels.main"))))
+                               uiOutput("collapse.levels.side")),
+              conditionalPanel("input.categorical_variables_select=='Rename levels'",
+                               uiOutput("rename.levels.side")),
+              conditionalPanel("input.categorical_variables_select=='Combine categorical'",
+                               uiOutput("combine.levels.side"))),
+         uiOutput("categorical.main.panel"))
   }
 }
 
-categorical.variables = function(){
+categorical.variables.panel = function(){
   sidebarLayout(
     sidebarPanel(get.categorical.variables()[[1]]),
     mainPanel(get.categorical.variables()[[2]])

@@ -325,18 +325,18 @@ shinyServer(function(input, output, session) {
   ##  Modify data -> transform columns (Perform column transformations)
   
   transform.temp.table = reactive({
-    input$select.columns
+    input$select.columns.transform
     input$select.transform
     isolate({
-      transform.tempTable(input$select.transform,input$select.columns)
+      transform.tempTable(input$select.transform,input$select.columns.transform)
     })
   })
   
   perform.transform = reactive({
-  #       input$select.columns
+  #       input$select.columns.transform
   #       input$select.transform
     isolate({
-      transform.perform(input$select.transform,input$select.columns)
+      transform.perform(input$select.transform,input$select.columns.transform)
     })
   })
   
@@ -345,8 +345,8 @@ shinyServer(function(input, output, session) {
     isolate({
       if(!is.null(input$transform)&&input$transform>0){
         data <<- perform.transform()
-        updateSelectInput(session, inputId="select.columns", 
-                          choices=colnames(data), selected=input$select.columns)
+        updateSelectInput(session, inputId="select.columns.transform", 
+                          choices=colnames(data), selected=input$select.columns.transform)
         dataHasChanged <<- T
       }
     })
@@ -358,7 +358,7 @@ shinyServer(function(input, output, session) {
   
   output$status = renderText({
       input$transform
-      input$select.columns
+      input$select.columns.transform
       input$select.transform
       isolate({
         transform.text = ""
@@ -383,8 +383,6 @@ shinyServer(function(input, output, session) {
     isolate({
       if(!is.null(input$filter_data_perform)&&input$filter_data_perform>0){
         if(input$select_filter%in%"levels of categorical variable"){
-          print(input$select_categorical1)
-          print(input$levels1)
           if(!is.null(input$select_categorical1)&&!input$select_categorical1%in%""){
             to.remove = which(data[,which(colnames(data)%in%input$select_categorical1)]%in%input$levels1)
             if(length(to.remove)>0){
@@ -428,10 +426,9 @@ shinyServer(function(input, output, session) {
           if(is.convertable.numeric(input$numeric_input2)&&
                is.convertable.numeric(input$numeric_input3)&&
                as.numeric(input$numeric_input2)<=nrow(data)&&
-               (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(data)&
-                   !input$bootstrap_check)|
-                  ((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(data)&
-                     input$bootstrap_check))){
+               (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(data)&
+                   input$bootstrap_check)|
+                  (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(data))){
             data <<- sample.data(df=data,
                                  sampleSize=as.numeric(input$numeric_input2),
                                  numSample=as.numeric(input$numeric_input3),
@@ -450,10 +447,9 @@ shinyServer(function(input, output, session) {
       if(is.convertable.numeric(input$numeric_input2)&&
            is.convertable.numeric(input$numeric_input3)&&
            as.numeric(input$numeric_input2)<=nrow(data)&&
-           (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(data)&
-               !input$bootstrap_check)|
-              ((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(data)&
-                 input$bootstrap_check))){
+           (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(data)&
+               input$bootstrap_check)|
+              (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(data))){
         cat("Size of sample: ",input$numeric_input2,"\n",
             "Number of sample: ", input$numeric_input3)
       }else{
@@ -505,9 +501,9 @@ shinyServer(function(input, output, session) {
     })
   })
   
-  output$filter.dataset =renderUI({
+  output$filter.dataset = renderUI({
     input$selector
-    row.operations.panel()
+    filter.data.panel()
   })
 
   ##  Row operations (Perform row operations) --> Sort data by variables
@@ -534,8 +530,6 @@ shinyServer(function(input, output, session) {
           vars = vars[-empties]
           sort.type =sort.type[-empties]
         }
-        print(vars)
-        print(sort.type)
         data <<- sort.data(vars,sort.type,data)
       }
     })
@@ -554,7 +548,7 @@ shinyServer(function(input, output, session) {
     })
   })
   
-  output$num.select.panel = renderUI({
+  output$num.select = renderUI({
     input$num_columns_sort
     isolate({
       num.select.panel(input$num_columns_sort)
@@ -634,13 +628,14 @@ shinyServer(function(input, output, session) {
   })
 
   output$stack.table = renderDataTable({
+    input$selector
     input$stack_vars
     data
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
   output$stack.variables = renderUI({
     input$selector
-    stack.variables()
+    stack.variables.panel()
   })
 
   ##  Row operations (Perform row operations) --> Restore data
@@ -660,84 +655,98 @@ shinyServer(function(input, output, session) {
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
   output$restore.data = renderUI({
-    input$selector
-    restore.data()
+#     input$selector
+    restore.data.panel()
   })
 
   ## Manipulate variables
 
   output$categorical.variables = renderUI({
-    input$selector
-    categorical.variables()
+    categorical.variables.panel()
   })
 
-  ## Manipulate variables --> Reorder levels
+  output$categorical.main.panel = renderUI({
+    if(!is.null(input$categorical_variables_select)&&
+         input$categorical_variables_select%in%"Reorder levels"){
+      reorder.main.panel()
+    }else if(!is.null(input$categorical_variables_select)&&
+               input$categorical_variables_select%in%"Collapse levels"){
+      collapse.main.panel()
+    }else if(!is.null(input$categorical_variables_select)&&
+               input$categorical_variables_select%in%"Rename levels"){
+      rename.levels.main.panel()
+    }else if(!is.null(input$categorical_variables_select)&&
+               input$categorical_variables_select%in%"Combine categorical"){
+      combine.main.panel()
+    }
+  })
+
+  ## Manipulate variables --> Categorical variables --> Reorder levels
 
   output$reorder.levels.side = renderUI({
     input$selector
-    get.reorder.sidebar()
-  })
-
-  output$reorder.levels.main = renderUI({
-    input$selector
-    get.reorder.main()
-  })
-
-  observe({
-    input$reorder
-    updateSelectInput(session=session,inputId="select.item",selected="",choices="")
-    updateSelectInput(session=session,inputId="select.column",selected="")
     isolate({
-      items = input$select.item
-      if(!is.null(items)&!is.null(input$select.column)){
-        column = data[,input$select.column]
-        if(length(items)<length(column)){
-          not.in = sort(unique(data[,input$select.column])[which(!unique(data[,input$select.column])%in%items)])
-          levels.new = c(items,not.in)
-        }else{
-          levels.new = c(items)
-        }
-        data[,input$select.column] <<- as.factor(data[,input$select.column])
-        levels(data[,input$select.column]) <<- levels.new
+      if(input$categorical_variables_select%in%"Reorder levels"&
+           input$selector%in%"Categorical variables"){
+        reorder.sidebar.panel()
       }
     })
   })
 
-  output$maintext.reorder = renderPrint({
-      text = ""
-      if(!is.null(input$select.column)&&!""%in%input$select.column){
-          print(table(data[,input$select.column]))
+  observe({
+    input$reorder
+    isolate({
+      items = input$select.reorder.item
+      if(!is.null(items)&!is.null(input$select.reorder.column)){
+        column = data[,input$select.reorder.column]
+        if(length(items)<length(unique(column))){
+          not.in = sort(unique(data[,input$select.reorder.column])
+                        [which(!unique(data[,input$select.reorder.column])%in%items)])
+          levels.new = c(items,as.character(not.in))
+        }else{
+          levels.new = items
+        }
+        data <<- reorder.levels(data,input$select.reorder.column,levels.new)
+        updateSelectInput(session=session,inputId="select.reorder.item",selected="",choices="")
+        updateSelectInput(session=session,inputId="select.reorder.column",selected="")
+      }
+    })
+  })
+
+  output$text_reorder = renderPrint({
+      if(!is.null(input$select.reorder.column)&&!""%in%input$select.reorder.column){
+          print(table(data[,input$select.reorder.column]))
       }else{
           print("Select a column!")
       }
   })
   
   observe({
-      if(!is.null(input$select.column)){
+      if(!is.null(input$select.reorder.column)){
           choices=""
-          if(!"" %in% input$select.column){
-              if(is.factor(data[,input$select.column])){
-                  choices = levels(data[,input$select.column])
+          if(!"" %in% input$select.reorder.column){
+              if(is.factor(data[,input$select.reorder.column])){
+                  choices = levels(data[,input$select.reorder.column])
               }else{
-                  choices = levels(as.factor(data[,input$select.column]))
+                  choices = levels(as.factor(data[,input$select.reorder.column]))
               }
           }
-          updateSelectInput(session=session,inputId="select.item",selected="",choices=choices)
+          updateSelectInput(session=session,inputId="select.reorder.item",selected="",choices=choices)
       }
   })
 
 
 
-  ## Manipulate variables --> Collapse levels
+  ## Manipulate variables --> Categorical variables --> Collapse levels
 
   output$collapse.levels.side = renderUI({
     input$selector
-    get.collapse.sidebar()
-  })
-
-  output$collapse.levels.main = renderUI({
-    input$selector
-    get.collapse.main()
+    isolate({
+      if(input$categorical_variables_select%in%"Collapse levels"&
+           input$selector%in%"Categorical variables"){
+        collapse.sidebar.panel()
+      }
+    })
   })
 
   observe({
@@ -754,7 +763,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  output$text.collapse.old = renderPrint({
+  output$text_collapse_1st = renderPrint({
     input$collapse
     if(!is.null(input$select.collapse.column)&&!""%in%input$select.collapse.column){
       print(table(data[,input$select.collapse.column]))
@@ -763,7 +772,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  output$text.collapse.new = renderPrint({
+  output$text_collapse_2nd = renderPrint({
     input$collapse
     if(!is.null(input$select.collapse.column)&&!""%in%input$select.collapse.column&&
          !is.null(input$select.collapse.item)&&!""%in%input$select.collapse.item){
@@ -783,6 +792,87 @@ shinyServer(function(input, output, session) {
             input$select.collapse.item)
           updateSelectInput(session,"select.collapse.column",selected=1)
         }
+      }
+    })
+  })
+
+  ## Manipulate variables --> Categorical variables --> Rename levels
+
+  output$rename.levels.side = renderUI({
+    input$selector
+    isolate({
+      if(input$categorical_variables_select%in%"Rename levels"&
+           input$selector%in%"Categorical variables"){
+        rename.levels.sidebar.panel()
+      }
+    })
+  })
+
+  output$rename.factors.inputs = renderUI({
+    input$select.rename.column
+    isolate({
+      if(!is.null(input$select.rename.column)&&!input$select.rename.column%in%""){
+        rename.factors.textfields(levels(data[,input$select.rename.column]))
+      }
+    })
+  })
+
+  output$text_rename = renderPrint({
+    input$selector
+    input$select.rename.column
+    isolate({
+      if(!is.null(input$select.rename.column)&&!input$select.rename.column%in%""){
+        print(summary(data[,input$select.rename.column]))
+      }else{
+        print("")
+      }
+    })
+  })
+
+  observe({
+    input$rename.levs
+    isolate({
+      if(!is.null(input$rename.levs)&&input$rename.levs>0){
+        indexes1= grep("^factor[0-9]+$",names(input))
+        new.levels = c()
+        for(i in 1:length(indexes1)){
+          new.levels[i] = input[[names(input)[indexes1[i]]]]
+          if(is.null(new.levels[i])||new.levels[i]%in%""){
+            new.levels[i] = levels(data[,input$select.rename.column])[i]
+          }
+        }
+        data <<- rename.levels(data,input$select.rename.column,new.levels)
+        updateSelectInput(session,"select.rename.column",selected=0)
+      }
+    })
+  })
+
+  ## Manipulate variables --> Categorical variables --> Combine levels
+
+  output$combine.levels.side = renderUI({
+    input$selector
+    isolate({
+      if(input$categorical_variables_select%in%"Combine categorical"&
+           input$selector%in%"Categorical variables"){
+        combine.sidebar.panel()
+      }
+    })
+  })
+
+  output$text_combine = renderPrint({
+    if(length(input$select.combine.columns)>0){
+      temp = combine.levels(data,input$select.combine.columns)
+      print(table(temp[,ncol(temp)]))  
+    }else{
+      print("Please select a set of columns")
+    }
+  })
+
+  observe({
+    input$combine
+    isolate({
+      if(!is.null(input$combine)&&input$combine>0){
+        data <<- combine.levels(data,columns)
       }
     })
   })

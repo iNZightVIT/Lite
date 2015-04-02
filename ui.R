@@ -110,12 +110,12 @@ shinyUI(
                        tabPanel("Stack variables",
                                 uiOutput('stack.variables')),
                        tabPanel("Restore data",
-                                uiOutput('restore.data'))),
-            ##  "Modify Data" tab.
+                                uiOutput('restore.data'))
+            ),
+            ##  "Manipulate variables" tab.
             navbarMenu("Manipulate variables",
                        tabPanel("Categorical variables",
                                   uiOutput('categorical.variables')),
-#                                 uiOutput('reorder.levels')),
                        tabPanel("Numeric variables",
                                 uiOutput('transform.columns')),
 #                        tabPanel("Compare dates",
@@ -123,24 +123,26 @@ shinyUI(
                        tabPanel("Add columns",
                                 uiOutput("add.columns")),
                        tabPanel("Remove columns",
-                                uiOutput("remove.columns"))),
+                                uiOutput("remove.columns"))
+            ),
 
             ##  "Quick Explore" tab.
             navbarMenu("Advanced",
                        tabPanel("Quick explore",
                                 uiOutput("quick.explore")),
                        tabPanel("Time Series",
-                                uiOutput("timeseries.panel")))#,
-#             navbarMenu("Quick explore",
-#                       tabPanel("Data Summary",
-#                                uiOutput("quick.summary")),
-#                       tabPanel("Single column plot",
-#                                uiOutput("single.column.plot")),
-#                       tabPanel("Column Pair plot",
-#                                uiOutput("column.pair.plot")),
-#                       tabPanel("Compare pairs",
-#                                uiOutput("matrix.plot"))
-#                       ),      
+                                uiOutput("timeseries.panel"))
+            ),
+            navbarMenu("Quick explore",
+                      tabPanel("Data Summary",
+                               uiOutput("quick.summary")),
+                      tabPanel("Single column plot",
+                               uiOutput("single.column.plot")),
+                      tabPanel("Column Pair plot",
+                               uiOutput("column.pair.plot")),
+                      tabPanel("Compare pairs",
+                               uiOutput("matrix.plot"))
+                      )#,      
             ##  "Help" tab.
 #             tabPanel("Help",
 #                      uiOutput("help.panel"))

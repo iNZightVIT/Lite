@@ -5,7 +5,7 @@ restore.data.sidebar =  function(){
     br())
 }
 
-restore.data =function(){
+restore.data.panel = function(){
   if(is.null(data)){
     sidebarLayout(
       sidebarPanel(help.display('Restore data','restore_data_help',"gui-elements/notes/restore.data.md")),

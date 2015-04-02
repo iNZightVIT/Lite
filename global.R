@@ -1,6 +1,74 @@
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
+#'Combine the levels of factor variables.
+#'
+#' @param dafr The dataframe containing factor columns 
+#' specified in columns.
+#' @param columns The column names of the columns in dafr 
+#' to combine.
+#' 
+#' @return A data.frame with one additional column as dafr,
+#' which contains the combined levels.
+#' 
+#' @author Christoph Knapp
+combine.levels = function(dafr,columns){
+  new.column = do.call(paste,lapply(columns,function(name,d){
+      d[,name]
+    },dafr))
+  dafr = cbind(dafr,gsub(" ",".",new.column))
+  colnames(dafr)[ncol(dafr)] = paste(columns,collapse=".")
+  dafr
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' Renames the levels of a factor.
+#'
+#' @param dafr A data.frame of the data to change.
+#' @param column The column name of the column to change.
+#' @param new.levels A character variabel of the length of 
+#' the number of factors of the column to change. This 
+#' vector contains the new levels.
+#'
+#' @return A data.frame where the levels of the specified 
+#' columns are changed.
+#' 
+#' @author Christoph Knapp
+rename.levels = function(dafr,column,new.levels){
+  temp = as.character(dafr[,column])
+  for(i in 1:length(levels(dafr[,column]))){
+    temp[which(dafr[,column]%in%levels(dafr[,column])[i])] = new.levels[i]
+  }
+  dafr[,column] = factor(temp,levels=new.levels)
+  dafr
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' This function changes the order of levels in the data.
+#' 
+#' @param dafr The data to be changed
+#' @param column the factor column where the order of 
+#' levels should be changed.
+#' @param levels.new A vector of all levels in the column 
+#' specified by column in the order they should be 
+#' ordered.
+#' 
+#' @return A data.frame with the levels of one column 
+#' reordered
+#' 
+#' @author Christoph Knapp
+reorder.levels = function(dafr,column,levels.new){
+  dafr[,column] = factor(dafr[,column],levels=levels.new)
+  dafr
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
 #' Collapses selected levels in factor vector
 #' 
 #' @param column the vector where levels should be 
@@ -153,10 +221,23 @@ sort.data = function(vars,sort.type,df){
   df[order.overwrite(z),]
 }
 
-#' version of the order function which lets you pass in a list of 
-#' vectors to order instead of the ... argument. It is shortened 
-#' and might be therefore not as stable as the original order 
-#' function.
+#' The iNZight version of the order function which lets you pass 
+#' in a list of vectors to order instead of the ... argument. It 
+#' is shortened and might be therefore not as stable as the 
+#' original order function.
+#' 
+#' @param z a sequence of numeric, complex, character or logical 
+#' vectors, all of the same length, or a classed R object.
+#' @param na.last for controlling the treatment of NAs. If TRUE, 
+#' missing values in the data are put last; if FALSE, they are 
+#' put first; if NA, they are removed (see ‘Note’.)
+#' @param decreasing logical. Should the sort order be increasing 
+#' or decreasing?
+#' 
+#' @note This function is only called in sort.data but needs to be 
+#' available to sort.data
+#' 
+#' @author Christoph Knapp
 order.overwrite = function (z, na.last = TRUE, decreasing = FALSE) {
   if (any(diff(l.z <- vapply(z, length, 1L)) != 0L)) 
     stop("argument lengths differ")
