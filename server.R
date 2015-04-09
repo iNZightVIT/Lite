@@ -71,7 +71,7 @@ shinyServer(function(input, output, session) {
     ##---------------------##
     source("panels/1_About/1_about-panel-ui.R")
     output$about.panel <- renderUI({
-        about.panel.ui()
+        about.panel.ui(get.lite.version(),get.lite.update())
     })
     ## "Current data" - presents currently selected data to user.
     output$current.text <- renderText({
@@ -1516,6 +1516,6 @@ shinyServer(function(input, output, session) {
     source("panels/7_Help/1_help-panel-ui.R", local = TRUE)
     output$help.panel <- renderUI({
         input$selector
-        help.panel.ui()
+        help.panel.ui(get.lite.version(),get.lite.update())
     })
 })

@@ -12,7 +12,7 @@
 
 ###  The code in this file is more or less identical to the panel UI
 ###  file for the "About" panel.
-help.panel.ui  = function() {
+help.panel.ui  = function(lite.version,lite.update) {
     ##  We manually set the page width to be 10 columns so that it looks
     ##  (rougly) centred.
     fixedPage(
