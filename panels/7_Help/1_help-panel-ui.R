@@ -33,9 +33,9 @@ help.panel.ui  = function(lite.version,lite.update) {
                ##  much effort to update the version number more than once.
                ##  Fortune favours the lazy. The same logic applies to
                ##  "lite.update".
-               p(em(lite.version,
+               p(em(lite.version)),
                  br(),
-                 em(lite.update,
+                 em(lite.update),
                  style = 'color:gray',
                  align = 'right')
                ),
