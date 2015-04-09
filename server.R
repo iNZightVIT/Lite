@@ -1186,38 +1186,12 @@ shinyServer(function(input, output, session) {
         remove.columns.panel(get.data.set())
     })
 
-#     output$quick.summary = renderUI({
-#         input$selector
-#         quick.summary.panel()
-#     })
-# 
-#     ##  Quick Explore -> Single column plot : Generate a plot of a single column in the data 
-# 
-#     output$single.column.plot = renderUI({
-#         input$selector
-#         single.column.plot.panel()
-#     })
-#     ##  Quick Explore -> Column pair plot : Generate a plot of all possible pairs of columns
-# 
-#     output$column.pair.plot = renderUI({
-#         input$selector
-#         column.pair.plot.panel()
-#     })
-# 
-#     ##  Quick Explore -> Compare pairs : Generate plots of all possible pairs of columns
-# 
-#     output$matrix.plot = renderUI({
-#         input$selector
-#         matrix.plot.panel()
-#     })
-
     ##--------------------##
     ##  Visualize Module  ##
     ##--------------------##
     source("panels/5_Visualize/1_visualize-panel-ui.R", local = TRUE)
     source("panels/5_Visualize/2_visualize-panel-server.R", local = TRUE)
     output$visualize.panel <- renderUI({
-        #input$selector
         visualize.panel.ui(get.data.set())
     })
 
@@ -1242,17 +1216,14 @@ shinyServer(function(input, output, session) {
 #   Advanced --> Quick explore --> Data summary
 
   output$quick.summary.side = renderUI({
-#     input$selector
     get.quick.summary.sidebar(get.data.set())
   })
   
   output$quick.summary.main = renderUI({
-#     input$selector
     get.quick.summary.main()
   })
 
   output$all.summary = renderPrint({
-#     input$selector
     data.summary(get.data.set())
   })
   
