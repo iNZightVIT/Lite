@@ -1,7 +1,7 @@
-combine.sidebar.panel =  function(){
+combine.sidebar.panel =  function(data.set){
   choices1 = c()
-  if(!is.null(data)&&!is.null(ncol(data))&&ncol(data)>0){
-    choices1 = get.categorical.column.names()
+  if(!is.null(data.set)&&!is.null(ncol(data.set))&&ncol(data.set)>0){
+    choices1 = get.categorical.column.names(data.set)
   }else{
     choices1 = c()
   }

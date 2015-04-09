@@ -28,11 +28,11 @@
 
 ts.data = reactive({
     validate(
-        need(!is.null(data), "Please select a data set!"),
+        need(!is.null(get.data.set()), "Please select a data set!"),
         need(length(input$select_variables) >= 1,
              "Please choose one or more variables!"),
         errorClass = "myClass")
-    ts.data = data
+    ts.data = get.data.set()
 })
 
 

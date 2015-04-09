@@ -16,6 +16,47 @@ library(gpairs)
 
 ### We write the server function.
 shinyServer(function(input, output, session) {
+  
+  ##Specify all the reactive values
+  
+  get.data.name = reactive({
+    values$data.name
+  })
+  
+  get.data.dir = reactive({
+    values$data.dir
+  })
+
+  get.data.set = reactive({
+    values$data.set
+  })
+  
+  get.data.restore = reactive({
+    values$data.restore
+  })
+  
+  get.lite.version = reactive({
+    values$lite.version
+  })
+  
+  get.lite.update = reactive({
+    values$lite.update
+  })
+  
+  get.button = reactive({
+    values$button
+  })
+  
+  get.transform.text = reactive({
+    values$transform.text
+  })
+  
+  get.dataHasChanged = reactive({
+    values$dataHasChanged
+  })
+  
+  #################################
+  
     ##  Turn errors and warnings off
     ## options(warn = -1, show.error.messages = FALSE)
     
@@ -35,8 +76,8 @@ shinyServer(function(input, output, session) {
     ## "Current data" - presents currently selected data to user.
     output$current.text <- renderText({
         input$selector
-        if (!is.null(data)) {
-            paste0("Current selected data: ", data.name)
+        if (!is.null(get.data.set())) {
+            paste0("Current selected data: ", get.data.name())
         } else {
             "No data selected!"
         }
@@ -46,7 +87,7 @@ shinyServer(function(input, output, session) {
     })
     output$current <- renderDataTable({
         input$selector
-        data
+        get.data.set()
     }, options =
         list(lengthMenu = c(10, 30, 50), pageLength = 10,
              columns.defaultContent = "NA", scrollX = TRUE))
@@ -55,7 +96,7 @@ shinyServer(function(input, output, session) {
       if (is.null(input[[input$data_select]])){
         "No data to select!"
       } else {
-        temp = load.data(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
+        temp = load.data(get.data.dir(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
                          [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
         if(is.null(temp[[1]])&is.null(temp[[2]])) {
           "No data to select!"
@@ -73,8 +114,8 @@ shinyServer(function(input, output, session) {
     col_names_show_reac <- reactive({
         input$change_set
         input$selector
-        if (!is.null(data) && !is.null(data.name)) {
-            paste("Column names: ", paste(colnames(data), collapse = ", "))
+        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+            paste("Column names: ", paste(colnames(get.data.set()), collapse = ", "))
         } else {
             ""
         }
@@ -89,8 +130,8 @@ shinyServer(function(input, output, session) {
     change_col_dim_reac <- reactive({
         input$change_set
         input$selector
-        if (!is.null(data) && !is.null(data.name)) {
-            paste("Selected data number of columns is: ", dim(data)[2])
+        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+            paste("Selected data number of columns is: ", dim(get.data.set())[2])
         } else {
             ""
         }
@@ -106,8 +147,8 @@ shinyServer(function(input, output, session) {
     change_row_dim_reac <- reactive({
         input$change_set
         input$selector
-        if (!is.null(data) && !is.null(data.name)) {
-            paste("Selected data number of rows is: ", dim(data)[1])
+        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+            paste("Selected data number of rows is: ", dim(get.data.set())[1])
         } else {
             ""
         }
@@ -122,8 +163,8 @@ shinyServer(function(input, output, session) {
     change_data_name_reac <- reactive({
         input$change_set
         input$selector
-        if (!is.null(data) && !is.null(data.name)) {
-            paste("Selected data set: ", data.name)
+        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+            paste("Selected data set: ", get.data.name())
         } else {
             "No data selected!"
         }
@@ -140,14 +181,14 @@ shinyServer(function(input, output, session) {
         isolate({
           if (!is.null(input[[input$data_select]])&&input$change_set > 0) {
             new.data =
-                load.data(strsplit(input[[input$data_select]],
+                load.data(get.data.dir(),strsplit(input[[input$data_select]],
                                    "==>", fixed = TRUE)[[1]]
                           [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
-            data.name <<- new.data[[1]]
+            values$data.name = new.data[[1]]
             new.data = new.data[[2]]
-            data <<- new.data
-            data.restore <<- data
-            loaded <<- F
+            values$data.set = new.data
+            values$data.restore = get.data.set()
+#            loaded <<- F
           }
         })
       }
@@ -164,7 +205,7 @@ shinyServer(function(input, output, session) {
 
     output$temp_table = renderDataTable({
       if (!is.null(input[[input$data_select]])){
-        load.data(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
+        load.data(get.data.dir(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
       } else {
           NULL
       }
@@ -177,17 +218,17 @@ shinyServer(function(input, output, session) {
       if(!is.null(input$import_set)&&input$import_set>0){
         isolate({
           if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
-            data <<- load.data(fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
-            data.restore <<- data
+            values$data.set <<- load.data(get.data.dir(),fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
+            values$data.restore <<- get.data.set()
             temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
             if(length(temp)>1){
               temp = temp[1:(length(temp)-1)]
             } 
-            data.name <<- paste(temp,collapse=".")
+            values$data.name = paste(temp,collapse=".")
             if (!file.exists("data/Imported")) {
               dir.create("data/Imported", recursive = TRUE)
             }
-            saveRDS(data,file = paste0("data/Imported/", data.name, ".RDS"))
+            saveRDS(get.data.set(),file = paste0("data/Imported/", get.data.name(), ".RDS"))
 #             print(input$files[1, "datapath"])
 #             unlink(input$files[1, "datapath"])
           }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
@@ -199,10 +240,10 @@ shinyServer(function(input, output, session) {
             }
             tryCatch({
               download.file(url=URL,destfile=paste0("data/Imported/",name),method="wget")
-              temp = load.data(fileID = name, path = paste0("data/Imported/",name))
-              data <<- temp[[2]]
-              data.restore <<- data
-              data.name <<- name
+              temp = load.data(get.data.dir(),fileID = name, path = paste0("data/Imported/",name))
+              values$data.set = temp[[2]]
+              values$data.restore <<- get.data.set()
+              values$data.name = name
             },error = function(e){
               if(file.exists(paste0("data/Imported/",name))){
                 unlink(paste0("data/Imported/",name))
@@ -230,7 +271,7 @@ shinyServer(function(input, output, session) {
         input$import_set
         isolate({
           if (!is.null(input$files)&&file.exists(input$files[1, "datapath"])) {
-            load.data(fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
+            load.data(get.data.dir(),fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
           } else if (!is.null(input$URLtext)&&!input$URLtext%in%"") {
             URL = input$URLtext
             name = strsplit(URL,"/")[[1]]
@@ -239,7 +280,7 @@ shinyServer(function(input, output, session) {
               dir.create("data/Imported", recursive = TRUE)
             }
             if(file.exists(paste0("data/Imported/",name))){
-              return(data)
+              return(get.data.set())
             }
             NULL
           }else{
@@ -258,7 +299,7 @@ shinyServer(function(input, output, session) {
                              pattern = input$Importedremove,
                              full.names = TRUE)
           if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])&&
-               grepl(data.name,files[1, "name"])){
+               grepl(get.data.name(),input$files[1, "name"])){
             unlink(input$files[1, "datapath"])
           }
           for(f in files){
@@ -273,32 +314,31 @@ shinyServer(function(input, output, session) {
     ##  Data -> Export data (export the currently used data set)
 
     output$save.data.panel = renderUI({
-      input$selector
-      save.data.panel()
+      #input$selector
+      save.data.panel(get.data.set())
     })
 
     output$save_table = renderDataTable({
-      data
+      get.data.set()
     }, options =
       list(lengthMenu = c(5, 30, 50), pageLength = 5,
            columns.defaultContent = "NA", scrollX = TRUE))
 
     output$downloadData <- downloadHandler(
-      filename = function() { 
-        paste(data.name,".",input$select_filetype, sep='')
+      filename = function() {
+        print(paste(get.data.name(),".",input$select_filetype, sep=''))
+        paste(get.data.name(),".",input$select_filetype, sep='')
       },
       content = function(file) {
         type = input$select_filetype
-        if(!is.null(data)){
-          if(type%in%"txt"&&!is.null(data)){
-            write.table(data, file, quote=F,row.names=F,sep="\t")
-          }else if(type%in%"csv"&&!is.null(data)){
-            write.table(data, file, quote=F,row.names=F,sep=",")
-          }else if(type%in%"RData"&&!is.null(data)){
-            save(data,file=file)
-          }else if(type%in%"RDS"&&!is.null(data)){
-            saveRDS(data,file=file)
-          }
+        if(type%in%"txt"&&!is.null(get.data.set())){
+          write.table(get.data.set(), file, quote=F,row.names=F,sep="\t")
+        }else if(type%in%"csv"&&!is.null(get.data.set())){
+          write.table(get.data.set(), file, quote=F,row.names=F,sep=",")
+        }else if(type%in%"RData"&&!is.null(get.data.set())){
+          save(get.data.set(),file=file)
+        }else if(type%in%"RDS"&&!is.null(get.data.set())){
+          saveRDS(get.data.set(),file=file)
         }
       }
     )
@@ -314,7 +354,7 @@ shinyServer(function(input, output, session) {
 
     output$removetable <- renderDataTable({
       if(!is.null(input$Importedremove)){
-        load.data(input$Importedremove)[[2]]
+        load.data(get.data.dir(),input$Importedremove)[[2]]
       } else {
           NULL
       }
@@ -328,7 +368,7 @@ shinyServer(function(input, output, session) {
     input$select.columns.transform
     input$select.transform
     isolate({
-      transform.tempTable(input$select.transform,input$select.columns.transform)
+      transform.tempTable(get.data.set(),input$select.transform,input$select.columns.transform)
     })
   })
   
@@ -336,7 +376,9 @@ shinyServer(function(input, output, session) {
   #       input$select.columns.transform
   #       input$select.transform
     isolate({
-      transform.perform(input$select.transform,input$select.columns.transform)
+      transform.perform(get.data.set(),
+                        input$select.transform,
+                        input$select.columns.transform)
     })
   })
   
@@ -344,10 +386,10 @@ shinyServer(function(input, output, session) {
     input$transform
     isolate({
       if(!is.null(input$transform)&&input$transform>0){
-        data <<- perform.transform()
+        values$data.set = perform.transform()
         updateSelectInput(session, inputId="select.columns.transform", 
-                          choices=colnames(data), selected=input$select.columns.transform)
-        dataHasChanged <<- T
+                          choices=colnames(get.data.set()), selected=input$select.columns.transform)
+        values$dataHasChanged = T
       }
     })
   })
@@ -361,19 +403,19 @@ shinyServer(function(input, output, session) {
       input$select.columns.transform
       input$select.transform
       isolate({
-        transform.text = ""
-        if(dataHasChanged){
-          transform.text = "The transformation  of the columns was successful."
+        values$transform.text = ""
+        if(get.dataHasChanged()){
+          values$transform.text = "The transformation  of the columns was successful."
         }
-        dataHasChanged <<- F
-        transform.text
+        values$dataHasChanged = F
+        get.transform.text()
       })
   })
   
   output$transform.columns =renderUI({
-      input$selector
+#       input$selector
   #         input$transform
-      transform.data.panel()
+      transform.data.panel(get.data.set())
   })
 
   ##  Row operations (Perform row operations) --> Filter Dataset
@@ -384,13 +426,13 @@ shinyServer(function(input, output, session) {
       if(!is.null(input$filter_data_perform)&&input$filter_data_perform>0){
         if(input$select_filter%in%"levels of categorical variable"){
           if(!is.null(input$select_categorical1)&&!input$select_categorical1%in%""){
-            to.remove = which(data[,which(colnames(data)%in%input$select_categorical1)]%in%input$levels1)
+            to.remove = which(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]%in%input$levels1)
             if(length(to.remove)>0){
-              data <<- data[-to.remove,]
-              data[,which(colnames(data)%in%input$select_categorical1)] <<- 
-                droplevels(data[,which(colnames(data)%in%input$select_categorical1)])
+              values$data.set = get.data.set()[-to.remove,]
+              values$data.set[,which(colnames(get.data.set())%in%input$select_categorical1)] = 
+                droplevels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])
               updateSelectInput(session=session,inputId="select_categorical1",
-                                choices=c("",get.categorical.column.names()),
+                                choices=c("",get.categorical.column.names(get.data.set())),
                                 selected=1)
               updateSelectInput(session=session,inputId="levels1",
                                 choices="",selected=1)
@@ -398,38 +440,38 @@ shinyServer(function(input, output, session) {
           }
         }else if(input$select_filter%in%"numeric condition"){
           if(!input$select_numeric1%in%""&!input$select_operation1%in%""&is.convertable.numeric(input$numeric_input1)){
-            indexes.keep = 1:nrow(data)
+            indexes.keep = 1:nrow(get.data.set())
             if(input$select_operation1%in%"<"){
-              indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]<as.numeric(input$numeric_input1)))
+              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]<as.numeric(input$numeric_input1)))
             }else if(input$select_operation1%in%">"){
-              indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]>as.numeric(input$numeric_input1)))
+              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]>as.numeric(input$numeric_input1)))
             }else if(input$select_operation1%in%"<="){
-              indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]<=as.numeric(input$numeric_input1)))
+              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]<=as.numeric(input$numeric_input1)))
             }else if(input$select_operation1%in%">="){
-              indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]>=as.numeric(input$numeric_input1)))
+              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]>=as.numeric(input$numeric_input1)))
             }else if(input$select_operation1%in%"=="){
-              indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]==as.numeric(input$numeric_input1)))
+              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]==as.numeric(input$numeric_input1)))
             }else if(input$select_operation1%in%"!="){
-              indexes.keep = which((data[,which(colnames(data)%in%input$select_numeric1)]!=as.numeric(input$numeric_input1)))
+              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]!=as.numeric(input$numeric_input1)))
             }
-            data <<- data[indexes.keep,]
+            values$data.set <<- get.data.set()[indexes.keep,]
           }
         }else if(input$select_filter%in%"row indices"){
           if(is.convertable.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]])){
             indices = as.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]])
-            indices = indices[which(indices%in%(1:nrow(data)))]
+            indices = indices[which(indices%in%(1:nrow(get.data.set())))]
             if(length(indices)>0){
-              data <<- data[-indices,] 
+              values$data.set = get.data.set()[-indices,] 
             }
           }
         }else if(input$select_filter%in%"randomly"){
           if(is.convertable.numeric(input$numeric_input2)&&
                is.convertable.numeric(input$numeric_input3)&&
-               as.numeric(input$numeric_input2)<=nrow(data)&&
-               (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(data)&
+               as.numeric(input$numeric_input2)<=nrow(get.data.set())&&
+               (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(get.data.set())&
                    input$bootstrap_check)|
-                  (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(data))){
-            data <<- sample.data(df=data,
+                  (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(get.data.set()))){
+            values$data.set = sample.data(df=get.data.set(),
                                  sampleSize=as.numeric(input$numeric_input2),
                                  numSample=as.numeric(input$numeric_input3),
                                  bootstrap=input$bootstrap_check)
@@ -446,15 +488,15 @@ shinyServer(function(input, output, session) {
     isolate({
       if(is.convertable.numeric(input$numeric_input2)&&
            is.convertable.numeric(input$numeric_input3)&&
-           as.numeric(input$numeric_input2)<=nrow(data)&&
-           (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(data)&
+           as.numeric(input$numeric_input2)<=nrow(get.data.set())&&
+           (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(get.data.set())&
                input$bootstrap_check)|
-              (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(data))){
+              (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(get.data.set()))){
         cat("Size of sample: ",input$numeric_input2,"\n",
             "Number of sample: ", input$numeric_input3)
       }else{
         cat("This input can not be processed. The data has ",
-            nrow(data)," rows.")
+            nrow(get.data.set())," rows.")
       }
     })
   })
@@ -464,7 +506,7 @@ shinyServer(function(input, output, session) {
     isolate({
       if(!is.null(input$select_categorical1)){
         updateSelectInput(session=session,inputId="levels1",
-                             choices=levels(data[,which(colnames(data)%in%input$select_categorical1)]))
+                             choices=levels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]))
       }
     })
   })
@@ -497,13 +539,13 @@ shinyServer(function(input, output, session) {
     input$selector
     input$filter_data_perform
     isolate({
-      data.summary()
+      data.summary(get.data.set())
     })
   })
   
   output$filter.dataset = renderUI({
-    input$selector
-    filter.data.panel()
+#     input$selector
+    filter.data.panel(get.data.set())
   })
 
   ##  Row operations (Perform row operations) --> Sort data by variables
@@ -530,7 +572,7 @@ shinyServer(function(input, output, session) {
           vars = vars[-empties]
           sort.type =sort.type[-empties]
         }
-        data <<- sort.data(vars,sort.type,data)
+        values$data.set <<- sort.data(vars,sort.type,get.data.set())
       }
     })
   })
@@ -538,20 +580,20 @@ shinyServer(function(input, output, session) {
   output$sort.table = renderDataTable({
     input$selector
     input$sort_vars
-    data
+    get.data.set()
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
   output$sort.variables = renderUI({
     input$selector
     isolate({
-      sort.variables()
+      sort.variables(get.data.set())
     })
   })
   
   output$num.select = renderUI({
     input$num_columns_sort
     isolate({
-      num.select.panel(input$num_columns_sort)
+      num.select.panel(input$num_columns_sort,get.data.set())
     })
   })
 
@@ -571,9 +613,9 @@ shinyServer(function(input, output, session) {
         if(length(rem)>0){
           methods = methods[-rem]
         }
-        if(length(vars)>0&length(methods)>0&!is.null(data)){
-          data <<- aggregate.data(aggregate.over=unique(vars),methods=methods,dafr=data)
-          updateSelectInput(session,"aggros",selected=0,choices=get.categorical.column.names())
+        if(length(vars)>0&length(methods)>0&!is.null(get.data.set())){
+          values$data.set = aggregate.data(aggregate.over=unique(vars),methods=methods,dafr=get.data.set())
+          updateSelectInput(session,"aggros",selected=0,choices=get.categorical.column.names(get.data.set()))
           updateSelectInput(session,"aggregate.method",selected=0)
         }
       }
@@ -581,16 +623,11 @@ shinyServer(function(input, output, session) {
   })
 
   output$aggregate.variable = renderUI({
-    input$selector
-    isolate({
-      aggregate.variable()
-    })
+    aggregate.variable(get.data.set())
   })
 
   output$aggregate.table = renderDataTable({
-    input$aggregate_vars
-    input$selector
-    data
+    get.data.set()
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, 
                  columns.defaultContent="NA",scrollX=T))
 
@@ -601,10 +638,10 @@ shinyServer(function(input, output, session) {
     isolate({
       if(!is.null(input$stack_vars)&&input$stack_vars>0&&
            !is.null(input$stack_vars_column)){
-        data <<- stack.variables.perform(input$stack_vars_column,data)
+        values$data.set = stack.variables.perform(input$stack_vars_column,get.data.set())
         updateSelectInput(session,"stack_vars_which",selected=0)
         updateSelectInput(session,inputId="stack_vars_column",
-                          choices=get.categorical.column.names(),
+                          choices=get.categorical.column.names(get.data.set()),
                           selected=0)
       }
     })
@@ -616,11 +653,11 @@ shinyServer(function(input, output, session) {
       if(!is.null(input$stack_vars_which)&&!""%in%input$stack_vars_which){
         if("categorical"%in%input$stack_vars_which){
           updateSelectInput(session,inputId="stack_vars_column",
-                            choices=get.categorical.column.names(),
+                            choices=get.categorical.column.names(get.data.set()),
                             selected=1)
         }else{
           updateSelectInput(session,inputId="stack_vars_column",
-                            choices=get.numeric.column.names(),
+                            choices=get.numeric.column.names(get.data.set()),
                             selected=1)
         }
       }
@@ -628,14 +665,14 @@ shinyServer(function(input, output, session) {
   })
 
   output$stack.table = renderDataTable({
-    input$selector
-    input$stack_vars
-    data
+#     input$selector
+#     input$stack_vars
+    get.data.set()
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
   output$stack.variables = renderUI({
-    input$selector
-    stack.variables.panel()
+#     input$selector
+    stack.variables.panel(get.data.set())
   })
 
   ##  Row operations (Perform row operations) --> Restore data
@@ -644,69 +681,96 @@ shinyServer(function(input, output, session) {
     input$restore_data_button
     isolate({
       if(!is.null(input$restore_data_button)&&input$restore_data_button>0){
-        data <<- data.restore
+        values$data.set = get.data.restore()
       }
     })
   })
   
   output$data.restore.table = renderDataTable({
     input$restore_data_button
-    data
+    get.data.set()
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
   output$restore.data = renderUI({
-#     input$selector
-    restore.data.panel()
+    restore.data.panel(get.data.set())
   })
 
-  ## Manipulate variables
+  ## Manipulate variables --> Categorical variables
 
   output$categorical.variables = renderUI({
-    categorical.variables.panel()
+    get.data.set()
+    isolate({
+      if(input$selector%in%"Categorical variables"){
+        categorical.variables.panel(input$categorical_variables_select,get.data.set())
+      }
+    })
   })
 
   output$categorical.main.panel = renderUI({
-    if(!is.null(input$categorical_variables_select)&&
-         input$categorical_variables_select%in%"Reorder levels"){
-      reorder.main.panel()
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Collapse levels"){
-      collapse.main.panel()
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Rename levels"){
-      rename.levels.main.panel()
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Combine categorical"){
-      combine.main.panel()
-    }
+    input$categorical_variables_select
+    isolate({
+      if(!is.null(input$categorical_variables_select)&&
+           input$categorical_variables_select%in%"Reorder levels"){
+        reorder.main.panel()
+      }else if(!is.null(input$categorical_variables_select)&&
+                 input$categorical_variables_select%in%"Collapse levels"){
+        collapse.main.panel()
+      }else if(!is.null(input$categorical_variables_select)&&
+                 input$categorical_variables_select%in%"Rename levels"){
+        rename.levels.main.panel()
+      }else if(!is.null(input$categorical_variables_select)&&
+                 input$categorical_variables_select%in%"Combine categorical"){
+        combine.main.panel()
+      }
+    })
+  })
+
+  output$categorical.side.panel = renderUI({
+    input$categorical_variables_select
+    get.data.set()
+    isolate({
+      if(!is.null(input$categorical_variables_select)&&
+           input$categorical_variables_select%in%"Reorder levels"){
+        reorder.sidebar.panel(get.data.set())
+      }else if(!is.null(input$categorical_variables_select)&&
+                 input$categorical_variables_select%in%"Collapse levels"){
+        collapse.sidebar.panel(get.data.set())
+      }else if(!is.null(input$categorical_variables_select)&&
+                 input$categorical_variables_select%in%"Rename levels"){
+        rename.levels.sidebar.panel(get.data.set())
+      }else if(!is.null(input$categorical_variables_select)&&
+                 input$categorical_variables_select%in%"Combine categorical"){
+        combine.sidebar.panel(get.data.set())
+      }
+    })
   })
 
   ## Manipulate variables --> Categorical variables --> Reorder levels
 
-  output$reorder.levels.side = renderUI({
-    input$selector
-    isolate({
-      if(input$categorical_variables_select%in%"Reorder levels"&
-           input$selector%in%"Categorical variables"){
-        reorder.sidebar.panel()
-      }
-    })
-  })
+#   output$reorder.levels.side = renderUI({
+#     input$selector
+#     isolate({
+#       if(input$categorical_variables_select%in%"Reorder levels"&
+#            input$selector%in%"Categorical variables"){
+#         reorder.sidebar.panel()
+#       }
+#     })
+#   })
 
   observe({
     input$reorder
     isolate({
       items = input$select.reorder.item
       if(!is.null(items)&!is.null(input$select.reorder.column)){
-        column = data[,input$select.reorder.column]
+        column = get.data.set()[,input$select.reorder.column]
         if(length(items)<length(unique(column))){
-          not.in = sort(unique(data[,input$select.reorder.column])
-                        [which(!unique(data[,input$select.reorder.column])%in%items)])
+          not.in = sort(unique(get.data.set()[,input$select.reorder.column])
+                        [which(!unique(get.data.set()[,input$select.reorder.column])%in%items)])
           levels.new = c(items,as.character(not.in))
         }else{
           levels.new = items
         }
-        data <<- reorder.levels(data,input$select.reorder.column,levels.new)
+        values$data.set = reorder.levels(get.data.set(),input$select.reorder.column,levels.new)
         updateSelectInput(session=session,inputId="select.reorder.item",selected="",choices="")
         updateSelectInput(session=session,inputId="select.reorder.column",selected="")
       }
@@ -715,7 +779,7 @@ shinyServer(function(input, output, session) {
 
   output$text_reorder = renderPrint({
       if(!is.null(input$select.reorder.column)&&!""%in%input$select.reorder.column){
-          print(table(data[,input$select.reorder.column]))
+          print(table(get.data.set()[,input$select.reorder.column]))
       }else{
           print("Select a column!")
       }
@@ -725,10 +789,10 @@ shinyServer(function(input, output, session) {
       if(!is.null(input$select.reorder.column)){
           choices=""
           if(!"" %in% input$select.reorder.column){
-              if(is.factor(data[,input$select.reorder.column])){
-                  choices = levels(data[,input$select.reorder.column])
+              if(is.factor(get.data.set()[,input$select.reorder.column])){
+                  choices = levels(get.data.set()[,input$select.reorder.column])
               }else{
-                  choices = levels(as.factor(data[,input$select.reorder.column]))
+                  choices = levels(as.factor(get.data.set()[,input$select.reorder.column]))
               }
           }
           updateSelectInput(session=session,inputId="select.reorder.item",selected="",choices=choices)
@@ -739,24 +803,24 @@ shinyServer(function(input, output, session) {
 
   ## Manipulate variables --> Categorical variables --> Collapse levels
 
-  output$collapse.levels.side = renderUI({
-    input$selector
-    isolate({
-      if(input$categorical_variables_select%in%"Collapse levels"&
-           input$selector%in%"Categorical variables"){
-        collapse.sidebar.panel()
-      }
-    })
-  })
+#   output$collapse.levels.side = renderUI({
+#     input$selector
+#     isolate({
+#       if(input$categorical_variables_select%in%"Collapse levels"&
+#            input$selector%in%"Categorical variables"){
+#         collapse.sidebar.panel()
+#       }
+#     })
+#   })
 
   observe({
     if(!is.null(input$select.collapse.column)){
       choices=""
       if(!"" %in% input$select.collapse.column){
-        if(is.factor(data[,input$select.collapse.column])){
-          choices = levels(data[,input$select.collapse.column])
+        if(is.factor(get.data.set()[,input$select.collapse.column])){
+          choices = levels(get.data.set()[,input$select.collapse.column])
         }else{
-          choices = levels(as.factor(data[,input$select.collapse.column]))
+          choices = levels(as.factor(get.data.set()[,input$select.collapse.column]))
         }
       }
       updateSelectInput(session=session,inputId="select.collapse.item",selected="",choices=choices)
@@ -766,7 +830,7 @@ shinyServer(function(input, output, session) {
   output$text_collapse_1st = renderPrint({
     input$collapse
     if(!is.null(input$select.collapse.column)&&!""%in%input$select.collapse.column){
-      print(table(data[,input$select.collapse.column]))
+      print(table(get.data.set()[,input$select.collapse.column]))
     }else{
       print("Select a column!")
     }
@@ -776,7 +840,7 @@ shinyServer(function(input, output, session) {
     input$collapse
     if(!is.null(input$select.collapse.column)&&!""%in%input$select.collapse.column&&
          !is.null(input$select.collapse.item)&&!""%in%input$select.collapse.item){
-      print(table(get.collapsed.column(data[,input$select.collapse.column],input$select.collapse.item)))
+      print(table(get.collapsed.column(get.data.set()[,input$select.collapse.column],input$select.collapse.item)))
     }else{
       print("")
     }
@@ -785,10 +849,10 @@ shinyServer(function(input, output, session) {
   observe({
     input$collapse
     isolate({
-      if(!is.null(input$collapse)&&input$collapse>0&&input$select.collapse.column%in%colnames(data)){
-        if(any(input$select.collapse.item%in%data[,which(colnames(data)%in%input$select.collapse.column)])){
-          data[,which(colnames(data)%in%input$select.collapse.column)] <<- get.collapsed.column(
-            data[,which(colnames(data)%in%input$select.collapse.column)],
+      if(!is.null(input$collapse)&&input$collapse>0&&input$select.collapse.column%in%colnames(get.data.set())){
+        if(any(input$select.collapse.item%in%get.data.set()[,which(colnames(get.data.set())%in%input$select.collapse.column)])){
+          values$data.set()[,which(colnames(get.data.set())%in%input$select.collapse.column)] = get.collapsed.column(
+            get.data.set()[,which(colnames(get.data.set())%in%input$select.collapse.column)],
             input$select.collapse.item)
           updateSelectInput(session,"select.collapse.column",selected=1)
         }
@@ -798,31 +862,32 @@ shinyServer(function(input, output, session) {
 
   ## Manipulate variables --> Categorical variables --> Rename levels
 
-  output$rename.levels.side = renderUI({
-    input$selector
-    isolate({
-      if(input$categorical_variables_select%in%"Rename levels"&
-           input$selector%in%"Categorical variables"){
-        rename.levels.sidebar.panel()
-      }
-    })
-  })
+#   output$rename.levels.side = renderUI({
+#     input$selector
+#     isolate({
+#       if(input$categorical_variables_select%in%"Rename levels"&
+#            input$selector%in%"Categorical variables"){
+#         rename.levels.sidebar.panel()
+#       }
+#     })
+#   })
 
   output$rename.factors.inputs = renderUI({
     input$select.rename.column
+    get.data.set()
     isolate({
       if(!is.null(input$select.rename.column)&&!input$select.rename.column%in%""){
-        rename.factors.textfields(levels(data[,input$select.rename.column]))
+        rename.factors.textfields(levels(get.data.set()[,input$select.rename.column]))
       }
     })
   })
 
   output$text_rename = renderPrint({
-    input$selector
     input$select.rename.column
+    get.data.set()
     isolate({
       if(!is.null(input$select.rename.column)&&!input$select.rename.column%in%""){
-        print(summary(data[,input$select.rename.column]))
+        print(summary(get.data.set()[,input$select.rename.column]))
       }else{
         print("")
       }
@@ -838,10 +903,10 @@ shinyServer(function(input, output, session) {
         for(i in 1:length(indexes1)){
           new.levels[i] = input[[names(input)[indexes1[i]]]]
           if(is.null(new.levels[i])||new.levels[i]%in%""){
-            new.levels[i] = levels(data[,input$select.rename.column])[i]
+            new.levels[i] = levels(get.data.set()[,input$select.rename.column])[i]
           }
         }
-        data <<- rename.levels(data,input$select.rename.column,new.levels)
+        values$data.set <<- rename.levels(get.data.set(),input$select.rename.column,new.levels)
         updateSelectInput(session,"select.rename.column",selected=0)
       }
     })
@@ -849,19 +914,19 @@ shinyServer(function(input, output, session) {
 
   ## Manipulate variables --> Categorical variables --> Combine levels
 
-  output$combine.levels.side = renderUI({
-    input$selector
-    isolate({
-      if(input$categorical_variables_select%in%"Combine categorical"&
-           input$selector%in%"Categorical variables"){
-        combine.sidebar.panel()
-      }
-    })
-  })
+#   output$combine.levels.side = renderUI({
+#     input$selector
+#     isolate({
+#       if(input$categorical_variables_select%in%"Combine categorical"&
+#            input$selector%in%"Categorical variables"){
+#         combine.sidebar.panel()
+#       }
+#     })
+#   })
 
   output$text_combine = renderPrint({
     if(length(input$select.combine.columns)>0){
-      temp = combine.levels(data,input$select.combine.columns)
+      temp = combine.levels(get.data.set(),input$select.combine.columns)
       print(table(temp[,ncol(temp)]))  
     }else{
       print("Please select a set of columns")
@@ -872,7 +937,7 @@ shinyServer(function(input, output, session) {
     input$combine
     isolate({
       if(!is.null(input$combine)&&input$combine>0){
-        data <<- combine.levels(data,columns)
+        values$data.set = combine.levels(get.data.set(),input$select.combine.columns)
       }
     })
   })
@@ -882,10 +947,10 @@ shinyServer(function(input, output, session) {
 #         if(!is.null(input$select.column)){
 #             choices=""
 #             if(!"" %in% input$select.column){
-#                 if(is.factor(data[,input$select.column])){
-#                     choices = levels(data[,input$select.column])
+#                 if(is.factor(get.data.set()[,input$select.column])){
+#                     choices = levels(get.data.set()[,input$select.column])
 #                 }else{
-#                     choices = levels(as.factor(data[,input$select.column]))
+#                     choices = levels(as.factor(get.data.set()[,input$select.column]))
 #                 }
 #             }
 #             updateSelectInput(session=session,inputId="select.item",selected="",choices=choices)
@@ -896,7 +961,7 @@ shinyServer(function(input, output, session) {
 #     output$maintext.reorder = renderPrint({
 #         text = ""
 #         if(!is.null(input$select.column)&&!""%in%input$select.column){
-#             print(table(data[,input$select.column]))
+#             print(table(get.data.set()[,input$select.column]))
 #         }else{
 #             print("Select a column!")
 #         }
@@ -911,7 +976,7 @@ shinyServer(function(input, output, session) {
 
 #     observe({
 #         input$compare_dates
-#         if(!is.null(data)&&!is.null(input$compare_dates)&&input$compare_dates>0){
+#         if(!is.null(get.data.set())&&!is.null(input$compare_dates)&&input$compare_dates>0){
 #             isolate({
 #                 columns = input$sel.compare.dates[1:2]
 #                 if(!is.null(columns)&&columns[1]!=""){
@@ -919,7 +984,7 @@ shinyServer(function(input, output, session) {
 #                     for(col in 1:length(columns)){
 #                         if(col==1){
 #                             tryCatch({
-#                                 temp.col = as.numeric(as.Date(data[,columns[col]], origin = "1900-01-01"))
+#                                 temp.col = as.numeric(as.Date(get.data.set()[,columns[col]], origin = "1900-01-01"))
 #                             },
 #                                      error=function(cond) {
 #                                          temp.col = NULL
@@ -930,7 +995,7 @@ shinyServer(function(input, output, session) {
 #                                      finally={})
 #                         }else{
 #                             tryCatch({
-#                                 temp.col = temp.col - as.numeric(as.Date(data[,columns[col]], origin = "1900-01-01"))
+#                                 temp.col = temp.col - as.numeric(as.Date(get.data.set()[,columns[col]], origin = "1900-01-01"))
 #                             },
 #                                      error=function(cond) {
 #                                          temp.col = NULL
@@ -943,12 +1008,12 @@ shinyServer(function(input, output, session) {
 #                     }
 #                     if(!is.null(temp.col)){
 #                         count=1
-#                         while(paste0("date",count)%in%colnames(data)){
+#                         while(paste0("date",count)%in%colnames(get.data.set())){
 #                             count = count+1
 #                         }
-#                         data <<- cbind(data,date.column.temp=round(temp.col,2))
-#                         colnames(data)[which(colnames(data)%in%"date.column.temp")] <<- paste0("date",count)
-#                         updateSelectInput(session=session,inputId="sel.compare.dates",selected="",choices=colnames(data))
+#                         values$data.set <<- cbind(get.data.set(),date.column.temp=round(temp.col,2))
+#                         colnames(get.data.set())[which(colnames(get.data.set())%in%"date.column.temp")] <<- paste0("date",count)
+#                         updateSelectInput(session=session,inputId="sel.compare.dates",selected="",choices=colnames(get.data.set()))
 #                     }
 #                 }
 #             })
@@ -958,8 +1023,8 @@ shinyServer(function(input, output, session) {
 #     output$comp.dates.table = renderDataTable({
 #         columns = input$sel.compare.dates[1:2]
 #         ret = NULL
-#         if(!is.null(data)){
-#             ret = data[,test.for.dates()]
+#         if(!is.null(get.data.set())){
+#             ret = get.data.set()[,test.for.dates(get.data.set())]
 #             if(ncol(ret)==0){
 #                 ret = NULL
 #             }
@@ -968,7 +1033,7 @@ shinyServer(function(input, output, session) {
 #                 for(col in 1:length(columns)){
 #                     if(col==1){
 #                         tryCatch({
-#                             temp.col = as.numeric(as.Date(data[,columns[col]], origin = "1900-01-01"))
+#                             temp.col = as.numeric(as.Date(get.data.set()[,columns[col]], origin = "1900-01-01"))
 #                         },
 #                                  error=function(cond) {
 #                                      temp.col = NULL
@@ -979,7 +1044,7 @@ shinyServer(function(input, output, session) {
 #                                  finally={})
 #                     }else{
 #                         tryCatch({
-#                             temp.col = temp.col - as.numeric(as.Date(data[,columns[col]], origin = "1900-01-01"))
+#                             temp.col = temp.col - as.numeric(as.Date(get.data.set()[,columns[col]], origin = "1900-01-01"))
 #                         },
 #                                  error=function(cond) {
 #                                      temp.col = NULL
@@ -1007,17 +1072,17 @@ shinyServer(function(input, output, session) {
     observe({
         input$add_column
         isolate({
-          temp=data
-          if(!is.null(data)&&!is.null(input$new.column)&&input$add_column>0){
+          temp=get.data.set()
+          if(!is.null(get.data.set())&&!is.null(input$new.column)&&input$add_column>0){
               colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
               if(length(colu)==1){
                   colu = strsplit(input$new.column,",",fixed=T)[[1]]
               }
-              if(length(colu)<nrow(data)){
-                  colu = rep(colu,length.out=nrow(data))
+              if(length(colu)<nrow(get.data.set())){
+                  colu = rep(colu,length.out=nrow(get.data.set()))
               }
-              if(length(colu)>nrow(data)){
-                  colu = colu[1:nrow(data)]
+              if(length(colu)>nrow(get.data.set())){
+                  colu = colu[1:nrow(get.data.set())]
               }
               NAs = which(is.na(colu))
               if(length(NAs)>0&&length(colu[-NAs])>0){
@@ -1028,15 +1093,15 @@ shinyServer(function(input, output, session) {
               }
               count = 1
               name = "add.column1"
-              while(name%in%colnames(data)){
+              while(name%in%colnames(get.data.set())){
                   count =  count +1
                   name = paste0("add.column",count)
               }
-              temp = cbind(data,temp.column=colu)
+              temp = cbind(get.data.set(),temp.column=colu)
               colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
               temp
           }
-          data <<- temp
+          values$data.set <<- temp
           updateTextInput(session, inputId="new.column", value="")
         })
     })
@@ -1046,17 +1111,17 @@ shinyServer(function(input, output, session) {
         input$new.column
         input$add_column
         isolate({
-          temp=data
-          if(!is.null(data)&&!is.null(input$new.column)){
+          temp=get.data.set()
+          if(!is.null(get.data.set())&&!is.null(input$new.column)){
               colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
               if(length(colu)==1){
                   colu = strsplit(input$new.column,",",fixed=T)[[1]]
               }
-              if(length(colu)<nrow(data)){
-                  colu = rep(colu,length.out=nrow(data))
+              if(length(colu)<nrow(get.data.set())){
+                  colu = rep(colu,length.out=nrow(get.data.set()))
               }
-              if(length(colu)>nrow(data)){
-                  colu = colu[1:nrow(data)]
+              if(length(colu)>nrow(get.data.set())){
+                  colu = colu[1:nrow(get.data.set())]
               }
               NAs = which(is.na(colu))
               if(length(NAs)>0&&length(colu[-NAs])>0){
@@ -1067,11 +1132,11 @@ shinyServer(function(input, output, session) {
               }
               count = 1
               name = "add.column1"
-              while(name%in%colnames(data)){
+              while(name%in%colnames(get.data.set())){
                   count =  count +1
                   name = paste0("add.column",count)
               }
-              temp = cbind(data,temp.column=colu)
+              temp = cbind(get.data.set(),temp.column=colu)
               colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
               temp
           }
@@ -1087,15 +1152,15 @@ shinyServer(function(input, output, session) {
 
     observe({
         input$rem_column
-        if(!is.null(data)&&!is.null(input$rem_column)&&input$rem_column>0){
+        if(!is.null(get.data.set())&&!is.null(input$rem_column)&&input$rem_column>0){
             isolate({
-                if(length(which(colnames(data)%in%input$select.remove.column))>0){
-                    data <<- as.data.frame(data[,-which(colnames(data)%in%input$select.remove.column)])
-                    if(ncol(data)==0){
-                        data <<- NULL
+                if(length(which(colnames(get.data.set())%in%input$select.remove.column))>0){
+                    values$data.set = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
+                    if(ncol(get.data.set())==0){
+                        values$data.set <<- NULL
                         updateSelectInput(session, inputId="select.remove.column",choices=c(""),selected="")
                     }else{
-                        updateSelectInput(session, inputId="select.remove.column", choices=colnames(data),selected="")
+                        updateSelectInput(session, inputId="select.remove.column", choices=colnames(get.data.set()),selected="")
                     }
                 }
             })
@@ -1106,9 +1171,9 @@ shinyServer(function(input, output, session) {
         input$selector
         input$rem_column
         isolate({
-          temp = data
-          if(!is.null(data)&&!is.null(input$select.remove.column)){
-              temp = as.data.frame(data[,-which(colnames(data)%in%input$select.remove.column)])
+          temp = get.data.set()
+          if(!is.null(get.data.set())&&!is.null(input$select.remove.column)){
+              temp = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
               if(ncol(temp)==0){
                   temp=NULL
               }
@@ -1118,8 +1183,7 @@ shinyServer(function(input, output, session) {
     },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
     output$remove.columns = renderUI({
-        input$selector
-        remove.columns.panel()
+        remove.columns.panel(get.data.set())
     })
 
 #     output$quick.summary = renderUI({
@@ -1153,8 +1217,8 @@ shinyServer(function(input, output, session) {
     source("panels/5_Visualize/1_visualize-panel-ui.R", local = TRUE)
     source("panels/5_Visualize/2_visualize-panel-server.R", local = TRUE)
     output$visualize.panel <- renderUI({
-        input$selector
-        visualize.panel.ui()
+        #input$selector
+        visualize.panel.ui(get.data.set())
     })
 
 #   Advanced --> Time Series
@@ -1166,36 +1230,35 @@ shinyServer(function(input, output, session) {
     source("panels/6_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
     output$timeseries.panel <- renderUI({
         input$selector
-        timeseries.panel.ui()
+        timeseries.panel.ui(get.data.set())
     })
 
 #   Advanced --> Quick explore
 
   output$quick.explore = renderUI({
-    input$selector
-    quick.explore.panel()
+    quick.explore.panel(get.data.set())
   })
 
 #   Advanced --> Quick explore --> Data summary
 
   output$quick.summary.side = renderUI({
-    input$selector
-    get.quick.summary.sidebar()
+#     input$selector
+    get.quick.summary.sidebar(get.data.set())
   })
   
   output$quick.summary.main = renderUI({
-    input$selector
+#     input$selector
     get.quick.summary.main()
   })
 
   output$all.summary = renderPrint({
-    input$selector
-    data.summary()
+#     input$selector
+    data.summary(get.data.set())
   })
   
   output$column.summary = renderPrint({
     if(!is.null(input$select.column.sum)){
-      temp = data[,which(colnames(data)%in%input$select.column.sum)]
+      temp = get.data.set()[,which(colnames(get.data.set())%in%input$select.column.sum)]
       if(is.character(temp)){
         print(as.factor(temp))
         cat("\n\t")
@@ -1211,13 +1274,13 @@ shinyServer(function(input, output, session) {
 #   Advanced --> Quick explore --> Single Column plot
 
   output$single.column.plot.side= renderUI({
-    input$selector
-    get.single.col.sidebar()
+#     input$selector
+    get.single.col.sidebar(get.data.set())
   })
 
   output$single.column.plot.main= renderUI({
-    input$selector
-    get.single.col.main()
+#     input$selector
+    get.single.col.main(get.data.set())
   })
 
   observe({
@@ -1225,12 +1288,12 @@ shinyServer(function(input, output, session) {
     isolate({
       if(!is.null(input$single.backward)&&input$single.backward>0){
         index=1
-        if(which(colnames(data)%in%input$select.column.plot)==1){
-          index=ncol(data)
+        if(which(colnames(get.data.set())%in%input$select.column.plot)==1){
+          index=ncol(get.data.set())
         }else{
-          index = which(colnames(data)%in%input$select.column.plot)-1
+          index = which(colnames(get.data.set())%in%input$select.column.plot)-1
         }
-        updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
+        updateSelectInput(session,inputId="select.column.plot",choices=colnames(get.data.set()),selected=colnames(get.data.set())[index])
         updateSliderInput(session,inputId="single.play",value=index)
       }
     })
@@ -1241,12 +1304,12 @@ shinyServer(function(input, output, session) {
     isolate({
       if(!is.null(input$single.forward)&&input$single.forward>0){
         index=1
-        if(which(colnames(data)%in%input$select.column.plot)==ncol(data)){
+        if(which(colnames(get.data.set())%in%input$select.column.plot)==ncol(get.data.set())){
           index=1
         }else{
-          index = which(colnames(data)%in%input$select.column.plot)+1
+          index = which(colnames(get.data.set())%in%input$select.column.plot)+1
         }
-        updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[index])
+        updateSelectInput(session,inputId="select.column.plot",choices=colnames(get.data.set()),selected=colnames(get.data.set())[index])
         updateSliderInput(session,inputId="single.play",value=index)
       }
     })
@@ -1256,7 +1319,7 @@ shinyServer(function(input, output, session) {
     input$single.play
     isolate({
       if(!is.null(input$single.play)){
-        updateSelectInput(session,inputId="select.column.plot",choices=colnames(data),selected=colnames(data)[input$single.play])
+        updateSelectInput(session,inputId="select.column.plot",choices=colnames(get.data.set()),selected=colnames(get.data.set())[input$single.play])
       }
     })
   })
@@ -1264,17 +1327,17 @@ shinyServer(function(input, output, session) {
   output$column.plot = renderPlot({
     input$select.column.plot
     isolate({
-      if(!is.null(data)&&!is.null(input$select.column.plot)){
-        index=which(colnames(data)%in%input$select.column.plot)
+      if(!is.null(get.data.set())&&!is.null(input$select.column.plot)){
+        index=which(colnames(get.data.set())%in%input$select.column.plot)
         if(length(index)==0){
           index = 1
         }
         updateSliderInput(session,inputId="single.play",value=index)
-        temp = data[,index]
+        temp = get.data.set()[,index]
         if(is.character(temp)){
             temp = as.factor(temp)
         }
-        iNZightPlot(temp,xlab=input$select.column.plot,main=data.name)
+        iNZightPlot(temp,xlab=input$select.column.plot,main=get.data.name())
       }
     })
   })
@@ -1282,28 +1345,26 @@ shinyServer(function(input, output, session) {
 #   Advanced --> Quick explore --> Column pair plot
 
   output$column.pair.plot.side = renderUI({
-    input$selector
-    get.pair.plot.sidebar()
+    get.pair.plot.sidebar(get.data.set())
   })
 
   output$column.pair.plot.main = renderUI({
-    input$selector
-    get.pair.plot.main()
+    get.pair.plot.main(get.data.set())
   })
 
   observe({
     input$pair.player
     isolate({
       if(!is.null(input$pair.player)){
-        indMat = rbind(1:(ncol(data)*(ncol(data)-1)),
-                       rep(1:(ncol(data)-1),ncol(data)),
-                       ceiling(seq(from=0.1,to=ncol(data),by=1/(ncol(data)-1))))
+        indMat = rbind(1:(ncol(get.data.set())*(ncol(get.data.set())-1)),
+                       rep(1:(ncol(get.data.set())-1),ncol(get.data.set())),
+                       ceiling(seq(from=0.1,to=ncol(get.data.set()),by=1/(ncol(get.data.set())-1))))
         index1 = indMat[3,input$pair.player]
         index2 = indMat[2,input$pair.player]
-        button<<-T
-        updateSelectInput(session,inputId="select.column.plot1",selected=colnames(data)[index1],choices=colnames(data))
-        updateSelectInput(session,inputId="select.column.plot2",selected=colnames(data)[-index1][index2],
-                          choices=colnames(data)[-index1])
+        values$button = T
+        updateSelectInput(session,inputId="select.column.plot1",selected=colnames(get.data.set())[index1],choices=colnames(get.data.set()))
+        updateSelectInput(session,inputId="select.column.plot2",selected=colnames(get.data.set())[-index1][index2],
+                          choices=colnames(get.data.set())[-index1])
       }
     })
   })
@@ -1312,29 +1373,29 @@ shinyServer(function(input, output, session) {
     input$pair.backward
     isolate({
       if(!is.null(input$pair.backward)&&input$pair.backward>0){
-        index1 = which(colnames(data)%in%input$select.column.plot1)
-        index2 = which(colnames(data)[-index1]%in%input$select.column.plot2)
+        index1 = which(colnames(get.data.set())%in%input$select.column.plot1)
+        index2 = which(colnames(get.data.set())[-index1]%in%input$select.column.plot2)
         if(index2==1){
           if(index1==1){
-            index1 = ncol(data)
+            index1 = ncol(get.data.set())
           }else{
             index1 = index1-1
           }
-          button<<-T
-          updateSelectInput(session,inputId="select.column.plot1",selected=colnames(data)[index1],choices=colnames(data))
-          index2 = ncol(data)-1
+          values$button = T
+          updateSelectInput(session,inputId="select.column.plot1",selected=colnames(get.data.set())[index1],choices=colnames(get.data.set()))
+          index2 = ncol(get.data.set())-1
         }else{
           index2 = index2-1
         }
-        updateSelectInput(session,inputId="select.column.plot2",selected=colnames(data)[-index1][index2],
-                          choices=colnames(data)[-index1])
-        matInd = which(colnames(data)%in%colnames(data)[-index1][index2])
+        updateSelectInput(session,inputId="select.column.plot2",selected=colnames(get.data.set())[-index1][index2],
+                          choices=colnames(get.data.set())[-index1])
+        matInd = which(colnames(get.data.set())%in%colnames(get.data.set())[-index1][index2])
         updateSliderInput(session,inputId="pair.player",
-                          value=matrix(c(unlist(lapply(seq(from=ncol(data),by=ncol(data),
-                                                           to=ncol(data)*(ncol(data)-1)),function(x,n){
+                          value=matrix(c(unlist(lapply(seq(from=ncol(get.data.set()),by=ncol(get.data.set()),
+                                                           to=ncol(get.data.set())*(ncol(get.data.set())-1)),function(x,n){
                                                              c(0,(x-(n-1)):x)
                                                            },
-                                                       ncol(data))),0),nrow=ncol(data))[matInd,index1]
+                                                       ncol(get.data.set()))),0),nrow=ncol(get.data.set()))[matInd,index1]
                           )
       }
     })
@@ -1344,29 +1405,29 @@ shinyServer(function(input, output, session) {
       input$pair.forward
       isolate({
         if(!is.null(input$pair.forward)&&input$pair.forward>0){
-          index1 = which(colnames(data)%in%input$select.column.plot1)
-          index2 = which(colnames(data)[-index1]%in%input$select.column.plot2)
-          if(index2==(ncol(data)-1)){
-            if(index1==ncol(data)){
+          index1 = which(colnames(get.data.set())%in%input$select.column.plot1)
+          index2 = which(colnames(get.data.set())[-index1]%in%input$select.column.plot2)
+          if(index2==(ncol(get.data.set())-1)){
+            if(index1==ncol(get.data.set())){
               index1 = 1
             }else{
               index1 = index1+1
             }
-            button<<-T
-            updateSelectInput(session,inputId="select.column.plot1",selected=colnames(data)[index1],choices=colnames(data))
+            values$button = T
+            updateSelectInput(session,inputId="select.column.plot1",selected=colnames(get.data.set())[index1],choices=colnames(get.data.set()))
             index2 = 1
           }else{
             index2 = index2+1
           }
-          updateSelectInput(session,inputId="select.column.plot2",selected=colnames(data)[-index1][index2],
-                            choices=colnames(data)[-index1])
-          matInd = which(colnames(data)%in%colnames(data)[-index1][index2])
+          updateSelectInput(session,inputId="select.column.plot2",selected=colnames(get.data.set())[-index1][index2],
+                            choices=colnames(get.data.set())[-index1])
+          matInd = which(colnames(get.data.set())%in%colnames(get.data.set())[-index1][index2])
           updateSliderInput(session,inputId="pair.player",
-                            value=matrix(c(unlist(lapply(seq(from=ncol(data),by=ncol(data),
-                                                             to=ncol(data)*(ncol(data)-1)),function(x,n){
+                            value=matrix(c(unlist(lapply(seq(from=ncol(get.data.set()),by=ncol(get.data.set()),
+                                                             to=ncol(get.data.set())*(ncol(get.data.set())-1)),function(x,n){
                                                                c(0,(x-(n-1)):x)
                                                              },
-                                                         ncol(data))),0),nrow=ncol(data))[matInd,index1]
+                                                         ncol(get.data.set()))),0),nrow=ncol(get.data.set()))[matInd,index1]
           )
         }
       })
@@ -1379,17 +1440,17 @@ shinyServer(function(input, output, session) {
           if(!is.null(choice)){
             i = input$select.column.plot2
             if(input$select.column.plot1==input$select.column.plot2){
-              i = which(colnames(data)%in%input$select.column.plot1)
-              if(i>(ncol(data)-1)){
+              i = which(colnames(get.data.set())%in%input$select.column.plot1)
+              if(i>(ncol(get.data.set())-1)){
                 i=1
               }
             }
-            ch = colnames(data)[-which(colnames(data)%in%choice)]
-            if(!button){
+            ch = colnames(get.data.set())[-which(colnames(get.data.set())%in%choice)]
+            if(!get.button()){
               updateSelectInput(session,"select.column.plot2",choices=ch,
                                 selected=ch[i])  
             }
-            button<<-F
+            values$button = F
           }
         })
     })
@@ -1397,34 +1458,32 @@ shinyServer(function(input, output, session) {
   output$plot.column.pair = renderPlot({
     if(!is.null(input$select.column.plot1)&&!is.null(input$select.column.plot2)&&
          !""%in%input$select.column.plot1&&!""%in%input$select.column.plot2){
-      index1 = which(colnames(data)%in%input$select.column.plot1)
-      index2 = which(colnames(data)%in%input$select.column.plot2)
+      index1 = which(colnames(get.data.set())%in%input$select.column.plot1)
+      index2 = which(colnames(get.data.set())%in%input$select.column.plot2)
       if(length(index1)==0){
         index1 = 1
       }
       if(length(index2)==0){
-        if(index1+1>ncol(data)){
+        if(index1+1>ncol(get.data.set())){
           index2 = 1
         }else{
           index2 = index1 + 1
         }
       }
-      x = data[,index1]
-      y = data[,index2]
-      iNZightPlot(x,y,xlab=input$select.column.plot1,ylab=input$select.column.plot2,main=data.name)
+      x = get.data.set()[,index1]
+      y = get.data.set()[,index2]
+      iNZightPlot(x,y,xlab=input$select.column.plot1,ylab=input$select.column.plot2,main=get.data.name())
     }
   })
 
 #   Advanced --> Quick explore --> Compare pairs
 
   output$compare.pairs.main = renderUI({
-    input$selector
-    get.matrix.main()
+    get.matrix.main(get.data.set())
   })
 
   output$compare.pairs.side = renderUI({
-    input$selector
-    get.matrix.sidebar()
+    get.matrix.sidebar(get.data.set())
   })
 
   output$plot.matrix = renderPlot({
@@ -1433,10 +1492,10 @@ shinyServer(function(input, output, session) {
           plot(1, 1, type = "n", axes = FALSE, xlab = "" , ylab = "")
           text(1, 1, "You have to select more than 1 variable", cex = 2)
       }else{
-          choices.ind = which(colnames(data) %in% choices)
+          choices.ind = which(colnames(get.data.set()) %in% choices)
           temp =
               do.call(cbind,
-                      lapply(data[, choices.ind],
+                      lapply(get.data.set()[, choices.ind],
                              function(x) {
                                  if (is.character(x)) {
                                      data.frame(factor(x, levels = unique(x)))

@@ -1,4 +1,4 @@
-iNZight *Lite* version 0.9.7.2
+iNZight *Lite* version 0.9.7.3
 ============================
 
 *Last Updated: 25/03/15*
@@ -19,6 +19,7 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [General] Changed all global variables to reactive values (CK)
 - [Row Operations] Row operations added (CK).
 - [General] A Markdown 'troubleshoot' document appears when no data set is loaded (CP).
 - [Data Import] URL support added (CK).

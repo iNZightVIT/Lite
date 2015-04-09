@@ -2,8 +2,8 @@
 #   helpModal('Modify data','transform_columns',inclMD("gui-elements/notes/transform.explanation.md"))
 # }
 
-get.transform.sidebar =  function(){
-  list(selectInput("select.columns.transform", "Select Columns", choices = c("",colnames(data)),multiple=T,selectize=T),br(),
+get.transform.sidebar =  function(data.set){
+  list(selectInput("select.columns.transform", "Select Columns", choices = c("",colnames(data.set)),multiple=T,selectize=T),br(),
        selectInput("select.transform", "Select Transformation", 
                    choices = c("", "change to factor","add","subtract","multiply","divide","log","root","square","abs","center",
                                "standardize","median split","reverse-coding","copy","change sign"),
@@ -12,8 +12,8 @@ get.transform.sidebar =  function(){
        help.display('Modify data','transform_columns',"gui-elements/notes/transform.explanation.md"),br())
 }
 
-transform.data.panel =function(){
-  if(is.null(data)){
+transform.data.panel =function(data.set){
+  if(is.null(data.set)){
     sidebarLayout(
       sidebarPanel(help.display('Modify data','transform_columns',"gui-elements/notes/transform.explanation.md")),
       mainPanel(
@@ -22,7 +22,7 @@ transform.data.panel =function(){
     )
   }else{
     sidebarLayout(
-        sidebarPanel(get.transform.sidebar()),
+        sidebarPanel(get.transform.sidebar(data.set)),
         mainPanel(dataTableOutput(outputId="table_part"))
     )
   }

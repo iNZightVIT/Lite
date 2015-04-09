@@ -310,10 +310,10 @@ sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
 #' Returns the names of all numeric columns in data 
 #' 
 #' @author Christoph Knapp
-get.numeric.column.names = function(){
-  colnames(data)[which(unlist(lapply(1:ncol(data),function(index,d){
+get.numeric.column.names = function(dafr){
+  colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
     is.numeric(as.data.frame(d)[,index])
-    },data)))]
+    },dafr)))]
 }
 
 #' Returns TRUE if x can be converted to a numeric 
@@ -333,14 +333,14 @@ is.convertable.numeric = function(x){
 #' Prints a summary of the currently selected data set.
 #' 
 #' @author Christoph Knapp
-data.summary = function(){  
-  if(!is.null(data)){
-    cat("Number of rows in data: ",nrow(data),"\n")
-    cat("Number of columns in data: ",ncol(data),"\n")
+data.summary = function(dafr){  
+  if(!is.null(dafr)){
+    cat("Number of rows in data: ",nrow(dafr),"\n")
+    cat("Number of columns in data: ",ncol(dafr),"\n")
     cat("\n")
-    for(col in 1:length(colnames(data))){
-      cat(colnames(data)[col],"\n")
-      print(summary(data[,col]))
+    for(col in 1:length(colnames(dafr))){
+      cat(colnames(dafr)[col],"\n")
+      print(summary(dafr[,col]))
     }
   }
 }
@@ -350,33 +350,33 @@ data.summary = function(){
 #' can be converted into factors.
 #' 
 #' @author Christoph Knapp
-get.categorical.column.names = function(){
-  colnames(data)[which(unlist(lapply(1:ncol(data),function(index,d){
+get.categorical.column.names = function(dafr){
+  colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
     class(as.data.frame(d)[,index])%in%"factor"||class(as.data.frame(d)[,index])%in%"character"
-    },data)))]
+    },dafr)))]
 }
 
-#' Creates a widget for moving through plots quickly.
-#' 
-#' @param ID.forward inputID for the forward button in the player widget
-#' @param ID.player inputID for the slider in the player widget
-#' @param ID.backward inputID for the backward button in the player widget
-#' 
-#' @author Christoph Knapp
-get.player = function(ID.forward,ID.player,ID.backward,maxi){
-  fixedRow(column(width=8,offset=2,
-                  div(class='player',
-                      fixedRow(
-                        column(width=1,offset=1,
-                               div(class="seper",actionButton(inputId=ID.backward,label="",icon=icon("backward")))),
-                        column(width=6,offset=1,
-                               sliderInput(inputId=ID.player,label="",min=1,max=maxi,step=1,
-                                           animate=animationOptions(interval=500,loop=T,play=T),
-                                           width="100%",value=1,ticks=F)),
-                        column(width=1,offset=1,
-                               div(class="seper",actionButton(inputId=ID.forward,label="",icon=icon("forward"))))
-                      ))))
-}
+# #' Creates a widget for moving through plots quickly.
+# #' 
+# #' @param ID.forward inputID for the forward button in the player widget
+# #' @param ID.player inputID for the slider in the player widget
+# #' @param ID.backward inputID for the backward button in the player widget
+# #' 
+# #' @author Christoph Knapp
+# get.player = function(ID.forward,ID.player,ID.backward,maxi){
+#   fixedRow(column(width=8,offset=2,
+#                   div(class='player',
+#                       fixedRow(
+#                         column(width=1,offset=1,
+#                                div(class="seper",actionButton(inputId=ID.backward,label="",icon=icon("backward")))),
+#                         column(width=6,offset=1,
+#                                sliderInput(inputId=ID.player,label="",min=1,max=maxi,step=1,
+#                                            animate=animationOptions(interval=500,loop=T,play=T),
+#                                            width="100%",value=1,ticks=F)),
+#                         column(width=1,offset=1,
+#                                div(class="seper",actionButton(inputId=ID.forward,label="",icon=icon("forward"))))
+#                       ))))
+# }
 #' Creates a widget for moving through plots quickly.
 #'
 #' @param ID.forward inputID for the forward button in the player widget
@@ -425,28 +425,30 @@ change.factor.transform = function(temp,columns){
     }
 }
 
-change.sign.transform = function(data,columns){
-    data = as.data.frame(data)
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(data),function(index,data){
-        if(is.numeric(data[,index])){
-            as.matrix(data[,index]*(-1))
+change.sign.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
+        if(is.numeric(dafr[,index])){
+            as.matrix(dafr[,index]*(-1))
         }else{
             NULL
         }
-    },data)))
+    },dafr)))
     if(!is.null(temp)){
-        colnames(temp) = paste("change_sign",columns[unlist(lapply(1:ncol(data),function(i,data){is.numeric(data[,i])},data))],sep=".")
+        colnames(temp) = paste("change_sign",columns[unlist(lapply(1:ncol(dafr),function(i,d){
+          is.numeric(d[,i])
+          },dafr))],sep=".")
     }
     temp
 }
 
-test.for.dates = function(){
+test.for.dates = function(dafr){
     ret = F
-    if(!is.null(data)){
+    if(!is.null(dafr)){
         ret = unlist(lapply(
-            1:ncol(data),function(index,data){
+            1:ncol(dafr),function(index,d){
                 tryCatch({
-                    is.numeric(as.numeric(as.Date(data[,index], origin = "1900-01-01")))
+                    is.numeric(as.numeric(as.Date(d[,index], origin = "1900-01-01")))
                 },
                          error=function(cond) {
                              ret = F
@@ -455,87 +457,105 @@ test.for.dates = function(){
                              print(cond)
                          },
                          finally={})
-            },data))
+            },dafr))
     }
     ret
 }
 
-copy.transform = function(data,columns){
-    data = as.data.frame(data)
-    colnames(data) = paste("copy",columns,sep=".")
+copy.transform = function(dafr,columns){
+    data = as.data.frame(dafr)
+    colnames(dafr) = paste("copy",columns,sep=".")
     data
 }
 
-reverse.coding.transform = function(data,columns){
-    data = as.data.frame(data)
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(data),function(index,data){
-        if(is.numeric(data[,index])){
-            min(data[,index],na.rm=T)+max(data[,index],na.rm=T)-data[,index]
+reverse.coding.transform = function(dafr,columns){
+    data = as.data.frame(dafr)
+    temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+        if(is.numeric(d[,index])){
+            min(d[,index],na.rm=T)+max(d[,index],na.rm=T)-d[,index]
         }else{
             NULL
         }
-    },data)))
+    },dafr)))
     if(!is.null(temp)){
-        colnames(temp) = paste("reverse_coding",columns[unlist(lapply(1:ncol(data),function(i,data){is.numeric(data[,i])},data))],sep=".")
+        colnames(temp) = paste("reverse_coding",
+                               columns[unlist(lapply(1:ncol(dafr),
+                                                     function(i,d){
+                                                       is.numeric(d[,i])
+                                                       },dafr))],sep=".")
     }
     temp
 }
 
-median.split.transform = function(temp,columns){
-    temp = as.data.frame(temp)
-    nums = unlist(lapply(1:ncol(temp),function(index,temp){is.numeric(temp[,index])},temp))
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(temp),function(index,temp){
-      if(is.numeric(temp[,index])){
-        med = median(temp[,index],na.rm=T)
-        ret = rep("high",length(temp[,index]))
-        ret[which(temp[,index]<=med)] = "low"
+median.split.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    nums = unlist(lapply(1:ncol(dafr),function(index,dafr){is.numeric(dafr[,index])},dafr))
+    dafr = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+      if(is.numeric(d[,index])){
+        med = median(d[,index],na.rm=T)
+        ret = rep("high",length(d[,index]))
+        ret[which(d[,index]<=med)] = "low"
         ret
       }else{
         NULL
       }
-    },temp)),stringsAsFactors=T)
-    colnames(temp) = paste("median_split",columns[nums],sep="_")
-    temp
+    },dafr)),stringsAsFactors=T)
+    colnames(dafr) = paste("median_split",columns[nums],sep="_")
+    dafr
 }
 
-standardize.transform = function(data,columns){
-    data = as.data.frame(data)
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(data),function(index,data){
-        if(is.numeric(data[,index])){
-            (data[,index]-mean(data[,index],na.rm=T))/sd(data[,index],na.rm=T)
+standardize.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    dafr = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+        if(is.numeric(d[,index])){
+            (d[,index]-mean(d[,index],na.rm=T))/sd(d[,index],na.rm=T)
         }else{
-            (as.numeric(factor(data[,index]))-mean(as.numeric(factor(data[,index])),na.rm=T))/sd(as.numeric(factor(data[,index])),na.rm=T)
+            (as.numeric(factor(d[,index]))
+             -mean(as.numeric(factor(d[,index])),na.rm=T))/
+              sd(as.numeric(factor(d[,index])),na.rm=T)
         }
-    },data)))
-    colnames(temp) = paste("standardize",columns,sep=".")
-    temp
+    },dafr)))
+    colnames(dafr) = paste("standardize",columns,sep=".")
+    dafr
 }
 
-center.transform = function(data,columns){
-    data = as.data.frame(data)
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(data),function(index,data){
-        if(is.numeric(data[,index])){
-            data[,index]-mean(data[,index])
+center.transform = function(dafr,columns){
+    data = as.data.frame(dafr)
+    temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+        if(is.numeric(d[,index])){
+            d[,index]-mean(d[,index])
         }else{
-            as.numeric(factor(data[,index]))-mean(as.numeric(factor(data[,index])))
+            as.numeric(factor(d[,index]))-mean(as.numeric(factor(d[,index])))
         }
-    },data)))
+    },dafr)))
     colnames(temp) = paste("center",columns,sep=".")
     temp
 }
 
-divide.transform = function(data,columns){
-    data = as.data.frame(data)
-    colnames(data) = columns
-    if(is.null(data)){
+divide.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    colnames(dafr) = columns
+    if(is.null(dafr)){
         return(NULL)
     }else{
-        if(ncol(as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))==1){
-            temp = as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))])
-            colnames(temp) = colnames(data)[unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]
-        }else if(ncol(as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))>1){
-            temp = as.data.frame(divide(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))
-            colnames(temp) = paste0("divide.",paste(colnames(data)[unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))],collapse="."))
+        if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+          is.numeric(d[,index])
+          },dafr))]))==1){
+            temp = as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))])
+            colnames(temp) = colnames(data)[unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },data))]
+        }else if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+          is.numeric(d[,index])
+          },data))]))>1){
+            temp = as.data.frame(divide(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])},dafr))]))
+            colnames(temp) = paste0("divide.",
+                                    paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
+                                      is.numeric(d[,index])
+                                      },dafr))],collapse="."))
         }else{
             return(NULL)
         }
@@ -543,32 +563,46 @@ divide.transform = function(data,columns){
     temp
 }
 
-divide = function(data){
-    data = data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]
-    data = as.data.frame(data)
-    if(ncol(data)==1){
-        data[,1]
+divide = function(dafr){
+    dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      is.numeric(d[,index])
+      },dafr))]
+    dafr = as.data.frame(dafr)
+    if(ncol(dafr)==1){
+        dafr[,1]
     }else{
-        start = data[,1]
-        for(col in 2:ncol(data)){
-            start = start/data[,col]
+        start = dafr[,1]
+        for(col in 2:ncol(dafr)){
+            start = start/dafr[,col]
         }
         start
     }
 }
 
-multiply.transform = function(data,columns){
-    data = as.data.frame(data)
-    colnames(data) = columns
-    if(is.null(data)){
+multiply.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    colnames(dafr) = columns
+    if(is.null(dafr)){
         return(NULL)
     }else{
-        if(ncol(as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))==1){
-            temp = as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))])
-            colnames(temp) = colnames(data)[unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]
-        }else if(ncol(as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))>1){
-            temp = as.data.frame(multiply(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))
-            colnames(temp) = paste0("multiply.",paste(colnames(data)[unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))],collapse="."))
+        if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+          is.numeric(d[,index])
+          },dafr))]))==1){
+            temp = as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))])
+            colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))]
+        }else if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+          is.numeric(d[,index])
+          },dafr))]))>1){
+            temp = as.data.frame(multiply(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))]))
+            colnames(temp) = paste0("multiply.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))],collapse="."))
         }else{
             return(NULL)
         }
@@ -576,32 +610,46 @@ multiply.transform = function(data,columns){
     temp
 }
 
-multiply = function(data){
-    data = data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]
-    data = as.data.frame(data)
-    if(ncol(data)==1){
-        data[,1]
+multiply = function(dafr){
+    dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      is.numeric(d[,index])
+      },dafr))]
+    dafr = as.data.frame(dafr)
+    if(ncol(dafr)==1){
+        dafr[,1]
     }else{
-        start = data[,1]
-        for(col in 2:ncol(data)){
-            start = start*data[,col]
+        start = dafr[,1]
+        for(col in 2:ncol(dafr)){
+            start = start*dafr[,col]
         }
         start
     }
 }
 
-subtract.transform = function(data,columns){
-    data = as.data.frame(data)
-    colnames(data) = columns
-    if(is.null(data)){
+subtract.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    colnames(dafr) = columns
+    if(is.null(dafr)){
         return(NULL)
     }else{
-        if(ncol(as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))==1){
-            temp = as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))])
-            colnames(temp) = colnames(data)[unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]
-        }else if(ncol(as.data.frame(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))>1){
-            temp = as.data.frame(subtract(data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]))
-            colnames(temp) = paste0("subtract.",paste(colnames(data)[unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))],collapse="."))
+        if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+          is.numeric(d[,index])
+          },dafr))]))==1){
+            temp = as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))])
+            colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))]
+        }else if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+          is.numeric(d[,index])
+          },dafr))]))>1){
+            temp = as.data.frame(subtract(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))]))
+            colnames(temp) = paste0("subtract.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
+              is.numeric(d[,index])
+              },dafr))],collapse="."))
         }else{
             return(NULL)
         }
@@ -609,15 +657,17 @@ subtract.transform = function(data,columns){
     temp
 }
 
-subtract = function(data){
-    data = data[,unlist(lapply(1:ncol(data),function(index,d)(is.numeric(d[,index])),data))]
-    data = as.data.frame(data)
-    if(ncol(data)==1){
-        data[,1]
+subtract = function(dafr){
+    dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      is.numeric(d[,index])
+      },dafr))]
+    dafr = as.data.frame(dafr)
+    if(ncol(dafr)==1){
+        dafr[,1]
     }else{
-        start = data[,1]
-        for(col in 2:ncol(data)){
-            start = start-data[,col]
+        start = dafr[,1]
+        for(col in 2:ncol(dafr)){
+            start = start-dafr[,col]
         }
         start
     }
@@ -629,7 +679,9 @@ add.transform  = function(temp,columns){
   if(is.null(temp)){
     return(NULL)
   }else{
-    ret = as.data.frame(temp[,unlist(lapply(1:ncol(temp),function(index,d)(is.numeric(d[,index])),temp))])
+    ret = as.data.frame(temp[,unlist(lapply(1:ncol(temp),function(index,d){
+      is.numeric(d[,index])
+      },temp))])
     if(ncol(ret)>1){
       ret = as.data.frame(apply(ret,1,function(row){sum(row)}))
       colnames(ret) = paste0("add_",paste(colnames(temp),collapse="_"))
@@ -642,19 +694,19 @@ add.transform  = function(temp,columns){
 
 # returns the transformed columns and the original data as 
 # dataframe (cbind(data,<transformed columns>)).
-transform.perform = function(type,columns){
-  temp = transform.get.temp(type,columns)
+transform.perform = function(dafr,type,columns){
+  temp = transform.get.temp(dafr,type,columns)
   if(!is.null(temp)){
-    temp = cbind(data,temp)
+    temp = cbind(dafr,temp)
   }
   temp
 }
 
 # returns the transformed columns and the original columns as 
 # dataframe (cbind(<original columns>,<transformed columns>)).
-transform.tempTable = function(type,columns){
-  temp1 = as.data.frame(data[,which(colnames(data)%in%columns)])
-  temp2 = transform.get.temp(type,columns)
+transform.tempTable = function(dafr,type,columns){
+  temp1 = as.data.frame(dafr[,which(colnames(dafr)%in%columns)])
+  temp2 = transform.get.temp(dafr,type,columns)
   if(!is.null(temp2)){
     temp1 = cbind(temp1,temp2)
   }
@@ -663,146 +715,150 @@ transform.tempTable = function(type,columns){
 
 # transorms the columns named columns in data with the selected 
 # type (type) of transformation.
-transform.get.temp = function(type,columns){
+transform.get.temp = function(dafr,type,columns){
   temp = NULL
   if (!is.null(columns) && type%in%"log"){
-    temp = log.transform(data[,columns],columns)
+    temp = log.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"add"){
-    temp = add.transform(data[,columns],columns)
+    temp = add.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"subtract"){
-    temp = subtract.transform(data[,columns],columns)
+    temp = subtract.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"multiply"){
-    temp = multiply.transform(data[,columns],columns)
+    temp = multiply.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"divide"){
-    temp = divide.transform(data[,columns],columns)
+    temp = divide.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"root"){
-    temp = root.transform(data[,columns],columns)
+    temp = root.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"square"){
-    temp = square.transform(data[,columns],columns)
+    temp = square.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"abs"){
-    temp = abs.transform(data[,columns],columns)
+    temp = abs.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"center"){
-    temp = center.transform(data[,columns],columns)
+    temp = center.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"standardize"){
-    temp = standardize.transform(data[,columns],columns)
+    temp = standardize.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"median split"){
-    temp = median.split.transform(data[,columns],columns)
+    temp = median.split.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"reverse-coding"){
-    temp = reverse.coding.transform(data[,columns],columns)
+    temp = reverse.coding.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"copy"){
-    temp = copy.transform(data[,columns],columns)
+    temp = copy.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"change sign"){
-    temp = change.sign.transform(data[,columns],columns)
+    temp = change.sign.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"change to factor"){
-    temp = change.factor.transform(data[,columns],columns)
+    temp = change.factor.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%""){
     temp = NULL
   }
   temp
 }
 
-log.transform = function(tempdata,columns){
-    tempdata = as.data.frame(tempdata)
-    colnames(tempdata) = columns
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(tempdata),function(index,tempdata){
-        if(is.numeric(tempdata[,index])){
-            log(tempdata[,index])
+log.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    colnames(dafr) = columns
+    temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
+        if(is.numeric(dafr[,index])){
+            log(dafr[,index])
         }else{
             NULL
         }
-    },tempdata)))
+    },dafr)))
     if(!is.null(temp)&&dim(temp)[1]>0&&dim(temp)[2]>0){
-        colnames(temp) = unlist(lapply(1:ncol(tempdata),function(index,tempdata){
-            if(is.numeric(tempdata[,index])){
-                paste0("log.",colnames(tempdata)[index])
+        colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,dafr){
+            if(is.numeric(dafr[,index])){
+                paste0("log.",colnames(dafr)[index])
             }else{
                 NULL
             }
-        },tempdata))
+        },dafr))
         temp
     }else{
         NULL
     }
 }
 
-root.transform = function(data,columns){
-    data = as.data.frame(data)
-    colnames(data) = columns
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(data),function(index,data){
-        if(is.numeric(data[,index])){
-            sqrt(data[,index])
+root.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    colnames(dafr) = columns
+    temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+        if(is.numeric(d[,index])){
+            sqrt(d[,index])
         }else{
             NULL
         }
-    },data)))
+    },dafr)))
     ##  temp = as.data.frame(temp)
     if(dim(temp)[1]>0&&dim(temp)[2]>0){
-        colnames(temp) = unlist(lapply(1:ncol(data),function(index,data){
-            if(is.numeric(data[,index])){
-                paste0("root.",colnames(data)[index])
+        colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,d){
+            if(is.numeric(d[,index])){
+                paste0("root.",colnames(d)[index])
             }else{
                 NULL
             }
-        },data))
+        },dafr))
         temp
     }else{
         NULL
     }
 }
 
-square.transform = function(data,columns){
-    data = as.data.frame(data)
-    colnames(data) = columns
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(data),function(index,data){
-        if(is.numeric(data[,index])){
-            data[,index]^2
+square.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    colnames(dafr) = columns
+    temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+        if(is.numeric(d[,index])){
+            d[,index]^2
         }else{
             NULL
         }
-    },data)))
+    },dafr)))
     ##  temp = as.data.frame(temp)
     if(dim(temp)[1]>0&&dim(temp)[2]>0){
-        colnames(temp) = unlist(lapply(1:ncol(data),function(index,data){
-            if(is.numeric(data[,index])){
-                paste0("square.",colnames(data)[index])
+        colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,d){
+            if(is.numeric(d[,index])){
+                paste0("square.",colnames(d)[index])
             }else{
                 NULL
             }
-        },data))
+        },dafr))
         temp
     }else{
         NULL
     }
 }
 
-abs.transform = function(data,columns){
-    data = as.data.frame(data)
-    colnames(data) = columns
-    temp = as.data.frame(do.call(cbind,lapply(1:ncol(data),function(index,data){
-        if(is.numeric(data[,index])){
-            abs(data[,index])
+abs.transform = function(dafr,columns){
+    dafr = as.data.frame(dafr)
+    colnames(dafr) = columns
+    temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+        if(is.numeric(d[,index])){
+            abs(d[,index])
         }else{
             NULL
         }
-    },data)))
+    },dafr)))
                                         #   temp = as.data.frame(temp)
     if(dim(temp)[1]>0&&dim(temp)[2]>0){
-        colnames(temp) = unlist(lapply(1:ncol(data),function(index,data){
-            if(is.numeric(data[,index])){
-                paste0("abs.",colnames(data)[index])
+        colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,d){
+            if(is.numeric(d[,index])){
+                paste0("abs.",colnames(d)[index])
             }else{
                 NULL
             }
-        },data))
+        },dafr))
         temp
     }else{
         NULL
     }
 }
 
-delete.old.files = function(days){
-    if(length(list.files(paste0(data.dir,"/Imported")))>0){
-        unlink(list.files(paste0(data.dir,"/Imported"))[difftime(Sys.time(), file.info(list.files(paste0(data.dir,"/Imported"),full.name=T))[,"mtime"], units = "days")>days])
+delete.old.files = function(data_dir,days){
+    if(length(list.files(paste0(data_dir,"/Imported")))>0){
+        unlink(list.files(paste0(data_dir,"/Imported"))
+               [difftime(Sys.time(), 
+                         file.info(list.files(
+                           paste0(data_dir,"/Imported"),full.name=T))
+                         [,"mtime"], units = "days")>days])
     }
 }
 
@@ -830,9 +886,9 @@ help.display = function(title, id, file) {
 }
 
 ## reads a data set from a filename in the data directory
-load.data = function(fileID=NULL,path=NULL){
+load.data = function(data_dir,fileID=NULL,path=NULL){
     temp = NULL
-    full.name = list.files(data.dir,full.names=T,recursive=T)
+    full.name = list.files(data_dir,full.names=T,recursive=T)
     if(!is.null(fileID)){
         if(is.null(path)){
             indexes = grep(paste(fileID,".",sep=""),full.name,fixed=T)
@@ -872,14 +928,22 @@ load.data = function(fileID=NULL,path=NULL){
 }
 
 ## returns directories in the data directory
-get.data.dirs = function(){
-    list.files(data.dir,include.dirs=T,full.names=T)[file.info(paste(data.dir,list.files(data.dir),sep="/"))[,"isdir"]]
+get.data.dirs = function(data_dir){
+    list.files(data_dir,
+               include.dirs=T,
+               full.names=T)[file.info(paste(data_dir,
+                                             list.files(data_dir),
+                                             sep="/"))[,"isdir"]]
 }
 
 ## returns a radioButton widget, for every filename in the dir.lable directory.
 get.radio.list = function(dir.label,idlabel){
     files = c()
-    files = list.files(dir.label,recursive=T,full.name=T)[!(file.info(list.files(dir.label,recursive=T,full.names=T))[,"isdir"])]
+    files = list.files(dir.label,
+                       recursive=T,
+                       full.name=T)[!(file.info(list.files(dir.label,
+                                                           recursive=T,
+                                                           full.names=T))[,"isdir"])]
     temp.files = strsplit(files,"/")
     files = unlist(lapply(temp.files,
         function(x,label){
@@ -907,7 +971,7 @@ change.file.ext = function(name,new.ext){
     splity
 }
 
-get.vars = function(){
+get.vars = function(data_dir){
     lines = c()
     if(file.exists("VARS")){
         lines = scan("VARS",what="character",sep="\n",quiet=T)
@@ -924,7 +988,7 @@ get.vars = function(){
                 }else{
                     if(variable[1]%in%vars&&!""%in%variable[2]){
                         if(variable[1]%in%"data.dir"){
-                            data.dir<<-variable[2]
+                            data_dir<<-variable[2]
                         }else if(variable[1]%in%"version"){
                             version<<-variable[2]
                         }
@@ -948,20 +1012,32 @@ get.quantiles = function(subx){
     g1
 }
 
-vars = c("data.dir","Version")
-data.dir = "data"
-lite.version = "iNZight Lite Version 0.9.8"
-lite.update = "Last Updated: 23/03/15"
-first.reorder = TRUE
+#vars = c("data.dir","Version")
+#data.dir = "data"
+#lite.version = "iNZight Lite Version 0.9.8"
+#lite.update = "Last Updated: 23/03/15"
+#first.reorder = TRUE
 #transform.text = ""
-rawdata = load.data()
-dataHasChanged = F
-data.name = rawdata[[1]]
-data = rawdata[[2]]
-data.restore = rawdata[[2]]
-temp.data = ""
-loaded = FALSE
-get.vars()
-single.play = F
-button = F
+rawdata = load.data(data.dir)
+#dataHasChanged = F
+#data.name = rawdata[[1]]
+#data.set = rawdata[[2]]
+#data.restore = rawdata[[2]]
+#temp.data = ""
+#loaded = FALSE
+
+#get.vars(data.dir)
+#single.play = F
+#button = F
+
+values = reactiveValues()
+values$data.name = rawdata[[1]]
+values$data.dir = "data"
+values$data.set = rawdata[[2]]
+values$data.restore = rawdata[[2]]
+values$lite.version = "iNZight Lite Version 0.9.8"
+values$lite.update = "Last Updated: 23/03/15"
+values$button = F
+values$transform.text = ""
+values$dataHasChanged = F
 

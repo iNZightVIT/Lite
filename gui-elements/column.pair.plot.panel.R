@@ -1,12 +1,12 @@
-get.pair.plot.sidebar =  function(){
-  if(is.null(data)){
+get.pair.plot.sidebar =  function(data.set){
+  if(is.null(data.set)){
     help.display('Column pair plot',
                  'column_pair_plot',
                  "gui-elements/notes/column.pair.plot.md")
   }else{
     choices1 = c()
-    if(!is.null(data)&&!is.null(ncol(data))&&ncol(data)>0){
-      choices1 = colnames(data)
+    if(!is.null(data.set)&&!is.null(ncol(data.set))&&ncol(data.set)>0){
+      choices1 = colnames(data.set)
     }else{
       choices1=c()
     }
@@ -26,30 +26,14 @@ get.pair.plot.sidebar =  function(){
   }
 }
 
-get.pair.plot.main = function(){
-  if(is.null(data)){
+get.pair.plot.main = function(data.set){
+  if(is.null(data.set)){
     h1("Please select or import a data set.")
   }else{
     list(plotOutput("plot.column.pair"),
          get.player(ID.forward="pair.forward",
                     ID.player="pair.player",
                     ID.backward="pair.backward",
-                    maxi=ncol(data)*(ncol(data)-1)))
+                    maxi=ncol(data.set)*(ncol(data.set)-1)))
   }
 }
-
-# column.pair.plot.panel =function(){
-#   if(is.null(data)){
-#     sidebarLayout(
-#       sidebarPanel(get.pair.plot.sidebar()),
-#       mainPanel(h1("Please select or import a data set."))
-#     )
-#   }else{
-#     sidebarLayout(
-#       sidebarPanel(get.pair.plot.sidebar()),
-#       mainPanel(plotOutput("plot.column.pair"),
-#                 get.player(ID.forward="pair.forward",ID.player="pair.player",ID.backward="pair.backward",maxi=ncol(data)*(ncol(data)-1)))
-#     )
-#   }
-# }
-# 

@@ -7,10 +7,10 @@ get.sidebar.save = function(){
   )
 }
 
-save.data.panel = function(){
+save.data.panel = function(data.set){
   m.panel = NULL
   s.panel = NULL
-  if(is.null(data)){
+  if(is.null(data.set)){
     m.panel = h1("Please Import or select a data set.")
   }else{
     s.panel = get.sidebar.save()
