@@ -1014,7 +1014,7 @@ get.quantiles = function(subx){
 
 #vars = c("data.dir","Version")
 #data.dir = "data"
-#lite.version = "iNZight Lite Version 0.9.8"
+ = "iNZight Lite Version 0.9.8"
 #lite.update = "Last Updated: 23/03/15"
 #first.reorder = TRUE
 #transform.text = ""
