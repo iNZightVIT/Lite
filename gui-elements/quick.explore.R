@@ -1,5 +1,5 @@
-get.quick.explore =  function(){
-  if(is.null(data)){
+get.quick.explore =  function(data.set){
+  if(is.null(data.set)){
     list(list(help.display('Quick explore','quick_explore',
                            "gui-elements/notes/quick.explore.md"),
               br(),HTML("")),
@@ -31,9 +31,9 @@ get.quick.explore =  function(){
   }
 }
 
-quick.explore.panel =function(){
+quick.explore.panel =function(data.set){
   sidebarLayout(
-    sidebarPanel(get.quick.explore()[[1]]),
-    mainPanel(get.quick.explore()[[2]])
+    sidebarPanel(get.quick.explore(data.set)[[1]]),
+    mainPanel(get.quick.explore(data.set)[[2]])
   )
 }

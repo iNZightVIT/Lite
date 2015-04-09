@@ -1,5 +1,5 @@
 
-filter.data.sidebar =  function(){
+filter.data.sidebar =  function(data.set){
   list(
     selectInput(inputId="select_filter",
                 label="Select Filter to apply",
@@ -9,14 +9,14 @@ filter.data.sidebar =  function(){
     conditionalPanel("input.select_filter=='levels of categorical variable'",
                      selectInput(inputId="select_categorical1",
                                  label="Select a categorical variable to filter the data on",
-                                 choices=c("",get.categorical.column.names()),
+                                 choices=c("",get.categorical.column.names(data.set)),
                                  selected=1,selectize=F),
                      selectInput(inputId="levels1",label="Select levels to remove from the data",
                                  choices="",selected=1,multiple=T)),
     conditionalPanel("input.select_filter=='numeric condition'",
                      selectInput(inputId="select_numeric1",
                                  label="Select a numerical variable to filter the data on",
-                                 choices=c("",get.numeric.column.names()),
+                                 choices=c("",get.numeric.column.names(data.set)),
                                  selected=1,selectize=F),
                      selectInput(inputId="select_operation1",
                                  label="Select a condition ",
@@ -37,8 +37,8 @@ filter.data.sidebar =  function(){
     help.display('Filter datset','row_op_help',"gui-elements/notes/filter.dataset.md"),br())
 }
 
-filter.data.panel =function(){
-  if(is.null(data)){
+filter.data.panel =function(data.set){
+  if(is.null(data.set)){
     sidebarLayout(
       sidebarPanel(help.display('Filter datset','row_op_help',"gui-elements/notes/filter.dataset.md")),
       mainPanel(
@@ -47,7 +47,7 @@ filter.data.panel =function(){
     )
   }else{
     sidebarLayout(
-      sidebarPanel(filter.data.sidebar()),
+      sidebarPanel(filter.data.sidebar(data.set)),
       mainPanel(verbatimTextOutput("filter.data.summary"))
     )
   }

@@ -2,10 +2,10 @@
 #   helpModal('Remove columns','rem_columns',inclMD("gui-elements/notes/remove.columns.md"))
 # }
 
-get.sidebar.remove= function(){
+get.sidebar.remove= function(data.set){
   choices = c()
-  if(!is.null(data)){
-    choices = colnames(data)
+  if(!is.null(data.set)){
+    choices = colnames(data.set)
   }
   list(
     helpText("Select columns to remove. The table on the left shows what the data will look like when the 
@@ -17,9 +17,9 @@ get.sidebar.remove= function(){
   )
 }
 
-remove.columns.panel = function(){
+remove.columns.panel = function(data.set){
   sidebarLayout(
-    sidebarPanel(get.sidebar.remove()),
+    sidebarPanel(get.sidebar.remove(data.set)),
     mainPanel( dataTableOutput("rem.col.table")
     )
   )

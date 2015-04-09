@@ -132,17 +132,17 @@ shinyUI(
                                 uiOutput("quick.explore")),
                        tabPanel("Time Series",
                                 uiOutput("timeseries.panel"))
-            ),
-            navbarMenu("Quick explore",
-                      tabPanel("Data Summary",
-                               uiOutput("quick.summary")),
-                      tabPanel("Single column plot",
-                               uiOutput("single.column.plot")),
-                      tabPanel("Column Pair plot",
-                               uiOutput("column.pair.plot")),
-                      tabPanel("Compare pairs",
-                               uiOutput("matrix.plot"))
-                      )#,      
+            )#,
+#             navbarMenu("Quick explore",
+#                       tabPanel("Data Summary",
+#                                uiOutput("quick.summary")),
+#                       tabPanel("Single column plot",
+#                                uiOutput("single.column.plot")),
+#                       tabPanel("Column Pair plot",
+#                                uiOutput("column.pair.plot")),
+#                       tabPanel("Compare pairs",
+#                                uiOutput("matrix.plot"))
+#                       )#,      
             ##  "Help" tab.
 #             tabPanel("Help",
 #                      uiOutput("help.panel"))

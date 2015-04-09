@@ -1,13 +1,13 @@
 
-get.single.col.sidebar <- function(){
-  if(is.null(data)){
+get.single.col.sidebar <- function(data.set){
+  if(is.null(data.set)){
     help.display('Single column plot',
                  'single_column_plot',
                  "gui-elements/notes/single.column.plot.md")
   }else{
     choices1 = ""
-    if (!is.null(data) && !is.null(ncol(data)) && ncol(data) > 0){
-      choices1 = colnames(data)
+    if (!is.null(data.set) && !is.null(ncol(data.set)) && ncol(data.set) > 0){
+      choices1 = colnames(data.set)
     } else {
       choices2 = ""
     }
@@ -24,21 +24,21 @@ get.single.col.sidebar <- function(){
   }
 }
 
-get.single.col.main <- function(){
-  if(is.null(data)){
+get.single.col.main <- function(data.set){
+  if(is.null(data.set)){
     h1("Please select or import a data set.")
   }else{
     list(plotOutput("column.plot"),
          get.player(ID.backward="single.backward",
                     ID.player="single.play",
                     ID.forward="single.forward",
-                    maxi=ncol(data)))
+                    maxi=ncol(data.set)))
   }
 }
 
 
 # single.column.plot.panel =function(){
-#   if(is.null(data)){
+#   if(is.null()){
 #     sidebarLayout(
 #       sidebarPanel(get.single.col.sidebar()),
 #       mainPanel(h1("Please select or import a data set."))
@@ -51,7 +51,7 @@ get.single.col.main <- function(){
 #       )
 #     )
 #   }
-#   if(is.null(data)){
+#   if(is.null()){
 #     sidebarLayout(
 #         sidebarPanel(get.single.col.sidebar()),
 #             mainPanel(h1("Please select or import a data set."))
@@ -61,7 +61,7 @@ get.single.col.main <- function(){
 #         sidebarPanel(get.single.col.sidebar()),
 #             mainPanel(plotOutput("column.plot"),
 #                 get.player(ID.backward="single.backward",ID.player="single.play",
-#                            ID.forward="single.forward",maxi=ncol(data))
+#                            ID.forward="single.forward",maxi=ncol())
 #             )
 #     )   
 #     }

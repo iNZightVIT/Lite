@@ -1,6 +1,6 @@
-aggregate.data.sidebar =  function(){
+aggregate.data.sidebar =  function(data.set){
   list(selectInput(inputId="aggros",
-                   choices=c("",get.categorical.column.names()),
+                   choices=c("",get.categorical.column.names(data.set)),
                    selected=1,
                    multiple=T,
                    label="Select categorical Variable"),
@@ -17,8 +17,8 @@ aggregate.data.sidebar =  function(){
        br())
 }
 
-aggregate.variable =function(){
-  if(is.null(data)){
+aggregate.variable =function(data.set){
+  if(is.null(data.set)){
     sidebarLayout(
       sidebarPanel(help.display('Aggregate data','aggregate_help',"gui-elements/notes/aggregate.data.md")),
       mainPanel(
@@ -27,7 +27,7 @@ aggregate.variable =function(){
     )
   }else{
     sidebarLayout(
-      sidebarPanel(aggregate.data.sidebar()),
+      sidebarPanel(aggregate.data.sidebar(data.set)),
       mainPanel(dataTableOutput("aggregate.table"))
     )
   }

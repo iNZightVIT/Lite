@@ -1,11 +1,7 @@
-# help.quick.summary = function(){
-#   helpModal('Quick summary','quick_summary',inclMD("gui-elements/notes/quick.summary.md"))
-# }
-
-get.quick.summary.sidebar =  function(){
+get.quick.summary.sidebar =  function(data.set){
   choices1 = c()
-  if(!is.null(data)&&!is.null(ncol(data))&&ncol(data)>0){
-    choices1 = colnames(data)
+  if(!is.null(data.set)&&!is.null(ncol(data.set))&&ncol(data.set)>0){
+    choices1 = colnames(data.set)
   }else{
     choices2=c()
   }
@@ -16,19 +12,4 @@ get.quick.summary.sidebar =  function(){
 get.quick.summary.main = function(){
   list(mainPanel(verbatimTextOutput("all.summary"),
             verbatimTextOutput("column.summary")))
-}
-
-quick.summary.panel =function(choices=c(),selected=""){
-  if(is.null(data)){
-    sidebarLayout(
-      sidebarPanel(get.quick.sidebar()),
-      mainPanel(h1("Please select or import a data set."))
-    )
-  }else{
-    sidebarLayout(
-      sidebarPanel(get.quick.sidebar()),
-      mainPanel(verbatimTextOutput("all.summary"),
-                verbatimTextOutput("column.summary"))
-    )
-  }
 }

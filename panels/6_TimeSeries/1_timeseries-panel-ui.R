@@ -28,9 +28,9 @@ ts.help = function() {
 
 
 ###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
-ts.sidebarPanel = function() {
+ts.sidebarPanel = function(data.set) {
     ##  Perform a routine data check (to be replaced).
-    if (is.null(data)) {
+    if (is.null(data.set)) {
           stop("Please select a data set!")
     }
     ##  We set up the sidebar panel UI. The code is in 4 sections:
@@ -65,7 +65,7 @@ ts.sidebarPanel = function() {
             selectInput(
                 inputId = "select_timevars",
                 label = "Select time variable: ",
-                choices = colnames(data),
+                choices = colnames(data.set),
                 selectize = FALSE
             )
         ),
@@ -102,8 +102,8 @@ ts.sidebarPanel = function() {
         ##  variable is often the first element of "colnames(data)".
         selectInput(inputId = "select_variables",
                     label = "Series Variables: ",
-                    choices =  rev(colnames(data)),
-                    selected = rev(colnames(data))[1],
+                    choices =  rev(colnames(data.set)),
+                    selected = rev(colnames(data.set))[1],
                     multiple = TRUE,
                     selectize = FALSE),
         helpText("(Remove variables with the",
@@ -312,16 +312,16 @@ ts.mainPanel = function() {
 ###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to
 ###  complete the UI for the Time Series module.
 
-timeseries.panel.ui = function() {
+timeseries.panel.ui = function(data.set) {
     fluidPage(  
-        if (is.null(data)) {
+        if (is.null(data.set)) {
             fluidRow(
                 includeMarkdown(
                     "panels/6_TimeSeries/4_timeseries-panel-null.md")
             )
         } else {
             fluidRow(
-                column(2, ts.sidebarPanel()),
+                column(2, ts.sidebarPanel(data.set)),
                 column(10, ts.mainPanel())
             )
         }

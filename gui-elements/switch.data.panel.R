@@ -4,7 +4,7 @@
 
 # puts together a list of shiny widgets to fill the sidebar
 get.sidebar.switch = function(){
-  choices1=get.data.dirs()
+  choices1=get.data.dirs(data.dir)
   ret = list(selectInput(inputId="data_select",
                          label="Select Data set category",
                          choices=basename(choices1),
@@ -21,7 +21,7 @@ get.sidebar.switch = function(){
 }
 
 get.switch.data.main = function(has.input){
-  if(is.null(data)){
+  if(is.null(data.set)){
     if(!has.input){
       list(div(class="page-divider"),
            h3(textOutput("data_name_show")),

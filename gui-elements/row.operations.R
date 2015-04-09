@@ -7,7 +7,7 @@
 #         conditionalPanel("input.select_filter=='levels of categorical variable'",
 #                          selectInput(inputId="select_categorical1",
 #                                      label="Select a categorical variable to filter the data on",
-#                                      choices=c("",get.categorical.column.names()),
+#                                      choices=c("",get.categorical.column.names(data.set)),
 #                                      selected=1,selectize=F),
 #                          selectInput(inputId="levels1",label="Select levels which remain in data",
 #                                      choices="",selected=1,multiple=T)),
@@ -35,7 +35,7 @@
 #          help.display('Perform Row operation','row_op_help',"gui-elements/notes/row.operations.md"))
 # }
 # row.operations.panel =function(){
-#     if(is.null(data)){
+#     if(is.null(data.set)){
 #         sidebarLayout(
 #             sidebarPanel(help.display('Perform Row operation','row_op_help',"gui-elements/notes/row.operations.md")),
 #             mainPanel(

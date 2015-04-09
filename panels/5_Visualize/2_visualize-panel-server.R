@@ -11,9 +11,9 @@
 
 ###  And on the first day of February, God said "Let there be data":
 vis.data <- reactive({
-    input$selector
-    data
-    vis.data <- data
+#     input$selector
+  values$data.set
+  vis.data <- get.data.set()
 })
 
 

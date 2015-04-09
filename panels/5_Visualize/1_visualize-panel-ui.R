@@ -241,9 +241,9 @@ vis.mainPanel = function() {
 ###  complete the UI for the Time Series module. If no data set has been
 ###  selected, we display a helpful warning message.
 
-visualize.panel.ui = function() {
+visualize.panel.ui = function(data.set) {
     fluidPage(  
-        if (is.null(data)) {
+        if (is.null(data.set)) {
             fluidRow(
                 includeMarkdown(
                     "panels/5_Visualize/4_visualize-panel-null.md")

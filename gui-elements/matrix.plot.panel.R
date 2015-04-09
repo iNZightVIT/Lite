@@ -1,12 +1,12 @@
-get.matrix.sidebar =  function(){
-  if(is.null(data)){
+get.matrix.sidebar =  function(data.set){
+  if(is.null(data.set)){
     help.display('Pair matrix plot',
                  'pair_matrix_plot',
                  "gui-elements/notes/matrix.plot.md")
   }else{
     choices1 = c()
-    if(!is.null(data)&&!is.null(ncol(data))&&ncol(data)>0){
-      choices1 = colnames(data)
+    if(!is.null(data.set)&&!is.null(ncol(data.set))&&ncol(data.set)>0){
+      choices1 = colnames(data.set)
     }else{
       choices2=c()
     }
@@ -23,24 +23,10 @@ get.matrix.sidebar =  function(){
   }
 }
 
-get.matrix.main = function(){
-  if(is.null(data)){
+get.matrix.main = function(data.set){
+  if(is.null(data.set)){
     h1("Please select or import a data set.")
   }else{
     tabPanel(NULL,plotOutput("plot.matrix", height = 700, width = 700))
   }
 }
-
-# matrix.plot.panel =function(){
-#   if(is.null(data)){
-#     sidebarLayout(
-#       sidebarPanel(get.matrix.sidebar()),
-#       mainPanel(h1("Please select or import a data set."))
-#     )
-#   }else{
-#     sidebarLayout(
-#       sidebarPanel(get.matrix.sidebar()),
-#       mainPanel(tabPanel(NULL,plotOutput("plot.matrix", height = 700, width = 700)))#plotOutput("plot.matrix"))#,width="100%",height="100%"))
-#     )
-#   }
-# }

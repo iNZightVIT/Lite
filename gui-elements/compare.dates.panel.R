@@ -3,7 +3,7 @@
 # }
 
 get.sidebar.comp.dates = function(){
-  is.dates = test.for.dates()
+  is.dates = test.for.dates(data.set)
   if(any(is.dates)){
     list(
       helpText("Select columns to remove. The table on the left shows what the data will look like when the 

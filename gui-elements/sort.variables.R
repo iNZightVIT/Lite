@@ -1,14 +1,14 @@
-num.select.panel = function(num.vars){
+num.select.panel = function(num.vars,data.set){
   if(!is.convertable.numeric(num.vars)){
     num.vars = 1
   }
-  if(as.numeric(num.vars)>ncol(data)){
-    num.vars=ncol(data)
+  if(as.numeric(num.vars)>ncol(data.set)){
+    num.vars=ncol(data.set)
   }
   lapply(1:num.vars,function(index){
     fixedRow(
       column(8,selectInput(inputId=paste0("sort",index),
-                            choices=c("",colnames(data)),
+                            choices=c("",colnames(data.set)),
                             selected=1,
                             label=paste("Variable",index))),
       column(3,checkboxInput(inputId=paste0("increasing",index),
@@ -25,8 +25,8 @@ sort.variables.sidebar =  function(){
          br()))
 }
 
-sort.variables =function(){
-  if(is.null(data)){
+sort.variables =function(data.set){
+  if(is.null(data.set)){
     sidebarLayout(
       sidebarPanel(help.display('Sort data by variables','sort_vars_help',"gui-elements/notes/sort.variables.md")),
       mainPanel(
