@@ -14,6 +14,8 @@ library(iNZightTS)
 library(markdown)
 library(gpairs)
 
+source("functions.R",local=T)
+
 ### We write the server function.
 shinyServer(function(input, output, session) {
   
@@ -210,7 +212,7 @@ shinyServer(function(input, output, session) {
       get.data.set()
       input$remove_set
       isolate({
-        switch.data.panel(get.data.set())
+        switch.data.panel(get.data.set(),get.data.dir())
       })
     })
 

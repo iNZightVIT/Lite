@@ -3,7 +3,7 @@
 # }
 
 # puts together a list of shiny widgets to fill the sidebar
-get.sidebar.switch = function(){
+get.sidebar.switch = function(data.dir){
   choices1=get.data.dirs(data.dir)
   ret = list(selectInput(inputId="data_select",
                          label="Select Data set category",
@@ -69,8 +69,8 @@ get.switch.data.main = function(has.input,data.set){
 }
 
 #switch.data.panel creates reactive panel for input files
-switch.data.panel = function(data.set){
-  sidebar.widgets = get.sidebar.switch()
+switch.data.panel = function(data.set,data.dir){
+  sidebar.widgets = get.sidebar.switch(data.dir)
   sidebarLayout(
     sidebarPanel(sidebar.widgets,br(),br(),
                  help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md")
