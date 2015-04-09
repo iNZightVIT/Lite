@@ -20,7 +20,7 @@ get.sidebar.switch = function(){
   ret
 }
 
-get.switch.data.main = function(has.input){
+get.switch.data.main = function(has.input,data.set){
   if(is.null(data.set)){
     if(!has.input){
       list(div(class="page-divider"),
@@ -69,12 +69,12 @@ get.switch.data.main = function(has.input){
 }
 
 #switch.data.panel creates reactive panel for input files
-switch.data.panel = function(){
+switch.data.panel = function(data.set){
   sidebar.widgets = get.sidebar.switch()
   sidebarLayout(
     sidebarPanel(sidebar.widgets,br(),br(),
                  help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md")
                  ,br(),
                  HTML("&nbsp;"),br()),
-    mainPanel(get.switch.data.main(T)))
+    mainPanel(get.switch.data.main(T,data.set)))
 }

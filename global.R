@@ -1012,32 +1012,4 @@ get.quantiles = function(subx){
     g1
 }
 
-#vars = c("data.dir","Version")
-#data.dir = "data"
-#lite.version = "iNZight Lite Version 0.9.8"
-#lite.update = "Last Updated: 23/03/15"
-#first.reorder = TRUE
-#transform.text = ""
-rawdata = load.data(data.dir)
-#dataHasChanged = F
-#data.name = rawdata[[1]]
-#data.set = rawdata[[2]]
-#data.restore = rawdata[[2]]
-#temp.data = ""
-#loaded = FALSE
-
-#get.vars(data.dir)
-#single.play = F
-#button = F
-
-values = reactiveValues()
-values$data.name = rawdata[[1]]
-values$data.dir = "data"
-values$data.set = rawdata[[2]]
-values$data.restore = rawdata[[2]]
-values$lite.version = "iNZight Lite Version 0.9.8"
-values$lite.update = "Last Updated: 23/03/15"
-values$button = F
-values$transform.text = ""
-values$dataHasChanged = F
 

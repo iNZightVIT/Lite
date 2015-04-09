@@ -19,6 +19,17 @@ shinyServer(function(input, output, session) {
   
   ##Specify all the reactive values
   
+  values = reactiveValues()
+  values$data.name = NULL
+  values$data.dir = "data"
+  values$data.set = NULL
+  values$data.restore = NULL
+  values$lite.version = "iNZight Lite Version 0.9.7.2"
+  values$lite.update = "Last Updated: 23/03/15"
+  values$button = F
+  values$transform.text = ""
+  values$dataHasChanged = F
+  
   get.data.name = reactive({
     values$data.name
   })
@@ -196,11 +207,11 @@ shinyServer(function(input, output, session) {
 
     ## loads and updates the switch data table Panel
     output$switch.data.panel = renderUI({
-        input$selector
-        input$remove_set
-        isolate({
-          switch.data.panel()
-        })
+      get.data.set()
+      input$remove_set
+      isolate({
+        switch.data.panel(get.data.set())
+      })
     })
 
     output$temp_table = renderDataTable({
@@ -259,7 +270,6 @@ shinyServer(function(input, output, session) {
     
     output$load.data.panel = renderUI({
         input$selector
-#         input$import_set
         isolate({
           load.data.panel()
         })
@@ -314,7 +324,6 @@ shinyServer(function(input, output, session) {
     ##  Data -> Export data (export the currently used data set)
 
     output$save.data.panel = renderUI({
-      #input$selector
       save.data.panel(get.data.set())
     })
 
@@ -413,8 +422,6 @@ shinyServer(function(input, output, session) {
   })
   
   output$transform.columns =renderUI({
-#       input$selector
-  #         input$transform
       transform.data.panel(get.data.set())
   })
 
@@ -536,7 +543,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$filter.data.summary <- renderPrint({
-    input$selector
+    get.data.set()
     input$filter_data_perform
     isolate({
       data.summary(get.data.set())
@@ -544,7 +551,6 @@ shinyServer(function(input, output, session) {
   })
   
   output$filter.dataset = renderUI({
-#     input$selector
     filter.data.panel(get.data.set())
   })
 
@@ -578,13 +584,12 @@ shinyServer(function(input, output, session) {
   })
 
   output$sort.table = renderDataTable({
-    input$selector
     input$sort_vars
     get.data.set()
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
   output$sort.variables = renderUI({
-    input$selector
+    get.data.set()
     isolate({
       sort.variables(get.data.set())
     })
@@ -665,13 +670,10 @@ shinyServer(function(input, output, session) {
   })
 
   output$stack.table = renderDataTable({
-#     input$selector
-#     input$stack_vars
     get.data.set()
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
   output$stack.variables = renderUI({
-#     input$selector
     stack.variables.panel(get.data.set())
   })
 
@@ -747,16 +749,6 @@ shinyServer(function(input, output, session) {
 
   ## Manipulate variables --> Categorical variables --> Reorder levels
 
-#   output$reorder.levels.side = renderUI({
-#     input$selector
-#     isolate({
-#       if(input$categorical_variables_select%in%"Reorder levels"&
-#            input$selector%in%"Categorical variables"){
-#         reorder.sidebar.panel()
-#       }
-#     })
-#   })
-
   observe({
     input$reorder
     isolate({
@@ -802,16 +794,6 @@ shinyServer(function(input, output, session) {
 
 
   ## Manipulate variables --> Categorical variables --> Collapse levels
-
-#   output$collapse.levels.side = renderUI({
-#     input$selector
-#     isolate({
-#       if(input$categorical_variables_select%in%"Collapse levels"&
-#            input$selector%in%"Categorical variables"){
-#         collapse.sidebar.panel()
-#       }
-#     })
-#   })
 
   observe({
     if(!is.null(input$select.collapse.column)){
@@ -860,18 +842,6 @@ shinyServer(function(input, output, session) {
     })
   })
 
-  ## Manipulate variables --> Categorical variables --> Rename levels
-
-#   output$rename.levels.side = renderUI({
-#     input$selector
-#     isolate({
-#       if(input$categorical_variables_select%in%"Rename levels"&
-#            input$selector%in%"Categorical variables"){
-#         rename.levels.sidebar.panel()
-#       }
-#     })
-#   })
-
   output$rename.factors.inputs = renderUI({
     input$select.rename.column
     get.data.set()
@@ -913,16 +883,6 @@ shinyServer(function(input, output, session) {
   })
 
   ## Manipulate variables --> Categorical variables --> Combine levels
-
-#   output$combine.levels.side = renderUI({
-#     input$selector
-#     isolate({
-#       if(input$categorical_variables_select%in%"Combine categorical"&
-#            input$selector%in%"Categorical variables"){
-#         combine.sidebar.panel()
-#       }
-#     })
-#   })
 
   output$text_combine = renderPrint({
     if(length(input$select.combine.columns)>0){
@@ -1107,41 +1067,40 @@ shinyServer(function(input, output, session) {
     })
 
     output$add.table = renderDataTable({
-        input$selector
-        input$new.column
-        input$add_column
-        isolate({
-          temp=get.data.set()
-          if(!is.null(get.data.set())&&!is.null(input$new.column)){
-              colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
-              if(length(colu)==1){
-                  colu = strsplit(input$new.column,",",fixed=T)[[1]]
-              }
-              if(length(colu)<nrow(get.data.set())){
-                  colu = rep(colu,length.out=nrow(get.data.set()))
-              }
-              if(length(colu)>nrow(get.data.set())){
-                  colu = colu[1:nrow(get.data.set())]
-              }
-              NAs = which(is.na(colu))
-              if(length(NAs)>0&&length(colu[-NAs])>0){
-                  temp.colu = as.numeric(colu[-NAs])
-                  if(!any(is.na(temp.colu))){
-                      colu = as.numeric(colu)
-                  }
-              }
-              count = 1
-              name = "add.column1"
-              while(name%in%colnames(get.data.set())){
-                  count =  count +1
-                  name = paste0("add.column",count)
-              }
-              temp = cbind(get.data.set(),temp.column=colu)
-              colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
-              temp
-          }
-          temp
-        })
+      temp=get.data.set()
+      input$new.column
+      input$add_column
+      isolate({
+        if(!is.null(get.data.set())&&!is.null(input$new.column)){
+            colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
+            if(length(colu)==1){
+                colu = strsplit(input$new.column,",",fixed=T)[[1]]
+            }
+            if(length(colu)<nrow(get.data.set())){
+                colu = rep(colu,length.out=nrow(get.data.set()))
+            }
+            if(length(colu)>nrow(get.data.set())){
+                colu = colu[1:nrow(get.data.set())]
+            }
+            NAs = which(is.na(colu))
+            if(length(NAs)>0&&length(colu[-NAs])>0){
+                temp.colu = as.numeric(colu[-NAs])
+                if(!any(is.na(temp.colu))){
+                    colu = as.numeric(colu)
+                }
+            }
+            count = 1
+            name = "add.column1"
+            while(name%in%colnames(get.data.set())){
+                count =  count +1
+                name = paste0("add.column",count)
+            }
+            temp = cbind(get.data.set(),temp.column=colu)
+            colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
+            temp
+        }
+        temp
+      })
     },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
     output$add.columns = renderUI({
@@ -1168,18 +1127,17 @@ shinyServer(function(input, output, session) {
     })
 
     output$rem.col.table = renderDataTable({
-        input$selector
-        input$rem_column
-        isolate({
-          temp = get.data.set()
-          if(!is.null(get.data.set())&&!is.null(input$select.remove.column)){
-              temp = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
-              if(ncol(temp)==0){
-                  temp=NULL
-              }
-          }
-          temp
-        })
+      temp = get.data.set()
+      input$rem_column
+      isolate({
+        if(!is.null(get.data.set())&&!is.null(input$select.remove.column)){
+            temp = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
+            if(ncol(temp)==0){
+                temp=NULL
+            }
+        }
+        temp
+      })
     },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
     output$remove.columns = renderUI({
@@ -1203,7 +1161,6 @@ shinyServer(function(input, output, session) {
     source("panels/6_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
     source("panels/6_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
     output$timeseries.panel <- renderUI({
-        input$selector
         timeseries.panel.ui(get.data.set())
     })
 
@@ -1245,12 +1202,10 @@ shinyServer(function(input, output, session) {
 #   Advanced --> Quick explore --> Single Column plot
 
   output$single.column.plot.side= renderUI({
-#     input$selector
     get.single.col.sidebar(get.data.set())
   })
 
   output$single.column.plot.main= renderUI({
-#     input$selector
     get.single.col.main(get.data.set())
   })
 
@@ -1486,7 +1441,6 @@ shinyServer(function(input, output, session) {
     ##---------------##
     source("panels/7_Help/1_help-panel-ui.R", local = TRUE)
     output$help.panel <- renderUI({
-        input$selector
         help.panel.ui(get.lite.version(),get.lite.update())
     })
 })
