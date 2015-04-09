@@ -1101,7 +1101,7 @@ shinyServer(function(input, output, session) {
               colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
               temp
           }
-          values$data.set <<- temp
+          values$data.set = temp
           updateTextInput(session, inputId="new.column", value="")
         })
     })
@@ -1157,7 +1157,7 @@ shinyServer(function(input, output, session) {
                 if(length(which(colnames(get.data.set())%in%input$select.remove.column))>0){
                     values$data.set = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
                     if(ncol(get.data.set())==0){
-                        values$data.set <<- NULL
+                        values$data.set = NULL
                         updateSelectInput(session, inputId="select.remove.column",choices=c(""),selected="")
                     }else{
                         updateSelectInput(session, inputId="select.remove.column", choices=colnames(get.data.set()),selected="")
