@@ -14,10 +14,12 @@ library(iNZightTS)
 library(markdown)
 library(gpairs)
 
-source("functions.R",local=T)
+
 
 ### We write the server function.
 shinyServer(function(input, output, session) {
+  
+  source("functions.R",local=T)
   
   ##Specify all the reactive values
   
