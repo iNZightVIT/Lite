@@ -14,17 +14,12 @@ library(iNZightTS)
 library(markdown)
 library(gpairs)
 
-<<<<<<< HEAD
 source("functions.R")
-=======
-
->>>>>>> refs/remotes/origin/development
-
 
 ### We write the server function.
 shinyServer(function(input, output, session) {
   
-  source("functions.R",local=T)
+#   source("functions.R",local=T)
   
   ##Specify all the reactive values
   
