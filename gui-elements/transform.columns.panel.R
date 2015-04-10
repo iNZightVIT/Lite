@@ -12,18 +12,22 @@ get.transform.sidebar =  function(data.set){
        help.display('Modify data','transform_columns',"gui-elements/notes/transform.explanation.md"),br())
 }
 
-transform.data.panel =function(data.set){
-  if(is.null(data.set)){
-    sidebarLayout(
-      sidebarPanel(help.display('Modify data','transform_columns',"gui-elements/notes/transform.explanation.md")),
-      mainPanel(
-        h1("Please select or import a data set.")
-      )
-    )
-  }else{
-    sidebarLayout(
-        sidebarPanel(get.transform.sidebar(data.set)),
-        mainPanel(dataTableOutput(outputId="table_part"))
-    )
-  }
+get.transform.main = function(){
+  dataTableOutput(outputId="table_part")
 }
+
+# transform.data.panel =function(data.set){
+#   if(is.null(data.set)){
+#     sidebarLayout(
+#       sidebarPanel(help.display('Modify data','transform_columns',"gui-elements/notes/transform.explanation.md")),
+#       mainPanel(
+#         h1("Please select or import a data set.")
+#       )
+#     )
+#   }else{
+#     sidebarLayout(
+#         sidebarPanel(get.transform.sidebar(data.set)),
+#         mainPanel(dataTableOutput(outputId="table_part"))
+#     )
+#   }
+# }

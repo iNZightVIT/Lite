@@ -48,7 +48,8 @@ shinyUI(
                        border-radius: 10px;
                     }
                     #categorical_variables_select,
-                    #quick_explore_select {
+                    #quick_explore_select,
+                    #numeric_variables_select {
                        background: #158CBA;
                        color: #F8DCCD
                        border-radius: 10px;
@@ -117,7 +118,7 @@ shinyUI(
                        tabPanel("Categorical variables",
                                   uiOutput('categorical.variables')),
                        tabPanel("Numeric variables",
-                                uiOutput('transform.columns')),
+                                uiOutput('numeric.variables')),
 #                        tabPanel("Compare dates",
 #                                 uiOutput("compare.dates")),
                        tabPanel("Add columns",
