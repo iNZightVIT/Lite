@@ -1,5 +1,5 @@
 num.select.panel = function(num.vars,data.set){
-  if(!is.convertable.numeric(num.vars)){
+  if(!all(is.convertable.numeric(num.vars))){
     num.vars = 1
   }
   if(as.numeric(num.vars)>ncol(data.set)){

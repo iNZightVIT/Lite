@@ -42,7 +42,8 @@ shinyUI(
                     #provide_startdate,
                     #provide_season,
                     #provide_frequency,
-                    #numeric_input1 {
+                    #numeric_input1,
+                    #form_class_interval_number {
                        background-color: #A3E7FF;
                        border: 1px solid;
                        border-radius: 10px;

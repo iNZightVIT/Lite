@@ -15,9 +15,16 @@ get.sidebar.add = function(){
   )
 }
 
-add.columns.panel = function(){
-  sidebarLayout(
-    sidebarPanel(get.sidebar.add()),
-    mainPanel( dataTableOutput("add.table"))
-  )
+add.columns.panel = function(data.set){
+  if(is.null(data.set)){
+    sidebarLayout(
+      sidebarPanel(help.display('Add a column','add_columns',"gui-elements/notes/add.columns.md")),
+      mainPanel(h1("Please select or import a data set."))
+    )  
+  }else{
+    sidebarLayout(
+      sidebarPanel(get.sidebar.add()),
+      mainPanel( dataTableOutput("add.table"))
+    )  
+  }
 }

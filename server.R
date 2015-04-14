@@ -408,7 +408,7 @@ shinyServer(function(input, output, session) {
             }
           }
         }else if(input$select_filter%in%"numeric condition"){
-          if(!input$select_numeric1%in%""&!input$select_operation1%in%""&is.convertable.numeric(input$numeric_input1)){
+          if(!input$select_numeric1%in%""&!input$select_operation1%in%""&all(is.convertable.numeric(input$numeric_input1))){
             indexes.keep = 1:nrow(get.data.set())
             if(input$select_operation1%in%"<"){
               indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]<as.numeric(input$numeric_input1)))
@@ -428,7 +428,7 @@ shinyServer(function(input, output, session) {
             }
           }
         }else if(input$select_filter%in%"row indices"){
-          if(is.convertable.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]])){
+          if(all(is.convertable.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]]))){
             indices = as.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]])
             indices = indices[which(indices%in%(1:nrow(get.data.set())))]
             if(length(indices)>0){
@@ -436,8 +436,8 @@ shinyServer(function(input, output, session) {
             }
           }
         }else if(input$select_filter%in%"randomly"){
-          if(is.convertable.numeric(input$numeric_input2)&&
-               is.convertable.numeric(input$numeric_input3)&&
+          if(all(is.convertable.numeric(input$numeric_input2))&&
+               all(is.convertable.numeric(input$numeric_input3))&&
                as.numeric(input$numeric_input2)<=nrow(get.data.set())&&
                (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(get.data.set())&
                    input$bootstrap_check)|
@@ -460,8 +460,8 @@ shinyServer(function(input, output, session) {
     input$numeric_input3
     input$bootstrap_check
     isolate({
-      if(is.convertable.numeric(input$numeric_input2)&&
-           is.convertable.numeric(input$numeric_input3)&&
+      if(all(is.convertable.numeric(input$numeric_input2))&&
+           all(is.convertable.numeric(input$numeric_input3))&&
            as.numeric(input$numeric_input2)<=nrow(get.data.set())&&
            (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(get.data.set())&
                input$bootstrap_check)|
@@ -486,7 +486,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$message2 = renderPrint({
-    valid = is.convertable.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]])
+    valid = all(is.convertable.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]]))
     isolate({
       if(!valid){
         cat("Please provide a comma seperated list of indices.")
@@ -501,7 +501,7 @@ shinyServer(function(input, output, session) {
     input$select_operation1
     input$numeric_input1
     isolate({
-      if(!is.convertable.numeric(input$numeric_input1)){
+      if(!all(is.convertable.numeric(input$numeric_input1))){
         cat("Please provide a numeric variable.")
       }else{
         cat(input$select_numeric1,input$select_operation1,input$numeric_input1)
@@ -968,55 +968,116 @@ shinyServer(function(input, output, session) {
   })
 
   output$form.class.interval.main = renderUI({
-    get.form.class.interval.main(get.data.set())
+    get.data.set()
+    get.form.class.interval.main()
   })
 
-    ##  Manipulate variables -> add columns : paste in data to add as additional column.
-    observe({
-        input$add_column
-        isolate({
-          temp=get.data.set()
-          if(!is.null(get.data.set())&&!is.null(input$new.column)&&input$add_column>0){
-              colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
-              if(length(colu)==1){
-                  colu = strsplit(input$new.column,",",fixed=T)[[1]]
-              }
-              if(length(colu)<nrow(get.data.set())){
-                  colu = rep(colu,length.out=nrow(get.data.set()))
-              }
-              if(length(colu)>nrow(get.data.set())){
-                  colu = colu[1:nrow(get.data.set())]
-              }
-              NAs = which(is.na(colu))
-              if(length(NAs)>0&&length(colu[-NAs])>0){
-                  temp.colu = as.numeric(colu[-NAs])
-                  if(!any(is.na(temp.colu))){
-                      colu = as.numeric(colu)
-                  }
-              }
-              count = 1
-              name = "add.column1"
-              while(name%in%colnames(get.data.set())){
-                  count =  count +1
-                  name = paste0("add.column",count)
-              }
-              temp = cbind(get.data.set(),temp.column=colu)
-              colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
-#               temp
-          }
-          if(!is.null(temp)){
-            values$data.set = temp
-            updateTextInput(session, inputId="new.column", value="")  
-          }
-        })
+  observe({
+    input$form_class_interval_number
+    isolate({
+      if((!is.null(input$form_class_interval_number)&&
+           !all(is.convertable.integer(input$form_class_interval_number)))||(
+             !is.null(input$form_class_interval_number)&&
+               all(is.convertable.integer(input$form_class_interval_number))&&
+               as.numeric(input$form_class_interval_number)<=1)){
+        updateTextInput(session,inputId="form_class_interval_number",
+                        value="")
+      }
     })
+  })
 
-    output$add.table = renderDataTable({
-      temp=get.data.set()
-      input$new.column
+  output$form.class.interval.table = renderDataTable({
+    get.data.set()
+  },,options=list(lengthMenu = c(5, 30, 50), 
+                  pageLength = 5, 
+                  columns.defaultContent="NA",
+                  scrollX=T))
+
+  observe({
+    input$form.class.interval.submit
+    isolate({
+      if(!is.null(input$form.class.interval.submit)&&
+           input$form.class.interval.submit>0&&
+           all(is.convertable.integer(input$form_class_interval_number))){
+        intervals = NULL
+        labels=NULL
+        if(input$form_class_interval_method_select%in%"specified"){
+          ids = names(input)[grep("^specified_text[0-9]+$",names(input))]
+          if(length(ids)>0){
+            intervals = unlist(lapply(1:length(ids),function(i){
+              input[[ids[i]]]
+            }))
+          }
+        }
+        if(input$form_class_interval_labels_provide){
+             labels = names(input)[grep("^lable_class[0-9]+$",names(input))]
+             for(i in 1:length(labels)){
+               labels[i] = input[[labels[i]]]
+             }
+             if(any(is.null(labels))||
+                  any(labels%in%"")){
+               labels=NULL
+             }
+        }
+        if(all(is.convertable.numeric(intervals))){
+          values$data.set = get.form.class.interval(dafr=get.data.set(),
+                                                    intervals=sort(as.numeric(intervals)),
+                                                    method=input$form_class_interval_method_select,
+                                                    column=input$form.class.interval.column.select,
+                                                    num.intervals=as.numeric(input$form_class_interval_number),
+                                                    open.left.closed.right=input$form.class.interval.format,
+                                                    labels=labels)
+        }
+      }
+    })
+  })
+
+  output$specified.range = renderUI({
+    input$form_class_interval_number
+    input$form.class.interval.column.select
+    isolate({
+      ret = NULL
+      if(all(is.convertable.integer(input$form_class_interval_number))&&
+         !is.null(input$form.class.interval.column.select)){
+        ret = list(helpText(paste("Fill in the text fields below with numeric 
+                                  range cuttoffs. The minimum in the selected 
+                                  column is ",
+                                  min(get.data.set()[,input$form.class.interval.column.select],na.rm=T),
+                                  ". The maximum is ",
+                                  max(get.data.set()[,input$form.class.interval.column.select],na.rm=T),
+                                  ". All values must be in this range."
+                                  ,sep="")))
+        for(i in 2:(input$form_class_interval_number)){
+          ret[[i]] = textInput(inputId=paste0("specified_text",i),
+                               label=paste("Range cutoff",(i-1),sep=" "),
+                               value = "")
+        }
+      }
+      ret
+    })
+  })
+
+  output$labels.provide = renderUI({
+    input$form_class_interval_number
+    isolate({
+      if(all(is.convertable.integer(input$form_class_interval_number))){
+        ret = list(helpText("Fill in all the text fields to label the 
+                            factors in the newly generated class interval 
+                            variable."))
+        for(i in 1:input$form_class_interval_number){
+          ret[[i+1]] = textInput(paste0("lable_class",i),label=paste("Specify factor",i,sep=" "))
+        }
+      }
+      ret
+    })
+  })
+
+ ##  Manipulate variables -> add columns : paste in data to add as additional column.
+  observe({
       input$add_column
       isolate({
-        if(!is.null(get.data.set())&&!is.null(input$new.column)){
+        temp=get.data.set()
+        if(!is.null(get.data.set())&&!is.null(input$new.column)&&input$add_column>0){
             colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
             if(length(colu)==1){
                 colu = strsplit(input$new.column,",",fixed=T)[[1]]
@@ -1042,55 +1103,95 @@ shinyServer(function(input, output, session) {
             }
             temp = cbind(get.data.set(),temp.column=colu)
             colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
-            temp
+#               temp
         }
-        temp
+        if(!is.null(temp)){
+          values$data.set = temp
+          updateTextInput(session, inputId="new.column", value="")  
+        }
       })
-    },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
+  })
 
-    output$add.columns = renderUI({
-        add.columns.panel()
+  output$add.table = renderDataTable({
+    temp=get.data.set()
+    input$new.column
+    input$add_column
+    isolate({
+      if(!is.null(get.data.set())&&!is.null(input$new.column)){
+          colu = strsplit(input$new.column,"\n",fixed=T)[[1]]
+          if(length(colu)==1){
+              colu = strsplit(input$new.column,",",fixed=T)[[1]]
+          }
+          if(length(colu)<nrow(get.data.set())){
+              colu = rep(colu,length.out=nrow(get.data.set()))
+          }
+          if(length(colu)>nrow(get.data.set())){
+              colu = colu[1:nrow(get.data.set())]
+          }
+          NAs = which(is.na(colu))
+          if(length(NAs)>0&&length(colu[-NAs])>0){
+              temp.colu = as.numeric(colu[-NAs])
+              if(!any(is.na(temp.colu))){
+                  colu = as.numeric(colu)
+              }
+          }
+          count = 1
+          name = "add.column1"
+          while(name%in%colnames(get.data.set())){
+              count =  count +1
+              name = paste0("add.column",count)
+          }
+          temp = cbind(get.data.set(),temp.column=colu)
+          colnames(temp)[which(colnames(temp)%in%"temp.column")] = name
+          temp
+      }
+      temp
     })
+  },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
-    ##  Manipulate variables -> remove columns : remove selected columns from the data.
+  output$add.columns = renderUI({
+      add.columns.panel(get.data.set())
+  })
 
-    observe({
-        input$rem_column
-        if(!is.null(get.data.set())&&!is.null(input$rem_column)&&input$rem_column>0){
-            isolate({
-                if(length(which(colnames(get.data.set())%in%input$select.remove.column))>0){
-                  temp = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
-                  if(!is.null(temp)){
-                    values$data.set = temp
-                    if(ncol(get.data.set())==0){
-                        values$data.set = NULL
-                        updateSelectInput(session, inputId="select.remove.column",choices=c(""),selected="")
-                    }else{
-                        updateSelectInput(session, inputId="select.remove.column", choices=colnames(get.data.set()),selected="")
-                    }
+  ##  Manipulate variables -> remove columns : remove selected columns from the data.
+
+  observe({
+      input$rem_column
+      if(!is.null(get.data.set())&&!is.null(input$rem_column)&&input$rem_column>0){
+          isolate({
+              if(length(which(colnames(get.data.set())%in%input$select.remove.column))>0){
+                temp = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
+                if(!is.null(temp)){
+                  values$data.set = temp
+                  if(ncol(get.data.set())==0){
+                      values$data.set = NULL
+                      updateSelectInput(session, inputId="select.remove.column",choices=c(""),selected="")
+                  }else{
+                      updateSelectInput(session, inputId="select.remove.column", choices=colnames(get.data.set()),selected="")
                   }
                 }
-            })
-        }
-    })
+              }
+          })
+      }
+  })
 
-    output$rem.col.table = renderDataTable({
-      temp = get.data.set()
-      input$rem_column
-      isolate({
-        if(!is.null(get.data.set())&&!is.null(input$select.remove.column)){
-            temp = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
-            if(ncol(temp)==0){
-                temp=NULL
-            }
-        }
-        temp
-      })
-    },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
-
-    output$remove.columns = renderUI({
-        remove.columns.panel(get.data.set())
+  output$rem.col.table = renderDataTable({
+    temp = get.data.set()
+    input$rem_column
+    isolate({
+      if(!is.null(get.data.set())&&!is.null(input$select.remove.column)){
+          temp = as.data.frame(get.data.set()[,-which(colnames(get.data.set())%in%input$select.remove.column)])
+          if(ncol(temp)==0){
+              temp=NULL
+          }
+      }
+      temp
     })
+  },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
+
+  output$remove.columns = renderUI({
+      remove.columns.panel(get.data.set())
+  })
 
   #   Advanced --> Quick explore
   
