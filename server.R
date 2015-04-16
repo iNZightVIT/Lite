@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
   values$lite.update = "Last Updated: 23/03/15"
   values$button = F
   values$transform.text = ""
-  values$dataHasChanged = F
+#   values$dataHasChanged = F
   
   get.data.name = reactive({
     values$data.name
@@ -66,9 +66,9 @@ shinyServer(function(input, output, session) {
     values$transform.text
   })
   
-  get.dataHasChanged = reactive({
-    values$dataHasChanged
-  })
+#   get.dataHasChanged = reactive({
+#     values$dataHasChanged
+#   })
   
   #################################
   
@@ -891,70 +891,42 @@ shinyServer(function(input, output, session) {
   ##  Manipulate variables -> Numeric variables
 
   output$numeric.variables = renderUI({
-    numeric.variables.panel(get.data.set())
+    isolate({
+      numeric.variables.panel(get.data.set())  
+    })
   })
 
   ##  Manipulate variables -> Numeric variables -> transform variables (Perform column transformations)
-  
-  transform.temp.table = reactive({
-    input$select.columns.transform
-    input$select.transform
-    get.data.set()
-    isolate({
-      transform.tempTable(get.data.set(),input$select.transform,input$select.columns.transform)
-    })
-  })
-  
-  perform.transform = reactive({
-    #       input$select.columns.transform
-    #       input$select.transform
-    get.data.set()
-    isolate({
-      transform.perform(get.data.set(),
-                        input$select.transform,
-                        input$select.columns.transform)
-    })
-  })
   
   observe({
     input$transform
     isolate({
       if(!is.null(input$transform)&&input$transform>0){
-        temp = perform.transform()
+        temp = transform.perform(get.data.set(),
+                                 input$select.transform,
+                                 input$select.columns.transform)
+        print(head(temp))
         if(!is.null(temp)){
           values$data.set = temp
-          updateSelectInput(session, inputId="select.columns.transform", 
-                            choices=colnames(get.data.set()), selected=input$select.columns.transform)
-          values$dataHasChanged = T
+          values$transform.text = "The transformation of the columns was succesful!"
         }
       }
     })
   })
   
   output$table_part <- renderDataTable({
-    transform.temp.table()
+    transform.tempTable(get.data.set(),input$select.transform,input$select.columns.transform)
   },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
   
   output$status = renderText({
-    input$transform
-    input$select.columns.transform
-    input$select.transform
-    isolate({
-      values$transform.text = ""
-      if(get.dataHasChanged()){
-        values$transform.text = "The transformation  of the columns was successful."
-      }
-      values$dataHasChanged = F
-      get.transform.text()
-    })
+    get.transform.text()
   })
-  
-#   output$transform.columns =renderUI({
-#     transform.data.panel(get.data.set())
-#   })
 
   output$transform.columns.side = renderUI({
-    get.transform.sidebar(get.data.set())
+    get.data.set()
+    isolate({
+      get.transform.sidebar(get.data.set())
+    })
   })
 
   output$transform.columns.main = renderUI({
@@ -988,7 +960,7 @@ shinyServer(function(input, output, session) {
 
   output$form.class.interval.table = renderDataTable({
     get.data.set()
-  },,options=list(lengthMenu = c(5, 30, 50), 
+  },options=list(lengthMenu = c(5, 30, 50), 
                   pageLength = 5, 
                   columns.defaultContent="NA",
                   scrollX=T))
@@ -1072,7 +1044,129 @@ shinyServer(function(input, output, session) {
     })
   })
 
- ##  Manipulate variables -> add columns : paste in data to add as additional column.
+  ## Manipulate variables -> Numeric variables -> Rank numeric
+
+  output$rank.numeric.table = renderDataTable({
+    get.data.set()
+  },options=list(lengthMenu = c(5, 30, 50), 
+                 pageLength = 5, 
+                 columns.defaultContent="NA",
+                 scrollX=T))
+
+  output$rank.numeric.side = renderUI({
+    rank.numeric.sidebar(get.data.set())
+  })
+
+  output$rank.numeric.main = renderUI({
+    rank.numeric.main()
+  })
+
+  observe({
+    input$rank.numeric.submit
+    isolate({
+      if(!is.null(input$rank.numeric.submit)&&
+           input$rank.numeric.submit>0&&
+           !is.null(input$rank.numeric.select.column)){
+        values$data.set = get.rank.numeric(get.data.set(),
+                                           input$rank.numeric.select.column)
+      }
+    })
+  })
+
+  ## Manipulate variables -> Rename Variables : rename a column.
+
+  output$rename.variables = renderUI({
+    get.rename.variables.panel(get.data.set())
+  })
+
+  observe({
+    input$rename.variables.column.select
+    isolate({
+      updateTextInput(session,
+                      "rename.variables.new.name",
+                      value=input$rename.variables.column.select)
+    })
+  })
+
+  observe({
+    input$rename.variables
+    isolate({
+      if(!is.null(input$rename.variables)&&
+           input$rename.variables>0&&
+           !is.null(input$rename.variables.new.name)&&
+           !input$rename.variables.new.name%in%""){
+        colnames(values$data.set)[
+          which(colnames(get.data.set())%in%
+                  input$rename.variables.column.select)
+          ] = input$rename.variables.new.name
+      }
+    })
+  })
+
+  output$rename.variables.out = renderPrint({
+    data.summary(get.data.set())
+  })
+  
+  ## Manipulate variables --> Create variables
+
+  output$create.variables = renderUI({
+    get.create.variables.panel(get.data.set())
+  })
+
+  output$create.variables.out = renderPrint({
+    data.summary(get.data.set())
+  })
+  
+  observe({
+    input$rename.variables.column.select
+    isolate({
+      updateTextInput(session,"create.variables.expression",
+                      value=paste0(input$create.variables.expression,
+                                   input$rename.variables.column.select,
+                                   sep=""))
+    })
+  })
+
+  observe({
+    input$rename.variables.operation.select
+    isolate({
+      updateTextInput(session,"create.variables.expression",
+                      value=paste0(input$create.variables.expression,
+                                   input$rename.variables.operation.select,
+                                   sep=""))
+    })
+  })
+
+  observe({
+    input$create.variables.submit
+    isolate({
+      if(!is.null(input$create.variables.submit)&&
+           input$create.variables.submit>0){
+        temp = get.create.variables(get.data.set(),
+                                    input$create.variables.expression)
+        if(is.null(temp)){
+          
+        }else{
+          values$data.set = temp
+        }
+      }
+    })
+  })
+
+  output$create.variables.status.message = renderPrint({
+    input$create.variables.expression
+    isolate({
+      if(is.null(get.create.variables(get.data.set(),
+                                      input$create.variables.expression))){
+        cat("This input can't be processed.")
+      }else{
+        cat("The expression is valid.")
+      }
+    })
+  })
+
+  ##  Manipulate variables -> add columns : paste in data to add as additional column.
+  
   observe({
       input$add_column
       isolate({

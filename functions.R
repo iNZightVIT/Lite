@@ -1,3 +1,81 @@
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' Takes an input string of a formula involvig colummn 
+#' names in the input data set and tries to evaluate it. 
+#' If this is not possible, NULL is returned and the error 
+#' is printed to standard out.
+#' 
+#' @param dafr The data.frame containing the data needed 
+#' to evaluate the expression.
+#' @param new.formula The character string holding the 
+#' expression to be evaluated.
+#' 
+#' @return Null if the expression could not be evaluated, 
+#' otherwise the input data.frame with one additional 
+#' column. This column contains the results of the 
+#' expression.
+#' 
+#' @author Christoph Knapp
+get.create.variables = function(dafr,new.formula){
+  tryCatch({
+    for(i in 1:ncol(dafr)){
+      new.formula = gsub(colnames(dafr)[i],
+                         paste("dafr",colnames(dafr)[i],sep="$"),
+                         new.formula,fixed=T)
+    }
+    temp = cbind(dafr,eval(parse(text=new.formula)))
+    new.name = "formula.new.1"
+    count = 1
+    while(new.name%in%colnames(dafr)){
+      count=count+1
+      new.name = paste("formula.new",count,sep=".")
+    }
+    colnames(temp)[ncol(temp)] = new.name
+    temp
+  },error=function(cond) {
+    #print(cond)
+    return (NULL)
+  },
+  warning=function(cond) {
+    #print(cond)
+  },
+  finally={
+    
+  })
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' This function is a wrapper function for the rank method.
+#' 
+#' @param dafr A dataframe with variables to be ranked.
+#' @param columns Character of column names or column 
+#' indices of the columns to be ranked.
+#' 
+#' @return A data.frame containig the original data plus 
+#' the ranked variables.
+#' 
+#' @author Christoph Knapp
+get.rank.numeric = function(dafr,columns){
+  temp = data.frame(sapply(dafr[,columns], 
+                           rank, 
+                           ties.method = "min", 
+                           na.last = "keep"))
+  nams = paste(columns,"rank",sep=".")
+  count = 0
+  while(any(nams%in%colnames(dafr))){
+    count = count + 1
+    nams = paste(nams,count,sep=".")
+  }
+  colnames(temp) = nams
+  cbind(dafr,temp)
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
 #' Form class intervals from a column specified by column 
 #' name or column index from the a data.frame.
 #' 
@@ -5,8 +83,8 @@
 #' @param column The column name or index to produce class 
 #' intervals from.
 #' @param num.intervals The number of intervals the column 
-#' should be seperated in.
-#' @param open.left.closed.right Logical variable specifiyng 
+#' should be separated in.
+#' @param open.left.closed.right Logical variable specifying 
 #' whether the output should be in the format 
 #' [open left, closed right) or (closed left, open right] 
 #' @param method The method used to generate the class 
@@ -19,9 +97,12 @@
 #' @param labels Optional labels for the intervals. By default 
 #' the range of the labels will be used.
 #' 
-#' @return The same data.frame asdafr except that the class 
+#' @return The same data.frame as dafr except that the class 
 #' intervals are added as additional column or the the unchanged 
-#' dafr data.frame.
+#' dafr data.frame is returned if the input is wrong. Warnings 
+#' are provided in this case.
+#'  
+#' @note This is a wrapper for the cut function. See \code{?cut}. 
 #' 
 #' @author Christoph Knapp 
 get.form.class.interval = function(dafr,column,num.intervals,
@@ -34,7 +115,6 @@ get.form.class.interval = function(dafr,column,num.intervals,
   if(length(method)>1||!method%in%c("equal.width",
                                     "equal.count",
                                     "specified")){
-#     print(T)
     method = "equal.width"
   }
   if(!is.null(labels)&&(length(labels)!=num.intervals||
@@ -396,12 +476,27 @@ sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
 
 #' Returns the names of all numeric columns in data 
 #' 
+#' @param dafr The input dataframe to be searched.
+#' 
 #' @author Christoph Knapp
 get.numeric.column.names = function(dafr){
   colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
     is.numeric(as.data.frame(d)[,index])
   },dafr)))]
 }
+
+#' Returns the column names of the currently selected data which
+#' can be converted into factors.
+#' 
+#' @param dafr The input dataframe to be searched.
+#' 
+#' @author Christoph Knapp
+get.categorical.column.names = function(dafr){
+  colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
+    class(as.data.frame(d)[,index])%in%"factor"||class(as.data.frame(d)[,index])%in%"character"
+  },dafr)))]
+}
+
 
 #' Returns TRUE if x can be converted to a numeric 
 #' value, FALSE if not. 
@@ -438,17 +533,6 @@ data.summary = function(dafr){
       print(summary(dafr[,col]))
     }
   }
-}
-
-
-#' Returns the column names of the currently selected data which
-#' can be converted into factors.
-#' 
-#' @author Christoph Knapp
-get.categorical.column.names = function(dafr){
-  colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
-    class(as.data.frame(d)[,index])%in%"factor"||class(as.data.frame(d)[,index])%in%"character"
-  },dafr)))]
 }
 
 # #' Creates a widget for moving through plots quickly.
