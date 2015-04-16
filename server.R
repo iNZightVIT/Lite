@@ -1118,21 +1118,25 @@ shinyServer(function(input, output, session) {
   })
   
   observe({
-    input$rename.variables.column.select
+    input$create.variables.column.select
     isolate({
       updateTextInput(session,"create.variables.expression",
                       value=paste0(input$create.variables.expression,
-                                   input$rename.variables.column.select,
+<<<<<<< HEAD
+                                   input$create.variables.operation.select,
+=======
+                                   input$create.variables.column.select,
+>>>>>>> branch 'development' of https://github.com/iNZightVIT/Lite
                                    sep=""))
     })
   })
 
   observe({
-    input$rename.variables.operation.select
+    input$create.variables.operation.select
     isolate({
       updateTextInput(session,"create.variables.expression",
                       value=paste0(input$create.variables.expression,
-                                   input$rename.variables.operation.select,
+                                   input$create.variables.operation.select,
                                    sep=""))
     })
   })
