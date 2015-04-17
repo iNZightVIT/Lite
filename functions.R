@@ -17,19 +17,16 @@
 #' expression.
 #' 
 #' @author Christoph Knapp
-get.create.variables = function(dafr,new.formula){
+get.create.variables = function(dafr,new.formula,new.name=NULL){
   tryCatch({
-    for(i in 1:ncol(dafr)){
-      new.formula = gsub(colnames(dafr)[i],
-                         paste("dafr",colnames(dafr)[i],sep="$"),
-                         new.formula,fixed=T)
+    temp = cbind(dafr,eval(parse(text=new.formula),dafr))
+    if(is.null(new.name)||""%in%new.name){
+      new.name = "new.name"
     }
-    temp = cbind(dafr,eval(parse(text=new.formula)))
-    new.name = "formula.new.1"
-    count = 1
+    count=0
     while(new.name%in%colnames(dafr)){
-      count=count+1
-      new.name = paste("formula.new",count,sep=".")
+      count = count+1
+      new.name = paste(new.name,count,sep=".")
     }
     colnames(temp)[ncol(temp)] = new.name
     temp
