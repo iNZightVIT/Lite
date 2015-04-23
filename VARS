@@ -10,7 +10,7 @@ data.dir.global=data
 # data unique to each instance 
 # is located
 ##############################
-data.dir.imported=/tmp/iNZight
+data.dir.imported=/home/christoph/test
 
 ##############################
 # This variable is displayed 

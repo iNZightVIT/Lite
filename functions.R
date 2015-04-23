@@ -1253,14 +1253,17 @@ get.vars = function(){
 #' 
 #' @note This is a Unix only function. On Windows and all other 
 #' OS where \code{.Platform$OS.type} is not unix the function 
-#' returns always TRUE. Extend this function if necessary.
+#' returns always TRUE. Extend this function if necessary. Only 
+#' relevant permission types have been added. 
 #' 
 #' @author Christoph Knapp
 file.writable = function(file,debug){
   if(file.exists(file)){
     if("unix"%in%.Platform$OS.type){
+      message(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T))
       grepl("777",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
-        grepl("775",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])
+        grepl("775",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
+        grepl("755",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])
     }else{
       T
     }
