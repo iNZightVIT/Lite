@@ -1237,6 +1237,7 @@ get.vars = function(){
           if(is.null(ret)){
             ret = list()
           }
+          message(trim(strsplit(line,"=")[[1]][2]))
           ret[[trim(strsplit(line,"=")[[1]][1])]] = trim(strsplit(line,"=")[[1]][2])
         }
       }
