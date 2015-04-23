@@ -43,7 +43,9 @@ shinyServer(function(input, output, session) {
       warning(paste("The directory : ",vars$data.dir.global,
                     " : is not writable."))
     }
-    
+    message(dir.create.logical(paste0(vars$data.dir.imported,"/Imported"),
+                               recursive=T))
+    message(file.writable(vars$data.dir.imported))
     if("data.dir.imported"%in%names(vars)&&
          dir.create.logical(paste0(vars$data.dir.imported,"/Imported"),
                             recursive=T)){
