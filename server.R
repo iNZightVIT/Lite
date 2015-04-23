@@ -39,6 +39,7 @@ shinyServer(function(input, output, session) {
          file.exists(vars$data.dir.global)&&
          file.writable(vars$data.dir.global)){
       values$data.dir.global = vars[["data.dir.global"]]
+      message("set values$data.dir.global")
     }else if(!file.writable(vars$data.dir.global)){
       warning(paste("The directory : ",vars$data.dir.global,
                     " : is not writable."))
@@ -48,8 +49,10 @@ shinyServer(function(input, output, session) {
                             recursive=T)){
       if(file.writable(vars$data.dir.imported)){
         values$data.dir.imported = vars[["data.dir.imported"]]
+        message("set values$data.dir.imported")
       }
     }else {
+      message("not set data.dir.imported")
       values$data.dir.imported = values$data.dir.global
       if(!file.exists(paste0(values$data.dir.imported,"/Imported"))){
         dir.create(paste0(values$data.dir.imported,"/Imported"),
