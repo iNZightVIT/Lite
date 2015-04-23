@@ -1259,6 +1259,7 @@ get.vars = function(){
 file.writable = function(file,debug){
   if(file.exists(file)){
     if("unix"%in%.Platform$OS.type){
+      message(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T))
       grepl("777",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
         grepl("775",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])
     }else{
