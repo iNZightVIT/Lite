@@ -1,0 +1,29 @@
+##############################
+# Sets the directory where the 
+# data shared by each instance 
+# is located
+##############################
+data.dir.global=data
+
+##############################
+# Sets the directory where the 
+# data unique to each instance 
+# is located
+##############################
+data.dir.imported=/tmp/iNZight
+
+##############################
+# This variable is displayed 
+# as the version in the about 
+# page.
+##############################
+lite.version=iNZight Lite Version 0.9.7.6
+
+##############################
+# This variable is displayed 
+# as the version in the about 
+# page.
+##############################
+lite.update=Last Updated: 23/04/15
+
+
