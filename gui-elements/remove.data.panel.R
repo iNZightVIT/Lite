@@ -3,20 +3,20 @@
 # }
 
 # puts together a list of shiny widgets to fill the sidebar
-get.sidebar.imported = function(){
+get.sidebar.imported = function(data.path){
   ret = list()
-  radio.list = get.radio.list("data/Imported","remove")
+  radio.list = get.radio.list(paste0(data.path,"/Imported"),"remove")
   if(!is.null(radio.list)){
     ret[[1]] = radio.list
   }
   ret
 }
 
-remove.data.panel = function(){
-  if(!file.exists("data/Imported")){
-    dir.create("data/Imported",recursive=T)
+remove.data.panel = function(data.path){
+  if(!file.exists(paste0(data.path,"/Imported"))){
+    dir.create(paste0(data.path,"/Imported"),recursive=T)
   }
-  sidebar.widgets = get.sidebar.imported()
+  sidebar.widgets = get.sidebar.imported(data.path)
   if(length(sidebar.widgets)==0){
     sidebarLayout(
       sidebarPanel(help.display('Remove data','remove_data',"gui-elements/notes/remove.data.md"),br(),HTML("&nbsp;")),

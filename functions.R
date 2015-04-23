@@ -1,6 +1,80 @@
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
+#' 
+#' 
+get.reshape.data = function(dafr){
+  temp = do.call(rbind,lapply(1:ncol(dafr),function(index,d){
+    name = colnames(d)[index]
+    data.frame(groups=name,d[,index])
+  },dafr))
+  colnames(temp)[2] = "variables"
+  temp
+}
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' Converts specified columns into binary factor variables 
+#' which get added to the input data.frame.
+#' 
+#' @param dafr The input data.frame.
+#' @param The column names or indexes to be converted.
+#' 
+#' @return A data.frame with the binary columns added.
+#' 
+#' @author Christoph Knapp  
+get.missing.categorical = function(dafr,columns){
+  temp = as.data.frame(dafr[,columns])
+  colnames(temp) = columns
+  new.dafr = data.frame(do.call(cbind,lapply(1:length(columns),
+                                  function(index,d,c){
+                                    te = rep("observed",nrow(d))
+                                    te[is.na(d[,index])] = "missing"
+                                    te
+                                  },temp,columns)))
+  colnames(new.dafr) = paste("missing",columns,sep=".")
+  cbind(dafr,new.dafr)
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' Takes a data.frame as generated from the 
+#' \texttt(get.missing.categorical) function and converts it 
+#' into a data.frame of all unique rows and there counts in 
+#' the original data.
+#' 
+#' @param dafr A data.frmae to convert
+#' 
+#' @return A data.frame with all unique rows from dafr and 
+#' their counts in the last column.
+#' 
+#' @author Christoph Knapp
+get.combinations = function(dafr){
+  ret = data.frame(matrix(ncol=ncol(dafr)+1,nrow=0))
+  for(i in 1:nrow(dafr)){
+    if(i==1){
+      ret = rbind(ret,cbind(as.data.frame(as.matrix(dafr[i,],nrow=1)),1))
+    }else{
+      is.counted = rep(F,nrow(ret))
+      for(j in 1:nrow(ret)){
+        if(identical(as.character(unlist(ret[j,1:ncol(dafr)])),as.character(unlist(dafr[i,])))){
+          ret[j,ncol(ret)] = ret[j,ncol(ret)]+1
+          is.counted[j] = T
+        }
+      }
+      if(all(!is.counted)){
+        ret = rbind(ret,cbind(as.data.frame(as.matrix(dafr[i,],nrow=1)),1))
+      }
+    }
+  }
+  colnames(ret) = c(colnames(dafr),"counts")
+  ret[order(ret$count,decreasing=T),]
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
 #' Takes an input string of a formula involvig colummn 
 #' names in the input data set and tries to evaluate it. 
 #' If this is not possible, NULL is returned and the error 
@@ -1147,33 +1221,92 @@ change.file.ext = function(name,new.ext){
   splity
 }
 
-get.vars = function(data_dir){
+get.vars = function(){
   lines = c()
   if(file.exists("VARS")){
     lines = scan("VARS",what="character",sep="\n",quiet=T)
   }
   if(length(lines)>0){
-    invisible(lapply(lines,function(line){
-      if(length(strsplit(line,"#")[[1]])>0){
-        line=strsplit(line,"#")[[1]][1]
-      }
-      if(!""%in%line){
-        variable = gsub("^\\s+|\\s+$", "", strsplit(line,"=")[[1]])
-        if(length(variable)!=2){
-          message(paste("Format of variable:",paste(variable,collapse=" "),"\n is not valid.",sep=" "))
-        }else{
-          if(variable[1]%in%vars&&!""%in%variable[2]){
-            if(variable[1]%in%"data.dir"){
-              data_dir<<-variable[2]
-            }else if(variable[1]%in%"version"){
-              version<<-variable[2]
-            }
+    ret = NULL
+    for(line in lines){
+      if(!grepl("^#",line)){
+        if(grepl("#",line)){
+          line = strsplit(line,"#")[[1]][1]
+        }
+        if(grepl("=",line)&&length(strsplit(line,"=")[[1]])>1){
+          if(is.null(ret)){
+            ret = list()
           }
+          ret[[trim(strsplit(line,"=")[[1]][1])]] = trim(strsplit(line,"=")[[1]][2])
         }
       }
-    }))
+    }
+    ret
   }
 }
+
+#' Tests whether a directory has read write execute permissions.
+#' 
+#' @param file The directory path to test
+#' 
+#' @return TRUE if writable and the file exists, otherwise FALSE
+#' 
+#' @note This is a Unix only function. On Windows and all other 
+#' OS where \code{.Platform$OS.type} is not unix the function 
+#' returns always TRUE. Extend this function if necessary.
+#' 
+#' @author Christoph Knapp
+file.writable = function(file,debug){
+  if(file.exists(file)){
+    if("unix"%in%.Platform$OS.type){
+      grepl("777",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
+        grepl("775",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])
+    }else{
+      T
+    }
+  }else{
+    F
+  }
+}
+
+#' Wrapper function for \code{dir.create} which returns 
+#' whether information whether the directory was created.
+#' 
+#' @param path a character vector containing a single 
+#' path name. Tilde expansion (see ?path.expand) is done.
+#' @param showWarnings logical; should the warnings on 
+#' failure be shown?
+#' @param recursive logical. Should elements of the path 
+#' other than the last be created? If true, like the Unix 
+#' command \code{mkdir -p}.
+#' @param mode the mode to be used on Unix-alikes: it 
+#' will be coerced by \code{?as.octmode}. For 
+#' \code{Sys.chmod} it is recycled along paths.
+#' 
+#' @note This function does most likely not work on a 
+#' windows System.
+#' 
+#' @return TRUE if the directory was created, FALSE if 
+#' not.
+#' 
+#' @author Christoph Knapp
+dir.create.logical = function(path,
+                              showWarnings=TRUE,
+                              recursive = FALSE,
+                              mode="0777"){
+  result = tryCatch({
+    if(!file.exists(path)){
+      dir.create(path,showWarnings,recursive,mode)
+    }
+    T
+  }, warning = function(w) {
+    return(F)
+  }, error = function(e) {
+    return(F)
+  }, finally = {})
+}
+
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 get.quantiles = function(subx){
   g1 = rep("",length(subx))

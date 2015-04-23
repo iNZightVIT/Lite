@@ -15,32 +15,66 @@ library(markdown)
 library(gpairs)
 
 source("functions.R")
-
 ### We write the server function.
 shinyServer(function(input, output, session) {
-  
 #   source("functions.R",local=T)
   
   ##Specify all the reactive values
   
   values = reactiveValues()
   values$data.name = NULL
-  values$data.dir = "data"
+  values$data.dir.global = "data"
+  values$data.dir.imported = "data"
   values$data.set = NULL
   values$data.restore = NULL
-  values$lite.version = "iNZight Lite Version 0.9.7.2"
-  values$lite.update = "Last Updated: 23/03/15"
+  values$lite.version = "iNZight Lite Version 0.9.7.5"
+  values$lite.update = "Last Updated: 21/04/15"
   values$button = F
   values$transform.text = ""
   values$create.variables.expression.text = ""
-#   values$dataHasChanged = F
+  
+  vars = get.vars()
+  if(!is.null(vars)){
+    if("data.dir.global"%in%names(vars)&&
+         file.exists(vars$data.dir.global)&&
+         file.writable(vars$data.dir.global)){
+      values$data.dir.global = vars[["data.dir.global"]]
+    }else if(!file.writable(vars$data.dir.global)){
+      warning(paste("The directory : ",vars$data.dir.global,
+                    " : is not writable."))
+    }
+    
+    if("data.dir.imported"%in%names(vars)&&
+         dir.create.logical(paste0(vars$data.dir.imported,"/Imported"),
+                            recursive=T)){
+      if(file.writable(vars$data.dir.imported)){
+        values$data.dir.imported = vars[["data.dir.imported"]]
+      }
+    }else {
+      values$data.dir.imported = values$data.dir.global
+      if(!file.exists(paste0(values$data.dir.imported,"/Imported"))){
+        dir.create(paste0(values$data.dir.imported,"/Imported"),
+                   recursive = T)
+      }
+    }
+    if("lite.version"%in%names(vars)){
+      values$lite.version = vars$lite.version
+    }
+    if("lite.update"%in%names(vars)){
+      values$lite.update = vars$lite.update
+    }
+  }
   
   get.data.name = reactive({
     values$data.name
   })
   
-  get.data.dir = reactive({
-    values$data.dir
+  get.data.dir.global = reactive({
+    values$data.dir.global
+  })
+  
+  get.data.dir.imported = reactive({
+    values$data.dir.imported
   })
 
   get.data.set = reactive({
@@ -93,6 +127,148 @@ shinyServer(function(input, output, session) {
     output$about.panel <- renderUI({
         about.panel.ui(get.lite.version(),get.lite.update())
     })
+
+  ##  Data -> load data (upload a data set)
+  
+  observe({
+    if(!is.null(input$import_set)&&input$import_set>0){
+      isolate({
+        if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
+          temp = load.data(get.data.dir.imported(),
+                           fileID = input$files[1, "name"],
+                           path = input$files[1, "datapath"])[[2]]
+          if(!is.null(temp)){  
+            values$data.set = temp
+            values$data.restore <<- get.data.set()
+            temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
+            if(length(temp)>1){
+              temp = temp[1:(length(temp)-1)]
+            } 
+            values$data.name = paste(temp,collapse=".")
+            if (!file.exists(paste(get.data.dir.imported(),"/Imported",sep=""))&&
+                  file.writable(get.data.dir.imported())) {
+              dir.create(paste(get.data.dir.imported(),"/Imported",sep=""), recursive = TRUE)
+            }
+            saveRDS(get.data.set(),file = paste0(get.data.dir.imported(),"/Imported/", get.data.name(), ".RDS"))
+          }
+          #             print(input$files[1, "datapath"])
+          #             unlink(input$files[1, "datapath"])
+        }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
+          URL = input$URLtext
+          name = strsplit(URL,"/")[[1]]
+          name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+          if (!file.exists(paste(get.data.dir.imported(),"/Imported",sep=""))&&
+                file.writable(get.data.dir.imported())) {
+            dir.create(paste(get.data.dir.imported(),"/Imported",sep=""), recursive = TRUE)
+          }
+          tryCatch({
+            download.file(url=URL,destfile=paste0(get.data.dir.imported(),"/Imported/",name),method="wget")
+            temp = load.data(get.data.dir.imported(),fileID = name, path = paste0(get.data.dir.imported(),"/Imported/",name))
+            if(!is.null(temp[[2]])){
+              values$data.set = temp[[2]]
+              values$data.restore = get.data.set()
+              values$data.name = name
+            }
+          },error = function(e){
+            if(file.exists(paste0(get.data.dir.imported(),"/Imported/",name))){
+              unlink(paste0(get.data.dir.imported(),"Imported/",name))
+            }
+            print(e)
+          },warning = function(w) {
+            print(w)
+          },finally = {})
+        }
+      })
+    }
+  })
+  
+  output$load.data.panel = renderUI({
+    input$selector
+    isolate({
+      load.data.panel()
+    })
+  })
+  
+  output$filetable <- renderDataTable({
+    input$selector
+    input$files
+    input$import_set
+    get.data.set()
+    isolate({
+      if (!is.null(input$files)&&file.exists(input$files[1, "datapath"])) {
+        load.data(get.data.dir.imported(),fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
+      } else if (!is.null(input$URLtext)&&!input$URLtext%in%"") {
+        URL = input$URLtext
+        name = strsplit(URL,"/")[[1]]
+        name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+        if (!file.exists(paste(get.data.dir.imported(),"/Imported",sep=""))&&
+              file.writable(get.data.dir.imported())) {
+          dir.create(paste0(get.data.dir.imported(),"/Imported"), recursive = TRUE)
+        }
+        if(file.exists(paste0(get.data.dir.imported(),"/Imported/",name))){
+          get.data.set()
+        }else{
+          NULL
+        }
+      }else{
+        NULL
+      }
+    })
+  }, options =
+    list(lengthMenu = c(5, 30, 50), pageLength = 5,
+         columns.defaultContent="NA", scrollX = TRUE))
+  
+  observe({
+    input$remove_set
+    isolate({
+      if(!is.null(input$remove_set)&&input$remove_set>0){
+        files = list.files(path = paste0(get.data.dir.imported(),"/Imported"),
+                           pattern = input$Importedremove,
+                           full.names = TRUE)
+        if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])&&
+             grepl(get.data.name(),input$files[1, "name"])){
+          unlink(input$files[1, "datapath"])
+        }
+        for(f in files){
+          if (file.exists(f)) {
+            unlink(f)
+          }
+        }
+      }
+    })
+  })
+  
+  ##  Data -> Export data (export the currently used data set)
+  
+  output$save.data.panel = renderUI({
+    save.data.panel(get.data.set())
+  })
+  
+  output$save_table = renderDataTable({
+    get.data.set()
+  }, options =
+    list(lengthMenu = c(5, 30, 50), pageLength = 5,
+         columns.defaultContent = "NA", scrollX = TRUE))
+  
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      #         print(paste(get.data.name(),".",input$select_filetype, sep=''))
+      paste(get.data.name(),".",input$select_filetype, sep='')
+    },
+    content = function(file) {
+      type = input$select_filetype
+      if(type%in%"txt"&&!is.null(get.data.set())){
+        write.table(get.data.set(), file, quote=F,row.names=F,sep="\t")
+      }else if(type%in%"csv"&&!is.null(get.data.set())){
+        write.table(get.data.set(), file, quote=F,row.names=F,sep=",")
+      }else if(type%in%"RData"&&!is.null(get.data.set())){
+        save(get.data.set(),file=file)
+      }else if(type%in%"RDS"&&!is.null(get.data.set())){
+        saveRDS(get.data.set(),file=file)
+      }
+    }
+  )
+
     ## "Current data" - presents currently selected data to user.
     output$current.text <- renderText({
         input$selector
@@ -102,22 +278,93 @@ shinyServer(function(input, output, session) {
             "No data selected!"
         }
     })
+
     output$current.data <- renderUI({
         current.data()
     })
+
     output$current <- renderDataTable({
         input$selector
         get.data.set()
     }, options =
         list(lengthMenu = c(10, 30, 50), pageLength = 10,
              columns.defaultContent = "NA", scrollX = TRUE))
+
+  ##  Data -> remove data (Remove an imported data set)
+
+  output$remove.data.panel <- renderUI({
+    input$selector
+    input$remove_set
+    input$import_set
+    isolate({
+      remove.data.panel(get.data.dir.imported())
+    })
+  })
+  
+  output$removetable <- renderDataTable({
+    if(!is.null(input$Importedremove)){
+      load.data(get.data.dir.imported(),input$Importedremove)[[2]]
+    } else {
+      NULL
+    }
+  }, options =
+    list(lengthMenu = c(5, 30, 50), pageLength = 5,
+         columns.defaultContent = "NA", scrollX = TRUE))
+
+
     ## "Switch data" - 'switches' to a different data set.
+
+  ## loads and updates the switch data table Panel
+  output$switch.data.panel = renderUI({
+    get.data.set()
+#     input$remove_set
+    isolate({
+      switch.data.panel(get.data.set(),get.data.dir.global(),
+                        get.data.dir.imported())
+    })
+  })
+  
+  output$temp_table = renderDataTable({
+    if (!is.null(input[[input$data_select]])){
+      if("Imported"%in%input$data_select){
+        load.data(get.data.dir.imported(),
+                  strsplit(input[[input$data_select]],
+                           "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
+                                                               "==>",fixed=T)[[1]])])[[2]]
+      }else{
+        load.data(get.data.dir.global(),
+                  strsplit(input[[input$data_select]],
+                           "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
+                                                               "==>",fixed=T)[[1]])])[[2]]
+      }
+    } else {
+      NULL
+    }
+  }, options = list(lengthMenu = c(5, 30, 50), pageLength = 5,
+                    columns.defaultContent = "NA", scrollX = TRUE))
+
     set_to_change_reac <- reactive({
       if (is.null(input[[input$data_select]])){
         "No data to select!"
       } else {
-        temp = load.data(get.data.dir(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
-                         [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
+        temp=NULL
+        if("Imported"%in%input$data_select){
+          if(!file.exists(get.data.dir.imported())&&
+               file.writable(dirname(get.data.dir.imported()))){
+            dir.create(get.data.dir.imported())
+          }else if(!file.exists(get.data.dir.imported())&&
+                     !file.writable(dirname(get.data.dir.imported()))){
+            warning(paste("Directory : ",get.data.dir.imported(),
+                          " : is not writable. Reset Imported dir 
+                          to global dir",sep=""))
+            
+          }
+          temp = load.data(get.data.dir.imported(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
+                           [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
+        }else{
+          temp = load.data(get.data.dir.global(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
+                           [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
+        }
         if(is.null(temp[[1]])&is.null(temp[[2]])) {
           "No data to select!"
         }else{
@@ -200,10 +447,18 @@ shinyServer(function(input, output, session) {
       if (!is.null(input$change_set)) {
         isolate({
           if (!is.null(input[[input$data_select]])&&input$change_set > 0) {
-            new.data =
-                load.data(get.data.dir(),strsplit(input[[input$data_select]],
-                                   "==>", fixed = TRUE)[[1]]
+            new.data = NULL
+            if("Imported"%in%input$data_select){
+              new.data =
+                load.data(get.data.dir.imported(),strsplit(input[[input$data_select]],
+                                                         "==>", fixed = TRUE)[[1]]
                           [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
+            }else{
+              new.data =
+                  load.data(get.data.dir.global(),strsplit(input[[input$data_select]],
+                                     "==>", fixed = TRUE)[[1]]
+                            [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
+            }
             values$data.name = new.data[[1]]
             values$data.set = new.data[[2]]
             values$data.restore = get.data.set()
@@ -211,177 +466,6 @@ shinyServer(function(input, output, session) {
         })
       }
     })
-
-    ## loads and updates the switch data table Panel
-    output$switch.data.panel = renderUI({
-      get.data.set()
-      input$remove_set
-      isolate({
-        switch.data.panel(get.data.set(),get.data.dir())
-      })
-    })
-
-    output$temp_table = renderDataTable({
-      if (!is.null(input[[input$data_select]])){
-        load.data(get.data.dir(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
-      } else {
-          NULL
-      }
-    }, options = list(lengthMenu = c(5, 30, 50), pageLength = 5,
-                      columns.defaultContent = "NA", scrollX = TRUE))
-
-    ##  Data -> load data (upload a data set)
-    
-    observe({
-      if(!is.null(input$import_set)&&input$import_set>0){
-        isolate({
-          if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
-            temp = load.data(get.data.dir(),fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
-            if(!is.null(temp)){  
-              values$data.set = temp
-              values$data.restore <<- get.data.set()
-              temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
-              if(length(temp)>1){
-                temp = temp[1:(length(temp)-1)]
-              } 
-              values$data.name = paste(temp,collapse=".")
-              if (!file.exists("data/Imported")) {
-                dir.create("data/Imported", recursive = TRUE)
-              }
-              saveRDS(get.data.set(),file = paste0("data/Imported/", get.data.name(), ".RDS"))
-            }
-#             print(input$files[1, "datapath"])
-#             unlink(input$files[1, "datapath"])
-          }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
-            URL = input$URLtext
-            name = strsplit(URL,"/")[[1]]
-            name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
-            if (!file.exists("data/Imported")) {
-              dir.create("data/Imported", recursive = TRUE)
-            }
-            tryCatch({
-              download.file(url=URL,destfile=paste0("data/Imported/",name),method="wget")
-              temp = load.data(get.data.dir(),fileID = name, path = paste0("data/Imported/",name))
-              if(!is.null(temp[[2]])){
-                values$data.set = temp[[2]]
-                values$data.restore <<- get.data.set()
-                values$data.name = name
-              }
-            },error = function(e){
-              if(file.exists(paste0("data/Imported/",name))){
-                unlink(paste0("data/Imported/",name))
-              }
-              print(e)
-            },warning = function(w) {
-              print(w)
-            },finally = {})
-          }
-        })
-      }
-    })
-    
-    output$load.data.panel = renderUI({
-        input$selector
-        isolate({
-          load.data.panel()
-        })
-    })
-
-    output$filetable <- renderDataTable({
-        input$selector
-        input$files
-        input$import_set
-        isolate({
-          if (!is.null(input$files)&&file.exists(input$files[1, "datapath"])) {
-            load.data(get.data.dir(),fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
-          } else if (!is.null(input$URLtext)&&!input$URLtext%in%"") {
-            URL = input$URLtext
-            name = strsplit(URL,"/")[[1]]
-            name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
-            if (!file.exists("data/Imported")) {
-              dir.create("data/Imported", recursive = TRUE)
-            }
-            if(file.exists(paste0("data/Imported/",name))){
-              return(get.data.set())
-            }
-            NULL
-          }else{
-            NULL
-          }
-        })
-    }, options =
-        list(lengthMenu = c(5, 30, 50), pageLength = 5,
-             columns.defaultContent="NA", scrollX = TRUE))
-
-    observe({
-      input$remove_set
-      isolate({
-        if(!is.null(input$remove_set)&&input$remove_set>0){
-          files = list.files(path = "data/Imported",
-                             pattern = input$Importedremove,
-                             full.names = TRUE)
-          if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])&&
-               grepl(get.data.name(),input$files[1, "name"])){
-            unlink(input$files[1, "datapath"])
-          }
-          for(f in files){
-            if (file.exists(f)) {
-                unlink(f)
-            }
-          }
-        }
-      })
-    })
-
-    ##  Data -> Export data (export the currently used data set)
-
-    output$save.data.panel = renderUI({
-      save.data.panel(get.data.set())
-    })
-
-    output$save_table = renderDataTable({
-      get.data.set()
-    }, options =
-      list(lengthMenu = c(5, 30, 50), pageLength = 5,
-           columns.defaultContent = "NA", scrollX = TRUE))
-
-    output$downloadData <- downloadHandler(
-      filename = function() {
-        print(paste(get.data.name(),".",input$select_filetype, sep=''))
-        paste(get.data.name(),".",input$select_filetype, sep='')
-      },
-      content = function(file) {
-        type = input$select_filetype
-        if(type%in%"txt"&&!is.null(get.data.set())){
-          write.table(get.data.set(), file, quote=F,row.names=F,sep="\t")
-        }else if(type%in%"csv"&&!is.null(get.data.set())){
-          write.table(get.data.set(), file, quote=F,row.names=F,sep=",")
-        }else if(type%in%"RData"&&!is.null(get.data.set())){
-          save(get.data.set(),file=file)
-        }else if(type%in%"RDS"&&!is.null(get.data.set())){
-          saveRDS(get.data.set(),file=file)
-        }
-      }
-    )
-    
-    ##  Data -> remove data (Remove an imported data set)
-    output$remove.data.panel <- renderUI({
-      input$selector
-      input$remove_set
-      isolate({
-        remove.data.panel()
-      })
-    })
-
-    output$removetable <- renderDataTable({
-      if(!is.null(input$Importedremove)){
-        load.data(get.data.dir(),input$Importedremove)[[2]]
-      } else {
-          NULL
-      }
-    }, options =
-        list(lengthMenu = c(5, 30, 50), pageLength = 5,
-             columns.defaultContent = "NA", scrollX = TRUE))
 
   ##--------------------##
   ##  Visualize Module  ##
@@ -910,7 +994,7 @@ shinyServer(function(input, output, session) {
         temp = transform.perform(get.data.set(),
                                  input$select.transform,
                                  input$select.columns.transform)
-        print(head(temp))
+#         print(head(temp))
         if(!is.null(temp)){
           values$data.set = temp
           values$transform.text = "The transformation of the columns was succesful!"
@@ -1181,7 +1265,7 @@ shinyServer(function(input, output, session) {
     input$create.variables.9
     input$create.variables.0
     input$create.variables.delete
-    input$create.variables.reset
+    input$create.variables.dot
     isolate({
       if(is.null(get.create.variables(get.data.set(),
                                       get.create.variables.expression.text(),
@@ -1295,10 +1379,11 @@ shinyServer(function(input, output, session) {
   })
 
   observe({
-    input$create.variables.reset
+    input$create.variables.dot
     isolate({
-      if(!is.null(input$create.variables.reset)&&input$create.variables.reset>0){
-        values$create.variables.expression.text = ""
+      if(!is.null(input$create.variables.dot)&&input$create.variables.dot>0){
+        values$create.variables.expression.text = paste(
+          values$create.variables.expression.text,".",sep="")
       }
     })
   })
@@ -1312,6 +1397,61 @@ shinyServer(function(input, output, session) {
             values$create.variables.expression.text,1,
             nchar(values$create.variables.expression.text)-1)
         }
+      }
+    })
+  })
+
+  ##  Manipulate variables -> Missing to categorical
+
+  output$missing.categorical = renderUI({
+    missing.categorical.panel(get.data.set())
+  })
+
+  output$missing.categorical.table = renderDataTable({
+    input$missing.categorical.column.select
+    dafr = get.data.set()
+    isolate({
+      if(!is.null(dafr)&!is.null(input$missing.categorical.column.select)){
+        missies = get.missing.categorical(dafr,columns=input$missing.categorical.column.select)
+        temp = data.frame(missies[,-which(colnames(missies)%in%colnames(get.data.set()))])
+        colnames(temp) = colnames(missies)[-which(colnames(missies)%in%colnames(get.data.set()))]
+        combos = get.combinations(temp)
+        combos
+      }
+    })
+  },options=list(lengthMenu = c(5, 30, 50), 
+                 pageLength = 5, 
+                 columns.defaultContent="NA",
+                 scrollX=T))
+
+  observe({
+    input$missing.categorical.submit
+    isolate({
+      if(!is.null(input$missing.categorical.submit)&&input$missing.categorical.submit>0){
+        values$data.set = get.missing.categorical(get.data.set(),columns=input$missing.categorical.column.select)
+      }
+    })
+  })
+
+  ##  Manipulate variables -> Reshape dataset: Convert the dataset 
+      #into 2 columns with all varibles stacked ont top of each other.
+
+  output$reshape.data = renderUI({
+    reshape.data.panel(get.data.set())
+  })
+
+  output$reshape.data.table = renderDataTable({
+    get.reshape.data(get.data.set())
+  },options=list(lengthMenu = c(5, 30, 50), 
+                 pageLength = 5, 
+                 columns.defaultContent="NA",
+                 scrollX=T))
+
+  observe({
+    input$reshape.data.submit
+    isolate({
+      if(!is.null(input$reshape.data.submit)&&input$reshape.data.submit>0){
+        values$data.set = get.reshape.data(get.data.set())
       }
     })
   })
