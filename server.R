@@ -36,10 +36,8 @@ shinyServer(function(input, output, session) {
   vars = get.vars()
   if(!is.null(vars)){
     if("data.dir.global"%in%names(vars)&&
-         file.exists(vars$data.dir.global)&&
-         file.writable(vars$data.dir.global)){
+         file.exists(vars$data.dir.global)){
       values$data.dir.global = vars[["data.dir.global"]]
-      message("set values$data.dir.global")
     }else if(!file.writable(vars$data.dir.global)){
       warning(paste("The directory : ",vars$data.dir.global,
                     " : is not writable."))
@@ -49,10 +47,8 @@ shinyServer(function(input, output, session) {
                             recursive=T)){
       if(file.writable(vars$data.dir.imported)){
         values$data.dir.imported = vars[["data.dir.imported"]]
-        message("set values$data.dir.imported")
       }
     }else {
-      message("not set data.dir.imported")
       values$data.dir.imported = values$data.dir.global
       if(!file.exists(paste0(values$data.dir.imported,"/Imported"))){
         dir.create(paste0(values$data.dir.imported,"/Imported"),
@@ -153,8 +149,7 @@ shinyServer(function(input, output, session) {
             }
             saveRDS(get.data.set(),file = paste0(get.data.dir.imported(),"/Imported/", get.data.name(), ".RDS"))
           }
-          #             print(input$files[1, "datapath"])
-          #             unlink(input$files[1, "datapath"])
+          unlink(input$files[1, "datapath"])
         }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
           URL = input$URLtext
           name = strsplit(URL,"/")[[1]]
@@ -319,7 +314,7 @@ shinyServer(function(input, output, session) {
   ## loads and updates the switch data table Panel
   output$switch.data.panel = renderUI({
     get.data.set()
-#     input$remove_set
+    input$remove_set
     isolate({
       switch.data.panel(get.data.set(),get.data.dir.global(),
                         get.data.dir.imported())
