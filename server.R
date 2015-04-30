@@ -11,6 +11,7 @@
 ###  We load the packages we require. This is done only ONCE per instance.
 library(iNZightPlots)
 library(iNZightTS)
+library(iNZightMR)
 library(markdown)
 library(gpairs)
 
@@ -1578,7 +1579,23 @@ shinyServer(function(input, output, session) {
   #   Advanced --> Quick explore
   
   output$quick.explore = renderUI({
-    quick.explore.panel(get.data.set())
+    isolate({
+      quick.explore.panel(get.data.set())
+    })
+  })
+
+  #   Advanced --> Quick explore --> Missing values
+
+  output$quick.missing.summary.side = renderUI({
+    get.quick.missing.summary.side(get.data.set(),get.data.name())
+  })
+
+  output$quick.missing.summary.main = renderUI({
+    get.quick.missing.summary.main(get.data.set())
+  })
+
+  output$quick.missing.summary.plot = renderPlot({
+    plotcombn(get.data.set())
   })
   
   #   Advanced --> Quick explore --> Data summary

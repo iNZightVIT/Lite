@@ -1,8 +1,15 @@
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
+#' Reahapes the data that all columns are merged into two 
+#' column with the variable names in the first column and 
+#' the values in the second column.
 #' 
+#' @param dafr The data.frame to convert
 #' 
+#' @return The converted data.frame.
+#' 
+#' @author Christoph Knapp
 get.reshape.data = function(dafr){
   temp = do.call(rbind,lapply(1:ncol(dafr),function(index,d){
     name = colnames(d)[index]
@@ -36,6 +43,53 @@ get.missing.categorical = function(dafr,columns){
   cbind(dafr,new.dafr)
 }
 
+#' Simplifies the input data.frame by keeping only 
+#' columns where NA values are present. Function 
+#' used in get.combinations
+#' 
+#' @param dafr A data.frame to be 
+#' simplified such that all columns 
+#' which do not contain NA values are 
+#' removed.
+#' 
+#' @author Christoph Knapp
+simplify.dafr = function(dafr){
+  ies = c()
+  for(col in 1:ncol(dafr)){
+    if(!any(is.na(dafr[,col]))){
+      ies = c(ies,col)
+    }
+  }
+  dafr = dafr[,-ies]
+  if(ncol(dafr)==0){
+    dafr=NULL
+  }
+  dafr
+}
+
+#' Converts a data.frame to a format where all 
+#' non NA are replaced by "observed" and all NA 
+#' values are repalced by "missing". Used by the 
+#' 
+#' @param dafr the data.frame to convert.
+#' 
+#' @return The converted data.frame.
+#' 
+#' @author Christoph Knapp
+convert.dafr = function(dafr){
+  if(!is.null(dafr)){
+    temp = do.call(cbind,lapply(1:ncol(dafr),function(i,d){
+      col = rep("observed",nrow(d))
+      col[is.na(d[,i])] = "missing"
+      col
+    },dafr))
+    colnames(temp) = colnames(dafr)
+    temp
+  }else{
+    dafr
+  }
+}
+
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
@@ -45,16 +99,30 @@ get.missing.categorical = function(dafr,columns){
 #' the original data.
 #' 
 #' @param dafr A data.frmae to convert
+#' @param simplify Returns the smallest number of possible 
+#' rows, ignoring columns which do not contain NA values if 
+#' TRUE, otherwise it processes the whole input.
+#' @param convert TRUE if the input data.frame should be 
+#' converted into "missing" or observed format.   
 #' 
 #' @return A data.frame with all unique rows from dafr and 
 #' their counts in the last column.
 #' 
 #' @author Christoph Knapp
-get.combinations = function(dafr){
-  ret = data.frame(matrix(ncol=ncol(dafr)+1,nrow=0))
+get.combinations = function(dafr,simplify=F,convert=F){
+  if(simplify){
+    dafr = simplify.dafr(dafr)
+  }
+  if(convert){
+    dafr = convert.dafr(dafr)
+  }
+  if(is.null(dafr)||ncol(dafr)==0){
+    return(NULL)
+  }
+  ret = data.frame(matrix(ncol=ncol(dafr)+1,nrow=0),stringsAsFactors=F)
   for(i in 1:nrow(dafr)){
     if(i==1){
-      ret = rbind(ret,cbind(as.data.frame(as.matrix(dafr[i,],nrow=1)),1))
+      ret = rbind(ret,cbind(data.frame(matrix(dafr[i,],nrow=1),stringsAsFactors=F),1))
     }else{
       is.counted = rep(F,nrow(ret))
       for(j in 1:nrow(ret)){
@@ -64,7 +132,7 @@ get.combinations = function(dafr){
         }
       }
       if(all(!is.counted)){
-        ret = rbind(ret,cbind(as.data.frame(as.matrix(dafr[i,],nrow=1)),1))
+        ret = rbind(ret,cbind(data.frame(matrix(dafr[i,],nrow=1),stringsAsFactors=F),1))
       }
     }
   }
