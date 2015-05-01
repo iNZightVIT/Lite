@@ -1615,7 +1615,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$quick.missing.summary.plot = renderPlot({
-    if(is.null(get.combinations(data.set,T,T))){
+    if(is.null(get.combinations(get.data.set(),T,T))){
       plot.new()
       text(0.5,0.5,"Data is clean of NA values",cex=2)
     }else{
