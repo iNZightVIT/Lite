@@ -15,10 +15,26 @@ library(iNZightMR)
 library(markdown)
 library(gpairs)
 
+# read in possible command line arguments such as 'vars.path'
+
+args=(commandArgs(TRUE))
+
+## args is now a list of character vectors
+## First check to see if arguments are passed.
+## Then cycle through each element of the list and evaluate the expressions.
+if(length(args)==0){
+  message("No arguments supplied.")
+}else{
+  for(i in 1:length(args)){
+    eval(parse(text=args[[i]]))
+  }
+}
+
+## read in all the functions used in iNZight Lite
 source("functions.R")
+
 ### We write the server function.
 shinyServer(function(input, output, session) {
-#   source("functions.R",local=T)
   
   ##Specify all the reactive values
   
@@ -34,7 +50,11 @@ shinyServer(function(input, output, session) {
   values$transform.text = ""
   values$create.variables.expression.text = ""
   
-  vars = get.vars()
+  if(!"vars.path"%in%ls()){
+    vars.path<<-NULL
+  }
+  
+  vars = get.vars(vars.path)
   if(!is.null(vars)){
     if("data.dir.global"%in%names(vars)&&
          file.exists(vars$data.dir.global)){
@@ -1595,7 +1615,12 @@ shinyServer(function(input, output, session) {
   })
 
   output$quick.missing.summary.plot = renderPlot({
-    plotcombn(get.data.set())
+    if(is.null(get.combinations(data.set,T,T))){
+      plot.new()
+      text(0.5,0.5,"Data is clean of NA values",cex=2)
+    }else{
+      plotcombn(get.data.set())
+    }
   })
   
   #   Advanced --> Quick explore --> Data summary

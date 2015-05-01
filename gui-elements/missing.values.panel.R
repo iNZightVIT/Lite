@@ -39,6 +39,8 @@ get.table.button = function(data.set,id,title){
     if(length(tex)==0){
       tex=" "
     }
+  }else{
+    tex = "No NA values in data."
   }
   HTML(paste("<div class='modal fade' id='", id, "' tabindex='-1' role='dialog' aria-labelledby='basicModal' aria-hidden='true'>
              <div class='modal-dialog'>

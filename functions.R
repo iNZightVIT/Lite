@@ -1289,10 +1289,15 @@ change.file.ext = function(name,new.ext){
   splity
 }
 
-get.vars = function(){
+get.vars = function(vars.path){
   lines = c()
-  if(file.exists("VARS")){
-    lines = scan("VARS",what="character",sep="\n",quiet=T)
+  if(is.null(vars.path)){
+    vars.path = "VARS"
+  }
+  if(file.exists(vars.path)){
+    lines = scan(vars.path,what="character",sep="\n",quiet=T)
+  }else{
+    stop("The VARS file does not exist.")
   }
   if(length(lines)>0){
     ret = NULL
