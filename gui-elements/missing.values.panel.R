@@ -15,20 +15,10 @@ get.quick.missing.summary.side = function(data.set,data.name){
 
 get.table.button = function(data.set,id,title){
   tex = " "
-  tab = get.combinations(data.set,T,T)
+  tab = get.combinations(data.set,T)
   if(!is.null(tab)){
-    tab["total",] = unlist(lapply(1:ncol(tab),function(i,ta){
-      if(is.numeric(ta[,i])){
-        sum(ta[,i])
-      }else if(is.character(ta[,i])){
-        length(which(ta[,i]%in%"missing"))
-      }else{
-        0
-      }
-    },tab)) 
-    tab[,"Freq"] = round(tab[,"counts"]/nrow(data.set),digits=3)
     if(!is.null(tab)&&nrow(tab)>0&&ncol(tab)>0){
-      tex = "<table style='width:100%'><th><td>"
+      tex = "<table style='width: 500px; overflow-y: scroll;'><th><td>"
       tex = paste(tex,paste(paste(colnames(tab),collapse="</td><td>"),sep=""),sep="")
       tex = paste(tex,"</td></th>",sep="")
       for(row in 1:nrow(tab)){
@@ -48,9 +38,11 @@ get.table.button = function(data.set,id,title){
              <div class='modal-header'>
              <h4 class='modal-title' id='myModalLabel'>",title,"</h4>
              </div>
-             <div class='modal-body'>",
+             <div class='modal-body'>
+             <div style='overflow: auto'>",
              tex,
              "</div>
+             </div>
              <div class='modal-footer'>
              </div>
              </div>

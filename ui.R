@@ -17,12 +17,12 @@ shinyUI(
                     ".nav {font-size:16px}
                     .btn.btn-default.action-button.shiny-bound-input:hover {
                        background-color: #00BAFA;
-                       border-radius: 14px;
+                       border-radius: 8px;
                        border: solid #1f628d 1px;
                        padding: 9px;}
                     .btn.btn-default.action-button.shiny-bound-input {
                        background-color: #00A7E0;
-                       border-radius: 14px;
+                       border-radius: 8px;
                        border: solid #1f628d 1px;
                        padding: 9px;}
                     .player {
@@ -43,7 +43,10 @@ shinyUI(
                     #provide_season,
                     #provide_frequency,
                     #numeric_input1,
-                    #form_class_interval_number {
+                    #form_class_interval_number,
+                    #main_title_text,
+                    #x_axis_text,
+                    #y_axis_text {
                        background-color: #A3E7FF;
                        border: 1px solid;
                        border-radius: 10px;

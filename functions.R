@@ -90,13 +90,11 @@ convert.dafr = function(dafr){
   }
 }
 
-##########################################################
-#To be removed when the iNZight tools package is working##
-##########################################################
 #' Takes a data.frame as generated from the 
 #' \texttt(get.missing.categorical) function and converts it 
 #' into a data.frame of all unique rows and there counts in 
-#' the original data.
+#' the original data. It is a modified version of the 
+#' calmissing.data.frame method from the iNZightMR package.
 #' 
 #' @param dafr A data.frmae to convert
 #' @param simplify Returns the smallest number of possible 
@@ -109,35 +107,95 @@ convert.dafr = function(dafr){
 #' their counts in the last column.
 #' 
 #' @author Christoph Knapp
-get.combinations = function(dafr,simplify=F,convert=F){
+get.combinations = function(dafr,simplify=F){
+  index.column = rep(T,ncol(dafr))
+  rm.na <- function(variable) {
+    sum(is.na(variable)) > 0
+  }
   if(simplify){
-    dafr = simplify.dafr(dafr)
+    index.column <- sapply(dafr, rm.na)
   }
-  if(convert){
-    dafr = convert.dafr(dafr)
+  x <- dafr[,index.column]
+  if(ncol(x)>0){
+    x1 <- as.numeric(apply(x, 2, function(x) length(which(is.na(x)))))
+    row4col.order <- order(x1) 
+    x1 <- c(x1, nrow(x))
+    z1 <- ifelse(is.na(x), "missing", "observed")
+    tab <- table(apply(z1, 1, paste, collapse = ","))
+    tab <- tab[order(names(tab), decreasing = TRUE)]
+    tab <- data.frame(combination = names(tab), count = as.numeric(tab))
+    tabp <- t(apply(tab, 1, function(x) {
+      unlist(strsplit(x, ",", fixed = TRUE))
+    }))
+    tabp <- data.frame(tabp,stringsAsFactors=F)
+    tabp <- tabp[,c(row4col.order, max(row4col.order)+1)]
+    tabp <- rbind(tabp, x1[c(row4col.order, max(row4col.order)+1)])  #  x1[row4col.order] == numMiss
+    names(tabp) <- c(names(x)[row4col.order], "Total")
+    row.names(tabp) <- c(seq_len(nrow(tab)), "Total")
+    
+    tabfinal <- tabp[-nrow(tabp), ]
+    tabfinal <- tabfinal[order(tabfinal$Total, decreasing = TRUE), ]
+    tabfinal <- rbind(tabfinal, tabp[nrow(tabp), ])
+    
+    finaltable <- tabfinal
+    
+    Name <- names(finaltable)
+    i <- nrow(finaltable)
+    j <- ncol(finaltable)
+    index <- order(x1[-j], decreasing = FALSE)
+    numMiss <- x1[c(index, j)]
+    percMiss <- round(numMiss / numMiss[j], 3)
+    
+    finaltable = rbind(finaltable,paste0(round(percMiss * 100, 2), "%"))
+    colnames(finaltable)[j] <- "Freq"
+    finaltable
+  }else{
+    NULL
   }
-  if(is.null(dafr)||ncol(dafr)==0){
-    return(NULL)
-  }
-  ret = data.frame(matrix(ncol=ncol(dafr)+1,nrow=0),stringsAsFactors=F)
-  for(i in 1:nrow(dafr)){
-    if(i==1){
-      ret = rbind(ret,cbind(data.frame(matrix(dafr[i,],nrow=1),stringsAsFactors=F),1))
-    }else{
-      is.counted = rep(F,nrow(ret))
-      for(j in 1:nrow(ret)){
-        if(identical(as.character(unlist(ret[j,1:ncol(dafr)])),as.character(unlist(dafr[i,])))){
-          ret[j,ncol(ret)] = ret[j,ncol(ret)]+1
-          is.counted[j] = T
-        }
-      }
-      if(all(!is.counted)){
-        ret = rbind(ret,cbind(data.frame(matrix(dafr[i,],nrow=1),stringsAsFactors=F),1))
-      }
+}
+
+##########################################################
+#To be removed when the iNZight tools package is working##
+##########################################################
+#' Takes an input string of a formula involvig colummn 
+#' names in the input data set and tries to evaluate it. 
+#' If this is not possible, NULL is returned and the error 
+#' is printed to standard out.
+#' 
+#' @param dafr The data.frame containing the data needed 
+#' to evaluate the expression.
+#' @param new.formula The character string holding the 
+#' expression to be evaluated.
+#' 
+#' @return Null if the expression could not be evaluated, 
+#' otherwise the input data.frame with one additional 
+#' column. This column contains the results of the 
+#' expression.
+#' 
+#' @author Christoph Knapp
+get.create.variables = function(dafr,new.formula,new.name=NULL){
+  tryCatch({
+    temp = cbind(dafr,eval(parse(text=new.formula),dafr))
+    if(is.null(new.name)||""%in%new.name){
+      new.name = "new.name"
     }
-  }
-  colnames(ret) = c(colnames(dafr),"counts")
-  ret[order(ret$count,decreasing=T),]
+    count=0
+    while(new.name%in%colnames(dafr)){
+      count = count+1
+      new.name = paste(new.name,count,sep=".")
+    }
+    colnames(temp)[ncol(temp)] = new.name
+    temp
+  },error=function(cond) {
+    #print(cond)
+    return (NULL)
+  },
+  warning=function(cond) {
+    #print(cond)
+  },
+  finally={
+    
+  })
 }
 
 ##########################################################

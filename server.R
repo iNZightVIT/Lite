@@ -1615,7 +1615,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$quick.missing.summary.plot = renderPlot({
-    if(is.null(get.combinations(get.data.set(),T,T))){
+    if(is.null(get.combinations(get.data.set(),T))){
       plot.new()
       text(0.5,0.5,"Data is clean of NA values",cex=2)
     }else{
@@ -1851,7 +1851,10 @@ shinyServer(function(input, output, session) {
       }
       x = get.data.set()[,index1]
       y = get.data.set()[,index2]
-      iNZightPlot(x,y,xlab=input$select.column.plot1,ylab=input$select.column.plot2,main=get.data.name())
+      try(iNZightPlot(x,y,
+                      xlab=input$select.column.plot1,
+                      ylab=input$select.column.plot2,
+                      main=get.data.name()))
     }
   })
   
