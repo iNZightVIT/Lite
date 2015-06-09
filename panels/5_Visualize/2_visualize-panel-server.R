@@ -59,54 +59,54 @@ get.default.num.bins = reactive({
 
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par = reactiveValues(
-    alpha = 1,
-    bg = "white", #background colour
-    ##  Box
-    box.col = "black",
-    box.fill = "white", # fill colour for the boxplot
-    ##  Bar
-    bar.lwd = 1,
-    bar.col = "black", # colour for borders of bars in bar plot
-    bar.fill = colors()[81], # colour for inside of bars in bar plot
-    ##  Line
-    lwd = 1,
-    lty = 1,
-    lwd.pt = 2,
-    col.line = "blue",
-    ##  Point
-    cex.pt = 0.5,
-    cex.dotpt = 0.5,
-    pch = 1,
-    col.pt = "gray50",
-#    fill.pt = "transparent",
-    ##  Colours
-    LOE = FALSE,
-    col.LOE = "black",
-    col.trend =
-        list(linear = "",
-             quadratic = "",
-             cubic =  ""),
-    col.smooth = "",
-    ##  Jitter, rugs, and trend.
-    jitter = "",
-    rugs = "",
-    trend = NULL,
-    ##  Others
-    cex = 1,
-    quant.smooth = NULL,
-    inference.type = NULL,
-#     largesample = NULL,
-    join = FALSE,
-    lines.by = FALSE,
-    trend.by = FALSE,
-    smooth = 0,
-    szsym = 1,
-    tpsym = 1,
-    plottype="default",
-    hist.bins=NULL,
-    scatter.grid.bins=50,
-    hex.bins=20,
-    bs.inference=F
+  alpha = 1,
+  bg = "white", #background colour
+  ##  Box
+  box.col = "black",
+  box.fill = "white", # fill colour for the boxplot
+  ##  Bar
+  bar.lwd = 1,
+  bar.col = "black", # colour for borders of bars in bar plot
+  bar.fill = colors()[81], # colour for inside of bars in bar plot
+  ##  Line
+  lwd = 1,
+  lty = 1,
+  lwd.pt = 2,
+  col.line = "blue",
+  ##  Point
+  cex.pt = 0.5,
+  cex.dotpt = 0.5,
+  pch = 1,
+  col.pt = "gray50",
+#   fill.pt = "transparent",
+  ##  Colours
+  LOE = FALSE,
+  col.LOE = "black",
+  col.trend = 
+  list(linear = "",
+       quadratic = "",
+       cubic =  ""),
+  col.smooth = "",
+  ##  Jitter, rugs, and trend.
+  jitter = "",
+  rugs = "",
+  trend = NULL,
+  ##  Others
+  cex = 1,
+  quant.smooth = NULL,
+  inference.type = NULL,
+#   largesample = NULL,
+  join = FALSE,
+  lines.by = FALSE,
+  trend.by = FALSE,
+  smooth = 0,
+  szsym = 1,
+  tpsym = 1,
+  plottype="default",
+  hist.bins=NULL,
+  scatter.grid.bins=50,
+  hex.bins=20,
+  bs.inference=F
 )
 
 ##  Data handling
@@ -719,7 +719,7 @@ observe({
       updateTextInput(session,"y_axis_text",
                       value="")
       plot.par$colby=NULL
-      updateSelectInput(session,"color.by.select",
+      updateSelectInput(session,"color_by_select",
                         selected="")
       plot.par$sizeby=NULL
       updateSelectInput(session,"resize.by.select",
@@ -1250,15 +1250,15 @@ output$code.variables.panel = renderUI({
     if((class(vis.data()[,input$vari1])%in%"factor"|
           class(vis.data()[,input$vari1])%in%"character")&
          (is.null(input$vari2)|input$vari2%in%"none")){
-      color.by.object = selectInput("color.by.select",
+      color.by.object = selectInput("color_by_select",
                                     label="Colour by levels of:",
                                     choices=c("",get.categorical.column.names(vis.data())),
-                                    selected=input$color.by.select)
+                                    selected=input$color_by_select)
     }else{
-      color.by.object = selectInput("color.by.select",
+      color.by.object = selectInput("color_by_select",
                                     label="Colour by levels of:",
                                     choices=c("",colnames(vis.data())),
-                                    selected=input$color.by.select)
+                                    selected=input$color_by_select)
     }
     resize.by.object = NULL
     if((class(vis.data()[,input$vari1])%in%"numeric"|
@@ -1279,16 +1279,16 @@ output$code.variables.panel = renderUI({
 
 # The variable the points are colored by has changed
 observe({
-  input$color.by.select
+  input$color_by_select
   isolate({
-    if(is.null(input$color.by.select)|
-         (!is.null(input$color.by.select)&&
-            input$color.by.select%in%"")){
+    if(is.null(input$color_by_select)|
+         (!is.null(input$color_by_select)&&
+            input$color_by_select%in%"")){
       plot.par$colby = NULL
       plot.par$varnames$colby = NULL
     }else{
-      plot.par$colby = vis.data()[,input$color.by.select]
-      plot.par$varnames$colby = input$color.by.select
+      plot.par$colby = vis.data()[,input$color_by_select]
+      plot.par$varnames$colby = input$color_by_select
     }
   })
 })
@@ -1309,6 +1309,16 @@ observe({
   })
 })
 
+observe({
+  input$color_by_select
+  isolate({
+    updateCheckboxInput(session,"each.level",
+                        label=paste("Fit trend for every level of",
+                                    input$color_by_select),
+                        value=input$each.level)
+  })
+})
+
 # add trends and curves 
 output$trend.curve.panel = renderUI({
   isolate({
@@ -1317,7 +1327,7 @@ output$trend.curve.panel = renderUI({
     check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = F)
     check.cubic.object = checkboxInput("check_cubic",label="cubic",value = F)
     check.smoother.object = checkboxInput("check_smoother",label="Draw a smoother",value = F)
-    check.quantiles.object = checkboxInput("check.quantiles",label="Use Quantiles",value = F)
+    check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = F)
     color.linear.select = selectInput("color.linear",label="",
                                       choices=c("red","black","blue",
                                                 "green4","yellow","pink",
@@ -1341,6 +1351,9 @@ output$trend.curve.panel = renderUI({
     smoother.smooth.slider = sliderInput("smoother.smooth",
                                          label="",min=0.01,max=1,value=0.7,
                                          step=0.01,ticks=F)
+    each.level.check = checkboxInput("each.level",
+                                     label=paste("Fit trend for every level of",
+                                                 input$color_by_select))
     list(title.add.trend.curve,
          fixedRow(column(width=6,check.linear.object),
                   column(width=6,color.linear.select)),
@@ -1352,7 +1365,33 @@ output$trend.curve.panel = renderUI({
                   column(width=6,color.smoother.select)),
          conditionalPanel("input.check_smoother",
                           fixedRow(width=12,check.quantiles.object),
-                          fixedRow(width=12,smoother.smooth.slider)))
+                          fixedRow(width=12,smoother.smooth.slider)),
+         conditionalPanel("input.color_by_select!=null&&input.color_by_select!=''&&
+                          (input.check_linear||input.check_quadratic||
+                          input.check_cubic||input.check_smoother)&&
+                          !input.check_quantiles",
+                          each.level.check))
+  })
+})
+
+observe({
+  input$check_quantiles
+  isolate({
+    if(!is.null(input$check_quantiles)&&input$check_quantiles){
+      updateCheckboxInput(session,"each.level",value=F)
+      graphical.par$quant.smooth = "default"
+    }else{
+      graphical.par$quant.smooth = NULL
+    }
+  })
+})
+
+observe({
+  input$each.level
+  isolate({
+    if(!is.null(input$each.level)){
+      graphical.par$trend.by = input$each.level
+    }
   })
 })
 

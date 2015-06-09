@@ -1817,14 +1817,15 @@ shinyServer(function(input, output, session) {
     isolate({
       choice = input$select.column.plot1
       if(!is.null(choice)){
-        i = input$select.column.plot2
-        if(input$select.column.plot1==input$select.column.plot2){
-          i = which(colnames(get.data.set())%in%input$select.column.plot1)
-          if(i>(ncol(get.data.set())-1)){
+        choice2 = input$select.column.plot2
+        i=2
+        ch = colnames(get.data.set())[-which(colnames(get.data.set())%in%choice)]
+        if(choice==choice2){
+          i = which(colnames(get.data.set())%in%choice2)
+          if(length(ch)>0&&i>length(ch)){
             i=1
           }
         }
-        ch = colnames(get.data.set())[-which(colnames(get.data.set())%in%choice)]
         if(!get.button()){
           updateSelectInput(session,"select.column.plot2",choices=ch,
                             selected=ch[i])  

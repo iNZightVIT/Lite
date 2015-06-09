@@ -543,7 +543,7 @@ aggregate.data= function(aggregate.over,
     }
   }
   temp
-  }
+}
 
 ##########################################################
 #To be removed when the iNZight tools package is working##
@@ -583,7 +583,7 @@ sort.data = function(vars,sort.type,df){
     vec
   },vars,sort.type,df)
   df[order.overwrite(z),]
-  }
+}
 
 #' The iNZight version of the order function which lets you pass 
 #' in a list of vectors to order instead of the ... argument. It 

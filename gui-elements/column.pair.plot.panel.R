@@ -17,7 +17,7 @@ get.pair.plot.sidebar =  function(data.set){
                      choices=choices1,multiple=F,selectize=T,
                      selected=choices1[1]),
          selectInput("select.column.plot2","Select Column 2",
-                     choices=choices1[-1],,multiple=F,selectize=T,
+                     choices=choices1[-1],multiple=F,selectize=T,
                      selected=choices1[-1][1]),
          br(),br(),help.display('Column pair plot',
                                 'column_pair_plot',
