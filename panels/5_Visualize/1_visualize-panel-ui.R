@@ -116,9 +116,11 @@ vis.mainPanel = function() {
                                       ),
                                     column(
                                       width = 4,
-                                      helpText("Advanced Options"),
-                                      br(),
                                       fluidRow(column(width = 8,
+                                                      h4("Inference"),
+                                                      uiOutput("add_inference"))),
+                                      fluidRow(column(width = 8,
+                                                      h4("Advanced options"),
                                                       uiOutput("advanced_options_panel"))),
                                       fluidRow(column(width=12,
                                                       conditionalPanel("input.advanced_options=='Code more variables'",

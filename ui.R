@@ -79,7 +79,7 @@ shinyUI(
             title =
                 HTML(
                 "<a href = 'https://www.stat.auckland.ac.nz/~wild/iNZight/'>
-                <img src = 'pendred_transp.png', width = 125, height = 32,
+                <img src = 'iNZight_lite_logo.png', width = 171, height = 36,
                      alt = 'iNZight Lite'/></a>"
                 ),
             ## footer = img(src = "pendred_footer.png"),

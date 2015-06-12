@@ -95,10 +95,12 @@ graphical.par = reactiveValues(
   cex = 1,
   quant.smooth = NULL,
   inference.type = NULL,
+  inference.par = NULL,
 #   largesample = NULL,
   join = FALSE,
   lines.by = FALSE,
   trend.by = FALSE,
+  trend.parallel = T,
   smooth = 0,
   szsym = 1,
   tpsym = 1,
@@ -686,9 +688,13 @@ observe({
       ##  Others
       graphical.par$cex = 1
       graphical.par$inference.type = NULL
+      graphical.par$inference.par = NULL
   #    graphical.par$largesample = NULL
       graphical.par$lines.by = FALSE
       graphical.par$trend.by = FALSE
+      updateCheckboxInput(session,"each_level",value=F)
+      graphical.par$trend.parallel = T
+      updateCheckboxInput(session,"each_level_seperate",value=T)
       graphical.par$smooth = 0
       graphical.par$szsym = 1
       graphical.par$tpsym = 1
@@ -727,6 +733,298 @@ observe({
       
     })
   }
+})
+
+output$add_inference = renderUI({
+  input$vari1
+  input$vari2
+  ret = NULL
+  isolate({
+    dafr = get.data.set()
+    add_inference.check = checkboxInput("add.inference",
+                                        label="Add inference",
+                                        value=input$add.inference)
+    mean_median.radio = radioButtons("inference_parameter1",
+                                     label="Parameter",
+                                     choices=c("Mean","Median"),
+                                     selected=input$inference_parameter1,
+                                     inline=T)
+    normal_bootstrap.radio = radioButtons("inference_type1",
+                                          label="Type of inference",
+                                          choices=c("Normal","Bootstrap"),
+                                          selected=input$inference_type1,
+                                          inline=T)
+    confidence.interval.check = checkboxInput("confidence_interval1",
+                                              label="Confidence interval",
+                                              value=input$confidence_interval1)
+    comparison.interval.check = checkboxInput("comparison_interval1",
+                                              label="Comparison interval",
+                                              value=input$comparison_interval1)
+    year12_bootstrap.radio = radioButtons("inference_type2",
+                                          label="Type of inference",
+                                          choices=c("Year 12","Bootstrap"),
+                                          selected=input$inference_type2,
+                                          inline=T)
+    intervals = NULL
+    graphical.par$inference.par = NULL
+    graphical.par$bs.inference = F
+    if((!is.null(input$confidence_interval1)&&
+         input$confidence_interval1)||
+         (!is.null(input$comparison_interval1)&&
+            input$comparison_interval1)){
+      if(!is.null(input$confidence_interval1)&&
+           input$confidence_interval1){
+        intervals = c(intervals,"conf")
+      }
+      if(!is.null(input$comparison_interval1)&&
+           input$comparison_interval1){
+        intervals = c(intervals,"comp")
+      }
+      if(!is.null(input$inference_parameter1)&&
+           input$inference_parameter1%in%"Mean"){
+        graphical.par$inference.par = "mean"
+      }else if(!is.null(input$inference_parameter1)&&
+                 input$inference_parameter1%in%"Median"){
+        graphical.par$inference.par = "median"
+      }
+      if((!is.null(input$inference_type1)&&
+            input$inference_type1%in%"Bootstrap")||
+           (!is.null(input$inference_type2)&&
+           input$inference_type2%in%"Bootstrap")){
+        graphical.par$bs.inference = T
+      }else{
+        graphical.par$bs.inference = F
+      }
+    }
+    graphical.par$inference.type = intervals
+    # vari1 = numeric; vari2 = none
+    if(!input$vari2%in%"none"&&
+         ((class(dafr[,input$vari1])%in%"numeric"|
+          class(dafr[,input$vari1])%in%"integer")&
+         (class(dafr[,input$vari2])%in%"numeric"|
+            class(dafr[,input$vari2])%in%"integer"))){
+      ret = conditionalPanel("input.check_linear||
+                             input.check_quadratic||
+                             input.check_cubic||
+                             input.check_smoother",
+                             add_inference.check)
+    # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
+    }else if(!input$vari2%in%"none"&&
+               (((class(dafr[,input$vari1])%in%"numeric"|
+                class(dafr[,input$vari1])%in%"integer")&
+               (class(dafr[,input$vari2])%in%"factor"|
+                  class(dafr[,input$vari2])%in%"character"))|
+               ((class(dafr[,input$vari1])%in%"factor"|
+                   class(dafr[,input$vari1])%in%"character")&
+                  (class(dafr[,input$vari2])%in%"numeric"|
+                     class(dafr[,input$vari2])%in%"integer")))){
+      ret = list(mean_median.radio,
+                 conditionalPanel("input.inference_parameter1=='Mean'",
+                                  normal_bootstrap.radio),
+                 conditionalPanel("input.inference_parameter1=='Median'",
+                                  year12_bootstrap.radio),
+                 conditionalPanel("input.inference_parameter1=='Mean'||
+                                  (input.inference_parameter1=='Median'&&
+                                  input.inference_type2=='Bootstrap')",
+                                  h5("Type of interval"),
+                                  confidence.interval.check,
+                                  comparison.interval.check)
+                 )
+    # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
+    }else if((!input$vari2%in%"none"&&
+                ((class(dafr[,input$vari1])%in%"factor"|
+                class(dafr[,input$vari1])%in%"character")&
+               (class(dafr[,input$vari2])%in%"factor"|
+                  class(dafr[,input$vari2])%in%"character")))|
+               ((class(dafr[,input$vari1])%in%"factor"|
+               class(dafr[,input$vari1])%in%"character")&
+                 input$vari2%in%"none")){
+      ret = list(h5("Parameter"),helpText("Proportions"),
+                 normal_bootstrap.radio,
+                 h5("Type of interval"),
+                 confidence.interval.check,
+                 conditionalPanel("input.inference_type1=='Normal'",
+                                  comparison.interval.check))
+    # var1 = numeric; vari2 = none
+    }else if(input$vari2%in%"none"&&
+               (class(dafr[,input$vari1])%in%"numeric"|
+               class(dafr[,input$vari1])%in%"integer")){
+      ret = list(mean_median.radio,
+                 conditionalPanel("input.inference_parameter1=='Mean'",
+                                  normal_bootstrap.radio),
+                 conditionalPanel("input.inference_parameter1=='Median'",
+                                  year12_bootstrap.radio),
+                 conditionalPanel("input.inference_parameter1=='Mean'||
+                                  (input.inference_parameter1=='Median'&&input.inference_type2=='Bootstrap')",
+                                  h5("Type of interval"),
+                                  confidence.interval.check))
+    }
+  })
+  ret
+})
+
+observe({
+  input$confidence_interval1
+  input$comparison_interval1
+  input$inference_type1
+  input$inference_type2
+  input$inference_parameter1
+  input$vari1
+  input$vari2
+  input$add.inference
+  isolate({
+    graphical.par$inference.par = NULL
+    intervals = NULL
+    graphical.par$bs.inference = F
+    # vari1 = numeric; vari2 = none
+    if(!is.null(input$vari1)&&
+         is.numeric(get.data.set()[,input$vari1])&&
+         !is.null(input$vari2)&&
+         input$vari2%in%"none"){
+      if(!is.null(input$inference_parameter1)&&
+           input$inference_parameter1%in%"Mean"&&
+           (!is.null(input$confidence_interval1)&&
+               input$confidence_interval1)){
+        graphical.par$inference.par = "mean"
+        if(!is.null(input$confidence_interval1)&&
+             input$confidence_interval1){
+          intervals = c(intervals,"conf")
+        }
+        if(length(intervals)>0){
+          if(input$inference_type1%in%"Normal"){
+            graphical.par$bs.inference = F
+          }else if(input$inference_type1%in%"Bootstrap"){
+            graphical.par$bs.inference = T
+          }
+        }
+      }else if((!is.null(input$inference_parameter1)&&
+                 input$inference_parameter1%in%"Median")){
+        graphical.par$inference.par = "median"
+        intervals = c(intervals,"conf")
+        graphical.par$bs.inference = F
+        if(input$inference_type2%in%"Bootstrap"&&
+             (!is.null(input$confidence_interval1)&&
+                input$confidence_interval1)){
+          graphical.par$bs.inference = T
+        }else if(input$inference_type2%in%"Bootstrap"){
+          graphical.par$bs.inference = T
+          intervals = NULL
+        }
+      }
+    # vari1 = factor; vari2 = none or vari1 = factor; vari2 = factor
+    }else if((!is.null(input$vari1)&&
+                (is.character(get.data.set()[,input$vari1])|
+                   is.factor(get.data.set()[,input$vari1]))&&
+                !is.null(input$vari2)&&input$vari2%in%"none")||
+               ((!is.null(input$vari1)&&
+                   (is.factor(get.data.set()[,input$vari1])|
+                      is.character(get.data.set()[,input$vari1])))&&
+                  (!is.null(input$vari2)&&!input$vari2%in%"none"&&
+                     (is.factor(get.data.set()[,input$vari2])|
+                        is.character(get.data.set()[,input$vari2]))))
+             ){
+      graphical.par$inference.par = "proportion"
+      if(!is.null(input$inference_type1)&&
+           input$inference_type1%in%"Normal"){
+        graphical.par$bs.inference = F
+        if(!is.null(input$confidence_interval1)&&
+             input$confidence_interval1){
+          intervals = c(intervals,"conf")
+        }
+        if(!is.null(input$comparison_interval1)&&
+             input$comparison_interval1){
+          intervals = c(intervals,"comp")
+        }
+      }else if(!is.null(input$inference_type1)&&
+                 input$inference_type1%in%"Bootstrap"){
+        graphical.par$bs.inference = T
+        if(!is.null(input$confidence_interval1)&&
+             input$confidence_interval1){
+          intervals = c(intervals,"conf")
+        }
+      }
+    # vari1 = numeric; vari2 = numeric
+    }else if((!is.null(input$vari1)&&
+                is.numeric(get.data.set()[,input$vari1]))&&
+               (!is.null(input$vari2)&&
+                  is.numeric(get.data.set()[,input$vari2]))){
+      graphical.par$bs.inference = input$add.inference
+    # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
+    }else if(((!is.null(input$vari1)&&
+                 (is.factor(get.data.set()[,input$vari1])|
+                    is.character(get.data.set()[,input$vari1])))&&
+                (!is.null(input$vari2)&&!input$vari2%in%"none"&&
+                   (is.numeric(get.data.set()[,input$vari2]))))||
+               ((!is.null(input$vari1)&&
+                   (is.numeric(get.data.set()[,input$vari1])))&&
+                  (!is.null(input$vari2)&&!input$vari2%in%"none"&&
+                     (is.factor(get.data.set()[,input$vari2])|
+                        is.character(get.data.set()[,input$vari2]))))){
+      if(!is.null(input$inference_parameter1)&&
+           input$inference_parameter1%in%"Mean"&&
+           ((!is.null(input$confidence_interval1)&&
+                input$confidence_interval1)|
+              (!is.null(input$comparison_interval1)&&
+                 input$comparison_interval1))){
+        graphical.par$inference.par = "mean"
+        if(!is.null(input$inference_type1)&&
+             input$inference_type1%in%"Normal"){
+          graphical.par$bs.inference = F
+          if(!is.null(input$confidence_interval1)&&
+               input$confidence_interval1){
+            intervals = c(intervals,"conf")
+          }
+          if(!is.null(input$comparison_interval1)&&
+               input$comparison_interval1){
+            intervals = c(intervals,"comp")
+          }
+        }else if(!is.null(input$inference_type1)&&
+                   input$inference_type1%in%"Bootstrap"){
+          graphical.par$bs.inference = T
+          if(!is.null(input$confidence_interval1)&&
+               input$confidence_interval1){
+            intervals = c(intervals,"conf")
+          }
+          if(!is.null(input$comparison_interval1)&&
+               input$comparison_interval1){
+            intervals = c(intervals,"comp")
+          }
+        }
+      }else if(!is.null(input$inference_parameter1)&&
+                 input$inference_parameter1%in%"Median"&&
+                 ((!is.null(input$confidence_interval1)&&
+                     input$confidence_interval1)|
+                    (!is.null(input$comparison_interval1)&&
+                       input$comparison_interval1))){
+        graphical.par$inference.par = "median"
+        intervals = c(intervals,"conf")
+        graphical.par$bs.inference = F
+        if(input$inference_type2%in%"Bootstrap"&&
+             ((!is.null(input$confidence_interval1)&&
+                input$confidence_interval1)|
+                (!is.null(input$comparison_interval1)&&
+                   input$comparison_interval1))){
+          intervals = NULL
+          if(!is.null(input$confidence_interval1)&&
+               input$confidence_interval1){
+            intervals = c(intervals,"conf")
+          }
+          if(!is.null(input$comparison_interval1)&&
+               input$comparison_interval1){
+            intervals = c(intervals,"comp")
+          }
+          graphical.par$bs.inference = T
+        }else if(input$inference_type2%in%"Bootstrap"){
+          graphical.par$bs.inference = T
+          intervals = NULL
+        }
+      }
+    }
+    graphical.par$inference.type = intervals
+    print(paste("bs.inference:",graphical.par$bs.inference))
+    print(paste("inference.type:",graphical.par$inference.type))
+    print(paste("inference.par:",graphical.par$inference.par))
+  })
 })
 
 output$advanced_options_panel = renderUI({
@@ -790,9 +1088,7 @@ output$advanced_options_panel = renderUI({
                         selected = 'Change plot appearance')
     }
   })
-  list(ret,conditionalPanel(
-    "input.check_linear||input.check_quadratic||input.check_cubic||input.check_smoother",
-    checkboxInput("add.inference",label="Add inference",value=F))) 
+  list(ret) 
 })
 
 output$plot.appearance.panel = renderUI({
@@ -1312,10 +1608,10 @@ observe({
 observe({
   input$color_by_select
   isolate({
-    updateCheckboxInput(session,"each.level",
+    updateCheckboxInput(session,"each_level",
                         label=paste("Fit trend for every level of",
                                     input$color_by_select),
-                        value=input$each.level)
+                        value=input$each_level)
   })
 })
 
@@ -1351,9 +1647,12 @@ output$trend.curve.panel = renderUI({
     smoother.smooth.slider = sliderInput("smoother.smooth",
                                          label="",min=0.01,max=1,value=0.7,
                                          step=0.01,ticks=F)
-    each.level.check = checkboxInput("each.level",
+    each_level.check = checkboxInput("each_level",
                                      label=paste("Fit trend for every level of",
                                                  input$color_by_select))
+    each_level_seperate.check = checkboxInput("each_level_seperate",
+                                     label="Fit paralell trend lines",
+                                     value=T)
     list(title.add.trend.curve,
          fixedRow(column(width=6,check.linear.object),
                   column(width=6,color.linear.select)),
@@ -1370,7 +1669,16 @@ output$trend.curve.panel = renderUI({
                           (input.check_linear||input.check_quadratic||
                           input.check_cubic||input.check_smoother)&&
                           !input.check_quantiles",
-                          each.level.check))
+                          each_level.check),
+         conditionalPanel("input.each_level",
+                          each_level_seperate.check))
+  })
+})
+
+observe({
+  input$each_level_seperate
+  isolate({
+    graphical.par$trend.parallel = input$each_level_seperate
   })
 })
 
@@ -1378,7 +1686,7 @@ observe({
   input$check_quantiles
   isolate({
     if(!is.null(input$check_quantiles)&&input$check_quantiles){
-      updateCheckboxInput(session,"each.level",value=F)
+      updateCheckboxInput(session,"each_level",value=F)
       graphical.par$quant.smooth = "default"
     }else{
       graphical.par$quant.smooth = NULL
@@ -1387,10 +1695,10 @@ observe({
 })
 
 observe({
-  input$each.level
+  input$each_level
   isolate({
-    if(!is.null(input$each.level)){
-      graphical.par$trend.by = input$each.level
+    if(!is.null(input$each_level)){
+      graphical.par$trend.by = input$each_level
     }
   })
 })
@@ -1600,12 +1908,5 @@ observe({
       graphical.par$col.line = input$color.join
       graphical.par$join = input$check.join
     }
-  })
-})
-
-observe({
-  input$add.inference
-  isolate({
-    graphical.par$bs.inference = input$add.inference
   })
 })
