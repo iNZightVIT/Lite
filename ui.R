@@ -39,7 +39,6 @@ shinyUI(
                     #URLtext,
                     #provide_xlab,
                     #provide_ylab,
-                    #provide_startdate,
                     #provide_season,
                     #provide_frequency,
                     #numeric_input1,
@@ -51,6 +50,15 @@ shinyUI(
                        border: 1px solid;
                        border-radius: 10px;
                     }
+                    */#provide_startdate {
+                       width: 100%;
+                       height: auto;
+                       margin: 5px auto 0;
+                       font: 9pt Arial, sans-serif;
+                       -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, .5);
+                       -moz-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, .5);
+                       box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, .5);
+                    }/*
                     #categorical_variables_select,
                     #quick_explore_select,
                     #numeric_variables_select {

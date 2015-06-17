@@ -69,7 +69,7 @@ simplify.dafr = function(dafr){
 
 #' Converts a data.frame to a format where all 
 #' non NA are replaced by "observed" and all NA 
-#' values are repalced by "missing". Used by the 
+#' values are repalced by "missing".
 #' 
 #' @param dafr the data.frame to convert.
 #' 
@@ -157,51 +157,7 @@ get.combinations = function(dafr,simplify=F){
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
-#' Takes an input string of a formula involvig colummn 
-#' names in the input data set and tries to evaluate it. 
-#' If this is not possible, NULL is returned and the error 
-#' is printed to standard out.
-#' 
-#' @param dafr The data.frame containing the data needed 
-#' to evaluate the expression.
-#' @param new.formula The character string holding the 
-#' expression to be evaluated.
-#' 
-#' @return Null if the expression could not be evaluated, 
-#' otherwise the input data.frame with one additional 
-#' column. This column contains the results of the 
-#' expression.
-#' 
-#' @author Christoph Knapp
-get.create.variables = function(dafr,new.formula,new.name=NULL){
-  tryCatch({
-    temp = cbind(dafr,eval(parse(text=new.formula),dafr))
-    if(is.null(new.name)||""%in%new.name){
-      new.name = "new.name"
-    }
-    count=0
-    while(new.name%in%colnames(dafr)){
-      count = count+1
-      new.name = paste(new.name,count,sep=".")
-    }
-    colnames(temp)[ncol(temp)] = new.name
-    temp
-  },error=function(cond) {
-    #print(cond)
-    return (NULL)
-  },
-  warning=function(cond) {
-    #print(cond)
-  },
-  finally={
-    
-  })
-}
-
-##########################################################
-#To be removed when the iNZight tools package is working##
-##########################################################
-#' Takes an input string of a formula involvig colummn 
+#' Takes an input string of a formula involving colummn 
 #' names in the input data set and tries to evaluate it. 
 #' If this is not possible, NULL is returned and the error 
 #' is printed to standard out.

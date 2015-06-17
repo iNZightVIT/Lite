@@ -878,9 +878,10 @@ observe({
     graphical.par$bs.inference = F
     # vari1 = numeric; vari2 = none
     if(!is.null(input$vari1)&&
+         input$vari1%in%colnames(get.data.set())&&
          is.numeric(get.data.set()[,input$vari1])&&
          !is.null(input$vari2)&&
-         input$vari2%in%"none"){
+         !input$vari2%in%colnames(get.data.set())){
       if(!is.null(input$inference_parameter1)&&
            input$inference_parameter1%in%"Mean"&&
            (!is.null(input$confidence_interval1)&&
@@ -913,13 +914,16 @@ observe({
       }
     # vari1 = factor; vari2 = none or vari1 = factor; vari2 = factor
     }else if((!is.null(input$vari1)&&
+                input$vari1%in%colnames(get.data.set())&&
                 (is.character(get.data.set()[,input$vari1])|
                    is.factor(get.data.set()[,input$vari1]))&&
                 !is.null(input$vari2)&&input$vari2%in%"none")||
                ((!is.null(input$vari1)&&
+                   input$vari1%in%colnames(get.data.set())&&
                    (is.factor(get.data.set()[,input$vari1])|
                       is.character(get.data.set()[,input$vari1])))&&
-                  (!is.null(input$vari2)&&!input$vari2%in%"none"&&
+                  (!is.null(input$vari2)&&
+                     input$vari2%in%colnames(get.data.set())&&
                      (is.factor(get.data.set()[,input$vari2])|
                         is.character(get.data.set()[,input$vari2]))))
              ){
@@ -945,19 +949,25 @@ observe({
       }
     # vari1 = numeric; vari2 = numeric
     }else if((!is.null(input$vari1)&&
+                input$vari1%in%colnames(get.data.set())&&
                 is.numeric(get.data.set()[,input$vari1]))&&
                (!is.null(input$vari2)&&
+                  input$vari2%in%colnames(get.data.set())&&
                   is.numeric(get.data.set()[,input$vari2]))){
       graphical.par$bs.inference = input$add.inference
     # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
     }else if(((!is.null(input$vari1)&&
+                 input$vari1%in%colnames(get.data.set())&&
                  (is.factor(get.data.set()[,input$vari1])|
                     is.character(get.data.set()[,input$vari1])))&&
-                (!is.null(input$vari2)&&!input$vari2%in%"none"&&
+                (!is.null(input$vari2)&&
+                   input$vari2%in%colnames(get.data.set())&&
                    (is.numeric(get.data.set()[,input$vari2]))))||
                ((!is.null(input$vari1)&&
+                   input$vari1%in%colnames(get.data.set())&&
                    (is.numeric(get.data.set()[,input$vari1])))&&
-                  (!is.null(input$vari2)&&!input$vari2%in%"none"&&
+                  (!is.null(input$vari2)&&
+                     input$vari2%in%colnames(get.data.set())&&
                      (is.factor(get.data.set()[,input$vari2])|
                         is.character(get.data.set()[,input$vari2]))))){
       if(!is.null(input$inference_parameter1)&&
@@ -1021,9 +1031,6 @@ observe({
       }
     }
     graphical.par$inference.type = intervals
-    print(paste("bs.inference:",graphical.par$bs.inference))
-    print(paste("inference.type:",graphical.par$inference.type))
-    print(paste("inference.par:",graphical.par$inference.par))
   })
 })
 

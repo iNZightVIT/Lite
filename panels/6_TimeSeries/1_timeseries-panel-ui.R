@@ -29,6 +29,11 @@ ts.help = function() {
 
 ###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
 ts.sidebarPanel = function(data.set) {
+  if("time"%in%colnames(data.set)){
+    sel="time"
+  }else{
+    sel = colnames(data.set)[1]
+  }
     ##  Perform a routine data check (to be replaced).
     if (is.null(data.set)) {
           stop("Please select a data set!")
@@ -66,6 +71,7 @@ ts.sidebarPanel = function(data.set) {
                 inputId = "select_timevars",
                 label = "Select time variable: ",
                 choices = colnames(data.set),
+                selected = sel,
                 selectize = FALSE
             )
         ),
@@ -73,12 +79,15 @@ ts.sidebarPanel = function(data.set) {
         ##  then load a panel that allows the user to do so.
         conditionalPanel(
             condition = "input.time_info == 2",
-            textInput(inputId = "provide_startdate",
-                      label = "Start Date: "),
-            textInput(inputId = "provide_frequency",
-                      label = "Frequency: "),
-            textInput(inputId = "provide_season",
-                      label = "Season Number: "),
+            helpText("Choose a start date and frequency. Choose any 
+                     day of the starting month. This will add an 
+                     additional column to the data called \"time\"."),
+            dateInput("provide_startdate",label="",format="yyyy-mm-dd"),
+            selectInput(inputId = "provide_frequency",
+                      label = "Frequency: ",
+#                       choices=c("","Day","Month","Quarter"),# to be added back when dayly data can be used
+                      choices=c("","Month","Quarter"),
+                      selected=""),
             actionButton(inputId = "provide_actionButton",
                          label = "Provide time information")
         ),
@@ -90,8 +99,8 @@ ts.sidebarPanel = function(data.set) {
         radioButtons(inputId = "choose_season",
                      label = "Seasonal Pattern: ",
                      choices =
-                         c("Multiplicative" = TRUE,
-                           "Additive" = FALSE)
+                         c("Additive" = FALSE,
+                           "Multiplicative" = TRUE)
                      ),
         ##  Section 3: Select Variables
         ##
@@ -102,13 +111,10 @@ ts.sidebarPanel = function(data.set) {
         ##  variable is often the first element of "colnames(data)".
         selectInput(inputId = "select_variables",
                     label = "Series Variables: ",
-                    choices =  rev(colnames(data.set)),
-                    selected = rev(colnames(data.set))[1],
+                    choices =  rev(get.numeric.column.names(data.set)),
+                    selected = rev(get.numeric.column.names(data.set))[1],
                     multiple = TRUE,
                     selectize = FALSE),
-        helpText("(Remove variables with the",
-                 strong('Delete'),
-                 "key)"),
 
         ##  Section 4: Select Labels
         ##
@@ -313,17 +319,17 @@ ts.mainPanel = function() {
 ###  complete the UI for the Time Series module.
 
 timeseries.panel.ui = function(data.set) {
-    fluidPage(  
-        if (is.null(data.set)) {
-            fluidRow(
-                includeMarkdown(
-                    "panels/6_TimeSeries/4_timeseries-panel-null.md")
-            )
-        } else {
-            fluidRow(
-                column(2, ts.sidebarPanel(data.set)),
-                column(10, ts.mainPanel())
-            )
-        }
-    )
+  fluidPage(  
+    if (is.null(data.set)) {
+      fluidRow(
+        includeMarkdown(
+          "panels/6_TimeSeries/4_timeseries-panel-null.md")
+      )
+    } else {
+      fluidRow(
+        column(2, ts.sidebarPanel(data.set)),
+        column(10, ts.mainPanel())
+      )
+    }
+  )
 }

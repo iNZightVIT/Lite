@@ -1899,7 +1899,7 @@ shinyServer(function(input, output, session) {
     source("panels/6_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
     source("panels/6_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
     output$timeseries.panel <- renderUI({
-        timeseries.panel.ui(get.data.set())
+      timeseries.panel.ui(get.data.set())
     })
 
 #   Help
