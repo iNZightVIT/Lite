@@ -14,28 +14,6 @@
 ###  Data check  ###
 ###--------------###
 
-###  Let data be reactive.
-###  If the dataset has no time variable defined, then print an error message.
-###  We need to replace this with a conditional panel that only offers the
-###  option to define one's own time variable.
-
-###  If no variables are selected, print an error message.
-## output$variable_message = renderPrint({
-##     if (length(input$select_variables) < 1) {
-##         "Please choose one or more variables to plot"
-##     }
-## })
-
-# ts.data = reactive({
-# #     validate(
-# #         need(!is.null(get.data.set()), "Please select a data set!"),
-# #         need(length(input$select_variables) >= 1,
-# #              "Please choose one or more variables!"),
-# #         errorClass = "myClass")
-#     ts.data = get.data.set()
-# })
-
-
 ###  We write a function that handles data.
 date_check = function(dafr,time.vars) {
     ##  Set of error checks.
@@ -52,41 +30,39 @@ date_check = function(dafr,time.vars) {
     subdata = dafr[,time.vars]
     ##  If any of the time series structures return an NA,
     ##  return TRUE. Else, return FALSE.
-    if (any(is.na(iNZightTS:::get.ts.structure(subdata)))) {
-        return(FALSE)
-    } else {
-        return(TRUE)
-    }
+    # function iNZightTS:::get.ts.structure is not stable 
+    # it throws an error if a normal factor variable is 
+    # passed in.
+    tryCatch({
+      if (any(is.na(suppressWarnings(iNZightTS:::get.ts.structure(subdata))))) {
+          return(FALSE)
+      } else {
+          return(TRUE)
+      }
+    }, error = function(e) {
+      cat("Handled error in date_check\n")
+      print(e)
+      return(F)
+    }, finally = {})
 }
 
 ###  Time information panel - conditional on the type of dataset.
 output$time_info = renderUI({
-#   if (date_check(get.data.set(),input$select_timevars)) {
   radioButtons(inputId = "time_info",
                label = "Time Information: ",
                choices = c("Select time variable" = 1,
                            "Provide time manually" = 2)
-  )
-#   } else {
-#     radioButtons(inputId = "time_info",
-#                  label = "Time Information: ",
-#                  choices = c("Provide time manually" = 2)
-#     )
-#   }                
+  )     
 })
 
-## reactive({
-##     if (!is.null(input$provide_actionButton)) {
-##         season = input$provide_season
-##         start = c(input$provide_startdate, season)
-##         freq = input$provide_frequency
-##     } else {
-##         season = 1
-##         start = c(1, season)
-##         freq = 1
-##     }
-## })
-
+# observes the Add time variable button.
+# Add an additional column "time" to the data 
+# set. This column is in the format of:
+# year = yyyy (i.e 2004)
+# frequency = Q or M (Quarter or Month)
+# start = 1-4 for Quarters or 1-12 for Month
+# example 2004Q2 (quarter 2 of the year 2004)
+#         2002M7 (July 2002)
 observe({
   input$provide_actionButton
   isolate({
@@ -142,7 +118,6 @@ variable.names = reactive({
 ###
 ###  Time Series Plot
 output$timeseries_plot = renderPlot({
-#     input$selector
     if(date_check(get.data.set(),input$select_timevars)){
       if (length(input$singleSeriesTabs) > 0) {
         temp = get.data.set()
