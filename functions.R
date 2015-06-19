@@ -1410,3 +1410,46 @@ get.quantiles = function(subx){
   g1
 }
 
+
+#' Loads data from a specified URL
+#' 
+#' @param URL A valid URL pointing to a data set
+#' @param data.dir.import The directory the data set 
+#' should be downloaded to
+#' 
+#' @return A list of two elements. 
+#'         data.set = A data.frame object containing the loaded data.set
+#'         data.name = The name of the data set as retrieved from the URL
+#'         
+#' @note This method is using the function download.file and the wget method. 
+#' This might not work in all possible cases.
+#' 
+#' @author Christoph Knapp
+get.data.from.URL = function(URL,data.dir.import){
+  ret = list()
+  print(URL)
+  name = strsplit(URL,"/")[[1]]
+  name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+  if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
+        file.writable(data.dir.import)) {
+    dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
+  }
+  tryCatch({
+    download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="wget")
+    temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
+    if(!is.null(temp[[2]])){
+      ret$data.set = temp[[2]]
+      ret$data.name = name
+    }else{
+      return(NULL)
+    }
+    ret
+  },error = function(e){
+    if(file.exists(paste0(data.dir.import,"/Imported/",name))){
+      unlink(paste0(data.dir.import,"Imported/",name))
+    }
+    print(e)
+  },warning = function(w) {
+    print(w)
+  },finally = {})
+}

@@ -144,7 +144,20 @@ shinyServer(function(input, output, session) {
     ##---------------------##
     source("panels/1_About/1_about-panel-ui.R")
     output$about.panel <- renderUI({
-        about.panel.ui(get.lite.version(),get.lite.update())
+      get.vars = parseQueryString(session$clientData$url_search)
+      if(length(get.vars)>0&&
+           any(names(get.vars)%in%"url")){
+        data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
+        if(!is.null(data.vals)){
+          values$data.set = data.vals$data.set
+          values$data.restore = get.data.set()
+          values$data.name = data.vals$data.name
+          if(!is.null(get.data.set())){
+            updateTabsetPanel(session,"selector","visualize")
+          }
+        }
+      }
+      about.panel.ui(get.lite.version(),get.lite.update())
     })
 
   ##  Data -> load data (upload a data set)
@@ -172,29 +185,10 @@ shinyServer(function(input, output, session) {
           }
           unlink(input$files[1, "datapath"])
         }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
-          URL = input$URLtext
-          name = strsplit(URL,"/")[[1]]
-          name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
-          if (!file.exists(paste(get.data.dir.imported(),"/Imported",sep=""))&&
-                file.writable(get.data.dir.imported())) {
-            dir.create(paste(get.data.dir.imported(),"/Imported",sep=""), recursive = TRUE)
-          }
-          tryCatch({
-            download.file(url=URL,destfile=paste0(get.data.dir.imported(),"/Imported/",name),method="wget")
-            temp = load.data(get.data.dir.imported(),fileID = name, path = paste0(get.data.dir.imported(),"/Imported/",name))
-            if(!is.null(temp[[2]])){
-              values$data.set = temp[[2]]
-              values$data.restore = get.data.set()
-              values$data.name = name
-            }
-          },error = function(e){
-            if(file.exists(paste0(get.data.dir.imported(),"/Imported/",name))){
-              unlink(paste0(get.data.dir.imported(),"Imported/",name))
-            }
-            print(e)
-          },warning = function(w) {
-            print(w)
-          },finally = {})
+          data.vals = get.data.from.URL(input$URLtext,get.data.dir.imported())
+          values$data.set = data.vals$data.set
+          values$data.restore = get.data.set()
+          values$data.name = data.vals$data.name
         }
       })
     }
