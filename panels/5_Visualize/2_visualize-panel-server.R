@@ -213,10 +213,9 @@ determine.g = reactive({
 vis.par = reactive({
     vis.par = reactiveValuesToList(plot.par)
     if (!is.null(vis.par$x) && plot.par$varnames$x != "") {
-        validate(
-            need(all(na.omit(vis.par$x) != ""),
-                 "All values are empty.")
-        )
+        if(any(na.omit(vis.par$x) == "")){
+          vis.par$x[which(vis.par$x == "")] = NA
+        }
         if (determine.g() == 6) {
             temp = list(x = NULL, y = NULL,
                          varnames = list(x = "", y = ""))

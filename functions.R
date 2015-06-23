@@ -1240,16 +1240,21 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
       if(!file.exists(full.name[indexes[1]])){
         return(list(NULL,NULL))
       }
-      if(tolower(ext)%in%"rds"){
-        temp = readRDS(file=full.name[indexes[1]])
-      }else if(tolower(ext)%in%"rda"|tolower(ext)%in%"rdata"){
-        name = load(full.name[indexes[1]])
-        temp = get(name)
-      }else if(tolower(ext)%in%"csv"){
-        temp = read.csv(full.name[indexes[1]])
-      }else if(tolower(ext)%in%"txt"){
-        temp = read.delim(full.name[indexes[1]])
-      }
+      # catch possible problems with user data.
+      tryCatch({
+        if(tolower(ext)%in%"rds"){
+          temp = readRDS(file=full.name[indexes[1]])
+        }else if(tolower(ext)%in%"rda"|tolower(ext)%in%"rdata"){
+          name = load(full.name[indexes[1]])
+          temp = get(name)
+        }else if(tolower(ext)%in%"csv"){
+          temp = read.csv(full.name[indexes[1]])
+        }else if(tolower(ext)%in%"txt"){
+          temp = read.delim(full.name[indexes[1]])
+        }
+      }, warning = function(w) {
+      }, error = function(e) {
+      }, finally = {})
     }
   }
   if(is.null(fileID)){

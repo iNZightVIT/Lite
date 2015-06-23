@@ -14,6 +14,7 @@ library(iNZightTS)
 library(iNZightMR)
 library(markdown)
 library(gpairs)
+library(iNZightRegression)
 
 # read in possible command line arguments such as 'vars.path'
 
@@ -146,7 +147,9 @@ shinyServer(function(input, output, session) {
     output$about.panel <- renderUI({
       get.vars = parseQueryString(session$clientData$url_search)
       if(length(get.vars)>0&&
-           any(names(get.vars)%in%"url")){
+           any(names(get.vars)%in%"url")&&
+           !is.null(get.vars$url)&&
+           get.vars$url!=""){
         data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
         if(!is.null(data.vals)){
           values$data.set = data.vals$data.set
@@ -272,9 +275,9 @@ shinyServer(function(input, output, session) {
     content = function(file) {
       type = input$select_filetype
       if(type%in%"txt"&&!is.null(get.data.set())){
-        write.table(get.data.set(), file, quote=F,row.names=F,sep="\t")
+        write.table(get.data.set(), file, quote=T,row.names=F,sep="\t")
       }else if(type%in%"csv"&&!is.null(get.data.set())){
-        write.table(get.data.set(), file, quote=F,row.names=F,sep=",")
+        write.table(get.data.set(), file, quote=T,row.names=F,sep=",")
       }else if(type%in%"RData"&&!is.null(get.data.set())){
         save(get.data.set(),file=file)
       }else if(type%in%"RDS"&&!is.null(get.data.set())){
@@ -1897,6 +1900,17 @@ shinyServer(function(input, output, session) {
     output$timeseries.panel <- renderUI({
       timeseries.panel.ui(get.data.set())
     })
+
+#   Advanced --> Model Fitting
+
+##----------------------##
+##  Model Fitting Module  ##
+##----------------------##
+source("panels/8_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
+source("panels/8_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
+output$modelfitting.panel <- renderUI({
+  model.fitting.panel.ui(get.data.set())
+})
 
 #   Help
 
