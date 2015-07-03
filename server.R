@@ -1852,14 +1852,19 @@ shinyServer(function(input, output, session) {
       }
       x = get.data.set()[,index1]
       y = get.data.set()[,index2]
+      x.lab = input$select.column.plot1
+      y.lab = input$select.column.plot2
       if(is.numeric(x)&is.numeric(y)){
         temp = x
         x = y
         y = temp
+        temp = x.lab
+        x.lab = y.lab
+        y.lab = temp
       }
       try(iNZightPlot(x,y,
-                      xlab=input$select.column.plot1,
-                      ylab=input$select.column.plot2,
+                      xlab=x.lab,
+                      ylab=y.lab,
                       main=get.data.name()))
     }
   })
