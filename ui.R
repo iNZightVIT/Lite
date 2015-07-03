@@ -45,7 +45,10 @@ shinyUI(
                     #form_class_interval_number,
                     #main_title_text,
                     #x_axis_text,
-                    #y_axis_text {
+                    #y_axis_text,
+                    #arg1, 
+                    #offset,
+                    #new_model_name {
                        background-color: #A3E7FF;
                        border: 1px solid;
                        border-radius: 10px;

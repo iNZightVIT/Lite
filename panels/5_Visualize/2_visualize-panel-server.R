@@ -557,7 +557,19 @@ output$visualize.plot = renderPlot({
   })
   # plot it
   if (!is.null(vis.par())) {
-    plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+    if(is.numeric(plot.par$x)&
+         is.numeric(plot.par$y)){
+      temp = vis.par()
+      temp.x = temp$x
+      temp$x=temp$y
+      temp$y=temp.x
+      temp.varnames.x = temp$varnames$x
+      temp$varnames$x = temp$varnames$y
+      temp$varnames$y = temp.varnames.x
+      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+    }else{
+      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+    }
   }
 })
 
@@ -578,7 +590,19 @@ output$mini.plot = renderPlot({
   })
   # plot it
   if (!is.null(vis.par())) {
-    plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+    if(is.numeric(plot.par$x)&
+         is.numeric(plot.par$y)){
+      temp = vis.par()
+      temp.x = temp$x
+      temp$x=temp$y
+      temp$y=temp.x
+      temp.varnames.x = temp$varnames$x
+      temp$varnames$x = temp$varnames$y
+      temp$varnames$y = temp.varnames.x
+      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+    }else{
+      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+    }
   }
 })
 
@@ -1611,6 +1635,7 @@ observe({
   })
 })
 
+# update checkbox to fit trend lines for every level
 observe({
   input$color_by_select
   isolate({
@@ -1681,6 +1706,7 @@ output$trend.curve.panel = renderUI({
   })
 })
 
+# update whether trend curves are parallel or not
 observe({
   input$each_level_seperate
   isolate({
@@ -1688,6 +1714,7 @@ observe({
   })
 })
 
+# update the quatile smother
 observe({
   input$check_quantiles
   isolate({
@@ -1700,6 +1727,8 @@ observe({
   })
 })
 
+# change whether trend lines are drawn for 
+# every selected level
 observe({
   input$each_level
   isolate({

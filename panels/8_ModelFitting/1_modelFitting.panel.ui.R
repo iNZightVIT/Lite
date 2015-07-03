@@ -18,24 +18,25 @@ model.fitting.panel.ui = function(data.set){
     )
   }else{
     sidebarLayout(
-      sidebarPanel(
-        selectInput("model.select",
-                    label="Select Fitted Model",
-                    choices = names(modelValues$models)),
+      sidebarPanel(fixedRow(
+        column(4,
+               selectInput("model.select",
+                           label="Select Fitted Model",
+                           choices = c())),
+        column(4,textInput("new_model_name",label="Rename Model")),
+        column(2,br(),actionButton("rename.model",label="Rename")),
+        column(2,br(),actionButton("remove.model",label="Remove"))),
         tabsetPanel(id="model_plot_selector",
                     tabPanel("Fit Model",
-                             uiOutput("model.fit")),
+                             uiOutput("model_fit")),
                     tabPanel("Plots",
-                             uiOutput("model.plots")),
+                             uiOutput("model_plots")),
+                    tabPanel("Code History",
+                             uiOutput("code_download")),
                     type="pills"),br(),
         modelfitting.help()
       ), 
-      mainPanel(conditionalPanel("input.model_plot_selector=='Fit Model'",
-                                 textOutput("r.code.fit"),br(),
-                                 textOutput("fit.Summary")),
-                conditionalPanel("input.model_plot_selector=='Plots'",
-                                 uiOutput("plots.main"))    
-      )
+      mainPanel(uiOutput("model_main"))
     )
   }
 }

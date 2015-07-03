@@ -15,6 +15,7 @@ library(iNZightMR)
 library(markdown)
 library(gpairs)
 library(iNZightRegression)
+library(RJSONIO)
 
 # read in possible command line arguments such as 'vars.path'
 
@@ -1851,6 +1852,11 @@ shinyServer(function(input, output, session) {
       }
       x = get.data.set()[,index1]
       y = get.data.set()[,index2]
+      if(is.numeric(x)&is.numeric(y)){
+        temp = x
+        x = y
+        y = temp
+      }
       try(iNZightPlot(x,y,
                       xlab=input$select.column.plot1,
                       ylab=input$select.column.plot2,
@@ -1901,16 +1907,18 @@ shinyServer(function(input, output, session) {
       timeseries.panel.ui(get.data.set())
     })
 
-#   Advanced --> Model Fitting
-
-##----------------------##
-##  Model Fitting Module  ##
-##----------------------##
-source("panels/8_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
-source("panels/8_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
-output$modelfitting.panel <- renderUI({
-  model.fitting.panel.ui(get.data.set())
-})
+  #   Advanced --> Model Fitting
+  
+  ##----------------------##
+  ##  Model Fitting Module  ##
+  ##----------------------##
+  source("panels/8_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
+  source("panels/8_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
+  output$modelfitting.panel <- renderUI({
+    isolate({
+      model.fitting.panel.ui(get.data.set())
+    })
+  })
 
 #   Help
 
