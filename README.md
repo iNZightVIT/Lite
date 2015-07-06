@@ -1,24 +1,28 @@
-iNZight *Lite* version 0.9.7.7
-============================
+iNZight *Lite* version 0.9.7.8
+==============================
 
-*Last Updated: 26/05/15*
+*Last Updated: 07/07/15*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
-- About
 - Visualize
 - Time Series
-- Help
+- Model Fitting
 
 Underway:
 ---------
 - [Wishlist] Adjust the size of the "Help" button so that it matches the size of the actionButton.	
 - [Manipulate] Go through the data extraction / manipulation options.
-- [Time Series] Fix "Provide Time Information".
-- [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
+- [Model Fitting] Implement the model fitting module
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
+- [Time Series] Fix "Provide Time Information".
+- [Help] This module was removed. Even though it is in iNZight links to the new webpage already exist in the "About" start page and help to every module is available for every module inside the modules. 
+- [Visualize]  Add inferential markups once Tom finishes updating iNZightPlots().
+- [Advanced] Nest QE and TS under "Advanced".
+- [Quick Explore] Merge into 1 tab.
 - [General] Changed all global variables to reactive values (CK)
 - [Row Operations] Row operations added (CK).
 - [General] A Markdown 'troubleshoot' document appears when no data set is loaded (CP).
@@ -37,11 +41,21 @@ Recent Updates (Most to least recent):
 To do:
 ------
 - [General] Write a "log" file script.
-- [Quick Explore] Merge into 1 tab.
-- [Visualize]  Add inferential markups once Tom finishes updating iNZightPlots().
-- [Advanced] Nest QE and TS under "Advanced".
 - [General] Find better place for "help" button.
-- [Time Series] Alter "iNZightTS" so that it can handle datasets with the "DATE" columns in column 2+.
+
+Package dependencies
+--------------------
+This are all the packages which are loaded by iNZight lite.
+Please install all dependencies.
+
+- iNZightPlots
+- iNZightTS
+- iNZightMR
+- markdown
+- gpairs
+- iNZightRegression
+- RJSONIO
+- survey
 
 Directories:
 ------------
@@ -52,10 +66,10 @@ This directory holds all the data. The data must be placed in sub-directories, w
 This directory contains the gui functions for all the old modules (from iNZight revamp). 
 
 - www:
-This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
+This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png javascript files. Images are stored in a sub-directory called "images". Javascript code is stored in a subdirectory "js".
 
 - panels:
-This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Help" modules. This makes it easier to modify code.
+This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Model Fitting" modules. This makes it easier to modify code.
 
 Main files:
 -----------
