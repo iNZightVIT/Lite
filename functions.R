@@ -1350,17 +1350,19 @@ get.vars = function(vars.path){
 #' 
 #' @author Christoph Knapp
 file.writable = function(file,debug){
-  if(file.exists(file)){
-    if("unix"%in%.Platform$OS.type){
+  tryCatch({
+    if(file.exists(file)&&
+         "unix"%in%.Platform$OS.type&&
+         "Linux"%in%Sys.info()["sysname"]){
       grepl("777",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
         grepl("775",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
         grepl("755",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])
     }else{
-      T
+      F
     }
-  }else{
-    F
-  }
+  },error = function(e){
+    return(F)
+  },finally = {})
 }
 
 #' Wrapper function for \code{dir.create} which returns 
