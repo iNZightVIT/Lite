@@ -1,0 +1,2 @@
+import(grid, lattice, vcd, barcode, MASS, colorspace)
+export(gpairs, corrgram)

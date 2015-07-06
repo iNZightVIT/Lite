@@ -1,0 +1,24 @@
+Package: iNZightTS
+Type: Package
+Title: Time Series for iNZight
+Version: 1.1.6
+Date: 2015-03-02
+Authors@R: c(person("Tom", "Elliott", role = c("aut", "cre"),
+    email = "tell029@aucklanduni.ac.nz"),
+    person("Junjie", "Zeng",   role = "aut"),
+    person("Simon", "Potter",  role = "aut"),
+    person("David", "Banks",   role = "aut"),
+    person("Marco", "Kuper",   role = "aut"))
+Depends: R (>= 2.13)
+Imports: grid
+Suggests: iNZight, Acinonyx
+Description: Time Series functionality for iNZight
+License: GPL-2
+Packaged: 2015-03-02 01:17:48 UTC; tell029
+Author: Tom Elliott [aut, cre],
+  Junjie Zeng [aut],
+  Simon Potter [aut],
+  David Banks [aut],
+  Marco Kuper [aut]
+Maintainer: Tom Elliott <tell029@aucklanduni.ac.nz>
+Built: R 3.1.2; ; 2015-05-01 00:34:05 UTC; unix

@@ -1,0 +1,11 @@
+                        Additional functionality for iNZight
+allPartialResPlots      Draw multiple partial residual plots
+histogramArray          Histogram Array
+iNZightQQplot           iNZight QQ Plot
+iNZightSummary          Informative Summary Information for Regression
+                        Models
+moecalc                 Margin of Error Calculations
+multicomp               Multiple Comparisons Between Factor Levels
+partialResPlot          Partial residual plots
+plotlm6                 Extended Plot Diagnostics for (g)lm Models
+ses.moecalc             Constructor function for Standard Error Class

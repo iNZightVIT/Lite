@@ -1,0 +1,43 @@
+AddNav                  Add a navigation item (R2html).
+AddNavItem              Add a navigation item (htmlize).
+BeginNav                Write the header for the HTML navigation file
+                        (htmlize).
+CreateIndexFile         Write an index file for the current output
+                        (htmlize).
+EndHTML                 End an HTML file (htmlize).
+HTMLgraph               Create a graphic in HTML output (R2html).
+Mode                    Find the modal value
+R2html                  Read an R script and write HTML output
+StartList               Write the header for the HTML listing file
+                        (htmlize).
+StartNav                Write the header for the HTML navigation file
+                        (R2html).
+add.value.labels        Add value labels
+addxtabs                Add the cells of two or more xtab objects
+brkdn                   Breakdown of a numeric variable by grouping
+                        variable(s)
+calculate.xtab          Calculate a crosstabulation
+createIndxFile          Write an index file for the current output
+                        (R2html).
+decimal.align           Turn numbers into strings with aligned decimal
+                        points
+delim.table             Format a 2D table
+delim.xtab              Format a crosstabulation
+describe                Description of variables
+describe.factor         Description of factor variables
+describe.logical        Description of logical variables
+describe.numeric        Description of numeric variables
+freq                    Calculate a frequency table
+htmlize                 Read an R script and write HTML output
+print.desc              Display descriptive stats output
+print.freq              Display frequency table(s)
+print.xtab              Display a 2D crosstabulation
+rep_n_stack             Replicate and stack columns of a data frame
+skew                    Calculate the skew of a distribution.
+stretch_df              Reshape a data frame from "long" to "wide"
+                        format
+toNA                    Set specified values in an object to NA
+truncString             Truncate strings and add ellipses if a string
+                        is truncated.
+valid.n                 Find the number of valid (not NA) values
+xtab                    Crosstabulate variables

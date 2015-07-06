@@ -1,0 +1,15 @@
+Compare-methods         Methods for Function Compare
+[-methods               Methods for Function [
+para                    Extract Transfer and Persistence Parameters I
+parameters              Extract Transfer and Persistence Parameters II
+parameters-methods      Methods for Function parameters
+plot-methods            Methods for Function plot
+show-methods            Methods for Function show
+summary-methods         Methods for Function summary
+tfer-package            Forensic Glass Transfer Probabilities
+tprob                   Transfer Probabilities
+tprob-methods           Methods for Function tprob
+transfer                Glass Transfer, Persistence and Recovery
+                        Probabilities
+transfer-class          Class "transfer"
+values                  Extract Transfer Values

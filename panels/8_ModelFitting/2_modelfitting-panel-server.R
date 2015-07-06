@@ -12,7 +12,7 @@
 # reactive values to store the fitted models
 modelValues = reactiveValues(models=list(),
                              code=list(),
-                             code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# iNZight has done this step for you, just run the\n# following code in your R console:\n")
+                             code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# iNZight has done this step for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\n")
 
 # print the summary of the fitted model.
 output$fit.summary = renderPrint({
@@ -22,7 +22,18 @@ output$fit.summary = renderPrint({
   isolate({
     if(!is.null(modelValues$models[[input$model.select]])&&
          !is.null(input$model.select)){
-      iNZightSummary(modelValues$models[[input$model.select]])
+      confounds = input$confounding_variables
+      if(" "%in%confounds){
+        confounds = confounds[-which(confounds%in%" ")]
+      }
+      if(!is.null(confounds)&&
+           length(confounds)>0&&
+           all(confounds%in%colnames(get.data.set()))){
+        iNZightSummary(modelValues$models[[input$model.select]],
+                       exclude=confounds)
+      }else{
+        iNZightSummary(modelValues$models[[input$model.select]])
+      }
     }else{
       cat("No model to show")
     }
@@ -136,7 +147,7 @@ output$model_fit = renderUI({
 
 # Submit the current model
 observe({
-  print("submit model")
+#   print("submit model")
   input$fit.model.button
   isolate({
     if(!is.null(input$fit.model.button)&&
@@ -161,45 +172,47 @@ observe({
           model.name = paste0(model.name,1)
         }
         formu = paste(input$select_Y," ~ ",
-                      paste(input$independent_variables[-which(input$independent_variables%in%" ")],
+                      paste(input$independent_variables[-which(input$independent_variables%in%" ")]
+                            ,collapse=" + ")," + ",
+                      paste(input$confounding_variables[-which(input$confounding_variables%in%" ")],
                             collapse=" + "),sep="")
         if(input$model_framework%in%"Least Squares"){
           temp.model = lm(formula(formu),data=get.data.set())
-          temp.code = paste0("lm(",formu,",data=mydata.new)")
+          temp.code = paste0("lm(",formu,",data=mydata)")
         }else if(input$model_framework%in%"Poisson Regression (Y counts)"){
           if(input$quasi){
             if(input$offset%in%""){
               temp.model = glm(formula(formu),data=get.data.set(),family='quasipoisson')
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='quasipoisson')")
+              temp.code = paste0("glm(",formu,",data=mydata,family='quasipoisson')")
             }else{
               temp.model = glm(formula(formu),data=get.data.set(),family='quasipoisson',offset=input$offset)
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='quasipoisson',offset=",input$offset,")")
+              temp.code = paste0("glm(",formu,",data=mydata,family='quasipoisson',offset=",input$offset,")")
             }
           }else{
             if(input$offset%in%""){
               temp.model = glm(formula(formu),data=get.data.set(),family='poisson')
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='poisson'")
+              temp.code = paste0("glm(",formu,",data=mydata,family='poisson'")
             }else{
               temp.model = glm(formula(formu),data=get.data.set(),family='poisson',offset=input$offset)
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='poisson',offset=",input$offset,")")
+              temp.code = paste0("glm(",formu,",data=mydata,family='poisson',offset=",input$offset,")")
             }
           }
         }else if(input$model_framework%in%"Logistic Regression (Y binary)"){
           if(input$quasi){
             if(input$offset%in%""){
               temp.model = glm(formula(formu),data=get.data.set(),family='quasibinomial')
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='quasibinomial')")
+              temp.code = paste0("glm(",formu,",data=mydata,family='quasibinomial')")
             }else{
               temp.model = glm(formula(formu),data=get.data.set(),family='quasibinomial',offset=input$offset)
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='quasibinomial',offset=",input$offset,")")
+              temp.code = paste0("glm(",formu,",data=mydata,family='quasibinomial',offset=",input$offset,")")
             }
           }else{
             if(input$offset%in%""){
               temp.model = glm(formula(formu),data=get.data.set(),family='binomial')
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='binomial')")
+              temp.code = paste0("glm(",formu,",data=mydata,family='binomial')")
             }else{
               temp.model = glm(formula(formu),data=get.data.set(),family='binomial',offset=input$offset)
-              temp.code = paste0("glm(",formu,",data=mydata.new,family='binomial',offset=",input$offset,")")
+              temp.code = paste0("glm(",formu,",data=mydata,family='binomial',offset=",input$offset,")")
             }
           }
         }
@@ -209,16 +222,30 @@ observe({
         print(e)
       }, finally = {})
       if(!is.null(temp.model)){
-        print("model submitted")
+#         print("model submitted")
         modelValues$models[[model.name]] = temp.model
         updateSelectInput(session,"model.select",
                           choices=names(modelValues$models),
                           selected=model.name)
         modelValues$code[[model.name]] = temp.code
-        modelValues$code.history = paste0(modelValues$code.history,
-                                          temp.code,"\niNZightSummary(",
-                                          model.name,
-                                          ")\n")
+        confounds = input$confounding_variables
+        if(" "%in%confounds){
+          confounds = confounds[-which(confounds%in%" ")]
+        }
+        if(!is.null(confounds)&&
+             length(confounds)>0&&
+             all(confounds%in%colnames(get.data.set()))){
+          modelValues$code.history = paste0(modelValues$code.history,
+                                            model.name," = ",temp.code,
+                                            "\niNZightSummary(",
+                                            model.name,",exclude=c(",
+                                            paste(confounds,collapse=","),"))\n")
+        }else{
+          modelValues$code.history = paste0(modelValues$code.history,
+                                            model.name," = ",temp.code,
+                                            "\niNZightSummary(",
+                                            model.name,")\n")
+        }
       }
     }
   })
@@ -307,46 +334,54 @@ output$current.code = renderPrint({
   input$quasi
   input$offset
   input$independent_variables
+  input$confounding_variables
+  input$data_structure
   isolate({
     if(!is.null(input$select_Y)&&
          !input$select_Y%in%""&&
          !is.null(input$model_framework)&&
          !input$model_framework%in%""){
       func = paste(input$select_Y," ~ ",
-                   paste(input$independent_variables[-which(input$independent_variables%in%" ")],
+                   paste(input$independent_variables[-which(input$independent_variables%in%" ")]
+                         ,collapse=" + ")," + ",
+                   paste(input$confounding_variables[-which(input$confounding_variables%in%" ")],
                          collapse=" + "),sep="")
-      if(input$model_framework%in%"Least Squares"){
-        cat("lm(",func,",data=mydata.new)")
-      }else if(input$model_framework%in%"Poisson Regression (Y counts)"){
-        if(input$quasi){
-          if(input$offset%in%""){
-            cat("glm(",func,",data=mydata.new,family='quasipoisson')")
-          }else{
-            cat("glm(",func,",data=mydata.new,family='quasipoisson',offset=",input$offset,")")
-          }
-        }else{
-          if(input$offset%in%""){
-            cat("glm(",func,",data=mydata.new,family='poisson')")
-          }else{
-            cat("glm(",func,",data=mydata.new,family='poisson',offset=",input$offset,")")
-          }
-        }
-      }else if(input$model_framework%in%"Logistic Regression (Y binary)"){
-        if(input$quasi){
-          if(input$offset%in%""){
-            cat("glm(",func,",data=mydata.new,family='quasibinomial')")
-          }else{
-            cat("glm(",func,",data=mydata.new,family='quasibinomial',offset=",input$offset,")")
-          }
-        }else{
-          if(input$offset%in%""){
-            cat("glm(",func,",data=mydata.new,family='binomial')")
-          }else{
-            cat("glm(",func,",data=mydata.new,family='binomial',offset=",input$offset,")")
-          }
-        }
+      if(input$data_structure%in%"Complex Survey"){
+        
       }else{
-        cat("No code to present")
+        if(input$model_framework%in%"Least Squares"){
+          cat("lm(",func,",data=mydata)")
+        }else if(input$model_framework%in%"Poisson Regression (Y counts)"){
+          if(input$quasi){
+            if(input$offset%in%""){
+              cat("glm(",func,",data=mydata,family='quasipoisson')")
+            }else{
+              cat("glm(",func,",data=mydata,family='quasipoisson',offset=",input$offset,")")
+            }
+          }else{
+            if(input$offset%in%""){
+              cat("glm(",func,",data=mydata,family='poisson')")
+            }else{
+              cat("glm(",func,",data=mydata,family='poisson',offset=",input$offset,")")
+            }
+          }
+        }else if(input$model_framework%in%"Logistic Regression (Y binary)"){
+          if(input$quasi){
+            if(input$offset%in%""){
+              cat("glm(",func,",data=mydata,family='quasibinomial')")
+            }else{
+              cat("glm(",func,",data=mydata,family='quasibinomial',offset=",input$offset,")")
+            }
+          }else{
+            if(input$offset%in%""){
+              cat("glm(",func,",data=mydata,family='binomial')")
+            }else{
+              cat("glm(",func,",data=mydata,family='binomial',offset=",input$offset,")")
+            }
+          }
+        }else{
+          cat("No code to present")
+        }
       }
     }
   })
@@ -355,12 +390,19 @@ output$current.code = renderPrint({
 # rename a model
 observe({
 #   print("rename button")
-  input$rename.model
+  input$rename_model
   isolate({
-    if(!is.null(input$rename.model)&&
-         input$rename.model>0){
-      if(!trim(input$new_model_name)%in%""){
+    if(!is.null(input$rename_model)&&
+         input$rename_model>0){
+      if(!is.null(input$new_model_name)&&
+           !trim(input$new_model_name)%in%""&&
+           !is.null(input$model.select)&&
+           !input$new_model_name%in%names(modelValues$models)){
         names(modelValues$models)[which(names(modelValues$models)%in%input$model.select)] = input$new_model_name
+        names(modelValues$code)[which(names(modelValues$code)%in%input$model.select)] = input$new_model_name
+        updateSelectInput(session,"model.select",
+                          choices=names(modelValues$models),
+                          selected=input$new_model_name)
       }
     }
   })
@@ -375,6 +417,9 @@ observe({
          input$remove.model>0){
       modelValues$models[[input$model.select]] = NULL
       modelValues$code[[input$model.select]] = NULL
+      updateSelectInput(session,"model.select",
+                        choices=names(modelValues$models),
+                        selected=names(modelValues$models)[1])
     }
   })
 })
@@ -392,7 +437,7 @@ output$code.history.text = renderPrint({
 })
 
 # panel for the R code download
-output$code.download = renderUI({
+output$code_download = renderUI({
 #   print("code history side")
   list(helpText("Press button below to download the R 
                 code to rerun the work you have done."),
@@ -453,11 +498,11 @@ output$model_main = renderUI({
 observe({
   get.data.set()
   isolate({
-    print(get.data.name())
-    print("modelValues reset")
+#     print(get.data.name())
+#     print("modelValues reset")
     modelValues$models=list()
     modelValues$code=list()
-    modelValues$code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# iNZight has done this step for you, just run the\n# following code in your R console:\n"
+    modelValues$code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# iNZight has done this step for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\n"
     updateSelectInput(session,"select_Y",
                       choices=colnames(get.data.set()),
                       selected=colnames(get.data.set())[1])
@@ -468,6 +513,6 @@ observe({
 #                       choices=c(" ",colnames(get.data.set())[-which(input$select_Y%in%colnames(get.data.set()))]),
 #                       selected=" ")
     updateSelectInput(session,"model.select",
-                      choices=c())
+                      choices=c(""))
   })
 })

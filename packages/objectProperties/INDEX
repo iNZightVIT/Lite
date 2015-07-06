@@ -1,0 +1,6 @@
+Enum-class              Enumerated types
+PositiveInteger         Bounded types for properties
+PropertySet-class       PropertySet-class
+as.list,-method         Coercion to 'list'
+properties              Properties signaling fileds
+setNumericWithRange     Define a speicific range object

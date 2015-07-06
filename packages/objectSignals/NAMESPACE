@@ -1,0 +1,6 @@
+exportClasses(Signal)
+export(Signal)
+exportMethods(length)
+exportMethods(listeners)
+export(fieldWithPrototype)
+export(declareSignal)

@@ -1,0 +1,21 @@
+============================================================
+Major change in different version
+============================================================
+------------------------------------------------------------
+Version 0.10.2
+------------------------------------------------------------
+* Submitted to CRAN again on 2011-10-27
+
+------------------------------------------------------------
+Version 0.9.7
+------------------------------------------------------------
+* Remove signalingField
+* Move signalingFields to objectProperties and
+  rename that to preperties
+
+------------------------------------------------------------
+Version 0.9.6
+------------------------------------------------------------
+* Rename the lazyField to fieldWithPrototype, adding default
+  and checking class inside
+* Make field setting in signalingFields() and signalingField() 

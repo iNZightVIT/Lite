@@ -1,0 +1,20 @@
+GComponentObservable    GComponentObservable adds the observable
+                        interface
+GEdit                   The GEdit class adds some methods beyond the
+                        spec: 'set_error', 'clear_error',
+                        'validate_value'
+GMessage                subclass for message dialog
+GTree                   Base class
+GTreeBase               Base class
+add_editable_cell_renderer
+                        make a view column for the given type of
+                        variable
+ensure_type             S3 generic to ensure we don't change data type
+                        when assigning into column
+gWidgets2RGtk2-package
+                        gWidgets2Rtk2
+getWidget.RGtkObject    method for stopping getWidget
+guiWidgetsToolkitRGtk2-class
+                        toolkit class for RGtk2
+isFirstMouseClick       Return TRUE if first mouse click
+isRightMouseClick       Return TRUE/FALSE if right mouse click

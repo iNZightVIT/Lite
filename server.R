@@ -16,6 +16,7 @@ library(markdown)
 library(gpairs)
 library(iNZightRegression)
 library(RJSONIO)
+library(survey)
 
 # read in possible command line arguments such as 'vars.path'
 

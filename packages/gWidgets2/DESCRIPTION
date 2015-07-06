@@ -1,0 +1,27 @@
+Package: gWidgets2
+Type: Package
+Title: Rewrite of gWidgets API for simplified GUI construction
+Version: 1.0-10
+Author: John Verzani
+Maintainer: John Verzani <jverzani@gmail.com>
+URL: https://github.com/jverzani/gWidgets2
+Description: Re-implementation of gWidgets API. The API is defined in this
+    package. A second, toolkit-specific package is required to use it. There
+    are three in development: gWidgets2RGtk2, gWidgets2Qt, and gWidgets2tcltk.
+Depends: methods, digest
+License: GPL (>= 3)
+LazyLoad: yes
+Collate: 'misc.R' 'guiToolkit.R' 'BasicInterface.R' 'S4-methods.R'
+        'S3-methods.R' 'command-stack.R' 'methods.R' 'dialogs.R'
+        'gWidgets2-package.R' 'gaction.R' 'gbutton.R' 'gcalendar.R'
+        'gcheckbox.R' 'gcheckboxgroup.R' 'gcombobox.R' 'gdf.R'
+        'gdfnotebook.R' 'gedit.R' 'ggroup.R' 'gframe.R'
+        'gexpandgroup.R' 'gfile.R' 'gfilter.R' 'gformlayout.R'
+        'ggraphics.R' 'ggraphicsnotebook.R' 'ghtml.R' 'gimage.R'
+        'glabel.R' 'glayout.R' 'gmenu.R' 'gnotebook.R' 'gpanedgroup.R'
+        'gprogressbar.R' 'gradio.R' 'gseparator.R' 'gslider.R'
+        'gspinbutton.R' 'gstackwidget.R' 'gstatusbar.R' 'gtable.R'
+        'gtext.R' 'gtimer.R' 'gtoolbar.R' 'gtree.R' 'ws-model.R'
+        'gvarbrowser.R' 'gwindow.R' 'handler-methods.R' 'icons.R'
+Packaged: 2014-12-11 22:03:13 UTC; tell029
+Built: R 3.1.2; ; 2015-02-26 10:26:00 UTC; unix

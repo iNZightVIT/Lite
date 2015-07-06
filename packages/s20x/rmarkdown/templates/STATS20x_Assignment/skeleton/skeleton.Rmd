@@ -1,0 +1,24 @@
+---
+title: "STATS 201/8 Assignment"
+date: "Put today's date here"
+student:
+  name: A Student
+  studentID: 123456789
+output:
+  pdf_document: default
+---
+```{r echo=FALSE}
+## Do not delete this!
+## It loads the s20x library for you. If you delete it 
+## your document may not compile.
+require(s20x)
+```
+
+# Question 1 here
+
+```{r}
+## your R code here
+```
+
+
+# Question 2 here

@@ -1,0 +1,12 @@
+import(grid)
+importFrom(car, Anova)
+
+export(iNZightSummary, plotlm6, partialResPlot, allPartialResPlots,
+       histogramArray, iNZightQQplot, moecalc, multicomp, ses.moecalc)
+
+S3method("plot", "moecalc")
+S3method("print", "moecalc")
+S3method("summary", "moecalc")
+S3method("multicomp", "moecalc")
+S3method("print", "multicomp")
+S3method("print", "summary.moecalc")

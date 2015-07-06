@@ -24,7 +24,7 @@ model.fitting.panel.ui = function(data.set){
                            label="Select Fitted Model",
                            choices = c())),
         column(4,textInput("new_model_name",label="Rename Model")),
-        column(2,br(),actionButton("rename.model",label="Rename")),
+        column(2,br(),actionButton("rename_model",label="Rename")),
         column(2,br(),actionButton("remove.model",label="Remove"))),
         tabsetPanel(id="model_plot_selector",
                     tabPanel("Fit Model",

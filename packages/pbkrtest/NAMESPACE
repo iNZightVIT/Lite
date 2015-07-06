@@ -1,0 +1,19 @@
+exportPattern("^[^\\.]")
+
+import(lme4)
+importFrom(MASS, ginv)
+
+importFrom(parallel, clusterCall, clusterExport, clusterSetRNGStream)
+
+importClassesFrom(Matrix, Matrix)
+importFrom(Matrix, Matrix, sparseMatrix, rankMatrix)
+importMethodsFrom(Matrix, t, isSymmetric, "%*%", solve, diag, chol, chol2inv, forceSymmetric, "*")
+
+
+
+
+
+
+
+
+

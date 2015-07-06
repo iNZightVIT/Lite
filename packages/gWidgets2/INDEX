@@ -1,0 +1,105 @@
+.gdfnotebook.default    Toolkit constructor
+Observer-class          Reference class to create an observer of an
+                        observable object
+XXX                     Functions to message something needs doing.
+                        Easy to search for
+[.GDefaultWidget        Return items
+add                     Add a child object to parent container
+add3rdMousePopupMenu    Alias for poor punctation choice
+addHandlerChanged.GGraphics
+                        change handler for ggraphics
+addSpring               Add a spring to box containers
+addStockIcons           Method to add icon to list of stock icons
+call_meth               helper function to bypass lack of cached value
+                        in method call
+check_deprecated        Method to send message if any depreacted
+                        arguments are being used
+check_return_class      check that toolkit object return the right
+                        class
+dispose                 Dispose of object
+editable                Controls whether widget is editable or not
+enabled                 enabled
+flatten                 Flatten a nested list
+focus                   Does widget have focus
+font<-.GText            Set font for gtext object
+gWidgets2-package       gWidgets2. An API for programming GUIs
+gaction                 An action constructor
+galert                  Alert dialog to display transient messages
+gbasicdialog            Constructor for modal dialog that can contain
+                        an arbitrary widget
+gbutton                 Basic button widget
+gcalendar               A constructor for a date selection widget
+gcheckbox               constructor for checkbox widget
+gcheckboxgroup          Constructor for checkbox group. A linked group
+                        of checkboxes, but not exclusive.
+gcombobox               constructor for a combobox
+gconfirm                Constructor for modal dialog to get
+                        confirmation
+gcontainer              Common parts of a container widget
+gdf                     Constructor for a data frame editor
+gdfnotebook             A notebook container for many 'gdf' instances
+gedit                   Single line text edit constructor
+getWidget.GDefaultWidget
+                        method for getWidget
+getWithDefault          Return x unless NULL, NA, length 0, ..., in
+                        which case we give default
+get_index_in_list       get index of element of list
+get_object_from_string
+                        Get an object from an environment specified by
+                        a string.
+gexpandgroup            Constructor of box container widget with
+                        disclosure trigger and label
+gfile                   dialog for file and directory selection
+gfilter                 A widget for filtering a data frame
+gformlayout             A form layout container
+gframe                  Constructor for framed box container with label
+ggraphics               Constructor for an embeddable graphics device
+ggraphicsnotebook       A notebook widget holding plot devices
+ggroup                  Basic box container
+ghtml                   Widget for HTML display
+gimage                  A widget for displaying an image file
+ginput                  Constructor for modal dialog to collect a line
+                        of text
+glabel                  Basic label widget
+glayout                 Constructor for grid layout container
+gmenu                   menu constructor, main and popup
+gmessage                Constructor for modal message dialog
+gnotebook               Constructor for a tabbed notebook container
+gpanedgroup             constructor for a two-paned container
+gprogressbar            Basic progress bar widget
+gradio                  Constructor for radio button widget
+gseparator              constructor providing a widget for displaying a
+                        line in a GUI
+gslider                 slider widget constructor
+gspinbutton             Spinbutton constructor
+gstackwidget            Constructor for a stack of widgets
+gstatusbar              constructor to add a status bar to main window
+gtable                  A constructor for displaying tabular data for
+                        selection
+gtext                   Multiline text edit constructor
+gtimer                  Basic timer widget
+gtoolbar                A toolbar constructor
+gtoolkit                Which toolkit are we using?
+gtree                   constructor for widget to display heirarchical
+                        data
+guiToolkit              set or get the current toolkit for gWidgets
+gvarbrowser             Constructor for workspace variable browser
+gwidget                 Common parts of a widget
+gwindow                 gwindow
+installing_gWidgets_toolkits
+                        blurb about installation
+isExtant                Check if widget is extant.
+is_MacOSX               Return logical indicating if we are on a
+                        macintosh machine
+is_Windows              Return logical indicating if we are on a
+                        Windows machine
+is_empty                is value missing, null, 0-length or NA length 1
+observer                constructor for handler object
+redo                    Redo past action.
+short_summary           Provide a short summary for an object
+size                    Return size (width and height) of widget
+svalue<-.GFormLayout    svalue assignment method for gformlayout
+tag                     get a persistent attribute for an object
+tooltip                 Get a tooltip for the widget
+undo                    Undo past action.
+visible                 Controls whether widget is visible or not

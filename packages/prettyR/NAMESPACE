@@ -1,0 +1,38 @@
+# created 6/9/2011 - Jim Lemon,
+export(
+ add.value.labels,
+ AddNav,
+ AddNavItem,
+ addxtabs,
+ BeginNav,
+ brkdn,
+ calculate.xtab,
+ CreateIndexFile,
+ createIndxFile,
+ decimal.align,
+ delim.table,
+ delim.xtab,
+ describe,
+ describe.factor,
+ describe.logical,
+ describe.numeric,
+ EndHTML,
+ freq,
+ HTMLgraph,
+ htmlize,
+ Mode,
+ R2html,
+ rep_n_stack,
+ skew,
+ StartList,
+ StartNav,
+ stretch_df,
+ toNA,
+ truncString,
+ valid.n,
+ xtab
+)
+# methods
+S3method(print,freq)
+S3method(print,xtab)
+S3method(print,desc)

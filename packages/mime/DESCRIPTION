@@ -1,0 +1,22 @@
+Package: mime
+Type: Package
+Title: Map Filenames to MIME Types
+Version: 0.3
+Date: 2015-03-29
+Authors@R: c(person("Jeffrey", "Horner", role = "ctb"),
+    person("Yihui", "Xie", role = c("aut", "cre"), email = "xie@yihui.name"))
+Maintainer: Yihui Xie <xie@yihui.name>
+Description: Guesses the MIME type from a filename extension using the data
+    derived from /etc/mime.types in UNIX-type systems.
+Imports: tools
+License: GPL-2
+URL: https://github.com/yihui/mime
+BugReports: https://github.com/yihui/mime/issues
+LazyData: TRUE
+Packaged: 2015-03-29 03:46:13 UTC; yihui
+Author: Jeffrey Horner [ctb],
+  Yihui Xie [aut, cre]
+NeedsCompilation: yes
+Repository: CRAN
+Date/Publication: 2015-03-29 08:43:01
+Built: R 3.1.2; x86_64-pc-linux-gnu; 2015-05-01 00:34:35 UTC; unix

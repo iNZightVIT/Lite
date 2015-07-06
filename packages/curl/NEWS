@@ -1,0 +1,35 @@
+0.8
+ - Fix for curl() character reader to invert byte-order on big endian architectures.
+
+0.7
+ - Rename the C function 'fetch' to 'fetchdata' because of Solaris conflict.
+ - Move warning about missing CA bundle on Windows to onAttach.
+
+0.6
+ - Validation of SSL certificates is now enabled by default if a bundle is available.
+ - Major rewrite to support configurable and reusable handles
+ - Added new_handle, handle_setopt, handle_setheaders, handle_setform, handle_reset, etc.
+ - Added curl_fetch interfaces for httr
+ - Add ie_proxy_settings to get system proxy configuration on windows
+
+0.5
+ - Check for CURLM_CALL_MULTI_PERFORM to support very old versions of libcurl
+
+0.4
+ - Fixed a memory bug that could cause R to crash
+ - Add curl_escape, curl_unescape
+ - Add curl_version and curl_options
+
+0.3
+ - Add curl_download function
+ - More efficient use of realloc
+ - Fix for older versions of libcurl (e.g. Snow Leopard)
+ - Add support for user interrupts while downloading (ESC or CTRL+C)
+ - Fixed bug that caused GC to corrupt connection object
+ - Refactoring and cleanup
+
+0.2
+  - add support for recycling connections
+
+0.1
+  - initial release

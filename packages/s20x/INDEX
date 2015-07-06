@@ -1,0 +1,70 @@
+airpass.df              International Airline Passengers
+apples.df               Apples Data
+arousal.df              Changes in Pupil Size with Emotional Arousal
+autocor.plot            Autocorrelation Plot
+beer.df                 US Beer Production
+body.df                 Body Image and Ethnicity
+books.df                Books Data
+boxqq                   Box plots and normal quantile-quantile plots
+bursary.df              Bursary Results for Auckland Secondary Schools
+butterfat.df            Butterfat Data
+camplake.df             Age and Length of Camp Lake Bluegills
+chalk.df                Chalk Data
+ciReg                   Confidence Intervals for Regression models
+computer.df             Computer Questionnaire
+cooks20x                Cook's distance plot
+course.df               Stats 20x Summer School Data
+course2way.df           Exam Mark, Gender and Attendance for Stats 20x
+                        Summer School Students
+crossFactors            Crossed Factors
+crosstabs               Crosstabulation of two variables
+diamonds.df             Prices and Weights of Diamonds
+eovcheck                Testing for equality of variance plot
+estimateContrasts       Contrast Estimates
+fire.df                 Fire Damage and Distance from the Fire Station
+freq1way                Analysis of 1-dimensional frequency tables
+fruitfly.df             Fruitfly Data
+getVersion              s20x pacakge version number
+house.df                Sale and Advertised Prices of Houses
+incomes.df              Mean Family Incomes
+interactionPlots        Interactions Plot for Two-way Analysis of
+                        Variance
+lakemary.df             Ages and Lengths of Lake Mary Bluegills
+larain.df               Los Angeles Rainfall
+layout20x               Layout
+levene.test             Levene test for the ANOVA Assumption
+mazda.df                Year and Price of Mazda Cars
+mening.df               Monthly Notifications of Meningococcal Disease
+mergers.df              Merger Days
+mozart.df               Length of Mozart's Movements
+multipleComp            Multiple Comparisons
+nail.df                 Nail Polish Data
+normcheck               Testing for normality plot
+onewayPlot              One-way Analysis of Variance Plot
+oysters.df              Oyster Abundances over Different Sites
+pairs20x                Pairwise Scatter Plots with Histograms and
+                        Correlations
+peru.df                 Peruvian Indians
+predict20x              Model Predictions for a Linear Model
+predictCount            Predicted Counts for a Generalized Linear Model
+propslsd.new            LSD-Display Intervals
+rain.df                 Cloud Seeding and Levels of Rainfall
+residPlot               Fitted values versus residuals plot
+rowdistr                Row distributions from a cross-tabulation of
+                        two variables
+rr                      Read Data
+seeds.df                Seeds Data
+sheep.df                Sheep Data
+skewness                Skewness Statistic
+skulls.df               Skulls Data
+soyabean.df             Soya Bean Yields
+stripqq                 Strip charts and normal quantile-quantile plots
+summary1way             One-way Analysis of Variance Summary
+summary2way             Two-way Analysis of Variance Summary
+summaryStats            Summary Statistics
+teach.df                Comparison of Three Teaching Methods
+technitron.df           Technitron Salary Information
+thyroid.df              Effect of a New Drug on Thyroid Weights
+toothpaste.df           Crest Toothpaste
+trendscatter            Trend and scatter plot
+zoo.df                  Zoo Attendance during an Advertising Campaign
