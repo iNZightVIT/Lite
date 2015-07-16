@@ -46,7 +46,9 @@ shinyUI(
                     #main_title_text,
                     #x_axis_text,
                     #y_axis_text,
-                    #arg1, 
+                    #arg1,
+                    #arg2,
+                    #arg3,
                     #offset,
                     #new_model_name {
                        background-color: #A3E7FF;

@@ -13,10 +13,14 @@ get.matrix.sidebar =  function(data.set){
     list(helpText("Select a column from the dropdown 
                   menu to display all posible pair 
                   combination plots."),
-         selectInput("select.matrix.plot","Select Column",
+         selectInput("select.matrix.plot","Select Columns",
                      choices=choices1,multiple=T,selectize=T,
                      selected=choices1[1]),
-         br(),br(),help.display('Pair matrix plot',
+         br(),selectInput("grpVar",
+                          label = "Select grouping variable",
+                          choices=c(" ",get.categorical.column.names(data.set)),
+                          selected=" "),
+         br(),help.display('Pair matrix plot',
                                 'pair_matrix_plot',
                                 "gui-elements/notes/matrix.plot.md"),
          br(),HTML(""))  

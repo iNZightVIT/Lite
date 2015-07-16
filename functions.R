@@ -733,6 +733,15 @@ get.player = function(ID.forward,ID.player,ID.backward,maxi){
                       ))))
 }
 
+#' changes numeric columns to factor columns
+#' 
+#' @param temp a matrix or data.frame with columns to change
+#' @param columns a vector of column names for temp
+#' 
+#' @return a data.frame where all numeric columns are 
+#' converted into character column
+#' 
+#' @author Christoph Knapp
 change.factor.transform = function(temp,columns){
   temp = as.data.frame(temp)
   nums = unlist(lapply(1:ncol(temp),function(index,temp.data,columns){
@@ -757,6 +766,12 @@ change.factor.transform = function(temp,columns){
   }
 }
 
+#' change the sign of numeric columns
+#' 
+#' @param dafr a data frame with columns to transform
+#' @param columns the column names of the columns in dafr
+#' 
+#' @author Christoph Knapp
 change.sign.transform = function(dafr,columns){
   dafr = as.data.frame(dafr)
   temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){

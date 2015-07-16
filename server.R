@@ -1898,7 +1898,19 @@ shinyServer(function(input, output, session) {
                          }
                        }))
       colnames(temp) = choices
-      gpairs(temp)
+      grpVar = input$grpVar#" "#svalue(grpVar)
+      if (is.null(input$grpVar)||grpVar%in%" ") {
+        scatter.pars <- NULL
+        stripplot.pars <- list(jitter = TRUE)
+      } else {
+        scatter.pars <- list(col = as.numeric(get.data.set()[, grpVar]))
+        stripplot.pars <- list(jitter = TRUE,
+                               col = as.numeric(get.data.set()[, grpVar]))
+      }
+      gpairs(temp,
+             upper.pars = list(conditional = "stripplot"),
+             scatter.pars = scatter.pars,
+             stripplot.pars = stripplot.pars)
     }
   })
 
