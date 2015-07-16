@@ -13,7 +13,8 @@ library(iNZightPlots)
 library(iNZightTS)
 library(iNZightMR)
 library(markdown)
-library(gpairs)
+# library(gpairs)
+library(GGally)
 library(iNZightRegression)
 library(RJSONIO)
 library(survey)
@@ -1898,19 +1899,22 @@ shinyServer(function(input, output, session) {
                          }
                        }))
       colnames(temp) = choices
-      grpVar = input$grpVar#" "#svalue(grpVar)
-      if (is.null(input$grpVar)||grpVar%in%" ") {
-        scatter.pars <- NULL
-        stripplot.pars <- list(jitter = TRUE)
-      } else {
-        scatter.pars <- list(col = as.numeric(get.data.set()[, grpVar]))
-        stripplot.pars <- list(jitter = TRUE,
-                               col = as.numeric(get.data.set()[, grpVar]))
+      grpVar = input$grpVar
+      if(!is.null(grpVar)&&!grpVar%in%" "){
+        suppressWarnings(ggpairs(temp,
+                                 lower=list(continous=density,
+                                            combo="box"),
+                                 upper=list(continous="points",
+                                            combo="dot"),
+                                 color=grpVar))
+      }else{
+        suppressWarnings(ggpairs(temp,
+                                 lower=list(continous=density,
+                                            combo="box"),
+                                 upper=list(continous="points",
+                                            combo="dot")))
       }
-      gpairs(temp,
-             upper.pars = list(conditional = "stripplot"),
-             scatter.pars = scatter.pars,
-             stripplot.pars = stripplot.pars)
+      
     }
   })
 

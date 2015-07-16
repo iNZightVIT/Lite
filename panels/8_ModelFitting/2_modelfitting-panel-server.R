@@ -1022,8 +1022,6 @@ output$plots.main = renderUI({
 
 # generates the facto comparison plot
 output$factor.comparison.plot = renderPlot({
-#   modelValues$models
-  print("comparison plot")
   input$model.select
   input$factor.comp.select
   isolate({
@@ -1060,10 +1058,12 @@ output$factor_comparison_matrix = renderPrint({
 output$scatter.plot.matrix = renderPlot({
   input$model.select
   isolate({
-    temp = modelValues$models[[input$model.select]]$model
-    modelValues$code.history = paste0(modelValues$code.history,
-                                      paste0("gpairs(",input$model.select,"$model)\n"))
-#     temp = temp[,c(get.numeric.column.names(temp),get.categorical.column.names(temp))]
-    gpairs(temp)
+    if(!is.null(modelValues$models[[input$model.select]])){
+      temp = modelValues$models[[input$model.select]]$model
+      modelValues$code.history = paste0(modelValues$code.history,
+                                        paste0("gpairs(",input$model.select,"$model)\n"))
+  #     temp = temp[,c(get.numeric.column.names(temp),get.categorical.column.names(temp))]
+      gpairs(temp)
+    }
   })
 },width=800,height=800)
