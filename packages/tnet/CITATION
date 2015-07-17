@@ -1,0 +1,21 @@
+citHeader("To cite tnet in publications use:")
+
+citEntry(entry="Book",
+         title = "Structure and Evolution of Weighted Networks", 
+         author  = personList(as.person("Tore Opsahl")), 
+         year    = 2009, 
+         publisher = "University of London (Queen Mary College), London, UK", 
+         pages   = "104-122",
+         url     = "http://toreopsahl.com/publications/thesis/",
+         
+         textVersion = 
+          paste("Opsahl, T., 2009.",
+          "Structure and Evolution of Weighted Networks.",
+          "University of London (Queen Mary College), London, UK, pp. 104-122.",
+          "Available at http://toreopsahl.com/publications/thesis/; http://toreopsahl.com/tnet/",
+               sep=" ")
+         )
+
+citFooter("I have invested a lot of time and effort in creating tnet,",
+          "please cite it when using it for data analysis.")
+          

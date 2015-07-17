@@ -1,0 +1,64 @@
+Cross.Parker.Consulting.net.info
+                        Intra-organisational networks
+Cross.Parker.Manufacturing.net.info
+                        Intra-organisational networks
+Davis.Southern.women.2mode
+                        Davis' Southern Women network
+Freemans.EIES.net.1.n48
+                        Freeman's EIES network data
+Newman.Condmat.95.99.net.2mode
+                        Newman's condmat 95-99 network (two-mode
+                        structure)
+OnlineSocialNetwork.n1899.net
+                        Facebook-like Online Social Network
+USairport.n500.net      The network among the 500 busiest US commercial
+                        airports.
+add_window_l            Add smoothing window to a longitudinal network
+as.static.tnet          Transform a longitudinal network to a static
+                        edgelist network
+as.tnet                 Ensures that networks conform to the tnet
+                        stardards
+betweenness_w           Betweenness centrality in a weighted network
+celegans.n306.net       The neural network of the Caenorhabditis
+                        elegans worm (c.elegans)
+closeness_w             Closeness centrality in a weighted network
+clustering_local_tm     Redefined local clusering coefficient for
+                        two-mode networks
+clustering_local_w      Barrat et al. (2004) generalised local
+                        clusering coefficient
+clustering_tm           Redefined clusering coefficient for two-mode
+                        networks
+clustering_w            Generalised clusering coefficient
+compress_ids            Remove non-active nodes from
+                        one-mode/two-mode/longitudinal networks
+degree_tm               Degree centrality in a two-mode network
+degree_w                Degree centrality in a weighted network
+dichotomise_tm          Dichotomise a weighted two-mode network into a
+                        binary two-mode network
+dichotomise_w           Dichotomise a weighted one-mode network into a
+                        binary one-mode network
+distance_tm             Distance in a two-mode network
+distance_w              Distance in a weighted network
+growth_l                Identifies growth mechanisms responsible for
+                        tie generation in longitudinal networks
+projecting_tm           Projecting binary and weighted two-mode
+                        networks onto weighted one-mode networks.
+reinforcement_tm        Reinforcement_tm
+rg_reshuffling_l        Reshuffling a longitudinal network
+rg_reshuffling_tm       Reshuffle of a binary two-mode network
+rg_reshuffling_w        Reshuffle of a weighted network
+rg_tm                   Random binary and weighted two-mode network
+rg_w                    Random weighted network generator
+shrink_to_weighted_network
+                        Shrink a repetative edgelist into a weighted
+symmetrise_w            Symmetrise_w
+tnet                    Collection of functions for analysing weighted
+                        networks, two-mode networks, and longitudinal
+                        networks
+tnet_igraph             Exports a tnet network to an igraph object
+tnet_ucinet             Exports a tnet network to a DL file for UCINET
+weighted_richclub_local_w
+                        The weighted rich-club effect (local measure)
+weighted_richclub_tm    The weighted rich-club effect (two-mode
+                        networks)
+weighted_richclub_w     The weighted rich-club effect

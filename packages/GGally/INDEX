@@ -1,0 +1,56 @@
++.gg                    Modify a ggpairs object by adding an ggplot2
+                        object to all plots
+add_ref_boxes           Add reference boxes around each cell of the
+                        glyphmap.
+add_ref_lines           Add reference lines for each cell of the
+                        glyphmap.
+cityServiceFirms        City and service firms data from the UCIrvine
+                        Network Data Repository
+flea                    Historical data used for classification
+                        examples.
+get.VarTypes            Get vector of variable types from data frame
+getPlot                 getPlot
+ggally_barDiag          Plots the Bar Plots by Using Diagonal
+ggally_blank            Blank
+ggally_box              Plots the Box Plot
+ggally_cor              Correlation from the Scatter Plot
+ggally_density          Plots the Scatter Density Plot
+ggally_densityDiag      Plots the Density Plots by Using Diagonal
+ggally_denstrip         Plots a tile plot with facets
+ggally_diagAxis         Internal Axis Labeling Plot for ggpairs
+ggally_dot              Plots the Box Plot with Dot
+ggally_dotAndBox        Plots either Box Plot or Dot Plots
+ggally_facetbar         Plots the Bar Plots Faceted by Conditional
+                        Variable
+ggally_facetdensity     Plots the density plots by faceting
+ggally_facetdensitystrip
+                        Plots a density plot with facets or a tile plot
+                        with facets
+ggally_facethist        Plots the Histograms by Faceting
+ggally_points           Plots the Scatter Plot
+ggally_ratio            Plots a mosaic plots
+ggally_smooth           Plots the Scatter Plot with Smoothing
+ggally_text             GGplot Text
+ggcorr                  ggcorr - Plot a correlation matrix with ggplot2
+ggfluctuation2          Fluctuation plot
+ggnet                   ggnet - Plot a network with ggplot2
+ggpairs                 ggpairs - A GGplot2 Matrix
+ggparcoord              ggparcoord - A ggplot2 Parallel Coordinate Plot
+ggscatmat               ggscatmat - a traditional scatterplot matrix
+                        for purely quantitative variables
+ggsurv                  Plot 'survfit' objects using 'ggplot2'
+glyphs                  Create the data needed to generate a glyph
+                        plot.
+happy                   Data related to happiness from the General
+                        Social Survey, 1972-2006.
+lowertriangle           lowertriangle - rearrange dataset as the
+                        preparation of ggscatmat function
+nasa                    Data from the Data Expo JSM 2006.
+putPlot                 Put Plot
+scagOrder               Find order of variables
+scatmat                 scatmat - plot the lowertriangle plots and
+                        density plots of the scatter plot matrix.
+singleClassOrder        Order axis variables
+skewness                Sample skewness
+uppertriangle           uppertriangle - rearrange dataset as the
+                        preparation of ggscatmat function

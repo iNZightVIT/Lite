@@ -1,0 +1,10 @@
+as.matrix.igraph        Convert igraph objects to adjacency or edge
+                        list matrices
+asDF                    Convert network to data frame(s)
+asIgraph                Coerce an object to class "igraph"
+asNetwork               Convert objects to class "network"
+attrmap                 Network attribute copying/renaming table
+dumpAttr                Dump network attributes to a list
+exNetwork               Sample network structure
+intergraph-package      Coercion Routines for Network Data Objects
+netcompare              Comparing and testing network objects
