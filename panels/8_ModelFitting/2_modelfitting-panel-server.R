@@ -984,7 +984,7 @@ output$model_plots = renderUI({
     navbarMenu("Graphical Diagnostics",
                id="graphical_diagnostics",
                tabPanel("Scatter plot matrix"),
-               tabPanel("tester")),
+               tabPanel("Basic plots")),
     tabPanel("Third"),
     widths=c(8,4)
   )
@@ -1001,11 +1001,12 @@ output$plots.main = renderUI({
     }else{
       if(!any(modelValues$independent.vars[[input$model.select]]%in%
                get.categorical.column.names(get.data.set()))&&
-           input.plot_selector%in%'Factor level comparison'){
+           input$plot_selector%in%'Factor level comparison'){
         h2("No factor variables are fit in this model.")
       }else{
         ch = modelValues$independent.vars[[input$model.select]][which(modelValues$independent.vars[[input$model.select]]%in%
                                                                         get.categorical.column.names(get.data.set()))]
+        
         list(conditionalPanel("input.plot_selector=='Factor level comparison'",
                               fixedRow(column(3,selectInput("factor.comp.select",
                                                             label="Select Factor to plot",
@@ -1014,7 +1015,9 @@ output$plots.main = renderUI({
                               h4("Comparison matrix of selected factor"),
                               verbatimTextOutput("factor_comparison_matrix")),
              conditionalPanel("input.plot_selector=='Scatter plot matrix'",
-                              plotOutput("scatter.plot.matrix")))
+                              plotOutput("scatter.plot.matrix")),
+             conditionalPanel("input.plot_selector=='Basic plots'",
+                              plotOutput("basic.plots")))
       }
     }
   })
@@ -1044,7 +1047,7 @@ output$factor_comparison_matrix = renderPrint({
   input$model.select
   input$factor.comp.select
   isolate({
-    suppressWarnings(multicomp(moecalc(modelValues$models[[input$model.select]],input$factor.comp.select)))
+    print(suppressWarnings(multicomp(moecalc(modelValues$models[[input$model.select]],input$factor.comp.select))))
     modelValues$code.history = paste0(modelValues$code.history,
                                       paste0("multicomp(moecalc(",
                                              input$model.select,
@@ -1062,8 +1065,49 @@ output$scatter.plot.matrix = renderPlot({
       temp = modelValues$models[[input$model.select]]$model
       modelValues$code.history = paste0(modelValues$code.history,
                                         paste0("gpairs(",input$model.select,"$model)\n"))
-  #     temp = temp[,c(get.numeric.column.names(temp),get.categorical.column.names(temp))]
-      gpairs(temp)
+      suppressWarnings(ggpairs(temp,
+                               lower=list(continous=density,
+                                          combo="box"),
+                               upper=list(continous="points",
+                                          combo="dot")))
     }
   })
 },width=800,height=800)
+
+output$basic.plots = renderUI({
+  isolate({
+    print(input$plot_selector)
+    list(helpText("Please select the type of the plot"),br(),
+         selectInput("basic.plots.select",
+                     label="Select the type of plot",
+                     choices=c("All Plots",
+                               "Residuals vs Fitted",
+                               "Scale-location",
+                               "Residuals vs Leverage",
+                               "Cooks Distance",
+                               "Summary Plot"),
+                     selected = input$basic.plots.select),br(),
+         plotOutput("basic.plots.plot"))
+  })
+})
+
+output$basic.plots.plot = renderPlot({
+  input$model.select
+  input$basic.plots.plot
+  isolate({
+    print("plot")
+    plotindex=7
+    if(input$basic.plots.plot%in%"Residuals vs Fitted"){
+      plotindex=1
+    }else if(input$basic.plots.plot%in%"Scale-location"){
+      plotindex=2
+    }else if(input$basic.plots.plot%in%"Residuals vs Leverage"){
+      plotindex=3
+    }else if(input$basic.plots.plot%in%"Cooks Distance"){
+      plotindex=4
+    }else if(input$basic.plots.plot%in%"Summary Plot"){
+      plotindex=5
+    }
+    plotlm6(modelValues$modela[[input$model.select]],which=plotindex)
+  })
+})
