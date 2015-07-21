@@ -1887,28 +1887,30 @@ shinyServer(function(input, output, session) {
       plot(1, 1, type = "n", axes = FALSE, xlab = "" , ylab = "")
       text(1, 1, "You have to select more than 1 variable", cex = 2)
     }else{
-      choices.ind = which(colnames(get.data.set()) %in% choices)
-      temp =
-        do.call(cbind,
-                lapply(get.data.set()[, choices.ind],
-                       function(x) {
-                         if (is.character(x)) {
-                           data.frame(factor(x, levels = unique(x)))
-                         } else {
-                           data.frame(x)
-                         }
-                       }))
-      colnames(temp) = choices
+#       choices.ind = which(colnames(get.data.set()) %in% choices)
+#       temp =
+#         do.call(cbind,
+#                 lapply(get.data.set()[, choices.ind],
+#                        function(x) {
+#                          if (is.character(x)) {
+#                            data.frame(factor(x, levels = unique(x)))
+#                          } else {
+#                            data.frame(x)
+#                          }
+#                        }))
+#       colnames(temp) = choices
       grpVar = input$grpVar
       if(!is.null(grpVar)&&!grpVar%in%" "){
-        suppressWarnings(ggpairs(temp,
+        suppressWarnings(ggpairs(get.data.set(),
+                                 columns=which(colnames(get.data.set())%in%choices),
                                  lower=list(continous=density,
                                             combo="box"),
                                  upper=list(continous="points",
                                             combo="dot"),
                                  color=grpVar))
       }else{
-        suppressWarnings(ggpairs(temp,
+        suppressWarnings(ggpairs(get.data.set(),
+                                 columns=which(colnames(get.data.set()) %in% choices),
                                  lower=list(continous=density,
                                             combo="box"),
                                  upper=list(continous="points",

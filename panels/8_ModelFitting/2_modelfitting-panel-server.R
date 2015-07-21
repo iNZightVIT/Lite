@@ -12,7 +12,7 @@
 # reactive values to store the fitted models
 modelValues = reactiveValues(models=list(),
                              code=list(),
-                             code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(survey) # only needed if a complex survey model was fitted\n",
+                             code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n",
                              transformation.log=c(),
                              independent.vars=list())
 
@@ -426,6 +426,7 @@ observe({
           }
         }
         design0=NULL
+        dafr = get.data.set()
         if(input$data_structure%in%"Complex Survey"){
           id0 = formula(paste0("~",input$cluster))
           if(!input$strata%in%" "){
@@ -444,7 +445,6 @@ observe({
             fpc0 = NULL
           }
           nest0 = input$nest
-          dafr = get.data.set()
           design0 = svydesign(id=id0,
                               strata=strata0,
                               weights=weights0,
@@ -498,41 +498,41 @@ observe({
           }
         }else{
           if(input$model_framework%in%"Least Squares"){
-            temp.model = lm(formula(formu),data=get.data.set())
+            temp.model = lm(formula(formu),data=dafr)
             temp.code = paste0(model.name," = lm(",formu,",data=mydata)")
           }else if(input$model_framework%in%"Poisson Regression (Y counts)"){
             if(input$quasi){
               if(input$offset%in%""){
-                temp.model = glm(formula(formu),data=get.data.set(),family='quasipoisson')
+                temp.model = glm(formula(formu),data=dafr,family='quasipoisson')
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasipoisson')")
               }else{
-                temp.model = glm(formula(formu),data=get.data.set(),family='quasipoisson',offset=input$offset)
+                temp.model = glm(formula(formu),data=dafr,family='quasipoisson',offset=input$offset)
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasipoisson',offset=",input$offset,")")
               }
             }else{
               if(input$offset%in%""){
-                temp.model = glm(formula(formu),data=get.data.set(),family='poisson')
+                temp.model = glm(formula(formu),data=dafr,family='poisson')
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='poisson'")
               }else{
-                temp.model = glm(formula(formu),data=get.data.set(),family='poisson',offset=input$offset)
+                temp.model = glm(formula(formu),data=dafr,family='poisson',offset=input$offset)
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='poisson',offset=",input$offset,")")
               }
             }
           }else if(input$model_framework%in%"Logistic Regression (Y binary)"){
             if(input$quasi){
               if(input$offset%in%""){
-                temp.model = glm(formula(formu),data=get.data.set(),family='quasibinomial')
+                temp.model = glm(formula(formu),data=dafr,family='quasibinomial')
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasibinomial')")
               }else{
-                temp.model = glm(formula(formu),data=get.data.set(),family='quasibinomial',offset=input$offset)
+                temp.model = glm(formula(formu),data=dafr,family='quasibinomial',offset=input$offset)
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasibinomial',offset=",input$offset,")")
               }
             }else{
               if(input$offset%in%""){
-                temp.model = glm(formula(formu),data=get.data.set(),family='binomial')
+                temp.model = glm(formula(formu),data=dafr,family='binomial')
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='binomial')")
               }else{
-                temp.model = glm(formula(formu),data=get.data.set(),family='binomial',offset=input$offset)
+                temp.model = glm(formula(formu),data=dafr,family='binomial',offset=input$offset)
                 temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='binomial',offset=",input$offset,")")
               }
             }
@@ -967,7 +967,7 @@ observe({
     #     print("modelValues reset")
     modelValues$models=list()
     modelValues$code=list()
-    modelValues$code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(survey) # only needed if a complex survey model was fitted\n"
+    modelValues$code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n"
     updateSelectInput(session,"select_Y",
                       choices=colnames(get.data.set()),
                       selected=colnames(get.data.set())[1])
@@ -981,11 +981,8 @@ output$model_plots = renderUI({
   navlistPanel(id="plot_selector",
     "Select Plot Type",
     tabPanel("Factor level comparison"),
-    navbarMenu("Graphical Diagnostics",
-               id="graphical_diagnostics",
-               tabPanel("Scatter plot matrix"),
-               tabPanel("Basic plots")),
-    tabPanel("Third"),
+    tabPanel("Graphical Diagnostics"),
+    tabPanel("Normality Checks"),
     widths=c(8,4)
   )
 })
@@ -1004,26 +1001,124 @@ output$plots.main = renderUI({
            input$plot_selector%in%'Factor level comparison'){
         h2("No factor variables are fit in this model.")
       }else{
-        ch = modelValues$independent.vars[[input$model.select]][which(modelValues$independent.vars[[input$model.select]]%in%
+        ch1 = modelValues$independent.vars[[input$model.select]][which(modelValues$independent.vars[[input$model.select]]%in%
                                                                         get.categorical.column.names(get.data.set()))]
-        
+        ch2 = get.numeric.column.names(modelValues$models[[input$model.select]]$model)
+        ch2 = ch2[which(ch2%in%modelValues$independent.vars[[input$model.select]])]
         list(conditionalPanel("input.plot_selector=='Factor level comparison'",
                               fixedRow(column(3,selectInput("factor.comp.select",
                                                             label="Select Factor to plot",
-                                                            choices=ch))),
+                                                            choices=ch1))),
                               plotOutput("factor.comparison.plot"),br(),
                               h4("Comparison matrix of selected factor"),
                               verbatimTextOutput("factor_comparison_matrix")),
-             conditionalPanel("input.plot_selector=='Scatter plot matrix'",
-                              plotOutput("scatter.plot.matrix")),
-             conditionalPanel("input.plot_selector=='Basic plots'",
-                              plotOutput("basic.plots")))
+             conditionalPanel("input.plot_selector=='Graphical Diagnostics'",
+                              tabsetPanel(id="navlist_basic_plot",
+                                          tabPanel("Scatter Plot Matrix",
+                                                   plotOutput("scatter.plot.matrix")),
+                                          tabPanel("Basic Plots",
+                                                   selectInput("plotlm6.selected",
+                                                               label="Select Plot type",
+                                                               choices=c("All Plots",
+                                                                         "Residuals vs Fitted",
+                                                                         "Scale-location",
+                                                                         "Residuals vs Leverage",
+                                                                         "Cooks Distance",
+                                                                         "QQ-Plot",
+                                                                         "Histogram"),
+                                                               selected = input$plotlm6.select),
+                                                   plotOutput("plotlm6")),
+                                          tabPanel("Partial Residual Plot",
+                                                   selectInput("partial.residual.plot.select",
+                                                               label="Select a variable",
+                                                               choices=ch2),
+                                                   plotOutput("partial.residual.plot")),
+                                          type="pills")),
+             conditionalPanel("input.plot_selector=='Normality Checks'",
+                              tabsetPanel(id="navlist_basic_plot",
+                                          tabPanel("Normal QQ-Plot",
+                                                   plotOutput("normal.qq.plot")),
+                                          tabPanel("Histogram",
+                                                   plotOutput("histogram.plot")),
+                                          tabPanel("Histogram Array",
+                                                   plotOutput("histogram.array")),
+                                          tabPanel("QQ-Plot inference",
+                                                   plotOutput("qq.inference")),
+                                          type="pills"))
+        )
       }
     }
   })
 })
 
-# generates the facto comparison plot
+# generates the qq-inference array (test for normality)
+output$qq.inference = renderPlot({
+  input$model.select
+  isolate({
+    modelValues$code.history = paste0(modelValues$code.history,
+                                      "iNZightQQplot(",
+                                      input$model.select,
+                                      ")\n")
+    iNZightQQplot(modelValues$models[[input$model.select]])
+  })
+})
+
+# generates the histogram array (test for normality)
+output$histogram.array = renderPlot({
+  input$model.select
+  isolate({
+    modelValues$code.history = paste0(modelValues$code.history,
+                                      "histogramArray(",
+                                      input$model.select,
+                                      ")\n")
+    histogramArray(modelValues$models[[input$model.select]])
+  })
+})
+
+# generates just the qq-plot from the plotlm6 function (test for normality)
+output$normal.qq.plot = renderPlot({
+  input$model.select
+  isolate({
+    modelValues$code.history = paste0(modelValues$code.history,
+                                      "plotlm6(",
+                                      input$model.select,
+                                      ",which=",
+                                      5,
+                                      ")\n")
+    invisible(plotlm6(modelValues$models[[input$model.select]],which=5))
+  })
+})
+
+# generates just the histogram from the plotlm6 function (test for normality)
+output$histogram.plot = renderPlot({
+  input$model.select
+  isolate({
+    modelValues$code.history = paste0(modelValues$code.history,
+                                      "plotlm6(",
+                                      input$model.select,
+                                      ",which=",
+                                      6,
+                                      ")\n")
+    invisible(plotlm6(modelValues$models[[input$model.select]],which=6))
+  })
+})
+
+output$partial.residual.plot = renderPlot({
+  input$model.select
+  input$partial.residual.plot.select
+  isolate({
+    partialResPlot(modelValues$models[[input$model.select]], 
+                   input$partial.residual.plot.select)
+    modelValues$code.history = paste0(modelValues$code.history,
+                                      "partialResPlot(",
+                                      input$model.select,
+                                      ",'",
+                                      input$partial.residual.plot.select,
+                                      "')\n")
+  })
+})
+
+# generates the factor comparison plot
 output$factor.comparison.plot = renderPlot({
   input$model.select
   input$factor.comp.select
@@ -1064,9 +1159,9 @@ output$scatter.plot.matrix = renderPlot({
     if(!is.null(modelValues$models[[input$model.select]])){
       temp = modelValues$models[[input$model.select]]$model
       modelValues$code.history = paste0(modelValues$code.history,
-                                        paste0("gpairs(",input$model.select,"$model)\n"))
+                                        paste0("ggpairs(",input$model.select,"$model,lower=list(continous='density',combo='box'),upper=list(continous='points',combo='dot'))\n"))
       suppressWarnings(ggpairs(temp,
-                               lower=list(continous=density,
+                               lower=list(continous="density",
                                           combo="box"),
                                upper=list(continous="points",
                                           combo="dot")))
@@ -1074,40 +1169,37 @@ output$scatter.plot.matrix = renderPlot({
   })
 },width=800,height=800)
 
-output$basic.plots = renderUI({
-  isolate({
-    print(input$plot_selector)
-    list(helpText("Please select the type of the plot"),br(),
-         selectInput("basic.plots.select",
-                     label="Select the type of plot",
-                     choices=c("All Plots",
-                               "Residuals vs Fitted",
-                               "Scale-location",
-                               "Residuals vs Leverage",
-                               "Cooks Distance",
-                               "Summary Plot"),
-                     selected = input$basic.plots.select),br(),
-         plotOutput("basic.plots.plot"))
-  })
-})
-
-output$basic.plots.plot = renderPlot({
+# generates the plots produced by plotlm6 (iNZightRegression) function
+output$plotlm6 = renderPlot({
   input$model.select
-  input$basic.plots.plot
+  input$plotlm6.selected
   isolate({
-    print("plot")
     plotindex=7
-    if(input$basic.plots.plot%in%"Residuals vs Fitted"){
-      plotindex=1
-    }else if(input$basic.plots.plot%in%"Scale-location"){
-      plotindex=2
-    }else if(input$basic.plots.plot%in%"Residuals vs Leverage"){
-      plotindex=3
-    }else if(input$basic.plots.plot%in%"Cooks Distance"){
-      plotindex=4
-    }else if(input$basic.plots.plot%in%"Summary Plot"){
-      plotindex=5
+    if(!is.null(input$plotlm6.selected)){ 
+      if(input$plotlm6.selected%in%"Residuals vs Fitted"){
+        plotindex=1
+      }else if(input$plotlm6.selected%in%"Scale-location"){
+        plotindex=2
+      }else if(input$plotlm6.selected%in%"Residuals vs Leverage"){
+        plotindex=3
+      }else if(input$plotlm6.selected%in%"Cooks Distance"){
+        plotindex=4
+      }else if(input$plotlm6.selected%in%"QQ-Plot"){
+        plotindex=5
+      }else if(input$plotlm6.selected%in%"Histogram"){
+        plotindex=6
+      }
+      # needs to have a global variable as the plotlm6 function reevaluates the 
+      # model formula which includes an object of name dafr (data set)
+      dafr<<-get.data.set() 
+      # plotting call
+      modelValues$code.history = paste0(modelValues$code.history,
+                                        "plotlm6(",
+                                        input$model.select,
+                                        ",which=",
+                                        plotindex,
+                                        ")\n")
+      invisible(plotlm6(modelValues$models[[input$model.select]],which=plotindex))
     }
-    plotlm6(modelValues$modela[[input$model.select]],which=plotindex)
   })
 })
