@@ -68,7 +68,8 @@ switch.data.panel = function(data.set,data.dir.global,data.dir.imported){
   sidebar.widgets = get.sidebar.switch(data.dir.global,data.dir.imported)
   sidebarLayout(
     sidebarPanel(sidebar.widgets,br(),br(),
-                 help.display('Switch data','switch_data',"gui-elements/notes/switch.data.md")
+                 help.display('Dataset Examples','switch_data',
+                              "panels/B5_DatasetExamples/3_data.set.examples-help.md")
                  ,br(),
                  HTML("&nbsp;"),br()),
     mainPanel(get.switch.data.main(data.set)))

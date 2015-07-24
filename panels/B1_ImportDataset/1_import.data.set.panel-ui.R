@@ -10,7 +10,7 @@ get.sidebar.load = function(url_load){
              \"Import file\" button below to finalize your choice"),
     br(),textInput(inputId="URLtext",label="URL",value=url_load),br(),
     actionButton(inputId="import_set",label="Import file",),
-    br(),br(),help.display('Load data','load_data',"gui-elements/notes/load.data.md")
+    br(),br(),help.display('Load data','load_data',"panels/B1_ImportDataset/3_import.data.set.panel.help.md")
   )
 }
 

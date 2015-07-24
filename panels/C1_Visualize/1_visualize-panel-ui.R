@@ -22,7 +22,7 @@
 visualize.help = function() {
     help.display("Visualize Module",
                  "Visualize",
-                 "panels/5_Visualize/3_visualize-panel-help.md")
+                 "panels/C1_Visualize/3_visualize-panel-help.md")
 }
 
 ###  Next, we set up the sidebar panel with "vis.sidebarPanel()".
@@ -181,7 +181,7 @@ visualize.panel.ui = function(data.set) {
         if (is.null(data.set)) {
             fluidRow(
                 includeMarkdown(
-                    "panels/5_Visualize/4_visualize-panel-null.md")
+                    "panels/C1_Visualize/4_visualize-panel-null.md")
             )
         } else {
             fluidRow(

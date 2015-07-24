@@ -3,7 +3,7 @@ get.sidebar.save = function(){
   list(
     selectInput(inputId="select_filetype",label="select the file type",choices=c("txt","csv","RData","RDS"),selected=1),
     downloadButton('downloadData', 'Download'),
-    br(),br(),help.display('Export data','export_data',"gui-elements/notes/export.data.md")
+    br(),br(),help.display('Export data','export_data',"panels/B2_ExportDataset/3_export.dataset.panel-help.md")
   )
 }
 

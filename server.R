@@ -13,7 +13,6 @@ library(iNZightPlots)
 library(iNZightTS)
 library(iNZightMR)
 library(markdown)
-# library(gpairs)
 library(GGally)
 library(iNZightRegression)
 library(RJSONIO)
@@ -128,507 +127,65 @@ shinyServer(function(input, output, session) {
     values$create.variables.expression.text
   })
   
-#   get.dataHasChanged = reactive({
-#     values$dataHasChanged
-#   })
-  
   #################################
   
-    ##  Turn errors and warnings off
-    ## options(warn = -1, show.error.messages = FALSE)
-    
-    ##  Delete all imported files that are older than 1 day.
-    ## Load all panels into memory.
-    filepaths <- list.files(pattern = "[.]R$",
-                            path = "gui-elements/",
-                            full.names = TRUE)
-    sapply(filepaths, source)
-    ##---------------------##
-    ##  1. "About" Module  ##
-    ##---------------------##
-    source("panels/1_About/1_about-panel-ui.R")
-    output$about.panel <- renderUI({
-      get.vars = parseQueryString(session$clientData$url_search)
-      if(length(get.vars)>0&&
-           any(names(get.vars)%in%"url")&&
-           !is.null(get.vars$url)&&
-           get.vars$url!=""){
-        data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
-        if(!is.null(data.vals)){
-          values$data.set = data.vals$data.set
-          values$data.restore = get.data.set()
-          values$data.name = data.vals$data.name
-          if(!is.null(get.data.set())){
-            updateTabsetPanel(session,"selector","visualize")
-          }
-        }
-      }
-      about.panel.ui(get.lite.version(),get.lite.update())
-    })
-
-  ##  Data -> load data (upload a data set)
+  ##  Turn errors and warnings off
+  ## options(warn = -1, show.error.messages = FALSE)
   
-  observe({
-    if(!is.null(input$import_set)&&input$import_set>0){
-      isolate({
-        if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])){
-          temp = load.data(get.data.dir.imported(),
-                           fileID = input$files[1, "name"],
-                           path = input$files[1, "datapath"])[[2]]
-          if(!is.null(temp)){  
-            values$data.set = temp
-            values$data.restore <<- get.data.set()
-            temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
-            if(length(temp)>1){
-              temp = temp[1:(length(temp)-1)]
-            } 
-            values$data.name = paste(temp,collapse=".")
-            if (!file.exists(paste(get.data.dir.imported(),"/Imported",sep=""))&&
-                  file.writable(get.data.dir.imported())) {
-              dir.create(paste(get.data.dir.imported(),"/Imported",sep=""), recursive = TRUE)
-            }
-            saveRDS(get.data.set(),file = paste0(get.data.dir.imported(),"/Imported/", get.data.name(), ".RDS"))
-          }
-          unlink(input$files[1, "datapath"])
-        }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
-          data.vals = get.data.from.URL(input$URLtext,get.data.dir.imported())
-          values$data.set = data.vals$data.set
-          values$data.restore = get.data.set()
-          values$data.name = data.vals$data.name
-        }
-      })
-    }
-  })
+  ##  Delete all imported files that are older than 1 day.
+  ## Load all panels into memory.
+  filepaths <- list.files(pattern = "[.]R$",
+                          path = "gui-elements/",
+                          full.names = TRUE)
+  sapply(filepaths, source)
+
+  ##----------------------##
+  ##  A1. "About" Module  ##
+  ##----------------------##
+  source("panels/A1_About/1_about-panel-ui.R",local=T)
+  source("panels/A1_About/2_about-panel-server.R",local=T)
   
-  output$load.data.panel = renderUI({
-    input$selector
-    isolate({
-      # looks for get requests to pass in an URL for a dataset 
-      url_search = parseQueryString(session$clientData$url_search)
-      load.data.panel(url_search)
-    })
-  })
+  ##---------------------------------------##
+  ##  B1. "File -> Import Dataset" Module  ##
+  ##---------------------------------------##
+  source("panels/B1_ImportDataset/1_import.data.set.panel-ui.R", local = TRUE)
+  source("panels/B1_ImportDataset/2_import.data.set.panel-server.R", local = TRUE)
+
+  ##---------------------------------------##
+  ##  B2. "File -> Import Dataset" Module  ##
+  ##---------------------------------------##
+  source("panels/B2_ExportDataset/1_export.dataset.panel-ui.R", local = TRUE)
+  source("panels/B2_ExportDataset/2_export.dataset.panel-server.R", local = TRUE)
+
+  ##---------------------------------------##
+  ##  B3. "File -> Export Dataset" Module  ##
+  ##---------------------------------------##
+  source("panels/B3_DisplayDataset/1_display.data.set.panel-ui.R", local = TRUE)
+  source("panels/B3_DisplayDataset/2_display.data.set.panel-server.R", local = TRUE)
   
-  output$filetable <- renderDataTable({
-    input$selector
-    input$files
-    input$import_set
-    get.data.set()
-    isolate({
-      if (!is.null(input$files)&&file.exists(input$files[1, "datapath"])) {
-        load.data(get.data.dir.imported(),fileID = input$files[1, "name"], path = input$files[1, "datapath"])[[2]]
-      } else if (!is.null(input$URLtext)&&!input$URLtext%in%"") {
-        URL = input$URLtext
-        name = strsplit(URL,"/")[[1]]
-        name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
-        if (!file.exists(paste(get.data.dir.imported(),"/Imported",sep=""))&&
-              file.writable(get.data.dir.imported())) {
-          dir.create(paste0(get.data.dir.imported(),"/Imported"), recursive = TRUE)
-        }
-        if(file.exists(paste0(get.data.dir.imported(),"/Imported/",name))){
-          get.data.set()
-        }else{
-          NULL
-        }
-      }else{
-        NULL
-      }
-    })
-  }, options =
-    list(lengthMenu = c(5, 30, 50), pageLength = 5,
-         columns.defaultContent="NA", scrollX = TRUE))
+  ##---------------------------------------##
+  ##  B4. "File -> Remove Dataset" Module  ##
+  ##---------------------------------------##
+  source("panels/B4_RemoveDataset/1_remove.data.set.panel-ui.R", local = TRUE)
+  source("panels/B4_RemoveDataset/2_remove.data.set.panel-server.R", local = TRUE)
   
-  observe({
-    input$remove_set
-    isolate({
-      if(!is.null(input$remove_set)&&input$remove_set>0){
-        files = list.files(path = paste0(get.data.dir.imported(),"/Imported"),
-                           pattern = input$Importedremove,
-                           full.names = TRUE)
-        if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])&&
-             grepl(get.data.name(),input$files[1, "name"])){
-          unlink(input$files[1, "datapath"])
-        }
-        for(f in files){
-          if (file.exists(f)) {
-            unlink(f)
-          }
-        }
-      }
-    })
-  })
+  ##-----------------------------------------##
+  ##  B5. "File -> Dataset Examples" Module  ##
+  ##-----------------------------------------##
+  source("panels/B5_DatasetExamples/1_data.set.examples-ui.R", local = TRUE)
+  source("panels/B5_DatasetExamples/2_data.set.examples-server.R", local = TRUE)
+
+  ##------------------------##
+  ##  C1. Visualize Module  ##
+  ##------------------------##
+  source("panels/C1_Visualize/1_visualize-panel-ui.R", local = TRUE)
+  source("panels/C1_Visualize/2_visualize-panel-server.R", local = TRUE)
   
-  ##  Data -> Export data (export the currently used data set)
-  
-  output$save.data.panel = renderUI({
-    save.data.panel(get.data.set())
-  })
-  
-  output$save_table = renderDataTable({
-    get.data.set()
-  }, options =
-    list(lengthMenu = c(5, 30, 50), pageLength = 5,
-         columns.defaultContent = "NA", scrollX = TRUE))
-  
-  output$downloadData <- downloadHandler(
-    filename = function() {
-      #         print(paste(get.data.name(),".",input$select_filetype, sep=''))
-      paste(get.data.name(),".",input$select_filetype, sep='')
-    },
-    content = function(file) {
-      type = input$select_filetype
-      if(type%in%"txt"&&!is.null(get.data.set())){
-        write.table(get.data.set(), file, quote=T,row.names=F,sep="\t")
-      }else if(type%in%"csv"&&!is.null(get.data.set())){
-        write.table(get.data.set(), file, quote=T,row.names=F,sep=",")
-      }else if(type%in%"RData"&&!is.null(get.data.set())){
-        save(get.data.set(),file=file)
-      }else if(type%in%"RDS"&&!is.null(get.data.set())){
-        saveRDS(get.data.set(),file=file)
-      }
-    }
-  )
-
-    ## "Current data" - presents currently selected data to user.
-    output$current.text <- renderText({
-        input$selector
-        if (!is.null(get.data.set())) {
-            paste0("Current selected data: ", get.data.name())
-        } else {
-            "No data selected!"
-        }
-    })
-
-    output$current.data <- renderUI({
-        current.data()
-    })
-
-    output$current <- renderDataTable({
-        input$selector
-        get.data.set()
-    }, options =
-        list(lengthMenu = c(10, 30, 50), pageLength = 10,
-             columns.defaultContent = "NA", scrollX = TRUE))
-
-  ##  Data -> remove data (Remove an imported data set)
-
-  output$remove.data.panel <- renderUI({
-    input$selector
-    input$remove_set
-    input$import_set
-    isolate({
-      remove.data.panel(get.data.dir.imported())
-    })
-  })
-  
-  output$removetable <- renderDataTable({
-    if(!is.null(input$Importedremove)){
-      load.data(get.data.dir.imported(),input$Importedremove)[[2]]
-    } else {
-      NULL
-    }
-  }, options =
-    list(lengthMenu = c(5, 30, 50), pageLength = 5,
-         columns.defaultContent = "NA", scrollX = TRUE))
-
-
-    ## "Switch data" - 'switches' to a different data set.
-
-  ## loads and updates the switch data table Panel
-  output$switch.data.panel = renderUI({
-    get.data.set()
-    input$remove_set
-    isolate({
-      switch.data.panel(get.data.set(),get.data.dir.global(),
-                        get.data.dir.imported())
-    })
-  })
-  
-  output$temp_table = renderDataTable({
-    if (!is.null(input[[input$data_select]])){
-      if("Imported"%in%input$data_select){
-        load.data(get.data.dir.imported(),
-                  strsplit(input[[input$data_select]],
-                           "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
-                                                               "==>",fixed=T)[[1]])])[[2]]
-      }else{
-        load.data(get.data.dir.global(),
-                  strsplit(input[[input$data_select]],
-                           "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
-                                                               "==>",fixed=T)[[1]])])[[2]]
-      }
-    } else {
-      NULL
-    }
-  }, options = list(lengthMenu = c(5, 30, 50), pageLength = 5,
-                    columns.defaultContent = "NA", scrollX = TRUE))
-
-    set_to_change_reac <- reactive({
-      if (is.null(input[[input$data_select]])){
-        "No data to select!"
-      } else {
-        temp=NULL
-        if("Imported"%in%input$data_select){
-          if(!file.exists(get.data.dir.imported())&&
-               file.writable(dirname(get.data.dir.imported()))){
-            dir.create(get.data.dir.imported())
-          }else if(!file.exists(get.data.dir.imported())&&
-                     !file.writable(dirname(get.data.dir.imported()))){
-            warning(paste("Directory : ",get.data.dir.imported(),
-                          " : is not writable. Reset Imported dir 
-                          to global dir",sep=""))
-            
-          }
-          temp = load.data(get.data.dir.imported(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
-                           [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
-        }else{
-          temp = load.data(get.data.dir.global(),strsplit(input[[input$data_select]],"==>",fixed=T)[[1]]
-                           [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])[[2]]
-        }
-        if(is.null(temp[[1]])&is.null(temp[[2]])) {
-          "No data to select!"
-        }else{
-          paste0("Data selected: ", input[[input$data_select]])  
-        }
-      }
-    })
-
-    output$set_to_change <- renderText({
-        input[[input$data_select]]
-        set_to_change_reac()
-    })
-
-    col_names_show_reac <- reactive({
-        input$change_set
-        input$selector
-        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-            paste("Column names: ", paste(colnames(get.data.set()), collapse = ", "))
-        } else {
-            ""
-        }
-    })
-
-    output$col_names_show <- renderText({
-        input$change_set
-        input$selector
-        col_names_show_reac()
-    })
-
-    change_col_dim_reac <- reactive({
-        input$change_set
-        input$selector
-        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-            paste("Selected data number of columns is: ", dim(get.data.set())[2])
-        } else {
-            ""
-        }
-    })
-
-    output$col_dimension_show <- renderText({
-        input$change_set
-        input$selector
-        input$selector
-        change_col_dim_reac()
-    })
-
-    change_row_dim_reac <- reactive({
-        input$change_set
-        input$selector
-        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-            paste("Selected data number of rows is: ", dim(get.data.set())[1])
-        } else {
-            ""
-        }
-    })
-
-    output$row_dimension_show <- renderText({
-        input$change_set
-        input$selector
-        change_row_dim_reac()
-    })
-
-    change_data_name_reac <- reactive({
-        input$change_set
-        input$selector
-        if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-            paste("Selected data set: ", get.data.name())
-        } else {
-            "No data selected!"
-        }
-    })
-
-    output$data_name_show <- renderText({
-        input$change_set
-        input$selector
-        change_data_name_reac()
-    })
-
-    observe({
-      if (!is.null(input$change_set)) {
-        isolate({
-          if (!is.null(input[[input$data_select]])&&input$change_set > 0) {
-            new.data = NULL
-            if("Imported"%in%input$data_select){
-              new.data =
-                load.data(get.data.dir.imported(),strsplit(input[[input$data_select]],
-                                                         "==>", fixed = TRUE)[[1]]
-                          [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
-            }else{
-              new.data =
-                  load.data(get.data.dir.global(),strsplit(input[[input$data_select]],
-                                     "==>", fixed = TRUE)[[1]]
-                            [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
-            }
-            values$data.name = new.data[[1]]
-            values$data.set = new.data[[2]]
-            values$data.restore = get.data.set()
-          }
-        })
-      }
-    })
-
-  ##--------------------##
-  ##  Visualize Module  ##
-  ##--------------------##
-  source("panels/5_Visualize/1_visualize-panel-ui.R", local = TRUE)
-  source("panels/5_Visualize/2_visualize-panel-server.R", local = TRUE)
-  output$visualize.panel <- renderUI({
-    visualize.panel.ui(get.data.set())
-  })
-
-  ##  Row operations (Perform row operations) --> Filter Dataset
-  
-  observe({
-    input$filter_data_perform
-    isolate({
-      if(!is.null(input$filter_data_perform)&&input$filter_data_perform>0){
-        if(input$select_filter%in%"levels of categorical variable"){
-          if(!is.null(input$select_categorical1)&&!input$select_categorical1%in%""){
-            to.remove = which(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]%in%input$levels1)
-            if(length(to.remove)>0){
-              values$data.set = get.data.set()[-to.remove,]
-              values$data.set[,which(colnames(get.data.set())%in%input$select_categorical1)] = 
-                droplevels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])
-              updateSelectInput(session=session,inputId="select_categorical1",
-                                choices=c("",get.categorical.column.names(get.data.set())),
-                                selected=1)
-              updateSelectInput(session=session,inputId="levels1",
-                                choices="",selected=1)
-            }
-          }
-        }else if(input$select_filter%in%"numeric condition"){
-          if(!input$select_numeric1%in%""&!input$select_operation1%in%""&all(is.convertable.numeric(input$numeric_input1))){
-            indexes.keep = 1:nrow(get.data.set())
-            if(input$select_operation1%in%"<"){
-              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]<as.numeric(input$numeric_input1)))
-            }else if(input$select_operation1%in%">"){
-              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]>as.numeric(input$numeric_input1)))
-            }else if(input$select_operation1%in%"<="){
-              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]<=as.numeric(input$numeric_input1)))
-            }else if(input$select_operation1%in%">="){
-              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]>=as.numeric(input$numeric_input1)))
-            }else if(input$select_operation1%in%"=="){
-              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]==as.numeric(input$numeric_input1)))
-            }else if(input$select_operation1%in%"!="){
-              indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]!=as.numeric(input$numeric_input1)))
-            }
-            if(length(indexes.keep)>0){
-              values$data.set = get.data.set()[indexes.keep,]
-            }
-          }
-        }else if(input$select_filter%in%"row indices"){
-          if(all(is.convertable.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]]))){
-            indices = as.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]])
-            indices = indices[which(indices%in%(1:nrow(get.data.set())))]
-            if(length(indices)>0){
-              values$data.set = get.data.set()[-indices,] 
-            }
-          }
-        }else if(input$select_filter%in%"randomly"){
-          if(all(is.convertable.numeric(input$numeric_input2))&&
-               all(is.convertable.numeric(input$numeric_input3))&&
-               as.numeric(input$numeric_input2)<=nrow(get.data.set())&&
-               (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(get.data.set())&
-                   input$bootstrap_check)|
-                  (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(get.data.set()))){
-            temp = sample.data(df=get.data.set(),
-                               sampleSize=as.numeric(input$numeric_input2),
-                               numSample=as.numeric(input$numeric_input3),
-                               bootstrap=input$bootstrap_check)
-            if(!is.null(temp)){
-              values$data.set = temp
-            }
-          }
-        }
-      }
-    })
-  })
-
-  output$message3 = renderPrint({
-    input$numeric_input2
-    input$numeric_input3
-    input$bootstrap_check
-    isolate({
-      if(all(is.convertable.numeric(input$numeric_input2))&&
-           all(is.convertable.numeric(input$numeric_input3))&&
-           as.numeric(input$numeric_input2)<=nrow(get.data.set())&&
-           (((as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))>=nrow(get.data.set())&
-               input$bootstrap_check)|
-              (as.numeric(input$numeric_input2)*as.numeric(input$numeric_input3))<=nrow(get.data.set()))){
-        cat("Size of sample: ",input$numeric_input2,"\n",
-            "Number of sample: ", input$numeric_input3)
-      }else{
-        cat("This input can not be processed. The data has ",
-            nrow(get.data.set())," rows.")
-      }
-    })
-  })
-
-  observe({
-    input$select_categorical1
-    isolate({
-      if(!is.null(input$select_categorical1)){
-        updateSelectInput(session=session,inputId="levels1",
-                             choices=levels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]))
-      }
-    })
-  })
-
-  output$message2 = renderPrint({
-    valid = all(is.convertable.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]]))
-    isolate({
-      if(!valid){
-        cat("Please provide a comma seperated list of indices.")
-      }else{
-        cat("")
-      } 
-    })
-  })
-
-  output$message1 = renderPrint({
-    input$select_numeric1
-    input$select_operation1
-    input$numeric_input1
-    isolate({
-      if(!all(is.convertable.numeric(input$numeric_input1))){
-        cat("Please provide a numeric variable.")
-      }else{
-        cat(input$select_numeric1,input$select_operation1,input$numeric_input1)
-      } 
-    })
-  })
-
-  output$filter.data.summary <- renderPrint({
-    get.data.set()
-    input$filter_data_perform
-    isolate({
-      data.summary(get.data.set())
-    })
-  })
-  
-  output$filter.dataset = renderUI({
-    filter.data.panel(get.data.set())
-  })
+  ##-----------------------------##
+  ##  D1. Filter Dataset Module  ##
+  ##-----------------------------##
+  source("panels/D1_FilterDataset/1_filter.dataset-ui.R", local = TRUE)
+  source("panels/D1_FilterDataset/2_filter.dataset-server.R", local = TRUE)
 
   ##  Row operations (Perform row operations) --> Sort data by variables
   

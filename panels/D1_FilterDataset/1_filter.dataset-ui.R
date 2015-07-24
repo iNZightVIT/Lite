@@ -34,13 +34,13 @@ filter.data.sidebar =  function(data.set){
                      checkboxInput("bootstrap_check",label="Check to sample with replacement", value=F),
                      verbatimTextOutput("message3")),
     actionButton("filter_data_perform","PERFORM OPERATION"),br(),br(),textOutput("op_status"),br(),br(),
-    help.display('Filter datset','row_op_help',"gui-elements/notes/filter.dataset.md"),br())
+    help.display('Filter datset','row_op_help',"panels/D1_FilterDataset/3_filter.dataset-help.md"),br())
 }
 
 filter.data.panel =function(data.set){
   if(is.null(data.set)){
     sidebarLayout(
-      sidebarPanel(help.display('Filter datset','row_op_help',"gui-elements/notes/filter.dataset.md")),
+      sidebarPanel(help.display('Filter datset','row_op_help',"panels/D1_FilterDataset/3_filter.dataset-help.md")),
       mainPanel(
         h1("Please select or import a data set.")
       )

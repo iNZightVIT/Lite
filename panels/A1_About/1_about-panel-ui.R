@@ -17,7 +17,7 @@ about.panel.ui = function(lite.version,lite.update) {
             width = 10, offset = 1,
             ##  We include the markdown document that contains the
             ##  text for the "About" module. 
-            includeMarkdown("panels/1_About/4_about-panel-text.md"),
+            includeMarkdown("panels/A1_About/4_about-panel-text.md"),
             ##  We include some line breaks to space things out.
             br(),
             br(),

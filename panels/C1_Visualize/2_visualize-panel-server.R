@@ -39,6 +39,12 @@ plot.par <- reactiveValues(
   #largesample = FALSE
 )
 
+identified.points = reactiveValues(values=list())
+
+get.identified.points = reactive({
+  sort(unique(unlist(identified.points$values)))
+})
+
 plot.ret.para = reactiveValues(
   parameters = NULL,
   default.num.bins=NULL
@@ -49,6 +55,7 @@ get.plottype = reactive({
 })
 
 get.nbins = reactive({
+  print(attr(plot.ret.para$parameters,"nbins"))
   attr(plot.ret.para$parameters,"nbins")
 })
 
@@ -163,6 +170,10 @@ handle.input = function(input, subs = FALSE) {
     }
     list(input.out = input.out, factor.levels = factor.levels)
 }
+
+output$visualize.panel <- renderUI({
+  visualize.panel.ui(get.data.set())
+})
 
 x.class = reactive({
     determine.class(plot.par$x)
@@ -791,32 +802,34 @@ output$add_inference = renderUI({
     intervals = NULL
     graphical.par$inference.par = NULL
     graphical.par$bs.inference = F
-    if((!is.null(input$confidence_interval1)&&
-         input$confidence_interval1)||
-         (!is.null(input$comparison_interval1)&&
-            input$comparison_interval1)){
-      if(!is.null(input$confidence_interval1)&&
-           input$confidence_interval1){
-        intervals = c(intervals,"conf")
-      }
-      if(!is.null(input$comparison_interval1)&&
-           input$comparison_interval1){
-        intervals = c(intervals,"comp")
-      }
-      if(!is.null(input$inference_parameter1)&&
-           input$inference_parameter1%in%"Mean"){
-        graphical.par$inference.par = "mean"
-      }else if(!is.null(input$inference_parameter1)&&
-                 input$inference_parameter1%in%"Median"){
-        graphical.par$inference.par = "median"
-      }
-      if((!is.null(input$inference_type1)&&
-            input$inference_type1%in%"Bootstrap")||
-           (!is.null(input$inference_type2)&&
-           input$inference_type2%in%"Bootstrap")){
-        graphical.par$bs.inference = T
-      }else{
-        graphical.par$bs.inference = F
+    if(input$vari1%in%colnames(get.data.set)){
+      if((!is.null(input$confidence_interval1)&&
+           input$confidence_interval1)||
+           (!is.null(input$comparison_interval1)&&
+              input$comparison_interval1)){
+        if(!is.null(input$confidence_interval1)&&
+             input$confidence_interval1){
+          intervals = c(intervals,"conf")
+        }
+        if(!is.null(input$comparison_interval1)&&
+             input$comparison_interval1){
+          intervals = c(intervals,"comp")
+        }
+        if(!is.null(input$inference_parameter1)&&
+             input$inference_parameter1%in%"Mean"){
+          graphical.par$inference.par = "mean"
+        }else if(!is.null(input$inference_parameter1)&&
+                   input$inference_parameter1%in%"Median"){
+          graphical.par$inference.par = "median"
+        }
+        if((!is.null(input$inference_type1)&&
+              input$inference_type1%in%"Bootstrap")||
+             (!is.null(input$inference_type2)&&
+             input$inference_type2%in%"Bootstrap")){
+          graphical.par$bs.inference = T
+        }else{
+          graphical.par$bs.inference = F
+        }
       }
     }
     graphical.par$inference.type = intervals
@@ -1236,6 +1249,9 @@ output$plot.appearance.panel = renderUI({
           m = max(c(length(unique(get.data.set()[,input$vari1])),
                     length(unique(get.data.set()[,input$vari2]))))
         }
+        if(m<nbins){
+          m=nbins
+        }
         adjust.num.bins.object = sliderInput("adjust.num.bins", label = "Number of bars:", min = 1, 
                                              max = m, value=nbins,step=1)
         ret=list(h5("Change plot appearance"),
@@ -1287,84 +1303,86 @@ observe({
   input$select.plot.type
   if(!is.null(input$vari1)&!is.null(input$vari2)){
     isolate({
-      if(!is.null(input$advanced_options)){
-        sel = input$advanced_options
-        ch = NULL
-        if((class(get.data.set()[,input$vari1])%in%"factor"|
-              class(get.data.set()[,input$vari1])%in%"character")&
-             input$vari2%in%"none"){
-          ch = c('Code more variables',
-                 'Change plot appearance',
-                 'Customize labels')
-          if(!sel%in%ch){
-            sel = 'Change plot appearance'
-          }
-        }else if((class(get.data.set()[,input$vari1])%in%"factor"|
-                    class(get.data.set()[,input$vari1])%in%"character")&
-                   !input$vari2%in%"none"&&
-                   (class(get.data.set()[,input$vari2])%in%"factor"|
-                      class(get.data.set()[,input$vari2])%in%"character")){
-          ch = c('Change plot appearance',
-                 'Customize labels')
-          if(!sel%in%ch){
-            sel = 'Change plot appearance'
-          }
-        }else if(((class(get.data.set()[,input$vari1])%in%"numeric"|
-                     class(get.data.set()[,input$vari1])%in%"integer")&
-                    input$vari2%in%"none")|
-                   ((class(get.data.set()[,input$vari1])%in%"factor"|
-                       class(get.data.set()[,input$vari1])%in%"character")&
-                      !input$vari2%in%"none"&&
-                      (class(get.data.set()[,input$vari2])%in%"integer"|
-                         class(get.data.set()[,input$vari2])%in%"numeric"))|
-                   ((class(get.data.set()[,input$vari1])%in%"integer"|
-                       class(get.data.set()[,input$vari1])%in%"numeric")&
-                      !input$vari2%in%"none"&&
-                      (class(get.data.set()[,input$vari2])%in%"factor"|
-                         class(get.data.set()[,input$vari2])%in%"character"))){
-          ch = c('Code more variables',
-                 'Change plot appearance',
-                 'Identify points',
-                 'Customize labels')
-          if(!is.null(input$select.plot.type)&&
-               input$select.plot.type%in%"histogram"&
-               input$advanced_options%in%'Change plot appearance'){
-            ch = c('Change plot appearance',
-                   'Customize labels')
-          }
-          if(!sel%in%ch){
-            sel = 'Change plot appearance'
-          }
-        }else if((class(get.data.set()[,input$vari1])%in%"numeric"|
-                    class(get.data.set()[,input$vari1])%in%"integer")&
-                   !input$vari2%in%"none"&&
-                   (class(get.data.set()[,input$vari2])%in%"numeric"|
-                      class(get.data.set()[,input$vari2])%in%"integer")){
-          ch = c('Code more variables',
-                'Add trend curves',
-                'Add x=y line',
-                'Add a jitter',
-                'Add rugs',
-                'Join points by line',
-                'Change plot appearance',
-                'Identify points',
-                'Customize labels')
-          if(!is.null(input$select.plot.type)&&
-               (input$select.plot.type%in%"grid-density plot"|
-                  input$select.plot.type%in%"hexbin plot")&
-               input$advanced_options%in%'Change plot appearance'){
-            ch = c('Add trend curves',
-                   'Add x=y line',
+      if(input$vari1%in%colnames(get.data.set())){
+        if(!is.null(input$advanced_options)){
+          sel = input$advanced_options
+          ch = NULL
+          if((class(get.data.set()[,input$vari1])%in%"factor"|
+                class(get.data.set()[,input$vari1])%in%"character")&
+               input$vari2%in%"none"){
+            ch = c('Code more variables',
                    'Change plot appearance',
                    'Customize labels')
+            if(!sel%in%ch){
+              sel = 'Change plot appearance'
+            }
+          }else if((class(get.data.set()[,input$vari1])%in%"factor"|
+                      class(get.data.set()[,input$vari1])%in%"character")&
+                     !input$vari2%in%"none"&&
+                     (class(get.data.set()[,input$vari2])%in%"factor"|
+                        class(get.data.set()[,input$vari2])%in%"character")){
+            ch = c('Change plot appearance',
+                   'Customize labels')
+            if(!sel%in%ch){
+              sel = 'Change plot appearance'
+            }
+          }else if(((class(get.data.set()[,input$vari1])%in%"numeric"|
+                       class(get.data.set()[,input$vari1])%in%"integer")&
+                      input$vari2%in%"none")|
+                     ((class(get.data.set()[,input$vari1])%in%"factor"|
+                         class(get.data.set()[,input$vari1])%in%"character")&
+                        !input$vari2%in%"none"&&
+                        (class(get.data.set()[,input$vari2])%in%"integer"|
+                           class(get.data.set()[,input$vari2])%in%"numeric"))|
+                     ((class(get.data.set()[,input$vari1])%in%"integer"|
+                         class(get.data.set()[,input$vari1])%in%"numeric")&
+                        !input$vari2%in%"none"&&
+                        (class(get.data.set()[,input$vari2])%in%"factor"|
+                           class(get.data.set()[,input$vari2])%in%"character"))){
+            ch = c('Code more variables',
+                   'Change plot appearance',
+                   'Identify points',
+                   'Customize labels')
+            if(!is.null(input$select.plot.type)&&
+                 input$select.plot.type%in%"histogram"&
+                 input$advanced_options%in%'Change plot appearance'){
+              ch = c('Change plot appearance',
+                     'Customize labels')
+            }
+            if(!sel%in%ch){
+              sel = 'Change plot appearance'
+            }
+          }else if((class(get.data.set()[,input$vari1])%in%"numeric"|
+                      class(get.data.set()[,input$vari1])%in%"integer")&
+                     !input$vari2%in%"none"&&
+                     (class(get.data.set()[,input$vari2])%in%"numeric"|
+                        class(get.data.set()[,input$vari2])%in%"integer")){
+            ch = c('Code more variables',
+                  'Add trend curves',
+                  'Add x=y line',
+                  'Add a jitter',
+                  'Add rugs',
+                  'Join points by line',
+                  'Change plot appearance',
+                  'Identify points',
+                  'Customize labels')
+            if(!is.null(input$select.plot.type)&&
+                 (input$select.plot.type%in%"grid-density plot"|
+                    input$select.plot.type%in%"hexbin plot")&
+                 input$advanced_options%in%'Change plot appearance'){
+              ch = c('Add trend curves',
+                     'Add x=y line',
+                     'Change plot appearance',
+                     'Customize labels')
+            }
+            if(!sel%in%ch){
+              sel = 'Change plot appearance'
+            }
           }
-          if(!sel%in%ch){
-            sel = 'Change plot appearance'
-          }
+          updateSelectInput(session,inputId = "advanced_options",
+                            choices = ch,
+                            selected = sel)
         }
-        updateSelectInput(session,inputId = "advanced_options",
-                          choices = ch,
-                          selected = sel)
       }
     })
   }
@@ -1578,12 +1596,12 @@ output$code.variables.panel = renderUI({
          (is.null(input$vari2)|input$vari2%in%"none")){
       color.by.object = selectInput("color_by_select",
                                     label="Colour by levels of:",
-                                    choices=c("",get.categorical.column.names(vis.data())),
+                                    choices=c(" ",get.categorical.column.names(vis.data())),
                                     selected=input$color_by_select)
     }else{
       color.by.object = selectInput("color_by_select",
                                     label="Colour by levels of:",
-                                    choices=c("",colnames(vis.data())),
+                                    choices=c(" ",colnames(vis.data())),
                                     selected=input$color_by_select)
     }
     resize.by.object = NULL
@@ -1609,7 +1627,7 @@ observe({
   isolate({
     if(is.null(input$color_by_select)|
          (!is.null(input$color_by_select)&&
-            input$color_by_select%in%"")){
+            input$color_by_select%in%" ")){
       plot.par$colby = NULL
       plot.par$varnames$colby = NULL
     }else{
@@ -1714,7 +1732,7 @@ observe({
   })
 })
 
-# update the quatile smother
+# update the quantile smother
 observe({
   input$check_quantiles
   isolate({
@@ -1943,5 +1961,150 @@ observe({
       graphical.par$col.line = input$color.join
       graphical.par$join = input$check.join
     }
+  })
+})
+
+output$points.identify.panel = renderUI({
+  input$vari1
+  input$vari2
+  isolate({
+    identified.points$values=list()
+    ret = list()
+    ret[[1]] = fixedRow(column(3,
+                               checkboxInput("label_observation_check",
+                                             label="Label observations",
+                                             value=F)),
+                        column(5,
+                               offset=1,
+                               conditionalPanel("input.label_observation_check",
+                               selectInput("label.select",
+                                           label="Select column",
+                                           choices=c("id",
+                                                     colnames(get.data.set()))))))
+                               
+    ret[[2]] = fixedRow(column(3,
+                               checkboxInput("color_points_check",
+                                             label="Colour observations",
+                                             value=F)),
+                        column(5,offset=1,
+                               conditionalPanel("input.color_points_check",
+                               selectInput("color.select",
+                                           label="Select Colour",
+                                           choices=c("red",
+                                                     "blue",
+                                                     "green4")))))
+    ret[[3]] = fixedRow(column(3,
+                               checkboxInput("same_level_of_check",
+                                             label="Identify Observations per level",
+                                             value=F)),
+                        column(5,offset=1,
+                               conditionalPanel("input.same_level_of_check",
+                                                selectInput("same.level.of.select",
+                                                            label="Select Column",
+                                                            choices=colnames(get.data.set())))))
+    ret[[4]] = radioButtons("select_identify_method",
+                            label = "Select method of selection",
+                            choices = c("Select by value",
+                                        "Extremes",
+                                        "Range of values"))
+    if(!is.null(input$vari1)&&!is.null(input$vari2)){
+      if(input$vari1%in%colnames(get.data.set())&&
+           input$vari2%in%colnames(get.data.set())){
+        if(is.numeric(get.data.set()[,input$vari1])&&
+             is.numeric(get.data.set()[,input$vari2])){
+          ch = get.data.set()[,input$by.value.column.select]
+          if(!is.numeric(ch)){
+            sort(ch)
+          }
+          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'",
+                                      fixedRow(column(6,
+                                                      selectInput("by.value.column.select",
+                                                                  label="Select a column",
+                                                                  choices=colnames(get.data.set()))
+                                                      ),
+                                               column(6,
+                                                      selectInput("value.select",
+                                                                  label="Select multiple values",
+                                                                  choices=ch,
+                                                                  multiple=T,
+                                                                  selectize=F,
+                                                                  size=8)
+                                                      )),
+                                      fixedRow(column(8,
+                                                      sliderInput("select.unique.value.slider",
+                                                                  label="Select single value",
+                                                                  min=1,
+                                                                  max=2,
+                                                                  value=0,
+                                                                  step=1,
+                                                                  ticks=F)),
+                                               column(4,
+                                                      numericInput("specify.correct.numeric",
+                                                                   label="",
+                                                                   value=1,
+                                                                   min=1,
+                                                                   max=2,
+                                                                   step=1))))
+          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'")
+          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'")
+        }else if((is.factor(get.data.set()[,input$vari1])&&
+                   is.numeric(get.data.set()[,input$vari2]))||
+                   is.numeric(get.data.set()[,input$vari1])&&
+                   is.factor(get.data.set()[,input$vari2])){
+          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'")
+          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'")
+          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'")
+        }
+        ret[[8]] = fixedRow(column(5,offset=1,
+                                   actionButton("store.obs.button",
+                                                label="Store")),
+                            column(5,offset=1,
+                                   actionButton("reset.obs.button",
+                                                label="Reset")))
+      }
+    }
+    ret
+  })
+})
+
+observe({
+  if(!is.null(input$same_level_of_check)&!is.null(input$by.value.column.select)){
+    updateSelectInput(session,"value.select",
+                      choices=sort(get.data.set()[,input$by.value.column.select]))
+    if(input$same_level_of_check){
+      updateSliderInput(session,"select.unique.value.slider",
+                        min=1,
+                        step=1,
+                        max=length(unique(get.data.set()[,input$by.value.column.select])))
+      updateNumericInput(session,"specify.correct.numeric",
+                         min=1,
+                         step=1,
+                         max=length(unique(get.data.set()[,input$by.value.column.select])))
+    }else{
+      updateSliderInput(session,"select.unique.value.slider",
+                        min=1,
+                        step=1,
+                        max=length(get.data.set()[,input$by.value.column.select]))
+      updateNumericInput(session,"specify.correct.numeric",
+                         min=1,
+                         step=1,
+                         max=length(get.data.set()[,input$by.value.column.select]))
+    }
+  }
+})
+
+observe({
+  input$select.unique.value.slider
+  isolate({
+    updateNumericInput(session,"specify.correct.numeric",
+                       value=input$select.unique.value.slider)
+  })
+})
+
+observe({
+  input$specify.correct.numeric
+  isolate({
+    updateNumericInput(session,"select.unique.value.slider",
+                       value=input$specify.correct.numeric)
   })
 })
