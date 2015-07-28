@@ -83,7 +83,7 @@ graphical.par = reactiveValues(
   ##  Point
   cex.pt = 0.5,
   cex.dotpt = 0.5,
-  pch = 1,
+  pch = 1, # fill colour of points
   col.pt = "gray50",
 #   fill.pt = "transparent",
   ##  Colours

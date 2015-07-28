@@ -2,6 +2,78 @@
 \title{NEWS file for the iNZightPlots package}
 \encoding{UTF-8}
 
+\section{Changes in Version 2.0.5}{
+  RELEASE DATE: 27 July 2015
+  
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item additional arguments `xlim` and `ylim` allow users to
+      specify the range of values shown on the plot
+    }
+  }
+  
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item several issues for dotplots have been fixed
+
+      \item weighting variable used when drawing a scatter plot of
+      survey data
+
+      \item \code{conf} now corresponds to Year 12 intervals in dot plot
+      inferences (previously, \code{comp} corresponded to this interval)
+    }
+  }
+}
+
+\section{Changes in Version 2.0.3}{
+  RELEASE DATE: 01 July 2015
+  
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item fix up the order of bars in segmented bar plots to
+      correspond to the legend
+    }
+  }
+}
+
+\section{Changes in Version 2.0.2}{
+  RELEASE DATE: 24 June 2015
+  
+  \subsection{MINOR CHANGES}{
+    \itemize{
+      \item remove facility where the colour-by variable is ignored if
+      there are 'too many' levels---this is now left up to users to
+      decide if colour by a particular variable makes sense of not.
+    }
+  }
+}
+
+\section{Changes in Version 2.0.1}{
+  RELEASE DATE: 16 June 2015
+  
+  \subsection{MINOR CHANGES}{
+    \itemize{
+      \item Dotplot locating implemented using new methodology, with the
+      additional argument `label.extreme = numeric(2)`, allowing users
+      to specify how many lower and upper points to identify,
+      respectively.
+
+      \item equivalently, extreme points (by using Mahalanobis'
+      distance) can be labelled on scatter plots using `label.extreme =
+      numeric(1)`.
+    }
+  }
+  
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item fixed a small bug that stopped inference from working in
+      dotplots when `x` is a factor and `y` is the numeric variable.
+
+      \item fix a bug that caused `nbins = 0` in some cases.
+    }
+  }
+}
+
 \section{Changes in Version 2.0}{
   Release Date: 26 May 2015
   

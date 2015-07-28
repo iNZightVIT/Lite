@@ -13,17 +13,7 @@ Suggests: iNZight
 LazyData: true
 Description: Interaction and analysis of Multiple Response Data
 License: GPL-2
-RemoteType: github
-RemoteHost: api.github.com
-RemoteRepo: iNZightMR
-RemoteUsername: iNZightVIT
-RemoteRef: master
-RemoteSha: 7eda8ed2f4345d3b19a8a371855114314d868dfe
-GithubRepo: iNZightMR
-GithubUsername: iNZightVIT
-GithubRef: master
-GithubSHA1: 7eda8ed2f4345d3b19a8a371855114314d868dfe
 Author: Junjie Zeng [aut, cre],
   Simon Potter [aut]
 Maintainer: Junjie Zeng <jzen188@aucklanduni.ac.nz>
-Built: R 3.2.0; ; 2015-06-09 09:41:28 UTC; unix
+Built: R 3.2.1; ; 2015-07-28 02:31:49 UTC; unix

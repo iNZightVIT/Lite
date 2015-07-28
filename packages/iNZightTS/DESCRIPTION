@@ -14,11 +14,10 @@ Imports: grid
 Suggests: iNZight, Acinonyx
 Description: Time Series functionality for iNZight
 License: GPL-2
-Packaged: 2015-03-02 01:17:48 UTC; tell029
 Author: Tom Elliott [aut, cre],
   Junjie Zeng [aut],
   Simon Potter [aut],
   David Banks [aut],
   Marco Kuper [aut]
 Maintainer: Tom Elliott <tell029@aucklanduni.ac.nz>
-Built: R 3.1.2; ; 2015-05-01 00:34:05 UTC; unix
+Built: R 3.2.1; ; 2015-07-28 02:31:38 UTC; unix
