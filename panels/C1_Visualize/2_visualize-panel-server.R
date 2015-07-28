@@ -55,7 +55,7 @@ get.plottype = reactive({
 })
 
 get.nbins = reactive({
-  print(attr(plot.ret.para$parameters,"nbins"))
+#   print(attr(plot.ret.para$parameters,"nbins"))
   attr(plot.ret.para$parameters,"nbins")
 })
 
@@ -326,15 +326,40 @@ output$subs1_panel = renderUI({
 
 ##  Update plot.par$g1.
 observe({
+  input$subs1
+  isolate({
     subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
-    isolate({
-      plot.par$g1 = subs1.par
-      plot.par$varnames$g1 = input$subs1
-      choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-      updateSliderInput(session,"sub1_level",
-                        label = paste0("Subset '", input$subs1, "':"),
-                        min = 0, max = choices1, value = 0)
-    })
+    plot.par$g1 = subs1.par
+    plot.par$varnames$g1 = input$subs1
+    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    if(is.null(choices1)){
+      choices1 = 1
+    }
+#     print(choices1)
+#     print("--------")
+    updateSliderInput(session,"sub1_level",
+                      label = paste0("Subset '", input$subs1, "':"),
+                      min = 0, max = choices1, value = 0,step=1)
+  })
+})
+
+##  Update plot.par$g1.
+observe({
+  input$subs1
+  isolate({
+    subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
+    plot.par$g1 = subs1.par
+    plot.par$varnames$g1 = input$subs1
+    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    if(is.null(choices1)){
+      choices1 = 1
+    }
+#     print(choices1)
+#     print("--mini--")
+    updateSliderInput(session,"sub1_level_mini",
+                      label = paste0("Subset '", input$subs1, "':"),
+                      min = 0, max = choices1, value = 0,step=1)
+  })
 })
 
 
@@ -342,25 +367,27 @@ observe({
 output$subs1_conditional = renderUI({
   isolate({
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-    if (is.null(choices1))
+    if (is.null(choices1)){
       choices1 = 1
+    }
     sliderInput(inputId = "sub1_level",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = 0, step = 1,
-                animate = TRUE)
+                animate = TRUE,ticks=F)
   })
 })
 
-
+#  Subset level (Slider) for variable 1 (mini plot).
 output$subs1_conditional_mini = renderUI({
   isolate({
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-    if (is.null(choices1))
-        choices1 = 1
+    if (is.null(choices1)){
+      choices1 = 1
+    }
     sliderInput(inputId = "sub1_level_mini",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = 0, step = 1,
-                animate = TRUE)
+                animate = TRUE,ticks=F)
   })
 })
 
@@ -386,16 +413,16 @@ observe({
   })
 })
 
-#  Clean up slider every time the subset variables change.
-observe({
-  input$subs1
-  isolate({
-    plot.par$g1.level = NULL
-    updateSliderInput(session,
-                      inputId = "subs1_level",
-                      value = 0)
-  })
-})
+# #  Clean up slider every time the subset variables change.
+# observe({
+#   input$subs1
+#   isolate({
+#     plot.par$g1.level = NULL
+#     updateSliderInput(session,
+#                       inputId = "sub1_level",
+#                       value = 0)
+#   })
+# })
 
 ##  Variable 2  ##
 ##
@@ -478,6 +505,7 @@ observe({
     if(!is.null(input$vari2)&&input$vari2%in%ch){
       ch  = ch[-which(ch%in%input$vari2)]
     }
+#     print(ch)
     updateSelectInput(session,"subs1",choices=ch,selected=input$subs1)
   })
 })
@@ -492,7 +520,7 @@ output$subs2_conditional = renderUI({
     sliderInput(inputId = "sub2_level",
                 label = paste0("Subset '", input$subs2, "':"),
                 min = 0, max = choices2, value = 0, step = 1,
-                animate = TRUE)
+                animate = TRUE,ticks=F)
 })
 
 ##  Subset level (Slider) for variable 2.
@@ -505,7 +533,7 @@ output$subs2_conditional_mini = renderUI({
     sliderInput(inputId = "sub2_level_mini",
                 label = paste0("Subset '", input$subs2, "':"),
                 min = 0, max = choices2, value = 0, step = 1,
-                animate = TRUE)
+                animate = TRUE,ticks=F)
 })
 
 
@@ -539,17 +567,16 @@ observe({
 })
 
 
-##  Clean up slider every time the subset variables change.
-observe({
-    input$subs2
-    isolate({
-      plot.par$g2.level = NULL
-      updateSliderInput(session,
-                        inputId = "subs2_level",
-                        value = 0)
-    })
-})
-
+# ##  Clean up slider every time the subset variables change.
+# observe({
+#     input$subs2
+#     isolate({
+#       plot.par$g2.level = NULL
+#       updateSliderInput(session,
+#                         inputId = "sub2_level",
+#                         value = 0)
+#     })
+# })
 
 output$visualize.plot = renderPlot({
   isolate({
@@ -1612,7 +1639,7 @@ output$code.variables.panel = renderUI({
             class(vis.data()[,input$vari2])%in%"integer")){
       resize.by.object = selectInput("resize.by.select",
                                      label="Resize points proportional to:",
-                                     choices=c("",get.numeric.column.names(vis.data())),
+                                     choices=c(" ",get.numeric.column.names(vis.data())),
                                      selected=input$resize.by.select)
     }
     list(title.pane,
@@ -1643,7 +1670,7 @@ observe({
   isolate({
     if(is.null(input$resize.by.select)|
          (!is.null(input$resize.by.select)&&
-            input$resize.by.select%in%"")){
+            input$resize.by.select%in%" ")){
       plot.par$sizeby = NULL
       plot.par$varnames$sizeby = NULL
     }else{
@@ -2012,48 +2039,58 @@ output$points.identify.panel = renderUI({
            input$vari2%in%colnames(get.data.set())){
         if(is.numeric(get.data.set()[,input$vari1])&&
              is.numeric(get.data.set()[,input$vari2])){
-          ch = get.data.set()[,input$by.value.column.select]
-          if(!is.numeric(ch)){
-            sort(ch)
+          ch = ""
+          if(!is.null(input$by.value.column.select)){
+            ch = get.data.set()[,input$by.value.column.select]
+#             names(ch) = as.character(1:length(ch))
           }
-          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'",
-                                      fixedRow(column(6,
-                                                      selectInput("by.value.column.select",
-                                                                  label="Select a column",
-                                                                  choices=colnames(get.data.set()))
-                                                      ),
-                                               column(6,
-                                                      selectInput("value.select",
-                                                                  label="Select multiple values",
-                                                                  choices=ch,
-                                                                  multiple=T,
-                                                                  selectize=F,
-                                                                  size=8)
-                                                      )),
-                                      fixedRow(column(8,
-                                                      sliderInput("select.unique.value.slider",
-                                                                  label="Select single value",
-                                                                  min=1,
-                                                                  max=2,
-                                                                  value=0,
-                                                                  step=1,
-                                                                  ticks=F)),
-                                               column(4,
-                                                      numericInput("specify.correct.numeric",
-                                                                   label="",
-                                                                   value=1,
-                                                                   min=1,
-                                                                   max=2,
-                                                                   step=1))))
-          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'")
-          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'")
+          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'&&
+                                      (input.label_observation_check||input.color_points_check)",
+                                      checkboxInput("single_vs_multiple_check",
+                                                    label="Single value",
+                                                    value=F),
+                                      conditionalPanel("!input.single_vs_multiple_check",
+                                                       fixedRow(column(6,
+                                                                       selectInput("by.value.column.select",
+                                                                                   label="Select a column",
+                                                                                   choices=colnames(get.data.set()))),
+                                                                column(6,
+                                                                       selectInput("value.select",
+                                                                                   label="Select multiple values",
+                                                                                   choices=ch,
+                                                                                   multiple=T,
+                                                                                   selectize=F,
+                                                                                   size=8)))),
+                                      conditionalPanel("input.single_vs_multiple_check",
+                                                       fixedRow(column(8,
+                                                                       sliderInput("select.unique.value.slider",
+                                                                                   label="Select single value",
+                                                                                   min=1,
+                                                                                   max=2,
+                                                                                   value=0,
+                                                                                   step=1,
+                                                                                   ticks=F)),
+                                                                column(4,
+                                                                       numericInput("specify.correct.numeric",
+                                                                                    label="",
+                                                                                    value=1,
+                                                                                    min=1,
+                                                                                    max=2,
+                                                                                    step=1)))))
+          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'&&
+                                      (input.label_observation_check||input.color_points_check)")
+          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'&&
+                                      (input.label_observation_check||input.color_points_check)")
         }else if((is.factor(get.data.set()[,input$vari1])&&
                    is.numeric(get.data.set()[,input$vari2]))||
                    is.numeric(get.data.set()[,input$vari1])&&
                    is.factor(get.data.set()[,input$vari2])){
-          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'")
-          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'")
-          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'")
+          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'&&
+                                      (input.label_observation_check||input.color_points_check)")
+          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'&&
+                                      (input.label_observation_check||input.color_points_check)")
+          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'&&
+                                      (input.label_observation_check||input.color_points_check)")
         }
         ret[[8]] = fixedRow(column(5,offset=1,
                                    actionButton("store.obs.button",
@@ -2069,8 +2106,19 @@ output$points.identify.panel = renderUI({
 
 observe({
   if(!is.null(input$same_level_of_check)&!is.null(input$by.value.column.select)){
+    namesCH = as.character(get.data.set()[,input$by.value.column.select])
+    ch = 1:length(namesCH)
+#     print(length(namesCH))
+#     print(ch)
+    names(ch) = namesCH
+#     print(ch)
+#     print(is.numeric(get.data.set()[,input$by.value.column.select]))
+#     print(sort(get.data.set()[,input$by.value.column.select]))
+    if(is.numeric(get.data.set()[,input$by.value.column.select])){
+      ch = ch[as.character(sort(get.data.set()[,input$by.value.column.select]))]
+    }
     updateSelectInput(session,"value.select",
-                      choices=sort(get.data.set()[,input$by.value.column.select]))
+                      choices=ch)
     if(input$same_level_of_check){
       updateSliderInput(session,"select.unique.value.slider",
                         min=1,
@@ -2107,4 +2155,8 @@ observe({
     updateNumericInput(session,"select.unique.value.slider",
                        value=input$specify.correct.numeric)
   })
+})
+
+observe({
+  print(input$value.select)
 })
