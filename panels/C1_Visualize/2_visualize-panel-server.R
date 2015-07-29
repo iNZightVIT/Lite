@@ -172,7 +172,9 @@ handle.input = function(input, subs = FALSE) {
 }
 
 output$visualize.panel <- renderUI({
-  visualize.panel.ui(get.data.set())
+  isolate({
+    visualize.panel.ui(get.data.set())
+  })
 })
 
 x.class = reactive({
@@ -861,16 +863,22 @@ output$add_inference = renderUI({
     }
     graphical.par$inference.type = intervals
     # vari1 = numeric; vari2 = none
+#     print(input$toggle_inference)
     if(!input$vari2%in%"none"&&
          ((class(dafr[,input$vari1])%in%"numeric"|
           class(dafr[,input$vari1])%in%"integer")&
          (class(dafr[,input$vari2])%in%"numeric"|
             class(dafr[,input$vari2])%in%"integer"))){
-      ret = conditionalPanel("input.check_linear||
-                             input.check_quadratic||
-                             input.check_cubic||
-                             input.check_smoother",
-                             add_inference.check)
+      ret = list(fixedRow(column(12,offset=11,
+                                 checkboxInput("toggle_inference",
+                                               label="Show Inference",
+                                               value=input$toggle_inference))),
+                 conditionalPanel("input.toggle_inference",
+                                  conditionalPanel("input.check_linear||
+                                                   input.check_quadratic||
+                                                   input.check_cubic||
+                                                   input.check_smoother",
+                                                   add_inference.check)))
     # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
     }else if(!input$vari2%in%"none"&&
                (((class(dafr[,input$vari1])%in%"numeric"|
@@ -881,17 +889,22 @@ output$add_inference = renderUI({
                    class(dafr[,input$vari1])%in%"character")&
                   (class(dafr[,input$vari2])%in%"numeric"|
                      class(dafr[,input$vari2])%in%"integer")))){
-      ret = list(mean_median.radio,
-                 conditionalPanel("input.inference_parameter1=='Mean'",
-                                  normal_bootstrap.radio),
-                 conditionalPanel("input.inference_parameter1=='Median'",
-                                  year12_bootstrap.radio),
-                 conditionalPanel("input.inference_parameter1=='Mean'||
-                                  (input.inference_parameter1=='Median'&&
-                                  input.inference_type2=='Bootstrap')",
-                                  h5("Type of interval"),
-                                  confidence.interval.check,
-                                  comparison.interval.check)
+      ret = list(fixedRow(column(12,offset=11,
+                                 checkboxInput("toggle_inference",
+                                               label="Show Inference",
+                                               value=input$toggle_inference))),
+                 conditionalPanel("input.toggle_inference",
+                                  mean_median.radio,
+                                  conditionalPanel("input.inference_parameter1=='Mean'",
+                                                   normal_bootstrap.radio),
+                                  conditionalPanel("input.inference_parameter1=='Median'",
+                                                   year12_bootstrap.radio),
+                                  conditionalPanel("input.inference_parameter1=='Mean'||
+                                                   (input.inference_parameter1=='Median'&&
+                                                   input.inference_type2=='Bootstrap')",
+                                                   h5("Type of interval"),
+                                                   confidence.interval.check,
+                                                   comparison.interval.check))
                  )
     # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
     }else if((!input$vari2%in%"none"&&
@@ -902,30 +915,42 @@ output$add_inference = renderUI({
                ((class(dafr[,input$vari1])%in%"factor"|
                class(dafr[,input$vari1])%in%"character")&
                  input$vari2%in%"none")){
-      ret = list(h5("Parameter"),helpText("Proportions"),
-                 normal_bootstrap.radio,
-                 h5("Type of interval"),
-                 confidence.interval.check,
-                 conditionalPanel("input.inference_type1=='Normal'",
-                                  comparison.interval.check))
+      ret = list(fixedRow(column(12,offset=11,
+                                 checkboxInput("toggle_inference",
+                                               label="Show Inference",
+                                               value=input$toggle_inference))),
+                 conditionalPanel("input.toggle_inference",
+                                  h5("Parameter"),helpText("Proportions"),
+                                  normal_bootstrap.radio,
+                                  h5("Type of interval"),
+                                  confidence.interval.check,
+                                  conditionalPanel("input.inference_type1=='Normal'",
+                                                   comparison.interval.check)))
     # var1 = numeric; vari2 = none
     }else if(input$vari2%in%"none"&&
                (class(dafr[,input$vari1])%in%"numeric"|
                class(dafr[,input$vari1])%in%"integer")){
-      ret = list(mean_median.radio,
-                 conditionalPanel("input.inference_parameter1=='Mean'",
-                                  normal_bootstrap.radio),
-                 conditionalPanel("input.inference_parameter1=='Median'",
-                                  year12_bootstrap.radio),
-                 conditionalPanel("input.inference_parameter1=='Mean'||
-                                  (input.inference_parameter1=='Median'&&input.inference_type2=='Bootstrap')",
-                                  h5("Type of interval"),
-                                  confidence.interval.check))
+      ret = list(fixedRow(column(12,offset=11,
+                                 checkboxInput("toggle_inference",
+                                               label="Show Inference",
+                                               value=input$toggle_inference))),
+                 conditionalPanel("input.toggle_inference",
+                                  mean_median.radio,
+                                  conditionalPanel("input.inference_parameter1=='Mean'",
+                                                   normal_bootstrap.radio),
+                                  conditionalPanel("input.inference_parameter1=='Median'",
+                                                   year12_bootstrap.radio),
+                                  conditionalPanel("input.inference_parameter1=='Mean'||
+                                                   (input.inference_parameter1=='Median'&&
+                                                   input.inference_type2=='Bootstrap')",
+                                                   h5("Type of interval"),
+                                                   confidence.interval.check)))
     }
   })
   ret
 })
 
+# inference handles
 observe({
   input$confidence_interval1
   input$comparison_interval1
@@ -1097,6 +1122,7 @@ observe({
   })
 })
 
+# advanced option panel
 output$advanced_options_panel = renderUI({
   ret = NULL
   isolate({
@@ -1553,6 +1579,11 @@ output$customize.labels.panel = renderUI({
   input$vari1
   input$vari2
   isolate({
+    plot.par$xlab = NULL
+    plot.par$varnames$xlab = NULL
+    plot.par$ylab = NULL
+    plot.par$varnames$ylab = NULL
+    plot.par$main = NULL
     title.pane=h4("Customize labels")
     main_title_text.object = textInput(inputId="main_title_text",label="Main title:")
     x_axis_text.object = textInput(inputId="x_axis_text",label="X-axis label:")
@@ -2158,5 +2189,5 @@ observe({
 })
 
 observe({
-  print(input$value.select)
+#   print(input$value.select)
 })

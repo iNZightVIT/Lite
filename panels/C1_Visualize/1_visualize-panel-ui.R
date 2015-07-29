@@ -60,6 +60,10 @@ vis.sidebarPanel = function() {
 }
 ###  We set up the main panel.
 vis.mainPanel = function() {
+  toggle_advanced_options = T
+  if(!is.null(input$toggle_advanced_options)){
+    toggle_advanced_options = input$toggle_advanced_options
+  }
   panel = list(
     br(),
     tabsetPanel(
@@ -69,12 +73,12 @@ vis.mainPanel = function() {
       tabPanel(
         title = "Plot",
         br(),
-        fluidRow(
+        fixedRow(
           column(width = 12,
                  conditionalPanel(condition = "input.customize_plot == 1",
                                   helpText("Plots for visualizing data."),
                                   plotOutput("visualize.plot"),
-                                  fluidRow(
+                                  fixedRow(
                                     column(
                                       width = 5, offset = 1,
                                       conditionalPanel(
@@ -96,12 +100,12 @@ vis.mainPanel = function() {
                                     )
                                   ),
                  conditionalPanel(condition = "input.customize_plot == 2",
-                                  fluidRow(
+                                  fixedRow(
                                     column(
                                       width = 8,
                                       helpText("Plots for visualizing the data."),
                                       plotOutput("mini.plot"),
-                                      fluidRow(column(width = 6,
+                                      fixedRow(column(width = 6,
                                                       conditionalPanel(
                                                         condition = "input.subs1 != 'none'",
                                                         uiOutput("subs1_conditional_mini")
@@ -116,34 +120,35 @@ vis.mainPanel = function() {
                                       ),
                                     column(
                                       width = 4,
-                                      fluidRow(column(width = 8,
+                                      fixedRow(column(width = 8,
                                                       h4("Inference"),
                                                       uiOutput("add_inference"))),
-                                      fluidRow(column(width = 8,
-                                                      h4("Advanced options"),
-                                                      uiOutput("advanced_options_panel"))),
-                                      fluidRow(column(width=12,
-                                                      conditionalPanel("input.advanced_options=='Code more variables'",
-                                                                       uiOutput("code.variables.panel")),
-                                                      conditionalPanel("input.advanced_options=='Add trend curves'",
-                                                                       uiOutput("trend.curve.panel")),
-                                                      conditionalPanel("input.advanced_options=='Add x=y line'",
-                                                                       uiOutput("xy.line.panel")),
-                                                      conditionalPanel("input.advanced_options=='Add a jitter'",
-                                                                       uiOutput("add.jitter.panel")),
-                                                      conditionalPanel("input.advanced_options=='Add rugs'",
-                                                                       uiOutput("add.rugs.panel")),
-                                                      conditionalPanel("input.advanced_options=='Join points by line'",
-                                                                       uiOutput("join.points.panel")),
-                                                      conditionalPanel("input.advanced_options=='Change plot appearance'",
-                                                                       uiOutput("plot.appearance.panel")),
-                                                      conditionalPanel("input.advanced_options=='Identify points'",
-                                                                       uiOutput("points.identify.panel")),
-                                                      conditionalPanel("input.advanced_options=='Customize labels'",
-                                                                       uiOutput("customize.labels.panel"))
-                                                      )
-                                               )
-                                      )
+                                      h4("Advanced options"),
+                                      fixedRow(column(8,offset=7,checkboxInput("toggle_advanced_options",
+                                                                                 label="Show Advanced Options",
+                                                                                 value=toggle_advanced_options))),
+                                      conditionalPanel("input.toggle_advanced_options",
+                                                       fixedRow(column(width = 8,
+                                                                       uiOutput("advanced_options_panel"))),
+                                                       fixedRow(column(width=12,
+                                                                       conditionalPanel("input.advanced_options=='Code more variables'",
+                                                                                        uiOutput("code.variables.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add trend curves'",
+                                                                                        uiOutput("trend.curve.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add x=y line'",
+                                                                                        uiOutput("xy.line.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add a jitter'",
+                                                                                        uiOutput("add.jitter.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add rugs'",
+                                                                                        uiOutput("add.rugs.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Join points by line'",
+                                                                                        uiOutput("join.points.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Change plot appearance'",
+                                                                                        uiOutput("plot.appearance.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Identify points'",
+                                                                                        uiOutput("points.identify.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Customize labels'",
+                                                                                        uiOutput("customize.labels.panel"))))))
                                     )
                        )
                 )
@@ -179,12 +184,12 @@ vis.mainPanel = function() {
 visualize.panel.ui = function(data.set) {
     fluidPage(  
         if (is.null(data.set)) {
-            fluidRow(
+            fixedRow(
                 includeMarkdown(
                     "panels/C1_Visualize/4_visualize-panel-null.md")
             )
         } else {
-            fluidRow(
+            fixedRow(
                 column(2, vis.sidebarPanel()),
                 column(10, vis.mainPanel())
             )
