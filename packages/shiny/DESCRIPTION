@@ -1,8 +1,8 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 0.12.0
-Date: 2015-05-18
+Version: 0.12.1
+Date: 2015-06-11
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -75,7 +75,7 @@ Collate: 'app.R' 'bootstrap-layout.R' 'map.R' 'globals.R' 'utils.R'
         'shinywrappers.R' 'showcase.R' 'slider.R' 'tar.R' 'timer.R'
         'update-input.R'
 NeedsCompilation: no
-Packaged: 2015-05-18 17:14:41 UTC; winston
+Packaged: 2015-06-12 06:42:27 UTC; jcheng
 Author: Winston Chang [aut, cre],
   Joe Cheng [aut],
   JJ Allaire [aut],
@@ -107,5 +107,5 @@ Author: Winston Chang [aut, cre],
   R Core Team [ctb, cph] (tar implementation from R)
 Maintainer: Winston Chang <winston@rstudio.com>
 Repository: CRAN
-Date/Publication: 2015-05-18 23:58:19
-Built: R 3.2.0; ; 2015-05-22 01:23:33 UTC; unix
+Date/Publication: 2015-06-12 23:22:03
+Built: R 3.2.1; ; 2015-07-29 00:47:27 UTC; unix

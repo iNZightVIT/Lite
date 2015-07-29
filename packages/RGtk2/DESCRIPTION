@@ -15,4 +15,4 @@ Packaged: 2014-07-19 13:12:02 UTC; larman
 NeedsCompilation: yes
 Repository: CRAN
 Date/Publication: 2014-07-19 16:30:55
-Built: R 3.1.2; x86_64-pc-linux-gnu; 2015-02-10 01:46:43 UTC; unix
+Built: R 3.2.1; x86_64-pc-linux-gnu; 2015-07-29 01:33:21 UTC; unix

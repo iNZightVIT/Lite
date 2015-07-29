@@ -26,4 +26,4 @@ Packaged: 2014-07-28 15:19:10 UTC; ripley
 NeedsCompilation: yes
 Repository: CRAN
 Date/Publication: 2014-07-28 17:26:19
-Built: R 3.1.2; x86_64-pc-linux-gnu; 2015-02-10 00:06:32 UTC; unix
+Built: R 3.2.1; x86_64-pc-linux-gnu; 2015-07-29 00:50:12 UTC; unix
