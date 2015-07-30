@@ -34,8 +34,7 @@ output$load.data.panel = renderUI({
   input$selector
   isolate({
     # looks for get requests to pass in an URL for a dataset 
-    url_search = parseQueryString(session$clientData$url_search)
-    load.data.panel(url_search)
+    load.data.panel(parseQueryString(session$clientData$url_search))
   })
 })
 

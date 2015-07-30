@@ -35,7 +35,10 @@ plot.par <- reactiveValues(
   ylab = NULL,
   colby=NULL,
   sizeby=NULL,
-  data=NULL
+  data=NULL,
+  locate=NULL,
+  locate.id=NULL,
+  locate.col=NULL
   #largesample = FALSE
 )
 
@@ -664,7 +667,18 @@ output$visualize.inference = renderPrint({
              inference.type = "conf",
              inference.par = NULL)
       )
-      try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({
+          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+      }else{
+        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+      }
     })
   }
 })
@@ -675,7 +689,18 @@ output$visualize.summary = renderPrint({
     }
     values.list = modifyList(reactiveValuesToList(plot.par),
                               reactiveValuesToList(graphical.par))
-    try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
+    if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      tryCatch({
+        cat(do.call(getPlotSummary, values.list), sep = "\n")
+      }, warning = function(w) {
+        print(w)
+      }, error = function(e) {
+        print(e)
+      }, finally = {})
+    }else{
+      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
+    }
 })
 
 ##  Reset variable selection and graphical parameters.
@@ -793,7 +818,9 @@ observe({
       plot.par$sizeby=NULL
       updateSelectInput(session,"resize.by.select",
                         selected="")
-      
+      plot.par$locate=NULL
+      plot.par$locate.id=NULL
+      plot.par$locate.col=NULL 
     })
   }
 })
