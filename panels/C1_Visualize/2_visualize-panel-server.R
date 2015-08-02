@@ -19,6 +19,11 @@ vis.data <- reactive({
 
 ###  Then on the second day, he said let there be parameters for
 ###  iNZightPlot():
+
+plot.par.stored = reactiveValues(
+  locate.id=NULL
+  )
+
 plot.par <- reactiveValues(
   x = NULL,
   y = NULL,
@@ -677,7 +682,7 @@ output$visualize.inference = renderPrint({
           print(e)
         }, finally = {})
       }else{
-        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+        cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
       }
     })
   }
@@ -699,7 +704,7 @@ output$visualize.summary = renderPrint({
         print(e)
       }, finally = {})
     }else{
-      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
+      cat(do.call(getPlotSummary, values.list), sep = "\n")
     }
 })
 
@@ -896,11 +901,7 @@ output$add_inference = renderUI({
           class(dafr[,input$vari1])%in%"integer")&
          (class(dafr[,input$vari2])%in%"numeric"|
             class(dafr[,input$vari2])%in%"integer"))){
-      ret = list(fixedRow(column(12,offset=11,
-                                 checkboxInput("toggle_inference",
-                                               label="Show Inference",
-                                               value=input$toggle_inference))),
-                 conditionalPanel("input.toggle_inference",
+      ret = list(conditionalPanel("input.toggle_inference",
                                   conditionalPanel("input.check_linear||
                                                    input.check_quadratic||
                                                    input.check_cubic||
@@ -916,11 +917,7 @@ output$add_inference = renderUI({
                    class(dafr[,input$vari1])%in%"character")&
                   (class(dafr[,input$vari2])%in%"numeric"|
                      class(dafr[,input$vari2])%in%"integer")))){
-      ret = list(fixedRow(column(12,offset=11,
-                                 checkboxInput("toggle_inference",
-                                               label="Show Inference",
-                                               value=input$toggle_inference))),
-                 conditionalPanel("input.toggle_inference",
+      ret = list(conditionalPanel("input.toggle_inference",
                                   mean_median.radio,
                                   conditionalPanel("input.inference_parameter1=='Mean'",
                                                    normal_bootstrap.radio),
@@ -942,11 +939,7 @@ output$add_inference = renderUI({
                ((class(dafr[,input$vari1])%in%"factor"|
                class(dafr[,input$vari1])%in%"character")&
                  input$vari2%in%"none")){
-      ret = list(fixedRow(column(12,offset=11,
-                                 checkboxInput("toggle_inference",
-                                               label="Show Inference",
-                                               value=input$toggle_inference))),
-                 conditionalPanel("input.toggle_inference",
+      ret = list(conditionalPanel("input.toggle_inference",
                                   h5("Parameter"),helpText("Proportions"),
                                   normal_bootstrap.radio,
                                   h5("Type of interval"),
@@ -957,11 +950,7 @@ output$add_inference = renderUI({
     }else if(input$vari2%in%"none"&&
                (class(dafr[,input$vari1])%in%"numeric"|
                class(dafr[,input$vari1])%in%"integer")){
-      ret = list(fixedRow(column(12,offset=11,
-                                 checkboxInput("toggle_inference",
-                                               label="Show Inference",
-                                               value=input$toggle_inference))),
-                 conditionalPanel("input.toggle_inference",
+      ret = list(conditionalPanel("input.toggle_inference",
                                   mean_median.radio,
                                   conditionalPanel("input.inference_parameter1=='Mean'",
                                                    normal_bootstrap.radio),
@@ -1302,15 +1291,14 @@ output$plot.appearance.panel = renderUI({
                                             selected=input$select.plot.type)
       ret = list(h5("Change plot appearance"),
                  select.plot.type.object,
+                 adjust.size.points.dot.object,
+                 adjust.transparency.object,
                  select.bg.object,
                  select.dotcolor.object,
-                 color.interior,
-                 adjust.size.points.dot.object,
-                 adjust.transparency.object
+                 color.interior
                  )
       if(!is.null(input$select.plot.type)&&
            input$select.plot.type%in%"histogram"){
-        # to be implemented
         isolate({
           temp = vis.par()
         })
@@ -1354,24 +1342,24 @@ output$plot.appearance.panel = renderUI({
                                             selected=input$select.plot.type)
       ret = list(h5("Change plot appearance"),
                  select.plot.type.object,
+                 adjust.size.points.scatter.object,
+                 adjust.transparency.object,
                  select.bg.object,
                  select.dotcolor.object,
-                 color.interior,
-                 adjust.size.points.scatter.object,
-                 adjust.transparency.object)
+                 color.interior)
       if(!is.null(input$select.plot.type)&&
            input$select.plot.type%in%"grid-density plot"){
         ret = list(h5("Change plot appearance"),
                    select.plot.type.object,
-                   select.bg.object,
                    adjust.grid.size.object,
-                   adjust.min.count.grid.object)
+                   adjust.min.count.grid.object,
+                   select.bg.object)
       }else if(!is.null(input$select.plot.type)&&
                  input$select.plot.type%in%"hexbin plot"){
         ret = list(h5("Change plot appearance"),
                    select.plot.type.object,
-                   select.bg.object,
-                   adjust.hex.bins.object)
+                   adjust.hex.bins.object,
+                   select.bg.object)
       }
     }
   })
@@ -2100,7 +2088,6 @@ output$points.identify.panel = renderUI({
           ch = ""
           if(!is.null(input$by.value.column.select)){
             ch = get.data.set()[,input$by.value.column.select]
-#             names(ch) = as.character(1:length(ch))
           }
           ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'&&
                                       (input.label_observation_check||input.color_points_check)",
@@ -2123,7 +2110,7 @@ output$points.identify.panel = renderUI({
                                                        fixedRow(column(8,
                                                                        sliderInput("select.unique.value.slider",
                                                                                    label="Select single value",
-                                                                                   min=1,
+                                                                                   min=0,
                                                                                    max=2,
                                                                                    value=0,
                                                                                    step=1,
@@ -2132,7 +2119,7 @@ output$points.identify.panel = renderUI({
                                                                        numericInput("specify.correct.numeric",
                                                                                     label="",
                                                                                     value=1,
-                                                                                    min=1,
+                                                                                    min=0,
                                                                                     max=2,
                                                                                     step=1)))))
           ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'&&
@@ -2166,33 +2153,30 @@ observe({
   if(!is.null(input$same_level_of_check)&!is.null(input$by.value.column.select)){
     namesCH = as.character(get.data.set()[,input$by.value.column.select])
     ch = 1:length(namesCH)
-#     print(length(namesCH))
-#     print(ch)
     names(ch) = namesCH
-#     print(ch)
-#     print(is.numeric(get.data.set()[,input$by.value.column.select]))
-#     print(sort(get.data.set()[,input$by.value.column.select]))
     if(is.numeric(get.data.set()[,input$by.value.column.select])){
       ch = ch[as.character(sort(get.data.set()[,input$by.value.column.select]))]
     }
+    ch["none"] = 0
     updateSelectInput(session,"value.select",
-                      choices=ch)
+                      choices=ch,
+                      selected = 0)
     if(input$same_level_of_check){
       updateSliderInput(session,"select.unique.value.slider",
-                        min=1,
+                        min=0,
                         step=1,
                         max=length(unique(get.data.set()[,input$by.value.column.select])))
       updateNumericInput(session,"specify.correct.numeric",
-                         min=1,
+                         min=0,
                          step=1,
                          max=length(unique(get.data.set()[,input$by.value.column.select])))
     }else{
       updateSliderInput(session,"select.unique.value.slider",
-                        min=1,
+                        min=0,
                         step=1,
                         max=length(get.data.set()[,input$by.value.column.select]))
       updateNumericInput(session,"specify.correct.numeric",
-                         min=1,
+                         min=0,
                          step=1,
                          max=length(get.data.set()[,input$by.value.column.select]))
     }
@@ -2208,6 +2192,108 @@ observe({
 })
 
 observe({
+  input$label_observation_check
+  input$label.select
+  input$advanced_options
+  isolate({
+    if(!is.null(input$label_observation_check)&&
+         !is.null(input$label.select)){
+      if(input$label_observation_check&&
+           !is.null(input$label.select)&&
+           input$advanced_options%in%'Identify points'){
+        if(input$label.select%in%"id"){
+          plot.par$locate=1:nrow(get.data.set())
+        }else{
+          plot.par$locate=get.data.set()[,input$label.select]
+        }
+      }else{
+        plot.par$locate=NULL
+      }
+    }
+  })
+})
+
+observe({
+  input$color_points_check
+  input$color.select
+  input$advanced_options
+  input$value.select
+  input$select.unique.value.slider
+  isolate({
+    if(!is.null(input$color_points_check)&&
+         !is.null(input$color.select)&&
+         !is.null(input$advanced_options)&
+         !is.null(input$value.select)&&
+         !is.null(input$select.unique.value.slider)){
+      if(length(input$value.select)>0||
+           input$select.unique.value.slider>0){
+        if(input$color_points_check&&
+             !is.null(input$color.select)&&
+             input$advanced_options%in%'Identify points'){
+          plot.par$locate.col=input$color.select
+        }else{
+          plot.par$locate.col=NULL
+        }
+      }else{
+        plot.par$locate.col=NULL
+      }
+    }
+  })
+})
+
+observe({
+  input$select.unique.value.slider
+  input$specify.correct.numeric
+  input$single_vs_multiple_check
+  input$select_identify_method
+  input$same_level_of_check
+  input$same.level.of.select
+  input$advanced_options
+  input$by.value.column.select
+  input$value.select
+  isolate({
+    if(!is.null(input$select.unique.value.slider)&&
+         !is.null(input$specify.correct.numeric)&&
+         !is.null(input$single_vs_multiple_check)&&
+         !is.null(input$select_identify_method)&&
+         !is.null(input$same_level_of_check)&&
+         !is.null(input$same.level.of.select)&&
+         !is.null(input$advanced_options)&&
+         !is.null(input$by.value.column.select)&&
+         !is.null(input$value.select)){
+      if(input$advanced_options%in%'Identify points'){
+        if(input$single_vs_multiple_check&&
+             input$select_identify_method%in%"Select by value"){
+          if(input$same_level_of_check){
+            plot.par$locate.id=unique(c(plot.par.stored$locate.id,
+                                        which(get.data.set()[,input$same.level.of.select]%in%
+                                                get.data.set()[,input$
+                                                                 same.level.of.select][
+                                                                   input$
+                                                                     select.unique.value.slider])))
+          }else{
+            plot.par$locate.id=unique(c(plot.par.stored$locate.id,input$select.unique.value.slider))
+          }
+        }else if(!input$single_vs_multiple_check&&
+                   input$select_identify_method%in%"Select by value"){
+          if(input$same_level_of_check){
+            plot.par$locate.id=unique(c(plot.par.stored$locate.id,
+                                        which(get.data.set()[,input$same.level.of.select]%in%
+                                                get.data.set()[,input$
+                                                                 same.level.of.select][
+                                                                   as.numeric(input$value.select)])))
+          }else{
+            plot.par$locate.id=unique(c(plot.par.stored$locate.id,as.numeric(input$value.select)))
+          }
+        }else{
+          plot.par$locate.id=plot.par.stored$locate.id
+        }
+      }
+    }
+  })
+})
+
+observe({
   input$specify.correct.numeric
   isolate({
     updateNumericInput(session,"select.unique.value.slider",
@@ -2216,5 +2302,17 @@ observe({
 })
 
 observe({
-#   print(input$value.select)
+  input$advanced_options
+  isolate({
+    if(!is.null(input$advanced_options)&&
+         !input$advanced_options%in%'Identify points'){
+      if(length(plot.par.stored$locate.id)==0){
+        plot.par$locate=NULL
+        plot.par$locate.col=NULL
+        plot.par$locate.id=NULL
+      }else{
+        plot.par$locate.id=plot.par.stored$locate.id
+      }
+    }
+  })
 })
