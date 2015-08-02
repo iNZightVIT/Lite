@@ -682,7 +682,7 @@ output$visualize.inference = renderPrint({
           print(e)
         }, finally = {})
       }else{
-        cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
       }
     })
   }
@@ -704,7 +704,7 @@ output$visualize.summary = renderPrint({
         print(e)
       }, finally = {})
     }else{
-      cat(do.call(getPlotSummary, values.list), sep = "\n")
+      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
     }
 })
 
