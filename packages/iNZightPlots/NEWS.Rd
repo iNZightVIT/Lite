@@ -2,6 +2,19 @@
 \title{NEWS file for the iNZightPlots package}
 \encoding{UTF-8}
 
+\section{Changes in Version 2.1}{
+  RELEASE DATE: 04 August 2015
+
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item allow zooming of plots with the new \code{zoom}
+      argument. Works for both univariate and bivariate plots, and a
+      related funcionality for 'zooming in' on bars in a barplot. 
+    }
+  }
+}
+
+
 \section{Changes in Version 2.0.6}{
   RELEASE DATE: 03 August 2015
 
