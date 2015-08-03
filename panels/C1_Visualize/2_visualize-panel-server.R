@@ -43,7 +43,8 @@ plot.par <- reactiveValues(
   data=NULL,
   locate=NULL,
   locate.id=NULL,
-  locate.col=NULL
+  locate.col=NULL,
+  extrem.points=NULL
   #largesample = FALSE
 )
 
@@ -2123,7 +2124,14 @@ output$points.identify.panel = renderUI({
                                                                                     max=2,
                                                                                     step=1)))))
           ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'&&
-                                      (input.label_observation_check||input.color_points_check)")
+                                      (input.label_observation_check||input.color_points_check)",
+                                      sliderInput("scatter.extremes.slider",
+                                                  label="Number of points",
+                                                  min=0,
+                                                  max=nrow(get.data.set()),
+                                                  step=1,
+                                                  value=0,
+                                                  ticks=F))
           ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'&&
                                       (input.label_observation_check||input.color_points_check)")
         }else if((is.factor(get.data.set()[,input$vari1])&&
@@ -2137,10 +2145,13 @@ output$points.identify.panel = renderUI({
           ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'&&
                                       (input.label_observation_check||input.color_points_check)")
         }
-        ret[[8]] = fixedRow(column(5,offset=1,
+        ret[[8]] = fixedRow(column(3,checkboxInput("show.stored.check",
+                                                   label="Show stored",
+                                                   value=T)),
+                            column(4,
                                    actionButton("store.obs.button",
                                                 label="Store")),
-                            column(5,offset=1,
+                            column(4,offset=1,
                                    actionButton("reset.obs.button",
                                                 label="Reset")))
       }
@@ -2265,25 +2276,47 @@ observe({
         if(input$single_vs_multiple_check&&
              input$select_identify_method%in%"Select by value"){
           if(input$same_level_of_check){
-            plot.par$locate.id=unique(c(plot.par.stored$locate.id,
-                                        which(get.data.set()[,input$same.level.of.select]%in%
-                                                get.data.set()[,input$
-                                                                 same.level.of.select][
-                                                                   input$
-                                                                     select.unique.value.slider])))
+            if(input$show.stored.check){
+              plot.par$locate.id=unique(c(plot.par.stored$locate.id,
+                                          which(get.data.set()[,input$same.level.of.select]%in%
+                                                  get.data.set()[,input$
+                                                                   same.level.of.select][
+                                                                     input$
+                                                                       select.unique.value.slider])))
+            }else{
+              plot.par$locate.id=which(get.data.set()[,input$same.level.of.select]%in%
+                                         get.data.set()[,input$
+                                                          same.level.of.select][
+                                                            input$select.unique.value.slider])
+            }
           }else{
-            plot.par$locate.id=unique(c(plot.par.stored$locate.id,input$select.unique.value.slider))
+            if(input$show.stored.check){
+              plot.par$locate.id=unique(c(plot.par.stored$locate.id,input$select.unique.value.slider))
+            }else{
+              plot.par$locate.id=input$select.unique.value.slider
+            }
           }
         }else if(!input$single_vs_multiple_check&&
                    input$select_identify_method%in%"Select by value"){
           if(input$same_level_of_check){
-            plot.par$locate.id=unique(c(plot.par.stored$locate.id,
-                                        which(get.data.set()[,input$same.level.of.select]%in%
-                                                get.data.set()[,input$
-                                                                 same.level.of.select][
-                                                                   as.numeric(input$value.select)])))
+            if(input$show.stored.check){
+              plot.par$locate.id=unique(c(plot.par.stored$locate.id,
+                                          which(get.data.set()[,input$same.level.of.select]%in%
+                                                  get.data.set()[,input$
+                                                                   same.level.of.select][
+                                                                     as.numeric(input$value.select)])))
+            }else{
+              plot.par$locate.id=which(get.data.set()[,input$same.level.of.select]%in%
+                                         get.data.set()[,input$
+                                                          same.level.of.select][
+                                                            as.numeric(input$value.select)])
+            }
           }else{
-            plot.par$locate.id=unique(c(plot.par.stored$locate.id,as.numeric(input$value.select)))
+            if(input$show.stored.check){
+              plot.par$locate.id=unique(c(plot.par.stored$locate.id,as.numeric(input$value.select)))
+            }else{
+              plot.par$locate.id=as.numeric(input$value.select)
+            }
           }
         }else{
           plot.par$locate.id=plot.par.stored$locate.id
@@ -2312,6 +2345,37 @@ observe({
         plot.par$locate.id=NULL
       }else{
         plot.par$locate.id=plot.par.stored$locate.id
+      }
+    }
+  })
+})
+
+observe({
+  input$scatter.extremes.slider
+  input$same_level_of_check
+  isolate({
+    if(!is.null(input$scatter.extremes.slider)&&
+         input$scatter.extremes.slider!=0){
+      plot.para = try(iNZightPlot(get.data.set()[,input$vari1],
+                                   get.data.set()[,input$vari2],
+                                   plot=F,
+                                   locate=1:nrow(get.data.set()),
+                                   locate.extreme=input$scatter.extremes.slider))
+      plot.para = plot.para$all$all
+      if(!is.null(plot.para$text.labels)){
+        inds=NULL
+        if(input$same_level_of_check){
+          inds = which(!plot.para$text.labels%in%"")
+          inds = which(get.data.set()[,input$same.level.of.select]%in%
+                         get.data.set()[,input$same.level.of.select][inds])
+        }else{
+          inds = which(!plot.para$text.labels%in%"")
+        }
+        if(input$show.stored.check){
+          plot.par$locate.id=unique(c(plot.par.stored$locate.id,inds))
+        }else{
+          plot.par$locate.id = inds
+        }
       }
     }
   })
