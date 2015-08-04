@@ -1,4 +1,4 @@
-###-----------------------------------------------###
+##-----------------------------------------------###
 ###  Server Functions for the "Visualize" Module  ###
 ###-----------------------------------------------###
 ###
@@ -17,7 +17,7 @@ vis.data <- reactive({
   get.data.set()
 })
 
-###  Then on the second day, he said let there be parameters for
+###  Then on the second day, he siad let there be parameters for
 ###  iNZightPlot():
 
 plot.par.stored = reactiveValues(
@@ -616,9 +616,29 @@ output$visualize.plot = renderPlot({
       temp.varnames.x = temp$varnames$x
       temp$varnames$x = temp$varnames$y
       temp$varnames$y = temp.varnames.x
-      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+                  }, warning = function(w) {
+                    print(w)
+                  }, error = function(e) {
+                    print(e)
+                  }, finally = {})
+      }else{
+        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      }
     }else{
-      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+      }else{
+        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+      }
     }
   }
 })
@@ -649,9 +669,29 @@ output$mini.plot = renderPlot({
       temp.varnames.x = temp$varnames$x
       temp$varnames$x = temp$varnames$y
       temp$varnames$y = temp.varnames.x
-      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+      }else{
+        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      }
     }else{
-      plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+      }else{
+        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+      }
     }
   }
 })
@@ -1706,8 +1746,10 @@ observe({
       plot.par$colby = NULL
       plot.par$varnames$colby = NULL
     }else{
-      plot.par$colby = vis.data()[,input$color_by_select]
-      plot.par$varnames$colby = input$color_by_select
+      if(input$color_by_select%in%colnames(vis.data())){
+        plot.par$colby = vis.data()[,input$color_by_select]
+        plot.par$varnames$colby = input$color_by_select
+      }
     }
   })
 })
@@ -2134,7 +2176,17 @@ output$points.identify.panel = renderUI({
                                                   value=0,
                                                   ticks=F))
           ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'&&
-                                      (input.label_observation_check||input.color_points_check)")
+                                      (input.label_observation_check||input.color_points_check)",
+                                      fixedRow(column(8,
+                                                      sliderInput("range.values.slider", 
+                                                                  label = "Select range", 
+                                                                  min = 0, 
+                                                                  max = 1, 
+                                                                  value = c(0, 1))),
+                                               column(4,
+                                                      selectInput("range.column.select",
+                                                                  label="Select column",
+                                                                  choices=colnames(get.data.set())))))
         }else if((is.factor(get.data.set()[,input$vari1])&&
                    is.numeric(get.data.set()[,input$vari2]))||
                    is.numeric(get.data.set()[,input$vari1])&&
@@ -2389,6 +2441,54 @@ observe({
           plot.par$locate.id = inds
         }
       }
+    }
+  })
+})
+
+observe({
+  input$range.column.select
+  input$same_level_of_check
+  isolate({
+    if(!is.null(input$range.column.select)&&
+         !is.null(input$range.values.slider)){
+      if(input$same_level_of_check){
+        updateSliderInput(session,
+                          "range.values.slider",
+                          min=1,
+                          max=length(unique(get.data.set()[,input$same.level.of.select])),
+                          step=1,
+                          value=c(input$range.values.slider[1],input$range.values.slider[2]))
+      }else{
+        updateSliderInput(session,
+                          "range.values.slider",
+                          min=1,
+                          max=nrow(get.data.set()),
+                          step=1,
+                          value=c(input$range.values.slider[1],input$range.values.slider[2]))
+      }
+    }
+  })
+})
+
+observe({
+  input$range.values.slider
+  input$range.column.select
+  input$same_level_of_check
+  isolate({
+    if(!is.null(input$range.values.slider)&&
+         !is.null(input$range.column.select)&&
+         !is.null(input$same_level_of_check)){
+      temp = get.data.set()[,input$range.column.select]
+      names(temp) = 1:length(temp)
+      temp = sort(temp)
+      temp = as.numeric(
+        names(temp)[input$range.values.slider[1]:
+                      input$range.values.slider[2]])
+      if(input$same_level_of_check){
+        temp = which(get.data.set()[,input$same.level.of.select]%in%
+                       get.data.set()[,input$same.level.of.select][temp])
+      }
+      plot.par$locate.id = temp
     }
   })
 })
