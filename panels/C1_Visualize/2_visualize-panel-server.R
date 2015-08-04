@@ -21,7 +21,8 @@ vis.data <- reactive({
 ###  iNZightPlot():
 
 plot.par.stored = reactiveValues(
-  locate.id=NULL
+  locate.id=NULL,
+  column.select.order=NULL
   )
 
 plot.par <- reactiveValues(
@@ -2101,11 +2102,11 @@ output$points.identify.panel = renderUI({
                                                                                    label="Select a column",
                                                                                    choices=colnames(get.data.set()))),
                                                                 column(6,
-                                                                       selectInput("value.select",
+                                                                       selectizeInput("value.select",
                                                                                    label="Select multiple values",
                                                                                    choices=ch,
                                                                                    multiple=T,
-                                                                                   selectize=F,
+#                                                                                    selectize=F,
                                                                                    size=8)))),
                                       conditionalPanel("input.single_vs_multiple_check",
                                                        fixedRow(column(8,
@@ -2162,14 +2163,23 @@ output$points.identify.panel = renderUI({
 
 observe({
   if(!is.null(input$same_level_of_check)&!is.null(input$by.value.column.select)){
-    namesCH = as.character(get.data.set()[,input$by.value.column.select])
-    ch = 1:length(namesCH)
-    names(ch) = namesCH
-    if(is.numeric(get.data.set()[,input$by.value.column.select])){
-      ch = ch[as.character(sort(get.data.set()[,input$by.value.column.select]))]
+#     namesCH = as.character(get.data.set()[,input$by.value.column.select])
+#     ch = 1:length(namesCH)
+#     names(ch) = namesCH
+#     if(is.numeric(get.data.set()[,input$by.value.column.select])){
+#       ch = ch[as.character(sort(get.data.set()[,input$by.value.column.select]))]
+#     }
+    ch = get.data.set()[,input$by.value.column.select]
+    names(ch) = 1:length(ch)
+    if(is.numeric(ch)){
+      ch = sort(ch)
     }
+    plot.par.stored$column.select.order = ch
+#     names(ch) = NULL
+#     print(plot.par.stored$column.select.order)
     ch["none"] = 0
-    updateSelectInput(session,"value.select",
+    ch = as.list(ch)
+    updateSelectizeInput(session,"value.select",
                       choices=ch,
                       selected = 0)
     if(input$same_level_of_check){
@@ -2300,6 +2310,7 @@ observe({
                    input$select_identify_method%in%"Select by value"){
           if(input$same_level_of_check){
             if(input$show.stored.check){
+#               print(input$value.select)
               plot.par$locate.id=unique(c(plot.par.stored$locate.id,
                                           which(get.data.set()[,input$same.level.of.select]%in%
                                                   get.data.set()[,input$
@@ -2313,6 +2324,7 @@ observe({
             }
           }else{
             if(input$show.stored.check){
+#               print(input$value.select)
               plot.par$locate.id=unique(c(plot.par.stored$locate.id,as.numeric(input$value.select)))
             }else{
               plot.par$locate.id=as.numeric(input$value.select)
