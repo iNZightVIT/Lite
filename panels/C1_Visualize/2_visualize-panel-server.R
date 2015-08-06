@@ -182,6 +182,7 @@ handle.input = function(input, subs = FALSE) {
 }
 
 output$visualize.panel <- renderUI({
+  get.data.set()
   isolate({
     visualize.panel.ui(get.data.set())
   })
@@ -320,7 +321,7 @@ observe({
 output$subs1_panel = renderUI({
   isolate({
     ch  = colnames(vis.data())
-    if(!is.null(input$vari1)){
+    if(!is.null(input$vari1)&&input$vari1%in%ch){
       ch  = ch[-which(ch%in%input$vari1)]
     }
     if(!is.null(input$vari2)&&input$vari2%in%ch){
@@ -425,23 +426,16 @@ observe({
   })
 })
 
-# #  Clean up slider every time the subset variables change.
-# observe({
-#   input$subs1
-#   isolate({
-#     plot.par$g1.level = NULL
-#     updateSliderInput(session,
-#                       inputId = "sub1_level",
-#                       value = 0)
-#   })
-# })
-
 ##  Variable 2  ##
 ##
 ##  Select variable 2.
 output$vari2_panel = renderUI({
   isolate({
-    ch = colnames(vis.data())[-which(colnames(vis.data())%in%input$vari1)]
+    ch = colnames(vis.data())
+    if(!is.null(input$vari1)&&
+         input$vari1%in%colnames(vis.data())){
+      ch = ch[-which(ch%in%input$vari1)]
+    }
     selectInput(inputId = "vari2",
                 label = "Select second variable:",
                 choices = c("none", ch),
@@ -457,7 +451,7 @@ observe({
         plot.par$y = vari2.par
         plot.par$varnames$y = input$vari2
         ch  = colnames(vis.data())
-        if(!is.null(input$vari1)){
+        if(!is.null(input$vari1)&&input$vari1%in%ch){
           ch  = ch[-which(ch%in%input$vari1)]
         }
         if(!is.null(input$vari2)&&input$vari2%in%ch){
@@ -470,7 +464,7 @@ observe({
         }
         updateSelectInput(session,"subs1",choices=ch,selected=sel)
         ch  = colnames(vis.data())
-        if(!is.null(input$vari1)){
+        if(!is.null(input$vari1)&&input$vari1%in%ch){
           ch  = ch[-which(ch%in%input$vari1)]
         }
         if(!is.null(input$vari2)&&input$vari2%in%ch){
@@ -490,7 +484,7 @@ observe({
 output$subs2_panel = renderUI({
   isolate({
     ch = colnames(vis.data())
-    if(!is.null(input$vari1)){
+    if(!is.null(input$vari1)&&input$vari1%in%ch){
       ch  = ch[-which(ch%in%input$vari1)]
     }
     if(!is.null(input$vari2)&&input$vari2%in%ch){
@@ -511,13 +505,12 @@ observe({
     plot.par$g2 = subs2.par
     plot.par$varnames$g2 = input$subs2
     ch = colnames(vis.data())
-    if(!is.null(input$vari1)){
+    if(!is.null(input$vari1)&&input$vari1%in%ch){
       ch  = ch[-which(ch%in%input$vari1)]
     }
     if(!is.null(input$vari2)&&input$vari2%in%ch){
       ch  = ch[-which(ch%in%input$vari2)]
     }
-#     print(ch)
     updateSelectInput(session,"subs1",choices=ch,selected=input$subs1)
   })
 })
@@ -577,18 +570,6 @@ observe({
   }
   plot.par$g2.level = g2_level
 })
-
-
-# ##  Clean up slider every time the subset variables change.
-# observe({
-#     input$subs2
-#     isolate({
-#       plot.par$g2.level = NULL
-#       updateSliderInput(session,
-#                         inputId = "sub2_level",
-#                         value = 0)
-#     })
-# })
 
 output$visualize.plot = renderPlot({
   isolate({
@@ -872,6 +853,7 @@ observe({
   }
 })
 
+# This refreshes the infernce parameters.
 output$add_inference = renderUI({
   input$vari1
   input$vari2
@@ -905,7 +887,7 @@ output$add_inference = renderUI({
     intervals = NULL
     graphical.par$inference.par = NULL
     graphical.par$bs.inference = F
-    if(input$vari1%in%colnames(get.data.set)){
+    if(input$vari1%in%colnames(get.data.set())){
       if((!is.null(input$confidence_interval1)&&
            input$confidence_interval1)||
            (!is.null(input$comparison_interval1)&&
@@ -936,9 +918,11 @@ output$add_inference = renderUI({
       }
     }
     graphical.par$inference.type = intervals
-    # vari1 = numeric; vari2 = none
-#     print(input$toggle_inference)
-    if(!input$vari2%in%"none"&&
+    # vari1 = numeric; vari2 = numeric
+    if(!is.null(input$vari1)&&
+         (!input$vari2%in%"none"&&
+         input$vari1%in%colnames(dafr)&&
+         input$vari2%in%colnames(dafr))&&
          ((class(dafr[,input$vari1])%in%"numeric"|
           class(dafr[,input$vari1])%in%"integer")&
          (class(dafr[,input$vari2])%in%"numeric"|
@@ -950,13 +934,17 @@ output$add_inference = renderUI({
                                                    input.check_smoother",
                                                    add_inference.check)))
     # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
-    }else if(!input$vari2%in%"none"&&
-               (((class(dafr[,input$vari1])%in%"numeric"|
-                class(dafr[,input$vari1])%in%"integer")&
-               (class(dafr[,input$vari2])%in%"factor"|
-                  class(dafr[,input$vari2])%in%"character"))|
-               ((class(dafr[,input$vari1])%in%"factor"|
-                   class(dafr[,input$vari1])%in%"character")&
+    }else if(!is.null(input$vari1)&&
+               (input$vari1%in%colnames(dafr)&&
+               input$vari2%in%colnames(dafr))&&
+               ((input$vari2%in%"none"&&
+                   (class(dafr[,input$vari1])%in%"numeric"|
+                      class(dafr[,input$vari1])%in%"integer")&
+                   (class(dafr[,input$vari2])%in%"factor"|
+                      class(dafr[,input$vari2])%in%"character"))|
+               (input$vari2%in%"none"&&
+                  (class(dafr[,input$vari1])%in%"factor"|
+                     class(dafr[,input$vari1])%in%"character")&
                   (class(dafr[,input$vari2])%in%"numeric"|
                      class(dafr[,input$vari2])%in%"integer")))){
       ret = list(conditionalPanel("input.toggle_inference",
@@ -973,14 +961,17 @@ output$add_inference = renderUI({
                                                    comparison.interval.check))
                  )
     # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
-    }else if((!input$vari2%in%"none"&&
-                ((class(dafr[,input$vari1])%in%"factor"|
-                class(dafr[,input$vari1])%in%"character")&
-               (class(dafr[,input$vari2])%in%"factor"|
-                  class(dafr[,input$vari2])%in%"character")))|
-               ((class(dafr[,input$vari1])%in%"factor"|
-               class(dafr[,input$vari1])%in%"character")&
-                 input$vari2%in%"none")){
+    }else if(!is.null(input$vari1)&&
+               (input$vari1%in%colnames(dafr)&&
+                input$vari2%in%colnames(dafr))&&
+                (!input$vari2%in%"none"&
+                   (class(dafr[,input$vari1])%in%"factor"|
+                      class(dafr[,input$vari1])%in%"character")&
+                   (class(dafr[,input$vari2])%in%"factor"|
+                      class(dafr[,input$vari2])%in%"character"))|
+               (input$vari2%in%"none"&
+                  (class(dafr[,input$vari1])%in%"factor"|
+                     class(dafr[,input$vari1])%in%"character"))){
       ret = list(conditionalPanel("input.toggle_inference",
                                   h5("Parameter"),helpText("Proportions"),
                                   normal_bootstrap.radio,
@@ -989,9 +980,11 @@ output$add_inference = renderUI({
                                   conditionalPanel("input.inference_type1=='Normal'",
                                                    comparison.interval.check)))
     # var1 = numeric; vari2 = none
-    }else if(input$vari2%in%"none"&&
-               (class(dafr[,input$vari1])%in%"numeric"|
-               class(dafr[,input$vari1])%in%"integer")){
+    }else if(!is.null(input$vari1)&&
+               input$vari1%in%colnames(dafr)&&
+               (input$vari2%in%"none"&&
+                  (class(dafr[,input$vari1])%in%"numeric"|
+                     class(dafr[,input$vari1])%in%"integer"))){
       ret = list(conditionalPanel("input.toggle_inference",
                                   mean_median.radio,
                                   conditionalPanel("input.inference_parameter1=='Mean'",
@@ -1023,11 +1016,12 @@ observe({
     intervals = NULL
     graphical.par$bs.inference = F
     # vari1 = numeric; vari2 = none
-    if(!is.null(input$vari1)&&
-         input$vari1%in%colnames(get.data.set())&&
-         is.numeric(get.data.set()[,input$vari1])&&
+    if((!is.null(input$vari1)&&
          !is.null(input$vari2)&&
-         !input$vari2%in%colnames(get.data.set())){
+          input$vari1%in%colnames(get.data.set())&&
+          input$vari2%in%"none")&&
+         (is.numeric(get.data.set()[,input$vari1])|
+            is.integer(get.data.set()[,input$vari1]))){
       if(!is.null(input$inference_parameter1)&&
            input$inference_parameter1%in%"Mean"&&
            (!is.null(input$confidence_interval1)&&
@@ -1059,20 +1053,17 @@ observe({
         }
       }
     # vari1 = factor; vari2 = none or vari1 = factor; vari2 = factor
-    }else if((!is.null(input$vari1)&&
+    }else if(!is.null(input$vari1)&&
                 input$vari1%in%colnames(get.data.set())&&
-                (is.character(get.data.set()[,input$vari1])|
-                   is.factor(get.data.set()[,input$vari1]))&&
-                !is.null(input$vari2)&&input$vari2%in%"none")||
-               ((!is.null(input$vari1)&&
-                   input$vari1%in%colnames(get.data.set())&&
-                   (is.factor(get.data.set()[,input$vari1])|
-                      is.character(get.data.set()[,input$vari1])))&&
-                  (!is.null(input$vari2)&&
-                     input$vari2%in%colnames(get.data.set())&&
-                     (is.factor(get.data.set()[,input$vari2])|
-                        is.character(get.data.set()[,input$vari2]))))
-             ){
+                (input$vari2%in%"none"&&
+                   (is.character(get.data.set()[,input$vari1])|
+                   is.factor(get.data.set()[,input$vari1])))||
+               ((!input$vari2%in%"none"&&
+                  input$vari2%in%colnames(get.data.set()))&&                                              
+                  ((is.factor(get.data.set()[,input$vari1])|
+                      is.character(get.data.set()[,input$vari1]))&&
+                  (is.factor(get.data.set()[,input$vari2])|
+                     is.character(get.data.set()[,input$vari2]))))){
       graphical.par$inference.par = "proportion"
       if(!is.null(input$inference_type1)&&
            input$inference_type1%in%"Normal"){
@@ -1095,27 +1086,25 @@ observe({
       }
     # vari1 = numeric; vari2 = numeric
     }else if((!is.null(input$vari1)&&
+                !is.null(input$vari2)&&
                 input$vari1%in%colnames(get.data.set())&&
-                is.numeric(get.data.set()[,input$vari1]))&&
-               (!is.null(input$vari2)&&
-                  input$vari2%in%colnames(get.data.set())&&
-                  is.numeric(get.data.set()[,input$vari2]))){
+                input$vari2%in%colnames(get.data.set()))&&
+                (is.numeric(get.data.set()[,input$vari1])&&
+                   is.numeric(get.data.set()[,input$vari2]))){
       graphical.par$bs.inference = input$add.inference
     # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
-    }else if(((!is.null(input$vari1)&&
-                 input$vari1%in%colnames(get.data.set())&&
-                 (is.factor(get.data.set()[,input$vari1])|
-                    is.character(get.data.set()[,input$vari1])))&&
-                (!is.null(input$vari2)&&
-                   input$vari2%in%colnames(get.data.set())&&
-                   (is.numeric(get.data.set()[,input$vari2]))))||
-               ((!is.null(input$vari1)&&
-                   input$vari1%in%colnames(get.data.set())&&
-                   (is.numeric(get.data.set()[,input$vari1])))&&
-                  (!is.null(input$vari2)&&
-                     input$vari2%in%colnames(get.data.set())&&
-                     (is.factor(get.data.set()[,input$vari2])|
-                        is.character(get.data.set()[,input$vari2]))))){
+    }else if((!is.null(input$vari1)&&
+                !is.null(input$vari2)&&
+                input$vari1%in%colnames(get.data.set())&&
+                input$vari1%in%colnames(get.data.set()))&&
+               (((is.factor(get.data.set()[,input$vari1])|
+                   is.character(get.data.set()[,input$vari1]))&&
+                   (is.numeric(get.data.set()[,input$vari2])|
+                      is.integer(get.data.set()[,input$vari2])))||
+               ((is.numeric(get.data.set()[,input$vari1])|
+                   is.integer(get.data.set()[,input$vari1]))&&
+                  (is.factor(get.data.set()[,input$vari2])|
+                     is.character(get.data.set()[,input$vari2]))))){
       if(!is.null(input$inference_parameter1)&&
            input$inference_parameter1%in%"Mean"&&
            ((!is.null(input$confidence_interval1)&&
@@ -1184,38 +1173,55 @@ observe({
 output$advanced_options_panel = renderUI({
   ret = NULL
   isolate({
-    if((class(get.data.set()[,input$vari1])%in%"factor"|
-          class(get.data.set()[,input$vari1])%in%"character")&
-         input$vari2%in%"none"){
+    # vari = factor, vari = none
+    if((!is.null(input$vari1)&&
+          !is.null(input$vari2)&&
+          input$vari1%in%colnames(get.data.set())&&
+          input$vari2%in%"none")&&
+         (class(get.data.set()[,input$vari1])%in%"factor"|
+          class(get.data.set()[,input$vari1])%in%"character")){
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Code more variables',
                                     'Change plot appearance',
                                     'Customize labels'),
                         selected = 'Change plot appearance')
-    }else if((class(get.data.set()[,input$vari1])%in%"factor"|
-                class(get.data.set()[,input$vari1])%in%"character")&
+    # vari1 = factor, vari2 = factor
+    }else if((!is.null(input$vari1)&&
+               !is.null(input$vari2)&&
                !input$vari2%in%"none"&&
+                input$vari1%in%colnames(get.data.set())&&
+                input$vari2%in%colnames(get.data.set()))&&
+               ((class(get.data.set()[,input$vari1])%in%"factor"|
+                class(get.data.set()[,input$vari1])%in%"character")&
                (class(get.data.set()[,input$vari2])%in%"factor"|
-                  class(get.data.set()[,input$vari2])%in%"character")){
+                  class(get.data.set()[,input$vari2])%in%"character"))){
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Change plot appearance',
                                     'Customize labels'),
                         selected = 'Change plot appearance')
-    }else if(((class(get.data.set()[,input$vari1])%in%"numeric"|
-                class(get.data.set()[,input$vari1])%in%"integer")&
-               input$vari2%in%"none")|
-               ((class(get.data.set()[,input$vari1])%in%"factor"|
-                   class(get.data.set()[,input$vari1])%in%"character")&
-                  !input$vari2%in%"none"&&
-                  (class(get.data.set()[,input$vari2])%in%"integer"|
-                     class(get.data.set()[,input$vari2])%in%"numeric"))|
-               ((class(get.data.set()[,input$vari1])%in%"integer"|
-                   class(get.data.set()[,input$vari1])%in%"numeric")&
-                  !input$vari2%in%"none"&&
-                  (class(get.data.set()[,input$vari2])%in%"character"|
-                     class(get.data.set()[,input$vari2])%in%"factor"))){
+    # vari1 = numeric , vari2 = none or
+    # vari1 = numeric , vari2 = factor or
+    # vari1 = factor , vari2 = numeric
+    }else if((!is.null(input$vari1)&&
+               !is.null(input$vari2)&&
+                input$vari1%in%colnames(get.data.set()))&&
+               ((input$vari2%in%"none"&
+                   (class(get.data.set()[,input$vari1])%in%"numeric"|
+                      class(get.data.set()[,input$vari1])%in%"integer"))||
+                  ((!input$vari2%in%"none"&&
+                      input$vari2%in%colnames(get.data.set()))&&
+                     (class(get.data.set()[,input$vari1])%in%"factor"|
+                        class(get.data.set()[,input$vari1])%in%"character")&
+                     (class(get.data.set()[,input$vari2])%in%"integer"|
+                        class(get.data.set()[,input$vari2])%in%"numeric"))||
+                  ((!input$vari2%in%"none"&&
+                      input$vari2%in%colnames(get.data.set()))&&
+                     (class(get.data.set()[,input$vari1])%in%"integer"|
+                        class(get.data.set()[,input$vari1])%in%"numeric")&
+                     (class(get.data.set()[,input$vari2])%in%"character"|
+                        class(get.data.set()[,input$vari2])%in%"factor")))){
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Code more variables',
@@ -1223,11 +1229,16 @@ output$advanced_options_panel = renderUI({
                                     'Identify points',
                                     'Customize labels'),
                         selected = 'Change plot appearance')
-    }else if((class(get.data.set()[,input$vari1])%in%"numeric"|
-                class(get.data.set()[,input$vari1])%in%"integer")&
+    # vari1 = numeric , vari2 = numeric
+    }else if((!is.null(input$vari1)&&
+               !is.null(input$vari2)&&
                !input$vari2%in%"none"&&
-               (class(get.data.set()[,input$vari1])%in%"numeric"|
-                  class(get.data.set()[,input$vari1])%in%"integer")){
+               input$vari1%in%colnames(get.data.set())&&
+               input$vari2%in%colnames(get.data.set()))&&
+               ((class(get.data.set()[,input$vari1])%in%"numeric"|
+                   class(get.data.set()[,input$vari1])%in%"integer")&
+                  (class(get.data.set()[,input$vari2])%in%"numeric"|
+                     class(get.data.set()[,input$vari2])%in%"integer"))){
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Code more variables',
@@ -1245,6 +1256,7 @@ output$advanced_options_panel = renderUI({
   list(ret) 
 })
 
+# Advanced options panel
 output$plot.appearance.panel = renderUI({
   ret=NULL
   input$vari1
@@ -1292,19 +1304,28 @@ output$plot.appearance.panel = renderUI({
     
     adjust.num.bins.object = NULL
     # bar plot with one factor variable
-    if((class(get.data.set()[,input$vari1])%in%"factor"|
-          class(get.data.set()[,input$vari1])%in%"character")&
-         input$vari2%in%"none"){
+    # vari1 = numeric , vari2 = none
+    if((!is.null(input$vari1)&&
+          !is.null(input$vari2)&&
+          input$vari1%in%colnames(get.data.set())&&
+          input$vari2%in%"none")&&
+         (class(get.data.set()[,input$vari1])%in%"factor"|
+            class(get.data.set()[,input$vari1])%in%"character")){
       ret = list(h5("Change plot appearance"),
                  select.bg.object,
                  select.barcolor.object
       )
     # bar plot with two factor variables
-    }else if((class(get.data.set()[,input$vari1])%in%"factor"|
-              class(get.data.set()[,input$vari1])%in%"character")&
+    # vari1 = factor , vari2 = factor
+    }else if((!is.null(input$vari1)&&
+               !is.null(input$vari2)&&
                !input$vari2%in%"none"&&
-             (class(get.data.set()[,input$vari2])%in%"factor"|
-                class(get.data.set()[,input$vari2])%in%"character")){
+               input$vari1%in%colnames(get.data.set())&&
+               input$vari2%in%colnames(get.data.set()))&&
+               ((class(get.data.set()[,input$vari1])%in%"factor"|
+                      class(get.data.set()[,input$vari1])%in%"character")&
+                     (class(get.data.set()[,input$vari2])%in%"factor"|
+                        class(get.data.set()[,input$vari2])%in%"character"))){
       select.bg.object = selectInput(inputId="select.bg1",label="Select Background colour:",
                                      choices=cols1,
                                      selected=graphical.par$bg)
@@ -1312,19 +1333,26 @@ output$plot.appearance.panel = renderUI({
                  select.bg.object
       )
     # dotplot or histogram for one numeric variable
-    }else if(((class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer")&
-                input$vari2%in%"none")|
-               ((class(get.data.set()[,input$vari1])%in%"factor"|
-                   class(get.data.set()[,input$vari1])%in%"character")&
-                  !input$vari2%in%"none"&&
-                  (class(get.data.set()[,input$vari2])%in%"integer"|
-                     class(get.data.set()[,input$vari2])%in%"numeric"))|
-               ((class(get.data.set()[,input$vari1])%in%"integer"|
-                   class(get.data.set()[,input$vari1])%in%"numeric")&
-                  !input$vari2%in%"none"&&
-                  (class(get.data.set()[,input$vari2])%in%"character"|
-                     class(get.data.set()[,input$vari2])%in%"factor"))){
+    # vari1 = factor , vari2 = numeric or
+    # vari1 = numeric , vari2 = factor
+    }else if((!is.null(input$vari1)&&
+               !is.null(input$vari1)&&
+                input$vari1%in%colnames(get.data.set()))&&
+               ((input$vari2%in%"none"&&
+                   (class(get.data.set()[,input$vari1])%in%"numeric"|
+                      class(get.data.set()[,input$vari1])%in%"integer"))||
+                  ((!input$vari2%in%"none"&&
+                      input$vari2%in%colnames(get.data.set()))&&
+                     (class(get.data.set()[,input$vari1])%in%"factor"|
+                        class(get.data.set()[,input$vari1])%in%"character")&
+                     (class(get.data.set()[,input$vari2])%in%"integer"|
+                        class(get.data.set()[,input$vari2])%in%"numeric"))||
+                  ((!input$vari2%in%"none"&&
+                      input$vari2%in%colnames(get.data.set()))&&
+                     (class(get.data.set()[,input$vari1])%in%"integer"|
+                        class(get.data.set()[,input$vari1])%in%"numeric")&
+                     (class(get.data.set()[,input$vari2])%in%"character"|
+                        class(get.data.set()[,input$vari2])%in%"factor")))){
       select.plot.type.object = selectInput(inputId = "select.plot.type",
                                             label = "Plot type:",
                                             choices=c("default",
@@ -1355,10 +1383,8 @@ output$plot.appearance.panel = renderUI({
           nbins = get.nbins()
         }
         m = length(unique(get.data.set()[,input$vari1]))
-        if(input$vari2%in%colnames(get.data.set())){
-          m = max(c(length(unique(get.data.set()[,input$vari1])),
-                    length(unique(get.data.set()[,input$vari2]))))
-        }
+        m = max(c(length(unique(get.data.set()[,input$vari1])),
+                length(unique(get.data.set()[,input$vari2]))))
         if(m<nbins){
           m=nbins
         }
@@ -1370,11 +1396,17 @@ output$plot.appearance.panel = renderUI({
                  select.barcolor.object,
                  adjust.num.bins.object)
       }
-    }else if((class(get.data.set()[,input$vari1])%in%"numeric"|
-                class(get.data.set()[,input$vari1])%in%"integer")&
-               !input$vari2%in%"none"&&
-               (class(get.data.set()[,input$vari1])%in%"numeric"|
-                  class(get.data.set()[,input$vari1])%in%"integer")){
+    # scatter plot
+    # vari1 = numeric , vari2 = numeric
+    }else if((!is.null(input$vari1)&&
+                !is.null(input$vari2)&&
+                !input$vari2%in%"none"&&
+                input$vari1%in%colnames(get.data.set())&&
+                input$vari2%in%colnames(get.data.set()))&&
+               ((class(get.data.set()[,input$vari1])%in%"numeric"|
+                   class(get.data.set()[,input$vari1])%in%"integer")&
+                  (class(get.data.set()[,input$vari1])%in%"numeric"|
+                     class(get.data.set()[,input$vari1])%in%"integer"))){
       select.plot.type.object = selectInput(inputId = "select.plot.type",
                                             label = "Plot type:",
                                             choices=c("default",
@@ -1413,7 +1445,9 @@ observe({
   input$select.plot.type
   if(!is.null(input$vari1)&!is.null(input$vari2)){
     isolate({
-      if(input$vari1%in%colnames(get.data.set())){
+      if(input$vari1%in%colnames(get.data.set())&&
+           (input$vari2%in%colnames(get.data.set())||
+              input$vari2%in%"none")){
         if(!is.null(input$advanced_options)){
           sel = input$advanced_options
           ch = NULL
@@ -1646,7 +1680,8 @@ output$customize.labels.panel = renderUI({
     x_axis_text.object = textInput(inputId="x_axis_text",label="X-axis label:")
     y_axis_text.object = textInput(inputId="y_axis_text",label="Y-axis label:")
     change.labels.button.object = actionButton(inputId="change.labels.button",label="Submit")
-    if(!is.null(vis.data())&&!is.null(input$vari1)&&!is.null(input$vari2)){
+    if(!is.null(vis.data())&&!is.null(input$vari1)&&!is.null(input$vari2)&&
+         input$vari1%in%colnames(get.data.set())){
       if((class(vis.data()[,input$vari1])%in%"numeric"|
             class(vis.data()[,input$vari1])%in%"integer")&
            !is.null(input$vari2)&&!input$vari2%in%"none"&&
@@ -1706,7 +1741,9 @@ output$code.variables.panel = renderUI({
   isolate({
     title.pane = h4("Code More Variables")
     color.by.object  = NULL
-    if((class(vis.data()[,input$vari1])%in%"factor"|
+    if(!is.null(input$vari1)&&
+         input$vari1%in%colnames(get.data.set())&&
+         (class(vis.data()[,input$vari1])%in%"factor"|
           class(vis.data()[,input$vari1])%in%"character")&
          (is.null(input$vari2)|input$vari2%in%"none")){
       color.by.object = selectInput("color_by_select",
@@ -1720,7 +1757,9 @@ output$code.variables.panel = renderUI({
                                     selected=input$color_by_select)
     }
     resize.by.object = NULL
-    if((class(vis.data()[,input$vari1])%in%"numeric"|
+    if(!is.null(input$vari1)&&
+         input$vari1%in%colnames(get.data.set())&&
+         (class(vis.data()[,input$vari1])%in%"numeric"|
           class(vis.data()[,input$vari1])%in%"integer")&
          (!is.null(input$vari2)&!input$vari2%in%"none")&&
          (class(vis.data()[,input$vari2])%in%"numeric"|
@@ -2131,7 +2170,7 @@ output$points.identify.panel = renderUI({
              is.numeric(get.data.set()[,input$vari2])){
           ch = ""
           if(!is.null(input$by.value.column.select)){
-            ch = get.data.set()[,input$by.value.column.select]
+            ch = c("none",get.data.set()[,input$by.value.column.select])
           }
           ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'&&
                                       (input.label_observation_check||input.color_points_check)",
@@ -2144,11 +2183,12 @@ output$points.identify.panel = renderUI({
                                                                                    label="Select a column",
                                                                                    choices=colnames(get.data.set()))),
                                                                 column(6,
-                                                                       selectizeInput("value.select",
+                                                                       selectInput("value.select",
                                                                                    label="Select multiple values",
                                                                                    choices=ch,
                                                                                    multiple=T,
-#                                                                                    selectize=F,
+                                                                                   selectize=F,
+                                                                                   selected="none",
                                                                                    size=8)))),
                                       conditionalPanel("input.single_vs_multiple_check",
                                                        fixedRow(column(8,
@@ -2182,7 +2222,8 @@ output$points.identify.panel = renderUI({
                                                                   label = "Select range", 
                                                                   min = 0, 
                                                                   max = 1, 
-                                                                  value = c(0, 1))),
+                                                                  value = c(0, 1),
+                                                                  ticks=F)),
                                                column(4,
                                                       selectInput("range.column.select",
                                                                   label="Select column",
@@ -2214,26 +2255,18 @@ output$points.identify.panel = renderUI({
 })
 
 observe({
-  if(!is.null(input$same_level_of_check)&!is.null(input$by.value.column.select)){
-#     namesCH = as.character(get.data.set()[,input$by.value.column.select])
-#     ch = 1:length(namesCH)
-#     names(ch) = namesCH
-#     if(is.numeric(get.data.set()[,input$by.value.column.select])){
-#       ch = ch[as.character(sort(get.data.set()[,input$by.value.column.select]))]
-#     }
-    ch = get.data.set()[,input$by.value.column.select]
-    names(ch) = 1:length(ch)
+  if(!is.null(input$same_level_of_check)&&
+       !is.null(input$by.value.column.select)&&
+       input$by.value.column.select%in%colnames(get.data.set())){
+    ch = unique(get.data.set()[,input$by.value.column.select])
     if(is.numeric(ch)){
       ch = sort(ch)
     }
-    plot.par.stored$column.select.order = ch
-#     names(ch) = NULL
-#     print(plot.par.stored$column.select.order)
-    ch["none"] = 0
-    ch = as.list(ch)
-    updateSelectizeInput(session,"value.select",
+    ch = as.character(ch)
+    ch = c("none",ch)
+    updateSelectInput(session,"value.select",
                       choices=ch,
-                      selected = 0)
+                      selected = "none")
     if(input$same_level_of_check){
       updateSliderInput(session,"select.unique.value.slider",
                         min=0,
@@ -2256,14 +2289,7 @@ observe({
   }
 })
 
-observe({
-  input$select.unique.value.slider
-  isolate({
-    updateNumericInput(session,"specify.correct.numeric",
-                       value=input$select.unique.value.slider)
-  })
-})
-
+# identify points per label
 observe({
   input$label_observation_check
   input$label.select
@@ -2286,6 +2312,7 @@ observe({
   })
 })
 
+# identify points per color
 observe({
   input$color_points_check
   input$color.select
@@ -2314,6 +2341,9 @@ observe({
   })
 })
 
+# Identify points is selected, 
+# select single value to identify,
+# or multiple value from list
 observe({
   input$select.unique.value.slider
   input$specify.correct.numeric
@@ -2334,9 +2364,13 @@ observe({
          !is.null(input$advanced_options)&&
          !is.null(input$by.value.column.select)&&
          !is.null(input$value.select)){
-      if(input$advanced_options%in%'Identify points'){
+      if(input$select_identify_method%in%'Select by value'&&
+           input$vari1%in%colnames(get.data.set())&&
+           input$vari2%in%colnames(get.data.set())&&
+           input$vari1%in%get.numeric.column.names(get.data.set())&&
+           input$vari2%in%get.numeric.column.names(get.data.set())){
         if(input$single_vs_multiple_check&&
-             input$select_identify_method%in%"Select by value"){
+             input$advanced_options%in%'Identify points'){
           if(input$same_level_of_check){
             if(input$show.stored.check){
               plot.par$locate.id=unique(c(plot.par.stored$locate.id,
@@ -2359,27 +2393,27 @@ observe({
             }
           }
         }else if(!input$single_vs_multiple_check&&
-                   input$select_identify_method%in%"Select by value"){
+                   input$advanced_options%in%'Identify points'){
+          temp = which(get.data.set()[,as.character(input$by.value.column.select)]%in%
+                         input$value.select)
           if(input$same_level_of_check){
             if(input$show.stored.check){
-#               print(input$value.select)
-              plot.par$locate.id=unique(c(plot.par.stored$locate.id,
-                                          which(get.data.set()[,input$same.level.of.select]%in%
-                                                  get.data.set()[,input$
-                                                                   same.level.of.select][
-                                                                     as.numeric(input$value.select)])))
+              if(!is.null(temp)&&!length(temp)==0){
+                plot.par$locate.id=unique(c(plot.par.stored$locate.id,
+                                            which(get.data.set()[,input$same.level.of.select]%in%
+                                                    get.data.set()[,input$
+                                                                     same.level.of.select][temp])))
+              }
             }else{
               plot.par$locate.id=which(get.data.set()[,input$same.level.of.select]%in%
                                          get.data.set()[,input$
-                                                          same.level.of.select][
-                                                            as.numeric(input$value.select)])
+                                                          same.level.of.select][temp])
             }
           }else{
             if(input$show.stored.check){
-#               print(input$value.select)
-              plot.par$locate.id=unique(c(plot.par.stored$locate.id,as.numeric(input$value.select)))
+              plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
             }else{
-              plot.par$locate.id=as.numeric(input$value.select)
+              plot.par$locate.id=temp
             }
           }
         }else{
@@ -2390,6 +2424,8 @@ observe({
   })
 })
 
+# numeric for single value choice has changed,
+# update slider for single choice
 observe({
   input$specify.correct.numeric
   isolate({
@@ -2398,6 +2434,18 @@ observe({
   })
 })
 
+# the unique value slider has changed,
+# update unique value numeric
+observe({
+  input$select.unique.value.slider
+  isolate({
+    updateNumericInput(session,"specify.correct.numeric",
+                       value=input$select.unique.value.slider)
+  })
+})
+
+# Identify points is not selected but 
+# there are points to label/color?
 observe({
   input$advanced_options
   isolate({
@@ -2414,38 +2462,47 @@ observe({
   })
 })
 
+# scatter plot "extreme values"
 observe({
   input$scatter.extremes.slider
   input$same_level_of_check
   isolate({
     if(!is.null(input$scatter.extremes.slider)&&
          input$scatter.extremes.slider!=0){
-      plot.para = try(iNZightPlot(get.data.set()[,input$vari1],
-                                   get.data.set()[,input$vari2],
-                                   plot=F,
-                                   locate=1:nrow(get.data.set()),
-                                   locate.extreme=input$scatter.extremes.slider))
-      plot.para = plot.para$all$all
-      if(!is.null(plot.para$text.labels)){
-        inds=NULL
-        if(input$same_level_of_check){
-          inds = which(!plot.para$text.labels%in%"")
-          inds = which(get.data.set()[,input$same.level.of.select]%in%
-                         get.data.set()[,input$same.level.of.select][inds])
-        }else{
-          inds = which(!plot.para$text.labels%in%"")
-        }
-        if(input$show.stored.check){
-          plot.par$locate.id=unique(c(plot.par.stored$locate.id,inds))
-        }else{
-          plot.par$locate.id = inds
+      if(input$select_identify_method%in%'Extremes'&&
+           input$vari1%in%colnames(get.data.set())&&
+           input$vari2%in%colnames(get.data.set())&&
+           input$vari1%in%get.numeric.column.names(get.data.set())&&
+           input$vari2%in%get.numeric.column.names(get.data.set())){
+        plot.para = try(iNZightPlot(get.data.set()[,input$vari1],
+                                     get.data.set()[,input$vari2],
+                                     plot=F,
+                                     locate=1:nrow(get.data.set()),
+                                     locate.extreme=input$scatter.extremes.slider))
+        plot.para = plot.para$all$all
+        if(!is.null(plot.para$text.labels)){
+          inds=NULL
+          if(input$same_level_of_check){
+            inds = which(!plot.para$text.labels%in%"")
+            inds = which(get.data.set()[,input$same.level.of.select]%in%
+                           get.data.set()[,input$same.level.of.select][inds])
+          }else{
+            inds = which(!plot.para$text.labels%in%"")
+          }
+          if(input$show.stored.check){
+            plot.par$locate.id=unique(c(plot.par.stored$locate.id,inds))
+          }else{
+            plot.par$locate.id = inds
+          }
         }
       }
     }
   })
 })
 
+# scatter plot update sliders
 observe({
+  input$select_identify_method
   input$range.column.select
   input$same_level_of_check
   isolate({
@@ -2470,25 +2527,40 @@ observe({
   })
 })
 
+# scatter plot select a range
 observe({
+  input$select_identify_method
   input$range.values.slider
   input$range.column.select
   input$same_level_of_check
+  input$show.stored.check
+  input$same.level.of.select
   isolate({
     if(!is.null(input$range.values.slider)&&
          !is.null(input$range.column.select)&&
-         !is.null(input$same_level_of_check)){
-      temp = get.data.set()[,input$range.column.select]
-      names(temp) = 1:length(temp)
-      temp = sort(temp)
-      temp = as.numeric(
-        names(temp)[input$range.values.slider[1]:
-                      input$range.values.slider[2]])
-      if(input$same_level_of_check){
-        temp = which(get.data.set()[,input$same.level.of.select]%in%
-                       get.data.set()[,input$same.level.of.select][temp])
+         !is.null(input$same_level_of_check)&&
+         input$vari1%in%colnames(get.data.set())&&
+         input$vari2%in%colnames(get.data.set())){
+      if(input$select_identify_method%in%'Range of values'&&
+           input$vari1%in%get.numeric.column.names(get.data.set())&&
+           input$vari2%in%get.numeric.column.names(get.data.set())){
+        temp = get.data.set()[,input$range.column.select]
+        names(temp) = 1:length(temp)
+        temp = sort(temp)
+        temp = as.numeric(names(temp)[input$range.values.slider[1]:
+                                        input$range.values.slider[2]])
+        temp = which(get.data.set()[,input$range.column.select]%in%
+                       get.data.set()[,input$range.column.select][temp])
+        if(input$same_level_of_check){
+          temp = which(get.data.set()[,input$same.level.of.select]%in%
+                         get.data.set()[,input$same.level.of.select][temp])
+        }
+        if(input$show.stored.check){
+          plot.par$locate.id = c(plot.par.stored$locate.id,temp)
+        }else{
+          plot.par$locate.id = temp
+        }
       }
-      plot.par$locate.id = temp
     }
   })
 })
