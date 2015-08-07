@@ -1,4 +1,4 @@
-##-----------------------------------------------###
+##------------------------------------------------###
 ###  Server Functions for the "Visualize" Module  ###
 ###-----------------------------------------------###
 ###
@@ -695,6 +695,15 @@ output$visualize.inference = renderPrint({
              inference.type = "conf",
              inference.par = NULL)
       )
+      if(is.numeric(plot.par$x)&
+           is.numeric(plot.par$y)){
+        values.list.x = values.list$x
+        values.list$x=values.list$y
+        values.list$y=values.list.x
+        values.list.varnames.x = values.list$varnames$x
+        values.list$varnames$x = values.list$varnames$y
+        values.list$varnames$y = values.list.varnames.x
+      }
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({
@@ -717,6 +726,15 @@ output$visualize.summary = renderPrint({
     }
     values.list = modifyList(reactiveValuesToList(plot.par),
                               reactiveValuesToList(graphical.par))
+    if(is.numeric(plot.par$x)&
+         is.numeric(plot.par$y)){
+      values.list.x = values.list$x
+      values.list$x=values.list$y
+      values.list$y=values.list.x
+      values.list.varnames.x = values.list$varnames$x
+      values.list$varnames$x = values.list$varnames$y
+      values.list$varnames$y = values.list.varnames.x
+    }
     if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
          tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       tryCatch({
@@ -1290,12 +1308,13 @@ output$plot.appearance.panel = renderUI({
     adjust.grid.size.object = sliderInput("adjust.grid.size", label = "Grid size (n x n):", min = 10, 
                                                     max = 250, value=graphical.par$scatter.grid.bins,step=1)
     adjust.min.count.grid.object = sliderInput("adjust.min.count.grid", label = "Min-count colour (% grey):", min = 0, 
-                                          max = 1, value=graphical.par$alpha,step=0.01)
+                                          max = 100, value=convert.to.percent(graphical.par$alpha),step=1)
     if(is.null(graphical.par$alpha)){
       graphical.par$alpha = 1
     }
     adjust.transparency.object = sliderInput("adjust.transparency", label = "Transparency:", min = 0, 
-                                            max = 1, value=graphical.par$alpha,step=.01)
+                                            max = 100, value=convert.to.percent(graphical.par$alpha),
+                                            step=1)
     if(is.null(graphical.par$hex.bins)){
       graphical.par$hex.bins = 20
     }
@@ -1303,16 +1322,27 @@ output$plot.appearance.panel = renderUI({
                                              max = 70, value=graphical.par$hex.bins,step=1)
     
     adjust.num.bins.object = NULL
+    tester = NULL
+    suppressWarnings({
+      if(input$vari2%in%"none"){
+        tester = try(iNZightPlot(get.data.set()[,input$vari1],
+                                 plot=F))
+      }else{
+        tester = try(iNZightPlot(get.data.set()[,input$vari1],
+                                 get.data.set()[,input$vari2],
+                                 plot=F))
+      }
+    })
+    large.sample = tester$all$all$boxinfo$all$opts$largesample
     # bar plot with one factor variable
-    # vari1 = numeric , vari2 = none
+    # vari1 = factor , vari2 = none
     if((!is.null(input$vari1)&&
           !is.null(input$vari2)&&
           input$vari1%in%colnames(get.data.set())&&
           input$vari2%in%"none")&&
          (class(get.data.set()[,input$vari1])%in%"factor"|
             class(get.data.set()[,input$vari1])%in%"character")){
-      ret = list(h5("Change plot appearance"),
-                 select.bg.object,
+      ret = list(select.bg.object,
                  select.barcolor.object
       )
     # bar plot with two factor variables
@@ -1329,10 +1359,11 @@ output$plot.appearance.panel = renderUI({
       select.bg.object = selectInput(inputId="select.bg1",label="Select Background colour:",
                                      choices=cols1,
                                      selected=graphical.par$bg)
-      ret = list(h5("Change plot appearance"),
-                 select.bg.object
+      ret = list(select.bg.object
       )
-    # dotplot or histogram for one numeric variable
+    # dotplot or histogram for numeric varible in x or 
+    # dotplot or histogram for one numeric one factor variable
+    # vari1 = numeric , vari2 = none
     # vari1 = factor , vari2 = numeric or
     # vari1 = numeric , vari2 = factor
     }else if((!is.null(input$vari1)&&
@@ -1359,16 +1390,16 @@ output$plot.appearance.panel = renderUI({
                                                       "dot plot",
                                                       "histogram"),
                                             selected=input$select.plot.type)
-      ret = list(h5("Change plot appearance"),
-                 select.plot.type.object,
+      ret = list(select.plot.type.object,
                  adjust.size.points.dot.object,
                  adjust.transparency.object,
                  select.bg.object,
                  select.dotcolor.object,
                  color.interior
-                 )
+      )
       if(!is.null(input$select.plot.type)&&
-           input$select.plot.type%in%"histogram"){
+           (input$select.plot.type%in%"histogram"||
+           (large.sample&&input$select.plot.type%in%"default"))){
         isolate({
           temp = vis.par()
         })
@@ -1383,18 +1414,21 @@ output$plot.appearance.panel = renderUI({
           nbins = get.nbins()
         }
         m = length(unique(get.data.set()[,input$vari1]))
-        m = max(c(length(unique(get.data.set()[,input$vari1])),
-                length(unique(get.data.set()[,input$vari2]))))
+        if(!is.null(input$vari2)&&
+             !input$vari2%in%"none"&&
+             input$vari2%in%colnames(get.data.set())){
+          m = max(c(length(unique(get.data.set()[,input$vari1])),
+                    length(unique(get.data.set()[,input$vari2]))))
+        }
         if(m<nbins){
           m=nbins
         }
         adjust.num.bins.object = sliderInput("adjust.num.bins", label = "Number of bars:", min = 1, 
                                              max = m, value=nbins,step=1)
-        ret=list(h5("Change plot appearance"),
-                 select.plot.type.object,
+        ret=list(select.plot.type.object,
+                 adjust.num.bins.object,
                  select.bg.object,
-                 select.barcolor.object,
-                 adjust.num.bins.object)
+                 select.barcolor.object)
       }
     # scatter plot
     # vari1 = numeric , vari2 = numeric
@@ -1414,24 +1448,22 @@ output$plot.appearance.panel = renderUI({
                                                       "grid-density plot",
                                                       "hexbin plot"),
                                             selected=input$select.plot.type)
-      ret = list(h5("Change plot appearance"),
-                 select.plot.type.object,
+      ret = list(select.plot.type.object,
                  adjust.size.points.scatter.object,
                  adjust.transparency.object,
                  select.bg.object,
                  select.dotcolor.object,
                  color.interior)
       if(!is.null(input$select.plot.type)&&
-           input$select.plot.type%in%"grid-density plot"){
-        ret = list(h5("Change plot appearance"),
-                   select.plot.type.object,
+           (input$select.plot.type%in%"grid-density plot"||
+              (large.sample&&input$select.plot.type%in%"default"))){
+        ret = list(select.plot.type.object,
                    adjust.grid.size.object,
                    adjust.min.count.grid.object,
                    select.bg.object)
       }else if(!is.null(input$select.plot.type)&&
                  input$select.plot.type%in%"hexbin plot"){
-        ret = list(h5("Change plot appearance"),
-                   select.plot.type.object,
+        ret = list(select.plot.type.object,
                    adjust.hex.bins.object,
                    select.bg.object)
       }
@@ -1629,7 +1661,8 @@ observe({
         graphical.par$pch=19
       }
     }
-    graphical.par$alpha = input$adjust.transparency
+    print(input$adjust.transparency)
+    graphical.par$alpha = convert.to.percent(input$adjust.transparency,T)
   })
 })
 
@@ -1653,7 +1686,8 @@ observe({
 observe({
   input$adjust.min.count.grid
   isolate({
-    graphical.par$alpha = input$adjust.min.count.grid
+    print(input$adjust.min.count.grid,T)
+    graphical.par$alpha = convert.to.percent(input$adjust.min.count.grid,T)
   })
 })
 
@@ -1675,7 +1709,6 @@ output$customize.labels.panel = renderUI({
     plot.par$ylab = NULL
     plot.par$varnames$ylab = NULL
     plot.par$main = NULL
-    title.pane=h4("Customize labels")
     main_title_text.object = textInput(inputId="main_title_text",label="Main title:")
     x_axis_text.object = textInput(inputId="x_axis_text",label="X-axis label:")
     y_axis_text.object = textInput(inputId="y_axis_text",label="Y-axis label:")
@@ -1687,14 +1720,12 @@ output$customize.labels.panel = renderUI({
            !is.null(input$vari2)&&!input$vari2%in%"none"&&
            (class(vis.data()[,input$vari2])%in%"numeric"|
            class(vis.data()[,input$vari2])%in%"integer")){
-        list(title.pane,
-             main_title_text.object,
+        list(main_title_text.object,
              x_axis_text.object,
              y_axis_text.object,
              change.labels.button.object)
       }else{
-        list(title.pane,
-             main_title_text.object,
+        list(main_title_text.object,
              x_axis_text.object,
              change.labels.button.object)
       }
@@ -1739,7 +1770,6 @@ output$code.variables.panel = renderUI({
   input$vari1
   input$vari2
   isolate({
-    title.pane = h4("Code More Variables")
     color.by.object  = NULL
     if(!is.null(input$vari1)&&
          input$vari1%in%colnames(get.data.set())&&
@@ -1769,8 +1799,7 @@ output$code.variables.panel = renderUI({
                                      choices=c(" ",get.numeric.column.names(vis.data())),
                                      selected=input$resize.by.select)
     }
-    list(title.pane,
-         color.by.object,
+    list(color.by.object,
          resize.by.object)
   })
 })
@@ -2120,6 +2149,7 @@ observe({
   })
 })
 
+# identify points panel
 output$points.identify.panel = renderUI({
   input$vari1
   input$vari2
@@ -2474,11 +2504,24 @@ observe({
            input$vari2%in%colnames(get.data.set())&&
            input$vari1%in%get.numeric.column.names(get.data.set())&&
            input$vari2%in%get.numeric.column.names(get.data.set())){
-        plot.para = try(iNZightPlot(get.data.set()[,input$vari1],
-                                     get.data.set()[,input$vari2],
-                                     plot=F,
-                                     locate=1:nrow(get.data.set()),
-                                     locate.extreme=input$scatter.extremes.slider))
+        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+          tryCatch({
+            plot.para = iNZightPlot(get.data.set()[,input$vari1],
+                                    get.data.set()[,input$vari2],
+                                    plot=F,
+                                    locate=1:nrow(get.data.set()),
+                                    locate.extreme=input$scatter.extremes.slider)
+          })
+        }else{
+          suppressWarnings({
+            plot.para = try(iNZightPlot(get.data.set()[,input$vari1],
+                                        get.data.set()[,input$vari2],
+                                        plot=F,
+                                        locate=1:nrow(get.data.set()),
+                                        locate.extreme=input$scatter.extremes.slider))
+          })
+        }
         plot.para = plot.para$all$all
         if(!is.null(plot.para$text.labels)){
           inds=NULL

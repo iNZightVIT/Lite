@@ -1092,7 +1092,7 @@ transform.get.temp = function(dafr,type,columns){
     temp = copy.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"change sign"){
     temp = change.sign.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"change to factor"){
+  } else if (!is.null(columns)&type%in%"convert to categorical"){
     temp = change.factor.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%""){
     temp = NULL
@@ -1474,4 +1474,33 @@ get.data.from.URL = function(URL,data.dir.import){
   },warning = function(w) {
     print(w)
   },finally = {})
+}
+
+#' Connerts transparency or alpha value to a 
+#' percentage integer.
+#' 
+#' @param value Value to convert. Either a 
+#' value between 0 and 1 in steps of 0.01 
+#' (back = T) or a value between 0 and 100
+#' (back = F).
+#' @param back Wether to convert from 
+#' percentage into fraction (back = T) or
+#' from fraction to percentage (back = F). 
+#' 
+convert.to.percent = function(value,back=F){
+  #percentage to numeric
+  if(is.null(value)){
+    if(!back){
+      x = 0
+    }else{
+      x = 1
+    }
+  }else{
+    if(back){
+      x = (100-value)*0.01
+    }else{
+      x = (1-value)*100
+    }
+  }
+  x
 }
