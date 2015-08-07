@@ -54,7 +54,7 @@ set_to_change_reac <- reactive({
     if(is.null(temp[[1]])&is.null(temp[[2]])) {
       "No data to select!"
     }else{
-      paste0("Data selected: ", input[[input$data_select]])  
+      paste0("Data: ", input[[input$data_select]])  
     }
     }
 })

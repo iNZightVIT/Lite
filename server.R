@@ -1490,16 +1490,11 @@ shinyServer(function(input, output, session) {
 
   #   Advanced --> Model Fitting
   
-  ##----------------------##
+  ##------------------------##
   ##  Model Fitting Module  ##
-  ##----------------------##
+  ##------------------------##
   source("panels/8_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
   source("panels/8_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
-  output$modelfitting.panel <- renderUI({
-    isolate({
-      model.fitting.panel.ui(get.data.set())
-    })
-  })
 
 #   Help
 

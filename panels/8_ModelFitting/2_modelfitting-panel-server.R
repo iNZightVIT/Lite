@@ -16,14 +16,27 @@ modelValues = reactiveValues(models=list(),
                              transformation.log=c(),
                              independent.vars=list())
 
+output$modelfitting.panel <- renderUI({
+  modelValues$models
+  isolate({
+    if(length(modelValues$models)>0){
+      model.fitting.panel.ui(get.data.set(),T)
+    }else{
+      model.fitting.panel.ui(get.data.set())
+    }
+  })
+})
+
 # print the summary of the fitted model.
 output$fit.summary = renderPrint({
-  #   print("fit.summary")
+    print("fit.summary")
   #   getModel()
   input$model.select
+#   input$remove.model
   isolate({
-    if(!is.null(modelValues$models[[input$model.select]])&&
-         !is.null(input$model.select)){
+    if(length(modelValues$models)>0&&
+         (!is.null(modelValues$models[[input$model.select]])&&
+         !is.null(input$model.select))){
       confounds = input$confounding_variables
       if(" "%in%confounds){
         confounds = confounds[-which(confounds%in%" ")]
@@ -931,11 +944,17 @@ output$downloadScript <- downloadHandler(
 output$r.code.fit = renderPrint({
   #   print("code selected model")
   input$model.select
+#   input$remove.model
+  modelValues$models
+print("test")
   isolate({
+    print("test2")
     if(!is.null(input$model.select)&&
          !input$model.select%in%""){
+      print(input$model.select)
       cat(modelValues$code[[input$model.select]])
     }else{
+      print("test3")
       cat("No model code to show!")
     }
   })
@@ -951,7 +970,7 @@ output$show.model = renderUI({
 output$model_main = renderUI({
   #   print("main panels")
   #   print(input$model_plot_selector)
-  list(conditionalPanel("input.model_plot_selector=='Fit Model'",
+  list(conditionalPanel("input.model_plot_selector=='Model'",
                         uiOutput("show.model")),
        conditionalPanel("input.model_plot_selector=='Plots'",
                         uiOutput("plots.main")),

@@ -21,8 +21,7 @@ vis.data <- reactive({
 ###  iNZightPlot():
 
 plot.par.stored = reactiveValues(
-  locate.id=NULL,
-  column.select.order=NULL
+  locate.id=NULL
   )
 
 plot.par <- reactiveValues(
@@ -44,8 +43,7 @@ plot.par <- reactiveValues(
   data=NULL,
   locate=NULL,
   locate.id=NULL,
-  locate.col=NULL,
-  extrem.points=NULL
+  locate.col=NULL
   #largesample = FALSE
 )
 
@@ -866,7 +864,7 @@ observe({
                         selected="")
       plot.par$locate=NULL
       plot.par$locate.id=NULL
-      plot.par$locate.col=NULL 
+      plot.par$locate.col=NULL
     })
   }
 })
@@ -951,17 +949,18 @@ output$add_inference = renderUI({
                                                    input.check_cubic||
                                                    input.check_smoother",
                                                    add_inference.check)))
-    # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
-    }else if(!is.null(input$vari1)&&
-               (input$vari1%in%colnames(dafr)&&
-               input$vari2%in%colnames(dafr))&&
-               ((input$vari2%in%"none"&&
-                   (class(dafr[,input$vari1])%in%"numeric"|
-                      class(dafr[,input$vari1])%in%"integer")&
+    # vari1 = numeric; vari2 = factor or 
+    # vari1 = factor; vari2 = numeric
+    }else if((!is.null(input$vari1)&&
+                !is.null(input$vari2)&&
+                !input$vari2%in%"none"&&
+                input$vari1%in%colnames(dafr)&&
+                input$vari2%in%colnames(dafr))&&
+               (((class(dafr[,input$vari1])%in%"numeric"|
+                    class(dafr[,input$vari1])%in%"integer")&
                    (class(dafr[,input$vari2])%in%"factor"|
-                      class(dafr[,input$vari2])%in%"character"))|
-               (input$vari2%in%"none"&&
-                  (class(dafr[,input$vari1])%in%"factor"|
+                      class(dafr[,input$vari2])%in%"character"))||
+                  ((class(dafr[,input$vari1])%in%"factor"|
                      class(dafr[,input$vari1])%in%"character")&
                   (class(dafr[,input$vari2])%in%"numeric"|
                      class(dafr[,input$vari2])%in%"integer")))){
@@ -1110,7 +1109,8 @@ observe({
                 (is.numeric(get.data.set()[,input$vari1])&&
                    is.numeric(get.data.set()[,input$vari2]))){
       graphical.par$bs.inference = input$add.inference
-    # vari1 = numeric; vari2 = factor or vari1 = factor; vari2 = numeric
+    # vari1 = numeric; vari2 = factor or 
+    # vari1 = factor; vari2 = numeric
     }else if((!is.null(input$vari1)&&
                 !is.null(input$vari2)&&
                 input$vari1%in%colnames(get.data.set())&&
@@ -1179,7 +1179,14 @@ observe({
           graphical.par$bs.inference = T
         }else if(input$inference_type2%in%"Bootstrap"){
           graphical.par$bs.inference = T
-          intervals = NULL
+          intervals=NULL
+        }
+      }else if(!is.null(input$inference_parameter1)&&
+                 input$inference_parameter1%in%"Median"){
+        if(input$inference_type2%in%"Year 12"){
+          graphical.par$inference.par = "median"
+          intervals = c(intervals,"conf")
+          graphical.par$bs.inference = F
         }
       }
     }
@@ -1334,6 +1341,9 @@ output$plot.appearance.panel = renderUI({
       }
     })
     large.sample = tester$all$all$boxinfo$all$opts$largesample
+    if(is.null(large.sample)){
+      large.sample = F
+    }
     # bar plot with one factor variable
     # vari1 = factor , vari2 = none
     if((!is.null(input$vari1)&&
@@ -1661,7 +1671,6 @@ observe({
         graphical.par$pch=19
       }
     }
-    print(input$adjust.transparency)
     graphical.par$alpha = convert.to.percent(input$adjust.transparency,T)
   })
 })
@@ -1686,7 +1695,6 @@ observe({
 observe({
   input$adjust.min.count.grid
   isolate({
-    print(input$adjust.min.count.grid,T)
     graphical.par$alpha = convert.to.percent(input$adjust.min.count.grid,T)
   })
 })
@@ -2052,6 +2060,9 @@ observe({
        input$check.xyline){
     graphical.par$LOE = T
     graphical.par$col.LOE = input$color.xyline
+  }else{
+    graphical.par$LOE = F
+    graphical.par$col.LOE = NULL
   }
 })
 
