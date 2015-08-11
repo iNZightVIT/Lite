@@ -1504,3 +1504,31 @@ convert.to.percent = function(value,back=F){
   }
   x
 }
+
+get.transformation.string = function(transform_select,
+                                     transform_variable_select,
+                                     arg3){
+  transformation.string = ""
+  if(transform_select%in%"log"){
+    transformation.string = paste0("log(",
+                                   transform_variable_select,
+                                   ")")
+  }else if(transform_select%in%"sqrt"){
+    transformation.string = paste0("sqrt(",
+                                   transform_variable_select,
+                                   ")")
+  }else if(transform_select%in%"by degree"&&
+             !arg3%in%""){
+    transformation.string = paste0("I(",
+                                   transform_variable_select,
+                                   "^",
+                                   arg3,
+                                   ")")
+  }else if(transform_select%in%"polynomial of degree"&&
+             !arg3%in%""){
+    transformation.string = paste0("poly(",
+                                   transform_variable_select,
+                                   ",",arg3,")")
+  }
+  transformation.string
+}

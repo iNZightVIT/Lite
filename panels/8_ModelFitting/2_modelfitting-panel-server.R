@@ -4,8 +4,6 @@
 ###
 ###  Date Created   :   June 23, 2015
 ###
-###  Please consult the comments before editing any code.
-###
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
@@ -14,25 +12,20 @@ modelValues = reactiveValues(models=list(),
                              code=list(),
                              code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n",
                              transformation.log=c(),
+                             interaction.log=list(),
                              independent.vars=list())
 
 output$modelfitting.panel <- renderUI({
   modelValues$models
+  get.data.set()
   isolate({
-    if(length(modelValues$models)>0){
-      model.fitting.panel.ui(get.data.set(),T)
-    }else{
-      model.fitting.panel.ui(get.data.set())
-    }
+    model.fitting.panel.ui(get.data.set())
   })
 })
 
 # print the summary of the fitted model.
 output$fit.summary = renderPrint({
-    print("fit.summary")
-  #   getModel()
   input$model.select
-#   input$remove.model
   isolate({
     if(length(modelValues$models)>0&&
          (!is.null(modelValues$models[[input$model.select]])&&
@@ -57,8 +50,6 @@ output$fit.summary = renderPrint({
 
 # panel for fitting a model
 output$model_fit = renderUI({
-  #   print("model fit side ui")
-  #   get.data.set()
   input$select_Y
   isolate({
     is.numeric.column = NULL
@@ -74,7 +65,7 @@ output$model_fit = renderUI({
       is.numeric.column = toJSON(get.data.set()[,input$select_Y])
     }
     list(br(),
-         fixedRow(column(11,h4("Choose Model parameters")),
+         fixedRow(column(11,h4("Choose Model Settings")),
                   column(1,checkboxInput("toggle_check4",
                                          label="",
                                          value=T))),
@@ -139,13 +130,13 @@ output$model_fit = renderUI({
                                                     column(4,checkboxInput("nest",label="Nest",
                                                                            value=input$nest)))
                           )),
-         fixedRow(column(11,h4("Variables to fit")),
+         fixedRow(column(11,h4("Choose predictor Variables")),
                   column(1,checkboxInput("toggle_check3",
                                          label="",
                                          value=T))),
          conditionalPanel("input.toggle_check3",
                           fixedRow(column(6,selectInput("independent_variables",
-                                                        label="Independent Variables",
+                                                        label="Variables of interest",
                                                         choices=colnames(get.data.set())[-which(input$select_Y%in%colnames(get.data.set()))],
                                                         selected=input$independent_variables,
                                                         selectize=T,
@@ -156,20 +147,38 @@ output$model_fit = renderUI({
                                                         selected=input$confounding_variables,
                                                         selectize=T,
                                                         multiple=T)))),
-         fixedRow(column(11,h4("Interaction")),
+         fixedRow(column(11,h4("Add Interactions")),
                   column(1,checkboxInput("toggle_check1",
                                          label="",
                                          value=input$toggle_check1))),
          conditionalPanel("input.toggle_check1",
                           fixedRow(column(4,selectInput("intersaction_select",
                                                         label="Interaction",
-                                                        choices=c("none","all","by degree"),
+                                                        choices=c("none","all","by degree",
+                                                                  "by variables"),
                                                         selected="none")),
-                                   column(4,helpText("")),
-                                   column(4,textInput("arg2",
-                                                      label="degree",
-                                                      value=input$arg2)))),
-         fixedRow(column(11,h4("Transformation")),
+                                   conditionalPanel("input.intersaction_select=='by degree'",
+                                                    column(5,offset=3,
+                                                           textInput("arg2",label="degree"))),
+                                   conditionalPanel("input.intersaction_select=='by variables'",
+                                                    column(5,offset=3,
+                                                           selectInput("interaction.vars.select",
+                                                                       label="Select interaction",
+                                                                       choices=c(input$independent_variables,
+                                                                                 input$confounding_variables),
+                                                                       multiple=T)))),
+                          conditionalPanel("input.intersaction_select=='by variables'",
+                                           fixedRow(column(3,
+                                                           actionButton("submit.interaction",
+                                                                        label="Submit")))),
+                          conditionalPanel("input.intersaction_select=='by variables'",
+                                           fixedRow(column(7,h5("Remove interaction")),
+                                                    column(5,
+                                                           selectInput("interaction_remove",
+                                                                       label="",
+                                                                       choices="none",
+                                                                       selected=input$transformation_remove))))),
+         fixedRow(column(11,h4("Transform x-variables")),
                   column(1,checkboxInput("toggle_check2",
                                          label="",
                                          value=input$toggle_check2))),
@@ -204,10 +213,10 @@ output$model_fit = renderUI({
                                                                        label="",
                                                                        choices="none",
                                                                        selected=input$transformation_remove))))),
-         fixedRow(column(11,h4("Code preview")),
+         fixedRow(column(11,h4("Display model formula")),
                   column(1,checkboxInput("toggle_check5",
                                          label="",
-                                         value=T))),
+                                         value=input$toggle_check5))),
          conditionalPanel("input.toggle_check5",
                           helpText("The code used for the next model fit. Note,
                                    this code might not be executable."),
@@ -218,45 +227,90 @@ output$model_fit = renderUI({
   })
 })
 
+
+
+# update the numericInput for the degree of selected variables
+observe({
+  input$interaction.vars.select
+  isolate({
+    max=2
+    if(length(input$interaction.vars.select)>2){
+      max = length(input$interaction.vars.select)
+    }
+    updateNumericInput(session,"degree.interaction.numeric",
+                       max = max)
+  })
+})
+
+# submit a custom interaction
+observe({
+  input$submit.interaction
+  isolate({
+    if(!is.null(input$submit.interaction)&&
+         input$submit.interaction>0){
+      if(!is.null(input$interaction.vars.select)&&
+           !is.null(input$intersaction_select)&&
+           !input$intersaction_select%in%"none"&&
+           all(unlist(lapply(input$interaction.vars.select,
+                             function(x,y,z){
+                               x%in%z||(x%in%names(y)&&
+                                          y[x]%in%z)
+                             },modelValues$transformation.log,
+                             colnames(get.data.set()))))&&
+           length(input$interaction.vars.select)>1){
+        dup = F
+        if(length(modelValues$interaction.log)>0){
+          dup = any(unlist(lapply(modelValues$interaction.log,function(x,y){
+            length(which(y%in%x))==length(x)
+            },input$interaction.vars.select)))
+        }
+        if(!dup){
+          interaction.string = paste(input$interaction.vars.select,collapse=":")
+          modelValues$interaction.log[[interaction.string]] = input$interaction.vars.select
+          updateSelectInput(session,"interaction_remove",
+                            choices=c("none",names(modelValues$interaction.log)))
+        }
+      }
+    }
+  })
+})
+
+observe({
+  input$interaction_remove
+  isolate({
+    if(!is.null(input$interaction_remove)&&
+         input$interaction_remove%in%names(modelValues$interaction.log)){
+      modelValues$interaction.log[[input$interaction_remove]] = NULL
+      updateSelectInput(session,"interaction_remove",
+                        choices=c("none",names(modelValues$interaction.log)))
+    }
+  })
+})
+
 # submit a transformation of a variable
 observe({
   input$transformation_submit
   isolate({
     if(!is.null(input$transformation_submit)&&
-         input$transformation_submit>0){
+         input$transformation_submit>0){ 
       if(!is.null(input$transform_select)&&
            !input$transform_select%in%"none"&&
            !is.null(input$transform_variable_select)&&
            input$transform_variable_select%in%colnames(get.data.set())){
-        transformation.string = ""
-        if(input$transform_select%in%"log"){
-          transformation.string = paste0("log(",
-                                         input$transform_variable_select,
-                                         ")")
-        }else if(input$transform_select%in%"sqrt"){
-          transformation.string = paste0("sqrt(",
-                                         input$transform_variable_select,
-                                         ")")
-        }else if(input$transform_select%in%"by degree"&&
-                   !input$arg3%in%""){
-          transformation.string = paste0(input$transform_variable_select,
-                                         " + I(",
-                                         input$transform_variable_select,
-                                         ",^",
-                                         input$arg3,
-                                         ")")
-        }else if(input$transform_select%in%"polynomial of degree"&&
-                   !input$arg3%in%""){
-          transformation.string = paste0("poly(",
-                                         input$transform_variable_select,
-                                         ",",input$arg3,")")
-        }
+        transformation.string = get.transformation.string(input$transform_select,
+                                                          input$transform_variable_select,
+                                                          input$arg3)
         if(!transformation.string%in%""&&
              !transformation.string%in%names(modelValues$transformation.log)){
           modelValues$transformation.log[transformation.string] = input$transform_variable_select
           updateSelectInput(session,"transformation_remove",
                             choices=c("none",names(modelValues$transformation.log)),
                             selected="none")
+          ch = c(input$independent_variables,input$confounding_variables)
+          ch[which(ch%in%modelValues$transformation.log)] = 
+            names(modelValues$transformation.log)[which(modelValues$transformation.log%in%ch)]
+          updateSelectInput(session,"interaction.vars.select",
+                            choices=ch)
         }
       }
     }
@@ -270,6 +324,11 @@ observe({
   input$independent_variables
   input$confounding_variables
   isolate({
+    updateSelectInput(session,"interaction.vars.select",
+                      choices=c(" ",
+                                input$independent_variables,
+                                input$confounding_variables,
+                                selected=input$interaction.vars.select))
     if((!is.null(input$independent_variables)||
           !is.null(input$confounding_variables))&&
          !is.null(modelValues$transformation.log)){
@@ -280,6 +339,11 @@ observe({
         updateSelectInput(session,"transformation_remove",
                           choices=c("none",names(modelValues$transformation.log)),
                           selected="none")
+        ch = c(input$independent_variables,input$confounding_variables)
+        ch[which(ch%in%modelValues$transformation.log)] = 
+          names(modelValues$transformation.log)[which(modelValues$transformation.log%in%ch)]
+        updateSelectInput(session,"interaction.vars.select",
+                          choices=ch)
       }
     }
   })
@@ -298,6 +362,11 @@ observe({
       updateSelectInput(session,"transformation_remove",
                         choices=c("none",names(modelValues$transformation.log)),
                         selected="none")
+      ch = c(input$independent_variables,input$confounding_variables)
+      ch[which(ch%in%modelValues$transformation.log)] = 
+        names(modelValues$transformation.log)[which(modelValues$transformation.log%in%ch)]
+      updateSelectInput(session,"interaction.vars.select",
+                        choices=ch)
     }
   })
 })
@@ -332,7 +401,6 @@ observe({
 
 # Submit the current model
 observe({
-  #   print("submit model")
   input$fit.model.button
   isolate({
     if(!is.null(input$fit.model.button)&&
@@ -359,12 +427,18 @@ observe({
         formu = ""
         col = " + "
         int.deg = F
+        int.specific = F
+        # interaction is used
         if(!is.null(input$intersaction_select)&&
              input$intersaction_select%in%"all"){
           col  = " * "
         }else if(!is.null(input$intersaction_select)&&
                    input$intersaction_select%in%"by degree"){
           int.deg = T
+        }else if(!is.null(input$intersaction_select)&&
+                   input$intersaction_select%in%"by variables"&&
+                   length(modelValues$interaction.log)>0){
+          int.specific = T
         }
         if(input$transform_Y%in%"log"){
           formu = paste("log(",input$select_Y,") ~ ",
@@ -436,6 +510,24 @@ observe({
             }else if(length(formu)==2){
               formu = paste0(formu,collapse=trans)
             }
+          }
+        }
+        if(int.specific){
+          if(any(unlist(lapply(modelValues$interaction.log,
+                               function(x,y){
+                                 any(x%in%y)
+                               },
+                               modelValues$transformation.log)))){
+            new.interaction.log = lapply(modelValues$interaction.log,
+                                         function(x,y){
+                                           x[which(x%in%y)] = names(y)[which(y%in%x)] 
+                                         },modelValues$transformation.log)
+            names(new.interaction.log) = unlist(lapply(new.interaction.log,function(x){
+              paste(x,collapse=":")
+            }))
+            formu = paste(formu,paste(names(new.interaction.log),collapse=" + "),sep=" + ")
+          }else{
+            formu = paste(formu,paste(names(modelValues$interaction.log),collapse=" + "),sep=" + ")
           }
         }
         design0=NULL
@@ -556,6 +648,8 @@ observe({
       }, error = function(e) {
         print(e)
       }, finally = {})
+      modelValues$interaction.log = list()
+      modelValues$transformation.log = c()
       if(!is.null(temp.model)){
         modelValues$models[[model.name]] = temp.model
         updateSelectInput(session,"model.select",
@@ -591,7 +685,6 @@ observe({
 # confounders and independent variables. This 
 # checks the independent variables.
 observe({
-  #   print("check independent")
   input$independent_variables
   input$select_Y
   isolate({
@@ -610,7 +703,6 @@ observe({
 # confounders and independent variables. This 
 # checks the confounding variables.
 observe({
-  #   print("check confounders")
   input$confounding_variables
   input$select_Y
   isolate({
@@ -629,7 +721,6 @@ observe({
 # numeric, binary or count data and set 
 # the model framework accordingly
 observe({
-  #   print("check numeric")
   input$select_Y
   isolate({
     if(!is.null(input$select_Y)&&
@@ -652,7 +743,6 @@ observe({
 # Test whether input in the numeric text field for 
 # transforming Y is numeric
 observe({
-  #   print("check transform text")
   input$arg1
   isolate({
     if(!is.null(input$arg1)&&
@@ -674,7 +764,6 @@ observe({
 
 # print the current code used for the next model
 output$current.code = renderPrint({
-  #   print("print current code")
   input$select_Y
   input$model_framework
   input$quasi
@@ -693,19 +782,32 @@ output$current.code = renderPrint({
   input$transformation_select
   input$arg2
   modelValues$transformation.log
+  modelValues$interaction.log
+  input$interaction.vars.select
+  input$degree.interaction.numeric
   isolate({
+    # test whether y is not NULL or not "" and
+    # a framework is selected
     if(!is.null(input$select_Y)&&
          !input$select_Y%in%""&&
          !is.null(input$model_framework)&&
          !input$model_framework%in%""){
       col = " + "
+      int.all = F
       int.deg = F
+      int.specific = F
+      # interaction is used
       if(!is.null(input$intersaction_select)&&
            input$intersaction_select%in%"all"){
+        int.all = T
         col  = " * "
       }else if(!is.null(input$intersaction_select)&&
                  input$intersaction_select%in%"by degree"){
         int.deg = T
+      }else if(!is.null(input$intersaction_select)&&
+                 input$intersaction_select%in%"by variables"&&
+                 length(modelValues$interaction.log)>0){
+        int.specific = T
       }
       if(input$transform_Y%in%"log"){
         func = paste("log(",input$select_Y,") ~ ",
@@ -761,14 +863,29 @@ output$current.code = renderPrint({
       for(trans in names(modelValues$transformation.log)){
         if(!grepl(trans,func,fixed=T)){
           func = strsplit(func,modelValues$transformation.log[trans])[[1]]
-          print(func)
-          print(trans)
           if(length(func)==1){
             func = paste0(func,trans)
           }else if(length(func)==2){
             func = paste0(func,collapse=trans)
           }
-          print(func)
+        }
+      }
+      if(int.specific){
+        if(any(unlist(lapply(modelValues$interaction.log,
+                             function(x,y){
+                               any(x%in%y)
+                               },
+                             modelValues$transformation.log)))){
+          new.interaction.log = lapply(modelValues$interaction.log,
+                                       function(x,y){
+                                         x[which(x%in%y)] = names(y)[which(y%in%x)] 
+                                       },modelValues$transformation.log)
+          names(new.interaction.log) = unlist(lapply(new.interaction.log,function(x){
+            paste(x,collapse=":")
+          }))
+          func = paste(func,paste(names(new.interaction.log),collapse=" + "),sep=" + ")
+        }else{
+          func = paste(func,paste(names(modelValues$interaction.log),collapse=" + "),sep=" + ")
         }
       }
       if(input$data_structure%in%"Complex Survey"){
@@ -776,9 +893,6 @@ output$current.code = renderPrint({
         if(!input$strata%in%" "){
           design = paste0(design,",strata=~",input$strata)
         }
-        #         print("input$weights")
-        #         print(input$weights)
-        #         print(!input$weights%in%"")
         if(!input$weights%in%" "){
           design = paste0(design,",weights=~",input$weights)
         }
@@ -864,7 +978,6 @@ output$current.code = renderPrint({
 
 # rename a model
 observe({
-  #   print("rename button")
   input$rename_model
   isolate({
     if(!is.null(input$rename_model)&&
@@ -886,7 +999,6 @@ observe({
 
 # remove a model
 observe({
-  #   print("remove button")
   input$remove.model
   isolate({
     if(!is.null(input$remove.model)&&
@@ -894,6 +1006,7 @@ observe({
       modelValues$models[[input$model.select]] = NULL
       modelValues$code[[input$model.select]] = NULL
       modelValues$independent.vars[[input$model.select]] = NULL
+      ch = names(modelValues$models)
       updateSelectInput(session,"model.select",
                         choices=names(modelValues$models),
                         selected=names(modelValues$models)[1])
@@ -903,19 +1016,16 @@ observe({
 
 # show code history in main panel
 output$code_history = renderUI({
-  #   print("code history ui")
   verbatimTextOutput("code.history.text")
 })
 
 # update code history
 output$code.history.text = renderPrint({
-  #   print("code history print")
   cat(modelValues$code.history)
 })
 
 # panel for the R code download
 output$code_download = renderUI({
-  #   print("code history side")
   list(helpText("Press button below to download the R 
                 code to rerun the work you have done."),
        downloadButton('downloadScript', 'Download R script'))
@@ -942,34 +1052,25 @@ output$downloadScript <- downloadHandler(
 
 # display the code for the selected model.
 output$r.code.fit = renderPrint({
-  #   print("code selected model")
   input$model.select
-#   input$remove.model
-  modelValues$models
-print("test")
+#   modelValues$models
   isolate({
-    print("test2")
     if(!is.null(input$model.select)&&
          !input$model.select%in%""){
-      print(input$model.select)
       cat(modelValues$code[[input$model.select]])
     }else{
-      print("test3")
       cat("No model code to show!")
     }
   })
 })
 
 output$show.model = renderUI({
-  #   print("model ui")
   list(verbatimTextOutput("r.code.fit"),
        br(),
        verbatimTextOutput("fit.summary"))
 })
 
 output$model_main = renderUI({
-  #   print("main panels")
-  #   print(input$model_plot_selector)
   list(conditionalPanel("input.model_plot_selector=='Model'",
                         uiOutput("show.model")),
        conditionalPanel("input.model_plot_selector=='Plots'",
@@ -982,8 +1083,6 @@ output$model_main = renderUI({
 observe({
   get.data.set()
   isolate({
-    #     print(get.data.name())
-    #     print("modelValues reset")
     modelValues$models=list()
     modelValues$code=list()
     modelValues$code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n"

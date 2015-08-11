@@ -146,7 +146,7 @@ shinyUI(
             navbarMenu("Advanced",
                        tabPanel("Quick explore",
                                 uiOutput("quick.explore")),
-                       tabPanel("Time Series",
+                       tabPanel("Time Series",value="timeSeries",
                                 uiOutput("timeseries.panel")),
                        tabPanel("Model Fitting",
                                 uiOutput("modelfitting.panel"))

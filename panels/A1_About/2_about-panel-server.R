@@ -19,8 +19,13 @@ output$about.panel <- renderUI({
       values$data.set = data.vals$data.set
       values$data.restore = get.data.set()
       values$data.name = data.vals$data.name
-      if(!is.null(get.data.set())){
+      if(!is.null(get.data.set())&&
+           !"timeSeries"%in%names(get.vars)){
         updateTabsetPanel(session,"selector","visualize")
+      }else if(!is.null(get.data.set())&&
+                 "timeSeries"%in%names(get.vars)&&
+                 get.vars$timeSeries%in%"true"){
+        updateTabsetPanel(session,"selector","timeSeries")
       }
     }
   }
