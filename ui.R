@@ -63,6 +63,9 @@ shinyUI(
                        border-radius: 10px;
                        font-size: 150%;
                     }
+                    #fit_model_button {
+                      font-size: 25px;
+                    }
                     ")),
         ## This code fixes the DataTables warning coming up from time to time.
         tags$head(tags$script("window.alert = (function() {

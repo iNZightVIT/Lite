@@ -222,7 +222,7 @@ output$model_fit = renderUI({
                                    this code might not be executable."),
                           verbatimTextOutput("current.code")),
          br(),
-         actionButton("fit.model.button","Fit Model")
+         actionButton("fit_model_button","Fit Model")
          )
   })
 })
@@ -401,10 +401,10 @@ observe({
 
 # Submit the current model
 observe({
-  input$fit.model.button
+  input$fit_model_button
   isolate({
-    if(!is.null(input$fit.model.button)&&
-         input$fit.model.button>0){
+    if(!is.null(input$fit_model_button)&&
+         input$fit_model_button>0){
       temp.model = NULL
       temp.code = NULL
       tryCatch({
@@ -1132,8 +1132,6 @@ output$plots.main = renderUI({
                               verbatimTextOutput("factor_comparison_matrix")),
              conditionalPanel("input.plot_selector=='Graphical Diagnostics'",
                               tabsetPanel(id="navlist_basic_plot",
-                                          tabPanel("Scatter Plot Matrix",
-                                                   plotOutput("scatter.plot.matrix")),
                                           tabPanel("Basic Plots",
                                                    selectInput("plotlm6.selected",
                                                                label="Select Plot type",
@@ -1151,6 +1149,8 @@ output$plots.main = renderUI({
                                                                label="Select a variable",
                                                                choices=ch2),
                                                    plotOutput("partial.residual.plot")),
+                                          tabPanel("Scatter Plot Matrix",
+                                                   plotOutput("scatter.plot.matrix")),
                                           type="pills")),
              conditionalPanel("input.plot_selector=='Normality Checks'",
                               tabsetPanel(id="navlist_basic_plot",
