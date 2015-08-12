@@ -43,8 +43,8 @@ plot.par <- reactiveValues(
   data=NULL,
   locate=NULL,
   locate.id=NULL,
-  locate.col=NULL
-  #largesample = FALSE
+  locate.col=NULL,
+  locate.extreme=NULL
 )
 
 identified.points = reactiveValues(values=list())
@@ -865,6 +865,7 @@ observe({
       plot.par$locate=NULL
       plot.par$locate.id=NULL
       plot.par$locate.col=NULL
+      plot.par$locate.extreme=NULL
     })
   }
 })
@@ -1415,8 +1416,8 @@ output$plot.appearance.panel = renderUI({
         })
         temp$plot = F
         if(is.null(get.nbins())){
-          default.nbins = try(do.call(iNZightPlots:::iNZightPlot,temp))
-          nbins = attr(default.nbins,"nbins")
+#           default.nbins = try(do.call(iNZightPlots:::iNZightPlot,temp))
+          nbins = attr(plot.ret.para$parameters,"nbins")
           if(is.null(get.default.num.bins())){
             plot.ret.para$default.num.bins = nbins
           }
@@ -2263,7 +2264,7 @@ output$points.identify.panel = renderUI({
                                                                   label = "Select range", 
                                                                   min = 0, 
                                                                   max = 1, 
-                                                                  value = c(0, 1),
+                                                                  value = c(0, 0),
                                                                   ticks=F)),
                                                column(4,
                                                       selectInput("range.column.select",
@@ -2334,13 +2335,11 @@ observe({
 observe({
   input$label_observation_check
   input$label.select
-  input$advanced_options
   isolate({
     if(!is.null(input$label_observation_check)&&
          !is.null(input$label.select)){
       if(input$label_observation_check&&
-           !is.null(input$label.select)&&
-           input$advanced_options%in%'Identify points'){
+           !is.null(input$label.select)){
         if(input$label.select%in%"id"){
           plot.par$locate=1:nrow(get.data.set())
         }else{
@@ -2357,20 +2356,17 @@ observe({
 observe({
   input$color_points_check
   input$color.select
-  input$advanced_options
   input$value.select
   input$select.unique.value.slider
   isolate({
     if(!is.null(input$color_points_check)&&
          !is.null(input$color.select)&&
-         !is.null(input$advanced_options)&
          !is.null(input$value.select)&&
          !is.null(input$select.unique.value.slider)){
       if(length(input$value.select)>0||
            input$select.unique.value.slider>0){
         if(input$color_points_check&&
-             !is.null(input$color.select)&&
-             input$advanced_options%in%'Identify points'){
+             !is.null(input$color.select)){
           plot.par$locate.col=input$color.select
         }else{
           plot.par$locate.col=NULL
@@ -2392,9 +2388,10 @@ observe({
   input$select_identify_method
   input$same_level_of_check
   input$same.level.of.select
-  input$advanced_options
   input$by.value.column.select
   input$value.select
+  input$show.stored.check
+  input$reset.obs.button
   isolate({
     if(!is.null(input$select.unique.value.slider)&&
          !is.null(input$specify.correct.numeric)&&
@@ -2402,18 +2399,19 @@ observe({
          !is.null(input$select_identify_method)&&
          !is.null(input$same_level_of_check)&&
          !is.null(input$same.level.of.select)&&
-         !is.null(input$advanced_options)&&
          !is.null(input$by.value.column.select)&&
-         !is.null(input$value.select)){
+         !is.null(input$value.select)&&
+         !is.null(input$show.stored.check)&&
+         !is.null(input$reset.obs.button)){
       if(input$select_identify_method%in%'Select by value'&&
            input$vari1%in%colnames(get.data.set())&&
            input$vari2%in%colnames(get.data.set())&&
            input$vari1%in%get.numeric.column.names(get.data.set())&&
            input$vari2%in%get.numeric.column.names(get.data.set())){
-        if(input$single_vs_multiple_check&&
-             input$advanced_options%in%'Identify points'){
+        if(input$single_vs_multiple_check){
           if(input$same_level_of_check){
             if(input$show.stored.check){
+              plot.par.locate.extreme = NULL
               plot.par$locate.id=unique(c(plot.par.stored$locate.id,
                                           which(get.data.set()[,input$same.level.of.select]%in%
                                                   get.data.set()[,input$
@@ -2421,6 +2419,7 @@ observe({
                                                                      input$
                                                                        select.unique.value.slider])))
             }else{
+              plot.par.locate.extreme = NULL
               plot.par$locate.id=which(get.data.set()[,input$same.level.of.select]%in%
                                          get.data.set()[,input$
                                                           same.level.of.select][
@@ -2428,36 +2427,42 @@ observe({
             }
           }else{
             if(input$show.stored.check){
+              plot.par.locate.extreme = NULL
               plot.par$locate.id=unique(c(plot.par.stored$locate.id,input$select.unique.value.slider))
             }else{
+              plot.par.locate.extreme = NULL
               plot.par$locate.id=input$select.unique.value.slider
             }
           }
-        }else if(!input$single_vs_multiple_check&&
-                   input$advanced_options%in%'Identify points'){
+        }else if(!input$single_vs_multiple_check){
           temp = which(get.data.set()[,as.character(input$by.value.column.select)]%in%
                          input$value.select)
           if(input$same_level_of_check){
             if(input$show.stored.check){
               if(!is.null(temp)&&!length(temp)==0){
+                plot.par.locate.extreme = NULL
                 plot.par$locate.id=unique(c(plot.par.stored$locate.id,
                                             which(get.data.set()[,input$same.level.of.select]%in%
                                                     get.data.set()[,input$
                                                                      same.level.of.select][temp])))
               }
             }else{
+              plot.par.locate.extreme = NULL
               plot.par$locate.id=which(get.data.set()[,input$same.level.of.select]%in%
                                          get.data.set()[,input$
                                                           same.level.of.select][temp])
             }
           }else{
             if(input$show.stored.check){
+              plot.par.locate.extreme = NULL
               plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
             }else{
+              plot.par.locate.extreme = NULL
               plot.par$locate.id=temp
             }
           }
         }else{
+          plot.par.locate.extreme = NULL
           plot.par$locate.id=plot.par.stored$locate.id
         }
       }
@@ -2485,28 +2490,31 @@ observe({
   })
 })
 
-# Identify points is not selected but 
-# there are points to label/color?
-observe({
-  input$advanced_options
-  isolate({
-    if(!is.null(input$advanced_options)&&
-         !input$advanced_options%in%'Identify points'){
-      if(length(plot.par.stored$locate.id)==0){
-        plot.par$locate=NULL
-        plot.par$locate.col=NULL
-        plot.par$locate.id=NULL
-      }else{
-        plot.par$locate.id=plot.par.stored$locate.id
-      }
-    }
-  })
-})
+# # Identify points is not selected but 
+# # there are points to label/color?
+# observe({
+#   input$advanced_options
+#   isolate({
+#     if(!is.null(input$advanced_options)&&
+#          !input$advanced_options%in%'Identify points'){
+#       if(length(plot.par.stored$locate.id)==0){
+#         plot.par$locate=NULL
+#         plot.par$locate.col=NULL
+#         plot.par$locate.id=NULL
+#       }else{
+#         
+#         plot.par$locate.id=plot.par.stored$locate.id
+#       }
+#     }
+#   })
+# })
 
 # scatter plot "extreme values"
 observe({
   input$scatter.extremes.slider
   input$same_level_of_check
+  input$select_identify_method
+  input$reset.obs.button
   isolate({
     if(!is.null(input$scatter.extremes.slider)&&
          input$scatter.extremes.slider!=0){
@@ -2515,41 +2523,13 @@ observe({
            input$vari2%in%colnames(get.data.set())&&
            input$vari1%in%get.numeric.column.names(get.data.set())&&
            input$vari2%in%get.numeric.column.names(get.data.set())){
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-          tryCatch({
-            plot.para = iNZightPlot(get.data.set()[,input$vari1],
-                                    get.data.set()[,input$vari2],
-                                    plot=F,
-                                    locate=1:nrow(get.data.set()),
-                                    locate.extreme=input$scatter.extremes.slider)
-          })
-        }else{
-          suppressWarnings({
-            plot.para = try(iNZightPlot(get.data.set()[,input$vari1],
-                                        get.data.set()[,input$vari2],
-                                        plot=F,
-                                        locate=1:nrow(get.data.set()),
-                                        locate.extreme=input$scatter.extremes.slider))
-          })
-        }
-        plot.para = plot.para$all$all
-        if(!is.null(plot.para$text.labels)){
-          inds=NULL
-          if(input$same_level_of_check){
-            inds = which(!plot.para$text.labels%in%"")
-            inds = which(get.data.set()[,input$same.level.of.select]%in%
-                           get.data.set()[,input$same.level.of.select][inds])
-          }else{
-            inds = which(!plot.para$text.labels%in%"")
-          }
-          if(input$show.stored.check){
-            plot.par$locate.id=unique(c(plot.par.stored$locate.id,inds))
-          }else{
-            plot.par$locate.id = inds
-          }
-        }
+        plot.par$locate.id = NULL
+        plot.par$locate.extreme = input$scatter.extremes.slider
       }
+    }else if(!is.null(input$scatter.extremes.slider)&&
+               input$scatter.extremes.slider==0){
+      plot.par$locate.id = NULL
+      plot.par$locate.extreme = NULL
     }
   })
 })
@@ -2565,14 +2545,14 @@ observe({
       if(input$same_level_of_check){
         updateSliderInput(session,
                           "range.values.slider",
-                          min=1,
+                          min=0,
                           max=length(unique(get.data.set()[,input$same.level.of.select])),
                           step=1,
                           value=c(input$range.values.slider[1],input$range.values.slider[2]))
       }else{
         updateSliderInput(session,
                           "range.values.slider",
-                          min=1,
+                          min=0,
                           max=nrow(get.data.set()),
                           step=1,
                           value=c(input$range.values.slider[1],input$range.values.slider[2]))
@@ -2589,6 +2569,7 @@ observe({
   input$same_level_of_check
   input$show.stored.check
   input$same.level.of.select
+  input$reset.obs.button
   isolate({
     if(!is.null(input$range.values.slider)&&
          !is.null(input$range.column.select)&&
@@ -2598,23 +2579,64 @@ observe({
       if(input$select_identify_method%in%'Range of values'&&
            input$vari1%in%get.numeric.column.names(get.data.set())&&
            input$vari2%in%get.numeric.column.names(get.data.set())){
-        temp = get.data.set()[,input$range.column.select]
-        names(temp) = 1:length(temp)
-        temp = sort(temp)
-        temp = as.numeric(names(temp)[input$range.values.slider[1]:
-                                        input$range.values.slider[2]])
-        temp = which(get.data.set()[,input$range.column.select]%in%
-                       get.data.set()[,input$range.column.select][temp])
-        if(input$same_level_of_check){
-          temp = which(get.data.set()[,input$same.level.of.select]%in%
-                         get.data.set()[,input$same.level.of.select][temp])
+        temp = NULL
+        if(any(input$range.values.slider>0)){
+          range = input$range.values.slider
+          range[which(range%in%0)] = 1
+          temp = get.data.set()[,input$range.column.select]
+          names(temp) = 1:length(temp)
+          temp = sort(temp)
+          temp = as.numeric(names(temp)[range[1]:range[2]])
+          temp = which(get.data.set()[,input$range.column.select]%in%
+                         get.data.set()[,input$range.column.select][temp])
+          if(input$same_level_of_check){
+            temp = which(get.data.set()[,input$same.level.of.select]%in%
+                           get.data.set()[,input$same.level.of.select][temp])
+          }
         }
-        if(input$show.stored.check){
+        if((length(plot.par.stored$locate.id)==0&&
+             length(temp)==0)||
+             (!input$show.stored.check&&
+                length(temp)==0)){
+          plot.par$locate.id = NULL
+        }else if(input$show.stored.check){
           plot.par$locate.id = c(plot.par.stored$locate.id,temp)
         }else{
           plot.par$locate.id = temp
         }
       }
+    }
+  })
+})
+
+# Store points to be visible in othe plots
+observe({
+  input$store.obs.button
+  isolate({
+    if(!is.null(input$store.obs.button)&&
+         input$store.obs.button>0){
+      if((is.null(plot.par$locate.id)||
+           length(plot.par$locate.id)==0)&&
+           length(plot.par$locate.extreme)>0){
+        cp = plot.ret.para$parameters
+        cp = cp[1:(length(cp) - 3)]
+        plot.par.stored$locate.id = unique(c(plot.par$locate.id,
+                                             cp$all$all$extreme.ids))
+      }else if(length(plot.par$locate.id)>0){
+        plot.par.stored$locate.id = unique(c(plot.par$locate.id,
+                                             plot.par.stored$locate.id))
+      }
+    }
+  })
+})
+
+# Remove all stored points
+observe({
+  input$reset.obs.button
+  isolate({
+    if(!is.null(input$reset.obs.button)&&
+         input$reset.obs.button>0){
+      plot.par.stored$locate.id = NULL
     }
   })
 })

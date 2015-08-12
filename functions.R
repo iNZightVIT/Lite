@@ -175,7 +175,11 @@ get.combinations = function(dafr,simplify=F){
 #' @author Christoph Knapp
 get.create.variables = function(dafr,new.formula,new.name=NULL){
   tryCatch({
-    temp = cbind(dafr,eval(parse(text=new.formula),dafr))
+    colu = eval(parse(text=new.formula),dafr)
+    if(length(colu)>nrow(dafr)){
+      colu = colu[1:nrow(dafr)]
+    }
+    temp = cbind(dafr,colu)
     if(is.null(new.name)||""%in%new.name){
       new.name = "new.name"
     }

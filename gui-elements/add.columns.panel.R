@@ -10,6 +10,7 @@ get.sidebar.add = function(){
              rows in the data. To have all values on a new line is preferered. 
              Therefore if there are commas inside your values use the second method."),
     tags$textarea(id="new.column", rows=5, cols=35, ""),br(),
+    checkboxInput("convert.numeric",label="Numeric input"),br(),
     actionButton(inputId="add_column",label="Add as column",),br(),br(),
     help.display('Add a column','add_columns',"gui-elements/notes/add.columns.md")
   )

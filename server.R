@@ -1050,12 +1050,9 @@ shinyServer(function(input, output, session) {
             if(length(colu)>nrow(get.data.set())){
                 colu = colu[1:nrow(get.data.set())]
             }
-            NAs = which(is.na(colu))
-            if(length(NAs)>0&&length(colu[-NAs])>0){
-                temp.colu = as.numeric(colu[-NAs])
-                if(!any(is.na(temp.colu))){
-                    colu = as.numeric(colu)
-                }
+            if(input$convert.numeric&&
+                 !any(suppressWarnings(is.na(as.numeric(colu))))){
+              colu = as.numeric(colu)
             }
             count = 1
             name = "add.column1"
