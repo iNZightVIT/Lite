@@ -1536,3 +1536,59 @@ get.transformation.string = function(transform_select,
   }
   transformation.string
 }
+
+#' Searches a list recursivly for a name and
+#' returns the value associated with the name
+#' 
+#' @param list.seach A list to search
+#' @param search.name A name to be found in a list. 
+#' If null, the whole simplified list is returned.
+#' 
+#' @return The value found in the list associated with
+#' search.name, NULL if not there.
+#' 
+#' @note This function is used to change the 
+#' everchanging plot output from iNZightPlot.
+#' 
+#' @author Christoph Knapp
+search.name = function(list.search,search.name=NULL){
+  list.out=list()
+  search = function(input.list,nam=NULL){
+    if("list"%in%class(input.list)||
+         "inzplotoutput"%in%class(input.list)||
+         "inzgrid"%in%class(input.list)||
+         "inzpar.list"%in%class(input.list)){
+      for(i in 1:length(input.list)){
+        if(!is.null(names(input.list)[i])){
+          nam = names(input.list)[i]
+        }else{
+          nam = i
+        }
+        search(input.list[[nam]],nam)
+      }
+    }else{
+      if(is.null(nam)){
+        nam=length(list.out)+1
+      }
+      if(nam%in%names(list.out)){
+        temp = list.out[[nam]]
+        if("list"%in%class(temp)||
+             "inzplotoutput"%in%class(temp)||
+             "inzgrid"%in%class(input.list)||
+             "inzpar.list"%in%class(input.list)){
+          list.out[[nam]] <<- c(temp,input.list)
+        }else{
+          list.out[[nam]] <<- list(list.out[[nam]],input.list)
+        }
+      }else{
+        list.out[[nam]] <<- input.list
+      }
+    }
+  }
+  search(list.search)
+  if(is.null(search.name)){
+    list.out
+  }else{
+    list.out[[search.name]]
+  }
+}

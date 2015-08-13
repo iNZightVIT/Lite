@@ -1199,6 +1199,13 @@ observe({
 output$advanced_options_panel = renderUI({
   ret = NULL
   isolate({
+    large.sample = search.name(plot.ret.para$parameters,"largesample")
+    if(is.null(large.sample)){
+      large.sample=F
+    }
+    if(length(large.sample)>1){
+      large.sample = large.sample[[1]]
+    }
     # vari = factor, vari = none
     if((!is.null(input$vari1)&&
           !is.null(input$vari2)&&
@@ -1210,7 +1217,8 @@ output$advanced_options_panel = renderUI({
                         label = "Options",
                         choices = c('Code more variables',
                                     'Change plot appearance',
-                                    'Customize labels'),
+                                    'Customize labels',
+                                    'Adjust number of Bars'),
                         selected = 'Change plot appearance')
     # vari1 = factor, vari2 = factor
     }else if((!is.null(input$vari1)&&
@@ -1225,7 +1233,8 @@ output$advanced_options_panel = renderUI({
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Change plot appearance',
-                                    'Customize labels'),
+                                    'Customize labels',
+                                    'Adjust number of Bars'),
                         selected = 'Change plot appearance')
     # vari1 = numeric , vari2 = none or
     # vari1 = numeric , vari2 = factor or
@@ -1253,8 +1262,17 @@ output$advanced_options_panel = renderUI({
                         choices = c('Code more variables',
                                     'Change plot appearance',
                                     'Identify points',
-                                    'Customize labels'),
+                                    'Customize labels',
+                                    'Adjust axis limits'),
                         selected = 'Change plot appearance')
+      if(large.sample){
+        ret = selectInput(inputId = "advanced_options",
+                          label = "Options",
+                          choices = c('Change plot appearance',
+                                      'Customize labels',
+                                      'Adjust axis limits'),
+                          selected = 'Change plot appearance')
+      }
     # vari1 = numeric , vari2 = numeric
     }else if((!is.null(input$vari1)&&
                !is.null(input$vari2)&&
@@ -1275,14 +1293,25 @@ output$advanced_options_panel = renderUI({
                                     'Join points by line',
                                     'Change plot appearance',
                                     'Identify points',
-                                    'Customize labels'),
+                                    'Customize labels',
+                                    'Adjust axis limits'),
                         selected = 'Change plot appearance')
+      if(large.sample){
+        ret = selectInput(inputId = "advanced_options",
+                          label = "Options",
+                          choices = c('Add trend curves',
+                                      'Add x=y line',
+                                      'Change plot appearance',
+                                      'Customize labels',
+                                      'Adjust axis limits'),
+                          selected = 'Change plot appearance')
+      }
     }
   })
   list(ret) 
 })
 
-# Advanced options panel
+# Advanced options panel -> 
 output$plot.appearance.panel = renderUI({
   ret=NULL
   input$vari1
@@ -1330,20 +1359,13 @@ output$plot.appearance.panel = renderUI({
                                              max = 70, value=graphical.par$hex.bins,step=1)
     
     adjust.num.bins.object = NULL
-    tester = NULL
-    suppressWarnings({
-      if(input$vari2%in%"none"){
-        tester = try(iNZightPlot(get.data.set()[,input$vari1],
-                                 plot=F))
-      }else{
-        tester = try(iNZightPlot(get.data.set()[,input$vari1],
-                                 get.data.set()[,input$vari2],
-                                 plot=F))
-      }
-    })
-    large.sample = tester$all$all$boxinfo$all$opts$largesample
+    tester = plot.ret.para$parameters
+    large.sample = search.name(tester,"largesample")
     if(is.null(large.sample)){
       large.sample = F
+    }
+    if(length(large.sample)>1){
+      large.sample = large.sample[[1]]
     }
     # bar plot with one factor variable
     # vari1 = factor , vari2 = none
@@ -1415,14 +1437,15 @@ output$plot.appearance.panel = renderUI({
           temp = vis.par()
         })
         temp$plot = F
+        nbins=NULL
         if(is.null(get.nbins())){
-#           default.nbins = try(do.call(iNZightPlots:::iNZightPlot,temp))
-          nbins = attr(plot.ret.para$parameters,"nbins")
-          if(is.null(get.default.num.bins())){
-            plot.ret.para$default.num.bins = nbins
-          }
+          nbins  = search.name(plot.ret.para$parameters,"hist.bins")
+          nbins = nbins[1]
         }else{
           nbins = get.nbins()
+        }
+        if(is.null(nbins)){
+          nbins=50
         }
         m = length(unique(get.data.set()[,input$vari1]))
         if(!is.null(input$vari2)&&
@@ -1483,7 +1506,7 @@ output$plot.appearance.panel = renderUI({
   ret
 })
 
-# observe the plot type
+# observe the plot type and change 'Advanced options' select input
 observe({
   input$select.plot.type
   if(!is.null(input$vari1)&!is.null(input$vari2)){
@@ -1492,6 +1515,14 @@ observe({
            (input$vari2%in%colnames(get.data.set())||
               input$vari2%in%"none")){
         if(!is.null(input$advanced_options)){
+          tester = plot.ret.para$parameters
+          large.sample = search.name(tester,"largesample")
+          if(is.null(large.sample)){
+            large.sample = F
+          }
+          if(length(large.sample)>1){
+            large.sample = large.sample[[1]]
+          }
           sel = input$advanced_options
           ch = NULL
           if((class(get.data.set()[,input$vari1])%in%"factor"|
@@ -1499,7 +1530,8 @@ observe({
                input$vari2%in%"none"){
             ch = c('Code more variables',
                    'Change plot appearance',
-                   'Customize labels')
+                   'Customize labels',
+                   'Adjust number of Bars')
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
@@ -1509,7 +1541,8 @@ observe({
                      (class(get.data.set()[,input$vari2])%in%"factor"|
                         class(get.data.set()[,input$vari2])%in%"character")){
             ch = c('Change plot appearance',
-                   'Customize labels')
+                   'Customize labels',
+                   'Adjust number of Bars')
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
@@ -1529,12 +1562,15 @@ observe({
             ch = c('Code more variables',
                    'Change plot appearance',
                    'Identify points',
-                   'Customize labels')
+                   'Customize labels',
+                   'Adjust axis limits')
             if(!is.null(input$select.plot.type)&&
-                 input$select.plot.type%in%"histogram"&
-                 input$advanced_options%in%'Change plot appearance'){
+                 (input$select.plot.type%in%"histogram"||
+                 (large.sample&&
+                    input$select.plot.type%in%"default"))){
               ch = c('Change plot appearance',
-                     'Customize labels')
+                     'Customize labels',
+                     'Adjust axis limits')
             }
             if(!sel%in%ch){
               sel = 'Change plot appearance'
@@ -1552,15 +1588,18 @@ observe({
                   'Join points by line',
                   'Change plot appearance',
                   'Identify points',
-                  'Customize labels')
+                  'Customize labels',
+                  'Adjust axis limits')
             if(!is.null(input$select.plot.type)&&
-                 (input$select.plot.type%in%"grid-density plot"|
-                    input$select.plot.type%in%"hexbin plot")&
-                 input$advanced_options%in%'Change plot appearance'){
+                 ((input$select.plot.type%in%"grid-density plot"|
+                    input$select.plot.type%in%"hexbin plot")||
+                    large.sample&&
+                    input$select.plot.type%in%"default")){
               ch = c('Add trend curves',
                      'Add x=y line',
                      'Change plot appearance',
-                     'Customize labels')
+                     'Customize labels',
+                     'Adjust axis limits')
             }
             if(!sel%in%ch){
               sel = 'Change plot appearance'
@@ -2296,6 +2335,7 @@ output$points.identify.panel = renderUI({
   })
 })
 
+# update sliders for unique values when the "same level of" is checked
 observe({
   if(!is.null(input$same_level_of_check)&&
        !is.null(input$by.value.column.select)&&
@@ -2490,25 +2530,6 @@ observe({
   })
 })
 
-# # Identify points is not selected but 
-# # there are points to label/color?
-# observe({
-#   input$advanced_options
-#   isolate({
-#     if(!is.null(input$advanced_options)&&
-#          !input$advanced_options%in%'Identify points'){
-#       if(length(plot.par.stored$locate.id)==0){
-#         plot.par$locate=NULL
-#         plot.par$locate.col=NULL
-#         plot.par$locate.id=NULL
-#       }else{
-#         
-#         plot.par$locate.id=plot.par.stored$locate.id
-#       }
-#     }
-#   })
-# })
-
 # scatter plot "extreme values"
 observe({
   input$scatter.extremes.slider
@@ -2609,7 +2630,7 @@ observe({
   })
 })
 
-# Store points to be visible in othe plots
+# Store points to be visible in other plots
 observe({
   input$store.obs.button
   isolate({
@@ -2620,8 +2641,13 @@ observe({
            length(plot.par$locate.extreme)>0){
         cp = plot.ret.para$parameters
         cp = cp[1:(length(cp) - 3)]
+        extreme.ids = search.name(cp,"extreme.ids")
+        if(length(extreme.ids)>1){
+          extreme.ids = extreme.ids[[1]]
+        }
         plot.par.stored$locate.id = unique(c(plot.par$locate.id,
-                                             cp$all$all$extreme.ids))
+                                             extreme.ids))
+        
       }else if(length(plot.par$locate.id)>0){
         plot.par.stored$locate.id = unique(c(plot.par$locate.id,
                                              plot.par.stored$locate.id))
