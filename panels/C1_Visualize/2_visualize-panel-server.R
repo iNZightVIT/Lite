@@ -38,6 +38,9 @@ plot.par <- reactiveValues(
   main = NULL,
   xlab = NULL,
   ylab = NULL,
+  xlim =  NULL,
+  ylim = NULL,
+  inzpars = inzpar(),
   colby=NULL,
   sizeby=NULL,
   data=NULL,
@@ -619,6 +622,8 @@ output$visualize.plot = renderPlot({
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
       }
     }
+#     print(plot.ret.para$parameters)
+#     print('###########################################################################')
   }
 })
 
@@ -672,6 +677,8 @@ output$mini.plot = renderPlot({
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
       }
     }
+#     print(plot.ret.para$parameters)
+#     print('###########################################################################')
   }
 })
 
@@ -904,9 +911,13 @@ output$add_inference = renderUI({
     intervals = NULL
     graphical.par$inference.par = NULL
     graphical.par$bs.inference = F
-    if(input$vari1%in%colnames(get.data.set())){
+    if((!is.null(input$vari1)&&
+          !is.null(input$vari2))&&
+         (input$vari1%in%colnames(get.data.set())&&
+            (input$vari2%in%colnames(get.data.set())||
+               input$vari2%in%'none'))){
       if((!is.null(input$confidence_interval1)&&
-           input$confidence_interval1)||
+            input$confidence_interval1)||
            (!is.null(input$comparison_interval1)&&
               input$comparison_interval1)){
         if(!is.null(input$confidence_interval1)&&
@@ -927,93 +938,81 @@ output$add_inference = renderUI({
         if((!is.null(input$inference_type1)&&
               input$inference_type1%in%"Bootstrap")||
              (!is.null(input$inference_type2)&&
-             input$inference_type2%in%"Bootstrap")){
+                input$inference_type2%in%"Bootstrap")){
           graphical.par$bs.inference = T
         }else{
           graphical.par$bs.inference = F
         }
       }
-    }
-    graphical.par$inference.type = intervals
-    # vari1 = numeric; vari2 = numeric
-    if(!is.null(input$vari1)&&
-         (!input$vari2%in%"none"&&
-         input$vari1%in%colnames(dafr)&&
-         input$vari2%in%colnames(dafr))&&
-         ((class(dafr[,input$vari1])%in%"numeric"|
-          class(dafr[,input$vari1])%in%"integer")&
-         (class(dafr[,input$vari2])%in%"numeric"|
-            class(dafr[,input$vari2])%in%"integer"))){
-      ret = list(conditionalPanel("input.toggle_inference",
-                                  conditionalPanel("input.check_linear||
-                                                   input.check_quadratic||
-                                                   input.check_cubic||
-                                                   input.check_smoother",
-                                                   add_inference.check)))
-    # vari1 = numeric; vari2 = factor or 
-    # vari1 = factor; vari2 = numeric
-    }else if((!is.null(input$vari1)&&
-                !is.null(input$vari2)&&
-                !input$vari2%in%"none"&&
-                input$vari1%in%colnames(dafr)&&
-                input$vari2%in%colnames(dafr))&&
-               (((class(dafr[,input$vari1])%in%"numeric"|
-                    class(dafr[,input$vari1])%in%"integer")&
-                   (class(dafr[,input$vari2])%in%"factor"|
-                      class(dafr[,input$vari2])%in%"character"))||
+      graphical.par$inference.type = intervals
+      # vari1 = numeric; vari2 = numeric
+      if(!input$vari2%in%"none"&&
+           (class(dafr[,input$vari1])%in%"numeric"|
+              class(dafr[,input$vari1])%in%"integer")&&
+           (class(dafr[,input$vari2])%in%"numeric"|
+              class(dafr[,input$vari2])%in%"integer")){
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    conditionalPanel("input.check_linear||
+                                                     input.check_quadratic||
+                                                     input.check_cubic||
+                                                     input.check_smoother",
+                                                     add_inference.check)))
+      # vari1 = numeric; vari2 = factor or 
+      # vari1 = factor; vari2 = numeric
+      }else if(!input$vari2%in%"none"&&
+                 (((class(dafr[,input$vari1])%in%"numeric"|
+                     class(dafr[,input$vari1])%in%"integer")&&
+                    (class(dafr[,input$vari2])%in%"factor"|
+                       class(dafr[,input$vari2])%in%"character"))||
+                 ((class(dafr[,input$vari1])%in%"factor"|
+                     class(dafr[,input$vari1])%in%"character")&&
+                    (class(dafr[,input$vari2])%in%"numeric"|
+                       class(dafr[,input$vari2])%in%"integer")))){
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    mean_median.radio,
+                                    conditionalPanel("input.inference_parameter1=='Mean'",
+                                                     normal_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Median'",
+                                                     year12_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Mean'||
+                                                     (input.inference_parameter1=='Median'&&
+                                                     input.inference_type2=='Bootstrap')",
+                                                     h5("Type of interval"),
+                                                     confidence.interval.check,
+                                                     comparison.interval.check))
+        )
+      # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
+      }else if((!input$vari2%in%"none"&&
                   ((class(dafr[,input$vari1])%in%"factor"|
-                     class(dafr[,input$vari1])%in%"character")&
-                  (class(dafr[,input$vari2])%in%"numeric"|
-                     class(dafr[,input$vari2])%in%"integer")))){
-      ret = list(conditionalPanel("input.toggle_inference",
-                                  mean_median.radio,
-                                  conditionalPanel("input.inference_parameter1=='Mean'",
-                                                   normal_bootstrap.radio),
-                                  conditionalPanel("input.inference_parameter1=='Median'",
-                                                   year12_bootstrap.radio),
-                                  conditionalPanel("input.inference_parameter1=='Mean'||
-                                                   (input.inference_parameter1=='Median'&&
-                                                   input.inference_type2=='Bootstrap')",
-                                                   h5("Type of interval"),
-                                                   confidence.interval.check,
-                                                   comparison.interval.check))
-                 )
-    # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
-    }else if(!is.null(input$vari1)&&
-               (input$vari1%in%colnames(dafr)&&
-                input$vari2%in%colnames(dafr))&&
-                (!input$vari2%in%"none"&
-                   (class(dafr[,input$vari1])%in%"factor"|
-                      class(dafr[,input$vari1])%in%"character")&
-                   (class(dafr[,input$vari2])%in%"factor"|
-                      class(dafr[,input$vari2])%in%"character"))|
-               (input$vari2%in%"none"&
-                  (class(dafr[,input$vari1])%in%"factor"|
-                     class(dafr[,input$vari1])%in%"character"))){
-      ret = list(conditionalPanel("input.toggle_inference",
-                                  h5("Parameter"),helpText("Proportions"),
-                                  normal_bootstrap.radio,
-                                  h5("Type of interval"),
-                                  confidence.interval.check,
-                                  conditionalPanel("input.inference_type1=='Normal'",
-                                                   comparison.interval.check)))
-    # var1 = numeric; vari2 = none
-    }else if(!is.null(input$vari1)&&
-               input$vari1%in%colnames(dafr)&&
-               (input$vari2%in%"none"&&
+                      class(dafr[,input$vari1])%in%"character")&&
+                     (class(dafr[,input$vari2])%in%"factor"|
+                        class(dafr[,input$vari2])%in%"character")))||
+                 (input$vari2%in%"none"&&
+                    (class(dafr[,input$vari1])%in%"factor"|
+                       class(dafr[,input$vari1])%in%"character"))){
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    h5("Parameter"),helpText("Proportions"),
+                                    normal_bootstrap.radio,
+                                    h5("Type of interval"),
+                                    confidence.interval.check,
+                                    conditionalPanel("input.inference_type1=='Normal'",
+                                                     comparison.interval.check)))
+      # var1 = numeric; vari2 = none
+      }else if((input$vari2%in%"none"&&
                   (class(dafr[,input$vari1])%in%"numeric"|
                      class(dafr[,input$vari1])%in%"integer"))){
-      ret = list(conditionalPanel("input.toggle_inference",
-                                  mean_median.radio,
-                                  conditionalPanel("input.inference_parameter1=='Mean'",
-                                                   normal_bootstrap.radio),
-                                  conditionalPanel("input.inference_parameter1=='Median'",
-                                                   year12_bootstrap.radio),
-                                  conditionalPanel("input.inference_parameter1=='Mean'||
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    mean_median.radio,
+                                    conditionalPanel("input.inference_parameter1=='Mean'",
+                                                     normal_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Median'",
+                                                     year12_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Mean'||
                                                    (input.inference_parameter1=='Median'&&
                                                    input.inference_type2=='Bootstrap')",
-                                                   h5("Type of interval"),
-                                                   confidence.interval.check)))
+                                                     h5("Type of interval"),
+                                                     confidence.interval.check)))
+      }
     }
   })
   ret
@@ -1195,16 +1194,13 @@ observe({
   })
 })
 
-# advanced option panel
+# advanced option panel -> options selectinput (initial)
 output$advanced_options_panel = renderUI({
   ret = NULL
   isolate({
-    large.sample = search.name(plot.ret.para$parameters,"largesample")
+    large.sample = search.name(plot.ret.para$parameters,"largesample")[[1]]
     if(is.null(large.sample)){
       large.sample=F
-    }
-    if(length(large.sample)>1){
-      large.sample = large.sample[[1]]
     }
     # vari = factor, vari = none
     if((!is.null(input$vari1)&&
@@ -1360,12 +1356,9 @@ output$plot.appearance.panel = renderUI({
     
     adjust.num.bins.object = NULL
     tester = plot.ret.para$parameters
-    large.sample = search.name(tester,"largesample")
+    large.sample = search.name(tester,"largesample")[[1]]
     if(is.null(large.sample)){
       large.sample = F
-    }
-    if(length(large.sample)>1){
-      large.sample = large.sample[[1]]
     }
     # bar plot with one factor variable
     # vari1 = factor , vari2 = none
@@ -1439,8 +1432,8 @@ output$plot.appearance.panel = renderUI({
         temp$plot = F
         nbins=NULL
         if(is.null(get.nbins())){
-          nbins  = search.name(plot.ret.para$parameters,"hist.bins")
-          nbins = nbins[1]
+          nbins  = search.name(plot.ret.para$parameters,"hist.bins")[[1]]
+#           nbins = nbins[1]
         }else{
           nbins = get.nbins()
         }
@@ -1509,22 +1502,20 @@ output$plot.appearance.panel = renderUI({
 # observe the plot type and change 'Advanced options' select input
 observe({
   input$select.plot.type
+  tester = plot.ret.para$parameters
   if(!is.null(input$vari1)&!is.null(input$vari2)){
     isolate({
       if(input$vari1%in%colnames(get.data.set())&&
            (input$vari2%in%colnames(get.data.set())||
               input$vari2%in%"none")){
         if(!is.null(input$advanced_options)){
-          tester = plot.ret.para$parameters
-          large.sample = search.name(tester,"largesample")
+          large.sample = search.name(tester,"largesample")[[1]]
           if(is.null(large.sample)){
             large.sample = F
           }
-          if(length(large.sample)>1){
-            large.sample = large.sample[[1]]
-          }
           sel = input$advanced_options
           ch = NULL
+          # vari1 = factor, vari2 = none
           if((class(get.data.set()[,input$vari1])%in%"factor"|
                 class(get.data.set()[,input$vari1])%in%"character")&
                input$vari2%in%"none"){
@@ -1535,6 +1526,7 @@ observe({
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
+          # vari1 = factor, vari2 = factor
           }else if((class(get.data.set()[,input$vari1])%in%"factor"|
                       class(get.data.set()[,input$vari1])%in%"character")&
                      !input$vari2%in%"none"&&
@@ -1546,6 +1538,9 @@ observe({
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
+          # vari1 = numeric, vari2 = none or
+          # vari1 = factor, vari2 = numeric or
+          # vari1 = numeric, vari2 = factor
           }else if(((class(get.data.set()[,input$vari1])%in%"numeric"|
                        class(get.data.set()[,input$vari1])%in%"integer")&
                       input$vari2%in%"none")|
@@ -1575,6 +1570,7 @@ observe({
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
+          # vari1 = numeric, vari2 = numeric
           }else if((class(get.data.set()[,input$vari1])%in%"numeric"|
                       class(get.data.set()[,input$vari1])%in%"integer")&
                      !input$vari2%in%"none"&&
@@ -1819,36 +1815,38 @@ output$code.variables.panel = renderUI({
   input$vari2
   isolate({
     color.by.object  = NULL
-    if(!is.null(input$vari1)&&
-         input$vari1%in%colnames(get.data.set())&&
-         (class(vis.data()[,input$vari1])%in%"factor"|
-          class(vis.data()[,input$vari1])%in%"character")&
-         (is.null(input$vari2)|input$vari2%in%"none")){
-      color.by.object = selectInput("color_by_select",
-                                    label="Colour by levels of:",
-                                    choices=c(" ",get.categorical.column.names(vis.data())),
-                                    selected=input$color_by_select)
-    }else{
-      color.by.object = selectInput("color_by_select",
-                                    label="Colour by levels of:",
-                                    choices=c(" ",colnames(vis.data())),
-                                    selected=input$color_by_select)
+    if((!is.null(input$vari1)&&
+          !is.null(input$vari2))&&
+         (input$vari1%in%colnames(get.data.set())&&
+            (input$vari2%in%'none'||
+               input$vari2%in%colnames(get.data.set())))){
+      if((class(vis.data()[,input$vari1])%in%"factor"|
+            class(vis.data()[,input$vari1])%in%"character")&&
+           (is.null(input$vari2)|input$vari2%in%"none")){
+        color.by.object = selectInput("color_by_select",
+                                      label="Colour by levels of:",
+                                      choices=c(" ",get.categorical.column.names(vis.data())),
+                                      selected=input$color_by_select)
+      }else{
+        color.by.object = selectInput("color_by_select",
+                                      label="Colour by levels of:",
+                                      choices=c(" ",colnames(vis.data())),
+                                      selected=input$color_by_select)
+      }
+      resize.by.object = NULL
+      if((class(vis.data()[,input$vari1])%in%"numeric"|
+            class(vis.data()[,input$vari1])%in%"integer")&&
+           (!input$vari2%in%"none"&&
+              (class(vis.data()[,input$vari2])%in%"numeric"|
+                 class(vis.data()[,input$vari2])%in%"integer"))){
+        resize.by.object = selectInput("resize.by.select",
+                                       label="Resize points proportional to:",
+                                       choices=c(" ",get.numeric.column.names(vis.data())),
+                                       selected=input$resize.by.select)
+      }
+      list(color.by.object,
+           resize.by.object)
     }
-    resize.by.object = NULL
-    if(!is.null(input$vari1)&&
-         input$vari1%in%colnames(get.data.set())&&
-         (class(vis.data()[,input$vari1])%in%"numeric"|
-          class(vis.data()[,input$vari1])%in%"integer")&
-         (!is.null(input$vari2)&!input$vari2%in%"none")&&
-         (class(vis.data()[,input$vari2])%in%"numeric"|
-            class(vis.data()[,input$vari2])%in%"integer")){
-      resize.by.object = selectInput("resize.by.select",
-                                     label="Resize points proportional to:",
-                                     choices=c(" ",get.numeric.column.names(vis.data())),
-                                     selected=input$resize.by.select)
-    }
-    list(color.by.object,
-         resize.by.object)
   })
 })
 
@@ -2196,6 +2194,205 @@ observe({
     if(!is.null(input$check.join)){
       graphical.par$col.line = input$color.join
       graphical.par$join = input$check.join
+    }
+  })
+})
+
+# panel for wigets to adjust the x and y axis limits
+output$adjust.axis.panel = renderUI({
+  input$vari1
+  input$vari2
+#   plot.ret.para$parameters
+  isolate({
+    ret = NULL
+    plot.par$xlim = NULL
+    plot.par$ylim = NULL
+    if((!is.null(input$vari1)&&
+         !is.null(input$vari2))&&
+         (input$vari1%in%colnames(get.data.set())&&
+            (input$vari2%in%"none"||
+               input$vari2%in%colnames(get.data.set())))){
+      ret = list(h4('Adjust axis limits'))
+      temp = list()
+      temp$x = get.data.set()[,input$vari1]
+      if(input$vari2%in%'none'){
+        temp$y = NULL
+      }else{
+        temp$y = get.data.set()[,input$vari2]
+      }
+      temp$plot = F
+      tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      large.sample = search.name(tester,"largesample")[[1]]
+      limits.x = search.name(tester,"xlim")[[1]]
+#       print(limits.x)
+      limits.y = search.name(tester,"ylim")[[1]]
+#       print(limits.y)
+#       print("###########################################")
+      if(is.null(large.sample)){
+        large.sample = F
+      }
+      # vari1 = numeric, vari2 = none or
+      # vari1 = numeric, vari2 = factor or
+      # vari1 = factor, vari2 = numeric
+      if(((is.numeric(get.data.set()[,input$vari1])||
+             is.integer(get.data.set()[,input$vari1]))&&
+            input$vari2%in%"none")||
+           (!input$vari2%in%"none"&&
+              ((is.numeric(get.data.set()[,input$vari1])||
+               is.integer(get.data.set()[,input$vari1]))&&
+              (is.factor(get.data.set()[,input$vari2])||
+                 is.character(get.data.set()[,input$vari2])))||
+           ((is.numeric(get.data.set()[,input$vari2])||
+               is.integer(get.data.set()[,input$vari2]))&&
+              (is.factor(get.data.set()[,input$vari1])||
+                 is.character(get.data.set()[,input$vari1]))))){
+        ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+                            column(4,textInput("x_axis_low_text",
+                                               label="",
+                                               value=limits.x[1])),
+                            column(4,textInput("x_axis_hig_text",
+                                               label="",
+                                               value=limits.x[2])))
+      # vari1 = numeric, vari2 = numeric
+      }else if((is.numeric(get.data.set()[,input$vari1])||
+                 is.integer(get.data.set()[,input$vari1]))&&
+                 (!input$vari2%in%"none"&&
+                    (is.numeric(get.data.set()[,input$vari2])||
+                       is.integer(get.data.set()[,input$vari2])))){
+        ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+                            column(4,textInput("x_axis_low_text",
+                                               label="",
+                                               value=limits.y[1])),
+                            column(4,textInput("x_axis_hig_text",
+                                               label="",
+                                               value=limits.y[2])))
+        ret[[3]] = fixedRow(column(3,h5("y-axis:")),
+                            column(4,textInput("y_axis_low_text",
+                                               label="",
+                                               value=limits.x[1])),
+                            column(4,textInput("y_axis_hig_text",
+                                               label="",
+                                               value=limits.x[2])))
+      }
+      ret[[length(ret)+1]] = fixedRow(column(2,offset=8,
+                                             actionButton("reset_axis_limits_button",
+                                                          label='Reset')))
+    }
+    ret
+  })
+})
+
+# observe whether numeric input is used in x axis limit low and high
+observe({
+  input$x_axis_low_text
+  input$x_axis_hig_text
+  isolate({
+    if(!is.null(input$x_axis_low_text)&&
+         !is.null(input$x_axis_hig_text)){
+      tryCatch({
+        xlim = c(as.numeric(input$x_axis_low_text),
+                 as.numeric(input$x_axis_hig_text))
+        if(is.na(as.numeric(input$x_axis_low_text))){
+          xlim[1] = 0
+        }
+        if(is.na(as.numeric(input$x_axis_hig_text))){
+          xlim[2] = 0
+        }
+        plot.par$xlim = xlim
+      }, warning = function(w) {
+        if(is.na(suppressWarnings(as.numeric(input$x_axis_low_text)))){
+          updateTextInput(session,"x_axis_low_text",
+                          value = "")
+        }
+        if(is.na(suppressWarnings(as.numeric(input$x_axis_hig_text)))){
+          updateTextInput(session,"x_axis_hig_text",
+                          value = "")
+        }
+        plot.par$xlim = NULL
+      }, error = function(e) {
+        if(is.na(suppressWarnings(as.numeric(input$x_axis_low_text)))){
+          updateTextInput(session,"x_axis_low_text",
+                          value = "")
+        }
+        if(is.na(suppressWarnings(as.numeric(input$x_axis_hig_text)))){
+          updateTextInput(session,"x_axis_hig_text",
+                          value = "")
+        }
+        plot.par$xlim = NULL
+      }, finally = {})
+    }
+  })
+})
+
+# observe whether numeric input is used in y axis limit low and high
+observe({
+  input$y_axis_low_text
+  input$y_axis_hig_text
+  isolate({
+    if(!is.null(input$y_axis_low_text)&&
+         !is.null(input$y_axis_hig_text)){
+      tryCatch({
+        ylim = c(as.numeric(input$y_axis_low_text),
+                 as.numeric(input$y_axis_hig_text))
+        if(is.na(as.numeric(input$y_axis_low_text))){
+          ylim[1] = 0
+        }
+        if(is.na(as.numeric(input$y_axis_hig_text))){
+          ylim[2] = 0
+        }
+        plot.par$ylim = ylim
+      }, warning = function(w) {
+        if(is.na(suppressWarnings(as.numeric(input$y_axis_low_text)))){
+          updateTextInput(session,"y_axis_low_text",
+                          value = "")
+        }
+        if(is.na(suppressWarnings(as.numeric(input$y_axis_hig_text)))){
+          updateTextInput(session,"y_axis_hig_text",
+                          value = "")
+        }
+        plot.par$ylim = NULL
+      }, error = function(e) {
+        if(is.na(suppressWarnings(as.numeric(input$y_axis_low_text)))){
+          updateTextInput(session,"y_axis_low_text",
+                          value = "")
+        }
+        if(is.na(suppressWarnings(as.numeric(input$y_axis_hig_text)))){
+          updateTextInput(session,"y_axis_hig_text",
+                          value = "")
+        }
+        plot.par$ylim = NULL
+      }, finally = {})
+    }
+  })
+})
+
+# reset the x and y limits
+observe({
+  input$reset_axis_limits_button
+  isolate({
+    if(!is.null(input$reset_axis_limits_button)&&
+         input$reset_axis_limits_button>0){
+      plot.par$xlim = NULL
+      plot.par$ylim = NULL
+      temp = list()
+      temp$x = get.data.set()[,input$vari1]
+      if(input$vari2%in%'none'){
+        temp$y = NULL
+      }else{
+        temp$y = get.data.set()[,input$vari2]
+      }
+      temp$plot = F
+      temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      limits.x = search.name(temp,"xlim")[[1]]
+      limits.y = search.name(temp,"ylim")[[1]]
+      updateTextInput(session,"x_axis_low_text",
+                      value = limits.x[1])
+      updateTextInput(session,"x_axis_hig_text",
+                      value = limits.x[2])
+      updateTextInput(session,"y_axis_low_text",
+                      value = limits.y[1])
+      updateTextInput(session,"y_axis_hig_text",
+                      value = limits.y[2])
     }
   })
 })
@@ -2641,7 +2838,7 @@ observe({
            length(plot.par$locate.extreme)>0){
         cp = plot.ret.para$parameters
         cp = cp[1:(length(cp) - 3)]
-        extreme.ids = search.name(cp,"extreme.ids")
+        extreme.ids = search.name(cp,"extreme.ids")[[1]]
         if(length(extreme.ids)>1){
           extreme.ids = extreme.ids[[1]]
         }

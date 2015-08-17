@@ -1557,7 +1557,10 @@ search.name = function(list.search,search.name=NULL){
     if("list"%in%class(input.list)||
          "inzplotoutput"%in%class(input.list)||
          "inzgrid"%in%class(input.list)||
-         "inzpar.list"%in%class(input.list)){
+         "inzpar.list"%in%class(input.list)||
+         "inzdot"%in%class(input.list)||
+         "inzhist"%in%class(input.list)||
+         "inzscatter"%in%class(input.list)){
       for(i in 1:length(input.list)){
         if(!is.null(names(input.list)[i])){
           nam = names(input.list)[i]
@@ -1570,18 +1573,13 @@ search.name = function(list.search,search.name=NULL){
       if(is.null(nam)){
         nam=length(list.out)+1
       }
-      if(nam%in%names(list.out)){
-        temp = list.out[[nam]]
-        if("list"%in%class(temp)||
-             "inzplotoutput"%in%class(temp)||
-             "inzgrid"%in%class(input.list)||
-             "inzpar.list"%in%class(input.list)){
-          list.out[[nam]] <<- c(temp,input.list)
+      if(!is.null(input.list)){
+        if(nam%in%names(list.out)){
+          temp = list.out[[nam]]
+          list.out[[nam]][[length(list.out[[nam]])+1]] <<- input.list
         }else{
-          list.out[[nam]] <<- list(list.out[[nam]],input.list)
+          list.out[[nam]] <<- list(input.list)
         }
-      }else{
-        list.out[[nam]] <<- input.list
       }
     }
   }
