@@ -154,7 +154,9 @@ vis.mainPanel = function() {
                                                                        conditionalPanel("input.advanced_options=='Customize labels'",
                                                                                         uiOutput("customize.labels.panel")),
                                                                        conditionalPanel("input.advanced_options=='Adjust axis limits'",
-                                                                                        uiOutput("adjust.axis.panel"))))))
+                                                                                        uiOutput("adjust.axis.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Adjust number of Bars'",
+                                                                                        uiOutput("adjust.number.bars.panel"))))))
                                     )
                        )
                 )

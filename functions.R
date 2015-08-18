@@ -1560,7 +1560,8 @@ search.name = function(list.search,search.name=NULL){
          "inzpar.list"%in%class(input.list)||
          "inzdot"%in%class(input.list)||
          "inzhist"%in%class(input.list)||
-         "inzscatter"%in%class(input.list)){
+         "inzscatter"%in%class(input.list)||
+         "inzbar"%in%class(input.list)){
       for(i in 1:length(input.list)){
         if(!is.null(names(input.list)[i])){
           nam = names(input.list)[i]
@@ -1590,3 +1591,4 @@ search.name = function(list.search,search.name=NULL){
     list.out[[search.name]]
   }
 }
+

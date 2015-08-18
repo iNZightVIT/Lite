@@ -47,7 +47,8 @@ plot.par <- reactiveValues(
   locate=NULL,
   locate.id=NULL,
   locate.col=NULL,
-  locate.extreme=NULL
+  locate.extreme=NULL,
+  zoombar=NULL
 )
 
 identified.points = reactiveValues(values=list())
@@ -558,6 +559,7 @@ observe({
     plot.par$g2.level = g2_level
 })
 
+
 observe({
   g2_level = input$sub2_level_mini
   if (is.null(g2_level) || g2_level == 0) {
@@ -570,6 +572,26 @@ observe({
     g2_level = "_MULTI"
   }
   plot.par$g2.level = g2_level
+})
+
+# update sliders for subsetting variables
+observe({
+  input$customize_plot
+  isolate({
+    if(!is.null(input$customize_plot)){
+      if(input$customize_plot%in%"1"){
+        updateSliderInput(session,"sub1_level_mini",
+                          value=input$sub1_level)
+        updateSliderInput(session,"sub2_level_mini",
+                          value=input$sub2_level)
+      }else{
+        updateSliderInput(session,"sub1_level",
+                          value=input$sub1_level_mini)
+        updateSliderInput(session,"sub2_level",
+                          value=input$sub2_level_mini)
+      }
+    }
+  })
 })
 
 output$visualize.plot = renderPlot({
@@ -873,6 +895,7 @@ observe({
       plot.par$locate.id=NULL
       plot.par$locate.col=NULL
       plot.par$locate.extreme=NULL
+      plot.par$zoombar=NULL
     })
   }
 })
@@ -1198,17 +1221,28 @@ observe({
 output$advanced_options_panel = renderUI({
   ret = NULL
   isolate({
-    large.sample = search.name(plot.ret.para$parameters,"largesample")[[1]]
+    temp = list()
+    temp$x = get.data.set()[,input$vari1]
+    if(input$vari2%in%'none'){
+      temp$y = NULL
+    }else{
+      temp$y = get.data.set()[,input$vari2]
+    }
+    temp$plot = F
+    temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+    large.sample = search.name(temp,"largesample")[[1]]
     if(is.null(large.sample)){
       large.sample=F
     }
-    # vari = factor, vari = none
     if((!is.null(input$vari1)&&
-          !is.null(input$vari2)&&
-          input$vari1%in%colnames(get.data.set())&&
-          input$vari2%in%"none")&&
+          !is.null(input$vari2))&&
+          (input$vari1%in%colnames(get.data.set())&&
+          (input$vari2%in%"none"|
+             input$vari2%in%colnames(get.data.set()))))
+    # vari = factor, vari = none
+    if(input$vari2%in%"none"&&
          (class(get.data.set()[,input$vari1])%in%"factor"|
-          class(get.data.set()[,input$vari1])%in%"character")){
+            class(get.data.set()[,input$vari1])%in%"character")){
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Code more variables',
@@ -1217,15 +1251,11 @@ output$advanced_options_panel = renderUI({
                                     'Adjust number of Bars'),
                         selected = 'Change plot appearance')
     # vari1 = factor, vari2 = factor
-    }else if((!is.null(input$vari1)&&
-               !is.null(input$vari2)&&
-               !input$vari2%in%"none"&&
-                input$vari1%in%colnames(get.data.set())&&
-                input$vari2%in%colnames(get.data.set()))&&
+    }else if(!input$vari2%in%"none"&&
                ((class(get.data.set()[,input$vari1])%in%"factor"|
-                class(get.data.set()[,input$vari1])%in%"character")&
-               (class(get.data.set()[,input$vari2])%in%"factor"|
-                  class(get.data.set()[,input$vari2])%in%"character"))){
+                   class(get.data.set()[,input$vari1])%in%"character")&&
+                  (class(get.data.set()[,input$vari2])%in%"factor"|
+                     class(get.data.set()[,input$vari2])%in%"character"))){
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Change plot appearance',
@@ -1235,24 +1265,19 @@ output$advanced_options_panel = renderUI({
     # vari1 = numeric , vari2 = none or
     # vari1 = numeric , vari2 = factor or
     # vari1 = factor , vari2 = numeric
-    }else if((!is.null(input$vari1)&&
-               !is.null(input$vari2)&&
-                input$vari1%in%colnames(get.data.set()))&&
-               ((input$vari2%in%"none"&
-                   (class(get.data.set()[,input$vari1])%in%"numeric"|
-                      class(get.data.set()[,input$vari1])%in%"integer"))||
-                  ((!input$vari2%in%"none"&&
-                      input$vari2%in%colnames(get.data.set()))&&
-                     (class(get.data.set()[,input$vari1])%in%"factor"|
-                        class(get.data.set()[,input$vari1])%in%"character")&
-                     (class(get.data.set()[,input$vari2])%in%"integer"|
-                        class(get.data.set()[,input$vari2])%in%"numeric"))||
-                  ((!input$vari2%in%"none"&&
-                      input$vari2%in%colnames(get.data.set()))&&
+    }else if((input$vari2%in%"none"&&
+                (class(get.data.set()[,input$vari1])%in%"numeric"|
+                   class(get.data.set()[,input$vari1])%in%"integer"))||
+               (!input$vari2%in%"none"&&
+                  (class(get.data.set()[,input$vari1])%in%"factor"|
+                     class(get.data.set()[,input$vari1])%in%"character")&&
+                  (class(get.data.set()[,input$vari2])%in%"integer"|
+                     class(get.data.set()[,input$vari2])%in%"numeric"))||
+                  (!input$vari2%in%"none"&&
                      (class(get.data.set()[,input$vari1])%in%"integer"|
-                        class(get.data.set()[,input$vari1])%in%"numeric")&
+                        class(get.data.set()[,input$vari1])%in%"numeric")&&
                      (class(get.data.set()[,input$vari2])%in%"character"|
-                        class(get.data.set()[,input$vari2])%in%"factor")))){
+                        class(get.data.set()[,input$vari2])%in%"factor"))){
       ret = selectInput(inputId = "advanced_options",
                         label = "Options",
                         choices = c('Code more variables',
@@ -1270,13 +1295,9 @@ output$advanced_options_panel = renderUI({
                           selected = 'Change plot appearance')
       }
     # vari1 = numeric , vari2 = numeric
-    }else if((!is.null(input$vari1)&&
-               !is.null(input$vari2)&&
-               !input$vari2%in%"none"&&
-               input$vari1%in%colnames(get.data.set())&&
-               input$vari2%in%colnames(get.data.set()))&&
+    }else if(!input$vari2%in%"none"&&
                ((class(get.data.set()[,input$vari1])%in%"numeric"|
-                   class(get.data.set()[,input$vari1])%in%"integer")&
+                   class(get.data.set()[,input$vari1])%in%"integer")&&
                   (class(get.data.set()[,input$vari2])%in%"numeric"|
                      class(get.data.set()[,input$vari2])%in%"integer"))){
       ret = selectInput(inputId = "advanced_options",
@@ -1355,144 +1376,141 @@ output$plot.appearance.panel = renderUI({
                                              max = 70, value=graphical.par$hex.bins,step=1)
     
     adjust.num.bins.object = NULL
-    tester = plot.ret.para$parameters
-    large.sample = search.name(tester,"largesample")[[1]]
-    if(is.null(large.sample)){
-      large.sample = F
-    }
-    # bar plot with one factor variable
-    # vari1 = factor , vari2 = none
-    if((!is.null(input$vari1)&&
-          !is.null(input$vari2)&&
-          input$vari1%in%colnames(get.data.set())&&
-          input$vari2%in%"none")&&
-         (class(get.data.set()[,input$vari1])%in%"factor"|
-            class(get.data.set()[,input$vari1])%in%"character")){
-      ret = list(select.bg.object,
-                 select.barcolor.object
-      )
-    # bar plot with two factor variables
-    # vari1 = factor , vari2 = factor
-    }else if((!is.null(input$vari1)&&
-               !is.null(input$vari2)&&
-               !input$vari2%in%"none"&&
-               input$vari1%in%colnames(get.data.set())&&
-               input$vari2%in%colnames(get.data.set()))&&
-               ((class(get.data.set()[,input$vari1])%in%"factor"|
-                      class(get.data.set()[,input$vari1])%in%"character")&
-                     (class(get.data.set()[,input$vari2])%in%"factor"|
-                        class(get.data.set()[,input$vari2])%in%"character"))){
-      select.bg.object = selectInput(inputId="select.bg1",label="Select Background colour:",
-                                     choices=cols1,
-                                     selected=graphical.par$bg)
-      ret = list(select.bg.object
-      )
-    # dotplot or histogram for numeric varible in x or 
-    # dotplot or histogram for one numeric one factor variable
-    # vari1 = numeric , vari2 = none
-    # vari1 = factor , vari2 = numeric or
-    # vari1 = numeric , vari2 = factor
-    }else if((!is.null(input$vari1)&&
-               !is.null(input$vari1)&&
-                input$vari1%in%colnames(get.data.set()))&&
-               ((input$vari2%in%"none"&&
-                   (class(get.data.set()[,input$vari1])%in%"numeric"|
-                      class(get.data.set()[,input$vari1])%in%"integer"))||
-                  ((!input$vari2%in%"none"&&
-                      input$vari2%in%colnames(get.data.set()))&&
-                     (class(get.data.set()[,input$vari1])%in%"factor"|
-                        class(get.data.set()[,input$vari1])%in%"character")&
-                     (class(get.data.set()[,input$vari2])%in%"integer"|
-                        class(get.data.set()[,input$vari2])%in%"numeric"))||
-                  ((!input$vari2%in%"none"&&
-                      input$vari2%in%colnames(get.data.set()))&&
-                     (class(get.data.set()[,input$vari1])%in%"integer"|
-                        class(get.data.set()[,input$vari1])%in%"numeric")&
-                     (class(get.data.set()[,input$vari2])%in%"character"|
-                        class(get.data.set()[,input$vari2])%in%"factor")))){
-      select.plot.type.object = selectInput(inputId = "select.plot.type",
-                                            label = "Plot type:",
-                                            choices=c("default",
-                                                      "dot plot",
-                                                      "histogram"),
-                                            selected=input$select.plot.type)
-      ret = list(select.plot.type.object,
-                 adjust.size.points.dot.object,
-                 adjust.transparency.object,
-                 select.bg.object,
-                 select.dotcolor.object,
-                 color.interior
-      )
-      if(!is.null(input$select.plot.type)&&
-           (input$select.plot.type%in%"histogram"||
-           (large.sample&&input$select.plot.type%in%"default"))){
-        isolate({
-          temp = vis.par()
-        })
-        temp$plot = F
-        nbins=NULL
-        if(is.null(get.nbins())){
-          nbins  = search.name(plot.ret.para$parameters,"hist.bins")[[1]]
-#           nbins = nbins[1]
-        }else{
-          nbins = get.nbins()
-        }
-        if(is.null(nbins)){
-          nbins=50
-        }
-        m = length(unique(get.data.set()[,input$vari1]))
-        if(!is.null(input$vari2)&&
-             !input$vari2%in%"none"&&
-             input$vari2%in%colnames(get.data.set())){
-          m = max(c(length(unique(get.data.set()[,input$vari1])),
-                    length(unique(get.data.set()[,input$vari2]))))
-        }
-        if(m<nbins){
-          m=nbins
-        }
-        adjust.num.bins.object = sliderInput("adjust.num.bins", label = "Number of bars:", min = 1, 
-                                             max = m, value=nbins,step=1)
-        ret=list(select.plot.type.object,
-                 adjust.num.bins.object,
-                 select.bg.object,
-                 select.barcolor.object)
+    if((!is.null(input$vari1)&
+         !is.null(input$vari2))&&
+         (input$vari1%in%colnames(get.data.set())&&
+            (input$vari2%in%colnames(get.data.set())|
+               input$vari2%in%"none"))){
+      temp = list()
+      temp$x = get.data.set()[,input$vari1]
+      if(input$vari2%in%'none'){
+        temp$y = NULL
+      }else{
+        temp$y = get.data.set()[,input$vari2]
       }
-    # scatter plot
-    # vari1 = numeric , vari2 = numeric
-    }else if((!is.null(input$vari1)&&
-                !is.null(input$vari2)&&
-                !input$vari2%in%"none"&&
-                input$vari1%in%colnames(get.data.set())&&
-                input$vari2%in%colnames(get.data.set()))&&
-               ((class(get.data.set()[,input$vari1])%in%"numeric"|
-                   class(get.data.set()[,input$vari1])%in%"integer")&
-                  (class(get.data.set()[,input$vari1])%in%"numeric"|
-                     class(get.data.set()[,input$vari1])%in%"integer"))){
-      select.plot.type.object = selectInput(inputId = "select.plot.type",
-                                            label = "Plot type:",
-                                            choices=c("default",
-                                                      "scatter plot",
-                                                      "grid-density plot",
-                                                      "hexbin plot"),
-                                            selected=input$select.plot.type)
-      ret = list(select.plot.type.object,
-                 adjust.size.points.scatter.object,
-                 adjust.transparency.object,
-                 select.bg.object,
-                 select.dotcolor.object,
-                 color.interior)
-      if(!is.null(input$select.plot.type)&&
-           (input$select.plot.type%in%"grid-density plot"||
-              (large.sample&&input$select.plot.type%in%"default"))){
+      temp$plot = F
+      tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      large.sample = search.name(tester,"largesample")[[1]]
+      if(is.null(large.sample)){
+        large.sample = F
+      }
+      # bar plot with one factor variable
+      # vari1 = factor , vari2 = none
+      if(input$vari2%in%"none"&&
+           (class(get.data.set()[,input$vari1])%in%"factor"|
+              class(get.data.set()[,input$vari1])%in%"character")){
+        ret = list(select.bg.object,
+                   select.barcolor.object
+        )
+      # bar plot with two factor variables
+      # vari1 = factor , vari2 = factor
+      }else if(!input$vari2%in%"none"&&
+                 ((class(get.data.set()[,input$vari1])%in%"factor"|
+                     class(get.data.set()[,input$vari1])%in%"character")&&
+                    (class(get.data.set()[,input$vari2])%in%"factor"|
+                       class(get.data.set()[,input$vari2])%in%"character"))){
+        select.bg.object = selectInput(inputId="select.bg1",label="Select Background colour:",
+                                       choices=cols1,
+                                       selected=graphical.par$bg)
+        ret = list(select.bg.object)
+      # dotplot or histogram for numeric varible in x or 
+      # dotplot or histogram for one numeric one factor variable
+      # vari1 = numeric , vari2 = none
+      # vari1 = factor , vari2 = numeric or
+      # vari1 = numeric , vari2 = factor
+      }else if((input$vari2%in%"none"&&
+                     (class(get.data.set()[,input$vari1])%in%"numeric"|
+                        class(get.data.set()[,input$vari1])%in%"integer"))||
+                    (!input$vari2%in%"none"&&
+                       ((class(get.data.set()[,input$vari1])%in%"factor"|
+                          class(get.data.set()[,input$vari1])%in%"character")&&
+                       (class(get.data.set()[,input$vari2])%in%"integer"|
+                          class(get.data.set()[,input$vari2])%in%"numeric")))||
+                    (!input$vari2%in%"none"&&
+                       ((class(get.data.set()[,input$vari1])%in%"integer"|
+                          class(get.data.set()[,input$vari1])%in%"numeric")&
+                       (class(get.data.set()[,input$vari2])%in%"character"|
+                          class(get.data.set()[,input$vari2])%in%"factor")))){
+        select.plot.type.object = selectInput(inputId = "select.plot.type",
+                                              label = "Plot type:",
+                                              choices=c("default",
+                                                        "dot plot",
+                                                        "histogram"),
+                                              selected=input$select.plot.type)
         ret = list(select.plot.type.object,
-                   adjust.grid.size.object,
-                   adjust.min.count.grid.object,
-                   select.bg.object)
-      }else if(!is.null(input$select.plot.type)&&
-                 input$select.plot.type%in%"hexbin plot"){
+                   adjust.size.points.dot.object,
+                   adjust.transparency.object,
+                   select.bg.object,
+                   select.dotcolor.object,
+                   color.interior
+        )
+        if(!is.null(input$select.plot.type)&&
+             (input$select.plot.type%in%"histogram"||
+             (large.sample&&input$select.plot.type%in%"default"))){
+          isolate({
+            temp = vis.par()
+          })
+          temp$plot = F
+          nbins=NULL
+          if(is.null(get.nbins())){
+            nbins  = search.name(tester,"hist.bins")[[1]][1]
+  #           nbins = nbins[1]
+          }else{
+            nbins = get.nbins()
+          }
+          if(is.null(nbins)|is.na(nbins)){
+            nbins=50
+          }
+          m = length(unique(get.data.set()[,input$vari1]))
+          if(!is.null(input$vari2)&&
+               !input$vari2%in%"none"&&
+               input$vari2%in%colnames(get.data.set())){
+            m = max(c(length(unique(get.data.set()[,input$vari1])),
+                      length(unique(get.data.set()[,input$vari2]))))
+          }
+          if(m<nbins){
+            m=nbins
+          }
+          adjust.num.bins.object = sliderInput("adjust.num.bins", label = "Number of bars:", min = 1, 
+                                               max = m, value=nbins,step=1)
+          ret=list(select.plot.type.object,
+                   adjust.num.bins.object,
+                   select.bg.object,
+                   select.barcolor.object)
+        }
+      # scatter plot
+      # vari1 = numeric , vari2 = numeric
+      }else if(!input$vari2%in%"none"&&
+                 ((class(get.data.set()[,input$vari1])%in%"numeric"|
+                     class(get.data.set()[,input$vari1])%in%"integer")&&
+                    (class(get.data.set()[,input$vari1])%in%"numeric"|
+                       class(get.data.set()[,input$vari1])%in%"integer"))){
+        select.plot.type.object = selectInput(inputId = "select.plot.type",
+                                              label = "Plot type:",
+                                              choices=c("default",
+                                                        "scatter plot",
+                                                        "grid-density plot",
+                                                        "hexbin plot"),
+                                              selected=input$select.plot.type)
         ret = list(select.plot.type.object,
-                   adjust.hex.bins.object,
-                   select.bg.object)
+                   adjust.size.points.scatter.object,
+                   adjust.transparency.object,
+                   select.bg.object,
+                   select.dotcolor.object,
+                   color.interior)
+        if(!is.null(input$select.plot.type)&&
+             (input$select.plot.type%in%"grid-density plot"||
+                (large.sample&&input$select.plot.type%in%"default"))){
+          ret = list(select.plot.type.object,
+                     adjust.grid.size.object,
+                     adjust.min.count.grid.object,
+                     select.bg.object)
+        }else if(!is.null(input$select.plot.type)&&
+                   input$select.plot.type%in%"hexbin plot"){
+          ret = list(select.plot.type.object,
+                     adjust.hex.bins.object,
+                     select.bg.object)
+        }
       }
     }
   })
@@ -1502,17 +1520,25 @@ output$plot.appearance.panel = renderUI({
 # observe the plot type and change 'Advanced options' select input
 observe({
   input$select.plot.type
-  tester = plot.ret.para$parameters
   if(!is.null(input$vari1)&!is.null(input$vari2)){
     isolate({
       if(input$vari1%in%colnames(get.data.set())&&
            (input$vari2%in%colnames(get.data.set())||
               input$vari2%in%"none")){
+        temp = list()
+        temp$x = get.data.set()[,input$vari1]
+        if(input$vari2%in%'none'){
+          temp$y = NULL
+        }else{
+          temp$y = get.data.set()[,input$vari2]
+        }
+        temp$plot = F
+        tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
+        large.sample = search.name(tester,"largesample")[[1]]
+        if(is.null(large.sample)){
+          large.sample = F
+        }
         if(!is.null(input$advanced_options)){
-          large.sample = search.name(tester,"largesample")[[1]]
-          if(is.null(large.sample)){
-            large.sample = F
-          }
           sel = input$advanced_options
           ch = NULL
           # vari1 = factor, vari2 = none
@@ -2224,16 +2250,10 @@ output$adjust.axis.panel = renderUI({
       tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
       large.sample = search.name(tester,"largesample")[[1]]
       limits.x = search.name(tester,"xlim")[[1]]
-#       print(limits.x)
       limits.y = search.name(tester,"ylim")[[1]]
-#       print(limits.y)
-#       print("###########################################")
       if(is.null(large.sample)){
         large.sample = F
       }
-      # vari1 = numeric, vari2 = none or
-      # vari1 = numeric, vari2 = factor or
-      # vari1 = factor, vari2 = numeric
       if(((is.numeric(get.data.set()[,input$vari1])||
              is.integer(get.data.set()[,input$vari1]))&&
             input$vari2%in%"none")||
@@ -2394,6 +2414,59 @@ observe({
       updateTextInput(session,"y_axis_hig_text",
                       value = limits.y[2])
     }
+  })
+})
+
+output$adjust.number.bars.panel = renderUI({
+  input$vari1
+  input$vari2
+  get.data.set()
+  isolate({
+    plot.par$zoombar = NULL
+    ret = NULL
+    if((!is.null(input$vari1)&&
+         !is.null(input$vari2))&&
+         (input$vari1%in%colnames(get.data.set())&&
+            (input$vari1%in%colnames(get.data.set())||
+               input$vari1%in%"none"))){
+      if(length(levels(get.data.set()[,input$vari1]))>2){
+        ret = list(sliderInput("num.bars.slider",
+                               label = "Number of Bars:",
+                               min=2,
+                               max=length(levels(get.data.set()[,input$vari1])),
+                               step=1,
+                               ticks=F,
+                               value=length(levels(get.data.set()[,input$vari1]))),
+                   sliderInput("starting.bars.slider",
+                               label = "Starting Point:",
+                               min=1,
+                               max=length(levels(get.data.set()[,input$vari1]))-1,
+                               step=1,
+                               ticks=F,
+                               value=1),
+                   actionButton("reset.zoombars","Reset"))
+      }
+    }
+  })
+})
+
+# observe the Number of bars slider
+observe({
+  input$num.bars.slider
+  input$starting.bars.slider
+  isolate({
+    plot.par$zoombar = c(input$starting.bars.slider,input$num.bars.slider)
+  })
+})
+
+#observe the reset button for adjusting bars
+observe({
+  input$reset.zoombars
+  isolate({
+    updateSliderInput(session,"num.bars.slider",
+                      value=length(levels(get.data.set()[,input$vari1])))
+    updateSliderInput(session,"starting.bars.slider",
+                      value=1)
   })
 })
 
@@ -2836,9 +2909,16 @@ observe({
       if((is.null(plot.par$locate.id)||
            length(plot.par$locate.id)==0)&&
            length(plot.par$locate.extreme)>0){
-        cp = plot.ret.para$parameters
-        cp = cp[1:(length(cp) - 3)]
-        extreme.ids = search.name(cp,"extreme.ids")[[1]]
+        temp = list()
+        temp$x = get.data.set()[,input$vari1]
+        if(input$vari2%in%'none'){
+          temp$y = NULL
+        }else{
+          temp$y = get.data.set()[,input$vari2]
+        }
+        temp$plot = F
+        temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+        extreme.ids = search.name(temp,"extreme.ids")[[1]]
         if(length(extreme.ids)>1){
           extreme.ids = extreme.ids[[1]]
         }

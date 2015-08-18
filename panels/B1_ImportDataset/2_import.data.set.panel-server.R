@@ -1,3 +1,8 @@
+import_reactives = reactiveValues(
+  success = F
+)
+
+
 observe({
   if(!is.null(input$import_set)&&input$import_set>0){
     isolate({
@@ -13,6 +18,7 @@ observe({
             temp = temp[1:(length(temp)-1)]
           } 
           values$data.name = paste(temp,collapse=".")
+          import_reactives$success = T
           if (!file.exists(paste(get.data.dir.imported(),"/Imported",sep=""))&&
                 file.writable(get.data.dir.imported())) {
             dir.create(paste(get.data.dir.imported(),"/Imported",sep=""), recursive = TRUE)
@@ -25,6 +31,7 @@ observe({
         values$data.set = data.vals$data.set
         values$data.restore = get.data.set()
         values$data.name = data.vals$data.name
+        import_reactives$success = T
       }
     })
   }
@@ -83,6 +90,17 @@ observe({
           unlink(f)
         }
       }
+    }
+  })
+})
+
+output$message.success = renderText({
+  input$import_set
+  input$files
+  isolate({
+    if(import_reactives$success){
+      import_reactives$success = F
+      "Import was successful"
     }
   })
 })

@@ -3,14 +3,14 @@ get.sidebar.load = function(url_load){
     url_load=""
   }
   list(
-    fileInput("files", "File data", multiple=F),
-    helpText("The button above will import a data set from a file and will make it
-             available to other users of this instance. Otherwise, paste a URL in
-             the text field below to import a file from a web resource. Press the
-             \"Import file\" button below to finalize your choice"),
-    br(),textInput(inputId="URLtext",label="URL",value=url_load),br(),
-    actionButton(inputId="import_set",label="Import file",),
-    br(),br(),help.display('Load data','load_data',"panels/B1_ImportDataset/3_import.data.set.panel.help.md")
+    helpText("Select a file,"),
+    fileInput("files",label="", multiple=F),
+    helpText("or provide a URL pointing to a file on a web location"),
+    br(),textInput(inputId="URLtext",label="paste/enter URL",value=url_load),br(),
+    helpText("Finalise your choice by pressing the button below."),
+    actionButton(inputId="import_set",label="Import file"),br(),br(),
+    verbatimTextOutput("message.success"),
+    br(),help.display('Load data','load_data',"panels/B1_ImportDataset/3_import.data.set.panel.help.md")
   )
 }
 
