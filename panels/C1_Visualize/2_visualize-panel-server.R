@@ -263,17 +263,21 @@ vis.par = reactive({
 ##
 ##  Select variable 1.
 output$vari1_panel = renderUI({
+  isolate({
     selectInput(inputId = "vari1",
                 label = "Select first variable:",
                 choices = colnames(vis.data()),
-                selected = plot.par$varnames$x)
+                selected = input$vari1,
+                selectize=F,
+                size=2)
+  })
 })
 
 ##  Update plot.par$x.
 observe({
   if(!is.null(input$vari1)){
-    vari1.par = handle.input(input$vari1)$input.out
     isolate({
+      vari1.par = handle.input(input$vari1)$input.out
       plot.par$x = vari1.par
       plot.par$varnames$x = input$vari1
       if(!is.null(vis.data())){
@@ -441,7 +445,9 @@ output$vari2_panel = renderUI({
     selectInput(inputId = "vari2",
                 label = "Select second variable:",
                 choices = c("none", ch),
-                selected = plot.par$varnames$y)
+                selected = input$vari2,
+                selectize=F,
+                size=2)
   })
 })
 
