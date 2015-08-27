@@ -113,7 +113,7 @@ shinyUI(
             tabPanel("Visualize",value="visualize",
                      uiOutput("visualize.panel")),
             ## Row operations tab
-            navbarMenu("Row operations",id="operations_row",
+            navbarMenu("Dataset",id="operations_row",
                        tabPanel("Filter Dataset",
                                 uiOutput('filter.dataset')),
                        tabPanel("Sort data by variables",

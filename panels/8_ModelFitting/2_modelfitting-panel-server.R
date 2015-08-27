@@ -1,6 +1,6 @@
-###-------------------------------------------------###
+###---------------------------------------------------###
 ###  Server Functions for the "Model Fitting" Module  ###
-###-------------------------------------------------###
+###---------------------------------------------------###
 ###
 ###  Date Created   :   June 23, 2015
 ###
@@ -16,7 +16,6 @@ modelValues = reactiveValues(models=list(),
                              independent.vars=list())
 
 output$modelfitting.panel <- renderUI({
-  modelValues$models
   get.data.set()
   isolate({
     model.fitting.panel.ui(get.data.set())
@@ -227,8 +226,6 @@ output$model_fit = renderUI({
   })
 })
 
-
-
 # update the numericInput for the degree of selected variables
 observe({
   input$interaction.vars.select
@@ -403,6 +400,7 @@ observe({
 observe({
   input$fit_model_button
   isolate({
+    model.name = ""
     if(!is.null(input$fit_model_button)&&
          input$fit_model_button>0){
       temp.model = NULL
@@ -643,8 +641,6 @@ observe({
             }
           }
         }
-      }, warning = function(w) {
-        print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
@@ -1221,6 +1217,7 @@ output$histogram.plot = renderPlot({
   })
 })
 
+# partial residual plots
 output$partial.residual.plot = renderPlot({
   input$model.select
   input$partial.residual.plot.select

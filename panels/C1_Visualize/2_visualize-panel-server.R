@@ -48,7 +48,8 @@ plot.par <- reactiveValues(
   locate.id=NULL,
   locate.col=NULL,
   locate.extreme=NULL,
-  zoombar=NULL
+  zoombar=NULL,
+  dummy = T
 )
 
 identified.points = reactiveValues(values=list())
@@ -381,7 +382,6 @@ observe({
   })
 })
 
-
 #  Subset level (Slider) for variable 1.
 output$subs1_conditional = renderUI({
   isolate({
@@ -389,9 +389,13 @@ output$subs1_conditional = renderUI({
     if (is.null(choices1)){
       choices1 = 1
     }
+    v=0
+    if(!is.null(input$sub1_level_mini)){
+      v = input$sub1_level_mini
+    }
     sliderInput(inputId = "sub1_level",
                 label = paste0("Subset '", input$subs1, "':"),
-                min = 0, max = choices1, value = 0, step = 1,
+                min = 0, max = choices1, value = v, step = 1,
                 animate = TRUE,ticks=F)
   })
 })
@@ -403,9 +407,13 @@ output$subs1_conditional_mini = renderUI({
     if (is.null(choices1)){
       choices1 = 1
     }
+    v = 0
+    if(!is.null(input$sub1_level)){
+      v = input$sub1_level
+    }
     sliderInput(inputId = "sub1_level_mini",
                 label = paste0("Subset '", input$subs1, "':"),
-                min = 0, max = choices1, value = 0, step = 1,
+                min = 0, max = choices1, value = v, step = 1,
                 animate = TRUE,ticks=F)
   })
 })
@@ -419,6 +427,11 @@ observe({
         g1_level = NULL
     }
     plot.par$g1.level = g1_level
+    if(is.null(g1_level)){
+      g1_level = 0
+    }
+    updateSliderInput(session,"sub1_level_mini",
+                      value=g1_level)
   })
 })
 
@@ -429,6 +442,11 @@ observe({
       g1_level = NULL
     }
     plot.par$g1.level = g1_level
+    if(is.null(g1_level)){
+      g1_level = 0
+    }
+    updateSliderInput(session,"sub1_level",
+                      value=g1_level)
   })
 })
 
@@ -580,26 +598,6 @@ observe({
   plot.par$g2.level = g2_level
 })
 
-# update sliders for subsetting variables
-observe({
-  input$customize_plot
-  isolate({
-    if(!is.null(input$customize_plot)){
-      if(input$customize_plot%in%"1"){
-        updateSliderInput(session,"sub1_level_mini",
-                          value=input$sub1_level)
-        updateSliderInput(session,"sub2_level_mini",
-                          value=input$sub2_level)
-      }else{
-        updateSliderInput(session,"sub1_level",
-                          value=input$sub1_level_mini)
-        updateSliderInput(session,"sub2_level",
-                          value=input$sub2_level_mini)
-      }
-    }
-  })
-})
-
 output$visualize.plot = renderPlot({
   isolate({
     # some of the graphical parameters need 
@@ -702,6 +700,7 @@ output$mini.plot = renderPlot({
           print(e)
         }, finally = {})
       }else{
+#         print(plot.par$locate.id)
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
       }
     }
@@ -2481,170 +2480,153 @@ output$points.identify.panel = renderUI({
   input$vari1
   input$vari2
   isolate({
+    plot.par$locate=NULL
+    plot.par$locate.id=NULL
+    plot.par$locate.col=NULL
+    plot.par$locate.extreme=NULL
+    plot.par.stored$locate.id=NULL
     identified.points$values=list()
     ret = list()
-    ret[[1]] = fixedRow(column(3,
+    ret[[1]] = fixedRow(column(11,h5("Select type of Labeling")))
+    ret[[2]] = fixedRow(column(4,
                                checkboxInput("label_observation_check",
-                                             label="Label observations",
+                                             label="Text label",
                                              value=F)),
                         column(5,
-                               offset=1,
                                conditionalPanel("input.label_observation_check",
                                selectInput("label.select",
-                                           label="Select column",
+                                           label="",
                                            choices=c("id",
                                                      colnames(get.data.set()))))))
                                
-    ret[[2]] = fixedRow(column(3,
+    ret[[3]] = fixedRow(column(4,
                                checkboxInput("color_points_check",
-                                             label="Colour observations",
+                                             label="Colour",
                                              value=F)),
-                        column(5,offset=1,
+                        column(5,
                                conditionalPanel("input.color_points_check",
                                selectInput("color.select",
                                            label="Select Colour",
                                            choices=c("red",
                                                      "blue",
                                                      "green4")))))
-    ret[[3]] = fixedRow(column(3,
+    ret[[4]] = fixedRow(column(4,
                                checkboxInput("same_level_of_check",
-                                             label="Identify Observations per level",
+                                             label="With the same level of",
                                              value=F)),
-                        column(5,offset=1,
+                        column(5,
                                conditionalPanel("input.same_level_of_check",
                                                 selectInput("same.level.of.select",
-                                                            label="Select Column",
+                                                            label="",
                                                             choices=colnames(get.data.set())))))
-    ret[[4]] = radioButtons("select_identify_method",
+    ret[[5]] = radioButtons("select_identify_method",
                             label = "Select method of selection",
                             choices = c("Select by value",
                                         "Extremes",
                                         "Range of values"))
     if(!is.null(input$vari1)&&!is.null(input$vari2)){
       if(input$vari1%in%colnames(get.data.set())&&
-           input$vari2%in%colnames(get.data.set())){
+           (input$vari2%in%"none"||
+              input$vari2%in%colnames(get.data.set()))){
+        ch = ""
+        if(!is.null(input$by.value.column.select)){
+          ch = c("none",sort(get.data.set()[,input$by.value.column.select]))
+        }
+        ret[[6]] = conditionalPanel("input.select_identify_method=='Select by value'&&
+                                      (input.label_observation_check||input.color_points_check)",
+                                    checkboxInput("single_vs_multiple_check",
+                                                  label="Single value",
+                                                  value=F),
+                                    conditionalPanel("!input.single_vs_multiple_check",
+                                                     fixedRow(column(4,
+                                                                     selectInput("by.value.column.select",
+                                                                                 label="Select a column",
+                                                                                 choices=colnames(get.data.set()))),
+                                                              column(5,
+                                                                     selectInput("value.select",
+                                                                                 label="Select multiple values",
+                                                                                 choices=ch,
+                                                                                 multiple=T,
+                                                                                 selectize=F,
+                                                                                 selected="none",
+                                                                                 size=8)))),
+                                    conditionalPanel("input.single_vs_multiple_check",
+                                                     fixedRow(column(6,
+                                                                     sliderInput("select.unique.value.slider",
+                                                                                 label="Select single value",
+                                                                                 min=0,
+                                                                                 max=nrow(get.data.set()),
+                                                                                 value=0,
+                                                                                 step=1,
+                                                                                 ticks=F)),
+                                                              column(3,
+                                                                     numericInput("specify.correct.numeric",
+                                                                                  label="",
+                                                                                  value=0,
+                                                                                  min=0,
+                                                                                  max=nrow(get.data.set()),
+                                                                                  step=1)))))
+        
         if(is.numeric(get.data.set()[,input$vari1])&&
-             is.numeric(get.data.set()[,input$vari2])){
-          ch = ""
-          if(!is.null(input$by.value.column.select)){
-            ch = c("none",get.data.set()[,input$by.value.column.select])
-          }
-          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'&&
+             (!input$vari2%in%"none"&&
+                is.numeric(get.data.set()[,input$vari2]))){
+          ret[[7]] = conditionalPanel("input.select_identify_method=='Extremes'&&
                                       (input.label_observation_check||input.color_points_check)",
-                                      checkboxInput("single_vs_multiple_check",
-                                                    label="Single value",
-                                                    value=F),
-                                      conditionalPanel("!input.single_vs_multiple_check",
-                                                       fixedRow(column(6,
-                                                                       selectInput("by.value.column.select",
-                                                                                   label="Select a column",
-                                                                                   choices=colnames(get.data.set()))),
-                                                                column(6,
-                                                                       selectInput("value.select",
-                                                                                   label="Select multiple values",
-                                                                                   choices=ch,
-                                                                                   multiple=T,
-                                                                                   selectize=F,
-                                                                                   selected="none",
-                                                                                   size=8)))),
-                                      conditionalPanel("input.single_vs_multiple_check",
-                                                       fixedRow(column(8,
-                                                                       sliderInput("select.unique.value.slider",
-                                                                                   label="Select single value",
-                                                                                   min=0,
-                                                                                   max=2,
-                                                                                   value=0,
-                                                                                   step=1,
-                                                                                   ticks=F)),
-                                                                column(4,
-                                                                       numericInput("specify.correct.numeric",
-                                                                                    label="",
-                                                                                    value=1,
-                                                                                    min=0,
-                                                                                    max=2,
-                                                                                    step=1)))))
-          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'&&
-                                      (input.label_observation_check||input.color_points_check)",
-                                      sliderInput("scatter.extremes.slider",
+                                      sliderInput("extremes.slider",
                                                   label="Number of points",
                                                   min=0,
                                                   max=nrow(get.data.set()),
                                                   step=1,
                                                   value=0,
                                                   ticks=F))
-          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'&&
+        }else if((!input$vari2%in%"none"&&
+                   ((is.factor(get.data.set()[,input$vari1])&&
+                       is.numeric(get.data.set()[,input$vari2]))||
+                      (is.numeric(get.data.set()[,input$vari1])&&
+                         is.factor(get.data.set()[,input$vari2]))))||
+                   (input$vari2%in%"none"&&
+                      is.numeric(get.data.set()[,input$vari1]))){
+          ret[[7]] = conditionalPanel("input.select_identify_method=='Extremes'&&
                                       (input.label_observation_check||input.color_points_check)",
-                                      fixedRow(column(8,
-                                                      sliderInput("range.values.slider", 
-                                                                  label = "Select range", 
-                                                                  min = 0, 
-                                                                  max = 1, 
-                                                                  value = c(0, 0),
-                                                                  ticks=F)),
-                                               column(4,
-                                                      selectInput("range.column.select",
-                                                                  label="Select column",
-                                                                  choices=colnames(get.data.set())))))
-        }else if((is.factor(get.data.set()[,input$vari1])&&
-                   is.numeric(get.data.set()[,input$vari2]))||
-                   is.numeric(get.data.set()[,input$vari1])&&
-                   is.factor(get.data.set()[,input$vari2])){
-          ret[[5]] = conditionalPanel("input.select_identify_method=='Select by value'&&
-                                      (input.label_observation_check||input.color_points_check)")
-          ret[[6]] = conditionalPanel("input.select_identify_method=='Extremes'&&
-                                      (input.label_observation_check||input.color_points_check)")
-          ret[[7]] = conditionalPanel("input.select_identify_method=='Range of values'&&
-                                      (input.label_observation_check||input.color_points_check)")
+                                      fixedRow(column(4,numericInput("extreme.lower",
+                                                                     label="Lower",
+                                                                     value=0,
+                                                                     min=0,
+                                                                     max=nrow(get.data.set()),
+                                                                     step=1)),
+                                               column(4,numericInput("extreme.upper",
+                                                                     label="Upper",
+                                                                     value=0,
+                                                                     min=0,
+                                                                     max=nrow(get.data.set()),
+                                                                     step=1))))
         }
-        ret[[8]] = fixedRow(column(3,checkboxInput("show.stored.check",
+        ret[[8]] = conditionalPanel("input.select_identify_method=='Range of values'&&
+                                      (input.label_observation_check||input.color_points_check)",
+                                    fixedRow(column(6,
+                                                    sliderInput("range.values.slider", 
+                                                                label = "Select range", 
+                                                                min = 0, 
+                                                                max = nrow(get.data.set()), 
+                                                                value = c(0, 0),
+                                                                ticks=F)),
+                                             column(3,
+                                                    selectInput("range.column.select",
+                                                                label="Select column",
+                                                                choices=colnames(get.data.set())))))
+        ret[[9]] = fixedRow(column(2,checkboxInput("show.stored.check",
                                                    label="Show stored",
                                                    value=T)),
                             column(4,
                                    actionButton("store.obs.button",
-                                                label="Store")),
-                            column(4,offset=1,
+                                                label="Store selected")),
+                            column(4,
                                    actionButton("reset.obs.button",
-                                                label="Reset")))
+                                                label="Forget stored")))
       }
     }
     ret
   })
-})
-
-# update sliders for unique values when the "same level of" is checked
-observe({
-  if(!is.null(input$same_level_of_check)&&
-       !is.null(input$by.value.column.select)&&
-       input$by.value.column.select%in%colnames(get.data.set())){
-    ch = unique(get.data.set()[,input$by.value.column.select])
-    if(is.numeric(ch)){
-      ch = sort(ch)
-    }
-    ch = as.character(ch)
-    ch = c("none",ch)
-    updateSelectInput(session,"value.select",
-                      choices=ch,
-                      selected = "none")
-    if(input$same_level_of_check){
-      updateSliderInput(session,"select.unique.value.slider",
-                        min=0,
-                        step=1,
-                        max=length(unique(get.data.set()[,input$by.value.column.select])))
-      updateNumericInput(session,"specify.correct.numeric",
-                         min=0,
-                         step=1,
-                         max=length(unique(get.data.set()[,input$by.value.column.select])))
-    }else{
-      updateSliderInput(session,"select.unique.value.slider",
-                        min=0,
-                        step=1,
-                        max=length(get.data.set()[,input$by.value.column.select]))
-      updateNumericInput(session,"specify.correct.numeric",
-                         min=0,
-                         step=1,
-                         max=length(get.data.set()[,input$by.value.column.select]))
-    }
-  }
 })
 
 # identify points per label
@@ -2653,9 +2635,10 @@ observe({
   input$label.select
   isolate({
     if(!is.null(input$label_observation_check)&&
-         !is.null(input$label.select)){
-      if(input$label_observation_check&&
-           !is.null(input$label.select)){
+         !is.null(input$label.select)&&
+         (input$label.select%in%colnames(get.data.set())||
+            input$label.select%in%"id")){
+      if(input$label_observation_check){
         if(input$label.select%in%"id"){
           plot.par$locate=1:nrow(get.data.set())
         }else{
@@ -2672,213 +2655,42 @@ observe({
 observe({
   input$color_points_check
   input$color.select
-  input$value.select
-  input$select.unique.value.slider
   isolate({
     if(!is.null(input$color_points_check)&&
-         !is.null(input$color.select)&&
-         !is.null(input$value.select)&&
-         !is.null(input$select.unique.value.slider)){
-      if(length(input$value.select)>0||
-           input$select.unique.value.slider>0){
-        if(input$color_points_check&&
-             !is.null(input$color.select)){
-          plot.par$locate.col=input$color.select
-        }else{
-          plot.par$locate.col=NULL
-        }
+         !is.null(input$color.select)){
+      if(input$color_points_check){
+        plot.par$locate.col=input$color.select
       }else{
         plot.par$locate.col=NULL
       }
+    }else{
+      plot.par$locate.col=NULL
     }
   })
 })
 
-# Identify points is selected, 
-# select single value to identify,
-# or multiple value from list
+# reset the identify points widgets when the selection 
+# method is changed.
 observe({
-  input$select.unique.value.slider
-  input$specify.correct.numeric
-  input$single_vs_multiple_check
   input$select_identify_method
-  input$same_level_of_check
-  input$same.level.of.select
-  input$by.value.column.select
-  input$value.select
-  input$show.stored.check
-  input$reset.obs.button
   isolate({
-    if(!is.null(input$select.unique.value.slider)&&
-         !is.null(input$specify.correct.numeric)&&
-         !is.null(input$single_vs_multiple_check)&&
-         !is.null(input$select_identify_method)&&
-         !is.null(input$same_level_of_check)&&
-         !is.null(input$same.level.of.select)&&
-         !is.null(input$by.value.column.select)&&
-         !is.null(input$value.select)&&
-         !is.null(input$show.stored.check)&&
-         !is.null(input$reset.obs.button)){
-      if(input$select_identify_method%in%'Select by value'&&
-           input$vari1%in%colnames(get.data.set())&&
-           input$vari2%in%colnames(get.data.set())&&
-           input$vari1%in%get.numeric.column.names(get.data.set())&&
-           input$vari2%in%get.numeric.column.names(get.data.set())){
+    temp = NULL
+    if(!is.null(input$select_identify_method)){
+      if(input$select_identify_method%in%"Select by value"){
         if(input$single_vs_multiple_check){
-          if(input$same_level_of_check){
-            if(input$show.stored.check){
-              plot.par.locate.extreme = NULL
-              plot.par$locate.id=unique(c(plot.par.stored$locate.id,
-                                          which(get.data.set()[,input$same.level.of.select]%in%
-                                                  get.data.set()[,input$
-                                                                   same.level.of.select][
-                                                                     input$
-                                                                       select.unique.value.slider])))
-            }else{
-              plot.par.locate.extreme = NULL
-              plot.par$locate.id=which(get.data.set()[,input$same.level.of.select]%in%
-                                         get.data.set()[,input$
-                                                          same.level.of.select][
-                                                            input$select.unique.value.slider])
-            }
-          }else{
-            if(input$show.stored.check){
-              plot.par.locate.extreme = NULL
-              plot.par$locate.id=unique(c(plot.par.stored$locate.id,input$select.unique.value.slider))
-            }else{
-              plot.par.locate.extreme = NULL
-              plot.par$locate.id=input$select.unique.value.slider
-            }
-          }
-        }else if(!input$single_vs_multiple_check){
-          temp = which(get.data.set()[,as.character(input$by.value.column.select)]%in%
-                         input$value.select)
-          if(input$same_level_of_check){
-            if(input$show.stored.check){
-              if(!is.null(temp)&&!length(temp)==0){
-                plot.par.locate.extreme = NULL
-                plot.par$locate.id=unique(c(plot.par.stored$locate.id,
-                                            which(get.data.set()[,input$same.level.of.select]%in%
-                                                    get.data.set()[,input$
-                                                                     same.level.of.select][temp])))
-              }
-            }else{
-              plot.par.locate.extreme = NULL
-              plot.par$locate.id=which(get.data.set()[,input$same.level.of.select]%in%
-                                         get.data.set()[,input$
-                                                          same.level.of.select][temp])
-            }
-          }else{
-            if(input$show.stored.check){
-              plot.par.locate.extreme = NULL
-              plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
-            }else{
-              plot.par.locate.extreme = NULL
-              plot.par$locate.id=temp
-            }
+          temp = input$select.unique.value.slider
+          if(temp==0){
+            temp=NULL
           }
         }else{
-          plot.par.locate.extreme = NULL
-          plot.par$locate.id=plot.par.stored$locate.id
+          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
+          if(length(temp)==0){
+            temp=NULL
+          }
         }
-      }
-    }
-  })
-})
-
-# numeric for single value choice has changed,
-# update slider for single choice
-observe({
-  input$specify.correct.numeric
-  isolate({
-    updateNumericInput(session,"select.unique.value.slider",
-                       value=input$specify.correct.numeric)
-  })
-})
-
-# the unique value slider has changed,
-# update unique value numeric
-observe({
-  input$select.unique.value.slider
-  isolate({
-    updateNumericInput(session,"specify.correct.numeric",
-                       value=input$select.unique.value.slider)
-  })
-})
-
-# scatter plot "extreme values"
-observe({
-  input$scatter.extremes.slider
-  input$same_level_of_check
-  input$select_identify_method
-  input$reset.obs.button
-  isolate({
-    if(!is.null(input$scatter.extremes.slider)&&
-         input$scatter.extremes.slider!=0){
-      if(input$select_identify_method%in%'Extremes'&&
-           input$vari1%in%colnames(get.data.set())&&
-           input$vari2%in%colnames(get.data.set())&&
-           input$vari1%in%get.numeric.column.names(get.data.set())&&
-           input$vari2%in%get.numeric.column.names(get.data.set())){
-        plot.par$locate.id = NULL
-        plot.par$locate.extreme = input$scatter.extremes.slider
-      }
-    }else if(!is.null(input$scatter.extremes.slider)&&
-               input$scatter.extremes.slider==0){
-      plot.par$locate.id = NULL
-      plot.par$locate.extreme = NULL
-    }
-  })
-})
-
-# scatter plot update sliders
-observe({
-  input$select_identify_method
-  input$range.column.select
-  input$same_level_of_check
-  isolate({
-    if(!is.null(input$range.column.select)&&
-         !is.null(input$range.values.slider)){
-      if(input$same_level_of_check){
-        updateSliderInput(session,
-                          "range.values.slider",
-                          min=0,
-                          max=length(unique(get.data.set()[,input$same.level.of.select])),
-                          step=1,
-                          value=c(input$range.values.slider[1],input$range.values.slider[2]))
-      }else{
-        updateSliderInput(session,
-                          "range.values.slider",
-                          min=0,
-                          max=nrow(get.data.set()),
-                          step=1,
-                          value=c(input$range.values.slider[1],input$range.values.slider[2]))
-      }
-    }
-  })
-})
-
-# scatter plot select a range
-observe({
-  input$select_identify_method
-  input$range.values.slider
-  input$range.column.select
-  input$same_level_of_check
-  input$show.stored.check
-  input$same.level.of.select
-  input$reset.obs.button
-  isolate({
-    if(!is.null(input$range.values.slider)&&
-         !is.null(input$range.column.select)&&
-         !is.null(input$same_level_of_check)&&
-         input$vari1%in%colnames(get.data.set())&&
-         input$vari2%in%colnames(get.data.set())){
-      if(input$select_identify_method%in%'Range of values'&&
-           input$vari1%in%get.numeric.column.names(get.data.set())&&
-           input$vari2%in%get.numeric.column.names(get.data.set())){
-        temp = NULL
-        if(any(input$range.values.slider>0)){
-          range = input$range.values.slider
+      }else if(input$select_identify_method%in%"Range of values"){
+        range = input$range.values.slider
+        if(!all(range%in%0)){
           range[which(range%in%0)] = 1
           temp = get.data.set()[,input$range.column.select]
           names(temp) = 1:length(temp)
@@ -2886,24 +2698,444 @@ observe({
           temp = as.numeric(names(temp)[range[1]:range[2]])
           temp = which(get.data.set()[,input$range.column.select]%in%
                          get.data.set()[,input$range.column.select][temp])
+        }else{
+          temp = NULL
+        }
+      }
+      if(!input$select_identify_method%in%"Extremes"){
+        if(input$same_level_of_check){
+          temp = which(get.data.set()[,input$same.level.of.select]%in%
+                         get.data.set()[,input$same.level.of.select][temp])
+        }
+        if(input$show.stored.check){
+          temp = unique(c(plot.par.stored$locate.id,temp))
+        }
+      }
+      if(length(temp)==0){
+        temp = NULL
+      }
+    }
+    plot.par$locate.id = temp
+    plot.par$locate.extreme=NULL
+    updateSelectInput(session,
+                      "by.value.column.select",
+                      choices=colnames(get.data.set()),
+                      selected=colnames(get.data.set())[1])
+    ch = ""
+    if(!is.null(input$by.value.column.select)){
+      ch = c("none",sort(get.data.set()[,input$by.value.column.select]))
+    }
+    updateSelectInput(session,
+                      "value.select",
+                      choices=ch,
+                      selected=ch[1])
+    updateCheckboxInput(session,
+                        "input.single_vs_multiple_check",
+                        value=F)
+    updateSliderInput(session,
+                      "select.unique.value.slider",
+                      max=length(ch),
+                      value=0)
+    updateNumericInput(session,
+                       "specify.correct.numeric",
+                       value=0,
+                       max=length(ch))
+    updateSliderInput(session,
+                      "extremes.slider",
+                      max=nrow(get.data.set()),
+                      value=0)
+    updateNumericInput(session,
+                       "extreme.lower",
+                       value=0,
+                       max=nrow(get.data.set()))
+    updateNumericInput(session,
+                       "extreme.upper",
+                       value=0,
+                       max=nrow(get.data.set()))
+    updateSliderInput(session,
+                      "range.values.slider",
+                      max = nrow(get.data.set()),
+                      value = c(0, 0))
+    updateSelectInput(session,
+                      "range.column.select",
+                      choices=colnames(get.data.set()),
+                      selected = colnames(get.data.set())[1])
+  })
+})
+
+# extreme slider for scatter plots
+observe({
+  if(!is.null(input$extremes.slider)){
+    isolate({
+      if(!is.null(input$select_identify_method)&&
+           input$select_identify_method%in%"Extremes"){
+        plot.par$locate.id = NULL
+        if(input$extremes.slider == 0){
+          plot.par$locate.extreme = NULL
+        }else{
+          plot.par$locate.extreme = input$extremes.slider
+        }
+      }
+    })
+  }
+})
+
+# observe the lower limit of extreme values in dot plots
+observe({
+  input$extreme.upper
+  isolate({
+    if(!is.null(input$select_identify_method)&&
+         input$select_identify_method%in%"Extremes"){
+      plot.par$locate.id = NULL
+      if(!is.null(input$extreme.upper)){
+        if(is.null(plot.par$locate.extreme)){
+          plot.par$locate.extreme = c(0,0)
+        }
+        plot.par$locate.extreme[2] = input$extreme.upper
+      }
+    }
+  })
+})
+
+# observe the lower limit of extreme values in dot plots
+observe({
+  input$extreme.lower
+  isolate({
+    if(!is.null(input$select_identify_method)&&
+         input$select_identify_method%in%"Extremes"){
+      plot.par$locate.id = NULL
+      if(!is.null(input$extreme.lower)){
+        if(is.null(plot.par$locate.extreme)){
+          plot.par$locate.extreme = c(0,0)
+        }
+        plot.par$locate.extreme[1] = input$extreme.lower
+      }
+    }
+  })
+})
+
+# With the same level of is checked
+observe({
+  if(!is.null(input$same_level_of_check)){
+    isolate({
+      temp = NULL
+      if(input$select_identify_method%in%"Select by value"){
+        if(input$single_vs_multiple_check){
+          temp = input$select.unique.value.slider
+          if(temp==0){
+            temp=NULL
+          }
+        }else{
+          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
+          if(length(temp)==0){
+            temp=NULL
+          }
+        }
+      }else if(input$select_identify_method%in%"Range of values"){
+        range = input$range.values.slider
+        if(!all(range%in%0)){
+          range[which(range%in%0)] = 1
+          temp = get.data.set()[,input$range.column.select]
+          names(temp) = 1:length(temp)
+          temp = sort(temp)
+          temp = as.numeric(names(temp)[range[1]:range[2]])
+          temp = which(get.data.set()[,input$range.column.select]%in%
+                         get.data.set()[,input$range.column.select][temp])
+        }
+      }
+      if(input$same_level_of_check){
+        temp = which(get.data.set()[,input$same.level.of.select]%in%
+                       get.data.set()[,input$same.level.of.select][temp])
+        if(length(temp)==0){
+          temp = NULL
+        }
+      }
+      if(input$show.stored.check){
+        temp = unique(c(plot.par.stored$locate.id,temp))
+      }
+      plot.par$locate.id = temp
+    })
+  }
+})
+
+# variable for with the same level of is changed
+observe({
+  if(!is.null(input$same.level.of.select)){
+    isolate({
+      temp = NULL
+      if(input$select_identify_method%in%"Select by value"){
+        if(input$single_vs_multiple_check){
+          temp = input$select.unique.value.slider
+          if(temp==0){
+            temp=NULL
+          }
+        }else{
+          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
+          if(length(temp)==0){
+            temp=NULL
+          }
+        }
+      }else if(input$select_identify_method%in%"Range of values"){
+        range = input$range.values.slider
+        if(!all(range%in%0)){
+          range[which(range%in%0)] = 1
+          temp = get.data.set()[,input$range.column.select]
+          names(temp) = 1:length(temp)
+          temp = sort(temp)
+          temp = as.numeric(names(temp)[range[1]:range[2]])
+          temp = which(get.data.set()[,input$range.column.select]%in%
+                         get.data.set()[,input$range.column.select][temp])
+        }else{
+          temp = NULL
+        }
+      }
+      temp = which(get.data.set()[,input$same.level.of.select]%in%
+                     get.data.set()[,input$same.level.of.select][temp])
+      if(length(temp)==0){
+        temp = NULL
+      }
+      if(input$show.stored.check){
+        temp = unique(c(plot.par.stored$locate.id,temp))
+      }
+      plot.par$locate.id = temp
+    })
+  }
+})
+
+# unique value slider
+observe({
+  if(!is.null(input$select.unique.value.slider)){
+    isolate({
+      if(!is.null(input$same.level.of.select)&&
+           input$same.level.of.select%in%colnames(get.data.set())){
+        temp = input$select.unique.value.slider
+        if(input$same_level_of_check){
+          temp = which(get.data.set()[,input$same.level.of.select]%in%
+                         get.data.set()[,input$same.level.of.select][temp])
+        }
+        if(input$show.stored.check){
+          plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
+        }else{
+          plot.par$locate.id=temp
+        }
+      }
+      updateNumericInput(session,"specify.correct.numeric",
+                         value=input$select.unique.value.slider)
+    })
+  }
+})
+
+# unique numeric
+observe({
+  if(!is.null(input$specify.correct.numeric)){
+    isolate({
+      if(!is.null(input$same.level.of.select)&&
+           input$same.level.of.select%in%colnames(get.data.set())){
+        temp = input$specify.correct.numeric
+        if(input$same_level_of_check){
+          temp = which(get.data.set()[,input$same.level.of.select]%in%
+                         get.data.set()[,input$same.level.of.select][temp])
+        }
+        if(input$show.stored.check){
+          plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
+        }else{
+          plot.par$locate.id=temp
+        }
+      }
+      updateNumericInput(session,"select.unique.value.slider",
+                         value=input$specify.correct.numeric)
+    })
+  }
+})
+
+# pick multiple values or just a single value
+observe({
+  input$single_vs_multiple_check
+  isolate({
+    plot.par$locate.id=NULL
+    updateSelectInput(session,
+                      "by.value.column.select",
+                      choices=colnames(get.data.set()),
+                      selected=colnames(get.data.set())[1])
+    ch = ""
+    if(!is.null(input$by.value.column.select)){
+      ch = c("none",sort(get.data.set()[,input$by.value.column.select]))
+    }
+    updateSelectInput(session,
+                      "value.select",
+                      choices=ch,
+                      selected=ch[1])
+    updateSliderInput(session,
+                      "select.unique.value.slider",
+                      max=length(ch),
+                      value=0)
+    updateNumericInput(session,
+                       "specify.correct.numeric",
+                       value=0,
+                       max=length(ch))
+  })
+})
+
+# update the values for picking multiple values when the variable is changed
+observe({
+  if(!is.null(input$by.value.column.select)){
+    isolate({
+      plot.par$locate.id=NULL
+      if(class(get.data.set()[,input$by.value.column.select])%in%"numeric"||
+           class(get.data.set()[,input$by.value.column.select])%in%"integer"){
+        temp = sort(get.data.set()[,input$by.value.column.select])
+      }else{
+        temp = sort(levels(get.data.set()[,input$by.value.column.select]))
+      }
+      updateSelectInput(session,
+                        "value.select",
+                        choices=c("none",temp),
+                        selected=c("none",temp)[1])
+    })
+  }
+})
+
+# update locate.id for multiple values
+observe({
+  if(!is.null(input$value.select)){
+    isolate({
+      if(!is.null(input$same.level.of.select)&&
+           input$same.level.of.select%in%colnames(get.data.set())){
+        temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
+        if(input$same_level_of_check){
+          temp = which(get.data.set()[,input$same.level.of.select]%in%
+                         get.data.set()[,input$same.level.of.select][temp])
+        }
+        if(input$show.stored.check){
+          plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
+        }else{
+          plot.par$locate.id=temp
+        }
+      }
+    })
+  }
+})
+
+# change whether the stored values are shown or not
+observe({
+  input$show.stored.check
+  isolate({
+    if(!is.null(input$select_identify_method)){
+      if(input$select_identify_method%in%"Select by value"){
+        if(!input$single_vs_multiple_check){
+          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
           if(input$same_level_of_check){
             temp = which(get.data.set()[,input$same.level.of.select]%in%
                            get.data.set()[,input$same.level.of.select][temp])
           }
-        }
-        if((length(plot.par.stored$locate.id)==0&&
-             length(temp)==0)||
-             (!input$show.stored.check&&
-                length(temp)==0)){
-          plot.par$locate.id = NULL
-        }else if(input$show.stored.check){
-          plot.par$locate.id = c(plot.par.stored$locate.id,temp)
+          if(input$show.stored.check){
+            plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
+          }else{
+            plot.par$locate.id = temp
+          }
         }else{
-          plot.par$locate.id = temp
+          if(input$select.unique.value.slider!=0&&
+               input$specify.correct.numeric!=0){
+            temp = input$specify.correct.numeric
+            if(input$same_level_of_check){
+              temp = which(get.data.set()[,input$same.level.of.select]%in%
+                             get.data.set()[,input$same.level.of.select][temp])
+            }
+            if(input$show.stored.check){
+              plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
+            }else{
+              plot.par$locate.id = temp
+            }
+          }
+        }
+      }else if(input$select_identify_method%in%"Extreme"){
+        # This needs work if the iNZight developer ever makes 
+        # it possible to use locate.id and locate.extreme at 
+        # the same time
+        if(input$extremes.slider!=0){ 
+          if(input$show.stored.check){
+            plot.par$locate.id = NULL
+            plot.par$locate.extreme = input$extremes.slider
+          }else{
+            plot.par$locate.id = NULL
+            plot.par$locate.extreme = input$extremes.slider
+          }
+        }else if(input$extreme.lower!=0||
+                   input$extreme.upper!=0){
+          if(input$show.stored.check){
+            plot.par$locate.id = NULL
+            plot.par$locate.extreme = c(input$extreme.lower,input$extreme.upper)
+          }else{
+            plot.par$locate.id = NULL
+            plot.par$locate.extreme = c(input$extreme.lower,input$extreme.upper)
+          }
+        }
+      }else{
+        if(any(input$range.values.slider>0)){
+          if(input$range.column.select%in%colnames(get.data.set())){
+            range = input$range.values.slider
+            range[which(range%in%0)] = 1
+            temp = get.data.set()[,input$range.column.select]
+            names(temp) = 1:length(temp)
+            temp = sort(temp)
+            temp = as.numeric(names(temp)[range[1]:range[2]])
+            temp = which(get.data.set()[,input$range.column.select]%in%
+                           get.data.set()[,input$range.column.select][temp])
+            if(input$same_level_of_check){
+              temp = which(get.data.set()[,input$same.level.of.select]%in%
+                             get.data.set()[,input$same.level.of.select][temp])
+            }
+            if(input$show.stored.check){
+              plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
+            }else{
+              plot.par$locate.id = temp
+            }
+          }
+        }else{
+          if(input$show.stored.check){
+            plot.par$locate.id = plot.par.stored$locate.id
+          }else{
+            plot.par$locate.id = NULL
+          }
         }
       }
     }
   })
+})
+
+# set a range of values
+observe({
+  if(!is.null(input$range.values.slider)&&
+       !is.null(input$range.column.select)&&
+       input$range.column.select%in%colnames(get.data.set())){
+    isolate({
+      range = input$range.values.slider
+      if(length(which(range%in%0))<2){
+        range[which(range%in%0)] = 1
+        temp = get.data.set()[,input$range.column.select]
+        names(temp) = 1:length(temp)
+        temp = sort(temp)
+        temp = as.numeric(names(temp)[range[1]:range[2]])
+        temp = which(get.data.set()[,input$range.column.select]%in%
+                       get.data.set()[,input$range.column.select][temp])
+        if(input$same_level_of_check){
+          temp = which(get.data.set()[,input$same.level.of.select]%in%
+                         get.data.set()[,input$same.level.of.select][temp])
+        }
+        if(input$show.stored.check){
+          plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
+        }else{
+          plot.par$locate.id = temp
+        }
+      }else{
+        if(input$show.stored.check){
+          plot.par$locate.id = plot.par.stored$locate.id
+        }else{
+          plot.par$locate.id = NULL
+        }
+      }
+    })
+  }
 })
 
 # Store points to be visible in other plots
@@ -2922,13 +3154,11 @@ observe({
         }else{
           temp$y = get.data.set()[,input$vari2]
         }
+        temp$locate.extreme = plot.par$locate.extreme
         temp$plot = F
         temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
         extreme.ids = search.name(temp,"extreme.ids")[[1]]
-        if(length(extreme.ids)>1){
-          extreme.ids = extreme.ids[[1]]
-        }
-        plot.par.stored$locate.id = unique(c(plot.par$locate.id,
+        plot.par.stored$locate.id = unique(c(plot.par.stored$locate.id,
                                              extreme.ids))
         
       }else if(length(plot.par$locate.id)>0){
@@ -2946,6 +3176,45 @@ observe({
     if(!is.null(input$reset.obs.button)&&
          input$reset.obs.button>0){
       plot.par.stored$locate.id = NULL
+      temp = NULL
+      if(input$select_identify_method%in%"Select by value"){
+        if(input$single_vs_multiple_check){
+          temp = input$select.unique.value.slider
+          if(temp==0){
+            temp=NULL
+          }
+        }else{
+          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
+          if(length(temp)==0){
+            temp=NULL
+          }
+        }
+      }else if(input$select_identify_method%in%"Range of values"){
+        range = input$range.values.slider
+        if(!all(range%in%0)){
+          range[which(range%in%0)] = 1
+          temp = get.data.set()[,input$range.column.select]
+          names(temp) = 1:length(temp)
+          temp = sort(temp)
+          temp = as.numeric(names(temp)[range[1]:range[2]])
+          temp = which(get.data.set()[,input$range.column.select]%in%
+                         get.data.set()[,input$range.column.select][temp])
+        }else{
+          temp = NULL
+        }
+      }
+      if(input$same_level_of_check){
+        temp = which(get.data.set()[,input$same.level.of.select]%in%
+                       get.data.set()[,input$same.level.of.select][temp])
+      }
+      if(length(temp)==0){
+        temp = NULL
+      }
+      if(input$show.stored.check){
+        temp = unique(c(plot.par.stored$locate.id,temp))
+      }
+      plot.par$locate.id = temp
+#       plot.par$dummy = !plot.par$dummy # need to change something in plot.par for plot to be redrawn 
     }
   })
 })
