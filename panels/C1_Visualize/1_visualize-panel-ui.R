@@ -31,6 +31,10 @@ vis.sidebarPanel = function() {
     ##  sections.
     sidebarPanelUI = list(
         hr(),
+        fixedRow(column(10,h4("Variable selection")),
+                 column(2,checkboxInput("change_var_selection",
+                                        value=F,
+                                        label=""))),
         ##  Select the first variable.
         uiOutput("vari1_panel"),
 

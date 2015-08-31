@@ -1,13 +1,12 @@
 Package: iNZightTools
 Type: Package
 Title: Tools for iNZight
-Version: 1.0.0
+Version: 1.1
 Depends: survey
 Suggests: iNZight
-Date: 2014-02-07
+Date: 2015-08-25
 Author: Tom Elliott [aut, cre]
-Maintainer: Tom Elliott <tell029@aucklanduni.ac.nz>
+Maintainer: Tom Elliott <inzight_support@stat.auckland.ac.nz>
 Description: Contains functions used by various other iNZight packages.
 License: GPL-2
-Packaged: 2014-09-19 00:19:22 UTC; tom
-Built: R 3.1.2; ; 2015-05-01 00:29:44 UTC; unix
+Built: R 3.2.1; ; 2015-08-31 00:29:09 UTC; unix

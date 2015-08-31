@@ -1,4 +1,4 @@
-##------------------------------------------------###
+###-----------------------------------------------###
 ###  Server Functions for the "Visualize" Module  ###
 ###-----------------------------------------------###
 ###
@@ -133,17 +133,17 @@ graphical.par = reactiveValues(
 
 ##  Data handling
 determine.class = function(input) {
-    if (is.null(input)) {
-        return(NULL)
-    }
-    if (class(input) == "integer") {
-        input.class = "numeric"
-    } else if (class(input) == "character") {
-        input.class = "factor"
-    } else {
-        input.class = class(input)
-    }
-    input.class
+  if (is.null(input)) {
+    return(NULL)
+  }
+  if (class(input) == "integer") {
+    input.class = "numeric"
+  } else if (class(input) == "character") {
+    input.class = "factor"
+  } else {
+    input.class = class(input)
+  }
+  input.class
 }
 
 ##  Input Handling
@@ -185,7 +185,6 @@ handle.input = function(input, subs = FALSE) {
 }
 
 output$visualize.panel <- renderUI({
-  get.data.set()
   isolate({
     visualize.panel.ui(get.data.set())
   })
@@ -264,13 +263,25 @@ vis.par = reactive({
 ##
 ##  Select variable 1.
 output$vari1_panel = renderUI({
+  get.data.set()
+  input$change_var_selection
   isolate({
-    selectInput(inputId = "vari1",
-                label = "Select first variable:",
-                choices = colnames(vis.data()),
-                selected = input$vari1,
-                selectize=F,
-                size=2)
+    if(!is.null(input$change_var_selection)){
+      if(!input$change_var_selection){
+        selectInput(inputId = "vari1",
+                    label = "Select first variable:",
+                    choices = colnames(vis.data()),
+                    selected = input$vari1,
+                    selectize=T)
+      }else{
+        selectInput(inputId = "vari1",
+                    label = "Select first variable:",
+                    choices = colnames(vis.data()),
+                    selected = input$vari1,
+                    selectize=F,
+                    size=2)
+      }
+    }
   })
 })
 
@@ -326,6 +337,7 @@ observe({
 
 #  Subset variable 1.
 output$subs1_panel = renderUI({
+  get.data.set()
   isolate({
     ch  = colnames(vis.data())
     if(!is.null(input$vari1)&&input$vari1%in%ch){
@@ -384,6 +396,7 @@ observe({
 
 #  Subset level (Slider) for variable 1.
 output$subs1_conditional = renderUI({
+  get.data.set()
   isolate({
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
     if (is.null(choices1)){
@@ -402,6 +415,7 @@ output$subs1_conditional = renderUI({
 
 #  Subset level (Slider) for variable 1 (mini plot).
 output$subs1_conditional_mini = renderUI({
+  get.data.set()
   isolate({
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
     if (is.null(choices1)){
@@ -454,18 +468,30 @@ observe({
 ##
 ##  Select variable 2.
 output$vari2_panel = renderUI({
+  get.data.set()
+  input$change_var_selection
   isolate({
-    ch = colnames(vis.data())
-    if(!is.null(input$vari1)&&
-         input$vari1%in%colnames(vis.data())){
-      ch = ch[-which(ch%in%input$vari1)]
+    if(!is.null(input$change_var_selection)){
+      ch = colnames(vis.data())
+      if(!is.null(input$vari1)&&
+           input$vari1%in%colnames(vis.data())){
+        ch = ch[-which(ch%in%input$vari1)]
+      }
+      if(!input$change_var_selection){
+        selectInput(inputId = "vari2",
+                    label = "Select second variable:",
+                    choices = c("none",ch),
+                    selected = input$vari2,
+                    selectize=T)
+      }else{
+        selectInput(inputId = "vari2",
+                    label = "Select second variable:",
+                    choices = c("none",ch),
+                    selected = input$vari2,
+                    selectize=F,
+                    size=2)
+      }
     }
-    selectInput(inputId = "vari2",
-                label = "Select second variable:",
-                choices = c("none", ch),
-                selected = input$vari2,
-                selectize=F,
-                size=2)
   })
 })
 
@@ -508,6 +534,7 @@ observe({
 
 #  Subset variable 2.
 output$subs2_panel = renderUI({
+  get.data.set()
   isolate({
     ch = colnames(vis.data())
     if(!is.null(input$vari1)&&input$vari1%in%ch){
@@ -543,28 +570,30 @@ observe({
 
 ##  Subset level (Slider) for variable 2.
 output$subs2_conditional = renderUI({
-    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
-    if (is.null(choices2))
-        choices2 = 2
-    else
-        choices2 = choices2 + 1
-    sliderInput(inputId = "sub2_level",
-                label = paste0("Subset '", input$subs2, "':"),
-                min = 0, max = choices2, value = 0, step = 1,
-                animate = TRUE,ticks=F)
+  get.data.set()
+  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
+  if (is.null(choices2))
+    choices2 = 2
+  else
+    choices2 = choices2 + 1
+  sliderInput(inputId = "sub2_level",
+              label = paste0("Subset '", input$subs2, "':"),
+              min = 0, max = choices2, value = 0, step = 1,
+              animate = TRUE,ticks=F)
 })
 
 ##  Subset level (Slider) for variable 2.
 output$subs2_conditional_mini = renderUI({
-    choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
-    if (is.null(choices2))
-        choices2 = 2
-    else
-        choices2 = choices2 + 1
-    sliderInput(inputId = "sub2_level_mini",
-                label = paste0("Subset '", input$subs2, "':"),
-                min = 0, max = choices2, value = 0, step = 1,
-                animate = TRUE,ticks=F)
+  get.data.set()
+  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
+  if (is.null(choices2))
+    choices2 = 2
+  else
+    choices2 = choices2 + 1
+  sliderInput(inputId = "sub2_level_mini",
+              label = paste0("Subset '", input$subs2, "':"),
+              min = 0, max = choices2, value = 0, step = 1,
+              animate = TRUE,ticks=F)
 })
 
 
@@ -907,6 +936,7 @@ observe({
 
 # This refreshes the infernce parameters.
 output$add_inference = renderUI({
+  get.data.set()
   input$vari1
   input$vari2
   ret = NULL
@@ -1224,6 +1254,7 @@ observe({
 
 # advanced option panel -> options selectinput (initial)
 output$advanced_options_panel = renderUI({
+  get.data.set()
   ret = NULL
   isolate({
     temp = list()
@@ -1335,6 +1366,7 @@ output$advanced_options_panel = renderUI({
 
 # Advanced options panel -> 
 output$plot.appearance.panel = renderUI({
+  get.data.set()
   ret=NULL
   input$vari1
   input$vari2
@@ -1776,6 +1808,7 @@ observe({
 
 # Customize labels UI
 output$customize.labels.panel = renderUI({
+  get.data.set()
   input$vari1
   input$vari2
   isolate({
@@ -1842,6 +1875,7 @@ observe({
 
 # "Code more variables" panel"
 output$code.variables.panel = renderUI({
+  get.data.set()
   input$vari1
   input$vari2
   isolate({
@@ -1928,6 +1962,7 @@ observe({
 
 # add trends and curves 
 output$trend.curve.panel = renderUI({
+  get.data.set()
   isolate({
     title.add.trend.curve = h4("Add trend curves")
     check.linear.object = checkboxInput("check_linear",label="linear",value = F)
@@ -2107,6 +2142,7 @@ observe({
 
 # add a x=y line
 output$xy.line.panel = renderUI({
+  get.data.set()
   titel.xyline = h4("Add x=y line")
   check.xyline.object = checkboxInput("check.xyline",
                                       label="Plot x=y line",
@@ -2137,6 +2173,7 @@ observe({
 
 # add jitter to the plot
 output$add.jitter.panel = renderUI({
+  get.data.set()
   title.jitter = h4("Add a jitter")
   check.jitter.x.object = checkboxInput("check.jitter.x",
                                         label="Jitter x-variable",
@@ -2170,6 +2207,7 @@ observe({
 
 # add rugs to plot
 output$add.rugs.panel = renderUI({
+  get.data.set()
   title.rugs = h4("Add rugs")
   check.rugs.x.object = checkboxInput("check.rugs.x",
                                         label="Add x-rugs",
@@ -2203,6 +2241,7 @@ observe({
 
 # join points panel
 output$join.points.panel = renderUI({
+  get.data.set()
   title.join = h4("Join points by line")
   check.join.object = checkboxInput("check.join",
                                       label="Join points",
@@ -2231,6 +2270,7 @@ observe({
 
 # panel for wigets to adjust the x and y axis limits
 output$adjust.axis.panel = renderUI({
+  get.data.set()
   input$vari1
   input$vari2
 #   plot.ret.para$parameters
@@ -2423,6 +2463,7 @@ observe({
 })
 
 output$adjust.number.bars.panel = renderUI({
+  get.data.set()
   input$vari1
   input$vari2
   get.data.set()
@@ -2477,6 +2518,7 @@ observe({
 
 # identify points panel
 output$points.identify.panel = renderUI({
+  get.data.set()
   input$vari1
   input$vari2
   isolate({

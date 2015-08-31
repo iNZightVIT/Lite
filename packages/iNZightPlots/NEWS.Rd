@@ -12,6 +12,12 @@
       related funcionality for 'zooming in' on bars in a barplot. 
     }
   }
+
+  \subsection{PATCH 2.1-1: 28 August 2015}{
+    \itemize{
+      \item fix a bug that occurs when all survey weights are equal
+    }
+  }
 }
 
 
