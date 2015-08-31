@@ -185,6 +185,7 @@ handle.input = function(input, subs = FALSE) {
 }
 
 output$visualize.panel <- renderUI({
+  get.data.set()
   isolate({
     visualize.panel.ui(get.data.set())
   })

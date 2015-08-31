@@ -13,14 +13,14 @@ aggregate.data.sidebar =  function(data.set){
        br(),br(),
        help.display('Aggregate data',
                     'aggregate_help',
-                    "gui-elements/notes/aggregate.data.md"),
+                    "panels/D3_AggregateData/3_aggregate.data.help.md"),
        br())
 }
 
 aggregate.variable =function(data.set){
   if(is.null(data.set)){
     sidebarLayout(
-      sidebarPanel(help.display('Aggregate data','aggregate_help',"gui-elements/notes/aggregate.data.md")),
+      sidebarPanel(help.display('Aggregate data','aggregate_help',"panels/D3_AggregateData/3_aggregate.data.help.md")),
       mainPanel(
         h1("Please select or import a data set.")
       )

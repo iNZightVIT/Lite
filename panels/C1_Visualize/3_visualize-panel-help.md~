@@ -18,16 +18,22 @@ the "show" option selected
 
 <br>
 
-<h5> Panel 1: User Input </h5>
+<h5> Panel 1: Variable selection </h5>
 This panel consists of a collection of user **inputs**:
 
-1. **Select first variable** lets you choose a variable to plot. A variable is 
+**Header** Next to the header is a checkbox which makes it possible to change 
+the selection method of the two main variables. If not checked, normal dropdown 
+menues can be used. When checked the variables can be selected from a list with 
+scroll bars next to them. In this view it is possible to change selection with 
+the arrow keys if the widget is selected.   
+
+**Select first variable** lets you choose a variable to plot. A variable is 
 chosen here by default, but you can choose a different one if you wish. The plot 
 generated will either be a box plot combined with a dotplot (for numeric 
 variables) or a barplot for categorical variables. In case the data is larger 
 than 2000 rows the dotplot (numeric variable) becomes a histogram.
 
-2. **Select second variable** lets you choose a second variable here to explore 
+**Select second variable** lets you choose a second variable here to explore 
 the relationship between two variables. The plot generated from selecting a 
 second variable depends on the type of variable chosen. The combinations are 
 
@@ -40,17 +46,17 @@ boxplots seperated by the categorical variable into different sets of plots.
 -**categorical-categorical** Bar plots which are subset by the second variable 
 selected.  
 
-3. **Subset by** gives you the option of subsetting the the variable(s) you 
+**Subset by** gives you the option of subsetting the the variable(s) you 
 chose above. If the variable you choose to subset by is not categorical, iNZight 
 Lite will automatically partition your data and define a set of categories for 
 you. You also have the option of subsetting by a second variable. You can adjust 
 the subset *level* by adjusting the slider(s) displayed underneath the plot 
 within the output panel in the middle part of the screen.
 
-4. **Advanced Options** (*advanced users only*) brings up the third panel which 
+**Advanced Options** (*advanced users only*) brings up the third panel which 
 makes it possible to customize the plot further. See Panel 3 below.
 
-5. **Reset All** will reset all the variable selections and graphical parameters 
+**Reset All** will reset all the variable selections and graphical parameters 
 used to generate the plot to their default values.
 
 <br>
@@ -140,10 +146,11 @@ observations with the same level are selected. A checkbox labeled "Single value"
 can be used to pick unique observations. For this the point of interst needs to 
 be found by scrolling through all points on a slider or numeric input. <br>
 **Extremes** With this feature extreme values can be selected. For scatter plot 
-this is picking extremes by blaaah method. How many extreme points can be 
-specified by adjusting a slider to the desired number in scatter plots and two 
-numeric values can be used to label extremes in dotplots. Some functions such as 
-showing the stored points does not work when "Extremes" is selected. <br>
+this is picking extremes by the Mahalanobis distance method. How many extreme 
+points can be specified by adjusting a slider to the desired number in scatter 
+plots and two numeric values can be used to label extremes in dotplots. Some 
+functions such as showing the stored points does not work when "Extremes" is 
+selected. <br>
 **Range of values** The last method lets the user choose a range of values. A 
 column can be selected and a range from this values according to the position in 
 the ordered variable can be selected from a slider.

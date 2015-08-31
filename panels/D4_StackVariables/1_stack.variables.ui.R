@@ -11,14 +11,16 @@ stack.variables.sidebar =  function(){
                 selectize=T,
                 multiple=T),
        actionButton("stack_vars","Stack variables"),br(),br(),
-         help.display('Stack variables','stack_vars_help',"gui-elements/notes/stack.variables.md"),
+         help.display('Stack variables','stack_vars_help',
+                      "panels/D4_StackVariables/3_stack.variables.help.md"),
          br())
 }
 
 stack.variables.panel =function(data.set){
   if(is.null(data.set)){
     sidebarLayout(
-      sidebarPanel(help.display('Stack variables','stack_vars_help',"gui-elements/notes/stack.variables.md")),
+      sidebarPanel(help.display('Stack variables','stack_vars_help',
+                                "panels/D4_StackVariables/3_stack.variables.help.md")),
       mainPanel(
         h1("Please select or import a data set.")
       )

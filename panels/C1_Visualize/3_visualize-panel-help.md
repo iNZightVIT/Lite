@@ -18,39 +18,45 @@ the "show" option selected
 
 <br>
 
-<h5> Panel 1: User Input </h5>
+<h5> Panel 1: Variable selection </h5>
 This panel consists of a collection of user **inputs**:
 
-1. **Select first variable** lets you choose a variable to plot. A variable is 
+**Header** Next to the header is a checkbox which makes it possible to change 
+the selection method of the two main variables. If not checked, normal dropdown 
+menues can be used. When checked the variables can be selected from a list with 
+scroll bars next to them. In this view it is possible to change selection with 
+the arrow keys if the widget is selected.   
+
+**Select first variable** lets you choose a variable to plot. A variable is 
 chosen here by default, but you can choose a different one if you wish. The plot 
 generated will either be a box plot combined with a dotplot (for numeric 
 variables) or a barplot for categorical variables. In case the data is larger 
 than 2000 rows the dotplot (numeric variable) becomes a histogram.
 
-2. **Select second variable** lets you choose a second variable here to explore 
+**Select second variable** lets you choose a second variable here to explore 
 the relationship between two variables. The plot generated from selecting a 
 second variable depends on the type of variable chosen. The combinations are 
 
--**numeric-numeric** Generates a scatter plot or for large data a grid-density 
+- **numeric-numeric** Generates a scatter plot or for large data a grid-density 
 plot
 
--**numeric-categorical** Any combination generates dotplots combined with 
+- **numeric-categorical** Any combination generates dotplots combined with 
 boxplots seperated by the categorical variable into different sets of plots.
 
--**categorical-categorical** Bar plots which are subset by the second variable 
+- **categorical-categorical** Bar plots which are subset by the second variable 
 selected.  
 
-3. **Subset by** gives you the option of subsetting the the variable(s) you 
+**Subset by** gives you the option of subsetting the the variable(s) you 
 chose above. If the variable you choose to subset by is not categorical, iNZight 
 Lite will automatically partition your data and define a set of categories for 
 you. You also have the option of subsetting by a second variable. You can adjust 
 the subset *level* by adjusting the slider(s) displayed underneath the plot 
 within the output panel in the middle part of the screen.
 
-4. **Advanced Options** (*advanced users only*) brings up the third panel which 
+**Advanced Options** (*advanced users only*) brings up the third panel which 
 makes it possible to customize the plot further. See Panel 3 below.
 
-5. **Reset All** will reset all the variable selections and graphical parameters 
+**Reset All** will reset all the variable selections and graphical parameters 
 used to generate the plot to their default values.
 
 <br>
