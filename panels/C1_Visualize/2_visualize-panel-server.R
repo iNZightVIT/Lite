@@ -781,17 +781,18 @@ output$visualize.inference = renderPrint({
           print(e)
         }, finally = {})
       }else{
-#         try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
 #         try(cat(search.name(do.call(iNZightPlots:::getPlotSummary, values.list),"inzplotoutput"), sep = "\n"))
 #         try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-        inzplotoutput = try(capture.output(do.call(iNZightPlots:::getPlotSummary, values.list),file=NULL))
-        if(length(inzplotoutput)==0){
-          try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-        }else{
-          cat(inzplotoutput[(which(grepl("inzplotoutput",
-                                         inzplotoutput,
-                                         fixed=T))+1):length(inzplotoutput)],sep="\n")
-        }
+#         inzplotoutput = try(capture.output(do.call(iNZightPlots:::getPlotSummary, values.list),file=NULL))
+#         if(length(inzplotoutput)==0){
+#           print("old")
+#           try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+#         }else{
+#           cat(inzplotoutput[(which(grepl("inzplotoutput",
+#                                          inzplotoutput,
+#                                          fixed=T))+1):length(inzplotoutput)],sep="\n")
+#         }
 #         cat(inzplotoutput, sep = "\n")
       }
     })
