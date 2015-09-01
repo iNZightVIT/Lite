@@ -741,6 +741,7 @@ output$mini.plot = renderPlot({
 
 output$visualize.inference = renderPrint({
   if(input$plot_selector%in%"Inference"){
+    input$type.inference.select
     input$vari1
     input$vari2
     input$subs1
@@ -750,9 +751,13 @@ output$visualize.inference = renderPrint({
       }
       values.list = modifyList(reactiveValuesToList(plot.par),
                                 reactiveValuesToList(graphical.par))
+      bs.inf= T
+      if(input$type.inference.select%in%"normal"){
+        bs.inf = F
+      }
       values.list <- modifyList(
         values.list,
-        list(bs.inference = T,
+        list(bs.inference = bs.inf,
              summary.type = "inference",
              inference.type = "conf",
              inference.par = NULL)
@@ -776,7 +781,14 @@ output$visualize.inference = renderPrint({
           print(e)
         }, finally = {})
       }else{
-        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+#         try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+#         try(cat(search.name(do.call(iNZightPlots:::getPlotSummary, values.list),"inzplotoutput"), sep = "\n"))
+#         try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+        inzplotoutput = try(capture.output(do.call(iNZightPlots:::getPlotSummary, values.list),file=NULL))
+#         cat(inzplotoutput, sep = "\n")
+        cat(inzplotoutput[(which(grepl("inzplotoutput",
+                                      inzplotoutput,
+                                      fixed=T))+1):length(inzplotoutput)],sep="\n")
       }
     })
   }

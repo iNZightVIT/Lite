@@ -177,6 +177,11 @@ vis.mainPanel = function() {
       tabPanel(
         title = "Inference",
         br(),
+        selectInput("type.inference.select",
+                    choices = c("normal",
+                                "bootstrap"),
+                    label = "Select type of inference"),
+        br(),
         helpText("Statistical Inference for the data."),
         verbatimTextOutput("visualize.inference")
         )

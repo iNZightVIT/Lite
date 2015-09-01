@@ -75,3 +75,54 @@ reorder.sidebar.panel =  function(data.set){
 reorder.main.panel = function(){
   verbatimTextOutput(outputId="text_reorder")
 }
+
+combine.sidebar.panel =  function(data.set){
+  choices1 = c()
+  if(!is.null(data.set)&&!is.null(ncol(data.set))&&ncol(data.set)>0){
+    choices1 = get.categorical.column.names(data.set)
+  }else{
+    choices1 = c()
+  }
+  list(helpText("Select factor columns to combine. All combined 
+                columns will be added as additional column to 
+                the data."),
+       selectInput("select.combine.columns", "Select columns to combine",choices=choices1,multiple=T,selectize=T),br(),
+       actionButton("combine","Combine levels"),br(),br(),
+       help.display('Combine Levels','combine_levels',"panels/E1_CategoricalVariables/7_combine.levels.help.md"),br(),HTML(""))
+}
+
+combine.main.panel = function(){
+  list(helpText("New levels after input is submitted"),br(),
+       div(verbatimTextOutput("text_combine")))
+}
+
+rename.levels.sidebar.panel = function(data.set){  
+  choices1 = c()
+  choices2 = c()
+  if(!is.null(data.set)&&!is.null(ncol(data.set))&&ncol(data.set)>0){
+    choices1 = get.categorical.column.names(data.set)
+  }else{
+    choices1 = c()
+  }
+  list(helpText("Select a column from the first dropdown menu. As many input 
+                variable will appear as there are factors in the selected 
+                column. Rename the factors using the text files next to it."),
+       selectInput("select.rename.column","Select Column",
+                   choices=c("",choices1),multiple=F,selectize=F,selected=1),
+       br(),
+       uiOutput(outputId="rename.factors.inputs"),
+       actionButton("rename.levs","Rename levels"),br(),br(),
+       help.display('Rename Levels','rename_levels',"panels/E1_CategoricalVariables/6_rename.levels.help.md"),br(),HTML(""))
+}
+
+rename.levels.main.panel = function(){
+  verbatimTextOutput("text_rename")
+}
+
+rename.factors.textfields = function(factors){
+  ret = list()
+  for(fac in 1:length(factors)){
+    ret[[fac]] = textInput(inputId=paste0("factor",fac),label=factors[fac],value=factors[fac])
+  }
+  ret
+}

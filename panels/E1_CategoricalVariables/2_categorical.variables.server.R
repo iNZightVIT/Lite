@@ -77,7 +77,7 @@ output$text_reorder = renderPrint({
   if(!is.null(input$select.reorder.column)&&!""%in%input$select.reorder.column){
     print(table(get.data.set()[,input$select.reorder.column]))
   }else{
-    print("Select a column!")
+    cat("Select a column!")
   }
 })
 
@@ -116,7 +116,7 @@ output$text_collapse_1st = renderPrint({
   if(!is.null(input$select.collapse.column)&&!""%in%input$select.collapse.column){
     print(table(get.data.set()[,input$select.collapse.column]))
   }else{
-    print("Select a column!")
+    cat("Select a column!")
   }
 })
 
@@ -126,7 +126,7 @@ output$text_collapse_2nd = renderPrint({
        !is.null(input$select.collapse.item)&&!""%in%input$select.collapse.item){
     print(table(get.collapsed.column(get.data.set()[,input$select.collapse.column],input$select.collapse.item)))
   }else{
-    print("")
+    cat("")
   }
 })
 
@@ -167,7 +167,7 @@ output$text_rename = renderPrint({
     if(!is.null(input$select.rename.column)&&!input$select.rename.column%in%""){
       print(summary(get.data.set()[,input$select.rename.column]))
     }else{
-      print("")
+      cat("")
     }
   })
 })
@@ -200,7 +200,7 @@ output$text_combine = renderPrint({
     temp = combine.levels(get.data.set(),input$select.combine.columns)
     print(table(temp[,ncol(temp)]))  
   }else{
-    print("Please select a set of columns")
+    cat("Please select a set of columns")
   }
 })
 
