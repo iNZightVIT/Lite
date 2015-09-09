@@ -31,7 +31,8 @@ survey.design.sidebar =  function(){
                                    selectize=T,
                                    selected="none"))),
     fixedRow(column(6,actionButton("create.design","Create design")),
-             column(6,actionButton("remove.design","Remove design"))),br(),br(),
+             column(6,actionButton("remove.design","Remove design"))),br(),
+    verbatimTextOutput("design.success.text"),br(),
     help.display('Create design','create_design_help',
                  "panels/D6_SurveyDesign/3_survey.design.help.md"),
     br())

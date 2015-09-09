@@ -5,6 +5,9 @@ design.parameters$fpc = NULL
 design.parameters$nest = F
 design.parameters$weights = NULL
 
+design.uitexts = reactiveValues()
+design.uitexts$success.text = ""
+
 output$survey.design = renderUI({
   create.design.panel(get.data.set())
 })
@@ -80,12 +83,14 @@ observe({
                                                 ", nest = ",
                                                 temp$nest,
                                                 ")")))
+        design.uitexts$success.text = "Survey design added!"
       }, error = function(e) {
         if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
              tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
           print(e)
         }
         plot.par$design=NULL
+        design.uitexts$success.text = "Survey design could not be generated!"
       }, finally = {})
     }
   })
@@ -97,6 +102,7 @@ observe({
     if(!is.null(input$remove.design)&&
          input$remove.design>0){
       plot.par$design=NULL
+      design.uitexts$success.text = "Survey design removed!"
     }
   })
 })
@@ -177,4 +183,6 @@ observe({
   })
 })
 
-
+output$design.success.text = renderPrint({
+  cat(design.uitexts$success.text)
+})
