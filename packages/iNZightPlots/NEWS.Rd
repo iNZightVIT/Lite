@@ -5,7 +5,9 @@
 # Implement confidence and comparison intervals for survey histograms
 # Fix bug where non-existing inference on barplots would crash the plot
 # Implement confidence intervals for one/two-way barplots
-# Fix bug where inference info for survey scatter plots would break the plot
+# Fix bug where inference info for survey scatter plots would break the
+# plot
+# bug-fix printing summary object
 
 \section{Changes in Version 2.1}{
   RELEASE DATE: 04 August 2015

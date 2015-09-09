@@ -114,8 +114,9 @@ output$model_fit = renderUI({
                           conditionalPanel("input.data_structure=='Complex Survey'",
                                            h4("Survey Design"),
                                            fixedRow(column(4,selectInput("cluster",label="Cluster",
-                                                                         choices=c(" ","1",colnames(get.data.set())),
-                                                                         selected=input$cluster)),
+                                                                         choices=c("none","1",colnames(get.data.set())),
+                                                                         selected=input$cluster,
+                                                                         multiple=T)),
                                                     column(4,selectInput("strata",label="Strata",
                                                                          choices=c(" ",colnames(get.data.set())),
                                                                          selected=input$strata)),
@@ -124,8 +125,9 @@ output$model_fit = renderUI({
                                                                          selected=input$weights))
                                            ),
                                            fixedRow(column(4,selectInput("fpc",label="fpc",
-                                                                         choices=c(" ",colnames(get.data.set())),
-                                                                         selected=input$fpc)),
+                                                                         choices=c("none",colnames(get.data.set())),
+                                                                         selected=input$fpc,
+                                                                         multiple=T)),
                                                     column(4,checkboxInput("nest",label="Nest",
                                                                            value=input$nest)))
                           )),
@@ -531,9 +533,22 @@ observe({
         design0=NULL
         dafr = get.data.set()
         if(input$data_structure%in%"Complex Survey"){
-          id0 = formula(paste0("~",input$cluster))
+          id0 = input$cluster
+          if("none"%in%id0){
+            id0 = id0[-which(id0%in%"none")]
+          }
+          if("1"%in%id0&&
+               length(id0)>1){
+            id0 = id0[-which(id0%in%"1")]
+          }
+          if(!is.null(id0)&&
+               length(id0)>0){
+            id0 = formula(paste0("~",paste(id0,collapse="+")))
+          }else{
+            id0=NULL
+          }
           if(!input$strata%in%" "){
-            strata0 = formula(paste0("~",input$strata))
+            strata0 = formula(paste0("~",input$strata,sep=""))
           }else{
             strata0 = NULL
           }
@@ -542,19 +557,34 @@ observe({
           }else{
             weights0=NULL
           }
-          if(!input$fpc%in%" "){
-            fpc0 = formula(paste0("~",input$fpc))
+          fpc0 = input$fpc
+          if("none"%in%fpc0){
+            fpc0 = fpc0[-which(fpc0%in%"none")]
+          }
+          if("1"%in%fpc0&&
+               length(fpc0)>1){
+            fpc0 = fpc0[-which(fpc0%in%"1")]
+          }
+          if(!is.null(fpc0)&&
+               length(fpc0)>0){
+            fpc0 = formula(paste0("~",paste(fpc0,collapse="+")))
           }else{
-            fpc0 = NULL
+            fpc0=NULL
           }
           nest0 = input$nest
-          design0 = svydesign(id=id0,
-                              strata=strata0,
-                              weights=weights0,
-                              fpc=fpc0,
-                              nest=nest0,
-                              data=dafr,
-                              variables=dafr)
+          temp = list(id=id0,strata=strata0,
+                      fpc=fpc0,nest=nest0,
+                      weights=weights0,
+                      data=dafr)
+          print(temp)
+          design0 = do.call(svydesign,temp)
+#           design0 = svydesign(id=id0,
+#                               strata=strata0,
+#                               weights=weights0,
+#                               fpc=fpc0,
+#                               nest=nest0,
+#                               data=dafr,
+#                               variables=dafr)
           design.text = paste0("mydesign = svydesign(id=~",input$cluster)
           if(!is.null(strata0)){
             design.text = paste0(design.text,",strata=~",input$strata)

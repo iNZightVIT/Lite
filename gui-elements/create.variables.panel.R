@@ -17,8 +17,7 @@ get.create.variables.panel = function(data.set){
                             expression. In case you want to add the same 
                             column twice, select the empty field in the 
                             select field before reselecting the column 
-                            again. Delete by pressing \"del\". Reset by 
-                            pressing \"res\""),
+                            again. Delete by pressing \"del\"."),
                    selectInput(inputId="create.variables.column.select",
                                label="Select a column to add to the expression",
                                choices=c(" ",get.numeric.column.names(data.set)),

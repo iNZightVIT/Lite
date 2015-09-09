@@ -49,7 +49,7 @@ plot.par <- reactiveValues(
   locate.col=NULL,
   locate.extreme=NULL,
   zoombar=NULL,
-  dummy = T
+  design=NULL
 )
 
 identified.points = reactiveValues(values=list())
@@ -102,10 +102,9 @@ graphical.par = reactiveValues(
   ##  Colours
   LOE = FALSE,
   col.LOE = "black",
-  col.trend = 
-  list(linear = "",
-       quadratic = "",
-       cubic =  ""),
+  col.trend =  list(linear = "",
+                    quadratic = "",
+                    cubic =  ""),
   col.smooth = "",
   ##  Jitter, rugs, and trend.
   jitter = "",
@@ -169,14 +168,26 @@ handle.input = function(input, subs = FALSE) {
     if (is.null(input)) {
         return()
     }
+    input.out = NULL
+    factor.levels = NULL
     if (input != "none" && input %in% names(vis.data())) {
-        if (subs) {
-            input.out = convert.to.factor(vis.data()[, input])
+      if (subs) {
+        if(class(vis.data()[, input])%in%"factor"||
+             class(vis.data()[, input])%in%"character"){
+          input.out = as.factor(vis.data()[, input])          
+          factor.levels = nlevels(input.out)
+        }else{
+          tryCatch({
+            input.out = convert.to.factor(vis.data()[, input])          
             factor.levels = nlevels(input.out)
-        } else {
-            input.out = vis.data()[, input]
-            factor.levels = NULL
+          },error=function(e){
+            print(e)
+          })
         }
+      } else {
+        input.out = vis.data()[, input]
+        factor.levels = NULL
+      }
     } else {
         input.out = NULL
         factor.levels = NULL
@@ -363,13 +374,16 @@ observe({
   isolate({
     subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
     plot.par$g1 = subs1.par
-    plot.par$varnames$g1 = input$subs1
+    varnames.g1 = input$subs1
+    if(!is.null(varnames.g1)&&
+         varnames.g1%in%"none"){
+      varnames.g1 = NULL
+    }
+    plot.par$varnames$g1 = varnames.g1
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
     if(is.null(choices1)){
       choices1 = 1
     }
-#     print(choices1)
-#     print("--------")
     updateSliderInput(session,"sub1_level",
                       label = paste0("Subset '", input$subs1, "':"),
                       min = 0, max = choices1, value = 0,step=1)
@@ -382,7 +396,12 @@ observe({
   isolate({
     subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
     plot.par$g1 = subs1.par
-    plot.par$varnames$g1 = input$subs1
+    varnames.g1 = input$subs1
+    if(!is.null(varnames.g1)&&
+         varnames.g1%in%"none"){
+      varnames.g1 = NULL
+    }
+    plot.par$varnames$g1 = varnames.g1
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
     if(is.null(choices1)){
       choices1 = 1
@@ -502,7 +521,12 @@ observe({
     isolate({
       if(!is.null(vis.data())){
         plot.par$y = vari2.par
-        plot.par$varnames$y = input$vari2
+        varnames.y = input$vari2
+        if(!is.null(varnames.y)&&
+             varnames.y%in%"none"){
+          varnames.y = NULL
+        }
+        plot.par$varnames$y = varnames.y
         ch  = colnames(vis.data())
         if(!is.null(input$vari1)&&input$vari1%in%ch){
           ch  = ch[-which(ch%in%input$vari1)]
@@ -557,7 +581,12 @@ observe({
   subs2.par = handle.input(input$subs2, subs = TRUE)$input.out
   isolate({
     plot.par$g2 = subs2.par
-    plot.par$varnames$g2 = input$subs2
+    varnames.g2 = input$subs2
+    if(!is.null(varnames.g2)&&
+         varnames.g2%in%"none"){
+      varnames.g2 = NULL
+    }
+    plot.par$varnames$g2 = varnames.g2
     ch = colnames(vis.data())
     if(!is.null(input$vari1)&&input$vari1%in%ch){
       ch  = ch[-which(ch%in%input$vari1)]
@@ -645,6 +674,7 @@ output$visualize.plot = renderPlot({
   })
   # plot it
   if (!is.null(vis.par())) {
+    dafr = get.data.set()
     if(is.numeric(plot.par$x)&
          is.numeric(plot.par$y)){
       temp = vis.par()
@@ -700,6 +730,7 @@ output$mini.plot = renderPlot({
   })
   # plot it
   if (!is.null(vis.par())) {
+    dafr = get.data.set()
     if(is.numeric(plot.par$x)&
          is.numeric(plot.par$y)){
       temp = vis.par()
@@ -771,6 +802,7 @@ output$visualize.inference = renderPrint({
         values.list$varnames$x = values.list$varnames$y
         values.list$varnames$y = values.list.varnames.x
       }
+      dafr = get.data.set()
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({
@@ -782,18 +814,6 @@ output$visualize.inference = renderPrint({
         }, finally = {})
       }else{
         try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-#         try(cat(search.name(do.call(iNZightPlots:::getPlotSummary, values.list),"inzplotoutput"), sep = "\n"))
-#         try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-#         inzplotoutput = try(capture.output(do.call(iNZightPlots:::getPlotSummary, values.list),file=NULL))
-#         if(length(inzplotoutput)==0){
-#           print("old")
-#           try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-#         }else{
-#           cat(inzplotoutput[(which(grepl("inzplotoutput",
-#                                          inzplotoutput,
-#                                          fixed=T))+1):length(inzplotoutput)],sep="\n")
-#         }
-#         cat(inzplotoutput, sep = "\n")
       }
     })
   }
@@ -813,6 +833,9 @@ output$visualize.summary = renderPrint({
       values.list.varnames.x = values.list$varnames$x
       values.list$varnames$x = values.list$varnames$y
       values.list$varnames$y = values.list.varnames.x
+    }
+    if(!is.null(values.list$design)){
+      values.list$data = NULL
     }
     if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
          tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
@@ -948,6 +971,13 @@ observe({
       plot.par$locate.col=NULL
       plot.par$locate.extreme=NULL
       plot.par$zoombar=NULL
+      plot.par$design=NULL
+      design.parameters$id = formula("~1")
+      design.parameters$strata = NULL
+      design.parameters$fpc = NULL
+      design.parameters$nest = F
+      design.parameters$weights = NULL
+      design.parameters$data.name = NULL
     })
   }
 })
@@ -1389,6 +1419,7 @@ output$plot.appearance.panel = renderUI({
   input$vari1
   input$vari2
   input$select.plot.type
+  plot.par$design
   isolate({
     # barplot with one factor variable the other one not specified
     cols1 = colors()[c(1,3,16,19,63,87,109,259,
@@ -1497,11 +1528,11 @@ output$plot.appearance.panel = renderUI({
                    adjust.transparency.object,
                    select.bg.object,
                    select.dotcolor.object,
-                   color.interior
-        )
-        if(!is.null(input$select.plot.type)&&
+                   color.interior)
+        if((!is.null(input$select.plot.type)&&
              (input$select.plot.type%in%"histogram"||
-             (large.sample&&input$select.plot.type%in%"default"))){
+             (large.sample&&input$select.plot.type%in%"default")))||
+             !is.null(plot.par$design)){
           isolate({
             temp = vis.par()
           })
@@ -1528,10 +1559,16 @@ output$plot.appearance.panel = renderUI({
           }
           adjust.num.bins.object = sliderInput("adjust.num.bins", label = "Number of bars:", min = 1, 
                                                max = m, value=nbins,step=1)
-          ret=list(select.plot.type.object,
-                   adjust.num.bins.object,
-                   select.bg.object,
-                   select.barcolor.object)
+          if(is.null(plot.par$design)){
+            ret=list(select.plot.type.object,
+                     adjust.num.bins.object,
+                     select.bg.object,
+                     select.barcolor.object)
+          }else{
+            ret=list(adjust.num.bins.object,
+                     select.bg.object,
+                     select.barcolor.object)
+          }
         }
       # scatter plot
       # vari1 = numeric , vari2 = numeric
@@ -2076,16 +2113,18 @@ observe({
   input$check_linear
   input$color.linear
   isolate({
-    if(!is.null(input$check_linear)&&input$check_linear){
-      if(length(which(graphical.par$trend%in%"linear"))==0){
-        graphical.par$trend=c(graphical.par$trend,"linear")
-      }
-      graphical.par$col.trend[["linear"]] = input$color.linear
-    }else{
-      if(length(which(graphical.par$trend%in%"linear"))>0){
-        graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"linear")]
-        if(length(graphical.par$trend)==0){
-          graphical.par$trend=NULL
+    if(!is.null(input$check_linear)){
+      if(input$check_linear){
+        if(length(which(graphical.par$trend%in%"linear"))==0){
+          graphical.par$trend=c(graphical.par$trend,"linear")
+        }
+        graphical.par$col.trend[["linear"]] = input$color.linear
+      }else{
+        if(length(which(graphical.par$trend%in%"linear"))>0){
+          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"linear")]
+          if(length(graphical.par$trend)==0){
+            graphical.par$trend=NULL
+          }
         }
       }
     }
@@ -2097,16 +2136,18 @@ observe({
   input$check_quadratic
   input$color.quadratic
   isolate({
-    if(!is.null(input$check_quadratic)&&input$check_quadratic){
-      if(length(which(graphical.par$trend%in%"quadratic"))==0){
-        graphical.par$trend=c(graphical.par$trend,"quadratic")
-      }
-      graphical.par$col.trend[["quadratic"]] = input$color.quadratic
-    }else{
-      if(length(which(graphical.par$trend%in%"quadratic"))>0){
-        graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"quadratic")]
-        if(length(graphical.par$trend)==0){
-          graphical.par$trend=NULL
+    if(!is.null(input$check_quadratic)){
+      if(input$check_quadratic){
+        if(length(which(graphical.par$trend%in%"quadratic"))==0){
+          graphical.par$trend=c(graphical.par$trend,"quadratic")
+        }
+        graphical.par$col.trend[["quadratic"]] = input$color.quadratic
+      }else{
+        if(length(which(graphical.par$trend%in%"quadratic"))>0){
+          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"quadratic")]
+          if(length(graphical.par$trend)==0){
+            graphical.par$trend=NULL
+          }
         }
       }
     }
@@ -2118,16 +2159,18 @@ observe({
   input$check_cubic
   input$color.cubic
   isolate({
-    if(!is.null(input$check_cubic)&&input$check_cubic){
-      if(length(which(graphical.par$trend%in%"cubic"))==0){
-        graphical.par$trend=c(graphical.par$trend,"cubic")
-      }
-      graphical.par$col.trend[["cubic"]] = input$color.cubic
-    }else{
-      if(length(which(graphical.par$trend%in%"cubic"))>0){
-        graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"cubic")]
-        if(length(graphical.par$trend)==0){
-          graphical.par$trend=NULL
+    if(!is.null(input$check_cubic)){
+      if(input$check_cubic){
+        if(length(which(graphical.par$trend%in%"cubic"))==0){
+          graphical.par$trend=c(graphical.par$trend,"cubic")
+        }
+        graphical.par$col.trend[["cubic"]] = input$color.cubic
+      }else{
+        if(length(which(graphical.par$trend%in%"cubic"))>0){
+          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"cubic")]
+          if(length(graphical.par$trend)==0){
+            graphical.par$trend=NULL
+          }
         }
       }
     }
@@ -3274,7 +3317,6 @@ observe({
         temp = unique(c(plot.par.stored$locate.id,temp))
       }
       plot.par$locate.id = temp
-#       plot.par$dummy = !plot.par$dummy # need to change something in plot.par for plot to be redrawn 
     }
   })
 })

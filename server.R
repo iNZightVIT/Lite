@@ -210,6 +210,12 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   source("panels/D5_RestoreData/1_restore.data.ui.R", local = TRUE)
   source("panels/D5_RestoreData/2_restore.data.server.R", local = TRUE)
+  
+  ##-----------------------------##
+  ##  D6. Create design (beta)   ##
+  ##-----------------------------##
+  source("panels/D6_SurveyDesign/1_survey.design.ui.R", local = TRUE)
+  source("panels/D6_SurveyDesign/2_survey.design.server.R", local = TRUE)
 
   ##-----------------------------##
   ##  E1. Categorical Variables  ##
@@ -222,6 +228,7 @@ shinyServer(function(input, output, session) {
   ##  Manipulate variables -> Numeric variables
 
   output$numeric.variables = renderUI({
+    get.data.set()
     isolate({
       numeric.variables.panel(get.data.set())  
     })

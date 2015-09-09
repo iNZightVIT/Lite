@@ -145,6 +145,7 @@ observe({
                                                      "==>", fixed = TRUE)[[1]]
                       [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
         }
+        plot.par$design=NULL
         values$data.name = new.data[[1]]
         values$data.set = new.data[[2]]
         values$data.restore = get.data.set()

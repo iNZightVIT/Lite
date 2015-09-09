@@ -1267,12 +1267,14 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
           name = load(full.name[indexes[1]])
           temp = get(name)
         }else if(tolower(ext)%in%"csv"){
-          temp = read.csv(full.name[indexes[1]])
+          temp = read.csv(full.name[indexes[1]],comment.char="#")
         }else if(tolower(ext)%in%"txt"){
-          temp = read.delim(full.name[indexes[1]])
+          temp = read.delim(full.name[indexes[1]],comment.char="#")
         }
       }, warning = function(w) {
+        print(w)
       }, error = function(e) {
+        print(e)
       }, finally = {})
     }
   }

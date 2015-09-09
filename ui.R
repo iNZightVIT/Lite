@@ -123,7 +123,9 @@ shinyUI(
                        tabPanel("Stack variables",
                                 uiOutput('stack.variables')),
                        tabPanel("Restore data",
-                                uiOutput('restore.data'))
+                                uiOutput('restore.data')),
+                       tabPanel("Survey design (beta)",
+                                uiOutput('survey.design'))
             ),
             ##  "Manipulate variables" tab.
             navbarMenu("Manipulate variables",

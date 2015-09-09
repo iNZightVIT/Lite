@@ -11,6 +11,7 @@ observe({
                          fileID = input$files[1, "name"],
                          path = input$files[1, "datapath"])[[2]]
         if(!is.null(temp)){  
+          plot.par$design=NULL
           values$data.set = temp
           values$data.restore <<- get.data.set()
           temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
@@ -28,6 +29,7 @@ observe({
         unlink(input$files[1, "datapath"])
       }else if (!is.null(input$URLtext)&&!input$URLtext%in%""){
         data.vals = get.data.from.URL(input$URLtext,get.data.dir.imported())
+        design.parameters$data.name = NULL
         values$data.set = data.vals$data.set
         values$data.restore = get.data.set()
         values$data.name = data.vals$data.name
