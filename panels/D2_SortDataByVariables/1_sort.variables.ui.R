@@ -21,14 +21,16 @@ sort.variables.sidebar =  function(){
   c(list(textInput(inputId="num_columns_sort",label="How many variables to sort on?",value="1")),
     list(uiOutput("num.select")),
     list(actionButton("sort_vars","Sort variables"),br(),br(),
-         help.display('Sort data by variables','sort_vars_help',"panels/D2_SortDataByVariables/3_sort.variables.help.md"),
+         help.display('Sort data by variables','sort_vars_help',
+                      "panels/D2_SortDataByVariables/3_sort.variables.help.md"),
          br()))
 }
 
 sort.variables =function(data.set){
   if(is.null(data.set)){
     sidebarLayout(
-      sidebarPanel(help.display('Sort data by variables','sort_vars_help',"D2_SortDataByVariables/3_sort.variables.help.md")),
+      sidebarPanel(help.display('Sort data by variables','sort_vars_help',
+                                "panels/D2_SortDataByVariables/3_sort.variables.help.md")),
       mainPanel(
         h1("Please select or import a data set.")
       )

@@ -24,6 +24,7 @@ observe({
       }
       temp = sort.data(vars,sort.type,get.data.set())
       if(!is.null(temp)){
+        updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
       }
     }

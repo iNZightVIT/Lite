@@ -2,12 +2,26 @@
 \title{NEWS file for the iNZightPlots package}
 \encoding{UTF-8}
 
-# Implement confidence and comparison intervals for survey histograms
-# Fix bug where non-existing inference on barplots would crash the plot
-# Implement confidence intervals for one/two-way barplots
-# Fix bug where inference info for survey scatter plots would break the
-# plot
-# bug-fix printing summary object
+\section{Changes in Version 2.2}{
+  RELEASE DATE: 14 September 2015
+
+  \subsection{NEW FEATURES - SURVEY DESIGN}{
+    \itemize{
+      \item confidence intervals for histograms and bar plots
+      \item comparison intervals for histograms broken down by a factor
+      \item summary information for all basic plots (histograms, bar plots, and scatter plots)
+    }
+  }
+
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item fixes a bug where missing information on barplots and scatter plots would cause the plotting function to die
+      \item fixes a bug in the printing of summary objects
+      \item fixes a bug where the minimum value of a single numeric variable summary was ommited
+      \item and various other small bug fixes
+    }
+  }
+}
 
 \section{Changes in Version 2.1}{
   RELEASE DATE: 04 August 2015

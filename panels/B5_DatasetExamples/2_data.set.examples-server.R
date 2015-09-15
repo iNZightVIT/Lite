@@ -2,7 +2,7 @@
 
 ## loads and updates the switch data table Panel
 output$switch.data.panel = renderUI({
-  get.data.set()
+  updatePanel$datachanged
   input$remove_set
   isolate({
     switch.data.panel(get.data.set(),get.data.dir.global(),
@@ -148,6 +148,7 @@ observe({
         plot.par$design=NULL
         values$data.name = new.data[[1]]
         values$data.set = new.data[[2]]
+        updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
       }
     })

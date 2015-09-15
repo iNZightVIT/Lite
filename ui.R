@@ -143,7 +143,7 @@ shinyUI(
                                 uiOutput("add.columns")),
                        tabPanel("Reshape dataset",
                                 uiOutput("reshape.data")),
-                       tabPanel("Remove columns",
+                       tabPanel("Delete variables",
                                 uiOutput("remove.columns"))
             ),
 
@@ -153,7 +153,7 @@ shinyUI(
                                 uiOutput("quick.explore")),
                        tabPanel("Time Series",value="timeSeries",
                                 uiOutput("timeseries.panel")),
-                       tabPanel("Model Fitting",
+                       tabPanel("Model Fitting",value="regression",
                                 uiOutput("modelfitting.panel"))
             )
         )

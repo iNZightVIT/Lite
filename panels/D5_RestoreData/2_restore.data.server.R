@@ -4,6 +4,7 @@ observe({
   input$restore_data_button
   isolate({
     if(!is.null(input$restore_data_button)&&input$restore_data_button>0){
+      updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = get.data.restore()
     }
   })

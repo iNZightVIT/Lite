@@ -278,18 +278,27 @@ output$vari1_panel = renderUI({
   get.data.set()
   input$change_var_selection
   isolate({
+    sel = input$vari1
+    get.vars = parseQueryString(session$clientData$url_search)
+    if(length(get.vars)>0&&
+         (any(names(get.vars)%in%"url")||
+            any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"x")&&
+            !get.vars$x%in%"")){
+      sel=get.vars$x
+    }
     if(!is.null(input$change_var_selection)){
       if(!input$change_var_selection){
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
                     choices = colnames(vis.data()),
-                    selected = input$vari1,
+                    selected = sel,
                     selectize=T)
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
                     choices = colnames(vis.data()),
-                    selected = input$vari1,
+                    selected = sel,
                     selectize=F,
                     size=2)
       }
@@ -361,11 +370,12 @@ output$subs1_panel = renderUI({
     if(!is.null(input$subs2)&&input$subs2%in%ch){
       ch  = ch[-which(ch%in%input$subs2)]
     }
+    sel = input$subs1
+    selectInput(inputId = "subs1",
+                label = "Subset by:",
+                choices = c("none", ch),
+                selected = sel)
   })
-  selectInput(inputId = "subs1",
-              label = "Subset by:",
-              choices = c("none", ch),
-              selected = plot.par$varnames$g1)
 })
 
 ##  Update plot.par$g1.
@@ -384,9 +394,13 @@ observe({
     if(is.null(choices1)){
       choices1 = 1
     }
-    updateSliderInput(session,"sub1_level",
-                      label = paste0("Subset '", input$subs1, "':"),
-                      min = 0, max = choices1, value = 0,step=1)
+    if(!is.null(input$subs1)&&
+         !input$subs1%in%""&&
+         !input$subs1%in%"none"){
+      updateSliderInput(session,"sub1_level",
+                        label = paste0("Subset '", input$subs1, "':"),
+                        min = 0, max = choices1, value = 0,step=1)
+    }
   })
 })
 
@@ -491,6 +505,15 @@ output$vari2_panel = renderUI({
   get.data.set()
   input$change_var_selection
   isolate({
+    sel = input$vari2
+    get.vars = parseQueryString(session$clientData$url_search)
+    if(length(get.vars)>0&&
+         (any(names(get.vars)%in%"url")||
+            any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"y")&&
+            !get.vars$y%in%"")){
+      sel=get.vars$y
+    }
     if(!is.null(input$change_var_selection)){
       ch = colnames(vis.data())
       if(!is.null(input$vari1)&&
@@ -501,13 +524,13 @@ output$vari2_panel = renderUI({
         selectInput(inputId = "vari2",
                     label = "Select second variable:",
                     choices = c("none",ch),
-                    selected = input$vari2,
+                    selected = sel,
                     selectize=T)
       }else{
         selectInput(inputId = "vari2",
                     label = "Select second variable:",
                     choices = c("none",ch),
-                    selected = input$vari2,
+                    selected = sel,
                     selectize=F,
                     size=2)
       }

@@ -13,6 +13,7 @@ observe({
         if(!is.null(temp)){  
           plot.par$design=NULL
           values$data.set = temp
+          updatePanel$doit = updatePanel$doit+1
           values$data.restore <<- get.data.set()
           temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
           if(length(temp)>1){
@@ -31,6 +32,7 @@ observe({
         data.vals = get.data.from.URL(input$URLtext,get.data.dir.imported())
         design.parameters$data.name = NULL
         values$data.set = data.vals$data.set
+        update$doit = update$doit+1
         values$data.restore = get.data.set()
         values$data.name = data.vals$data.name
         import_reactives$success = T

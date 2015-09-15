@@ -11,21 +11,36 @@
 output$about.panel <- renderUI({
   get.vars = parseQueryString(session$clientData$url_search)
   if(length(get.vars)>0&&
-       any(names(get.vars)%in%"url")&&
-       !is.null(get.vars$url)&&
-       get.vars$url!=""){
-    data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
+       (any(names(get.vars)%in%"url")||
+          any(names(get.vars)%in%"example"))){
+    data.vals = NULL
+    if(!is.null(get.vars$url)&&
+         get.vars$url!=""){
+      data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
+    }
+    if(!is.null(get.vars$example)&&
+         get.vars$example!=""){
+      data.vals = load.data("data",get.vars$example)
+    }
     if(!is.null(data.vals)){
       values$data.set = data.vals$data.set
       values$data.restore = get.data.set()
       values$data.name = data.vals$data.name
       if(!is.null(get.data.set())&&
-           !"timeSeries"%in%names(get.vars)){
+           "land"%in%names(get.vars)&&
+           get.vars$land!=""&&
+           get.vars$land%in%"visualize"){
         updateTabsetPanel(session,"selector","visualize")
       }else if(!is.null(get.data.set())&&
-                 "timeSeries"%in%names(get.vars)&&
-                 get.vars$timeSeries%in%"true"){
+                 "land"%in%names(get.vars)&&
+                 get.vars$land!=""&&
+                 get.vars$land%in%"timeSeries"){
         updateTabsetPanel(session,"selector","timeSeries")
+      }else if(!is.null(get.data.set())&&
+                 "land"%in%names(get.vars)&&
+                 get.vars$land!=""&&
+                 get.vars$land%in%"regression"){
+        updateTabsetPanel(session,"selector","regression")
       }
     }
   }

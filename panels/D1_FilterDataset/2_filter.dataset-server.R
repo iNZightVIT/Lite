@@ -8,6 +8,7 @@ observe({
         if(!is.null(input$select_categorical1)&&!input$select_categorical1%in%""){
           to.remove = which(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]%in%input$levels1)
           if(length(to.remove)>0){
+            updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = get.data.set()[-to.remove,]
             values$data.set[,which(colnames(get.data.set())%in%input$select_categorical1)] = 
               droplevels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])
@@ -35,6 +36,7 @@ observe({
             indexes.keep = which((get.data.set()[,which(colnames(get.data.set())%in%input$select_numeric1)]!=as.numeric(input$numeric_input1)))
           }
           if(length(indexes.keep)>0){
+            updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = get.data.set()[indexes.keep,]
           }
         }
@@ -43,6 +45,7 @@ observe({
           indices = as.numeric(strsplit(input$row_op_indexes,",",fixed=T)[[1]])
           indices = indices[which(indices%in%(1:nrow(get.data.set())))]
           if(length(indices)>0){
+            updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = get.data.set()[-indices,] 
           }
         }
@@ -58,6 +61,7 @@ observe({
                              numSample=as.numeric(input$numeric_input3),
                              bootstrap=input$bootstrap_check)
           if(!is.null(temp)){
+            updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = temp
           }
         }

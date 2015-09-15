@@ -65,6 +65,7 @@ observe({
       }
       temp = reorder.levels(get.data.set(),input$select.reorder.column,levels.new)
       if(!is.null(temp)){
+        updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
         updateSelectInput(session=session,inputId="select.reorder.item",selected="",choices="")
         updateSelectInput(session=session,inputId="select.reorder.column",selected="")
@@ -186,6 +187,7 @@ observe({
       }
       temp = rename.levels(get.data.set(),input$select.rename.column,new.levels)
       if(!is.null(temp)){
+        updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
         updateSelectInput(session,"select.rename.column",selected=0)
       }
@@ -210,6 +212,7 @@ observe({
     if(!is.null(input$combine)&&input$combine>0){
       temp = combine.levels(get.data.set(),input$select.combine.columns)
       if(!is.null(temp)){
+        updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
       }
     }

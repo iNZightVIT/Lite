@@ -17,6 +17,7 @@ observe({
       if(length(vars)>0&length(methods)>0&!is.null(get.data.set())){
         temp = aggregate.data(aggregate.over=unique(vars),methods=methods,dafr=get.data.set())
         if(!is.null(temp)){
+          updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = temp          
           updateSelectInput(session,"aggros",selected=0,choices=get.categorical.column.names(get.data.set()))
           updateSelectInput(session,"aggregate.method",selected=0)

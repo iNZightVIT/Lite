@@ -1,7 +1,7 @@
-iNZight *Lite* version 0.9.7.8
+iNZight *Lite* version 1.0
 ==============================
 
-*Last Updated: 07/07/15*
+*Last Updated: 14/09/15*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -11,12 +11,12 @@ This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with 
 
 Underway:
 ---------
-- [Wishlist] Adjust the size of the "Help" button so that it matches the size of the actionButton.	
-- [Manipulate] Go through the data extraction / manipulation options.
-- [Model Fitting] Implement the model fitting module
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Global] Implemented GET variables to add to iNZight-lite URL.
+- [Visualize] All "Advanced options" are now up to date with iNZight.
+- [Model Fitting] Implement the model fitting module
 - [Time Series] Check if it can handle datasets with the "DATE" columns in column 2+.
 - [Time Series] Fix "Provide Time Information".
 - [Help] This module was removed. Even though it is in iNZight links to the new webpage already exist in the "About" start page and help to every module is available for every module inside the modules. 
@@ -40,8 +40,7 @@ Recent Updates (Most to least recent):
 
 To do:
 ------
-- [General] Write a "log" file script.
-- [General] Find better place for "help" button.
+- [General] Documentation.
 
 Package dependencies
 --------------------
@@ -52,6 +51,7 @@ Please install all dependencies.
 - iNZightTS
 - iNZightMR
 - markdown
+- GGally
 - gpairs
 - iNZightRegression
 - RJSONIO
@@ -62,14 +62,14 @@ Directories:
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight-Lite.
 
-- gui-elements:
+- gui-elements: (removed)
 This directory contains the gui functions for all the old modules (from iNZight revamp). 
 
 - www:
 This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png javascript files. Images are stored in a sub-directory called "images". Javascript code is stored in a subdirectory "js".
 
 - panels:
-This directory contains the gui, server, help, and other functions for each module. It currently contains the "About", "Time Series", "Visualize", and "Model Fitting" modules. This makes it easier to modify code.
+This directory contains the gui, server, help, and other functions for each module. 
 
 Main files:
 -----------
@@ -85,13 +85,15 @@ Script for shiny server.
 - ui.R:
 Defines the main GUI.
 
+- functions.R
+Defines al functions used in iNZight-lite, some of them are also in iNZightTools.
+
 Note:
 -----
 This repository will gradually be changed into the following format throughout 2015:
 
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight *Lite*. 
-
 
 - www:
 This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png. Images are stored in a sub-directory called "images".
@@ -104,5 +106,34 @@ This directory contains the gui, server, help, and other functions for each modu
   + [File] 3_panelname-panel-help.R
   + [File] 4_panelname-panel-null.R
   + [File] 5_panelname-panel-other.R
+
+iNZight-lite URL feature
+------------------------
+
+Some GET parameters can be added to the URL to access iNZight-lite. In the moment 
+the following are implemented.
+
+- url:
+An URL to a dataset sitting somewhere in the internet.
+- example:
+A name of an data set inside the data folder.
+- land:
+The place where iNZight-lite starts. If not specified it is "About". Three 
+possibilities (visualize, timeSeries, regression).
+- x:
+The x variable in the visualize module
+- y:
+The y variable in the visualize module
+- time:
+The variable in time series where the dates are stored.
+-seriesVars
+A comma seperated list of column names. This names are set in time series to be 
+plotted
+- Y:
+The dependend variable in regression.
+- predict:
+Comma seperated list with predictor variables.
+- confound:
+Comma seperated list for confounding variables. 
 
 

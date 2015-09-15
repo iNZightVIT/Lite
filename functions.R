@@ -108,6 +108,7 @@ convert.dafr = function(dafr){
 #' 
 #' @author Christoph Knapp
 get.combinations = function(dafr,simplify=F){
+  dafr = data.frame(dafr)
   index.column = rep(T,ncol(dafr))
   rm.na <- function(variable) {
     sum(is.na(variable)) > 0
@@ -115,7 +116,7 @@ get.combinations = function(dafr,simplify=F){
   if(simplify){
     index.column <- sapply(dafr, rm.na)
   }
-  x <- dafr[,index.column]
+  x <- data.frame(dafr[,index.column])
   if(ncol(x)>0){
     x1 <- as.numeric(apply(x, 2, function(x) length(which(is.na(x)))))
     row4col.order <- order(x1) 
@@ -1098,7 +1099,7 @@ transform.get.temp = function(dafr,type,columns){
     temp = change.sign.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"convert to categorical"){
     temp = change.factor.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%""){
+  } else if (!is.null(columns)&type%in%" "){
     temp = NULL
   }
   temp
@@ -1281,7 +1282,7 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
   if(is.null(fileID)){
     list(NULL,temp)
   }else{
-    list(basename(fileID),temp)
+    list(data.name=basename(fileID),data.set=temp)
   }
 }
 

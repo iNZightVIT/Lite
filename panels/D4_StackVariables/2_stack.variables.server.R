@@ -7,6 +7,7 @@ observe({
          !is.null(input$stack_vars_column)){
       temp = stack.variables.perform(input$stack_vars_column,get.data.set())
       if(!is.null(temp)){
+        updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
         updateSelectInput(session,"stack_vars_which",selected=0)
         updateSelectInput(session,inputId="stack_vars_column",
