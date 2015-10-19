@@ -2,6 +2,46 @@
 \title{NEWS file for the iNZightPlots package}
 \encoding{UTF-8}
 
+\section{Changes in Version 2.3}{
+  RELEASE DATE: 1 October 2015
+
+  \subsection{MINOR CHANGES}{
+    \itemize{
+      \item new argument added for dotplots to allow group labels to be
+      placed inside the plot, rather than in the axis margin: \code{internal.labels=TRUE}
+    }
+  }
+
+  \subsection{PATCH 2.3.1 - 06/10/2015}{
+    \itemize{
+      \item fix how viewports are named
+    }
+  }
+  \subsection{PATCH 2.3.2 - 08/10/2015}{
+    \itemize{
+      \item fix a bug that prevented comparison lines to be drawn on
+      categorical dotplots
+    }
+  }
+  \subsection{PATCH 2.3.3 - 13/10/2015}{
+    \itemize{
+      \item fix a bug where adding comparison intervals would break the
+      plot if any of the subgroups in a dotplot were too small. New
+      behaviour ignores small groups and only compares large ones.
+    }
+  }
+  \subsection{PATCH 2.3.4 - 13/10/2015}{
+    \itemize{
+      \item continuing from 2.3.3, but now use independent covariances 
+    }
+  }
+  \subsection{PATCH 2.3.4 - 13/10/2015}{
+    \itemize{
+      \item FIX for Lite: dotplots by factor labels now also on histograms
+    }
+  }
+}
+
 \section{Changes in Version 2.2}{
   RELEASE DATE: 14 September 2015
 

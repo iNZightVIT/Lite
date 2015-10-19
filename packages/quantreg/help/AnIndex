@@ -5,6 +5,7 @@ AIC.rqss	rqss.object
 akj	akj
 anova.rq	anova.rq
 anova.rqlist	anova.rq
+anova.rqs	anova.rq
 bandwidth.rq	bandwidth.rq
 barro	barro
 boot.crq	boot.crq
@@ -23,6 +24,7 @@ critval	critval
 crq	crq
 crq.fit.pen	crq
 crq.fit.por	crq
+crq.fit.por2	crq
 crq.fit.pow	crq
 Curv	crq
 deviance.nlrq	nlrq
@@ -37,6 +39,7 @@ fitted.nlrq	nlrq
 fitted.rqss	rqss.object
 formula.nlrq	nlrq
 formula.rq	rq.object
+gasprice	gasprice
 index.dynrq	dynrq
 KhmaladzeTest	khmaladzeTest
 khmaladzize	khmaladzeTest

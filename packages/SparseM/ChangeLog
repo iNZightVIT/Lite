@@ -498,3 +498,7 @@ The version 1.05
     as environment() this ensures that calls to det() from SparseM will use
     the methods appropriate to SparseM objects.
 
+
+The version 1.7
+
+1.  Removed coerce from exports.
