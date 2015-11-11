@@ -1,8 +1,8 @@
 Package: iNZightPlots
 Type: Package
 Title: iNZightPlots
-Version: 2.2
-Date: 2015-09-14
+Version: 2.3.5
+Date: 2015-10-19
 Authors@R: c(person("Tom", "Elliott", role = c("aut", "cre"),
     email = "tell029@aucklanduni.ac.nz"))
 Depends: R(>= 2.13)
@@ -11,6 +11,16 @@ Suggests: iNZight
 Description: Simple plotting function(s) for exploratory data analysis with
     flexible plotting options to allow users to customise plots.
 License: GPL-2
+RemoteType: github
+RemoteHost: api.github.com
+RemoteRepo: iNZightPlots
+RemoteUsername: iNZightVIT
+RemoteRef: master
+RemoteSha: 677d3c23e5c466de9259164056f957dca51a585f
+GithubRepo: iNZightPlots
+GithubUsername: iNZightVIT
+GithubRef: master
+GithubSHA1: 677d3c23e5c466de9259164056f957dca51a585f
 Author: Tom Elliott [aut, cre]
 Maintainer: Tom Elliott <tell029@aucklanduni.ac.nz>
-Built: R 3.2.1; ; 2015-09-15 00:45:05 UTC; unix
+Built: R 3.2.2; ; 2015-10-19 03:23:56 UTC; unix
