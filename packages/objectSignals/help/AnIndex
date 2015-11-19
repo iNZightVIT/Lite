@@ -1,8 +1,0 @@
-class:Signal	Signal-class
-declareSignal	declareSignal
-fieldWithPrototype	fieldWithPrototype
-length,Signal-method	Signal-class
-listeners	Signal-class
-listeners,Signal-method	Signal-class
-Signal	Signal-class
-Signal-class	Signal-class
