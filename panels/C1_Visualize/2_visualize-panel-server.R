@@ -291,14 +291,14 @@ output$vari1_panel = renderUI({
       if(!input$change_var_selection){
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = colnames(vis.data()),
-                    selected = sel,
+                    choices = c("none", colnames(vis.data())),
+                    ## selected = sel,
                     selectize=T)
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = colnames(vis.data()),
-                    selected = sel,
+                    choices = c("none", colnames(vis.data())),
+                    ## selected = sel,
                     selectize=F,
                     size=2)
       }
