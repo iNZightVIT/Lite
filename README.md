@@ -1,7 +1,7 @@
 iNZight *Lite* version 1.0
 ==============================
 
-*Last Updated: 14/09/15*
+*Last Updated: 28/11/15*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -14,6 +14,7 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Visualize] "none" option added for selecting first variable.
 - [Global] Implemented GET variables to add to iNZight-lite URL.
 - [Visualize] All "Advanced options" are now up to date with iNZight.
 - [Model Fitting] Implement the model fitting module
