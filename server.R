@@ -25,7 +25,7 @@ args=(commandArgs(TRUE))
 ## args is now a list of character vectors
 ## First check to see if arguments are passed.
 ## Then cycle through each element of the list and evaluate the expressions.
-if(length(args)==0){
+if(length(args) == 0){
   message("No arguments supplied.")
 }else{
   for(i in 1:length(args)){
