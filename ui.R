@@ -3,7 +3,7 @@
 ###-----------------------###
 ###
 ###  Date Created   :   January 13, 2015
-###  Last Modified  :   March 23, 2015
+###  Last Modified  :   December 15, 2015
 ###
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
@@ -87,7 +87,7 @@ shinyUI(
             title =
                 HTML(
                 "<a href = 'https://www.stat.auckland.ac.nz/~wild/iNZight/'>
-                <img src = 'iNZight_lite_logo.png', width = 171, height = 36,
+                <img src = 'iNZight_lite_logo.png', width = 171, height = 33,
                      alt = 'iNZight Lite'/></a>"
                 ),
             ## footer = img(src = "pendred_footer.png"),

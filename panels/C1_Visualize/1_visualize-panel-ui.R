@@ -207,8 +207,8 @@ visualize.panel.ui = function(data.set) {
             )
         } else {
             fixedRow(
-                column(2, vis.sidebarPanel()),
-                column(10, vis.mainPanel())
+                column(4, vis.sidebarPanel()),
+                column(8, vis.mainPanel())
             )
         }
     )
