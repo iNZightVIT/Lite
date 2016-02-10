@@ -32,7 +32,7 @@ observe({
         data.vals = get.data.from.URL(input$URLtext,get.data.dir.imported())
         design.parameters$data.name = NULL
         values$data.set = data.vals$data.set
-        updatePanel$doit = updatePanel$doit+1
+        update$doit = update$doit+1
         values$data.restore = get.data.set()
         values$data.name = data.vals$data.name
         import_reactives$success = T

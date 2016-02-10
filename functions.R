@@ -1464,7 +1464,7 @@ get.data.from.URL = function(URL,data.dir.import){
     dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
   }
   tryCatch({
-    download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="curl")
+    download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="wget")
     temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
     if(!is.null(temp[[2]])){
       ret$data.set = temp[[2]]
