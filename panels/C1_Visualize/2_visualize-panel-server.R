@@ -2524,11 +2524,11 @@ observe({
       plot.par$xlim = NULL
       plot.par$ylim = NULL
       temp = list()
-      temp$x = get.data.set()[,input$vari1]
+      temp$y = get.data.set()[,input$vari1]
       if(input$vari2%in%'none'){
-        temp$y = NULL
+        temp$x = NULL
       }else{
-        temp$y = get.data.set()[,input$vari2]
+        temp$x = get.data.set()[,input$vari2]
       }
       temp$plot = F
       temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
