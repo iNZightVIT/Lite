@@ -1,8 +1,8 @@
 iNZight *Lite* version 1.0
 ==============================
 
-*Last Updated: 28/11/15*
-*Last Updated: 10/02/16*
+
+*Last Updated: 25/02/16*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -15,6 +15,10 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Import dataset] When users switch a page from "visualize" or other analysis modules back to "import dataset", old dataset preview table doesn't disappear
+- [Import dataset] Users are able to upload new dataset without removing old dataset or
+refreshing page
+- [Import dataset] importing local file doesn't need to click "import file" anymore
 - [Import dataset] fixed importing dataset from url
 - [Visualize] "none" option added for selecting first variable.
 - [Global] Implemented GET variables to add to iNZight-lite URL.
