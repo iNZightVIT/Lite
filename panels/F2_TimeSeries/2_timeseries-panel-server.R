@@ -399,7 +399,11 @@ output$time.select = renderUI({
   }else{
     sel = colnames(get.data.set())[1]
   }
-  get.vars = parseQueryString_Lite(session$clientData$url_search)
+  get.vars = parseQueryString(session$clientData$url_search)
+  if(!is.null(get.vars$url)) {
+    temp = session$clientData$url_search
+    get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
+  }
   if(length(get.vars)>0&&
        (any(names(get.vars)%in%"url")||
           any(names(get.vars)%in%"example"))&&
@@ -418,7 +422,11 @@ output$time.select = renderUI({
 
 output$time.plot.select = renderUI({
   sel = rev(get.numeric.column.names(get.data.set()))[1]
-  get.vars = parseQueryString_Lite(session$clientData$url_search)
+  get.vars = parseQueryString(session$clientData$url_search)
+  if(!is.null(get.vars$url)) {
+    temp = session$clientData$url_search
+    get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
+  }
   if(length(get.vars)>0&&
        (any(names(get.vars)%in%"url")||
           any(names(get.vars)%in%"example"))&&

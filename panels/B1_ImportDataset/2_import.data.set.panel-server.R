@@ -56,8 +56,13 @@ observeEvent(input$import_set, {
 output$load.data.panel = renderUI({
   input$selector
   isolate({
-    # looks for get requests to pass in an URL for a dataset 
-    load.data.panel(parseQueryString_Lite(session$clientData$url_search))
+    # looks for get requests to pass in an URL for a dataset
+    panel.list = parseQueryString(session$clientData$url_search)
+    if(!is.null(panel.list$url)) {
+      temp = session$clientData$url_search
+      panel.list$url = sub(".*?url=(.*?)&.*", "\\1", temp)
+    }
+    load.data.panel(panel.list)
   })
 })
 
