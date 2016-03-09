@@ -279,7 +279,7 @@ output$vari1_panel = renderUI({
   input$change_var_selection
   isolate({
     sel = input$vari1
-    get.vars = parseQueryString(session$clientData$url_search)
+    get.vars = parseQueryString_Lite(session$clientData$url_search)
     if(length(get.vars)>0&&
          (any(names(get.vars)%in%"url")||
             any(names(get.vars)%in%"example"))&&
@@ -504,9 +504,11 @@ observe({
 output$vari2_panel = renderUI({
   get.data.set()
   input$change_var_selection
+
   isolate({
+    
     sel = input$vari2
-    get.vars = parseQueryString(session$clientData$url_search)
+    get.vars = parseQueryString_Lite(session$clientData$url_search)
     if(length(get.vars)>0&&
          (any(names(get.vars)%in%"url")||
             any(names(get.vars)%in%"example"))&&
@@ -707,8 +709,8 @@ output$visualize.plot = renderPlot({
       temp.varnames.x = temp$varnames$x
       temp$varnames$x = temp$varnames$y
       temp$varnames$y = temp.varnames.x
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
                   }, warning = function(w) {
                     print(w)
@@ -719,8 +721,8 @@ output$visualize.plot = renderPlot({
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
       }
     }else{
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
         }, warning = function(w) {
           print(w)
@@ -763,8 +765,8 @@ output$mini.plot = renderPlot({
       temp.varnames.x = temp$varnames$x
       temp$varnames$x = temp$varnames$y
       temp$varnames$y = temp.varnames.x
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
         }, warning = function(w) {
           print(w)
@@ -775,8 +777,8 @@ output$mini.plot = renderPlot({
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
       }
     }else{
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
         }, warning = function(w) {
           print(w)
@@ -826,8 +828,8 @@ output$visualize.inference = renderPrint({
         values.list$varnames$y = values.list.varnames.x
       }
       dafr = get.data.set()
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({
           cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
         }, warning = function(w) {
@@ -860,18 +862,22 @@ output$visualize.summary = renderPrint({
     if(!is.null(values.list$design)){
       values.list$data = NULL
     }
-    if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-      tryCatch({
-        cat(do.call(getPlotSummary, values.list), sep = "\n")
-      }, warning = function(w) {
-        print(w)
-      }, error = function(e) {
-        print(e)
-      }, finally = {})
-    }else{
-      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
-    }
+    
+    try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
+    
+#    if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+#         tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
+#      tryCatch({
+#        cat(do.call(getPlotSummary, values.list), sep = "\n")
+#      }, warning = function(w) {
+#        print(w)
+#      }, error = function(e) {
+#        print(e)
+#      }, finally = {})
+#    }
+#    else{
+#      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
+#    }
 })
 
 ##  Reset variable selection and graphical parameters.

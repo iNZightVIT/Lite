@@ -61,7 +61,7 @@ output$model_fit = renderUI({
     confound.sel = input$confounding_variables
     if(updatePanel$first){
 #       updatePanel$first = F
-      get.vars = parseQueryString(session$clientData$url_search)
+      get.vars = parseQueryString_Lite(session$clientData$url_search)
       if(length(get.vars)>0&&
            (any(names(get.vars)%in%"url")||
               any(names(get.vars)%in%"example"))&&

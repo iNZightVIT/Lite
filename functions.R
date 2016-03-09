@@ -1599,3 +1599,16 @@ search.name = function(list.search,search.name=NULL){
   }
 }
 
+
+# A modification to the "parseQueryString" function
+# avoid the html encoding to the url address extracted
+
+parseQueryString_Lite = function(data) {
+  result = parseQueryString(data)
+  if(!is.null(result$url)) {
+    temp = session$clientData$url_search
+    result$url = sub(".*?url=(.*?)&.*", "\\1", temp)
+  }
+  return(result)
+}
+

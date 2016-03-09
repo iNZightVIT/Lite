@@ -44,8 +44,8 @@ output$create.design.summary = renderPrint({
                                         temp$nest,
                                         ")")))))
   }, error = function(e) {
-    if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+    if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+         tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
       print(e)
     }
     cat("This input can not be used with the current data set to generate a design object")
@@ -85,8 +85,8 @@ observe({
                                                 ")")))
         design.uitexts$success.text = "Survey design added!"
       }, error = function(e) {
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        if(!is.null(parseQueryString_Lite(session$clientData$url_search)$debug)&&
+             tolower(parseQueryString_Lite(session$clientData$url_search)$debug)%in%"true"){
           print(e)
         }
         plot.par$design=NULL

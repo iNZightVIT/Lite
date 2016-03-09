@@ -1,3 +1,5 @@
+options(shiny.maxRequestSize = 100*1024^2)
+
 import_reactives = reactiveValues(
   success = F
 )
@@ -55,7 +57,7 @@ output$load.data.panel = renderUI({
   input$selector
   isolate({
     # looks for get requests to pass in an URL for a dataset 
-    load.data.panel(parseQueryString(session$clientData$url_search))
+    load.data.panel(parseQueryString_Lite(session$clientData$url_search))
   })
 })
 
