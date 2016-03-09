@@ -1,4 +1,4 @@
-options(shiny.maxRequestSize = 100*1024^2)
+options(shiny.maxRequestSize=1024*1024^2)
 
 import_reactives = reactiveValues(
   success = F
@@ -56,13 +56,8 @@ observeEvent(input$import_set, {
 output$load.data.panel = renderUI({
   input$selector
   isolate({
-    # looks for get requests to pass in an URL for a dataset
-    panel.list = parseQueryString(session$clientData$url_search)
-    if(!is.null(panel.list$url)) {
-      temp = session$clientData$url_search
-      panel.list$url = sub(".*?url=(.*?)&.*", "\\1", temp)
-    }
-    load.data.panel(panel.list)
+    # looks for get requests to pass in an URL for a dataset 
+    load.data.panel(parseQueryString(session$clientData$url_search))
   })
 })
 

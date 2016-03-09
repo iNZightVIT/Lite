@@ -1456,6 +1456,8 @@ get.quantiles = function(subx){
 #' @author Christoph Knapp
 get.data.from.URL = function(URL,data.dir.import){
   ret = list()
+  #URL = gsub(" ", "%20", URL)
+  URL = URLencode(URL)
   print(URL)
   name = strsplit(URL,"/")[[1]]
   name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
