@@ -27,6 +27,7 @@ ts.help = function() {
 }
 
 
+
 ###  Next, we set up the sidebar panel with "ts.sidebarPanel()".
 ts.sidebarPanel = function(data.set) {
   ##  Perform a routine data check (to be replaced).
@@ -49,14 +50,14 @@ ts.sidebarPanel = function(data.set) {
       ##  of variables extracted from the dataset, or providing one
       ##  manually.
       hr(),
-      uiOutput("time_info"),
-      ## radioButtons(
-      ##     inputId = "time_info",
-      ##     label = "Time Information: ",
-      ##     choices =
-      ##         c("Select time variable" = 1,
-      ##           "Provide time manually" = 2)
-      ## ),
+      #uiOutput("time_info"),
+       radioButtons(
+           inputId = "time_info",
+           label = "Time Information: ",
+           choices =
+               c("Select time variable" = 1,
+                 "Provide time manually" = 2)
+       ),
       ##  If the user decides to select a variable, then load a panel
       ##  which contains the list of variables extracted from the
       ##  dataset.
@@ -126,6 +127,7 @@ ts.sidebarPanel = function(data.set) {
       ts.help()
   )
 }
+
 
 
 ###--------------###
@@ -294,6 +296,8 @@ ts.mainPanel = function() {
         )
     )
 }
+
+
 
 ###------------------###
 ###  Time Series UI  ###
