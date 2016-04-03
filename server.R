@@ -9,7 +9,12 @@
 ### This file sources the ui files for each panel separately.
 
 ###  We load the packages we require. This is done only ONCE per instance.
-install.packages("http://r.docker.stat.auckland.ac.nz/R/src/contrib/iNZightPlots_2.3.8.tar.gz", repo=NULL, type="source")
+
+options(repos = c(options()$repos, 
+                  inzight = "http://r.docker.stat.auckland.ac.nz/R"))
+install.packages("iNZightPlots", dependencies = TRUE)
+
+
 library(iNZightPlots)
 library(iNZightTS)
 library(iNZightMR)
