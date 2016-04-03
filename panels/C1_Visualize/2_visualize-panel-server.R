@@ -806,6 +806,8 @@ output$mini.plot = renderPlot({
 
 
 output$visualize.summary = renderPrint({
+  
+  
   if (is.null(plot.par$x)) {
     return(cat("Please select a variable"))
   }
@@ -826,14 +828,14 @@ output$visualize.summary = renderPrint({
   if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
        tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
     tryCatch({
-      cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+      cat(do.call(getPlotSummary, values.list), sep = "\n")
     }, warning = function(w) {
       print(w)
     }, error = function(e) {
       print(e)
     }, finally = {})
   }else{
-    try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+    try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
   }
 })
 
@@ -876,14 +878,14 @@ output$visualize.inference = renderPrint({
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({
-          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+          cat(do.call(getPlotSummary, values.list), sep = "\n")
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       }else{
-        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+        try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
       }
     })
   }
