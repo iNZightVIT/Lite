@@ -296,13 +296,13 @@ output$vari1_panel = renderUI({
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
                     choices = c("none", colnames(vis.data())),
-                    ## selected = sel,
+                    selected = sel,
                     selectize=T)
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
                     choices = c("none", colnames(vis.data())),
-                    ## selected = sel,
+                    selected = sel,
                     selectize=F,
                     size=2)
       }
@@ -853,7 +853,7 @@ output$visualize.inference = renderPrint({
 })
 
 output$visualize.summary = renderPrint({
-    if (is.null(plot.par$x)) {
+    if (is.null(plot.par$x)) {     
         return(cat("Please select a variable"))
     }
     values.list = modifyList(reactiveValuesToList(plot.par),
@@ -871,21 +871,21 @@ output$visualize.summary = renderPrint({
       values.list$data = NULL
     }
     
-    try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
+    # try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
     
-#    if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-#         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-#      tryCatch({
-#        cat(do.call(getPlotSummary, values.list), sep = "\n")
-#      }, warning = function(w) {
-#        print(w)
-#      }, error = function(e) {
-#        print(e)
-#      }, finally = {})
-#    }
-#    else{
-#      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
-#    }
+    if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      tryCatch({
+        cat(do.call(getPlotSummary, values.list), sep = "\n")
+      }, warning = function(w) {
+        print(w)
+      }, error = function(e) {
+        print(e)
+      }, finally = {})
+    }
+    else{
+      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
+    }
 })
 
 ##  Reset variable selection and graphical parameters.
