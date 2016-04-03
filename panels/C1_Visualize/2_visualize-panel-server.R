@@ -803,6 +803,43 @@ output$mini.plot = renderPlot({
   }
 })
 
+
+
+output$visualize.summary = renderPrint({
+  if (is.null(plot.par$x)) {
+    return(cat("Please select a variable"))
+  }
+  values.list = modifyList(reactiveValuesToList(plot.par),
+                           reactiveValuesToList(graphical.par))
+  if(is.numeric(plot.par$x)&
+       is.numeric(plot.par$y)){
+    values.list.x = values.list$x
+    values.list$x=values.list$y
+    values.list$y=values.list.x
+    values.list.varnames.x = values.list$varnames$x
+    values.list$varnames$x = values.list$varnames$y
+    values.list$varnames$y = values.list.varnames.x
+  }
+  if(!is.null(values.list$design)){
+    values.list$data = NULL
+  }
+  if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+    tryCatch({
+      cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+    }, warning = function(w) {
+      print(w)
+    }, error = function(e) {
+      print(e)
+    }, finally = {})
+  }else{
+    try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+  }
+})
+
+
+
+
 output$visualize.inference = renderPrint({
   if(input$plot_selector%in%"Inference"){
     input$type.inference.select
@@ -811,10 +848,10 @@ output$visualize.inference = renderPrint({
     input$subs1
     isolate({
       if (is.null(plot.par$x)) {
-          return(cat("Please select a variable"))
+        return(cat("Please select a variable"))
       }
       values.list = modifyList(reactiveValuesToList(plot.par),
-                                reactiveValuesToList(graphical.par))
+                               reactiveValuesToList(graphical.par))
       bs.inf= T
       if(input$type.inference.select%in%"normal"){
         bs.inf = F
@@ -852,41 +889,7 @@ output$visualize.inference = renderPrint({
   }
 })
 
-output$visualize.summary = renderPrint({
-    if (is.null(plot.par$x)) {     
-        return(cat("Please select a variable"))
-    }
-    values.list = modifyList(reactiveValuesToList(plot.par),
-                              reactiveValuesToList(graphical.par))
-    if(is.numeric(plot.par$x)&
-         is.numeric(plot.par$y)){
-      values.list.x = values.list$x
-      values.list$x=values.list$y
-      values.list$y=values.list.x
-      values.list.varnames.x = values.list$varnames$x
-      values.list$varnames$x = values.list$varnames$y
-      values.list$varnames$y = values.list.varnames.x
-    }
-    if(!is.null(values.list$design)){
-      values.list$data = NULL
-    }
-    
-    # try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
-    
-    if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-      tryCatch({
-        cat(do.call(getPlotSummary, values.list), sep = "\n")
-      }, warning = function(w) {
-        print(w)
-      }, error = function(e) {
-        print(e)
-      }, finally = {})
-    }
-    else{
-      try(cat(do.call(getPlotSummary, values.list), sep = "\n"))
-    }
-})
+
 
 ##  Reset variable selection and graphical parameters.
 observe({
