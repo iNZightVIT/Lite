@@ -10,11 +10,6 @@
 
 ###  We load the packages we require. This is done only ONCE per instance.
 
-options(repos = c(options()$repos, 
-                  inzight = "http://r.docker.stat.auckland.ac.nz/R"))
-install.packages("iNZightPlots", dependencies = TRUE)
-
-
 library(iNZightPlots)
 library(iNZightTS)
 library(iNZightMR)
