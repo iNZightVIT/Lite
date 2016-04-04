@@ -1268,9 +1268,9 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
           name = load(full.name[indexes[1]])
           temp = get(name)
         }else if(tolower(ext)%in%"csv"){
-          temp = read.csv(full.name[indexes[1]],comment.char="#")
+          temp = read.csv(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"))
         }else if(tolower(ext)%in%"txt"){
-          temp = read.delim(full.name[indexes[1]],comment.char="#")
+          temp = read.delim(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"))
         }
       }, warning = function(w) {
         print(w)
