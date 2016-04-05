@@ -824,7 +824,8 @@ output$visualize.summary = renderPrint({
     values.list$data = NULL
   }
   
-  cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+  
+  do.call(iNZightPlots:::getPlotSummary, values.list)
   
 #  if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
 #       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
