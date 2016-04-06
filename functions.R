@@ -6891,8 +6891,6 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
     plot.list <- lapply(plot.list, function(x) x[g1.level])
   
   
-  
-  
   attr(plot.list, "varnames") <- varnames
   attr(plot.list, "glevels") <- g.level
   attr(plot.list, "vartypes") <- vartypes
