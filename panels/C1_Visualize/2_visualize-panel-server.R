@@ -824,7 +824,15 @@ output$visualize.summary = renderPrint({
     values.list$data = NULL
   }
   
-
+  tmp.list <- values.list
+  if (is.numeric(tmp.list$x)) {
+    if (!is.null(tmp.list$y)) {
+      if (is.factor(tmp.list$y))
+        tmp.list$plottype = "hist"
+    } else {
+      tmp.list$plottype = "hist"
+    }
+  }
   
   if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
@@ -836,17 +844,7 @@ output$visualize.summary = renderPrint({
     print(e)
   }, finally = {})
  }else{
-#   try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-   tmp.list <- values.list
-   if (is.numeric(tmp.list$x)) {
-     if (!is.null(tmp.list$y)) {
-       if (is.factor(tmp.list$y))
-         tmp.list$plottype = "hist"
-     } else {
-       tmp.list$plottype = "hist"
-     }
-   }
-   cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
+   try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n"))
      }
 })
 
@@ -886,6 +884,17 @@ output$visualize.inference = renderPrint({
         values.list$varnames$y = values.list.varnames.x
       }
       dafr = get.data.set()
+      
+      tmp.list <- values.list
+      if (is.numeric(tmp.list$x)) {
+        if (!is.null(tmp.list$y)) {
+          if (is.factor(tmp.list$y))
+            tmp.list$plottype = "hist"
+        } else {
+          tmp.list$plottype = "hist"
+        }
+      }
+      
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
         tryCatch({
@@ -896,8 +905,7 @@ output$visualize.inference = renderPrint({
           print(e)
         }, finally = {})
       }else{
-#        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-        cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
       }
     })
   }
