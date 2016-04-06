@@ -5749,14 +5749,13 @@ summary.inzdot <- function(object, des, ...) {
     do.call(rbind, lapply(names(toplot), function(p) {
       x <- toplot[[p]]$x
       
-      s <- suppressWarnings(
-        c(min(x),
+      s <- c(min(x),
           quantile(x, 0.25),
           quantile(x, 0.5),
           quantile(x, 0.75),
           max(x),
           mean(x), sd(x), length(x))
-      )
+    
       s[!is.finite(s)] <- NA
       s
     })) -> mat
