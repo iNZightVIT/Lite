@@ -823,24 +823,35 @@ output$visualize.summary = renderPrint({
   if(!is.null(values.list$design)){
     values.list$data = NULL
   }
+ 
   
+#################################################################################
+
+   
+
+   #cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+
+
+
+#################################################################################
   
-  do.call(iNZightPlots:::getPlotSummary, values.list)
+
   
-#  if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-#       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-#    tryCatch({
-#      cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
-#      
-#      
-#    }, warning = function(w) {
-#     print(w)
-#    }, error = function(e) {
-#     print(e)
-#   }, finally = {})
-# }else{
+  if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+      tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+    tryCatch({
+      cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+      
+      
+    }, warning = function(w) {
+     print(w)
+   }, error = function(e) {
+    print(e)
+  }, finally = {})
+ }else{
 #   try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-#     }
+   cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+     }
 })
 
 
