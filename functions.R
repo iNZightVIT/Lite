@@ -2110,7 +2110,7 @@ addUnivarCompLines <- function(inflist) {
 
 
 
-createPlot_change <- function(df, opts, xattr) {
+createPlot <- function(df, opts, xattr) {
   # This function takes a data.frame object and creates the necessary object which will have a
   # `plot` method.
   
@@ -2170,11 +2170,11 @@ createPlot_change <- function(df, opts, xattr) {
   pclass <- paste("inz", type, sep = ".")
   obj <- structure(.Data = list(df = df, opts = opts, xattr = xattr),
                    class = pclass)
-  create_change(obj)
+  create(obj)
 }
 
-create_change <- function(obj)
-  UseMethod("create_change")
+create <- function(obj)
+  UseMethod("create")
 
 
 
@@ -3316,7 +3316,7 @@ inference.inzhex <- function(object, bs, nboot, vn, ...)
 
 
 
-create_change.inz.barplot <- function(obj) {
+create.inz.barplot <- function(obj) {
   # take the dataframe and settings from the object
   df <- obj$df
   opts <- obj$opts
@@ -3843,9 +3843,9 @@ inzDataList <- function(d, x) {
   df
 }
 
-################################################################################
 
-create_change.inz.dotplot <- function(obj, hist = FALSE) {
+
+create.inz.dotplot <- function(obj, hist = FALSE) {
   df <- obj$df
   opts <- obj$opts
   xattr <- obj$xattr
@@ -3946,7 +3946,7 @@ create_change.inz.dotplot <- function(obj, hist = FALSE) {
       ## To do this, we will pretty much grab stuff from the `survey` package, however it
       ## cannot be used separately to produce the bins etc without plotting it; so copyright
       ## for the next few lines goes to Thomas Lumley.
-#      h <- hist(x <- d$variables$x, breaks = cuts, plot = FALSE)
+      h <- hist(x <- d$variables$x, breaks = cuts, plot = FALSE)
       
       ## We can run into problems with PSUs have single clusters, so:
       oo <- options()$survey.lonely.psu
@@ -4097,10 +4097,6 @@ create_change.inz.dotplot <- function(obj, hist = FALSE) {
   
   out
 }
-
-
-
-#######################################################################################
 
 plot.inzdot <- function(obj, gen, hist = FALSE) {
   # First step is to grab stuff:
@@ -4527,7 +4523,7 @@ dotinference <- function(obj) {
 
 
 
-create_change.inz.gridplot <- function(obj) {
+create.inz.gridplot <- function(obj) {
   ## The original "grid" style plot for large sample sizes. This will only be used for
   ## simple iid data, and instead hexagonal binning will be used for frequency and
   ## survey data plots.
@@ -4646,7 +4642,7 @@ plot.inzgrid <- function(obj, gen) {
 
 
 
-create_change.inz.hexplot <- function(obj) {
+create.inz.hexplot <- function(obj) {
   # make a plot using hexagonal binning
   
   # take the dataframe and settings from the object
@@ -4732,8 +4728,8 @@ plot.inzhex <- function(obj, gen) {
 
 
 
-create_change.inz.histplot <- function(obj) {
-  create_change.inz.dotplot(obj, hist = TRUE)
+create.inz.histplot <- function(obj) {
+  create.inz.dotplot(obj, hist = TRUE)
 }
 
 plot.inzhist <- function(obj, gen) {
@@ -5048,7 +5044,7 @@ nothing <- function() {
 
 
 
-create_change.inz.scatterplot <- function(obj) {
+create.inz.scatterplot <- function(obj) {
   # take the dataframe and settings from the object
   df <- obj$df
   opts <- obj$opts
@@ -6809,7 +6805,7 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   ## createPlot - uses various things such as "grobWidth" which causes a new device to open
   ## so create a NULL device and delete it afterwards ...
   
-    jpeg(FILE <- tempfile())
+#    jpeg(FILE <- tempfile())
   
   
   ##### AND ANOTHER METHOD FOR SWITCHING BETWEEN DOTPLOTS ZOOMS
@@ -6819,12 +6815,12 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   #    }
   
   plot.list <- lapply(df.list, function(df)
-    lapply(df, createPlot_change, opts, xattr))
+    lapply(df, createPlot, opts, xattr))
   
-  if (!plot) {
-    dev.off()
-    unlink(FILE)
-  }
+#  if (!plot) {
+#    dev.off()
+#    unlink(FILE)
+#  }
   
   xlim.raw <- range(sapply(plot.list, function(x) sapply(x, function(y) y$xlim)), finite = TRUE)
   ylim.raw <- range(sapply(plot.list, function(x) sapply(x, function(y) y$ylim)), finite = TRUE)
