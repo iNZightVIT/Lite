@@ -6294,19 +6294,16 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
     ##     p <- eval(m2, env)
     ## }
     
-#    if (is.null(dev.list())) {
-#      xattr$symbol.width <- 1
-#    } else {
-#      xattr$symbol.width <- convertWidth(unit(opts$cex.dotpt, "char"),
-#                                         "native", valueOnly = TRUE)
-#    }
+    if (is.null(dev.list())) {
+      xattr$symbol.width <- 1
+    } else {
+      xattr$symbol.width <- convertWidth(unit(opts$cex.dotpt, "char"),
+                                         "native", valueOnly = TRUE)
+    }
     
     
     
-    #################  added by wilson ############################
-    xattr$symbol.width <- convertWidth(unit(opts$cex.dotpt, "char"),
-                                       "native", valueOnly = TRUE)
-    ################# added by wilson #############################
+
     
     #        dev.off()
     #        unlink(F)  ## delete the temp file
@@ -6991,14 +6988,14 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   if (attr(plot.list, "plottype") %in% c("dot", "hist"))
     attr(plot.list, "nbins") <- length(plot.list[[1]][[1]]$toplot[[1]]$counts)
   
-#  if (itsADotplot) {
-#    ## some recursion instructions        
-#    ## i.e., [original.size, new.size]
-#    attr(plot.list, "dotplot.redraw") <-
-#      round(xattr$symbol.width, 5) !=
-#      round(convertWidth(unit(opts$cex.dotpt, "char"),
-#                         "native", valueOnly = TRUE), 5)
-#  }
+  if (itsADotplot) {
+    ## some recursion instructions        
+    ## i.e., [original.size, new.size]
+    attr(plot.list, "dotplot.redraw") <-
+      round(xattr$symbol.width, 5) !=
+      round(convertWidth(unit(opts$cex.dotpt, "char"),
+                         "native", valueOnly = TRUE), 5)
+  }
   
   class(plot.list) <- "inzplotoutput"
   return(invisible(plot.list))
@@ -7253,12 +7250,12 @@ getPlotSummary_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   ## }
   
   
-  obj <- iNZightPlot_change(x = x, y = y, g1 = g1, g1.level = g1.level,
+  obj <- try(iNZightPlot_change(x = x, y = y, g1 = g1, g1.level = g1.level,
                      g2 = g2, g2.level = g2.level, varnames = varnames,
                      colby = NULL, sizeby = NULL,
                      data = data, design = design, freq = freq,
                      missing.info = missing.info, inzpars = inzpars,
-                     plot = FALSE, df = df, ...)
+                     plot = FALSE, df = df, ...))
   
   ### Now we just loop over everything ...
   
