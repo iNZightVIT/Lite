@@ -6223,11 +6223,14 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   
   ## if creating a dot plot, must figure out the size of a symbol:
   itsADotplot <- FALSE
+  
   if (ynull & !xfact)
     itsADotplot <- TRUE
+    
   else if (!ynull) {
     if ((!xfact & yfact) | (xfact & !yfact))
       itsADotplot <- TRUE
+      
   }
   
   if (itsADotplot)
@@ -6235,7 +6238,8 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
       if (opts$plottype != "default" | (opts$plottype == "default" & opts$largesample))
         itsADotplot <- FALSE
   
-  if (itsADotplot) {
+  #if (itsADotplot) {
+  if(itsADotplot) {
     ## m2 <- match.call(expand.dots = TRUE)
     ## m2$plottype <- "hist"
     ## m2$layout.only <- TRUE
@@ -6294,12 +6298,10 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
     ##     p <- eval(m2, env)
     ## }
     
-    if (is.null(dev.list())) {
-      xattr$symbol.width <- 1
-    } else {
+    
       xattr$symbol.width <- convertWidth(unit(opts$cex.dotpt, "char"),
                                          "native", valueOnly = TRUE)
-    }
+    
     
     
     
@@ -6335,9 +6337,7 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
     grid.newpage()
     pushViewport(viewport(gp = gpar(cex = opts$cex), name = "container"))
     grid.rect(gp = gpar(fill = opts$bg, col = opts$bg))
-  } else {
-    jpeg(FILE <- tempfile())
-  }
+  } 
   
   ##### AND ANOTHER METHOD FOR SWITCHING BETWEEN DOTPLOTS ZOOMS
   #    if (!is.null(xlim)) {
@@ -6348,10 +6348,7 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   plot.list <- lapply(df.list, function(df)
     lapply(df, createPlot, opts, xattr))
   
-  if (!plot) {
-    dev.off()
-    unlink(FILE)
-  }
+  
   
   xlim.raw <- range(sapply(plot.list, function(x) sapply(x, function(y) y$xlim)), finite = TRUE)
   ylim.raw <- range(sapply(plot.list, function(x) sapply(x, function(y) y$ylim)), finite = TRUE)
@@ -7250,12 +7247,12 @@ getPlotSummary_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   ## }
   
   
-  obj <- try(iNZightPlot_change(x = x, y = y, g1 = g1, g1.level = g1.level,
+  obj <- iNZightPlot_change(x = x, y = y, g1 = g1, g1.level = g1.level,
                      g2 = g2, g2.level = g2.level, varnames = varnames,
                      colby = NULL, sizeby = NULL,
                      data = data, design = design, freq = freq,
                      missing.info = missing.info, inzpars = inzpars,
-                     plot = FALSE, df = df, ...))
+                     plot = FALSE, df = df, ...)
   
   ### Now we just loop over everything ...
   
