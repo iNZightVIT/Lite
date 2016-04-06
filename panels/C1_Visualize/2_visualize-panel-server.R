@@ -837,7 +837,16 @@ output$visualize.summary = renderPrint({
   }, finally = {})
  }else{
 #   try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
-   cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+   tmp.list <- values.list
+   if (is.numeric(tmp.list$x)) {
+     if (!is.null(tmp.list$y)) {
+       if (is.factor(tmp.list$y))
+         tmp.list$plottype = "hist"
+     } else {
+       tmp.list$plottype = "hist"
+     }
+   }
+   cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
      }
 })
 
