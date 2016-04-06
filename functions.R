@@ -2110,7 +2110,7 @@ addUnivarCompLines <- function(inflist) {
 
 
 
-createPlot <- function(df, opts, xattr) {
+createPlot_change <- function(df, opts, xattr) {
   # This function takes a data.frame object and creates the necessary object which will have a
   # `plot` method.
   
@@ -2170,11 +2170,11 @@ createPlot <- function(df, opts, xattr) {
   pclass <- paste("inz", type, sep = ".")
   obj <- structure(.Data = list(df = df, opts = opts, xattr = xattr),
                    class = pclass)
-  create(obj)
+  create_change(obj)
 }
 
-create <- function(obj)
-  UseMethod("create")
+create_change <- function(obj)
+  UseMethod("create_change")
 
 
 
@@ -3316,7 +3316,7 @@ inference.inzhex <- function(object, bs, nboot, vn, ...)
 
 
 
-create.inz.barplot <- function(obj) {
+create_change.inz.barplot <- function(obj) {
   # take the dataframe and settings from the object
   df <- obj$df
   opts <- obj$opts
@@ -3845,7 +3845,7 @@ inzDataList <- function(d, x) {
 
 
 
-create.inz.dotplot <- function(obj, hist = FALSE) {
+create_change.inz.dotplot <- function(obj, hist = FALSE) {
   df <- obj$df
   opts <- obj$opts
   xattr <- obj$xattr
@@ -4084,7 +4084,8 @@ create.inz.dotplot <- function(obj, hist = FALSE) {
   
   
   ## Generate a list of the inference information for each plot:
-  inflist <- dotinference(obj)
+#  inflist <- dotinference(obj)
+  inflist = NULL
   
   out <- list(toplot = plist, n.missing = n.missing, boxinfo = boxinfo, inference.info = inflist,
               nacol = if ("colby" %in% v) any(sapply(plist, function(T)
@@ -4523,7 +4524,7 @@ dotinference <- function(obj) {
 
 
 
-create.inz.gridplot <- function(obj) {
+create_change.inz.gridplot <- function(obj) {
   ## The original "grid" style plot for large sample sizes. This will only be used for
   ## simple iid data, and instead hexagonal binning will be used for frequency and
   ## survey data plots.
@@ -4642,7 +4643,7 @@ plot.inzgrid <- function(obj, gen) {
 
 
 
-create.inz.hexplot <- function(obj) {
+create_change.inz.hexplot <- function(obj) {
   # make a plot using hexagonal binning
   
   # take the dataframe and settings from the object
@@ -4728,7 +4729,7 @@ plot.inzhex <- function(obj, gen) {
 
 
 
-create.inz.histplot <- function(obj) {
+create_change.inz.histplot <- function(obj) {
   create.inz.dotplot(obj, hist = TRUE)
 }
 
@@ -5044,7 +5045,7 @@ nothing <- function() {
 
 
 
-create.inz.scatterplot <- function(obj) {
+create_change.inz.scatterplot <- function(obj) {
   # take the dataframe and settings from the object
   df <- obj$df
   opts <- obj$opts
@@ -6815,7 +6816,7 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
   #    }
   
   plot.list <- lapply(df.list, function(df)
-    lapply(df, createPlot, opts, xattr))
+    lapply(df, createPlot_change, opts, xattr))
   
 #  if (!plot) {
 #    dev.off()
@@ -6889,6 +6890,8 @@ iNZightPlot_change <- function(x, y = NULL, g1 = NULL, g1.level = NULL,
     }
     
     plot.list <- lapply(plot.list, function(x) x[g1.level])
+  
+  
   
   
   attr(plot.list, "varnames") <- varnames

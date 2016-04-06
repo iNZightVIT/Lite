@@ -827,8 +827,7 @@ output$visualize.summary = renderPrint({
   
 #################################################################################
 
-   pdf <- function(...)
-     return(NULL)
+   
    
    cat(do.call(getPlotSummary_change, values.list), sep = "\n")
 
