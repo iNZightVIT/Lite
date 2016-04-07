@@ -905,7 +905,7 @@ output$visualize.inference = renderPrint({
           print(e)
         }, finally = {})
       }else{
-        try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n"))
+        try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n"))
       }
     })
   }
