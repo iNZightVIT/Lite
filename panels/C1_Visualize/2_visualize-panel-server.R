@@ -17,6 +17,9 @@ vis.data <- reactive({
   get.data.set()
 })
 
+
+
+
 ###  Then on the second day, he siad let there be parameters for
 ###  iNZightPlot():
 
@@ -627,7 +630,7 @@ observe({
     if(!is.null(input$vari2)&&input$vari2%in%ch){
       ch  = ch[-which(ch%in%input$vari2)]
     }
-    updateSelectInput(session,"subs1",choices=ch,selected=input$subs1)
+    updateSelectInput(session,"subs1",choices=c("none",ch),selected=input$subs1)
   })
 })
 
@@ -915,23 +918,20 @@ output$visualize.inference = renderPrint({
 
 ##  Reset variable selection and graphical parameters.
 observe({
-  if (!is.null(input$reset.graphics)&&input$reset.graphics > 0) {
+  input$reset.graphics
+  #if (!is.null(input$reset.graphics)&&input$reset.graphics > 0) {
     isolate({
       graphical.par$alpha = 1
       updateSliderInput(session,"adjust.transparency",
                         value=1)
       graphical.par$bg = "white" #background colour
-      updateSelectInput(session,"select.bg1",
-                        selected="white")
+      updateSelectInput(session,"select.bg1",selected="white")
       ##  Box
       graphical.par$box.col = "black"
       graphical.par$box.fill = "white" # fill colour for the boxplot
       ##  Bar
-      graphical.par$bar.lwd = 1
-      graphical.par$bar.col = "black" # colour for borders of bars in bar plot
       graphical.par$bar.fill = colors()[81] # colour for inside of bars in bar plot
-      updateSelectInput(session,"select.barcolor",
-                        selected=colors()[81])
+      updateSelectInput(session,"select.barcolor",selected=colors()[81])
       ##  Line
       graphical.par$lwd = 1
       graphical.par$lty = 1
@@ -942,17 +942,13 @@ observe({
       updateSelectInput(session,"color.join",selected="blue")
       ##  Point
       graphical.par$cex.pt = 0.5
-      updateSliderInput(session,"adjust.size.points.scatter",
-                        value=0.5)
+      updateSliderInput(session,"adjust.size.points.scatter",value=0.5)
       graphical.par$cex.dotpt = 0.5
-      updateSliderInput(session,"adjust.size.points.dot",
-                        value=0.5)
+      updateSliderInput(session,"adjust.size.points.dot",value=0.5)
       graphical.par$pch = 1
-      updateCheckboxInput(session,"color.interior",
-                          value=F)
+      updateCheckboxInput(session,"color.interior",value=F)
       graphical.par$col.pt = "gray50"
-      updateSelectInput(session,"select.dotcolor",
-                        selected="gray50")
+      updateSelectInput(session,"select.dotcolor",selected="gray50")
       #graphical.par$fill.pt = "transparent"
       ##  Colours
       graphical.par$col.LOE = "black"
@@ -987,7 +983,7 @@ observe({
       graphical.par$cex = 1
       graphical.par$inference.type = NULL
       graphical.par$inference.par = NULL
-  #    graphical.par$largesample = NULL
+     #graphical.par$largesample = NULL
       graphical.par$lines.by = FALSE
       graphical.par$trend.by = FALSE
       updateCheckboxInput(session,"each_level",value=F)
@@ -997,37 +993,28 @@ observe({
       graphical.par$szsym = 1
       graphical.par$tpsym = 1
       graphical.par$plottype="default"
-      updateSelectInput(session,"select.plot.type",
-                        selected="default")
+      updateSelectInput(session,"select.plot.type",selected="default")
       graphical.par$hist.bins=get.default.num.bins()
-      updateSliderInput(session,"adjust.num.bins",
-                        value=get.default.num.bins())
+#      updateSliderInput(session,"adjust.num.bins",value=get.default.num.bins())
       graphical.par$scatter.grid.bins=50
-      updateSliderInput(session,"adjust.grid.size",
-                        value=50)
+      updateSliderInput(session,"adjust.grid.size",value=50)
       graphical.par$hex.bins=20
-      updateSliderInput(session,"adjust.hex.bins",
-                        value=20)
+      updateSliderInput(session,"adjust.hex.bins",value=20)
       graphical.par$bs.inference=F
       graphical.par$varnames = list(x = NULL, y = NULL,
                                     xlab = NULL, ylab = NULL,
                                     g1 = NULL, g2 = NULL,
                                     colby=NULL,sizeby=NULL)
       plot.par$main=NULL
-      updateTextInput(session,"main_title_text",
-                      value="")
+      updateTextInput(session,"main_title_text",value="")
       plot.par$xlab=NULL
-      updateTextInput(session,"x_axis_text",
-                      value="")
+      updateTextInput(session,"x_axis_text",value="")
       plot.par$ylab=NULL
-      updateTextInput(session,"y_axis_text",
-                      value="")
+      updateTextInput(session,"y_axis_text",value="")
       plot.par$colby=NULL
-      updateSelectInput(session,"color_by_select",
-                        selected="")
+      updateSelectInput(session,"color_by_select",selected="")
       plot.par$sizeby=NULL
-      updateSelectInput(session,"resize.by.select",
-                        selected="")
+      updateSelectInput(session,"resize.by.select",selected="")
       plot.par$locate=NULL
       plot.par$locate.id=NULL
       plot.par$locate.col=NULL
@@ -1039,9 +1026,9 @@ observe({
       design.parameters$fpc = NULL
       design.parameters$nest = F
       design.parameters$weights = NULL
-      design.parameters$data.name = NULL
+      design.parameters$data.name = NULL   
     })
-  }
+#  }
 })
 
 # This refreshes the infernce parameters.

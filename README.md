@@ -2,7 +2,7 @@ iNZight *Lite* version 1.0
 ==============================
 
 
-*Last Updated: 07/04/16*
+*Last Updated: 18/04/16*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -15,6 +15,9 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Visualize] Fixed the problem of the "none" option for the 1st subset variable 
+- [Filter Dataset] Go back to "visualize" page after filtering the dataset, all the variable slections are cleared and users can select variables to be plotted again based on filtered dataset
+- [Visualize] Fixed the "RESET ALL" function
 - [Visualize] Fixed the problem of displaying summary and inference for a numeric varibale
 - [Visualize] Fixed the problem of considering NAs as a single category 
 - [Import dataset] When users switch a page from "visualize" or other analysis modules back to "import dataset", old dataset preview table doesn't disappear
