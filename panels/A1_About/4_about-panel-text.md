@@ -6,7 +6,7 @@
 
 <br>
 
-<font size = "4" color = "18afe3"><b>i<font color = "094b85">nz</font>ight</b></font> is a simple data analysis system which was initially designed for high school students to help explore data fast and easy without having to learn complex statistical software. By popular demand, it has been extended to support 3D graphics, multivariate analysis, and time series analysis. <font size = "4" color = "18afe3"><b>i<font color = "094b85">nz</font>ight</b><font color = "094b85"> lite</font></b></font> is an online version of the full software, which goes a long way to make it more accessible to a wide range of users. 
+<font size = "4" color = "18afe3"><b>i<font color = "094b85">nz</font>ight</b></font> is a simple data analysis system which was initially designed for high school students to help explore data fast and easy without having to learn complex statistical software. By popular demand, it has been extended to support multivariate and time series analysis. <font size = "4" color = "18afe3"><b>i<font color = "094b85">nz</font>ight</b><font color = "094b85"> lite</font></b></font> is an online version of the full software, which goes a long way to make it more accessible to a wide range of users. 
 
 <br>
 
