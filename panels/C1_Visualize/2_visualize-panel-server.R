@@ -298,13 +298,13 @@ output$vari1_panel = renderUI({
       if(!input$change_var_selection){
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = c("none", colnames(vis.data())),
+                    choices = c(colnames(vis.data())),
                     selected = sel,
                     selectize=T)
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = c("none", colnames(vis.data())),
+                    choices = c(colnames(vis.data())),
                     selected = sel,
                     selectize=F,
                     size=2)
@@ -604,11 +604,17 @@ output$subs2_panel = renderUI({
     if(!is.null(input$vari2)&&input$vari2%in%ch){
       ch  = ch[-which(ch%in%input$vari2)]
     }
+    # ..added by Wilson
+    if(!is.null(input$subs1)&&input$subs1%in%ch){
+      ch  = ch[-which(ch%in%input$subs1)]
+    }
+    
+    sel = input$subs2
+    selectInput(inputId = "subs2",
+                label = "Subset by:",
+                choices = c("none", ch),
+                selected = sel)
   })
-  selectInput(inputId = "subs2",
-              label = "Subset by:",
-              choices = c("none", ch),
-              selected = plot.par$varnames$g2)
 })
 
 
@@ -635,18 +641,35 @@ observe({
 })
 
 ##  Subset level (Slider) for variable 2.
+#output$subs2_conditional = renderUI({
+#  get.data.set()
+#  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
+#  if (is.null(choices2))
+#    choices2 = 2
+#  else
+#    choices2 = choices2 + 1
+#  sliderInput(inputId = "sub2_level",
+#              label = paste0("Subset '", input$subs2, "':"),
+#              min = 0, max = choices2, value = 0, step = 1,
+#              animate = TRUE,ticks=F)
+#})
+
+################ modified by Wilson #################
+
 output$subs2_conditional = renderUI({
   get.data.set()
   choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
   if (is.null(choices2))
     choices2 = 2
-  else
-    choices2 = choices2 + 1
+#  else
+#    choices2 = choices2 + 1
   sliderInput(inputId = "sub2_level",
               label = paste0("Subset '", input$subs2, "':"),
               min = 0, max = choices2, value = 0, step = 1,
               animate = TRUE,ticks=F)
 })
+
+
 
 ##  Subset level (Slider) for variable 2.
 output$subs2_conditional_mini = renderUI({
@@ -654,8 +677,8 @@ output$subs2_conditional_mini = renderUI({
   choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
   if (is.null(choices2))
     choices2 = 2
-  else
-    choices2 = choices2 + 1
+#  else
+#    choices2 = choices2 + 1
   sliderInput(inputId = "sub2_level_mini",
               label = paste0("Subset '", input$subs2, "':"),
               min = 0, max = choices2, value = 0, step = 1,
@@ -664,34 +687,66 @@ output$subs2_conditional_mini = renderUI({
 
 
 # ##  Update plot.par$g2.level
+#observe({
+#    g2_level = input$sub2_level
+#    if (is.null(g2_level) || g2_level == 0) {
+#        g2_level = NULL
+#    }
+#    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+#    if (!is.null(g2_level) && 
+#          length(g2.level.check) == 1 && 
+#          g2_level == g2.level.check) {
+#        g2_level = "_MULTI"
+#    }
+#    plot.par$g2.level = g2_level
+#})
+
+
+
+################## modified by Wilson ###################
+
+
+# ##  Update plot.par$g2.level
 observe({
+    input$subs2
     g2_level = input$sub2_level
-    if (is.null(g2_level) || g2_level == 0) {
-        g2_level = NULL
-    }
-    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
-    if (!is.null(g2_level) && 
-          length(g2.level.check) == 1 && 
-          g2_level == g2.level.check) {
+    if (!is.null(g2_level) && g2_level == 0) {
         g2_level = "_MULTI"
     }
+    
     plot.par$g2.level = g2_level
 })
 
+##########################################################
+
+
+#observe({
+#  g2_level = input$sub2_level_mini
+#  if (is.null(g2_level) || g2_level == 0) {
+#    g2_level = NULL
+#  }
+#  g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+#  if (!is.null(g2_level) && 
+#        length(g2.level.check) == 1 && 
+#        g2_level == g2.level.check) {
+#    g2_level = "_MULTI"
+#  }
+#  plot.par$g2.level = g2_level
+#})
+
+################## modified by Wilson ###################
 
 observe({
+  input$subs2
   g2_level = input$sub2_level_mini
-  if (is.null(g2_level) || g2_level == 0) {
-    g2_level = NULL
-  }
-  g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
-  if (!is.null(g2_level) && 
-        length(g2.level.check) == 1 && 
-        g2_level == g2.level.check) {
+  if (!is.null(g2_level) && g2_level == 0) {
     g2_level = "_MULTI"
   }
   plot.par$g2.level = g2_level
 })
+
+##########################################################
+
 
 output$visualize.plot = renderPlot({
   isolate({
@@ -1490,9 +1545,9 @@ output$plot.appearance.panel = renderUI({
     if(is.null(graphical.par$cex.dotpt)){
       graphical.par$cex.dotpt = 0.5
     }
-    adjust.size.points.dot.object = sliderInput("adjust.size.points.dot", label = "Adjust size:", min = 0.05, 
+    adjust.size.points.dot.object = sliderInput("adjust.size.points.dot", label = "Adjust size:", min = 0.1, 
                 max = 3.5, value=graphical.par$cex.dotpt,step=.05)
-    adjust.size.points.scatter.object = sliderInput("adjust.size.points.scatter", label = "Adjust size:", min = 0.05, 
+    adjust.size.points.scatter.object = sliderInput("adjust.size.points.scatter", label = "Adjust size:", min = 0.1, 
                                                 max = 3.5, value=graphical.par$cex.dotpt,step=.05)
     adjust.grid.size.object = sliderInput("adjust.grid.size", label = "Grid size (n x n):", min = 10, 
                                                     max = 250, value=graphical.par$scatter.grid.bins,step=1)
