@@ -661,8 +661,8 @@ output$subs2_conditional = renderUI({
   choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
   if (is.null(choices2))
     choices2 = 2
-#  else
-#    choices2 = choices2 + 1
+  else
+    choices2 = choices2 + 1
   sliderInput(inputId = "sub2_level",
               label = paste0("Subset '", input$subs2, "':"),
               min = 0, max = choices2, value = 0, step = 1,
@@ -677,8 +677,8 @@ output$subs2_conditional_mini = renderUI({
   choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
   if (is.null(choices2))
     choices2 = 2
-#  else
-#    choices2 = choices2 + 1
+  else
+    choices2 = choices2 + 1
   sliderInput(inputId = "sub2_level_mini",
               label = paste0("Subset '", input$subs2, "':"),
               min = 0, max = choices2, value = 0, step = 1,
@@ -687,19 +687,26 @@ output$subs2_conditional_mini = renderUI({
 
 
 # ##  Update plot.par$g2.level
-#observe({
-#    g2_level = input$sub2_level
-#    if (is.null(g2_level) || g2_level == 0) {
-#        g2_level = NULL
-#    }
-#    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
-#    if (!is.null(g2_level) && 
-#          length(g2.level.check) == 1 && 
-#          g2_level == g2.level.check) {
-#        g2_level = "_MULTI"
-#    }
-#    plot.par$g2.level = g2_level
-#})
+observe({
+    g2_level = input$sub2_level
+    g2 = handle.input(input$subs2, subs = TRUE)$input.out
+
+    if (is.null(g2_level) || g2_level == 0) {
+        g2_level = NULL
+        g2 = NULL
+    }
+    
+    
+    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    if (!is.null(g2_level) && 
+          length(g2.level.check) == 1 && 
+          g2_level == g2.level.check) {
+        g2_level = "_MULTI"
+    }
+    plot.par$g2.level = g2_level
+    plot.par$g2 = g2
+
+})
 
 
 
@@ -707,43 +714,46 @@ output$subs2_conditional_mini = renderUI({
 
 
 # ##  Update plot.par$g2.level
-observe({
-    input$subs2
-    g2_level = input$sub2_level
-    if (!is.null(g2_level) && g2_level == 0) {
-        g2_level = "_MULTI"
-    }
-    
-    plot.par$g2.level = g2_level
-})
+#observe({
+#    input$subs2
+#    g2_level = input$sub2_level
+#    if (!is.null(g2_level) && g2_level == 0) {
+#        g2_level = "_MULTI"
+#    }
+#    
+#    plot.par$g2.level = g2_level
+#})
 
 ##########################################################
 
 
+observe({
+  g2_level = input$sub2_level_mini
+  g2 = handle.input(input$subs2, subs = TRUE)$input.out
+  if (is.null(g2_level) || g2_level == 0) {
+    g2_level = NULL
+    g2 = NULL
+  }
+  g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+  if (!is.null(g2_level) && 
+        length(g2.level.check) == 1 && 
+        g2_level == g2.level.check) {
+    g2_level = "_MULTI"
+  }
+  plot.par$g2.level = g2_level
+  plot.par$g2 = g2
+})
+
+################## modified by Wilson ###################
+
 #observe({
+#  input$subs2
 #  g2_level = input$sub2_level_mini
-#  if (is.null(g2_level) || g2_level == 0) {
-#    g2_level = NULL
-#  }
-#  g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
-#  if (!is.null(g2_level) && 
-#        length(g2.level.check) == 1 && 
-#        g2_level == g2.level.check) {
+#  if (!is.null(g2_level) && g2_level == 0) {
 #    g2_level = "_MULTI"
 #  }
 #  plot.par$g2.level = g2_level
 #})
-
-################## modified by Wilson ###################
-
-observe({
-  input$subs2
-  g2_level = input$sub2_level_mini
-  if (!is.null(g2_level) && g2_level == 0) {
-    g2_level = "_MULTI"
-  }
-  plot.par$g2.level = g2_level
-})
 
 ##########################################################
 
