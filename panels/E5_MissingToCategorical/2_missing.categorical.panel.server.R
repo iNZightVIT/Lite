@@ -25,7 +25,7 @@ observe({
   isolate({
     if(!is.null(input$missing.categorical.submit)&&input$missing.categorical.submit>0){
       updatePanel$datachanged = updatePanel$datachanged+1
-      values$data.set = get.missing.categorical(get.data.set(),columns=input$missing.categorical.column.select)
+      values$data.set = display.missing.categorical(get.data.set(),columns=input$missing.categorical.column.select)
     }
   })
 })

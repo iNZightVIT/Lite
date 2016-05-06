@@ -2,7 +2,7 @@ iNZight *Lite* version 1.0
 ==============================
 
 
-*Last Updated: 01/05/16*
+*Last Updated: 06/05/16*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -15,6 +15,7 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Missing to categorical] Made the "missing to categorical" function to be consistent with iNZightVIT
 - [Visualize] Fixed the problem of "when g2_level == 0, doesn't show plots"
 - [Visualize] Get rid of "none" option for the selectinput box of variable 1. Now when users go to "visualize" page, it directly shows the plot of the first column 
 - [Visualize] The smallest pch size for dots plot is reset to be 0.1 (was 0.05) 

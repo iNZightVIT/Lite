@@ -300,7 +300,8 @@ output$vari1_panel = renderUI({
                     label = "Select first variable:",
                     choices = c(colnames(vis.data())),
                     selected = sel,
-                    selectize=T)
+                    # selectize = T, # changed by Wilson
+                    selectize=F)
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
@@ -381,7 +382,8 @@ output$subs1_panel = renderUI({
     selectInput(inputId = "subs1",
                 label = "Subset by:",
                 choices = c("none", ch),
-                selected = sel)
+                selected = sel,
+                selectize=F)
   })
 })
 
@@ -538,7 +540,7 @@ output$vari2_panel = renderUI({
                     label = "Select second variable:",
                     choices = c("none",ch),
                     selected = sel,
-                    selectize=T)
+                    selectize=F)
       }else{
         selectInput(inputId = "vari2",
                     label = "Select second variable:",
@@ -613,7 +615,8 @@ output$subs2_panel = renderUI({
     selectInput(inputId = "subs2",
                 label = "Subset by:",
                 choices = c("none", ch),
-                selected = sel)
+                selected = sel,
+                selectize=F)
   })
 })
 
