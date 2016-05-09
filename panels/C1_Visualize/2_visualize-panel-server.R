@@ -280,8 +280,8 @@ vis.par = reactive({
 output$vari1_panel = renderUI({
   get.data.set()
   input$change_var_selection
-  isolate({
-    sel = input$vari1
+  isolate({    
+    sel = input$vari1    
     get.vars = parseQueryString(session$clientData$url_search)
     if(!is.null(get.vars$url)) {
       temp = session$clientData$url_search
@@ -293,19 +293,19 @@ output$vari1_panel = renderUI({
          (any(names(get.vars)%in%"x")&&
             !get.vars$x%in%"")){
       sel=get.vars$x
-    }
+    }   
     if(!is.null(input$change_var_selection)){
       if(!input$change_var_selection){
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = c(colnames(vis.data())),
+                    choices = c("none", colnames(vis.data())),
                     selected = sel,
-                    # selectize = T, # changed by Wilson
+                    # selectize = T,
                     selectize=F)
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = c(colnames(vis.data())),
+                    choices = c("none", colnames(vis.data())),
                     selected = sel,
                     selectize=F,
                     size=2)
@@ -313,6 +313,17 @@ output$vari1_panel = renderUI({
     }
   })
 })
+
+
+observe({  
+  input$vari1
+  isolate({
+    if(is.null(input$vari1) || input$vari1 == "none")
+      updateSelectInput(session, "vari1", choices = colnames(vis.data()), selected = colnames(vis.data())[1])
+  })  
+})
+
+
 
 ##  Update plot.par$x.
 observe({
