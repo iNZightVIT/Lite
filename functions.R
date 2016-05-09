@@ -70,6 +70,7 @@ display.missing.categorical = function(dafr, columns) {
       index = is.na(temp)
       temp = rep("observed", length(temp))
       temp[index] = "missing"
+      temp = factor(temp, levels = c("observed", "missing"))
     }
     temp = as.data.frame(temp)
     colnames(temp) = paste(i, "miss", sep = "_")

@@ -19,7 +19,8 @@ missing.categorical.panel = function(data.set){
                                selected=1,
                                multiple=T),
                    actionButton("missing.categorical.submit",
-                                label="Submit data"),br(),br(),
+                                label="Create the new variables"), br(), br(),
+                   verbatimTextOutput("message.newvariablesadded"), br(),br(),
                    help.display('Missing to categorical','missing_categorical',
                                 "panels/E5_MissingToCategorical/3_missing.categorical.help.md")),
       mainPanel(helpText("The table shows the distribution of missing values in 

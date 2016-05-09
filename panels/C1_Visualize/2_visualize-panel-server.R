@@ -296,16 +296,27 @@ output$vari1_panel = renderUI({
     }   
     if(!is.null(input$change_var_selection)){
       if(!input$change_var_selection){
-        selectInput(inputId = "vari1",
-                    label = "Select first variable:",
-                    choices = c("none", colnames(vis.data())),
-                    selected = sel,
-                    # selectize = T,
-                    selectize=F)
+        if(is.null(input$vari1) || input$vari1 == "none") {
+          selectInput(inputId = "vari1",
+                      label = "Select first variable:",
+                      choices = c("none", colnames(vis.data())),
+                      selected = sel,
+                      # selectize = T,
+                      selectize=F)
+        }
+        else {
+          selectInput(inputId = "vari1",
+                      label = "Select first variable:",
+                      choices = c(colnames(vis.data())),
+                      selected = sel,
+                      # selectize = T,
+                      selectize=F)
+        }
+        
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = c("none", colnames(vis.data())),
+                    choices = c(colnames(vis.data())),
                     selected = sel,
                     selectize=F,
                     size=2)
@@ -318,8 +329,9 @@ output$vari1_panel = renderUI({
 observe({  
   input$vari1
   isolate({
-    if(is.null(input$vari1) || input$vari1 == "none")
+    if((is.null(input$vari1) || input$vari1 == "none") && (!is.null(input$change_var_selection) && !input$change_var_selection)) {
       updateSelectInput(session, "vari1", choices = colnames(vis.data()), selected = colnames(vis.data())[1])
+    }    
   })  
 })
 
