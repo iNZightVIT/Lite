@@ -8,12 +8,12 @@ missing.categorical.panel = function(data.set){
     sidebarLayout(
       sidebarPanel(helpText(HTML("For each selected variable <em>varname</em>, a new variable <em>varname_missing</em> 
                                   will be created at the end of the dataset in which any missing values 
-                                  in the variable are replaced by “missing”. 
+                                  in the variable are replaced by <q>missing</q>. 
                                   <br/>
                                   If a source variable <em>varname</em> 
-                                  is categorical, <em>varname_missing</em> will contain one additional category (“missing”). 
+                                  is categorical, <em>varname_missing</em> will contain one additional category (<q>missing</q>). 
                                   If the source variable <em>varname</em> is numeric, <em>varname_missing</em> will be binary with 
-                                  two categories (“observed” and “missing”).")),
+                                  two categories (<q>observed</q> and <q>missing</q>).")),
                    selectInput("missing.categorical.column.select",
                                label="Select columns",
                                choices=colnames(data.set),
