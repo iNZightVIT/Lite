@@ -39,15 +39,31 @@ observe({
 })
 
 
+  
 
-output$message.newvariablesadded = renderText({
-  input$missing.categorical.submit
-  isolate({
-    if(newvariablesadded_reactives$success){
+
+#ntext = observeEvent(input$missing.categorical.submit, {
+#  "New variables added to end of data set"
+#})
+
+#output$message.newvariablesadded = renderText({  
+#  ntext() 
+#})
+
+
+observeEvent(input$missing.categorical.submit, {
+  output$message.newvariablesadded = renderText({
+    if(newvariablesadded_reactives$success)
       "New variables added to end of data set"
-    }
   })
 })
+
+
+
+
+
+
+
 
 
 
