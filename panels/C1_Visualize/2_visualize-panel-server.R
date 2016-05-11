@@ -272,6 +272,9 @@ vis.par = reactive({
     }
 })
 
+
+
+
 ##  We write some UI outputs for variable selection and subsetting:
 ##
 ##  Variable 1
