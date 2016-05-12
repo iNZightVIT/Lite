@@ -1,5 +1,12 @@
 ##  Manipulate variables -> Missing to categorical
 
+
+
+newvariablesadded_reactives = reactiveValues(
+  success = F
+)
+
+
 output$missing.categorical = renderUI({
   missing.categorical.panel(get.data.set())
 })
@@ -25,7 +32,43 @@ observe({
   isolate({
     if(!is.null(input$missing.categorical.submit)&&input$missing.categorical.submit>0){
       updatePanel$datachanged = updatePanel$datachanged+1
-      values$data.set = get.missing.categorical(get.data.set(),columns=input$missing.categorical.column.select)
+      values$data.set = display.missing.categorical(get.data.set(),columns=input$missing.categorical.column.select)
+      newvariablesadded_reactives$success = T
     }
   })
 })
+
+
+  
+
+
+#ntext = observeEvent(input$missing.categorical.submit, {
+#  "New variables added to end of data set"
+#})
+
+#output$message.newvariablesadded = renderText({  
+#  ntext() 
+#})
+
+
+observeEvent(input$missing.categorical.submit, {
+  output$message.newvariablesadded = renderText({
+    if(newvariablesadded_reactives$success)
+      "New variables added to end of data set"
+  })
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

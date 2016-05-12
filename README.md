@@ -2,7 +2,7 @@ iNZight *Lite* version 1.0
 ==============================
 
 
-*Last Updated: 07/04/16*
+*Last Updated: 06/05/16*
 
 This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
 
@@ -15,6 +15,13 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Missing to categorical] Made the "missing to categorical" function to be consistent with iNZightVIT
+- [Visualize] Fixed the problem of "when g2_level == 0, doesn't show plots"
+- [Visualize] Get rid of "none" option for the selectinput box of variable 1. Now when users go to "visualize" page, it directly shows the plot of the first column 
+- [Visualize] The smallest pch size for dots plot is reset to be 0.1 (was 0.05) 
+- [Visualize] Fixed the problem of the "none" option for the 1st subset variable 
+- [Filter Dataset] Go back to "visualize" page after filtering the dataset, all the variable slections are cleared and users can select variables to be plotted again based on filtered dataset
+- [Visualize] Fixed the "RESET ALL" function
 - [Visualize] Fixed the problem of displaying summary and inference for a numeric varibale
 - [Visualize] Fixed the problem of considering NAs as a single category 
 - [Import dataset] When users switch a page from "visualize" or other analysis modules back to "import dataset", old dataset preview table doesn't disappear
