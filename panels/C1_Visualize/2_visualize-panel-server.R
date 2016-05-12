@@ -17,9 +17,6 @@ vis.data <- reactive({
   get.data.set()
 })
 
-
-
-
 ###  Then on the second day, he siad let there be parameters for
 ###  iNZightPlot():
 
@@ -280,8 +277,8 @@ vis.par = reactive({
 output$vari1_panel = renderUI({
   get.data.set()
   input$change_var_selection
-  isolate({    
-    sel = input$vari1    
+  isolate({
+    sel = input$vari1
     get.vars = parseQueryString(session$clientData$url_search)
     if(!is.null(get.vars$url)) {
       temp = session$clientData$url_search
@@ -293,30 +290,18 @@ output$vari1_panel = renderUI({
          (any(names(get.vars)%in%"x")&&
             !get.vars$x%in%"")){
       sel=get.vars$x
-    }   
+    }
     if(!is.null(input$change_var_selection)){
       if(!input$change_var_selection){
-        if(is.null(input$vari1) || input$vari1 == "none") {
-          selectInput(inputId = "vari1",
-                      label = "Select first variable:",
-                      choices = c("none", colnames(vis.data())),
-                      selected = sel,
-                      # selectize = T,
-                      selectize=F)
-        }
-        else {
-          selectInput(inputId = "vari1",
-                      label = "Select first variable:",
-                      choices = c(colnames(vis.data())),
-                      selected = sel,
-                      # selectize = T,
-                      selectize=F)
-        }
-        
+        selectInput(inputId = "vari1",
+                    label = "Select first variable:",
+                    choices = c("none", colnames(vis.data())),
+                    selected = sel,
+                    selectize=T)
       }else{
         selectInput(inputId = "vari1",
                     label = "Select first variable:",
-                    choices = c(colnames(vis.data())),
+                    choices = c("none", colnames(vis.data())),
                     selected = sel,
                     selectize=F,
                     size=2)
@@ -324,18 +309,6 @@ output$vari1_panel = renderUI({
     }
   })
 })
-
-
-observe({  
-  input$vari1
-  isolate({
-    if((is.null(input$vari1) || input$vari1 == "none") && (!is.null(input$change_var_selection) && !input$change_var_selection)) {
-      updateSelectInput(session, "vari1", choices = colnames(vis.data()), selected = colnames(vis.data())[1])
-    }    
-  })  
-})
-
-
 
 ##  Update plot.par$x.
 observe({
@@ -405,8 +378,7 @@ output$subs1_panel = renderUI({
     selectInput(inputId = "subs1",
                 label = "Subset by:",
                 choices = c("none", ch),
-                selected = sel,
-                selectize=F)
+                selected = sel)
   })
 })
 
@@ -563,7 +535,7 @@ output$vari2_panel = renderUI({
                     label = "Select second variable:",
                     choices = c("none",ch),
                     selected = sel,
-                    selectize=F)
+                    selectize=T)
       }else{
         selectInput(inputId = "vari2",
                     label = "Select second variable:",
@@ -629,18 +601,11 @@ output$subs2_panel = renderUI({
     if(!is.null(input$vari2)&&input$vari2%in%ch){
       ch  = ch[-which(ch%in%input$vari2)]
     }
-    # ..added by Wilson
-    if(!is.null(input$subs1)&&input$subs1%in%ch){
-      ch  = ch[-which(ch%in%input$subs1)]
-    }
-    
-    sel = input$subs2
-    selectInput(inputId = "subs2",
-                label = "Subset by:",
-                choices = c("none", ch),
-                selected = sel,
-                selectize=F)
   })
+  selectInput(inputId = "subs2",
+              label = "Subset by:",
+              choices = c("none", ch),
+              selected = plot.par$varnames$g2)
 })
 
 
@@ -662,26 +627,11 @@ observe({
     if(!is.null(input$vari2)&&input$vari2%in%ch){
       ch  = ch[-which(ch%in%input$vari2)]
     }
-    updateSelectInput(session,"subs1",choices=c("none",ch),selected=input$subs1)
+    updateSelectInput(session,"subs1",choices=ch,selected=input$subs1)
   })
 })
 
 ##  Subset level (Slider) for variable 2.
-#output$subs2_conditional = renderUI({
-#  get.data.set()
-#  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
-#  if (is.null(choices2))
-#    choices2 = 2
-#  else
-#    choices2 = choices2 + 1
-#  sliderInput(inputId = "sub2_level",
-#              label = paste0("Subset '", input$subs2, "':"),
-#              min = 0, max = choices2, value = 0, step = 1,
-#              animate = TRUE,ticks=F)
-#})
-
-################ modified by Wilson #################
-
 output$subs2_conditional = renderUI({
   get.data.set()
   choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
@@ -694,8 +644,6 @@ output$subs2_conditional = renderUI({
               min = 0, max = choices2, value = 0, step = 1,
               animate = TRUE,ticks=F)
 })
-
-
 
 ##  Subset level (Slider) for variable 2.
 output$subs2_conditional_mini = renderUI({
@@ -715,14 +663,9 @@ output$subs2_conditional_mini = renderUI({
 # ##  Update plot.par$g2.level
 observe({
     g2_level = input$sub2_level
-    g2 = handle.input(input$subs2, subs = TRUE)$input.out
-
     if (is.null(g2_level) || g2_level == 0) {
         g2_level = NULL
-        g2 = NULL
     }
-    
-    
     g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
     if (!is.null(g2_level) && 
           length(g2.level.check) == 1 && 
@@ -730,35 +673,13 @@ observe({
         g2_level = "_MULTI"
     }
     plot.par$g2.level = g2_level
-    plot.par$g2 = g2
-
 })
-
-
-
-################## modified by Wilson ###################
-
-
-# ##  Update plot.par$g2.level
-#observe({
-#    input$subs2
-#    g2_level = input$sub2_level
-#    if (!is.null(g2_level) && g2_level == 0) {
-#        g2_level = "_MULTI"
-#    }
-#    
-#    plot.par$g2.level = g2_level
-#})
-
-##########################################################
 
 
 observe({
   g2_level = input$sub2_level_mini
-  g2 = handle.input(input$subs2, subs = TRUE)$input.out
   if (is.null(g2_level) || g2_level == 0) {
     g2_level = NULL
-    g2 = NULL
   }
   g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
   if (!is.null(g2_level) && 
@@ -767,22 +688,7 @@ observe({
     g2_level = "_MULTI"
   }
   plot.par$g2.level = g2_level
-  plot.par$g2 = g2
 })
-
-################## modified by Wilson ###################
-
-#observe({
-#  input$subs2
-#  g2_level = input$sub2_level_mini
-#  if (!is.null(g2_level) && g2_level == 0) {
-#    g2_level = "_MULTI"
-#  }
-#  plot.par$g2.level = g2_level
-#})
-
-##########################################################
-
 
 output$visualize.plot = renderPlot({
   isolate({
@@ -918,7 +824,7 @@ output$visualize.summary = renderPrint({
     values.list$data = NULL
   }
   
-   tmp.list <- values.list
+  tmp.list <- values.list
   if (is.numeric(tmp.list$x)) {
     if (!is.null(tmp.list$y)) {
       if (is.factor(tmp.list$y))
@@ -1009,20 +915,23 @@ output$visualize.inference = renderPrint({
 
 ##  Reset variable selection and graphical parameters.
 observe({
-  input$reset.graphics
-  #if (!is.null(input$reset.graphics)&&input$reset.graphics > 0) {
+  if (!is.null(input$reset.graphics)&&input$reset.graphics > 0) {
     isolate({
       graphical.par$alpha = 1
       updateSliderInput(session,"adjust.transparency",
                         value=1)
       graphical.par$bg = "white" #background colour
-      updateSelectInput(session,"select.bg1",selected="white")
+      updateSelectInput(session,"select.bg1",
+                        selected="white")
       ##  Box
       graphical.par$box.col = "black"
       graphical.par$box.fill = "white" # fill colour for the boxplot
       ##  Bar
+      graphical.par$bar.lwd = 1
+      graphical.par$bar.col = "black" # colour for borders of bars in bar plot
       graphical.par$bar.fill = colors()[81] # colour for inside of bars in bar plot
-      updateSelectInput(session,"select.barcolor",selected=colors()[81])
+      updateSelectInput(session,"select.barcolor",
+                        selected=colors()[81])
       ##  Line
       graphical.par$lwd = 1
       graphical.par$lty = 1
@@ -1033,13 +942,17 @@ observe({
       updateSelectInput(session,"color.join",selected="blue")
       ##  Point
       graphical.par$cex.pt = 0.5
-      updateSliderInput(session,"adjust.size.points.scatter",value=0.5)
+      updateSliderInput(session,"adjust.size.points.scatter",
+                        value=0.5)
       graphical.par$cex.dotpt = 0.5
-      updateSliderInput(session,"adjust.size.points.dot",value=0.5)
+      updateSliderInput(session,"adjust.size.points.dot",
+                        value=0.5)
       graphical.par$pch = 1
-      updateCheckboxInput(session,"color.interior",value=F)
+      updateCheckboxInput(session,"color.interior",
+                          value=F)
       graphical.par$col.pt = "gray50"
-      updateSelectInput(session,"select.dotcolor",selected="gray50")
+      updateSelectInput(session,"select.dotcolor",
+                        selected="gray50")
       #graphical.par$fill.pt = "transparent"
       ##  Colours
       graphical.par$col.LOE = "black"
@@ -1074,7 +987,7 @@ observe({
       graphical.par$cex = 1
       graphical.par$inference.type = NULL
       graphical.par$inference.par = NULL
-     #graphical.par$largesample = NULL
+  #    graphical.par$largesample = NULL
       graphical.par$lines.by = FALSE
       graphical.par$trend.by = FALSE
       updateCheckboxInput(session,"each_level",value=F)
@@ -1084,28 +997,37 @@ observe({
       graphical.par$szsym = 1
       graphical.par$tpsym = 1
       graphical.par$plottype="default"
-      updateSelectInput(session,"select.plot.type",selected="default")
+      updateSelectInput(session,"select.plot.type",
+                        selected="default")
       graphical.par$hist.bins=get.default.num.bins()
-#      updateSliderInput(session,"adjust.num.bins",value=get.default.num.bins())
+      updateSliderInput(session,"adjust.num.bins",
+                        value=get.default.num.bins())
       graphical.par$scatter.grid.bins=50
-      updateSliderInput(session,"adjust.grid.size",value=50)
+      updateSliderInput(session,"adjust.grid.size",
+                        value=50)
       graphical.par$hex.bins=20
-      updateSliderInput(session,"adjust.hex.bins",value=20)
+      updateSliderInput(session,"adjust.hex.bins",
+                        value=20)
       graphical.par$bs.inference=F
       graphical.par$varnames = list(x = NULL, y = NULL,
                                     xlab = NULL, ylab = NULL,
                                     g1 = NULL, g2 = NULL,
                                     colby=NULL,sizeby=NULL)
       plot.par$main=NULL
-      updateTextInput(session,"main_title_text",value="")
+      updateTextInput(session,"main_title_text",
+                      value="")
       plot.par$xlab=NULL
-      updateTextInput(session,"x_axis_text",value="")
+      updateTextInput(session,"x_axis_text",
+                      value="")
       plot.par$ylab=NULL
-      updateTextInput(session,"y_axis_text",value="")
+      updateTextInput(session,"y_axis_text",
+                      value="")
       plot.par$colby=NULL
-      updateSelectInput(session,"color_by_select",selected="")
+      updateSelectInput(session,"color_by_select",
+                        selected="")
       plot.par$sizeby=NULL
-      updateSelectInput(session,"resize.by.select",selected="")
+      updateSelectInput(session,"resize.by.select",
+                        selected="")
       plot.par$locate=NULL
       plot.par$locate.id=NULL
       plot.par$locate.col=NULL
@@ -1117,9 +1039,9 @@ observe({
       design.parameters$fpc = NULL
       design.parameters$nest = F
       design.parameters$weights = NULL
-      design.parameters$data.name = NULL   
+      design.parameters$data.name = NULL
     })
-#  }
+  }
 })
 
 # This refreshes the infernce parameters.
@@ -1581,9 +1503,9 @@ output$plot.appearance.panel = renderUI({
     if(is.null(graphical.par$cex.dotpt)){
       graphical.par$cex.dotpt = 0.5
     }
-    adjust.size.points.dot.object = sliderInput("adjust.size.points.dot", label = "Adjust size:", min = 0.1, 
+    adjust.size.points.dot.object = sliderInput("adjust.size.points.dot", label = "Adjust size:", min = 0.05, 
                 max = 3.5, value=graphical.par$cex.dotpt,step=.05)
-    adjust.size.points.scatter.object = sliderInput("adjust.size.points.scatter", label = "Adjust size:", min = 0.1, 
+    adjust.size.points.scatter.object = sliderInput("adjust.size.points.scatter", label = "Adjust size:", min = 0.05, 
                                                 max = 3.5, value=graphical.par$cex.dotpt,step=.05)
     adjust.grid.size.object = sliderInput("adjust.grid.size", label = "Grid size (n x n):", min = 10, 
                                                     max = 250, value=graphical.par$scatter.grid.bins,step=1)
