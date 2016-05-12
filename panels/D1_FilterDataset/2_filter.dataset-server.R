@@ -135,29 +135,3 @@ output$filter.data.summary <- renderPrint({
 output$filter.dataset = renderUI({
   filter.data.panel(get.data.set())
 })
-
-
-observe({  
-  input$filter_data_perform  
-  isolate({
-    updateSelectInput(session, "subs2", selected = "none")
-    updateSelectInput(session, "subs1", selected = "none")
-    updateSelectInput(session, "vari2", selected = "none")
-    updateSelectInput(session, "vari1", selected = "none")
-  })  
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

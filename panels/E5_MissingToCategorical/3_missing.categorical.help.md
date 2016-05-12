@@ -1,4 +1,4 @@
-<h5>Missing to category</h5>
+<h5>Missing to categorical</h5>
 This module adds additional column with two possible values.
 - **observed** the value was observed
 - **missing** The value was NA

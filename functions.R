@@ -34,54 +34,14 @@ get.missing.categorical = function(dafr,columns){
   temp = as.data.frame(dafr[,columns])
   colnames(temp) = columns
   new.dafr = data.frame(do.call(cbind,lapply(1:length(columns),
-                                  function(index, d, c){
+                                  function(index,d,c){
                                     te = rep("observed",nrow(d))
                                     te[is.na(d[,index])] = "missing"
                                     te
-                                  }, temp, columns)))
+                                  },temp,columns)))
   colnames(new.dafr) = paste("missing",columns,sep=".")
-  cbind(dafr, new.dafr)
+  cbind(dafr,new.dafr)
 }
-
-
-
-
-#' add new columns to the original dataframe which replace "NA"
-#' with "missing" so that the missing values could be displayed 
-#' in the plot..
-#' 
-#' @param dafr The input data.frame.
-#' @param The column names or indexes to be converted.
-#' 
-#' @return A data.frame with the new columns added.
-#' 
-#' @author Wilson Hu 
-display.missing.categorical = function(dafr, columns) {
-  for(i in columns) {
-    temp = dafr[, i]
-    if(is.factor(temp) || is.character(temp)) {
-      temp = as.character(temp)
-      temp[is.na(temp)] = "missing"
-      temp = as.factor(temp)
-      original.level = levels(temp)[levels(temp) != "missing"]
-      temp = factor(temp, levels = c(original.level, "missing"))
-    }
-    else {
-      index = is.na(temp)
-      temp = rep("observed", length(temp))
-      temp[index] = "missing"
-      temp = factor(temp, levels = c("observed", "missing"))
-    }
-    temp = as.data.frame(temp)
-    colnames(temp) = paste(i, "missing", sep = "_")
-    dafr = data.frame(dafr, temp)
-  }
-  dafr
-}
-
-
-
-
 
 #' Simplifies the input data.frame by keeping only 
 #' columns where NA values are present. Function 

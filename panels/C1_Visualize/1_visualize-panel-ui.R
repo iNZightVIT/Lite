@@ -56,7 +56,7 @@ vis.sidebarPanel = function() {
                      selected = 1),
         hr(),
         actionButton(inputId = "reset.graphics",
-                     label = "Reset To Default"),
+                     label = "Reset All"),
         br(),
         br(),
         visualize.help()

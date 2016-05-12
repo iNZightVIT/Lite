@@ -18,15 +18,3 @@ output$data.restore.table = renderDataTable({
 output$restore.data = renderUI({
   restore.data.panel(get.data.set())
 })
-
-
-
-observe({  
-  input$restore_data_button 
-  isolate({
-    updateSelectInput(session, "subs2", selected = "none")
-    updateSelectInput(session, "subs1", selected = "none")
-    updateSelectInput(session, "vari2", selected = "none")
-    updateSelectInput(session, "vari1", selected = "none")
-  })  
-})

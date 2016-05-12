@@ -137,7 +137,7 @@ shinyUI(
                                 uiOutput("rename.variables")),
                        tabPanel("Create Variables",
                                 uiOutput("create.variables")),
-                       tabPanel("Missing to category",
+                       tabPanel("Missing to categorical",
                                 uiOutput("missing.categorical")),
                        tabPanel("Add columns",
                                 uiOutput("add.columns")),
