@@ -928,6 +928,7 @@ output$visualize.summary = renderPrint({
     }
   }
   
+  
   if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
     tryCatch({
