@@ -7,9 +7,6 @@ import_reactives = reactiveValues(
 
 
 
-
-
-
 observeEvent(input$files, { 
   
   if(file.exists(input$files[1, "datapath"])) {
