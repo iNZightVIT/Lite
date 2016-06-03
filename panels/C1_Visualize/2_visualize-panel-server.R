@@ -918,15 +918,18 @@ output$visualize.summary = renderPrint({
     values.list$data = NULL
   }
   
-   tmp.list <- values.list
-  if (is.numeric(tmp.list$x)) {
-    if (!is.null(tmp.list$y)) {
-      if (is.factor(tmp.list$y))
-        tmp.list$plottype = "hist"
-    } else {
-      tmp.list$plottype = "hist"
-    }
-  }
+#   tmp.list <- values.list
+#  if (is.numeric(tmp.list$x)) {
+#    if (!is.null(tmp.list$y)) {
+#      if (is.factor(tmp.list$y))
+#        tmp.list$plottype = "hist"
+#    } else {
+#      tmp.list$plottype = "hist"
+#    }
+#  }
+
+  tmp.list <- values.list
+  tmp.list$plottype = "hist"
   
   
   if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
@@ -980,15 +983,18 @@ output$visualize.inference = renderPrint({
       }
       dafr = get.data.set()
       
+#      tmp.list <- values.list
+#      if (is.numeric(tmp.list$x)) {
+#        if (!is.null(tmp.list$y)) {
+#          if (is.factor(tmp.list$y))
+#            tmp.list$plottype = "hist"
+#        } else {
+#          tmp.list$plottype = "hist"
+#        }
+#      }
+      
       tmp.list <- values.list
-      if (is.numeric(tmp.list$x)) {
-        if (!is.null(tmp.list$y)) {
-          if (is.factor(tmp.list$y))
-            tmp.list$plottype = "hist"
-        } else {
-          tmp.list$plottype = "hist"
-        }
-      }
+      tmp.list$plottype = "hist"
       
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
