@@ -155,6 +155,14 @@ shinyUI(
                                 uiOutput("timeseries.panel")),
                        tabPanel("Model Fitting",value="regression",
                                 uiOutput("modelfitting.panel"))
+            ),
+            
+            ## Backup Link
+            navbarMenu("Backup Link",
+                       tabPanel(HTML("</a><a href=\"http://litebackup1.test-pods.auckland.ac.nz\">Backup Link 1")),
+                       tabPanel(HTML("</a><a href=\"http://litebackup2.test-pods.auckland.ac.nz\">Backup Link 2")),
+                       tabPanel(HTML("</a><a href=\"http://litebackup3.test-pods.auckland.ac.nz\">Backup Link 3")),
+                       tabPanel(HTML("</a><a href=\"http://litebackup4.test-pods.auckland.ac.nz\">Backup Link 4"))
             )
         )
     )

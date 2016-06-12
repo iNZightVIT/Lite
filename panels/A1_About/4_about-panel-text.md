@@ -28,10 +28,5 @@ In case you have any problems or if you want to provide feedback please visit th
 
 <a href = "https://github.com/iNZightVIT" target="_blank">R source code</a>
 
-<br>
-
-<a href = "http://litebackup.test-pods.auckland.ac.nz/" target="_blank">Backup Link for Lite</a>
-
-
 </font>
 
