@@ -54,7 +54,7 @@ about.panel.ui = function(lite.version,lite.update) {
                       R Source Code
                     </a> |
                     <!--  Contact link. Excuse the line overlap. -->
-		    <a href = "mailto:cpar137@aucklanduni.ac.nz?Subject=iNZight-Lite%20Feedback" target = "_top">
+		    <a href = "mailto:inzightlite_support@stat.auckland.ac.nz?Subject=iNZight-Lite%20Feedback" target = "_top">
 		      Contact Us
 		    </a>
                     <br>
@@ -64,18 +64,16 @@ about.panel.ui = function(lite.version,lite.update) {
 		  </span>
 		  <span style = "float:right;">
                     <!-- Links to sponsors -->
-                    <a href = "http://new.censusatschool.org.nz/">
-		      <img src = "census_logo.png"/, height = 75>
-		    </a> &nbsp; &nbsp;
+          <a href = "http://stat.auckland.ac.nz">
+                      <img src = "uoa_logo.png", height = 65>
+                    </a> &nbsp; &nbsp;       
                     <a href = "http://www.stats.govt.nz/">
 		      <img src = "stats_nz.png"/, height = 75>
 		    </a> &nbsp; &nbsp;
                     <a href = "http://www.minedu.govt.nz/">
 		      <img src = "minedu_logo.png"/, height = 60, width = 170>
-		    </a> &nbsp; &nbsp;
-		    <a href = "http://stat.auckland.ac.nz">
-                      <img src = "uoa_logo.png", height = 65>
-                    </a> &nbsp;
+		    </a> &nbsp; 
+		    
 		  </span>
 		</div>
 	      </div>'
