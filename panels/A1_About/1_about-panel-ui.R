@@ -37,7 +37,6 @@ about.panel.ui = function(lite.version,lite.update) {
               align = 'right')
         ),
        
-
         ##  Next, we add a helpful footer.
         column(
             width = 12,

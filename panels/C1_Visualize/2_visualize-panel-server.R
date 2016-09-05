@@ -83,7 +83,7 @@ get.default.num.bins = reactive({
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par = reactiveValues(
   alpha = 1,
-  bg = "white", #background colour
+  bg = "grey93", #background colour
   ##  Box
   box.col = "black",
   box.fill = "white", # fill colour for the boxplot
@@ -264,9 +264,9 @@ vis.par = reactive({
             temp$y = vis.par$y
             temp$varnames$x = vis.par$varnames$x
             temp$varnames$y = vis.par$varnames$y
-            vis.par = modifyList(vis.par, temp)
+            vis.par = modifyList(vis.par, temp, keep.null = TRUE)
         }
-        vis.par = modifyList(reactiveValuesToList(graphical.par), vis.par)
+        vis.par = modifyList(reactiveValuesToList(graphical.par), vis.par, keep.null = TRUE)
     } else {
         NULL
     }
@@ -805,6 +805,7 @@ output$visualize.plot = renderPlot({
     if(is.numeric(plot.par$x)&
          is.numeric(plot.par$y)){
       temp = vis.par()
+      temp$trend.parallel = TRUE
       temp.x = temp$x
       temp$x=temp$y
       temp$y=temp.x
@@ -861,6 +862,7 @@ output$mini.plot = renderPlot({
     if(is.numeric(plot.par$x)&
          is.numeric(plot.par$y)){
       temp = vis.par()
+      temp$trend.parallel = TRUE
       temp.x = temp$x
       temp$x=temp$y
       temp$y=temp.x
@@ -904,7 +906,7 @@ output$visualize.summary = renderPrint({
     return(cat("Please select a variable"))
   }
   values.list = modifyList(reactiveValuesToList(plot.par),
-                           reactiveValuesToList(graphical.par))
+                           reactiveValuesToList(graphical.par), keep.null = TRUE)
   if(is.numeric(plot.par$x)&
        is.numeric(plot.par$y)){
     values.list.x = values.list$x
@@ -960,7 +962,7 @@ output$visualize.inference = renderPrint({
         return(cat("Please select a variable"))
       }
       values.list = modifyList(reactiveValuesToList(plot.par),
-                               reactiveValuesToList(graphical.par))
+                               reactiveValuesToList(graphical.par), keep.null = TRUE)
       bs.inf= T
       if(input$type.inference.select%in%"normal"){
         bs.inf = F
@@ -970,7 +972,8 @@ output$visualize.inference = renderPrint({
         list(bs.inference = bs.inf,
              summary.type = "inference",
              inference.type = "conf",
-             inference.par = NULL)
+             inference.par = NULL),
+        keep.null = TRUE
       )
       if(is.numeric(plot.par$x)&
            is.numeric(plot.par$y)){
@@ -1022,8 +1025,8 @@ observe({
       graphical.par$alpha = 1
       updateSliderInput(session,"adjust.transparency",
                         value=1)
-      graphical.par$bg = "white" #background colour
-      updateSelectInput(session,"select.bg1",selected="white")
+      graphical.par$bg = "grey93" #background colour
+      updateSelectInput(session,"select.bg1",selected="grey93")
       ##  Box
       graphical.par$box.col = "black"
       graphical.par$box.fill = "white" # fill colour for the boxplot
@@ -1081,7 +1084,7 @@ observe({
       graphical.par$cex = 1
       graphical.par$inference.type = NULL
       graphical.par$inference.par = NULL
-     #graphical.par$largesample = NULL
+#      graphical.par$largesample = NULL
       graphical.par$lines.by = FALSE
       graphical.par$trend.by = FALSE
       updateCheckboxInput(session,"each_level",value=F)
@@ -1461,10 +1464,13 @@ output$advanced_options_panel = renderUI({
     }
     temp$plot = F
     temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+##################################################################    
+#    large.sample = T
     large.sample = search.name(temp,"largesample")[[1]]
     if(is.null(large.sample)){
       large.sample=F
     }
+##################################################################
     if((!is.null(input$vari1)&&
           !is.null(input$vari2))&&
           (input$vari1%in%colnames(get.data.set())&&
@@ -1569,7 +1575,7 @@ output$plot.appearance.panel = renderUI({
   plot.par$design
   isolate({
     # barplot with one factor variable the other one not specified
-    cols1 = colors()[c(1,3,16,19,63,87,109,259,
+    cols1 = colors()[c(354, 1,3,16,19,63,87,109,259,
                        399,419,558,600,626,647)]
     cols2 = colors()[c(81,73,84,107,371,426,517,617)]
     cols3 = colors()[c(203,73,81,84,107,371,425,517,617)]
@@ -1623,10 +1629,13 @@ output$plot.appearance.panel = renderUI({
       }
       temp$plot = F
       tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
+#####################################################################
+#      large.sample = T
       large.sample = search.name(tester,"largesample")[[1]]
       if(is.null(large.sample)){
         large.sample = F
       }
+#####################################################################
       # bar plot with one factor variable
       # vari1 = factor , vari2 = none
       if(input$vari2%in%"none"&&
@@ -1773,10 +1782,13 @@ observe({
         }
         temp$plot = F
         tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
+####################################################################
+#        large.sample = T
         large.sample = search.name(tester,"largesample")[[1]]
         if(is.null(large.sample)){
           large.sample = F
         }
+####################################################################
         if(!is.null(input$advanced_options)){
           sel = input$advanced_options
           ch = NULL
@@ -1842,7 +1854,7 @@ observe({
                      (class(get.data.set()[,input$vari2])%in%"numeric"|
                         class(get.data.set()[,input$vari2])%in%"integer")){
             ch = c('Code more variables',
-                  'Add trend curves',
+                   'Add trend curves',
                   'Add x=y line',
                   'Add a jitter',
                   'Add rugs',
@@ -2501,12 +2513,15 @@ output$adjust.axis.panel = renderUI({
       }
       temp$plot = F
       tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
+###################################################################
+#      large.sample = T
       large.sample = search.name(tester,"largesample")[[1]]
       limits.x = search.name(tester,"xlim")[[1]]
       limits.y = search.name(tester,"ylim")[[1]]
       if(is.null(large.sample)){
         large.sample = F
       }
+###################################################################
       if(((is.numeric(get.data.set()[,input$vari1])||
              is.integer(get.data.set()[,input$vari1]))&&
             input$vari2%in%"none")||
