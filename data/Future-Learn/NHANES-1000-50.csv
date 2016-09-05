@@ -1,0 +1,51 @@
+SurveyYr,ID,Gender,Age,AgeDecade,Race3,Education,MaritalStatus,HHIncome,HHIncomeMid,Poverty,HomeRooms,HomeOwn,Work,Weight,Height,BMI,BMI_WHO,Pulse,BPSysAve,BPDiaAve,Testosterone,DirectChol,TotChol,UrineVol1,UrineFlow1,HealthGen,DaysPhysHlthBad,DaysMentHlthBad,SleepHrsNight,Alcohol12PlusYr,SmokeNow,Smoke100,SmokeAge,Marijuana,AgeFirstMarij,RegularMarij,AgeRegMarij,HardDrugs,SexEver,SexAge
+2011_12,63549,female,5, 0-9,Black,NA,NA,75000-99999,87500,2.58,5,Rent,NA,23.1,117.5,16.7,12.0_18.5,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,64871,female,49, 40-49,White,CollegeGrad,Married,75000-99999,87500,3.36,13,Own,Working,65,167.7,23.1,18.5_to_24.9,72,86,60,15.96,1.4,5.02,36,0.571,Vgood,0,0,8,Yes,NA,No,NA,Yes,16,No,NA,No,Yes,16
+2011_12,70551,male,37, 30-39,White,SomeCollege,Married,10000-14999,12500,0.52,10,Other,Working,100.8,188.6,28.3,25.0_to_29.9,94,125,72,239.58,1.03,5.82,126,0.869,Good,2,2,8,Yes,Yes,Yes,15,No,NA,No,NA,No,Yes,16
+2011_12,66033,female,37, 30-39,White,9_11thGrade,Married,NA,NA,NA,3,Own,NotWorking,52.8,151.3,23.1,18.5_to_24.9,98,117,76,280.85,1.68,3.47,195,2.532,Vgood,0,0,7,Yes,Yes,Yes,13,Yes,12,Yes,14,Yes,Yes,15
+2011_12,69958,male,12, 10-19,White,NA,NA,55000-64999,60000,2.6,8,Own,NA,91.9,175.6,29.8,25.0_to_29.9,76,113,47,NA,NA,NA,102,0.576,Vgood,1,0,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,69574,female,48, 40-49,White,CollegeGrad,Married,75000-99999,87500,4.96,7,Own,Working,65.9,168.5,23.2,18.5_to_24.9,74,120,83,24.13,1.66,5.46,84,1.4,Vgood,0,0,8,Yes,No,Yes,15,Yes,15,Yes,15,Yes,Yes,16
+2011_12,71123,male,41, 40-49,Black,SomeCollege,Married,75000-99999,87500,3.6,5,Rent,Working,99.7,181.2,30.4,30.0_plus,60,134,92,613.28,1.97,5.12,351,2.489,Excellent,0,0,8,Yes,NA,No,NA,Yes,18,No,NA,No,Yes,14
+2011_12,65373,female,45, 40-49,White,CollegeGrad,Married,more 99999,100000,5,8,Own,Working,79.7,174.7,26.1,25.0_to_29.9,74,100,76,12.25,1.47,6.88,197,2.213,Good,0,0,7,Yes,NA,No,NA,No,NA,No,NA,No,Yes,18
+2011_12,67671,female,5, 0-9,White,NA,NA,45000-54999,50000,1.67,6,Own,NA,21.5,118.8,15.2,12.0_18.5,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,65751,male,54, 50-59,Mexican,HighSchool,Married, 0-4999,2500,0.03,6,Own,Working,77.2,171.5,26.2,25.0_to_29.9,70,130,83,367.46,1.06,5.59,355,0.368,Good,0,0,7,Yes,No,Yes,18,No,NA,No,NA,No,Yes,15
+2011_12,65052,male,42, 40-49,White,CollegeGrad,Widowed,more 99999,100000,5,8,Own,Working,80.6,170.5,27.7,25.0_to_29.9,56,124,71,253.09,1.11,6.03,121,0.669,Vgood,0,0,8,Yes,NA,No,NA,No,NA,No,NA,No,Yes,23
+2011_12,63558,female,18, 10-19,White,NA,NA,NA,NA,NA,5,Own,Working,43.1,153,18.4,12.0_18.5,66,87,55,25.22,1.68,4.34,133,4.156,Vgood,0,0,10,Yes,NA,NA,NA,Yes,15,No,NA,No,Yes,18
+2011_12,63361,male,67, 60-69,Black,CollegeGrad,Widowed,25000-34999,30000,2.75,4,Own,NotWorking,84.9,182.1,25.6,25.0_to_29.9,88,138,88,326,1.03,5.92,373,2.234,Good,0,0,6,Yes,No,Yes,16,NA,NA,NA,NA,No,Yes,9
+2011_12,68417,male,19, 10-19,Mexican,NA,NA,25000-34999,30000,1.15,3,Rent,NotWorking,66.7,167.5,23.8,18.5_to_24.9,74,116,64,566.95,1.11,3.28,242,1.241,Excellent,2,2,6,No,NA,NA,NA,No,NA,No,NA,No,Yes,13
+2011_12,62578,female,6, 0-9,White,NA,NA,35000-44999,40000,1.55,7,Own,NA,34,116.6,25,25.0_to_29.9,NA,NA,NA,3.4,1.63,5.48,30,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,66562,female,26, 20-29,White,CollegeGrad,Married,65000-74999,70000,4.3,3,Own,Working,71.7,164.8,26.4,25.0_to_29.9,54,101,54,16.89,1.24,5.09,170,3.864,Vgood,0,0,8,Yes,NA,No,NA,Yes,18,Yes,18,No,Yes,19
+2011_12,68426,female,19, 10-19,White,NA,NA,NA,NA,0.55,5,Rent,Working,58.2,167.1,20.8,18.5_to_24.9,100,103,63,44.93,1.73,4.32,52,1.156,Excellent,0,2,8,Yes,NA,NA,NA,No,NA,No,NA,No,Yes,17
+2011_12,70779,male,80,NA,White,SomeCollege,Married,25000-34999,30000,1.82,6,Own,NotWorking,106.7,180.1,32.9,30.0_plus,72,103,60,241.27,0.98,4.47,14,0.311,Good,0,0,8,Yes,No,Yes,18,NA,NA,NA,NA,NA,NA,NA
+2011_12,66547,male,65, 60-69,White,CollegeGrad,Married,more 99999,100000,5,10,Own,Working,98.5,187.5,28,25.0_to_29.9,76,123,75,233.65,1.11,6.18,107,0.805,Excellent,0,0,9,Yes,NA,No,NA,NA,NA,NA,NA,No,Yes,19
+2011_12,70782,male,64, 60-69,White,CollegeGrad,Married,more 99999,100000,5,7,Own,NotWorking,79.4,175.7,25.7,25.0_to_29.9,78,127,90,679.41,1.34,4.11,66,0.917,Vgood,0,0,6,Yes,Yes,Yes,14,NA,NA,NA,NA,No,Yes,20
+2011_12,66473,male,56, 50-59,White,CollegeGrad,NeverMarried,more 99999,100000,5,6,Own,Working,74.5,179.1,23.2,18.5_to_24.9,76,132,94,358.53,1.32,5.43,256,0.859,Vgood,0,30,4,Yes,No,Yes,18,Yes,24,No,NA,No,Yes,20
+2011_12,62552,female,41, 40-49,White,CollegeGrad,Married,more 99999,100000,4.07,7,Own,Working,58.2,160.8,22.5,18.5_to_24.9,84,114,78,18.25,1.81,4.89,72,1.5,Vgood,0,5,8,Yes,Yes,Yes,16,Yes,16,No,NA,No,Yes,16
+2011_12,65325,female,73, 70+,White,SomeCollege,Widowed,35000-44999,40000,2.72,10,Own,NotWorking,52.9,160.2,20.6,18.5_to_24.9,70,105,50,13.5,2.12,4.42,61,0.5,Good,10,4,4,Yes,Yes,Yes,13,NA,NA,NA,NA,NA,NA,NA
+2011_12,62722,male,1, 0-9,Mexican,NA,NA,25000-34999,30000,1.21,5,Rent,NA,12.3,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,67447,female,57, 50-59,White,CollegeGrad,NeverMarried,45000-54999,50000,3.47,5,Own,Working,57.6,163.8,21.5,18.5_to_24.9,72,129,74,18.73,1.32,7.01,277,2.115,Vgood,0,1,7,Yes,No,Yes,21,Yes,19,No,NA,No,No,NA
+2011_12,67532,female,71, 70+,White,8thGrade,Married,25000-34999,30000,1.65,7,Own,NotWorking,60.5,168.2,21.4,18.5_to_24.9,68,122,64,16.97,1.24,4.01,12,0.24,Good,0,3,10,Yes,Yes,Yes,18,NA,NA,NA,NA,NA,NA,NA
+2011_12,66586,male,29, 20-29,Black,9_11thGrade,NeverMarried,45000-54999,50000,1.67,2,Rent,Looking,95.3,180.6,29.2,25.0_to_29.9,74,120,57,451.99,0.98,2.61,262,1.26,NA,NA,NA,8,NA,NA,No,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,67819,female,79, 70+,Other,SomeCollege,Widowed,10000-14999,12500,1.16,6,Own,NotWorking,68.3,163.2,25.6,25.0_to_29.9,88,152,87,22.99,1.11,4.11,20,0.074,Vgood,0,0,8,No,No,Yes,20,NA,NA,NA,NA,NA,NA,NA
+2011_12,65699,male,50, 50-59,White,HighSchool,Divorced,25000-34999,30000,2.24,7,Own,Working,104.9,183.9,31,30.0_plus,58,103,71,119.71,1.27,6.21,52,0.945,Good,0,0,7,Yes,NA,No,NA,No,NA,No,NA,No,Yes,19
+2011_12,62674,female,33, 30-39,White,CollegeGrad,Married,25000-34999,30000,1.16,4,Rent,Working,59.7,166.5,21.5,18.5_to_24.9,80,99,67,44.74,1.99,6.57,11,0.145,Excellent,0,30,7,Yes,NA,No,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,70404,female,7, 0-9,Hispanic,NA,NA,20000-24999,22500,1.04,4,Rent,NA,31.7,138.8,16.5,12.0_18.5,NA,NA,NA,NA,0.88,5.17,45,0.251,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,64327,male,9, 0-9,White,NA,NA,10000-14999,12500,0.93,7,Own,NA,35.3,135.1,19.3,18.5_to_24.9,68,94,59,3.09,1.19,4.24,162,0.717,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,64017,female,24, 20-29,White,SomeCollege,Married,55000-64999,60000,4.08,7,Own,Working,78.2,178.7,24.5,18.5_to_24.9,76,106,70,19.82,1.58,3.67,41,0.331,Excellent,0,3,8,Yes,NA,No,NA,No,NA,No,NA,No,Yes,21
+2011_12,64682,male,42, 40-49,White,HighSchool,Married,75000-99999,87500,2.96,6,Own,Working,99.7,175.2,32.5,30.0_plus,62,130,78,357.58,1.09,5.82,119,1.545,Vgood,2,0,8,Yes,NA,No,NA,No,NA,No,NA,No,Yes,30
+2011_12,71869,male,69, 60-69,White,CollegeGrad,Married,45000-54999,50000,2.7,9,Own,NotWorking,113.9,173.6,37.8,30.0_plus,64,108,63,NA,0.88,4.01,296,1.839,Fair,3,0,8,No,Yes,Yes,19,NA,NA,NA,NA,No,Yes,18
+2011_12,70090,female,7, 0-9,White,NA,NA,more 99999,100000,4.77,8,Rent,NA,31.4,128.4,19,18.5_to_24.9,NA,NA,NA,0.72,1.19,3.44,79,0.637,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,63451,male,28, 20-29,Black,9_11thGrade,NeverMarried,NA,NA,NA,4,Other,NotWorking,81.6,169.6,28.4,25.0_to_29.9,78,124,45,620,2.51,4.58,65,0.878,Vgood,0,2,7,Yes,NA,No,NA,Yes,15,No,NA,No,Yes,14
+2011_12,67888,male,8, 0-9,White,NA,NA,15000-19999,17500,0.73,8,Rent,NA,28.5,131.5,16.5,12.0_18.5,96,98,0,NA,1.53,4.37,88,0.8,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,65398,female,80,NA,Asian,SomeCollege,Widowed,NA,NA,NA,10,Own,NotWorking,50,152.4,21.5,18.5_to_24.9,70,179,67,17.9,1.45,4.76,141,0.597,Good,0,0,4,No,NA,No,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,63828,female,64, 60-69,White,SomeCollege,Married,65000-74999,70000,4.76,5,Own,NotWorking,66.5,159.5,26.1,25.0_to_29.9,74,127,65,25.99,2.25,5.12,18,0.247,Good,1,0,8,Yes,NA,No,NA,NA,NA,NA,NA,No,Yes,20
+2011_12,68619,male,30, 30-39,White,SomeCollege,Married,25000-34999,30000,1.12,4,Own,Working,85.1,184.5,25,25.0_to_29.9,70,116,66,399.75,1.16,4.22,214,2.019,Vgood,3,0,5,Yes,No,Yes,15,Yes,15,Yes,16,Yes,Yes,17
+2011_12,68293,male,54, 50-59,White,SomeCollege,Married,25000-34999,30000,1.98,6,Own,NotWorking,91.1,179.6,28.2,25.0_to_29.9,62,120,71,815.39,0.88,3.57,34,0.225,Vgood,0,0,6,Yes,NA,No,NA,Yes,16,Yes,16,No,Yes,13
+2011_12,71808,male,12, 10-19,Mexican,NA,NA,35000-44999,40000,1.53,5,Own,NA,73.9,158.6,29.4,25.0_to_29.9,74,113,63,310,1.55,3.75,144,0.682,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,65190,female,62, 60-69,White,HighSchool,Divorced,25000-34999,30000,1.78,3,Own,NotWorking,69.6,157.4,28.1,25.0_to_29.9,88,137,89,12.48,2.04,7.94,83,0.61,Good,4,0,8,No,No,Yes,15,NA,NA,NA,NA,No,Yes,23
+2011_12,65375,female,52, 50-59,White,HighSchool,Married,more 99999,100000,5,4,Own,NotWorking,58.7,146.4,27.4,25.0_to_29.9,72,120,74,25.7,2.46,7.86,22,0.328,Vgood,0,30,6,No,NA,No,NA,No,NA,No,NA,No,Yes,18
+2011_12,64682,male,42, 40-49,White,HighSchool,Married,75000-99999,87500,2.96,6,Own,Working,99.7,175.2,32.5,30.0_plus,62,130,78,357.58,1.09,5.82,119,1.545,Vgood,2,0,8,Yes,NA,No,NA,No,NA,No,NA,No,Yes,30
+2011_12,70180,male,4, 0-9,Black,NA,NA,25000-34999,30000,1,5,Rent,NA,14.4,101.3,14,12.0_18.5,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2011_12,70703,female,57, 50-59,White,SomeCollege,Married,45000-54999,50000,3.47,6,Own,Working,58.7,159.7,23,18.5_to_24.9,64,142,69,8.12,1.71,5.66,121,1.635,Good,30,0,8,Yes,Yes,Yes,15,Yes,22,No,NA,No,Yes,18
+2011_12,64893,female,23, 20-29,White,SomeCollege,NeverMarried,more 99999,100000,3.44,11,Own,Working,61.1,179.7,18.9,18.5_to_24.9,76,97,56,13.52,1.5,4.63,58,0.795,Excellent,0,0,8,Yes,NA,No,NA,Yes,18,Yes,21,No,Yes,18
+2011_12,62228,male,50, 50-59,White,CollegeGrad,Married,75000-99999,87500,3.15,10,Own,Working,164.9,195,43.4,30.0_plus,88,114,74,171.11,0.85,4.73,111,1.057,Good,0,0,7,Yes,NA,No,NA,Yes,19,No,NA,No,Yes,16
