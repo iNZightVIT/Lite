@@ -224,6 +224,12 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   source("panels/D6_SurveyDesign/1_survey.design.ui.R", local = TRUE)
   source("panels/D6_SurveyDesign/2_survey.design.server.R", local = TRUE)
+  
+  ##-----------------------------##
+  ##  D7. Alphabetise Variables   ##
+  ##-----------------------------##
+  source("panels/D7_AlphabetiseVariables/1_alphabetise.variables-ui.R", local = TRUE)
+  source("panels/D7_AlphabetiseVariables/2_alphabetise.variables-server.R", local = TRUE)
 
   ##-----------------------------##
   ##  E1. Categorical Variables  ##

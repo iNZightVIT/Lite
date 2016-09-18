@@ -1,4 +1,4 @@
-## Manipulate variables -> Rename Variables : rename a column.
+ ## Manipulate variables -> Rename Variables : rename a column.
 
 output$rename.variables = renderUI({
   get.rename.variables.panel(get.data.set())
