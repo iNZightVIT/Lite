@@ -78,6 +78,7 @@ shinyUI(
           }
         })();")),
         tags$head(tags$script(src="js/testNumeric.js")),
+        tags$head(includeScript("google-analytics.js")),
         ##  Load the "Lumen" Theme (from http://bootswatch.com).
         theme = "bootstrap.css",
         navbarPage(
