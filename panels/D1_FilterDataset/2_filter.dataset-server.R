@@ -10,8 +10,11 @@ observe({
           if(length(to.remove)>0){
             updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = get.data.set()[-to.remove,]
-            values$data.set[,which(colnames(get.data.set())%in%input$select_categorical1)] = 
-              droplevels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])
+            if(class(values$data.set[,which(colnames(get.data.set())%in%input$select_categorical1)]) == "factor") {
+              values$data.set[,which(colnames(get.data.set())%in%input$select_categorical1)] = 
+                droplevels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])
+            }
+            
             updateSelectInput(session=session,inputId="select_categorical1",
                               choices=c("",get.categorical.column.names(get.data.set())),
                               selected=1)
@@ -94,6 +97,9 @@ observe({
   input$select_categorical1
   isolate({
     if(!is.null(input$select_categorical1)){
+      if(is.null(levels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])))
+        updateSelectInput(session=session,inputId="levels1",
+                          choices=unique(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]))
       updateSelectInput(session=session,inputId="levels1",
                         choices=levels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]))
     }

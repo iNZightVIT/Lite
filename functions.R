@@ -1098,9 +1098,10 @@ transform.perform = function(dafr,type,columns){
 # dataframe (cbind(<original columns>,<transformed columns>)).
 transform.tempTable = function(dafr,type,columns){
   temp1 = as.data.frame(dafr[,which(colnames(dafr)%in%columns)])
+  colnames(temp1) = columns
   temp2 = transform.get.temp(dafr,type,columns)
   if(!is.null(temp2)){
-    temp1 = cbind(temp1,temp2)
+    temp1 = data.frame(temp1,temp2)
   }
   temp1
 }
@@ -1137,7 +1138,7 @@ transform.get.temp = function(dafr,type,columns){
     temp = copy.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%"change sign"){
     temp = change.sign.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"convert to categorical"){
+  } else if (!is.null(columns)&type%in%"change to factor"){
     temp = change.factor.transform(dafr[,columns],columns)
   } else if (!is.null(columns)&type%in%" "){
     temp = NULL
