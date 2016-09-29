@@ -99,7 +99,7 @@ observe({
     if(!is.null(input$select_categorical1)){
       if(is.null(levels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])))
         updateSelectInput(session=session,inputId="levels1",
-                          choices=unique(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]))
+                          choices=sort(unique(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)])))
       updateSelectInput(session=session,inputId="levels1",
                         choices=levels(get.data.set()[,which(colnames(get.data.set())%in%input$select_categorical1)]))
     }
