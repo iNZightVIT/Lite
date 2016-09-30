@@ -7,8 +7,7 @@ alphabetise.variables.sidebar =  function(data.set){
                    label="Select alphabetical order"),
        actionButton("alphabetise.var.button", "Alphabetise Variables"),
        br(),br(),
-       help.display('Alphabetise Variables',
-                    'alphabetise.variables_help',
+       help.display('Alphabetise Variables', 'alphabetise_variables_help',
                     "panels/D7_AlphabetiseVariables/3_alphabetise.variables-help.md"),
        br())
 }
@@ -18,8 +17,7 @@ alphabetise.variables.sidebar =  function(data.set){
 alphabetise.variables = function(data.set){
   if(is.null(data.set)){
     sidebarLayout(
-      sidebarPanel(help.display('Alphabetise Variables',
-                                'alphabetise.variables_help',
+      sidebarPanel(help.display('Alphabetise Variables', 'alphabetise_variables_help',
                                 "panels/D7_AlphabetiseVariables/3_alphabetise.variables-help.md")),
       mainPanel(
         h1("Please select or import a data set.")

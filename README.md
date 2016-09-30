@@ -2,9 +2,9 @@ iNZight *Lite* version 1.0
 ==============================
 
 
-*Last Updated: 06/05/16*
+*Last Updated: 30/09/16*
 
-This is the online version of iNZight (http://docker.stat.auckland.ac.nz), with four new modules:
+This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), with four new modules:
 
 - Visualize
 - Time Series
@@ -15,6 +15,16 @@ Underway:
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Manipulate variables] Fixed the "change to factor" function under "Manipulate variables"
+- [Filter data] Fixed a problem from "levels of categorical variables" under "Filter data"
+- [Alphabetise variables] Added a new "Alphabetise variables" category
+- [Visualize] Change the default backgorund color for plots to "grey93" 
+- [General] Fixed some problems occured from the implementation of iNZightPlots 2.50
+- [General] Implement iNZightPlots 2.50
+- [General] Re-order the logos at the bottom of the starting page
+- [General] Change the contact email to inzightlite_support@stat.auckland.ac.nz
+- [Visualize] Fixed an visualization problem happened to rds files where the first column name cannot be displayed
+- [Visualize] Change the displaying order of "missing" values and "observed" values
 - [Missing to categorical] Made the "missing to categorical" function to be consistent with iNZightVIT
 - [Visualize] Fixed the problem of "when g2_level == 0, doesn't show plots"
 - [Visualize] Get rid of "none" option for the selectinput box of variable 1. Now when users go to "visualize" page, it directly shows the plot of the first column 

@@ -22,8 +22,14 @@ observe({
   })
 })
 
+
+
+
 output$alphabetise.variables = renderUI({
-  alphabetise.variables(get.data.set())
+  get.data.set()
+  isolate({
+    alphabetise.variables(get.data.set())
+  })
 })
 
 

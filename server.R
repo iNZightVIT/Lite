@@ -49,7 +49,7 @@ shinyServer(function(input, output, session) {
   values$data.set = NULL
   values$data.restore = NULL
   values$lite.version = "iNZight Lite Version 0.9.7.5"
-  values$lite.update = "Last Updated: 21/04/15"
+  values$lite.update = "Last Updated: 30/09/16"
   values$button = F
   values$transform.text = ""
   values$create.variables.expression.text = ""

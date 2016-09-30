@@ -127,7 +127,7 @@ shinyUI(
                                 uiOutput('restore.data')),
                        tabPanel("Survey design (beta)",
                                 uiOutput('survey.design')),
-                       tabPanel("Alphabetise Variables (beta)",
+                       tabPanel("Alphabetise Variables",
                                 uiOutput('alphabetise.variables'))
             ),
             ##  "Manipulate variables" tab.
