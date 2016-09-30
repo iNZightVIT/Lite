@@ -1,4 +1,4 @@
-options(shiny.maxRequestSize=20*1024^2)
+options(shiny.maxRequestSize=5*1024^2)
 
 
 import_reactives = reactiveValues(
