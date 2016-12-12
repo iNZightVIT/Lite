@@ -201,7 +201,7 @@ handle.input = function(input, subs = FALSE) {
 output$visualize.panel <- renderUI({
   get.data.set()
   isolate({
-    visualize.panel.ui(get.data.set())
+    visualize.panel1.ui(get.data.set())
   })
 })
 
@@ -3481,4 +3481,34 @@ observe({
       plot.par$locate.id = temp
     }
   })
+})
+
+
+
+observe({
+  if (!is.null(input$go.visualisation) && input$go.visualisation > 0) {
+    isolate({
+      output$visualize.panel <- renderUI({
+        get.data.set()
+        isolate({
+          visualize.panel2.ui(get.data.set())
+        })
+      })
+    })
+  }
+})
+
+
+
+observe({
+  if (!is.null(input$backto.variableselection) && input$backto.variableselection > 0) {
+    isolate({
+      output$visualize.panel <- renderUI({
+        get.data.set()
+        isolate({
+          visualize.panel1.ui(get.data.set())
+        })
+      })
+    })
+  }
 })
