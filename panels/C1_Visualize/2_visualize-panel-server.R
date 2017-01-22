@@ -978,7 +978,7 @@ output$visualize.inference = renderPrint({
       }
       dafr = get.data.set()
       
-
+      pdf(NULL)
       
       tryCatch({
         cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
