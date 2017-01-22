@@ -978,18 +978,28 @@ output$visualize.inference = renderPrint({
       }
       dafr = get.data.set()
       
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-        tryCatch({
-          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
-      }else{
-        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
-      }
+
+      
+      tryCatch({
+        cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+      }, warning = function(w) {
+        print(w)
+      }, error = function(e) {
+        print(e)
+      }, finally = {})
+      
+#      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+#           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+#        tryCatch({
+#          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+#        }, warning = function(w) {
+#          print(w)
+#        }, error = function(e) {
+#          print(e)
+#        }, finally = {})
+#      }else{
+#        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
+#      }
     })
   }
 })
