@@ -2,7 +2,7 @@ iNZight *Lite* version 1.0
 ==============================
 
 
-*Last Updated: 30/09/16*
+*Last Updated: 20/02/17*
 
 This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), with four new modules:
 
@@ -12,9 +12,11 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), 
 
 Underway:
 ---------
+- Maps
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Visualize] Add Save Plot buttons for both main plot and mini plot
 - [Manipulate variables] Fixed the "change to factor" function under "Manipulate variables"
 - [Filter data] Fixed a problem from "levels of categorical variables" under "Filter data"
 - [Alphabetise variables] Added a new "Alphabetise variables" category
