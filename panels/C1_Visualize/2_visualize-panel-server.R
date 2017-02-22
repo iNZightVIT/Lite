@@ -856,7 +856,7 @@ output$saveplot = downloadHandler(
     else if(input$saveplottype == "png")
       png(file)
     else if(input$saveplottype == "pdf")
-      pdf(file)
+      pdf(file, useDingbats = FALSE)
     
     if (!is.null(vis.par())) {
       dafr = get.data.set()
@@ -912,7 +912,7 @@ output$saveplot2 = downloadHandler(
     else if(input$saveplottype2 == "png")
       png(file)
     else if(input$saveplottype2 == "pdf")
-      pdf(file)
+      pdf(file, useDingbats = FALSE)
     
     if (!is.null(vis.par())) {
       dafr = get.data.set()
