@@ -18,7 +18,6 @@ library(GGally)
 library(iNZightRegression)
 library(RJSONIO)
 library(survey)
-library(iNZightMaps)
 
 # read in possible command line arguments such as 'vars.path'
 
@@ -301,14 +300,6 @@ shinyServer(function(input, output, session) {
   ##------------------------##
   source("panels/F3_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
   source("panels/F3_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
-  
-  #   Advanced --> Maps
-  
-  ##---------------##
-  ##  Maps Module  ##
-  ##---------------##
-  source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
-  source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
 
 #   Help
 
