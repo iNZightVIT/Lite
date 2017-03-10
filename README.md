@@ -2,20 +2,18 @@ iNZight *Lite* version 1.0
 ==============================
 
 
-*Last Updated: 20/02/17*
+*Last Updated: 11/03/17*
 
 This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), with four new modules:
 
 - Visualize
 - Time Series
 - Model Fitting
-
-Underway:
----------
 - Maps
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [Maps] Add Maps module
 - [Visualize] Add Save Plot buttons for both main plot and mini plot
 - [Manipulate variables] Fixed the "change to factor" function under "Manipulate variables"
 - [Filter data] Fixed a problem from "levels of categorical variables" under "Filter data"
