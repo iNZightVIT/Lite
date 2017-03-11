@@ -399,7 +399,7 @@ observe({
       args$varnames$g2 = colnames(data.temp)[index]
       args$g2.level = "_ALL"
       if(input$map_type == 1) {
-        g2 = iNZightPlots::convert.to.factor(data.temp[, index])
+        g2 = iNZightPlots:::convert.to.factor(data.temp[, index])
         args$g2 = g2
       }
       else if(input$map_type == 2) {
@@ -410,7 +410,7 @@ observe({
                                                       location = input$maplocation,
                                                       data.region = input$locationvariable)
           data.temp2 = mapsplot.obj$data
-          g2 = iNZightPlots::convert.to.factor(data.temp2[, index])
+          g2 = iNZightPlots:::convert.to.factor(data.temp2[, index])
           args$g2 = g2
         }
       }
@@ -426,7 +426,7 @@ output$mapssubset1_slider_panel = renderUI({
     isolate({
       data.temp = get.data.set()
       index = which(input$mapssubset1 == colnames(data.temp))
-      temp = iNZightPlots::convert.to.factor(data.temp[, index])
+      temp = iNZightPlots:::convert.to.factor(data.temp[, index])
       n.levels = length(levels(temp))
       sliderInput(inputId = "mapssubset1_slider",
                   label = paste("Subset '", input$mapssubset1, "':", "_MULTI"),
@@ -444,7 +444,7 @@ observe({
        input$mapssubset1 %in% colnames(get.data.set())) {
       data.temp = get.data.set()
       index = which(input$mapssubset1 == colnames(data.temp))
-      temp = iNZightPlots::convert.to.factor(data.temp[, index])
+      temp = iNZightPlots:::convert.to.factor(data.temp[, index])
       level = input$mapssubset1_slider
       args$varnames$g1 = colnames(data.temp)[index]
       if(input$mapssubset1_slider == 0) {
@@ -458,7 +458,7 @@ observe({
         args$g1.level = levels(temp)[level]
       }
       if(input$map_type == 1) {
-        g1 = iNZightPlots::convert.to.factor(data.temp[, index])
+        g1 = iNZightPlots:::convert.to.factor(data.temp[, index])
         args$g1 = g1
       }
       else if(input$map_type == 2) {
@@ -469,7 +469,7 @@ observe({
                                                       location = input$maplocation,
                                                       data.region = input$locationvariable)
           data.temp2 = mapsplot.obj$data
-          g1 = iNZightPlots::convert.to.factor(data.temp2[, index])
+          g1 = iNZightPlots:::convert.to.factor(data.temp2[, index])
           args$g1 = g1
         }
       }
@@ -502,7 +502,7 @@ observe({
       args$varnames$g1 = colnames(data.temp)[index]
       args$g1.level = "_MULTI"
       if(input$map_type == 1) {
-        g1 = iNZightPlots::convert.to.factor(data.temp[, index])
+        g1 = iNZightPlots:::convert.to.factor(data.temp[, index])
         args$g1 = g1
       }
       else if(input$map_type == 2) {
@@ -513,7 +513,7 @@ observe({
                                                       location = input$maplocation,
                                                       data.region = input$locationvariable)
           data.temp2 = mapsplot.obj$data
-          g1 = iNZightPlots::convert.to.factor(data.temp2[, index])
+          g1 = iNZightPlots:::convert.to.factor(data.temp2[, index])
           args$g1 = g1
         }
       }
@@ -536,7 +536,7 @@ output$mapssubset2_slider_panel = renderUI({
     isolate({
       data.temp = get.data.set()
       index = which(input$mapssubset2 == colnames(data.temp))
-      temp = iNZightPlots::convert.to.factor(data.temp[, index])
+      temp = iNZightPlots:::convert.to.factor(data.temp[, index])
       n.levels = length(levels(temp))
       sliderInput(inputId = "mapssubset2_slider",
                   label = paste("Subset '", input$mapssubset2, "': ", "_ALL"),
@@ -554,7 +554,7 @@ observe({
        input$mapssubset2 %in% colnames(get.data.set())) {
       data.temp = get.data.set()
       index = which(input$mapssubset2 == colnames(data.temp))
-      temp = iNZightPlots::convert.to.factor(data.temp[, index])
+      temp = iNZightPlots:::convert.to.factor(data.temp[, index])
       n.levels = length(levels(temp))
       level = input$mapssubset2_slider
       args$varnames$g2 = colnames(data.temp)[index]
@@ -574,7 +574,7 @@ observe({
         args$g2.level = levels(temp)[level]
       }
       if(input$map_type == 1) {
-        g2 = iNZightPlots::convert.to.factor(data.temp[, index])
+        g2 = iNZightPlots:::convert.to.factor(data.temp[, index])
         args$g2 = g2
       }
       else if(input$map_type == 2) {
@@ -585,7 +585,7 @@ observe({
                                                       location = input$maplocation,
                                                       data.region = input$locationvariable)
           data.temp2 = mapsplot.obj$data
-          g2 = iNZightPlots::convert.to.factor(data.temp2[, index])
+          g2 = iNZightPlots:::convert.to.factor(data.temp2[, index])
           args$g2 = g2
         }
       }
