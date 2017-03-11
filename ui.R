@@ -157,7 +157,9 @@ shinyUI(
                        tabPanel("Time Series",value="timeSeries",
                                 uiOutput("timeseries.panel")),
                        tabPanel("Model Fitting",value="regression",
-                                uiOutput("modelfitting.panel"))
+                                uiOutput("modelfitting.panel")),
+                       tabPanel("Maps",
+                                uiOutput("maps.panel"))
             )
             
             ## Backup Link

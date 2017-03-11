@@ -201,7 +201,7 @@ handle.input = function(input, subs = FALSE) {
 output$visualize.panel <- renderUI({
   get.data.set()
   isolate({
-    visualize.panel.ui(get.data.set())
+    visualize.panel1.ui(get.data.set())
   })
 })
 
@@ -841,125 +841,6 @@ output$visualize.plot = renderPlot({
   }
 })
 
-
-
-
-# save main plot;
-output$saveplot = downloadHandler(
-  filename = function() {
-    paste("Plot", input$saveplottype, sep = ".")
-  },
-  content = function(file) {
-    
-    if(input$saveplottype == "jpg")
-      jpeg(file)
-    else if(input$saveplottype == "png")
-      png(file)
-    else if(input$saveplottype == "pdf")
-      pdf(file, useDingbats = FALSE)
-    
-    if (!is.null(vis.par())) {
-      dafr = get.data.set()
-      if(is.numeric(plot.par$x)&
-         is.numeric(plot.par$y)){
-        temp = vis.par()
-        temp$trend.parallel = TRUE
-        temp.x = temp$x
-        temp$x=temp$y
-        temp$y=temp.x
-        temp.varnames.x = temp$varnames$x
-        temp$varnames$x = temp$varnames$y
-        temp$varnames$y = temp.varnames.x
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
-          }, warning = function(w) {
-            print(w)
-          }, error = function(e) {
-            print(e)
-          }, finally = {})
-        }else{
-          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
-        }
-      }else{
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
-          }, warning = function(w) {
-            print(w)
-          }, error = function(e) {
-            print(e)
-          }, finally = {})
-        }else{
-          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
-        }
-      }
-    }
-
-    dev.off()
-  })    
-
-
-# save mini plot;
-output$saveplot2 = downloadHandler(
-  filename = function() {
-    paste("Plot", input$saveplottype2, sep = ".")
-  },
-  content = function(file) {
-    
-    if(input$saveplottype == "jpg")
-      jpeg(file)
-    else if(input$saveplottype2 == "png")
-      png(file)
-    else if(input$saveplottype2 == "pdf")
-      pdf(file, useDingbats = FALSE)
-    
-    if (!is.null(vis.par())) {
-      dafr = get.data.set()
-      if(is.numeric(plot.par$x)&
-         is.numeric(plot.par$y)){
-        temp = vis.par()
-        temp$trend.parallel = TRUE
-        temp.x = temp$x
-        temp$x=temp$y
-        temp$y=temp.x
-        temp.varnames.x = temp$varnames$x
-        temp$varnames$x = temp$varnames$y
-        temp$varnames$y = temp.varnames.x
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
-          }, warning = function(w) {
-            print(w)
-          }, error = function(e) {
-            print(e)
-          }, finally = {})
-        }else{
-          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
-        }
-      }else{
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
-          }, warning = function(w) {
-            print(w)
-          }, error = function(e) {
-            print(e)
-          }, finally = {})
-        }else{
-          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
-        }
-      }
-    }
-    
-    dev.off()
-  })    
-
-
-
-
-
-
 output$mini.plot = renderPlot({
   isolate({
     # some of the graphical parameters need 
@@ -1038,34 +919,23 @@ output$visualize.summary = renderPrint({
   if(!is.null(values.list$design)){
     values.list$data = NULL
   }
-  
-  pdf(NULL)
-  
-#   tmp.list <- values.list
-#  if (is.numeric(tmp.list$x)) {
-#    if (!is.null(tmp.list$y)) {
-#      if (is.factor(tmp.list$y))
-#        tmp.list$plottype = "hist"
-#    } else {
-#      tmp.list$plottype = "hist"
-#    }
-#  }
 
-#  tmp.list <- values.list
-#  tmp.list$plottype = "hist"
+
+  tmp.list <- values.list
+  tmp.list$plottype = "hist"
   
   
   if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
     tryCatch({
-      cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+      cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
     }, warning = function(w) {
      print(w)
    }, error = function(e) {
     print(e)
   }, finally = {})
  }else{
-   suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
+   suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
      }
 })
 
@@ -1094,6 +964,7 @@ output$visualize.inference = renderPrint({
              summary.type = "inference",
              inference.type = "conf",
              inference.par = NULL),
+        
         keep.null = TRUE
       )
       if(is.numeric(plot.par$x)&
@@ -1109,31 +980,26 @@ output$visualize.inference = renderPrint({
       
       pdf(NULL)
       
-#      tmp.list <- values.list
-#      if (is.numeric(tmp.list$x)) {
-#        if (!is.null(tmp.list$y)) {
-#          if (is.factor(tmp.list$y))
-#            tmp.list$plottype = "hist"
-#        } else {
-#          tmp.list$plottype = "hist"
-#        }
+      tryCatch({
+        cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+      }, warning = function(w) {
+        print(w)
+      }, error = function(e) {
+        print(e)
+      }, finally = {})
+      
+#      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+#           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+#        tryCatch({
+#          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+#        }, warning = function(w) {
+#          print(w)
+#        }, error = function(e) {
+#          print(e)
+#        }, finally = {})
+#      }else{
+#        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
 #      }
-      
-#      tmp.list <- values.list
-#      tmp.list$plottype = "hist"
-      
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-        tryCatch({
-          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
-      }else{
-        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
-      }
     })
   }
 })
@@ -3604,4 +3470,34 @@ observe({
       plot.par$locate.id = temp
     }
   })
+})
+
+
+
+observe({
+  if (!is.null(input$go.visualisation) && input$go.visualisation > 0) {
+    isolate({
+      output$visualize.panel <- renderUI({
+        get.data.set()
+        isolate({
+          visualize.panel2.ui(get.data.set())
+        })
+      })
+    })
+  }
+})
+
+
+
+observe({
+  if (!is.null(input$backto.variableselection) && input$backto.variableselection > 0) {
+    isolate({
+      output$visualize.panel <- renderUI({
+        get.data.set()
+        isolate({
+          visualize.panel1.ui(get.data.set())
+        })
+      })
+    })
+  }
 })
