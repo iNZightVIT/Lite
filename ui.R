@@ -100,7 +100,7 @@ shinyUI(
             tabPanel("About",
                      uiOutput('about.panel')),
             ##  "Data" tab.
-            navbarMenu("File",id = "data",
+            navbarMenu("File",
                        tabPanel("Import Dataset",
                                 uiOutput('load.data.panel')),
                        tabPanel("Export Dataset",
@@ -114,7 +114,7 @@ shinyUI(
             tabPanel("Visualize",value="visualize",
                      uiOutput("visualize.panel")),
             ## Row operations tab
-            navbarMenu("Dataset",id="operations_row",
+            navbarMenu("Dataset",
                        tabPanel("Filter Dataset",
                                 uiOutput('filter.dataset')),
                        tabPanel("Sort data by variables",
