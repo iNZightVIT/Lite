@@ -496,11 +496,11 @@ observe({
       if(input$mapssubset1_slider != 0) {
         updateSliderInput(session, "mapssubset1_slider",
                           label = paste("Subset '", input$mapssubset1, "': ", levels(temp)[level]))
-        args$g1.level = levels(temp)[level]
-        args$varnames$g1 = colnames(data.temp)[index]
+#        args$g1.level = levels(temp)[level]
+#        args$varnames$g1 = colnames(data.temp)[index]
         if(input$map_type == 1) {
-          g1 = convert.to.factor(data.temp[, index])
-          args$g1 = g1
+#          g1 = convert.to.factor(data.temp[, index])
+#          args$g1 = g1
         }
         else if(input$map_type == 2) {
           if(!is.null(input$maplocation) &&
