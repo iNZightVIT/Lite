@@ -202,7 +202,7 @@ maps.panel.ui = function(data.set) {
     if (is.null(data.set)) {
       fluidRow(
         includeMarkdown(
-          "panels/F4_Maps/4_maps-panel-null.md")
+          "panels/F4_Maps/4_maps.panel-null.md")
       )
     } else {
       fluidRow(
