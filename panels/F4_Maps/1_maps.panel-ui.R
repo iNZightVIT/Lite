@@ -31,7 +31,7 @@ maps.sidebarPanel = function(data.set) {
   
   sidebarPanelUI = list(
     tabsetPanel(
-      id = "sidebar_selector",
+      id = "maps_sidebar_tabs",
       type = "tabs",
       
       tabPanel(
@@ -140,11 +140,8 @@ maps.sidebarPanel = function(data.set) {
           uiOutput("plot_region_colour_panel"),
           uiOutput("missingvaluecolour_panel"),
           uiOutput("plotlabels_panel")
-        ),
-        
-        hr(),
-        
-        maps.help()
+        )
+
       )
     )
     
