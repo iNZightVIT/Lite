@@ -438,48 +438,6 @@ output$mapssubset1_slider_panel = renderUI({
 
 
 
-#observe({
-#  input$mapssubset1_slider
-#  isolate({
-#    if(!is.null(input$mapssubset1) &&
-#       input$mapssubset1 %in% colnames(get.data.set())) {
-#      data.temp = get.data.set()
-#      index = which(input$mapssubset1 == colnames(data.temp))
-#      temp = convert.to.factor(data.temp[, index])
-#      level = input$mapssubset1_slider
-#      args$varnames$g1 = colnames(data.temp)[index]
-#      if(input$mapssubset1_slider == 0) {
-#        updateSliderInput(session, "mapssubset1_slider",
-#                          label = paste("Subset '", input$mapssubset1, "': ", "_MULTI"))
-#        args$g1.level = "_MULTI"
-#      }
-#      else {
-#        updateSliderInput(session, "mapssubset1_slider",
-#                          label = paste("Subset '", input$mapssubset1, "': ", levels(temp)[level]))
-#        args$g1.level = levels(temp)[level]
-#      }
-#      if(input$map_type == 1) {
-#        g1 = convert.to.factor(data.temp[, index])
-#        args$g1 = g1
-#      }
-#      else if(input$map_type == 2) {
-#        if(!is.null(input$maplocation) &&
-#           !is.null(input$locationvariable) &&
-#           input$locationvariable %in% colnames(data.temp)) {
-#          mapsplot.obj = iNZightShapeMap(data = data.temp,
-#                                         location = input$maplocation,
-#                                         data.region = input$locationvariable)
-#          data.temp2 = mapsplot.obj$data
-#          g1 = convert.to.factor(data.temp2[, index])
-#          args$g1 = g1
-#        }
-#      }
-#    }
-#  })
-#})
-
-
-
 observe({
   input$mapssubset1_slider
   isolate({
