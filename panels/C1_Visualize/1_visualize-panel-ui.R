@@ -1,10 +1,10 @@
-###  Last Modified : March 22, 2015.
+###  Last Modified : March 12, 2017.
 ###---------------------------------------------###
 ###  User Interface for the "Visualize" Module  ###
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : March 22, 2015.
+###  Last Modified : March 12, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -14,6 +14,7 @@
 ###  Please consult the comments before editing any code.
 ###
 ###  * Note: Thie file is to be sourced locally within "server.R" *
+
 
 ###-----------------###
 ###  Sidebar Panel  ###
@@ -25,6 +26,122 @@ visualize.help = function() {
                  "Visualize",
                  "panels/C1_Visualize/3_visualize-panel-help.md")
 }
+
+
+###  Next, we set up the sidebar panel with "vis.sidebarPanel()".
+vis.sidebarPanel = function() {
+  
+  sidebarPanelUI = list(
+    
+    tabsetPanel(
+      id = "visualize_sidebar_tabs",
+      type = "pills",
+      
+      tabPanel(
+        title = "Select Variables",
+        
+        hr(),
+        
+        fixedRow(column(10,h4("Variable selection")),
+                 column(2,checkboxInput("change_var_selection",
+                                        value=F,
+                                        label=""))),
+        
+        ##  Select the first variable.
+        uiOutput("vari1_panel"),
+        
+        ##  Select the second variable.
+        uiOutput("vari2_panel"),
+        hr(),
+        ## Select desired subset for the first variable.
+        uiOutput("subs1_panel"),
+        
+        ##  Select desired subset for the second variable.
+        uiOutput("subs2_panel"),
+        
+        
+        ##########
+        
+        hr(),
+        actionButton(inputId = "reset.graphics",
+                     label = "Reset To Default"),
+        br(),
+        br(),
+        visualize.help()
+      ),
+      
+      tabPanel(
+        title = "Add To Plot",
+        
+        hr(),
+        
+        h4("Select Additions"),
+        
+        uiOutput("select_additions_panel"),
+        
+        hr(),
+        
+        conditionalPanel(
+          condition = "input.select_additions=='Customise Plot Appearance'",
+          
+          uiOutput("plot.appearance.panel"),
+          uiOutput("code.variables.panel")
+        ),
+        
+        conditionalPanel(
+          condition = "input.select_additions=='Trend Lines and Curves'",
+          
+          uiOutput("trend.curve.panel"),
+          uiOutput("join.points.panel"),
+          uiOutput("xy.line.panel")
+        ),
+        
+        conditionalPanel(
+          condition = "input.select_additions=='Axes and Labels'",
+          
+          uiOutput("customize.labels.panel"),
+          uiOutput("add.jitter.panel"),
+          uiOutput("add.rugs.panel")
+#          uiOutput("adjust.axis.panel"),
+#          uiOutput("adjust.number.bars.panel")
+        ),
+        
+        conditionalPanel(
+          condition = "input.select_additions=='Identify Points'",
+          
+          uiOutput("points.identify.panel")
+        ),
+
+        conditionalPanel(
+          condition = "input.select_additions=='Add Inference Information'",
+  
+          fixedRow(column(8,h4("Inference")),
+                   column(2,
+                          checkboxInput("toggle_inference",
+                                        label="",
+                                        value=TRUE))),
+          fixedRow(column(width = 8,
+                          uiOutput("add_inference")))
+        )
+
+      )
+    )
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###  Next, we set up the sidebar panel with "vis.sidebarPanel()".
 vis.sidebarPanel1 = function() {
@@ -88,6 +205,7 @@ vis.sidebarPanel2 = function() {
                                   value=input$toggle_inference))),
     fixedRow(column(width = 8,
                     uiOutput("add_inference"))),
+    
     fixedRow(column(8,h4("Advanced options")),column(2,
                                                      checkboxInput("toggle_advanced_options",
                                                                    label="",
@@ -202,6 +320,29 @@ vis.mainPanel = function() {
 ###  We combine the vis.sidebarPanel() and vis.mainPanel() functions to
 ###  complete the UI for the Time Series module. If no data set has been
 ###  selected, we display a helpful warning message.
+
+visualize.panel.ui = function(data.set) {
+  fluidPage(  
+    if (is.null(data.set)) {
+      fixedRow(
+        includeMarkdown(
+          "panels/C1_Visualize/4_visualize-panel-null.md")
+      )
+    } else {
+      fixedRow(
+        column(4, vis.sidebarPanel()),
+        column(8, vis.mainPanel())
+      )
+    }
+  )
+}
+
+
+
+
+
+
+
 
 visualize.panel1.ui = function(data.set) {
     fluidPage(  
