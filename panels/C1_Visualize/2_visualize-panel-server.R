@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   March 12, 2017.
+###  Last Modified  :   March 18, 2015
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -841,6 +841,125 @@ output$visualize.plot = renderPlot({
   }
 })
 
+
+
+
+# save main plot;
+output$saveplot = downloadHandler(
+  filename = function() {
+    paste("Plot", input$saveplottype, sep = ".")
+  },
+  content = function(file) {
+    
+    if(input$saveplottype == "jpg")
+      jpeg(file)
+    else if(input$saveplottype == "png")
+      png(file)
+    else if(input$saveplottype == "pdf")
+      pdf(file, useDingbats = FALSE)
+    
+    if (!is.null(vis.par())) {
+      dafr = get.data.set()
+      if(is.numeric(plot.par$x)&
+         is.numeric(plot.par$y)){
+        temp = vis.par()
+        temp$trend.parallel = TRUE
+        temp.x = temp$x
+        temp$x=temp$y
+        temp$y=temp.x
+        temp.varnames.x = temp$varnames$x
+        temp$varnames$x = temp$varnames$y
+        temp$varnames$y = temp.varnames.x
+        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        }else{
+          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+        }
+      }else{
+        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        }else{
+          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+        }
+      }
+    }
+
+    dev.off()
+  })    
+
+
+# save mini plot;
+output$saveplot2 = downloadHandler(
+  filename = function() {
+    paste("Plot", input$saveplottype2, sep = ".")
+  },
+  content = function(file) {
+    
+    if(input$saveplottype == "jpg")
+      jpeg(file)
+    else if(input$saveplottype2 == "png")
+      png(file)
+    else if(input$saveplottype2 == "pdf")
+      pdf(file, useDingbats = FALSE)
+    
+    if (!is.null(vis.par())) {
+      dafr = get.data.set()
+      if(is.numeric(plot.par$x)&
+         is.numeric(plot.par$y)){
+        temp = vis.par()
+        temp$trend.parallel = TRUE
+        temp.x = temp$x
+        temp$x=temp$y
+        temp$y=temp.x
+        temp.varnames.x = temp$varnames$x
+        temp$varnames$x = temp$varnames$y
+        temp$varnames$y = temp.varnames.x
+        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        }else{
+          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+        }
+      }else{
+        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        }else{
+          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+        }
+      }
+    }
+    
+    dev.off()
+  })    
+
+
+
+
+
+
 output$mini.plot = renderPlot({
   isolate({
     # some of the graphical parameters need 
@@ -919,23 +1038,34 @@ output$visualize.summary = renderPrint({
   if(!is.null(values.list$design)){
     values.list$data = NULL
   }
+  
+  pdf(NULL)
+  
+#   tmp.list <- values.list
+#  if (is.numeric(tmp.list$x)) {
+#    if (!is.null(tmp.list$y)) {
+#      if (is.factor(tmp.list$y))
+#        tmp.list$plottype = "hist"
+#    } else {
+#      tmp.list$plottype = "hist"
+#    }
+#  }
 
-
-  tmp.list <- values.list
-  tmp.list$plottype = "hist"
+#  tmp.list <- values.list
+#  tmp.list$plottype = "hist"
   
   
   if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
     tryCatch({
-      cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
+      cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
     }, warning = function(w) {
      print(w)
    }, error = function(e) {
     print(e)
   }, finally = {})
  }else{
-   suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
+   suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
      }
 })
 
@@ -964,7 +1094,6 @@ output$visualize.inference = renderPrint({
              summary.type = "inference",
              inference.type = "conf",
              inference.par = NULL),
-        
         keep.null = TRUE
       )
       if(is.numeric(plot.par$x)&
@@ -980,26 +1109,31 @@ output$visualize.inference = renderPrint({
       
       pdf(NULL)
       
-      tryCatch({
-        cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
-      }, warning = function(w) {
-        print(w)
-      }, error = function(e) {
-        print(e)
-      }, finally = {})
-      
-#      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-#           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-#        tryCatch({
-#          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
-#        }, warning = function(w) {
-#          print(w)
-#        }, error = function(e) {
-#          print(e)
-#        }, finally = {})
-#      }else{
-#        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
+#      tmp.list <- values.list
+#      if (is.numeric(tmp.list$x)) {
+#        if (!is.null(tmp.list$y)) {
+#          if (is.factor(tmp.list$y))
+#            tmp.list$plottype = "hist"
+#        } else {
+#          tmp.list$plottype = "hist"
+#        }
 #      }
+      
+#      tmp.list <- values.list
+#      tmp.list$plottype = "hist"
+      
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({
+          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+      }else{
+        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
+      }
     })
   }
 })
@@ -1131,7 +1265,7 @@ output$add_inference = renderUI({
     dafr = get.data.set()
     add_inference.check = checkboxInput("add.inference",
                                         label="Add inference",
-                                        value=input$toggle_inference)
+                                        value=input$add.inference)
     mean_median.radio = radioButtons("inference_parameter1",
                                      label="Parameter",
                                      choices=c("Mean","Median"),
@@ -1470,7 +1604,7 @@ output$advanced_options_panel = renderUI({
          (class(get.data.set()[,input$vari1])%in%"factor"|
             class(get.data.set()[,input$vari1])%in%"character")){
       ret = selectInput(inputId = "advanced_options",
-                        label = NULL,
+                        label = "Options",
                         choices = c('Code more variables',
                                     'Change plot appearance',
                                     'Customize labels',
@@ -1483,7 +1617,7 @@ output$advanced_options_panel = renderUI({
                   (class(get.data.set()[,input$vari2])%in%"factor"|
                      class(get.data.set()[,input$vari2])%in%"character"))){
       ret = selectInput(inputId = "advanced_options",
-                        label = NULL,
+                        label = "Options",
                         choices = c('Change plot appearance',
                                     'Customize labels',
                                     'Adjust number of Bars'),
@@ -1505,7 +1639,7 @@ output$advanced_options_panel = renderUI({
                      (class(get.data.set()[,input$vari2])%in%"character"|
                         class(get.data.set()[,input$vari2])%in%"factor"))){
       ret = selectInput(inputId = "advanced_options",
-                        label = NULL,
+                        label = "Options",
                         choices = c('Code more variables',
                                     'Change plot appearance',
                                     'Identify points',
@@ -1514,7 +1648,7 @@ output$advanced_options_panel = renderUI({
                         selected = 'Change plot appearance')
       if(large.sample){
         ret = selectInput(inputId = "advanced_options",
-                          label = NULL,
+                          label = "Options",
                           choices = c('Change plot appearance',
                                       'Customize labels',
                                       'Adjust axis limits'),
@@ -1527,7 +1661,7 @@ output$advanced_options_panel = renderUI({
                   (class(get.data.set()[,input$vari2])%in%"numeric"|
                      class(get.data.set()[,input$vari2])%in%"integer"))){
       ret = selectInput(inputId = "advanced_options",
-                        label = NULL,
+                        label = "Options",
                         choices = c('Code more variables',
                                     'Add trend curves',
                                     'Add x=y line',
@@ -1541,7 +1675,7 @@ output$advanced_options_panel = renderUI({
                         selected = 'Change plot appearance')
       if(large.sample){
         ret = selectInput(inputId = "advanced_options",
-                          label = NULL,
+                          label = "Options",
                           choices = c('Add trend curves',
                                       'Add x=y line',
                                       'Change plot appearance',
@@ -1568,13 +1702,13 @@ output$plot.appearance.panel = renderUI({
                        399,419,558,600,626,647)]
     cols2 = colors()[c(81,73,84,107,371,426,517,617)]
     cols3 = colors()[c(203,73,81,84,107,371,425,517,617)]
-    select.bg.object = selectInput(inputId="select.bg1",label="Background colour:",
+    select.bg.object = selectInput(inputId="select.bg1",label="Select Background colour:",
                                    choices=cols1,
                                    selected=graphical.par$bg)
     select.barcolor.object = selectInput(inputId="select.barcolor",label="Bar Colour:",
                                          choices=cols2,
                                          selected=graphical.par$bar.fill)
-    select.dotcolor.object = selectInput(inputId="select.dotcolor",label="Point Colour:",
+    select.dotcolor.object = selectInput(inputId="select.dotcolor",label="Colour:",
                                          choices=cols3,
                                          selected=graphical.par$col.pt)
     select.plot.type.object = NULL
@@ -1583,9 +1717,9 @@ output$plot.appearance.panel = renderUI({
     if(is.null(graphical.par$cex.dotpt)){
       graphical.par$cex.dotpt = 0.5
     }
-    adjust.size.points.dot.object = sliderInput("adjust.size.points.dot", label = "Point size:", min = 0.1, 
+    adjust.size.points.dot.object = sliderInput("adjust.size.points.dot", label = "Adjust size:", min = 0.1, 
                 max = 3.5, value=graphical.par$cex.dotpt,step=.05)
-    adjust.size.points.scatter.object = sliderInput("adjust.size.points.scatter", label = "Point size:", min = 0.1, 
+    adjust.size.points.scatter.object = sliderInput("adjust.size.points.scatter", label = "Adjust size:", min = 0.1, 
                                                 max = 3.5, value=graphical.par$cex.dotpt,step=.05)
     adjust.grid.size.object = sliderInput("adjust.grid.size", label = "Grid size (n x n):", min = 10, 
                                                     max = 250, value=graphical.par$scatter.grid.bins,step=1)
@@ -1669,11 +1803,11 @@ output$plot.appearance.panel = renderUI({
                                                         "histogram"),
                                               selected=input$select.plot.type)
         ret = list(select.plot.type.object,
-                   select.bg.object,
                    adjust.size.points.dot.object,
+                   adjust.transparency.object,
+                   select.bg.object,
                    select.dotcolor.object,
-                   color.interior,
-                   adjust.transparency.object)
+                   color.interior)
         if((!is.null(input$select.plot.type)&&
              (input$select.plot.type%in%"histogram"||
              (large.sample&&input$select.plot.type%in%"default")))||
@@ -1706,13 +1840,13 @@ output$plot.appearance.panel = renderUI({
                                                max = m, value=nbins,step=1)
           if(is.null(plot.par$design)){
             ret=list(select.plot.type.object,
+                     adjust.num.bins.object,
                      select.bg.object,
-                     select.barcolor.object,
-                     adjust.num.bins.object)
+                     select.barcolor.object)
           }else{
-            ret=list(select.bg.object,
-                     select.barcolor.object,
-                     adjust.num.bins.object)
+            ret=list(adjust.num.bins.object,
+                     select.bg.object,
+                     select.barcolor.object)
           }
         }
       # scatter plot
@@ -1730,23 +1864,23 @@ output$plot.appearance.panel = renderUI({
                                                         "hexbin plot"),
                                               selected=input$select.plot.type)
         ret = list(select.plot.type.object,
-                   select.bg.object,
                    adjust.size.points.scatter.object,
+                   adjust.transparency.object,
+                   select.bg.object,
                    select.dotcolor.object,
-                   color.interior,
-                   adjust.transparency.object)
+                   color.interior)
         if(!is.null(input$select.plot.type)&&
              (input$select.plot.type%in%"grid-density plot"||
                 (large.sample&&input$select.plot.type%in%"default"))){
           ret = list(select.plot.type.object,
-                     select.bg.object,
                      adjust.grid.size.object,
-                     adjust.min.count.grid.object)
+                     adjust.min.count.grid.object,
+                     select.bg.object)
         }else if(!is.null(input$select.plot.type)&&
                    input$select.plot.type%in%"hexbin plot"){
           ret = list(select.plot.type.object,
-                     select.bg.object,
-                     adjust.hex.bins.object)
+                     adjust.hex.bins.object,
+                     select.bg.object)
         }
       }
     }
@@ -2167,8 +2301,7 @@ observe({
 output$trend.curve.panel = renderUI({
   get.data.set()
   isolate({
-    title.add.trend.curve = h5("Trend Curves")
-    title.add.smoother = h5("Smoother")
+    title.add.trend.curve = h4("Add trend curves")
     check.linear.object = checkboxInput("check_linear",label="linear",value = F)
     check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = F)
     check.cubic.object = checkboxInput("check_cubic",label="cubic",value = F)
@@ -2210,7 +2343,6 @@ output$trend.curve.panel = renderUI({
                   column(width=6,color.quadratic.select)),
          fixedRow(column(width=6,check.cubic.object),
                   column(width=6,color.cubic.select)),
-         title.add.smoother,
          fixedRow(column(width=6,check.smoother.object),
                   column(width=6,color.smoother.select)),
          conditionalPanel("input.check_smoother",
@@ -2354,7 +2486,7 @@ observe({
 # add a x=y line
 output$xy.line.panel = renderUI({
   get.data.set()
-  titel.xyline = h5("Add line of equality (x = y)")
+  titel.xyline = h4("Add x=y line")
   check.xyline.object = checkboxInput("check.xyline",
                                       label="Plot x=y line",
                                       value=F)
@@ -2385,7 +2517,7 @@ observe({
 # add jitter to the plot
 output$add.jitter.panel = renderUI({
   get.data.set()
-  title.jitter = h5("Add a jitter")
+  title.jitter = h4("Add a jitter")
   check.jitter.x.object = checkboxInput("check.jitter.x",
                                         label="Jitter x-variable",
                                         value=F)
@@ -2419,7 +2551,7 @@ observe({
 # add rugs to plot
 output$add.rugs.panel = renderUI({
   get.data.set()
-  title.rugs = h5("Add rugs")
+  title.rugs = h4("Add rugs")
   check.rugs.x.object = checkboxInput("check.rugs.x",
                                         label="Add x-rugs",
                                         value=F)
@@ -2453,7 +2585,7 @@ observe({
 # join points panel
 output$join.points.panel = renderUI({
   get.data.set()
-  title.join = h5("Join points by lines")
+  title.join = h4("Join points by line")
   check.join.object = checkboxInput("check.join",
                                       label="Join points",
                                       value=F)
@@ -2494,7 +2626,7 @@ output$adjust.axis.panel = renderUI({
          (input$vari1%in%colnames(get.data.set())&&
             (input$vari2%in%"none"||
                input$vari2%in%colnames(get.data.set())))){
-      ret = list(h5('Adjust axis limits'))
+      ret = list(h4('Adjust axis limits'))
       temp = list()
       temp$x = get.data.set()[,input$vari1]
       if(input$vari2%in%'none'){
@@ -2680,10 +2812,10 @@ output$adjust.number.bars.panel = renderUI({
   get.data.set()
   input$vari1
   input$vari2
-  ret = NULL
+  get.data.set()
   isolate({
     plot.par$zoombar = NULL
-    
+    ret = NULL
     if((!is.null(input$vari1)&&
          !is.null(input$vari2))&&
          (input$vari1%in%colnames(get.data.set())&&
@@ -2708,7 +2840,6 @@ output$adjust.number.bars.panel = renderUI({
       }
     }
   })
-  ret
 })
 
 # observe the Number of bars slider
@@ -3473,59 +3604,4 @@ observe({
       plot.par$locate.id = temp
     }
   })
-})
-
-
-
-#observe({
-#  if (!is.null(input$go.visualisation) && input$go.visualisation > 0) {
-#    isolate({
-#      output$visualize.panel <- renderUI({
-#        get.data.set()
-#        isolate({
-#          visualize.panel2.ui(get.data.set())
-#        })
-#      })
-#    })
-#  }
-#})
-
-
-
-#observe({
-#  if (!is.null(input$backto.variableselection) && input$backto.variableselection > 0) {
-#    isolate({
-#      output$visualize.panel <- renderUI({
-#        get.data.set()
-#        isolate({
-#          visualize.panel1.ui(get.data.set())
-#        })
-#      })
-#    })
-#  }
-#})
-
-
-
-
-# set up select_additions_panel
-output$select_additions_panel = renderUI({
-  get.data.set()
-  
-  isolate({
-    
- 
-      
-     selectInput(inputId = "select_additions",
-                        label = NULL,
-                        choices = c('Customise Plot Appearance',
-                                    'Trend Lines and Curves',
-                                    'Axes and Labels',
-                                    'Identify Points',
-                                    'Add Inference Information'),
-                        selected = 'Customise Plot Appearance')
-    
-
-  })
- 
 })
