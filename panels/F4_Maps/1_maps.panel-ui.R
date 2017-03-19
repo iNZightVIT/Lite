@@ -3,7 +3,7 @@
 ###----------------------------------------###
 ###
 ###  Date Created  : Feb 22, 2017.
-###  Last Modified : Mar 09, 2017.
+###  Last Modified : Mar 19, 2017.
 
 
 
@@ -32,14 +32,14 @@ maps.sidebarPanel = function(data.set) {
   sidebarPanelUI = list(
     tabsetPanel(
       id = "maps_sidebar_tabs",
-      type = "tabs",
+      type = "pills",
       
       tabPanel(
         
         title = "Select Variables",
         
         ## type of map data
-        h3("Type of Map Data"),
+        h4("Type of Map Data"),
         
         radioButtons(
           inputId = "map_type",
@@ -59,7 +59,15 @@ maps.sidebarPanel = function(data.set) {
           
           ## mapping variables (latitude and longitude)
           uiOutput("latitude_panel"),  
-          uiOutput("longitude_panel")
+          uiOutput("longitude_panel"),
+          
+          hr(),
+          
+          h4("Code Variables"),
+          
+          uiOutput("colourby_panel"),
+          uiOutput("sizeby_panel"),
+          uiOutput("opacifyby_panel")
         ),
         
         conditionalPanel(
@@ -77,11 +85,11 @@ maps.sidebarPanel = function(data.set) {
           uiOutput("plottingvariable_panel")
         ),
         
-        hr(),
+#        hr(),
         
         ## subset variables
-        uiOutput("mapssubset1_panel"),
-        uiOutput("mapssubset2_panel"),
+#        uiOutput("mapssubset1_panel"),
+#        uiOutput("mapssubset2_panel"),
         
         hr(),
         
@@ -97,16 +105,16 @@ maps.sidebarPanel = function(data.set) {
           condition = "input.map_type == 1",
           
           ## code variables
-          h4("Code Variables"),
+#          h4("Code Variables"),
           
-          uiOutput("colourby_panel"),
-          uiOutput("sizeby_panel"),
-          uiOutput("opacifyby_panel"),
+#          uiOutput("colourby_panel"),
+#          uiOutput("sizeby_panel"),
+#          uiOutput("opacifyby_panel"),
           
-          hr(),
+#          hr(),
           
           ## plot options
-          h4("Plot Options"),
+#          h4("Plot Options"),
           
           uiOutput("plot_maptype_panel"),
           uiOutput("plot_colour_panel"),
@@ -135,7 +143,7 @@ maps.sidebarPanel = function(data.set) {
           condition = "input.map_type == 2",
           
           ## plot options
-          h4("Plot Options"),
+#          h4("Plot Options"),
           
           uiOutput("plot_region_colour_panel"),
           uiOutput("missingvaluecolour_panel"),
@@ -157,31 +165,52 @@ maps.sidebarPanel = function(data.set) {
 ###
 ###  We now set up the main panel with "maps.mainpanel()":
 maps.mainPanel = function() {
-  tabsetPanel(type = "tabs", 
-              tabPanel("Maps Plot", 
-                       plotOutput("maps_plot"),
-                       
-                       fixedRow(
-                         column(
-                           width = 5, offset = 1,
-                           conditionalPanel(
-                             condition = "input.mapssubset1 != 'None'",
-                             ##  Slider input GUI for the first subset variable
-                             br(),
-                             uiOutput("mapssubset1_slider_panel")
-                           )
-                         ),
-                         column(
-                           width = 5, offset = 1,
-                           ##  Slider input GUI for the second subset variable.
-                           conditionalPanel(
-                             condition = "input.mapssubset2 != 'None'",
-                             br(),
-                             uiOutput("mapssubset2_slider_panel")
-                           )
-                         )
-                       )
-                       )
+  fluidPage(
+    plotOutput("maps_plot"),
+    
+    conditionalPanel(
+      condition = "input.map_type == 1 &
+                   input.select_latitude != 'Select Latitude Information' &
+                   input.select_longitude != 'Select Longitude Information' ||
+                   input.map_type == 2 &
+                   input.maplocation != 'Select Map Location' &
+                   input.locationvariable != 'Select Location Variable' &
+                   input.plottingvariable != 'Select Variable'",
+      
+      fixedRow(column(width = 2, offset = 1,
+                      downloadButton(outputId = "savemaps", label = "Save Maps")),
+               column(width = 5,
+                      radioButtons(inputId = "savemapstype", 
+                                   label = "Select the file type", 
+                                   choices = list("jpg", "png", "pdf"), inline = TRUE))),
+      
+#      downloadButton(outputId = "savemaps", label = "Save Maps"),
+#      radioButtons(inputId = "savemapstype", 
+#                   label = "Select the file type", 
+#                   choices = list("jpg", "png", "pdf"), inline = TRUE),
+      fixedRow(
+        column(
+          width = 5, offset = 1,
+          uiOutput("mapssubset1_panel"),
+          conditionalPanel(
+            condition = "input.mapssubset1 != 'None'",
+            ##  Slider input GUI for the first subset variable
+            br(),
+            uiOutput("mapssubset1_slider_panel")
+          )
+        ),
+        column(
+          width = 5, offset = 1,
+          uiOutput("mapssubset2_panel"),
+          ##  Slider input GUI for the second subset variable.
+          conditionalPanel(
+            condition = "input.mapssubset2 != 'None'",
+            br(),
+            uiOutput("mapssubset2_slider_panel")
+          )
+        )
+      )
+    )
   )
 }
 

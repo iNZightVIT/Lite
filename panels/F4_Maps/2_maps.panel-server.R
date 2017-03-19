@@ -3,7 +3,7 @@
 ###---------------------------------------------------###
 ###
 ###  Date Created  : Feb 22, 2017.
-###  Last Modified : Mar 09, 2017.
+###  Last Modified : Mar 19, 2017.
 ###  
 ###
 ###  * Note: This is to be sourced within "server.R" *
@@ -63,7 +63,7 @@ output$maps_plot = renderPlot({
   }
   else if(input$map_type == 2) {
     condition2 = !is.null(input$maplocation) &&
-      input$maplocation != "" && 
+      input$maplocation != "Select Map Location" && 
       !is.null(input$locationvariable) &&
       input$locationvariable %in% colnames(get.data.set()) &&
       !is.null(input$plottingvariable) &&
@@ -605,6 +605,7 @@ output$maplocation_panel = renderUI({
     selectInput(inputId = "maplocation",
                 label = "Map Location:",
                 choices = c("Select Map Location", "world"),
+                selected = "world",
                 selectize = FALSE)
   })
 })
@@ -732,6 +733,53 @@ observe({
   })
 })
 
+
+## save maps
+output$savemaps = downloadHandler(
+  filename = function() {
+    paste("Maps", input$savemapstype, sep = ".")
+  },
+  content = function(file) {
+    
+    if(input$savemapstype == "jpg")
+      jpeg(file)
+    else if(input$savemapstype == "png")
+      png(file)
+    else if(input$savemapstype == "pdf")
+      pdf(file, useDingbats = FALSE)
+    
+
+    if(input$map_type == 1) {
+      condition1 = !is.null(input$select_latitude) &&
+        input$select_latitude %in% colnames(get.data.set()) &&
+        !is.null(input$select_longitude) &&
+        input$select_longitude %in% colnames(get.data.set())
+      if(condition1) {
+        temp = plot.args()
+        tryCatch({do.call(plot, temp)}, 
+                 error = function(e) {
+                   print(e)
+                 }, finally = {})
+      }
+    }
+    else if(input$map_type == 2) {
+      condition2 = !is.null(input$maplocation) &&
+        input$maplocation != "" && 
+        !is.null(input$locationvariable) &&
+        input$locationvariable %in% colnames(get.data.set()) &&
+        !is.null(input$plottingvariable) &&
+        input$plottingvariable %in% colnames(get.data.set())
+      if(condition2) {
+        temp = plot.args()
+        tryCatch({do.call(plot, temp)}, 
+                 error = function(e) {
+                   print(e)
+                 }, finally = {})
+      }
+    }
+    
+    dev.off()
+  })    
 
 
 
