@@ -176,13 +176,7 @@ maps.mainPanel = function() {
                    input.maplocation != 'Select Map Location' &
                    input.locationvariable != 'Select Location Variable' &
                    input.plottingvariable != 'Select Variable'",
-      
-      fixedRow(column(width = 2, offset = 1,
-                      downloadButton(outputId = "savemaps", label = "Save Maps")),
-               column(width = 5,
-                      radioButtons(inputId = "savemapstype", 
-                                   label = "Select the file type", 
-                                   choices = list("jpg", "png", "pdf"), inline = TRUE))),
+  
       
 #      downloadButton(outputId = "savemaps", label = "Save Maps"),
 #      radioButtons(inputId = "savemapstype", 
@@ -209,7 +203,14 @@ maps.mainPanel = function() {
             uiOutput("mapssubset2_slider_panel")
           )
         )
-      )
+      ),
+
+      fixedRow(column(width = 2, offset = 1,
+                      downloadButton(outputId = "savemaps", label = "Save Maps")),
+               column(width = 5,
+                      radioButtons(inputId = "savemapstype", 
+                                   label = "Select the file type", 
+                                   choices = list("jpg", "png", "pdf"), inline = TRUE)))
     )
   )
 }
