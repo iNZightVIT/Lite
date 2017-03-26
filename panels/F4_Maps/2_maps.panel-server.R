@@ -406,11 +406,12 @@ observe({
         if(!is.null(input$maplocation) &&
            !is.null(input$locationvariable) &&
            input$locationvariable %in% colnames(data.temp)) {
-          mapsplot.obj = iNZightShapeMap(data = data.temp,
-                                         location = input$maplocation,
-                                         data.region = input$locationvariable)
-          data.temp2 = mapsplot.obj$data
-          g2 = convert.to.factor(data.temp2[, index])
+          temp = plot.args()
+          data.temp2 = temp$x$data
+          if(!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index]))
+            g2 = factor(data.temp2[, index], ordered = TRUE)
+          else
+            g2 = convert.to.factor(data.temp2[, index])
           args$g2 = g2
         }
       }
@@ -426,7 +427,20 @@ output$mapssubset1_slider_panel = renderUI({
     isolate({
       data.temp = get.data.set()
       index = which(input$mapssubset1 == colnames(data.temp))
-      temp = convert.to.factor(data.temp[, index])
+      if(input$map_type == 1)
+        temp = convert.to.factor(data.temp[, index])
+      else if(input$map_type == 2) {
+#        mapsplot.obj = iNZightShapeMap(data = data.temp,
+#                                       location = input$maplocation,
+#                                       data.region = input$locationvariable)
+#        data.temp2 = mapsplot.obj$data
+#        temp = convert.to.factor(data.temp2[, index])
+        data.temp2 = plot.args()$x$data
+        if(!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index]))
+          temp = factor(data.temp2[, index], ordered = TRUE)
+        else
+          temp = convert.to.factor(data.temp2[, index])
+      }
       n.levels = length(levels(temp))
       sliderInput(inputId = "mapssubset1_slider",
                   label = paste("Subset '", input$mapssubset1, "':", "_MULTI"),
@@ -445,7 +459,21 @@ observe({
        input$mapssubset1 %in% colnames(get.data.set())) {
       data.temp = get.data.set()
       index = which(input$mapssubset1 == colnames(data.temp))
-      temp = convert.to.factor(data.temp[, index])
+#      temp = convert.to.factor(data.temp[, index])
+      if(input$map_type == 1)
+        temp = convert.to.factor(data.temp[, index])
+      else if(input$map_type == 2) {
+        #        mapsplot.obj = iNZightShapeMap(data = data.temp,
+        #                                       location = input$maplocation,
+        #                                       data.region = input$locationvariable)
+        #        data.temp2 = mapsplot.obj$data
+        #        temp = convert.to.factor(data.temp2[, index])
+        data.temp2 = plot.args()$x$data
+        if(!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index]))
+          temp = factor(data.temp2[, index], ordered = TRUE)
+        else
+          temp = convert.to.factor(data.temp2[, index])
+      }
       level = input$mapssubset1_slider
       args$varnames$g1 = colnames(data.temp)[index]
       if(input$mapssubset1_slider == 0) {
@@ -466,12 +494,12 @@ observe({
         if(!is.null(input$maplocation) &&
            !is.null(input$locationvariable) &&
            input$locationvariable %in% colnames(data.temp)) {
-          mapsplot.obj = iNZightShapeMap(data = data.temp,
-                                         location = input$maplocation,
-                                         data.region = input$locationvariable)
-          data.temp2 = mapsplot.obj$data
-          g1 = convert.to.factor(data.temp2[, index])
-          args$g1 = g1
+#          mapsplot.obj = iNZightShapeMap(data = data.temp,
+#                                         location = input$maplocation,
+#                                         data.region = input$locationvariable)
+#          data.temp2 = mapsplot.obj$data
+#          g1 = convert.to.factor(data.temp2[, index])
+#          args$g1 = g1
         }
       }
     }
@@ -512,11 +540,16 @@ observe({
         if(!is.null(input$maplocation) &&
            !is.null(input$locationvariable) &&
            input$locationvariable %in% colnames(data.temp)) {
-          mapsplot.obj = iNZightShapeMap(data = data.temp,
-                         location = input$maplocation,
-                         data.region = input$locationvariable)
-          data.temp2 = mapsplot.obj$data
-          g1 = convert.to.factor(data.temp2[, index])
+#          mapsplot.obj = iNZightMaps::iNZightShapeMap(data = data.temp,
+#                                                      location = input$maplocation,
+#                                                      data.region = input$locationvariable)
+#          data.temp2 = mapsplot.obj$data
+          temp = plot.args()
+          data.temp2 = temp$x$data
+          if(!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index]))
+            g1 = factor(data.temp2[, index], ordered = TRUE)
+          else
+            g1 = convert.to.factor(data.temp2[, index])
           args$g1 = g1
         }
       }
@@ -539,7 +572,16 @@ output$mapssubset2_slider_panel = renderUI({
     isolate({
       data.temp = get.data.set()
       index = which(input$mapssubset2 == colnames(data.temp))
-      temp = convert.to.factor(data.temp[, index])
+#      temp = convert.to.factor(data.temp[, index])
+      if(input$map_type == 1)
+        temp = convert.to.factor(data.temp[, index])
+      else if(input$map_type == 2) {
+        data.temp2 = plot.args()$x$data
+        if(!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index]))
+          temp = factor(data.temp2[, index], ordered = TRUE)
+        else
+          temp = convert.to.factor(data.temp2[, index])
+      }
       n.levels = length(levels(temp))
       sliderInput(inputId = "mapssubset2_slider",
                   label = paste("Subset '", input$mapssubset2, "': ", "_ALL"),
@@ -557,7 +599,16 @@ observe({
        input$mapssubset2 %in% colnames(get.data.set())) {
       data.temp = get.data.set()
       index = which(input$mapssubset2 == colnames(data.temp))
-      temp = convert.to.factor(data.temp[, index])
+#      temp = convert.to.factor(data.temp[, index])
+      if(input$map_type == 1)
+        temp = convert.to.factor(data.temp[, index])
+      else if(input$map_type == 2) {
+        data.temp2 = plot.args()$x$data
+        if(!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index]))
+          temp = factor(data.temp2[, index], ordered = TRUE)
+        else
+          temp = convert.to.factor(data.temp2[, index])
+      }
       n.levels = length(levels(temp))
       level = input$mapssubset2_slider
       args$varnames$g2 = colnames(data.temp)[index]
@@ -584,12 +635,12 @@ observe({
         if(!is.null(input$maplocation) &&
            !is.null(input$locationvariable) &&
            input$locationvariable %in% colnames(data.temp)) {
-          mapsplot.obj = iNZightShapeMap(data = data.temp,
-                         location = input$maplocation,
-                         data.region = input$locationvariable)
-          data.temp2 = mapsplot.obj$data
-          g2 = convert.to.factor(data.temp2[, index])
-          args$g2 = g2
+#          mapsplot.obj = iNZightShapeMap(data = data.temp,
+#                         location = input$maplocation,
+#                         data.region = input$locationvariable)
+#          data.temp2 = mapsplot.obj$data
+#          g2 = convert.to.factor(data.temp2[, index])
+#          args$g2 = g2
         }
       }
     }
