@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   March 18, 2015
+###  Last Modified  :   March 30, 2017
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -2614,84 +2614,122 @@ observe({
 # panel for wigets to adjust the x and y axis limits
 output$adjust.axis.panel = renderUI({
   get.data.set()
+  ret = NULL
   input$vari1
   input$vari2
-#   plot.ret.para$parameters
+  #   plot.ret.para$parameters
   isolate({
-    ret = NULL
-    plot.par$xlim = NULL
-    plot.par$ylim = NULL
-    if((!is.null(input$vari1)&&
-         !is.null(input$vari2))&&
+    
+    if((input$vari2%in%"none"&&
+        (class(get.data.set()[,input$vari1])%in%"numeric"|
+         class(get.data.set()[,input$vari1])%in%"integer"))||
+       (!input$vari2%in%"none"&&
+        (class(get.data.set()[,input$vari1])%in%"factor"|
+         class(get.data.set()[,input$vari1])%in%"character")&&
+        (class(get.data.set()[,input$vari2])%in%"integer"|
+         class(get.data.set()[,input$vari2])%in%"numeric"))||
+       (!input$vari2%in%"none"&&
+        (class(get.data.set()[,input$vari1])%in%"integer"|
+         class(get.data.set()[,input$vari1])%in%"numeric")&&
+        (class(get.data.set()[,input$vari2])%in%"character"|
+         class(get.data.set()[,input$vari2])%in%"factor")) ||
+       (!input$vari2%in%"none"&&
+        ((class(get.data.set()[,input$vari1])%in%"numeric"|
+          class(get.data.set()[,input$vari1])%in%"integer")&&
+         (class(get.data.set()[,input$vari2])%in%"numeric"|
+          class(get.data.set()[,input$vari2])%in%"integer")))) {
+      
+      plot.par$xlim = NULL
+      plot.par$ylim = NULL
+      if((!is.null(input$vari1)&&
+          !is.null(input$vari2))&&
          (input$vari1%in%colnames(get.data.set())&&
-            (input$vari2%in%"none"||
-               input$vari2%in%colnames(get.data.set())))){
-      ret = list(h4('Adjust axis limits'))
-      temp = list()
-      temp$x = get.data.set()[,input$vari1]
-      if(input$vari2%in%'none'){
-        temp$y = NULL
-      }else{
-        temp$y = get.data.set()[,input$vari2]
-      }
-      temp$plot = F
-      tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
-###################################################################
-#      large.sample = T
-      large.sample = search.name(tester,"largesample")[[1]]
-      limits.x = search.name(tester,"xlim")[[1]]
-      limits.y = search.name(tester,"ylim")[[1]]
-      if(is.null(large.sample)){
-        large.sample = F
-      }
-###################################################################
-      if(((is.numeric(get.data.set()[,input$vari1])||
-             is.integer(get.data.set()[,input$vari1]))&&
-            input$vari2%in%"none")||
+          (input$vari2%in%"none"||
+           input$vari2%in%colnames(get.data.set())))){
+        ret = list(h5('Adjust axis limits'))
+        temp = list()
+        temp$x = get.data.set()[,input$vari1]
+        if(input$vari2%in%'none'){
+          temp$y = NULL
+        }else{
+          temp$y = get.data.set()[,input$vari2]
+        }
+        temp$plot = F
+        tester = try(do.call(iNZightPlots:::iNZightPlot, temp))
+        ###################################################################
+        #      large.sample = T
+        large.sample = search.name(tester,"largesample")[[1]]
+        #        limits.x = search.name(tester,"xlim")[[1]]
+        #        limits.y = search.name(tester,"ylim")[[1]]
+        if(is.null(large.sample)){
+          large.sample = F
+        }
+        ###################################################################
+        if((input$vari2%in%"none"&&
+            (class(get.data.set()[,input$vari1])%in%"numeric"|
+             class(get.data.set()[,input$vari1])%in%"integer"))||
            (!input$vari2%in%"none"&&
-              ((is.numeric(get.data.set()[,input$vari1])||
-               is.integer(get.data.set()[,input$vari1]))&&
-              (is.factor(get.data.set()[,input$vari2])||
-                 is.character(get.data.set()[,input$vari2])))||
-           ((is.numeric(get.data.set()[,input$vari2])||
-               is.integer(get.data.set()[,input$vari2]))&&
-              (is.factor(get.data.set()[,input$vari1])||
-                 is.character(get.data.set()[,input$vari1]))))){
-        ret[[2]] = fixedRow(column(3,h5("x-axis:")),
-                            column(4,textInput("x_axis_low_text",
-                                               label="",
-                                               value=limits.x[1])),
-                            column(4,textInput("x_axis_hig_text",
-                                               label="",
-                                               value=limits.x[2])))
-      # vari1 = numeric, vari2 = numeric
-      }else if((is.numeric(get.data.set()[,input$vari1])||
-                 is.integer(get.data.set()[,input$vari1]))&&
-                 (!input$vari2%in%"none"&&
-                    (is.numeric(get.data.set()[,input$vari2])||
-                       is.integer(get.data.set()[,input$vari2])))){
-        ret[[2]] = fixedRow(column(3,h5("x-axis:")),
-                            column(4,textInput("x_axis_low_text",
-                                               label="",
-                                               value=limits.y[1])),
-                            column(4,textInput("x_axis_hig_text",
-                                               label="",
-                                               value=limits.y[2])))
-        ret[[3]] = fixedRow(column(3,h5("y-axis:")),
-                            column(4,textInput("y_axis_low_text",
-                                               label="",
-                                               value=limits.x[1])),
-                            column(4,textInput("y_axis_hig_text",
-                                               label="",
-                                               value=limits.x[2])))
+            (class(get.data.set()[,input$vari1])%in%"integer"|
+             class(get.data.set()[,input$vari1])%in%"numeric")&&
+            (class(get.data.set()[,input$vari2])%in%"character"|
+             class(get.data.set()[,input$vari2])%in%"factor"))){
+          limits.x = range(temp$x, na.rm = TRUE)
+          ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+                              column(4,textInput("x_axis_low_text",
+                                                 label="",
+                                                 value=limits.x[1])),
+                              column(4,textInput("x_axis_hig_text",
+                                                 label="",
+                                                 value=limits.x[2])))
+          
+        }
+        else if((!input$vari2%in%"none"&&
+                 (class(get.data.set()[,input$vari1])%in%"factor"|
+                  class(get.data.set()[,input$vari1])%in%"character")&&
+                 (class(get.data.set()[,input$vari2])%in%"integer"|
+                  class(get.data.set()[,input$vari2])%in%"numeric"))) {
+          limits.y = range(temp$y, na.rm = TRUE)
+          ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+                              column(4,textInput("x_axis_low_text",
+                                                 label="",
+                                                 value=limits.y[1])),
+                              column(4,textInput("x_axis_hig_text",
+                                                 label="",
+                                                 value=limits.y[2])))
+        }
+        else if((!input$vari2%in%"none"&&
+                 ((class(get.data.set()[,input$vari1])%in%"numeric"|
+                   class(get.data.set()[,input$vari1])%in%"integer")&&
+                  (class(get.data.set()[,input$vari2])%in%"numeric"|
+                   class(get.data.set()[,input$vari2])%in%"integer")))){
+          limits.x = range(temp$x, na.rm = TRUE)
+          limits.y = range(temp$y, na.rm = TRUE)
+          ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+                              column(4,textInput("x_axis_low_text",
+                                                 label="",
+                                                 value=limits.y[1])),
+                              column(4,textInput("x_axis_hig_text",
+                                                 label="",
+                                                 value=limits.y[2])))
+          ret[[3]] = fixedRow(column(3,h5("y-axis:")),
+                              column(4,textInput("y_axis_low_text",
+                                                 label="",
+                                                 value=limits.x[1])),
+                              column(4,textInput("y_axis_hig_text",
+                                                 label="",
+                                                 value=limits.x[2])))
+        }
+        ret[[length(ret)+1]] = fixedRow(column(2,offset=8,
+                                               actionButton("reset_axis_limits_button",
+                                                            label='Reset')))
       }
-      ret[[length(ret)+1]] = fixedRow(column(2,offset=8,
-                                             actionButton("reset_axis_limits_button",
-                                                          label='Reset')))
     }
-    ret
   })
+  
+  ret
 })
+
+
 
 # observe whether numeric input is used in x axis limit low and high
 observe({
