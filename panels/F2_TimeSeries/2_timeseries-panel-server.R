@@ -136,7 +136,8 @@ output$timeseries_plot = renderPlot({
             ## start = start),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
-            multiplicative = input$choose_season
+            multiplicative = input$choose_season,
+            t = 10
           )
         }, warning = function(w) {
           cat("Warning produced in timseries plot\n")
