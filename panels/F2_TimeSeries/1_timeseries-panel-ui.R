@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created  : January 16, 2015.
-###  Last Modified : March 6, 2015.
+###  Last Modified : March 30, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -92,6 +92,13 @@ ts.sidebarPanel = function(data.set) {
                        c("Additive" = FALSE,
                          "Multiplicative" = TRUE)
                    ),
+      ##  A slider bar for smoothing parameter.
+      sliderInput(inputId = "slidersmoothing", 
+                  label = "Smoothness:", 
+                  min = 0, 
+                  max = 1, 
+                  value = 0.1, 
+                  step = 0.01),
       ##  Section 3: Select Variables
       ##
       ##  We then ask the user to select the variables to plot in the
