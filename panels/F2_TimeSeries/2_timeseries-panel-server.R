@@ -3,7 +3,7 @@
 ###-------------------------------------------------###
 ###
 ###  Date Created   :   January 16, 2015
-###  Last Modified  :   February 26, 2015
+###  Last Modified  :   March 26, 2017
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -137,7 +137,7 @@ output$timeseries_plot = renderPlot({
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season,
-            t = 10
+            t = 100*input$slidersmoothing
           )
         }, warning = function(w) {
           cat("Warning produced in timseries plot\n")
@@ -168,7 +168,8 @@ output$seasonal_plot = renderPlot({
                       var = variable.names()),
             ylab = input$provide_ylab,
             xlab = input$provide_xlab,
-            multiplicative = input$choose_season
+            multiplicative = input$choose_season,
+            t = 100*input$slidersmoothing
           )
         }, warning = function(w) {
           cat("Warning produced in seasonplot\n")
@@ -200,7 +201,7 @@ output$decomposed_plot = renderPlot({
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season,
-            t = 10
+            t = 100*input$slidersmoothing
           )
         }, warning = function(w) {
           cat("Warning produced in decompositionplot \n")
@@ -233,7 +234,7 @@ output$trSeasonal_plot = renderPlot({
               xlab = input$provide_xlab,
               ylab = input$provide_ylab,
               multiplicative = input$choose_season,
-              t = 10
+              t = 100*input$slidersmoothing
             ),
             animate = FALSE
           )
