@@ -19,6 +19,7 @@ library(iNZightRegression)
 library(RJSONIO)
 library(survey)
 library(iNZightMaps)
+library(colorspace)
 
 # read in possible command line arguments such as 'vars.path'
 
