@@ -102,7 +102,7 @@ graphical.par = reactiveValues(
   cex.dotpt = 0.5,
   pch = 21, # fill colour of points
   col.pt = "gray50",
-#   fill.pt = "transparent",
+  fill.pt = "transparent",
   ##  Colours
   LOE = FALSE,
   col.LOE = "black",
@@ -1098,7 +1098,7 @@ observe({
       updateSliderInput(session,"adjust.size.points.scatter",value=0.5)
       graphical.par$cex.dotpt = 0.5
       updateSliderInput(session,"adjust.size.points.dot",value=0.5)
-      graphical.par$pch = 21
+#      graphical.par$pch = 21
       
       updateSliderInput(session,"adjust.size.scale",value = 1)
       graphical.par$cex = 1
@@ -1112,7 +1112,10 @@ observe({
       
       
       updateCheckboxInput(session,"color.interior", value = F)
-      graphical.par$col.pt = "gray50"
+#      graphical.par$col.pt = "gray50"
+      graphical.par$fill.pt = "transparent"
+      
+      
       updateSelectInput(session,"select.dotcolor",selected="gray50")
       #graphical.par$fill.pt = "transparent"
       ##  Colours
@@ -1209,12 +1212,12 @@ output$add_inference = renderUI({
     add_inference.check = checkboxInput("add.inference",
                                         label="Add inference")
     mean_median.radio = radioButtons("inference_parameter1",
-                                     label="Parameter",
+                                     label=h5(strong("Parameter")),
                                      choices=c("Mean","Median"),
                                      selected=input$inference_parameter1,
                                      inline=T)
     normal_bootstrap.radio = radioButtons("inference_type1",
-                                          label="Type of inference",
+                                          label=h5(strong("Type of inference")),
                                           choices=c("Normal","Bootstrap"),
                                           selected=input$inference_type1,
                                           inline=T)
@@ -1225,7 +1228,7 @@ output$add_inference = renderUI({
                                               label="Comparison interval",
                                               value=input$comparison_interval1)
     year12_bootstrap.radio = radioButtons("inference_type2",
-                                          label="Type of inference",
+                                          label=h5(strong("Type of inference")),
                                           choices=c("Year 12","Bootstrap"),
                                           selected=input$inference_type2,
                                           inline=T)
@@ -1297,7 +1300,7 @@ output$add_inference = renderUI({
                    conditionalPanel("input.inference_parameter1=='Mean'||
                                                      (input.inference_parameter1=='Median'&&
                                                      input.inference_type2=='Bootstrap')",
-                                    h5("Type of interval"),
+                                    h5(strong("Type of interval")),
                                     confidence.interval.check,
                                     comparison.interval.check)
         )
@@ -1313,7 +1316,7 @@ output$add_inference = renderUI({
         ret = list(conditionalPanel("input.toggle_inference",
                                     h5("Parameter"),helpText("Proportions"),
                                     normal_bootstrap.radio,
-                                    h5("Type of interval"),
+                                    h5(strong("Type of interval")),
                                     confidence.interval.check,
                                     conditionalPanel("input.inference_type1=='Normal'",
                                                      comparison.interval.check)))
@@ -1329,7 +1332,7 @@ output$add_inference = renderUI({
                    conditionalPanel("input.inference_parameter1=='Mean'||
                                                    (input.inference_parameter1=='Median'&&
                                                    input.inference_type2=='Bootstrap')",
-                                    h5("Type of interval"),
+                                    h5(strong("Type of interval")),
                                     confidence.interval.check))
       }
     }
@@ -1529,25 +1532,56 @@ output$plot.appearance.panel = renderUI({
     cols2 = colors()[c(81,73,84,107,371,426,517,617)]
     cols3 = colors()[c(203,73,81,84,107,371,425,517,617)]
     
+    
+    general.appearance.title = h5(strong("General Appearance"))
+    
+    bar.colour.title = h5(strong("Bar Colour"))
+    
+    point.size.title = checkboxInput(inputId = "point_size_title",
+                                     label = strong("Point Size"),
+                                     value = FALSE)
+    
+    point.colour.title = checkboxInput(inputId = "point_colour_title",
+                                       label = strong("Point Colour"),
+                                       value = FALSE)
+    
     select.bg.object = fixedRow(column(3, h5("Background colour:")),
                                 column(6, selectInput(inputId="select.bg1",
                                                       label=NULL,
                                                       choices=cols1,
                                                       selected=graphical.par$bg)))
-      
-    select.barcolor.object = fixedRow(column(3, h5("Bar Colour:")),
-                                      column(6, selectInput(inputId="select.barcolor",label=NULL,
-                                                            choices=cols2,
-                                                            selected=graphical.par$bar.fill)))
-      
-      
-    select.dotcolor.object = fixedRow(column(3, h5("Point Colour:")),
-                                      column(6, selectInput(inputId="select.dotcolor",label=NULL,
-                                                            choices=cols3,
-                                                            selected=graphical.par$col.pt)))
+    
     select.plot.type.object = NULL
-    color.interior = checkboxInput(inputId="color.interior",label = "Colour interior",
-                                   value=graphical.par$pch==19)
+    
+    select.barcolor.object = conditionalPanel(
+      condition = "input.color_by_select == ' '",
+      
+      fixedRow(column(3, h5("Bar Colour:")),
+               column(6, selectInput(inputId="select.barcolor",label=NULL,
+                                     choices=cols2,
+                                     selected=graphical.par$bar.fill)))
+    )
+      
+#    select.barcolor.object = fixedRow(column(3, h5("Bar Colour:")),
+#                                      column(6, selectInput(inputId="select.barcolor",label=NULL,
+#                                                            choices=cols2,
+#                                                            selected=graphical.par$bar.fill)))
+      
+    select.dotcolor.object = conditionalPanel(condition = "input.point_colour_title == true & input.color_by_select == ' '",
+                                              fixedRow(column(3, h5("Point Colour:")),
+                                                       column(6, selectInput(inputId="select.dotcolor",label=NULL,
+                                                                             choices=cols3,
+                                                                             selected=graphical.par$col.pt))))  
+#    select.dotcolor.object = fixedRow(column(3, h5("Point Colour:")),
+#                                      column(6, selectInput(inputId="select.dotcolor",label=NULL,
+#                                                            choices=cols3,
+#                                                            selected=graphical.par$col.pt)))
+    color.interior = conditionalPanel(condition = "input.point_colour_title == true",
+                                      fixedRow(column(3),
+                                               column(6, checkboxInput(inputId="color.interior",label = "Colour interior",
+                                                                       value = FALSE))))
+#    color.interior = checkboxInput(inputId="color.interior",label = "Colour interior",
+#                                   value = FALSE)
     
 #    select.dotcolor.interior.object = fixedRow(column(5, select.dotcolor.object),
 #                                               column(4, color.interior))
@@ -1562,26 +1596,47 @@ output$plot.appearance.panel = renderUI({
                                                               max = 2, 
                                                               value = 1, step = .05, ticks = FALSE)))
     
-    adjust.size.points.dot.object = fixedRow(column(3, h5("Point size:")),
-                                              column(6, sliderInput("adjust.size.points.dot", 
-                                                                    label = NULL, 
-                                                                    min = 0.1, 
-                                                                    max = 3.5, 
-                                                                    value=graphical.par$cex.dotpt,
-                                                                    step=.05, 
-                                                                    ticks = FALSE)))
     
-    adjust.size.points.scatter.object = fixedRow(column(3, h5("Point size:")),
-                                                 column(6, sliderInput("adjust.size.points.scatter", 
-                                                                       label = NULL, 
-                                                                       min = 0.1, 
-                                                                       max = 3.5, 
-                                                                       value=graphical.par$cex.dotpt,
-                                                                       step=.05, 
-                                                                       ticks = FALSE)))
+    adjust.size.points.dot.object = conditionalPanel(condition = "input.point_size_title == true",
+                                                     fixedRow(column(3, h5("Point size:")),
+                                                              column(6, sliderInput("adjust.size.points.dot", 
+                                                                                    label = NULL, 
+                                                                                    min = 0.1, 
+                                                                                    max = 3.5, 
+                                                                                    value=graphical.par$cex.dotpt,
+                                                                                    step=.05, 
+                                                                                    ticks = FALSE))))
+    
+#    adjust.size.points.dot.object = fixedRow(column(3, h5("Point size:")),
+#                                              column(6, sliderInput("adjust.size.points.dot", 
+#                                                                    label = NULL, 
+#                                                                    min = 0.1, 
+#                                                                    max = 3.5, 
+#                                                                    value=graphical.par$cex.dotpt,
+#                                                                    step=.05, 
+#                                                                    ticks = FALSE)))
+    
+    adjust.size.points.scatter.object = conditionalPanel(condition = "input.point_size_title == true",
+                                                         fixedRow(column(3, h5("Point size:")),
+                                                                  column(6, sliderInput("adjust.size.points.scatter", 
+                                                                                        label = NULL, 
+                                                                                        min = 0.1, 
+                                                                                        max = 3.5, 
+                                                                                        value=graphical.par$cex.dotpt,
+                                                                                        step=.05, 
+                                                                                        ticks = FALSE))))
+    
+#    adjust.size.points.scatter.object = fixedRow(column(3, h5("Point size:")),
+#                                                 column(6, sliderInput("adjust.size.points.scatter", 
+#                                                                       label = NULL, 
+#                                                                       min = 0.1, 
+#                                                                       max = 3.5, 
+#                                                                       value=graphical.par$cex.dotpt,
+#                                                                       step=.05, 
+#                                                                       ticks = FALSE)))
     
     
-    
+    adjust.grid.size.title = h5(strong("Size"))
     adjust.grid.size.object = fixedRow(column(3, h5("Grid size (n x n):")),
                                        column(6, sliderInput("adjust.grid.size", 
                                                              label = NULL, 
@@ -1604,17 +1659,25 @@ output$plot.appearance.panel = renderUI({
     if(is.null(graphical.par$alpha)){
       graphical.par$alpha = 1
     }
-    adjust.transparency.object = fixedRow(column(3, h5("Transparency:")),
-                                          column(6, sliderInput("adjust.transparency", 
-                                                                label = NULL, min = 0, 
-                                                                max = 100, 
-                                                                value=convert.to.percent(graphical.par$alpha),
-                                                                step=1, ticks = FALSE)))
+    adjust.transparency.object = conditionalPanel(condition = "input.point_colour_title == true",
+                                                  fixedRow(column(3, h5("Transparency:")),
+                                                           column(6, sliderInput("adjust.transparency", 
+                                                                                 label = NULL, min = 0, 
+                                                                                 max = 100, 
+                                                                                 value=convert.to.percent(graphical.par$alpha),
+                                                                                 step=1, ticks = FALSE))))
+#    adjust.transparency.object = fixedRow(column(3, h5("Transparency:")),
+#                                          column(6, sliderInput("adjust.transparency", 
+#                                                                label = NULL, min = 0, 
+#                                                                max = 100, 
+#                                                                value=convert.to.percent(graphical.par$alpha),
+#                                                                step=1, ticks = FALSE)))
       
     if(is.null(graphical.par$hex.bins)){
       graphical.par$hex.bins = 20
     }
-    adjust.hex.bins.object = fixedRow(column(3, h5("Hex grid size:")),
+    adjust.hex.bins.title = h5(strong("Size"))
+    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size:")),
                                       column(6, sliderInput("adjust.hex.bins", 
                                                             label = NULL, min = 5, 
                                                             max = 70, 
@@ -1648,8 +1711,10 @@ output$plot.appearance.panel = renderUI({
       if(input$vari2%in%"none"&&
            (class(get.data.set()[,input$vari1])%in%"factor"|
               class(get.data.set()[,input$vari1])%in%"character")){
-        ret = list(select.bg.object,
+        ret = list(general.appearance.title,
+                   select.bg.object,
                    adjust.size.scale.object,
+                   bar.colour.title,
                    select.barcolor.object
         )
       # bar plot with two factor variables
@@ -1663,8 +1728,10 @@ output$plot.appearance.panel = renderUI({
                                     column(6, selectInput(inputId="select.bg1",label=NULL,
                                                           choices=cols1,
                                                           selected=graphical.par$bg)))
-        ret = list(select.bg.object,
-                   adjust.size.scale.object)
+        ret = list(general.appearance.title,
+                   select.bg.object,
+                   adjust.size.scale.object,
+                   bar.colour.title)
       # dotplot or histogram for numeric varible in x or 
       # dotplot or histogram for one numeric one factor variable
       # vari1 = numeric , vari2 = none
@@ -1690,10 +1757,13 @@ output$plot.appearance.panel = renderUI({
                                                                            "dot plot",
                                                                            "histogram"),
                                                                  selected=input$select.plot.type)))
-        ret = list(select.plot.type.object,
+        ret = list(general.appearance.title,
+                   select.plot.type.object,
                    select.bg.object,
                    adjust.size.scale.object,
+                   point.size.title,
                    adjust.size.points.dot.object,
+                   point.colour.title,
                    select.dotcolor.object,
                    color.interior,
 #                   select.dotcolor.interior.object,
@@ -1726,19 +1796,26 @@ output$plot.appearance.panel = renderUI({
           if(m<nbins){
             m=nbins
           }
+          adjust.num.bins.title = h5(strong("Size"))
           adjust.num.bins.object = fixedRow(column(3, h5("Number of bars:")),
                                             column(6, sliderInput("adjust.num.bins", label = NULL, min = 1, 
-                                                                  max = m, value=nbins,step=1)))
+                                                                  max = m, value=nbins,step=1, ticks = FALSE)))
           if(is.null(plot.par$design)){
-            ret=list(select.plot.type.object,
+            ret=list(general.appearance.title,
+                     select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
+                     bar.colour.title,
                      select.barcolor.object,
+                     adjust.num.bins.title,
                      adjust.num.bins.object)
           }else{
-            ret=list(select.bg.object,
+            ret=list(general.appearance.title,
+                     select.bg.object,
                      adjust.size.scale.object,
+                     bar.colour.title,
                      select.barcolor.object,
+                     adjust.num.bins.title,
                      adjust.num.bins.object)
           }
         }
@@ -1757,10 +1834,25 @@ output$plot.appearance.panel = renderUI({
                                                                            "grid-density plot",
                                                                            "hexbin plot"),
                                                                  selected=input$select.plot.type)))
-        ret = list(select.plot.type.object,
+        resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
+                                            fixedRow(column(3, h5("Resize points by:")),
+                                                     column(6, selectInput("resize.by.select",
+                                                                           label=NULL,
+                                                                           choices=c(" ",get.numeric.column.names(vis.data())),
+                                                                           selected = "input$resize.by.select"))))
+#                resize.by.object = fixedRow(column(3, h5("Resize points by:")),
+#                                    column(6, selectInput("resize.by.select",
+#                                                          label=NULL,
+#                                                          choices=c(" ",get.numeric.column.names(vis.data())),
+#                                                          selected = "input$resize.by.select")))
+        ret = list(general.appearance.title,
+                   select.plot.type.object,
                    select.bg.object,
                    adjust.size.scale.object,
+                   point.size.title,
                    adjust.size.points.scatter.object,
+                   resize.by.object,
+                   point.colour.title,
                    select.dotcolor.object,
                    color.interior,
 #                   select.dotcolor.interior.object,
@@ -1768,17 +1860,22 @@ output$plot.appearance.panel = renderUI({
         if(!is.null(input$select.plot.type)&&
              (input$select.plot.type%in%"grid-density plot"||
                 (large.sample&&input$select.plot.type%in%"default"))){
-          ret = list(select.plot.type.object,
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
-                     adjust.grid.size.object,
-                     adjust.min.count.grid.object)
+                     adjust.grid.size.title,
+                     adjust.grid.size.object)
         }else if(!is.null(input$select.plot.type)&&
                    input$select.plot.type%in%"hexbin plot"){
-          ret = list(select.plot.type.object,
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
-                     adjust.hex.bins.object)
+                     adjust.hex.bins.title,
+                     adjust.hex.bins.object,
+                     point.colour.title,
+                     select.dotcolor.object)
         }
       }
     }
@@ -1978,9 +2075,12 @@ observe({
     isolate({
       if(!is.null(input$select.dotcolor)){
         if(input$color.interior){
-          graphical.par$pch = 19
+#          graphical.par$pch = 19
+          graphical.par$fill.pt = "fill"
+#          graphical.par$alpha = 0.3
         }else{
-          graphical.par$pch = 1
+#          graphical.par$pch = 1
+          graphical.par$fill.pt = "transparent"
         }
       }
     })
@@ -2033,13 +2133,13 @@ observe({
 observe({
   input$adjust.transparency
   isolate({
-    if(!is.null(input$adjust.transparency)){
-      if(input$adjust.transparency==0){
-        graphical.par$pch=1
-      }else{
-        graphical.par$pch=19
-      }
-    }
+#    if(!is.null(input$adjust.transparency)){
+#      if(input$adjust.transparency==0){
+#        graphical.par$pch=1
+#      }else{
+#        graphical.par$pch=19
+#      }
+#    }
     graphical.par$alpha = convert.to.percent(input$adjust.transparency,T)
   })
 })
@@ -2087,10 +2187,15 @@ output$customize.labels.panel = renderUI({
     plot.par$ylab = NULL
     plot.par$varnames$ylab = NULL
     plot.par$main = NULL
-    main_title_text.object = textInput(inputId="main_title_text",label="Main title:")
-    x_axis_text.object = textInput(inputId="x_axis_text",label="X-axis label:")
-    y_axis_text.object = textInput(inputId="y_axis_text",label="Y-axis label:")
-    change.labels.button.object = actionButton(inputId="change.labels.button",label="Submit")
+    axis.label.title = h5(strong("Axis Labels"))
+    main_title_text.object = fixedRow(column(4, h5("Main title:")),
+                                      column(6, textInput(inputId="main_title_text",label=NULL)))
+    x_axis_text.object = fixedRow(column(4, h5("X-axis label:")),
+                                  column(6, textInput(inputId="x_axis_text",label=NULL)))
+    y_axis_text.object = fixedRow(column(4, h5("Y-axis label:")),
+                                  column(6, textInput(inputId="y_axis_text",label=NULL)))
+    change.labels.button.object = fixedRow(column(4),
+                                           column(6, actionButton(inputId="change.labels.button",label="Submit")))
     if(!is.null(vis.data())&&!is.null(input$vari1)&&!is.null(input$vari2)&&
          input$vari1%in%colnames(get.data.set())){
       if((class(vis.data()[,input$vari1])%in%"numeric"|
@@ -2098,12 +2203,14 @@ output$customize.labels.panel = renderUI({
            !is.null(input$vari2)&&!input$vari2%in%"none"&&
            (class(vis.data()[,input$vari2])%in%"numeric"|
            class(vis.data()[,input$vari2])%in%"integer")){
-        list(main_title_text.object,
+        list(axis.label.title,
+             main_title_text.object,
              x_axis_text.object,
              y_axis_text.object,
              change.labels.button.object)
       }else{
-        list(main_title_text.object,
+        list(axis.label.title,
+             main_title_text.object,
              x_axis_text.object,
              change.labels.button.object)
       }
@@ -2149,6 +2256,7 @@ output$code.variables.panel = renderUI({
   ret = NULL
   input$vari1
   input$vari2
+  input$select.plot.type
   isolate({
     
     
@@ -2156,25 +2264,30 @@ output$code.variables.panel = renderUI({
     select.colour.palette.object = NULL
     colour.palette.reverse.object = NULL
     
+    
+    
     # vari1 = factor, vari2 = factor
     if(!input$vari2%in%"none"&&
        ((class(get.data.set()[,input$vari1])%in%"factor"|
          class(get.data.set()[,input$vari1])%in%"character")&&
         (class(get.data.set()[,input$vari2])%in%"factor"|
          class(get.data.set()[,input$vari2])%in%"character"))) {
+      
       select.colour.palette.object = fixedRow(column(3, h5("Colour palette:")),
                                               column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                     choices=names(graphical.par$colourPalettes$cat),
                                                                     selected = "Colourblind Friendly")))
-      colour.palette.reverse.object = checkboxInput(inputId = "colour.palette.reverse", label = "Reverse palette",
-                                                    value = FALSE)
+      colour.palette.reverse.object = fixedRow(column(3),
+                                               column(6, checkboxInput(inputId = "colour.palette.reverse", label = "Reverse palette",
+                                                                       value = FALSE)))
       
-      ret = list(select.colour.palette.object,
+      ret = list(
+                 select.colour.palette.object,
                  colour.palette.reverse.object)
     }
       
     else {
-      
+      point.symbol.title = NULL
       symbol.object = NULL
       symbol.by.object = NULL
       symbol.linewidth.object = NULL
@@ -2190,74 +2303,108 @@ output$code.variables.panel = renderUI({
         if((class(vis.data()[,input$vari1])%in%"factor"|
             class(vis.data()[,input$vari1])%in%"character")&&
            (is.null(input$vari2)|input$vari2%in%"none")){
-          color.by.object = list(fixedRow(column(3, h5("Colour by:")),
-                                          column(6, selectInput("color_by_select",
-                                                                label=NULL,
-                                                                choices = c(" ",get.categorical.column.names(vis.data())),
-                                                                selected = input$color_by_select))),
+          color.by.object = list(conditionalPanel(condition = "input.point_colour_title == true",
+                                                  fixedRow(column(3, h5("Colour by:")),
+                                                           column(6, selectInput("color_by_select",
+                                                                                 label=NULL,
+                                                                                 choices = c(" ",get.categorical.column.names(vis.data())),
+                                                                                 selected = input$color_by_select)))),
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3, h5("Colour palette:")),
                                                            column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                                  choices=names(graphical.par$colourPalettes$cat),
                                                                                  selected = "Colourblind Friendly"))),
                                  conditionalPanel("input.color_by_select != ' '",
-                                                  checkboxInput(inputId = "colour.palette.reverse",
-                                                                label = "Reverse palette",
-                                                                value = FALSE))))
+                                                  fixedRow(column(3),
+                                                           column(6, checkboxInput(inputId = "colour.palette.reverse",
+                                                                                   label = "Reverse palette",
+                                                                                   value = FALSE))))))
           
     
           
         }else{
-          color.by.object = list(fixedRow(column(3, h5("Colour by:")),
-                                          column(6, selectInput("color_by_select",
-                                                                label=NULL,
-                                                                choices=c(" ",colnames(vis.data())),
-                                                                selected = input$color_by_select))),
+          point.symbol.title = checkboxInput(inputId = "point_symbol_title",
+                                             label = strong("Point Symbol"),
+                                             value = FALSE)
+          color.by.object = list(conditionalPanel(condition = "input.point_colour_title == true",
+                                                  fixedRow(column(3, h5("Colour by:")),
+                                                           column(6, selectInput("color_by_select",
+                                                                                 label=NULL,
+                                                                                 choices=c(" ",colnames(vis.data())),
+                                                                                 selected = input$color_by_select)))),
+
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3, h5("Colour palette:")),
                                                            column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                                  choices=names(graphical.par$colourPalettes$cont),
                                                                                  selected = names(graphical.par$colourPalettes$cont)[1]))),
                                                   conditionalPanel("input.color_by_select != ' '",
-                                                                   checkboxInput(inputId = "colour.palette.reverse",
-                                                                                 label = "Reverse palette",
-                                                                                 value = FALSE))))
+                                                                   fixedRow(column(3),
+                                                                            column(6, checkboxInput(inputId = "colour.palette.reverse",
+                                                                                                    label = "Reverse palette",
+                                                                                                    value = FALSE))))))
+          
+          symbol.object = conditionalPanel(condition = "input.point_symbol_title == true",
+                                           fixedRow(column(3, h5("Symbol:")),
+                                                    column(6, selectInput("point_symbol",
+                                                                          label=NULL,
+                                                                          choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
+                                                                          selected = "circle"))))
+          
+#          symbol.object = fixedRow(column(3, h5("Point Symbol:")),
+#                                   column(6, selectInput("point_symbol",
+#                                                         label=NULL,
+#                                                         choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
+#                                                         selected = "circle")))
           
           
+          symbol.by.object = conditionalPanel(condition = "input.point_symbol_title == true",
+                                              fixedRow(column(3, h5("Symbol by:")),
+                                                       column(6, selectInput("point_symbol_by",
+                                                                             label=NULL,
+                                                                             choices = c(" ", get.categorical.column.names(vis.data())),
+                                                                             selected = " "))))
+#          symbol.by.object = fixedRow(column(3, h5("Symbol by:")),
+#                                      column(6, selectInput("point_symbol_by",
+#                                                            label=NULL,
+#                                                            choices = c(" ", get.categorical.column.names(vis.data())),
+#                                                            selected = " ")))
           
-          symbol.object = fixedRow(column(3, h5("Point Symbol:")),
-                                   column(6, selectInput("point_symbol",
-                                                         label=NULL,
-                                                         choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
-                                                         selected = "circle")))
-          
-          symbol.by.object = fixedRow(column(3, h5("Symbol by:")),
-                                      column(6, selectInput("point_symbol_by",
-                                                            label=NULL,
-                                                            choices = c(" ", get.categorical.column.names(vis.data())),
-                                                            selected = " ")))
-          
-          symbol.linewidth.object = fixedRow(column(3, h5("Symbol line width:")),
-                                             column(6, sliderInput("symbol_linewidth", label = NULL, min = 1, 
-                                                                   max = 4, value=2, step=0.2, ticks = FALSE)))
+          symbol.linewidth.object = conditionalPanel(condition = "input.point_symbol_title == true",
+                                                     fixedRow(column(3, h5("Symbol line width:")),
+                                                              column(6, sliderInput("symbol_linewidth", label = NULL, min = 1, 
+                                                                                    max = 4, value=2, step=0.2, ticks = FALSE))))
+#          symbol.linewidth.object = fixedRow(column(3, h5("Symbol line width:")),
+#                                             column(6, sliderInput("symbol_linewidth", label = NULL, min = 1, 
+#                                                                   max = 4, value=2, step=0.2, ticks = FALSE)))
         }
-        resize.by.object = NULL
-        if((class(vis.data()[,input$vari1])%in%"numeric"|
-            class(vis.data()[,input$vari1])%in%"integer")&&
-           (!input$vari2%in%"none"&&
-            (class(vis.data()[,input$vari2])%in%"numeric"|
-             class(vis.data()[,input$vari2])%in%"integer"))){
-          resize.by.object = fixedRow(column(3, h5("Resize points by:")),
-                                      column(6, selectInput("resize.by.select",
-                                                            label=NULL,
-                                                            choices=c(" ",get.numeric.column.names(vis.data())),
-                                                            selected = "input$resize.by.select")))
-        }
-        ret = list(color.by.object,
-                   resize.by.object,
-                   symbol.object,
-                   symbol.by.object,
-                   symbol.linewidth.object)
+#        resize.by.object = NULL
+#        if((class(vis.data()[,input$vari1])%in%"numeric"|
+#            class(vis.data()[,input$vari1])%in%"integer")&&
+#           (!input$vari2%in%"none"&&
+#            (class(vis.data()[,input$vari2])%in%"numeric"|
+#             class(vis.data()[,input$vari2])%in%"integer"))){
+#          resize.by.object = fixedRow(column(3, h5("Resize points by:")),
+#                                      column(6, selectInput("resize.by.select",
+#                                                            label=NULL,
+#                                                            choices=c(" ",get.numeric.column.names(vis.data())),
+#                                                            selected = "input$resize.by.select")))
+#        }
+        if(length(input$select.plot.type) != 0 && 
+           (input$select.plot.type %in% "histogram" ||
+           input$select.plot.type %in% "grid-density plot" ||
+           input$select.plot.type %in% "hexbin plot"))
+          ret = list(color.by.object)
+        else
+          ret = list(color.by.object,
+                     #                   resize.by.object,
+                     point.symbol.title,
+                     symbol.object,
+                     symbol.by.object,
+                     symbol.linewidth.object)
+        
+
+        
       }
       
       # vari1 = numeric , vari2 = none or
@@ -2408,10 +2555,12 @@ output$trend.curve.panel = renderUI({
   get.data.set()
   isolate({
 #    title.add.trend.curve = h5("Add trend curves")
+    trend.curves.title = h5(strong("Trend Curves"))
+    smoother.title = h5(strong("Smoother"))
     check.linear.object = checkboxInput("check_linear",label="linear",value = F)
     check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = F)
     check.cubic.object = checkboxInput("check_cubic",label="cubic",value = F)
-    check.smoother.object = checkboxInput("check_smoother",label="Draw a smoother",value = F)
+    check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = F)
     check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = F)
     color.linear.select = selectInput("color.linear",label="",
                                       choices=c("red","black","blue",
@@ -2443,13 +2592,14 @@ output$trend.curve.panel = renderUI({
     each_level_seperate.check = checkboxInput("each_level_seperate",
                                               label="Fit paralell trend lines",
                                               value=T)
-    list(
+    list(trend.curves.title,
          fixedRow(column(width=3,check.linear.object),
                   column(width=6,color.linear.select)),
          fixedRow(column(width=3,check.quadratic.object),
                   column(width=6,color.quadratic.select)),
          fixedRow(column(width=3,check.cubic.object),
                   column(width=6,color.cubic.select)),
+         smoother.title,
          fixedRow(column(width=3,check.smoother.object),
                   column(width=6,color.smoother.select)),
          conditionalPanel("input.check_smoother",
@@ -2609,6 +2759,7 @@ output$xy.line.panel = renderUI({
         (class(get.data.set()[,input$vari2])%in%"numeric"|
          class(get.data.set()[,input$vari2])%in%"integer"))) {
 #      titel.xyline = h5("Add line of equality (x = y)")
+      xyline.title = h5(strong("Trend Line Options"))
       check.xyline.object = checkboxInput("check.xyline",
                                           label="Add y=x line",
                                           value=F)
@@ -2617,7 +2768,7 @@ output$xy.line.panel = renderUI({
                                                   "green4","yellow","pink",
                                                   "grey","orange"),
                                         selected="black")
-      ret = list(
+      ret = list(xyline.title,
                  fixedRow(column(width=3,check.xyline.object),
                           column(width=6,color.xyline.select)))
     }
@@ -2653,16 +2804,18 @@ output$add.jitter.panel = renderUI({
          class(get.data.set()[,input$vari1])%in%"integer")&&
         (class(get.data.set()[,input$vari2])%in%"numeric"|
          class(get.data.set()[,input$vari2])%in%"integer"))) {
-      title.jitter = h5("Add a jitter")
+#      title.jitter = h5("Add a jitter")
+      axis.features.title = h5(strong("Axis Features"))
       check.jitter.x.object = checkboxInput("check.jitter.x",
-                                            label="Jitter x-variable",
+                                            label="height",
                                             value=F)
       check.jitter.y.object = checkboxInput("check.jitter.y",
-                                            label="Jitter y-variable",
+                                            label="rightfoot",
                                             value=F)
-      ret = list(title.jitter,
-                 fixedRow(column(width=6,check.jitter.x.object),
-                          column(width=6,check.jitter.y.object)))
+      ret = list(axis.features.title,
+                 fixedRow(column(2, h5("Jitter:")),
+                          column(width=4,check.jitter.x.object),
+                          column(width=4,check.jitter.y.object)))
       
       temp = list()
       temp$x = get.data.set()[,input$vari1]
@@ -2719,17 +2872,18 @@ output$add.rugs.panel = renderUI({
          class(get.data.set()[,input$vari1])%in%"integer")&&
         (class(get.data.set()[,input$vari2])%in%"numeric"|
          class(get.data.set()[,input$vari2])%in%"integer"))) {
-      title.rugs = h5("Add rugs")
+#      title.rugs = h5("Add rugs")
       check.rugs.x.object = checkboxInput("check.rugs.x",
-                                          label="Add x-rugs",
+                                          label="height",
                                           value=F)
       check.rugs.y.object = checkboxInput("check.rugs.y",
-                                          label="Add y-rugs",
+                                          label="rightfoot",
                                           value=F)
       
-      ret = list(title.rugs,
-                 fixedRow(column(width=6,check.rugs.x.object),
-                          column(width=6,check.rugs.y.object)))
+      ret = list(
+                 fixedRow(column(2, h5("Rugs:")),
+                          column(width=4,check.rugs.x.object),
+                          column(width=4,check.rugs.y.object)))
       
       temp = list()
       temp$x = get.data.set()[,input$vari1]
@@ -2787,6 +2941,7 @@ output$join.points.panel = renderUI({
          class(get.data.set()[,input$vari2])%in%"integer"))) {
       
 #      title.join = h5("Join points by lines")
+      join.points.title = h5(strong("Join points"))
       check.join.object = checkboxInput("check.join",
                                         label="Join points",
                                         value=F)
@@ -2795,7 +2950,7 @@ output$join.points.panel = renderUI({
                                                 "green4","yellow","pink",
                                                 "grey","orange"),
                                       selected="blue")
-      ret = list(
+      ret = list(join.points.title,
                  fixedRow(column(width=3,check.join.object),
                           column(width=6,color.join.select)))
       
@@ -2870,7 +3025,7 @@ output$adjust.axis.panel = renderUI({
          (input$vari1%in%colnames(get.data.set())&&
           (input$vari2%in%"none"||
            input$vari2%in%colnames(get.data.set())))){
-        ret = list(h5('Adjust axis limits'))
+        ret = list(h5(strong('Axis Limits')))
         temp = list()
         temp$x = get.data.set()[,input$vari1]
         if(input$vari2%in%'none'){
@@ -2898,7 +3053,7 @@ output$adjust.axis.panel = renderUI({
            (class(get.data.set()[,input$vari2])%in%"character"|
            class(get.data.set()[,input$vari2])%in%"factor"))){
           limits.x = range(temp$x, na.rm = TRUE)
-          ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+          ret[[2]] = fixedRow(column(2,h5("x-axis:")),
                               column(4,textInput("x_axis_low_text",
                                                  label="",
                                                  value=limits.x[1])),
@@ -2913,7 +3068,7 @@ output$adjust.axis.panel = renderUI({
                 (class(get.data.set()[,input$vari2])%in%"integer"|
                 class(get.data.set()[,input$vari2])%in%"numeric"))) {
           limits.y = range(temp$y, na.rm = TRUE)
-          ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+          ret[[2]] = fixedRow(column(2,h5("x-axis:")),
                               column(4,textInput("x_axis_low_text",
                                                  label="",
                                                  value=limits.y[1])),
@@ -2928,14 +3083,14 @@ output$adjust.axis.panel = renderUI({
                 class(get.data.set()[,input$vari2])%in%"integer")))){
           limits.x = range(temp$x, na.rm = TRUE)
           limits.y = range(temp$y, na.rm = TRUE)
-          ret[[2]] = fixedRow(column(3,h5("x-axis:")),
+          ret[[2]] = fixedRow(column(2,h5("x-axis:")),
                               column(4,textInput("x_axis_low_text",
                                                  label="",
                                                  value=limits.y[1])),
                               column(4,textInput("x_axis_hig_text",
                                                  label="",
                                                  value=limits.y[2])))
-          ret[[3]] = fixedRow(column(3,h5("y-axis:")),
+          ret[[3]] = fixedRow(column(2,h5("y-axis:")),
                               column(4,textInput("y_axis_low_text",
                                                  label="",
                                                  value=limits.x[1])),
@@ -2943,7 +3098,8 @@ output$adjust.axis.panel = renderUI({
                                                  label="",
                                                  value=limits.x[2])))
         }
-        ret[[length(ret)+1]] = fixedRow(column(2,offset=8,
+        ret[[length(ret)+1]] = fixedRow(column(2),
+                                        column(8, 
                                                actionButton("reset_axis_limits_button",
                                                             label='Reset')))
       }
@@ -3201,12 +3357,12 @@ output$points.identify.panel = renderUI({
       plot.par.stored$locate.id=NULL
       identified.points$values=list()
       ret = list()
-      ret[[1]] = fixedRow(column(11,h5("Select type of Labeling")))
+      ret[[1]] = fixedRow(column(11,h5(strong("How do you want to label points?"))))
       ret[[2]] = fixedRow(column(4,
                                  checkboxInput("label_observation_check",
                                                label="Text label",
                                                value=F)),
-                          column(5,
+                          column(6,
                                  conditionalPanel("input.label_observation_check",
                                                   selectInput("label.select",
                                                               label="",
@@ -3217,7 +3373,7 @@ output$points.identify.panel = renderUI({
                                  checkboxInput("color_points_check",
                                                label="Colour",
                                                value=F)),
-                          column(5,
+                          column(6,
                                  conditionalPanel("input.color_points_check",
                                                   selectInput("color.select",
                                                               label="Select Colour",
@@ -3228,13 +3384,13 @@ output$points.identify.panel = renderUI({
                                  checkboxInput("same_level_of_check",
                                                label="With the same level of",
                                                value=F)),
-                          column(5,
+                          column(6,
                                  conditionalPanel("input.same_level_of_check",
                                                   selectInput("same.level.of.select",
                                                               label="",
                                                               choices=colnames(get.data.set())))))
       ret[[5]] = radioButtons("select_identify_method",
-                              label = "Select method of selection",
+                              label = h5(strong("Select method of selection")),
                               choices = c("Select by value",
                                           "Extremes",
                                           "Range of values"))
@@ -3324,11 +3480,11 @@ output$points.identify.panel = renderUI({
                                                                   max = nrow(get.data.set()), 
                                                                   value = c(0, 0),
                                                                   ticks=F)),
-                                               column(3,
+                                               column(5,
                                                       selectInput("range.column.select",
                                                                   label="Select column",
                                                                   choices=colnames(get.data.set())))))
-          ret[[9]] = fixedRow(column(2,checkboxInput("show.stored.check",
+          ret[[9]] = fixedRow(column(3,checkboxInput("show.stored.check",
                                                      label="Show stored",
                                                      value=T)),
                               column(4,
