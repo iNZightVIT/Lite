@@ -42,7 +42,7 @@ vis.sidebarPanel = function() {
         
         hr(),
         
-        fixedRow(column(10,h4("Variable selection")),
+        fixedRow(column(10,h5(strong("Variable selection"))),
                  column(2,checkboxInput("change_var_selection",
                                         value=F,
                                         label=""))),
