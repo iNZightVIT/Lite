@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   April 09, 2017.
+###  Last Modified  :   April 25, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -111,6 +111,7 @@ graphical.par = reactiveValues(
                     cubic =  ""),
   col.smooth = "",
   col.fun = NULL,
+  col.method = "linear",
   ##  Jitter, rugs, and trend.
   jitter = "",
   rugs = "",
@@ -1115,6 +1116,11 @@ observe({
 #      graphical.par$col.pt = "gray50"
       graphical.par$fill.pt = "transparent"
       
+      updateCheckboxInput(session,"colour.use.ranks", value = F)
+      graphical.par$col.method = "linear"
+      
+      updateCheckboxInput(session,"colour.palette.reverse", value = F)
+      graphical.par$reverse.palette = FALSE
       
       updateSelectInput(session,"select.dotcolor",selected="gray50")
       #graphical.par$fill.pt = "transparent"
@@ -2016,6 +2022,18 @@ observe({
   })
 })
 
+# select colour ranks or not
+
+observe({
+  input$colour.use.ranks
+  isolate({
+    if(!is.null(input$colour.use.ranks) && input$colour.use.ranks == TRUE)
+      graphical.par$col.method = "rank"
+    else
+      graphical.par$col.method = "linear"
+  })
+})
+
 observe({
   input$select.colour.palette
   isolate({
@@ -2257,6 +2275,8 @@ output$code.variables.panel = renderUI({
   input$vari1
   input$vari2
   input$select.plot.type
+  input$color_by_select
+  input$point_colour_title
   isolate({
     
     
@@ -2295,6 +2315,8 @@ output$code.variables.panel = renderUI({
         
       color.by.object  = NULL
       
+      color.use.ranks.object = NULL
+      
       if((!is.null(input$vari1)&&
           !is.null(input$vari2))&&
          (input$vari1%in%colnames(get.data.set())&&
@@ -2303,12 +2325,14 @@ output$code.variables.panel = renderUI({
         if((class(vis.data()[,input$vari1])%in%"factor"|
             class(vis.data()[,input$vari1])%in%"character")&&
            (is.null(input$vari2)|input$vari2%in%"none")){
-          color.by.object = list(conditionalPanel(condition = "input.point_colour_title == true",
-                                                  fixedRow(column(3, h5("Colour by:")),
-                                                           column(6, selectInput("color_by_select",
-                                                                                 label=NULL,
-                                                                                 choices = c(" ",get.categorical.column.names(vis.data())),
-                                                                                 selected = input$color_by_select)))),
+          color.by.object = list(fixedRow(column(3, h5("Colour by:")),
+                                          column(6, selectInput("color_by_select",
+                                                                label=NULL,
+                                                                choices = c(" ",get.categorical.column.names(vis.data())),
+                                                                selected = input$color_by_select,
+                                                                selectize=FALSE,
+                                                                size = 2))),
+                                 
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3, h5("Colour palette:")),
                                                            column(6, selectInput(inputId="select.colour.palette",label=NULL,
@@ -2331,18 +2355,29 @@ output$code.variables.panel = renderUI({
                                                            column(6, selectInput("color_by_select",
                                                                                  label=NULL,
                                                                                  choices=c(" ",colnames(vis.data())),
-                                                                                 selected = input$color_by_select)))),
+                                                                                 selected = input$color_by_select,
+                                                                                 selectize = FALSE,
+                                                                                 size = 2)))),
 
-                                 conditionalPanel("input.color_by_select != ' '",
+                                 conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                   fixedRow(column(3, h5("Colour palette:")),
                                                            column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                                  choices=names(graphical.par$colourPalettes$cont),
                                                                                  selected = names(graphical.par$colourPalettes$cont)[1]))),
-                                                  conditionalPanel("input.color_by_select != ' '",
+                                                  conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                                    fixedRow(column(3),
                                                                             column(6, checkboxInput(inputId = "colour.palette.reverse",
                                                                                                     label = "Reverse palette",
-                                                                                                    value = FALSE))))))
+                                                                                                    value = FALSE))))
+                                                  ))
+          
+          if(length(input$color_by_select) != 0 && 
+             input$color_by_select %in% get.numeric.column.names(vis.data()) && 
+             input$point_colour_title == TRUE)
+            color.use.ranks.object = fixedRow(column(3),
+                                              column(6, checkboxInput(inputId = "colour.use.ranks",
+                                                                      label = "Use Ranks",
+                                                                      value = FALSE)))
           
           symbol.object = conditionalPanel(condition = "input.point_symbol_title == true",
                                            fixedRow(column(3, h5("Symbol:")),
@@ -2397,6 +2432,7 @@ output$code.variables.panel = renderUI({
           ret = list(color.by.object)
         else
           ret = list(color.by.object,
+                     color.use.ranks.object,
                      #                   resize.by.object,
                      point.symbol.title,
                      symbol.object,
