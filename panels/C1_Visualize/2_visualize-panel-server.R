@@ -133,6 +133,7 @@ graphical.par = reactiveValues(
   hist.bins=NULL,
   scatter.grid.bins=50,
   hex.bins=20,
+  hex.style = "size",
   bs.inference=F,
   reverse.palette = FALSE,
   colourPalettes =
@@ -164,7 +165,8 @@ graphical.par = reactiveValues(
              magma = viridis::magma,
              plasma = viridis::plasma,
              inferno = viridis::inferno),
-      list('rainbow (hcl)' = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
+      list(
+           'rainbow (hcl)' = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
            blue =
              function(n) sequential_hcl(n, h = 260, c. = c(80, 10), l = c(30, 95), power = 0.7),
            green =
@@ -1683,12 +1685,13 @@ output$plot.appearance.panel = renderUI({
       graphical.par$hex.bins = 20
     }
     adjust.hex.bins.title = h5(strong("Size"))
-    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size:")),
+    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size (number of bins to use):")),
                                       column(6, sliderInput("adjust.hex.bins", 
-                                                            label = NULL, min = 5, 
+                                                            label = NULL, min = 2, 
                                                             max = 70, 
                                                             value=graphical.par$hex.bins,
                                                             step=1, ticks = FALSE)))
+    
     
     adjust.num.bins.object = NULL
     if((!is.null(input$vari1)&
@@ -1837,8 +1840,9 @@ output$plot.appearance.panel = renderUI({
                                                                  label = NULL,
                                                                  choices=c("default",
                                                                            "scatter plot",
-                                                                           "grid-density plot",
-                                                                           "hexbin plot"),
+                                                                           "hexbin plot-size",
+                                                                           "hexbin plot-alpha",
+                                                                           "grid-density plot"),
                                                                  selected=input$select.plot.type)))
         resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
                                             fixedRow(column(3, h5("Resize points by:")),
@@ -1873,7 +1877,18 @@ output$plot.appearance.panel = renderUI({
                      adjust.grid.size.title,
                      adjust.grid.size.object)
         }else if(!is.null(input$select.plot.type)&&
-                   input$select.plot.type%in%"hexbin plot"){
+                   input$select.plot.type%in%"hexbin plot-size"){
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     adjust.hex.bins.title,
+                     adjust.hex.bins.object,
+                     point.colour.title,
+                     select.dotcolor.object)
+        }
+        else if(!is.null(input$select.plot.type)&&
+                input$select.plot.type%in%"hexbin plot-alpha") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
@@ -1989,7 +2004,8 @@ observe({
                   'Adjust axis limits')
             if(!is.null(input$select.plot.type)&&
                  ((input$select.plot.type%in%"grid-density plot"|
-                    input$select.plot.type%in%"hexbin plot")||
+                    input$select.plot.type%in%"hexbin plot-size"|
+                   input$select.plot.type%in%"hexbin plot-alpha")||
                     large.sample&&
                     input$select.plot.type%in%"default")){
               ch = c('Add trend curves',
@@ -2079,7 +2095,7 @@ observe({
         graphical.par$plottype = "scatter"
       }else if(input$select.plot.type%in%"grid-density plot"){
         graphical.par$plottype = "grid"
-      }else if(input$select.plot.type%in%"hexbin plot"){
+      }else if(input$select.plot.type%in%"hexbin plot-size" || input$select.plot.type%in%"hexbin plot-alpha"){
         graphical.par$plottype = "hex"
       }else{
         graphical.par$plottype = "default"
@@ -2342,7 +2358,7 @@ output$code.variables.panel = renderUI({
                                                   fixedRow(column(3),
                                                            column(6, checkboxInput(inputId = "colour.palette.reverse",
                                                                                    label = "Reverse palette",
-                                                                                   value = FALSE))))))
+                                                                                   value = input$colour.palette.reverse))))))
           
     
           
@@ -2368,7 +2384,7 @@ output$code.variables.panel = renderUI({
                                                                    fixedRow(column(3),
                                                                             column(6, checkboxInput(inputId = "colour.palette.reverse",
                                                                                                     label = "Reverse palette",
-                                                                                                    value = FALSE))))
+                                                                                                    value = input$colour.palette.reverse))))
                                                   ))
           
           if(length(input$color_by_select) != 0 && 
@@ -2377,7 +2393,7 @@ output$code.variables.panel = renderUI({
             color.use.ranks.object = fixedRow(column(3),
                                               column(6, checkboxInput(inputId = "colour.use.ranks",
                                                                       label = "Use Ranks",
-                                                                      value = FALSE)))
+                                                                      value = input$colour.use.ranks)))
           
           symbol.object = conditionalPanel(condition = "input.point_symbol_title == true",
                                            fixedRow(column(3, h5("Symbol:")),
@@ -2428,7 +2444,8 @@ output$code.variables.panel = renderUI({
         if(length(input$select.plot.type) != 0 && 
            (input$select.plot.type %in% "histogram" ||
            input$select.plot.type %in% "grid-density plot" ||
-           input$select.plot.type %in% "hexbin plot"))
+           input$select.plot.type %in% "hexbin plot-size" ||
+           input$select.plot.type %in% "hexbin plot-alpha"))
           ret = list(color.by.object)
         else
           ret = list(color.by.object,
@@ -4394,4 +4411,21 @@ observe({
     })
   }
 })
+
+
+observe({
+  input$select.plot.type
+  isolate({
+    if(!is.null(input$select.plot.type) && input$select.plot.type == "hexbin plot-size")
+      graphical.par$hex.style = "size"
+    if(!is.null(input$select.plot.type) && input$select.plot.type == "hexbin plot-alpha")
+      graphical.par$hex.style = "alpha"
+    
+  })
+})
+
+
+
+
+
 
