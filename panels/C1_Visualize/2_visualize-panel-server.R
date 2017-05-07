@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   April 25, 2017.
+###  Last Modified  :   May 03, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -1321,13 +1321,14 @@ output$add_inference = renderUI({
                  (input$vari2%in%"none"&&
                     (class(dafr[,input$vari1])%in%"factor"|
                        class(dafr[,input$vari1])%in%"character"))){
-        ret = list(conditionalPanel("input.toggle_inference",
-                                    h5("Parameter"),helpText("Proportions"),
-                                    normal_bootstrap.radio,
-                                    h5(strong("Type of interval")),
-                                    confidence.interval.check,
-                                    conditionalPanel("input.inference_type1=='Normal'",
-                                                     comparison.interval.check)))
+        ret = list(h5(strong("Parameter")),
+                   helpText("Proportions"),
+                   normal_bootstrap.radio,
+                   h5(strong("Type of interval")),
+                   confidence.interval.check,
+                   conditionalPanel("input.inference_type1=='Normal'",
+                                    comparison.interval.check))
+                                    
       # var1 = numeric; vari2 = none
       }else if((input$vari2%in%"none"&&
                   (class(dafr[,input$vari1])%in%"numeric"|
@@ -2284,6 +2285,9 @@ observe({
   })
 })
 
+
+
+
 # "Code more variables" panel"
 output$code.variables.panel = renderUI({
   get.data.set()
@@ -2312,7 +2316,9 @@ output$code.variables.panel = renderUI({
       select.colour.palette.object = fixedRow(column(3, h5("Colour palette:")),
                                               column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                     choices=names(graphical.par$colourPalettes$cat),
-                                                                    selected = "Colourblind Friendly")))
+                                                                    selected = "Colourblind Friendly",
+                                                                    size = 2,
+                                                                    selectize = FALSE)))
       colour.palette.reverse.object = fixedRow(column(3),
                                                column(6, checkboxInput(inputId = "colour.palette.reverse", label = "Reverse palette",
                                                                        value = FALSE)))
@@ -2345,15 +2351,15 @@ output$code.variables.panel = renderUI({
                                           column(6, selectInput("color_by_select",
                                                                 label=NULL,
                                                                 choices = c(" ",get.categorical.column.names(vis.data())),
-                                                                selected = input$color_by_select,
-                                                                selectize=FALSE,
-                                                                size = 2))),
+                                                                selected = input$color_by_select))),
                                  
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3, h5("Colour palette:")),
                                                            column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                                  choices=names(graphical.par$colourPalettes$cat),
-                                                                                 selected = "Colourblind Friendly"))),
+                                                                                 selected = "Colourblind Friendly",
+                                                                                 selectize=FALSE,
+                                                                                 size = 2))),
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3),
                                                            column(6, checkboxInput(inputId = "colour.palette.reverse",
@@ -2366,20 +2372,26 @@ output$code.variables.panel = renderUI({
           point.symbol.title = checkboxInput(inputId = "point_symbol_title",
                                              label = strong("Point Symbol"),
                                              value = FALSE)
+          
+          
           color.by.object = list(conditionalPanel(condition = "input.point_colour_title == true",
                                                   fixedRow(column(3, h5("Colour by:")),
                                                            column(6, selectInput("color_by_select",
                                                                                  label=NULL,
                                                                                  choices=c(" ",colnames(vis.data())),
-                                                                                 selected = input$color_by_select,
-                                                                                 selectize = FALSE,
-                                                                                 size = 2)))),
+                                                                                 selected = input$color_by_select)))),
 
                                  conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                   fixedRow(column(3, h5("Colour palette:")),
-                                                           column(6, selectInput(inputId="select.colour.palette",label=NULL,
-                                                                                 choices=names(graphical.par$colourPalettes$cont),
-                                                                                 selected = names(graphical.par$colourPalettes$cont)[1]))),
+                                                           column(6, selectInput(inputId="select.colour.palette",
+                                                                                 label=NULL,
+                                                                                 
+                                                                                 choices = switch(as.character(length(input$color_by_select) > 0 && input$color_by_select %in% get.numeric.column.names(vis.data())),
+                                                                                                  "TRUE" = names(graphical.par$colourPalettes$cont),
+                                                                                                  "FALSE" = names(graphical.par$colourPalettes$cat)),
+                                                                                 selected = input$select.colour.palette,
+                                                                                 selectize = FALSE,
+                                                                                 size = 2))),
                                                   conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                                    fixedRow(column(3),
                                                                             column(6, checkboxInput(inputId = "colour.palette.reverse",
@@ -2610,11 +2622,11 @@ output$trend.curve.panel = renderUI({
 #    title.add.trend.curve = h5("Add trend curves")
     trend.curves.title = h5(strong("Trend Curves"))
     smoother.title = h5(strong("Smoother"))
-    check.linear.object = checkboxInput("check_linear",label="linear",value = F)
-    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = F)
-    check.cubic.object = checkboxInput("check_cubic",label="cubic",value = F)
-    check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = F)
-    check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = F)
+    check.linear.object = checkboxInput("check_linear",label="linear",value = input$check_linear)
+    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = input$check_quadratic)
+    check.cubic.object = checkboxInput("check_cubic",label="cubic",value = input$check_cubic)
+    check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = input$check_smoother)
+    check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = input$check_quantiles)
     color.linear.select = selectInput("color.linear",label="",
                                       choices=c("red","black","blue",
                                                 "green4","yellow","pink",
@@ -4154,6 +4166,7 @@ output$select_additions_panel = renderUI({
   isolate({
     
     temp = list()
+
     temp$x = get.data.set()[,input$vari1]
     if(input$vari2%in%'none'){
       temp$y = NULL
@@ -4425,7 +4438,230 @@ observe({
 })
 
 
+# add fitted values and residuals
+# add trends and curves 
+output$add.fitted.residuals.panel = renderUI({
+  get.data.set()
+  isolate({
+    add.fitted.values.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
+                                                actionButton("store_fitted_values", "Store fitted values"))
+    add.residuals.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
+                                            actionButton("store_residuals", "Store residuals"))
+    
+    
+    
+    
+   
+    list(fixedRow(column(width = 6, add.fitted.values.button),
+                  column(width = 6, add.residuals.button))
+         )
+  })
+})
 
 
+observeEvent(input$store_fitted_values, {
+  showModal(modalDialog(
+    h5(strong("Specify names for the new variables")),
+    
+    conditionalPanel("input.check_linear",
+                     fixedRow(column(2, h5("Linear:")),
+                              column(6, textInput(inputId = "add_linear_fitted_values",
+                                                  value = paste(input$vari1, ".predict.linear", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_quadratic",
+                     fixedRow(column(2, h5("Quadratic:")),
+                              column(6, textInput(inputId="add_quadratic_fitted_values",
+                                                  value = paste(input$vari1, ".predict.quadratic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_cubic",
+                     fixedRow(column(2, h5("Cubic:")),
+                              column(6, textInput(inputId="add_cubic_fitted_values",
+                                                  value = paste(input$vari1, ".predict.cubic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_smoother",
+                     fixedRow(column(2, h5("Smoother:")),
+                              column(6, textInput(inputId="add_smoother_fitted_values",
+                                                  value = paste(input$vari1, ".predict.smoother", sep = ""), 
+                                                  label=NULL)))),
+    actionButton("store_fitted_values_ok", "OK"),
+    textOutput("add_fitted_values_status"),
+    title = "Store fitted values"
+    
+  ))
+})
+
+
+output$add_fitted_values_status = renderText({
+  if(!is.null(input$store_fitted_values_ok) &&
+     input$store_fitted_values_ok > 0)
+    "Add succesful"
+  else
+    NULL
+})
+
+
+observeEvent(input$store_residuals, {
+  showModal(modalDialog(
+    h5(strong("Specify names for the new variables")),
+    
+    conditionalPanel("input.check_linear",
+                     fixedRow(column(2, h5("Linear:")),
+                              column(6, textInput(inputId="add_linear_residuals",
+                                                  value = paste(input$vari1, ".residuals.linear", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_quadratic",
+                     fixedRow(column(2, h5("Quadratic:")),
+                              column(6, textInput(inputId="add_quadratic_residuals",
+                                                  value = paste(input$vari1, ".residuals.quadratic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_cubic",
+                     fixedRow(column(2, h5("Cubic:")),
+                              column(6, textInput(inputId="add_cubic_residuals",
+                                                  value = paste(input$vari1, ".residuals.cubic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_smoother",
+                     fixedRow(column(2, h5("Smoother:")),
+                              column(6, textInput(inputId="add_smoother_residuals",
+                                                  value = paste(input$vari1, ".residuals.smoother", sep = ""), 
+                                                  label=NULL)))),
+    actionButton("store_resisuals_ok", "OK"),
+    textOutput("add_residuals_status"),
+    title = "Store residuals"
+    
+  ))
+})
+
+
+output$add_residuals_status = renderText({
+  if(!is.null(input$store_resisuals_ok) &&
+     input$store_resisuals_ok > 0)
+    "Add succesful"
+  else
+    NULL
+})
+
+observe({
+  input$store_resisuals_ok
+  isolate({
+    if(!is.null(input$store_resisuals_ok) &&
+       input$store_resisuals_ok > 0) {
+      linear_trend = FALSE
+      quadratic_trend = FALSE
+      cubic_trend = FALSE
+      smoother_trend = FALSE
+      temp1 = input$vari1
+      temp2 = input$vari2
+      temp = get.data.set()
+      if("linear" %in% graphical.par$trend) {
+        linear_trend = TRUE
+        fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
+        resi.linear = data.frame(residuals(fit.linear))
+        colnames(resi.linear) = input$add_linear_residuals
+        temp = cbind(temp, resi.linear)
+      }
+      if("quadratic" %in% graphical.par$trend) {
+        quadratic_trend = TRUE
+        fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
+        resi.quadratic = data.frame(residuals(fit.quadratic))
+        colnames(resi.quadratic) = input$add_quadratic_residuals
+        temp = cbind(temp, resi.quadratic)
+      }
+      if("cubic" %in% graphical.par$trend) {
+        cubic_trend = TRUE
+        fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
+        resi.cubic = data.frame(residuals(fit.cubic))
+        colnames(resi.cubic) = input$add_cubic_residuals
+        temp = cbind(temp, resi.cubic)
+      }
+      if(graphical.par$smooth > 0) {
+        temp3 = graphical.par$smooth
+        smoother_trend = TRUE
+        fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+                                           family = "gaussian", degree = 1, na.action = "na.exclude"))
+        resi.smooth = data.frame(residuals(fit.smooth))
+        colnames(resi.smooth) = input$add_smoother_residuals
+        temp = cbind(temp, resi.smooth)
+        
+      }
+      updatePanel$datachanged = updatePanel$datachanged + 1
+      values$data.set = temp
+      updateCheckboxInput(session, "vari1", value = temp1)
+      updateCheckboxInput(session, "vari2", value = temp2)
+      if(linear_trend)
+        updateCheckboxInput(session, "check_linear", value = T)
+      if(quadratic_trend)
+        updateCheckboxInput(session, "check_quadratic", value = T)
+      if(cubic_trend)
+        updateCheckboxInput(session, "check_cubic", value = T)
+      if(smoother_trend) {
+        updateCheckboxInput(session, "check_smoother",value = T)
+        updateSliderInput(session, "smoother.smooth", value = temp3)
+        
+      }
+    }
+  })
+})
+
+observe({
+  input$store_fitted_values_ok
+  isolate({
+    if(!is.null(input$store_fitted_values_ok) &&
+       input$store_fitted_values_ok > 0) {
+      linear_trend = FALSE
+      quadratic_trend = FALSE
+      cubic_trend = FALSE
+      smoother_trend = FALSE
+      temp1 = input$vari1
+      temp2 = input$vari2
+      temp = get.data.set()
+      if("linear" %in% graphical.par$trend) {
+        linear_trend = TRUE
+        fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
+        pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.linear) = input$add_linear_fitted_values
+        temp = cbind(temp, pred.linear)
+      }
+      if("quadratic" %in% graphical.par$trend) {
+        quadratic_trend = TRUE
+        fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
+        pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.quadratic) = input$add_quadratic_fitted_values
+        temp = cbind(temp, pred.quadratic)
+      }
+      if("cubic" %in% graphical.par$trend) {
+        cubic_trend = TRUE
+        fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
+        pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.cubic) = input$add_cubic_fitted_values
+        temp = cbind(temp, pred.cubic)
+      }
+      if(graphical.par$smooth > 0) {
+        temp3 = graphical.par$smooth
+        smoother_trend = TRUE
+        fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+                                           family = "gaussian", degree = 1, na.action = "na.exclude"))
+        pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.smooth) = input$add_smoother_fitted_values
+        temp = cbind(temp, pred.smooth)
+        
+      }
+      updatePanel$datachanged = updatePanel$datachanged + 1
+      values$data.set = temp
+      updateCheckboxInput(session, "vari1", value = temp1)
+      updateCheckboxInput(session, "vari2", value = temp2)
+      if(linear_trend)
+        updateCheckboxInput(session, "check_linear", value = T)
+      if(quadratic_trend)
+        updateCheckboxInput(session, "check_quadratic", value = T)
+      if(cubic_trend)
+        updateCheckboxInput(session, "check_cubic", value = T)
+      if(smoother_trend) {
+        updateCheckboxInput(session, "check_smoother",value = T)
+        updateSliderInput(session, "smoother.smooth", value = temp3)
+        
+      }
+    }
+  })
+})
 
 
