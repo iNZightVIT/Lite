@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : April 25, 2017.
+###  Last Modified : May 03, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -67,6 +67,12 @@ vis.sidebarPanel = function() {
                      label = "Reset To Default"),
         br(),
         br(),
+        
+        actionButton(inputId = "go.to.old",
+                     label = "Go To Old Version"),
+        br(),
+        br(),
+        
         visualize.help()
       ),
       
@@ -172,10 +178,12 @@ vis.mainPanel = function() {
                  
                  fixedRow(column(width = 2, offset = 1,
                                  downloadButton(outputId = "saveplot", label = "Save Plot")),
-                          column(width = 6,
+                          column(width = 4,
                                  radioButtons(inputId = "saveplottype", 
                                               label = "Select the file type", 
-                                              choices = list("jpg", "png", "pdf"), inline = TRUE))),
+                                              choices = list("jpg", "png", "pdf"), inline = TRUE)),
+                          column(width = 5,
+                                 uiOutput("add.fitted.residuals.panel"))),
                  
 #                 downloadButton(outputId = "saveplot", label = "Save Plot"),
 #                 radioButtons(inputId = "saveplottype", 
@@ -251,8 +259,6 @@ visualize.panel.ui = function(data.set) {
     }
   )
 }
-
-
 
 
 
