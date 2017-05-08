@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : April 25, 2017.
+###  Last Modified : May 03, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -67,6 +67,12 @@ vis.sidebarPanel = function() {
                      label = "Reset To Default"),
         br(),
         br(),
+        
+        actionButton(inputId = "go.to.old",
+                     label = "Go To Old Version"),
+        br(),
+        br(),
+        
         visualize.help()
       ),
       
@@ -172,10 +178,12 @@ vis.mainPanel = function() {
                  
                  fixedRow(column(width = 2, offset = 1,
                                  downloadButton(outputId = "saveplot", label = "Save Plot")),
-                          column(width = 6,
+                          column(width = 4,
                                  radioButtons(inputId = "saveplottype", 
                                               label = "Select the file type", 
-                                              choices = list("jpg", "png", "pdf"), inline = TRUE))),
+                                              choices = list("jpg", "png", "pdf"), inline = TRUE)),
+                          column(width = 5,
+                                 uiOutput("add.fitted.residuals.panel"))),
                  
 #                 downloadButton(outputId = "saveplot", label = "Save Plot"),
 #                 radioButtons(inputId = "saveplottype", 
@@ -251,6 +259,241 @@ visualize.panel.ui = function(data.set) {
     }
   )
 }
+
+
+
+
+
+
+########## the old version ##########
+
+old.vis.sidebarPanel = function() {
+  ##  Note the user of "hr()" (= horizontal rule) to separate
+  ##  sections.
+  sidebarPanelUI = list(
+    hr(),
+    fixedRow(column(10,h4("Variable selection")),
+             column(2,checkboxInput("change_var_selection",
+                                    value=F,
+                                    label=""))),
+    ##  Select the first variable.
+    uiOutput("vari1_panel"),
+    
+    ##  Select the second variable.
+    uiOutput("vari2_panel"),
+    hr(),
+    ## Select desired subset for the first variable.
+    uiOutput("subs1_panel"),
+    
+    ##  Select desired subset for the second variable.
+    uiOutput("subs2_panel"),
+    hr(),
+    ##  Reset graphical parameters.
+    radioButtons(inputId = "customize_plot",
+                 label =  "Advanced Options: ",
+                 choices =
+                   c("Hide" = 1,
+                     "Show" = 2),
+                 selected = 1),
+    hr(),
+    actionButton(inputId = "reset.graphics",
+                 label = "Reset To Default"),
+    br(),
+    br(),
+    
+    actionButton(inputId = "go.to.new",
+                 label = "Go To New Version"),
+    br(),
+    br(),
+    
+    
+    visualize.help()
+  )
+}
+
+old.vis.mainPanel = function() {
+  toggle_advanced_options = T
+  if(!is.null(input$toggle_advanced_options)){
+    toggle_advanced_options = input$toggle_advanced_options
+  }
+  panel = list(
+    br(),
+    tabsetPanel(
+      id = "plot_selector",
+      type = "pills",
+      ##  Plot Panel
+      tabPanel(
+        title = "Plot",
+        br(),
+        fixedRow(
+          column(width = 12,
+                 conditionalPanel(condition = "input.customize_plot == 1",
+                                  helpText("Plots for visualizing data."),
+                                  plotOutput("visualize.plot"),
+                                  
+                                  fixedRow(
+                                    column(
+                                      width = 5, offset = 1,
+                                      conditionalPanel(
+                                        condition = "input.subs1 != 'none'",
+                                        ##  Slider input GUI for the first variable.
+                                        br(),
+                                        uiOutput("subs1_conditional")
+                                      )
+                                    ),
+                                    column(
+                                      width = 5, offset = 1,
+                                      ##  Slider input GUI for the second variable.
+                                      conditionalPanel(
+                                        condition = "input.subs2 != 'none'",
+                                        br(),
+                                        uiOutput("subs2_conditional")
+                                      )
+                                    ),
+                                    
+                                    fixedRow(column(width = 2, offset = 1,
+                                                    downloadButton(outputId = "saveplot", label = "Save Plot")),
+                                             column(width = 6,
+                                                    radioButtons(inputId = "saveplottype", 
+                                                                 label = "Select the file type", 
+                                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
+                                    
+                                    
+                                  )
+                 ),
+                 
+                 conditionalPanel(condition = "input.customize_plot == 2",
+                                  fixedRow(
+                                    column(
+                                      width = 8,
+                                      helpText("Plots for visualizing the data."),
+                                      plotOutput("mini.plot"),
+                                      
+                                      
+                                      
+                                      fixedRow(column(width = 6,
+                                                      conditionalPanel(
+                                                        condition = "input.subs1 != 'none'",
+                                                        uiOutput("subs1_conditional_mini")
+                                                      )
+                                      ),
+                                      column(width = 6,
+                                             conditionalPanel(condition = "input.subs2 != 'none'",
+                                                              uiOutput("subs2_conditional_mini")
+                                             )
+                                      )
+                                      ),
+                                      fixedRow(column(width = 2, offset = 1,
+                                                      downloadButton(outputId = "saveplot2", label = "Save Plot")),
+                                               column(width = 6,
+                                                      radioButtons(inputId = "saveplottype2", 
+                                                                   label = "Select the file type", 
+                                                                   choices = list("jpg", "png", "pdf"), inline = TRUE)))
+                                      
+                                    ),
+                                    column(
+                                      width = 4,
+                                      fixedRow(column(8,h4("Inference")),
+                                               column(2,
+                                                      checkboxInput("toggle_inference",
+                                                                    label="",
+                                                                    value=input$toggle_inference))),
+                                      fixedRow(column(width = 8,
+                                                      uiOutput("old_add_inference"))),
+                                      fixedRow(column(8,h4("Advanced options")),column(2,
+                                                                                       checkboxInput("toggle_advanced_options",
+                                                                                                     label="",
+                                                                                                     value=toggle_advanced_options))),
+                                      conditionalPanel("input.toggle_advanced_options",
+                                                       fixedRow(column(width = 12,
+                                                                       uiOutput("old_advanced_options_panel"))),
+                                                       fixedRow(column(width=12,
+                                                                       conditionalPanel("input.advanced_options=='Code more variables'",
+                                                                                        uiOutput("code.variables.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add trend curves'",
+                                                                                        uiOutput("trend.curve.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add x=y line'",
+                                                                                        uiOutput("xy.line.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add a jitter'",
+                                                                                        uiOutput("add.jitter.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Add rugs'",
+                                                                                        uiOutput("add.rugs.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Join points by line'",
+                                                                                        uiOutput("join.points.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Change plot appearance'",
+                                                                                        uiOutput("plot.appearance.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Identify points'",
+                                                                                        uiOutput("points.identify.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Customize labels'",
+                                                                                        uiOutput("customize.labels.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Adjust axis limits'",
+                                                                                        uiOutput("adjust.axis.panel")),
+                                                                       conditionalPanel("input.advanced_options=='Adjust number of Bars'",
+                                                                                        uiOutput("adjust.number.bars.panel"))))))
+                                  )
+                 )
+          )
+        )
+      ),
+      ##  Summary Panel
+      tabPanel(
+        title = "Summary",
+        br(),
+        helpText("Statistical Sumary for the data."),
+        verbatimTextOutput("visualize.summary")
+      ),
+      ##  Inference Panel
+      tabPanel(
+        title = "Inference",
+        br(),
+        selectInput("type.inference.select",
+                    choices = c("normal",
+                                "bootstrap"),
+                    label = "Select type of inference"),
+        br(),
+        helpText("Statistical Inference for the data."),
+        verbatimTextOutput("visualize.inference")
+      )
+    )
+  )
+  panel
+}
+
+
+old.visualize.panel.ui = function(data.set) {
+  fluidPage(  
+    if (is.null(data.set)) {
+      fixedRow(
+        includeMarkdown(
+          "panels/C1_Visualize/4_visualize-panel-null.md")
+      )
+    } else {
+      fixedRow(
+        column(4, old.vis.sidebarPanel()),
+        column(8, old.vis.mainPanel())
+      )
+    }
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

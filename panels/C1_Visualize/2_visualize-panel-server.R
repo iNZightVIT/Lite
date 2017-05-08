@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   April 25, 2017.
+###  Last Modified  :   May 03, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -133,6 +133,7 @@ graphical.par = reactiveValues(
   hist.bins=NULL,
   scatter.grid.bins=50,
   hex.bins=20,
+  hex.style = "size",
   bs.inference=F,
   reverse.palette = FALSE,
   colourPalettes =
@@ -164,7 +165,8 @@ graphical.par = reactiveValues(
              magma = viridis::magma,
              plasma = viridis::plasma,
              inferno = viridis::inferno),
-      list('rainbow (hcl)' = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
+      list(
+           'rainbow (hcl)' = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
            blue =
              function(n) sequential_hcl(n, h = 260, c. = c(80, 10), l = c(30, 95), power = 0.7),
            green =
@@ -1319,13 +1321,14 @@ output$add_inference = renderUI({
                  (input$vari2%in%"none"&&
                     (class(dafr[,input$vari1])%in%"factor"|
                        class(dafr[,input$vari1])%in%"character"))){
-        ret = list(conditionalPanel("input.toggle_inference",
-                                    h5("Parameter"),helpText("Proportions"),
-                                    normal_bootstrap.radio,
-                                    h5(strong("Type of interval")),
-                                    confidence.interval.check,
-                                    conditionalPanel("input.inference_type1=='Normal'",
-                                                     comparison.interval.check)))
+        ret = list(h5(strong("Parameter")),
+                   helpText("Proportions"),
+                   normal_bootstrap.radio,
+                   h5(strong("Type of interval")),
+                   confidence.interval.check,
+                   conditionalPanel("input.inference_type1=='Normal'",
+                                    comparison.interval.check))
+                                    
       # var1 = numeric; vari2 = none
       }else if((input$vari2%in%"none"&&
                   (class(dafr[,input$vari1])%in%"numeric"|
@@ -1683,12 +1686,13 @@ output$plot.appearance.panel = renderUI({
       graphical.par$hex.bins = 20
     }
     adjust.hex.bins.title = h5(strong("Size"))
-    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size:")),
+    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size (number of bins to use):")),
                                       column(6, sliderInput("adjust.hex.bins", 
-                                                            label = NULL, min = 5, 
+                                                            label = NULL, min = 2, 
                                                             max = 70, 
                                                             value=graphical.par$hex.bins,
                                                             step=1, ticks = FALSE)))
+    
     
     adjust.num.bins.object = NULL
     if((!is.null(input$vari1)&
@@ -1837,8 +1841,9 @@ output$plot.appearance.panel = renderUI({
                                                                  label = NULL,
                                                                  choices=c("default",
                                                                            "scatter plot",
-                                                                           "grid-density plot",
-                                                                           "hexbin plot"),
+                                                                           "hexbin plot-size",
+                                                                           "hexbin plot-alpha",
+                                                                           "grid-density plot"),
                                                                  selected=input$select.plot.type)))
         resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
                                             fixedRow(column(3, h5("Resize points by:")),
@@ -1873,7 +1878,18 @@ output$plot.appearance.panel = renderUI({
                      adjust.grid.size.title,
                      adjust.grid.size.object)
         }else if(!is.null(input$select.plot.type)&&
-                   input$select.plot.type%in%"hexbin plot"){
+                   input$select.plot.type%in%"hexbin plot-size"){
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     adjust.hex.bins.title,
+                     adjust.hex.bins.object,
+                     point.colour.title,
+                     select.dotcolor.object)
+        }
+        else if(!is.null(input$select.plot.type)&&
+                input$select.plot.type%in%"hexbin plot-alpha") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
@@ -1989,7 +2005,8 @@ observe({
                   'Adjust axis limits')
             if(!is.null(input$select.plot.type)&&
                  ((input$select.plot.type%in%"grid-density plot"|
-                    input$select.plot.type%in%"hexbin plot")||
+                    input$select.plot.type%in%"hexbin plot-size"|
+                   input$select.plot.type%in%"hexbin plot-alpha")||
                     large.sample&&
                     input$select.plot.type%in%"default")){
               ch = c('Add trend curves',
@@ -2079,7 +2096,7 @@ observe({
         graphical.par$plottype = "scatter"
       }else if(input$select.plot.type%in%"grid-density plot"){
         graphical.par$plottype = "grid"
-      }else if(input$select.plot.type%in%"hexbin plot"){
+      }else if(input$select.plot.type%in%"hexbin plot-size" || input$select.plot.type%in%"hexbin plot-alpha"){
         graphical.par$plottype = "hex"
       }else{
         graphical.par$plottype = "default"
@@ -2268,6 +2285,9 @@ observe({
   })
 })
 
+
+
+
 # "Code more variables" panel"
 output$code.variables.panel = renderUI({
   get.data.set()
@@ -2296,7 +2316,9 @@ output$code.variables.panel = renderUI({
       select.colour.palette.object = fixedRow(column(3, h5("Colour palette:")),
                                               column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                     choices=names(graphical.par$colourPalettes$cat),
-                                                                    selected = "Colourblind Friendly")))
+                                                                    selected = "Colourblind Friendly",
+                                                                    size = 2,
+                                                                    selectize = FALSE)))
       colour.palette.reverse.object = fixedRow(column(3),
                                                column(6, checkboxInput(inputId = "colour.palette.reverse", label = "Reverse palette",
                                                                        value = FALSE)))
@@ -2329,20 +2351,20 @@ output$code.variables.panel = renderUI({
                                           column(6, selectInput("color_by_select",
                                                                 label=NULL,
                                                                 choices = c(" ",get.categorical.column.names(vis.data())),
-                                                                selected = input$color_by_select,
-                                                                selectize=FALSE,
-                                                                size = 2))),
+                                                                selected = input$color_by_select))),
                                  
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3, h5("Colour palette:")),
                                                            column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                                  choices=names(graphical.par$colourPalettes$cat),
-                                                                                 selected = "Colourblind Friendly"))),
+                                                                                 selected = "Colourblind Friendly",
+                                                                                 selectize=FALSE,
+                                                                                 size = 2))),
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3),
                                                            column(6, checkboxInput(inputId = "colour.palette.reverse",
                                                                                    label = "Reverse palette",
-                                                                                   value = FALSE))))))
+                                                                                   value = input$colour.palette.reverse))))))
           
     
           
@@ -2350,25 +2372,31 @@ output$code.variables.panel = renderUI({
           point.symbol.title = checkboxInput(inputId = "point_symbol_title",
                                              label = strong("Point Symbol"),
                                              value = FALSE)
+          
+          
           color.by.object = list(conditionalPanel(condition = "input.point_colour_title == true",
                                                   fixedRow(column(3, h5("Colour by:")),
                                                            column(6, selectInput("color_by_select",
                                                                                  label=NULL,
                                                                                  choices=c(" ",colnames(vis.data())),
-                                                                                 selected = input$color_by_select,
-                                                                                 selectize = FALSE,
-                                                                                 size = 2)))),
+                                                                                 selected = input$color_by_select)))),
 
                                  conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                   fixedRow(column(3, h5("Colour palette:")),
-                                                           column(6, selectInput(inputId="select.colour.palette",label=NULL,
-                                                                                 choices=names(graphical.par$colourPalettes$cont),
-                                                                                 selected = names(graphical.par$colourPalettes$cont)[1]))),
+                                                           column(6, selectInput(inputId="select.colour.palette",
+                                                                                 label=NULL,
+                                                                                 
+                                                                                 choices = switch(as.character(length(input$color_by_select) > 0 && input$color_by_select %in% get.numeric.column.names(vis.data())),
+                                                                                                  "TRUE" = names(graphical.par$colourPalettes$cont),
+                                                                                                  "FALSE" = names(graphical.par$colourPalettes$cat)),
+                                                                                 selected = input$select.colour.palette,
+                                                                                 selectize = FALSE,
+                                                                                 size = 2))),
                                                   conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                                    fixedRow(column(3),
                                                                             column(6, checkboxInput(inputId = "colour.palette.reverse",
                                                                                                     label = "Reverse palette",
-                                                                                                    value = FALSE))))
+                                                                                                    value = input$colour.palette.reverse))))
                                                   ))
           
           if(length(input$color_by_select) != 0 && 
@@ -2377,7 +2405,7 @@ output$code.variables.panel = renderUI({
             color.use.ranks.object = fixedRow(column(3),
                                               column(6, checkboxInput(inputId = "colour.use.ranks",
                                                                       label = "Use Ranks",
-                                                                      value = FALSE)))
+                                                                      value = input$colour.use.ranks)))
           
           symbol.object = conditionalPanel(condition = "input.point_symbol_title == true",
                                            fixedRow(column(3, h5("Symbol:")),
@@ -2428,7 +2456,8 @@ output$code.variables.panel = renderUI({
         if(length(input$select.plot.type) != 0 && 
            (input$select.plot.type %in% "histogram" ||
            input$select.plot.type %in% "grid-density plot" ||
-           input$select.plot.type %in% "hexbin plot"))
+           input$select.plot.type %in% "hexbin plot-size" ||
+           input$select.plot.type %in% "hexbin plot-alpha"))
           ret = list(color.by.object)
         else
           ret = list(color.by.object,
@@ -2593,11 +2622,11 @@ output$trend.curve.panel = renderUI({
 #    title.add.trend.curve = h5("Add trend curves")
     trend.curves.title = h5(strong("Trend Curves"))
     smoother.title = h5(strong("Smoother"))
-    check.linear.object = checkboxInput("check_linear",label="linear",value = F)
-    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = F)
-    check.cubic.object = checkboxInput("check_cubic",label="cubic",value = F)
-    check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = F)
-    check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = F)
+    check.linear.object = checkboxInput("check_linear",label="linear",value = input$check_linear)
+    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = input$check_quadratic)
+    check.cubic.object = checkboxInput("check_cubic",label="cubic",value = input$check_cubic)
+    check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = input$check_smoother)
+    check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = input$check_quantiles)
     color.linear.select = selectInput("color.linear",label="",
                                       choices=c("red","black","blue",
                                                 "green4","yellow","pink",
@@ -4137,6 +4166,7 @@ output$select_additions_panel = renderUI({
   isolate({
     
     temp = list()
+
     temp$x = get.data.set()[,input$vari1]
     if(input$vari2%in%'none'){
       temp$y = NULL
@@ -4393,5 +4423,528 @@ observe({
       iNZightPlots:::exportHTML.function(create.html, width = 10, height = 6)
     })
   }
+})
+
+
+observe({
+  input$select.plot.type
+  isolate({
+    if(!is.null(input$select.plot.type) && input$select.plot.type == "hexbin plot-size")
+      graphical.par$hex.style = "size"
+    if(!is.null(input$select.plot.type) && input$select.plot.type == "hexbin plot-alpha")
+      graphical.par$hex.style = "alpha"
+    
+  })
+})
+
+
+# add fitted values and residuals
+# add trends and curves 
+output$add.fitted.residuals.panel = renderUI({
+  get.data.set()
+  isolate({
+    add.fitted.values.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
+                                                actionButton("store_fitted_values", "Store fitted values"))
+    add.residuals.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
+                                            actionButton("store_residuals", "Store residuals"))
+    
+    
+    
+    
+   
+    list(fixedRow(column(width = 6, add.fitted.values.button),
+                  column(width = 6, add.residuals.button))
+         )
+  })
+})
+
+
+observeEvent(input$store_fitted_values, {
+  showModal(modalDialog(
+    h5(strong("Specify names for the new variables")),
+    
+    conditionalPanel("input.check_linear",
+                     fixedRow(column(2, h5("Linear:")),
+                              column(6, textInput(inputId = "add_linear_fitted_values",
+                                                  value = paste(input$vari1, ".predict.linear", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_quadratic",
+                     fixedRow(column(2, h5("Quadratic:")),
+                              column(6, textInput(inputId="add_quadratic_fitted_values",
+                                                  value = paste(input$vari1, ".predict.quadratic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_cubic",
+                     fixedRow(column(2, h5("Cubic:")),
+                              column(6, textInput(inputId="add_cubic_fitted_values",
+                                                  value = paste(input$vari1, ".predict.cubic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_smoother",
+                     fixedRow(column(2, h5("Smoother:")),
+                              column(6, textInput(inputId="add_smoother_fitted_values",
+                                                  value = paste(input$vari1, ".predict.smoother", sep = ""), 
+                                                  label=NULL)))),
+    actionButton("store_fitted_values_ok", "OK"),
+    textOutput("add_fitted_values_status"),
+    title = "Store fitted values"
+    
+  ))
+})
+
+
+output$add_fitted_values_status = renderText({
+  if(!is.null(input$store_fitted_values_ok) &&
+     input$store_fitted_values_ok > 0)
+    "Add succesful"
+  else
+    NULL
+})
+
+
+observeEvent(input$store_residuals, {
+  showModal(modalDialog(
+    h5(strong("Specify names for the new variables")),
+    
+    conditionalPanel("input.check_linear",
+                     fixedRow(column(2, h5("Linear:")),
+                              column(6, textInput(inputId="add_linear_residuals",
+                                                  value = paste(input$vari1, ".residuals.linear", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_quadratic",
+                     fixedRow(column(2, h5("Quadratic:")),
+                              column(6, textInput(inputId="add_quadratic_residuals",
+                                                  value = paste(input$vari1, ".residuals.quadratic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_cubic",
+                     fixedRow(column(2, h5("Cubic:")),
+                              column(6, textInput(inputId="add_cubic_residuals",
+                                                  value = paste(input$vari1, ".residuals.cubic", sep = ""), 
+                                                  label=NULL)))),
+    conditionalPanel("input.check_smoother",
+                     fixedRow(column(2, h5("Smoother:")),
+                              column(6, textInput(inputId="add_smoother_residuals",
+                                                  value = paste(input$vari1, ".residuals.smoother", sep = ""), 
+                                                  label=NULL)))),
+    actionButton("store_resisuals_ok", "OK"),
+    textOutput("add_residuals_status"),
+    title = "Store residuals"
+    
+  ))
+})
+
+
+output$add_residuals_status = renderText({
+  if(!is.null(input$store_resisuals_ok) &&
+     input$store_resisuals_ok > 0)
+    "Add succesful"
+  else
+    NULL
+})
+
+observe({
+  input$store_resisuals_ok
+  isolate({
+    if(!is.null(input$store_resisuals_ok) &&
+       input$store_resisuals_ok > 0) {
+      linear_trend = FALSE
+      quadratic_trend = FALSE
+      cubic_trend = FALSE
+      smoother_trend = FALSE
+      temp1 = input$vari1
+      temp2 = input$vari2
+      temp = get.data.set()
+      if("linear" %in% graphical.par$trend) {
+        linear_trend = TRUE
+        fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
+        resi.linear = data.frame(residuals(fit.linear))
+        colnames(resi.linear) = input$add_linear_residuals
+        temp = cbind(temp, resi.linear)
+      }
+      if("quadratic" %in% graphical.par$trend) {
+        quadratic_trend = TRUE
+        fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
+        resi.quadratic = data.frame(residuals(fit.quadratic))
+        colnames(resi.quadratic) = input$add_quadratic_residuals
+        temp = cbind(temp, resi.quadratic)
+      }
+      if("cubic" %in% graphical.par$trend) {
+        cubic_trend = TRUE
+        fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
+        resi.cubic = data.frame(residuals(fit.cubic))
+        colnames(resi.cubic) = input$add_cubic_residuals
+        temp = cbind(temp, resi.cubic)
+      }
+      if(graphical.par$smooth > 0) {
+        temp3 = graphical.par$smooth
+        smoother_trend = TRUE
+        fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+                                           family = "gaussian", degree = 1, na.action = "na.exclude"))
+        resi.smooth = data.frame(residuals(fit.smooth))
+        colnames(resi.smooth) = input$add_smoother_residuals
+        temp = cbind(temp, resi.smooth)
+        
+      }
+      updatePanel$datachanged = updatePanel$datachanged + 1
+      values$data.set = temp
+      updateCheckboxInput(session, "vari1", value = temp1)
+      updateCheckboxInput(session, "vari2", value = temp2)
+      if(linear_trend)
+        updateCheckboxInput(session, "check_linear", value = T)
+      if(quadratic_trend)
+        updateCheckboxInput(session, "check_quadratic", value = T)
+      if(cubic_trend)
+        updateCheckboxInput(session, "check_cubic", value = T)
+      if(smoother_trend) {
+        updateCheckboxInput(session, "check_smoother",value = T)
+        updateSliderInput(session, "smoother.smooth", value = temp3)
+        
+      }
+    }
+  })
+})
+
+observe({
+  input$store_fitted_values_ok
+  isolate({
+    if(!is.null(input$store_fitted_values_ok) &&
+       input$store_fitted_values_ok > 0) {
+      linear_trend = FALSE
+      quadratic_trend = FALSE
+      cubic_trend = FALSE
+      smoother_trend = FALSE
+      temp1 = input$vari1
+      temp2 = input$vari2
+      temp = get.data.set()
+      if("linear" %in% graphical.par$trend) {
+        linear_trend = TRUE
+        fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
+        pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.linear) = input$add_linear_fitted_values
+        temp = cbind(temp, pred.linear)
+      }
+      if("quadratic" %in% graphical.par$trend) {
+        quadratic_trend = TRUE
+        fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
+        pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.quadratic) = input$add_quadratic_fitted_values
+        temp = cbind(temp, pred.quadratic)
+      }
+      if("cubic" %in% graphical.par$trend) {
+        cubic_trend = TRUE
+        fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
+        pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.cubic) = input$add_cubic_fitted_values
+        temp = cbind(temp, pred.cubic)
+      }
+      if(graphical.par$smooth > 0) {
+        temp3 = graphical.par$smooth
+        smoother_trend = TRUE
+        fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+                                           family = "gaussian", degree = 1, na.action = "na.exclude"))
+        pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = graphical.par$y)))
+        colnames(pred.smooth) = input$add_smoother_fitted_values
+        temp = cbind(temp, pred.smooth)
+        
+      }
+      updatePanel$datachanged = updatePanel$datachanged + 1
+      values$data.set = temp
+      updateCheckboxInput(session, "vari1", value = temp1)
+      updateCheckboxInput(session, "vari2", value = temp2)
+      if(linear_trend)
+        updateCheckboxInput(session, "check_linear", value = T)
+      if(quadratic_trend)
+        updateCheckboxInput(session, "check_quadratic", value = T)
+      if(cubic_trend)
+        updateCheckboxInput(session, "check_cubic", value = T)
+      if(smoother_trend) {
+        updateCheckboxInput(session, "check_smoother",value = T)
+        updateSliderInput(session, "smoother.smooth", value = temp3)
+        
+      }
+    }
+  })
+})
+
+
+observe({
+  if (!is.null(input$go.to.old) && input$go.to.old > 0) {
+    isolate({
+      output$visualize.panel <- renderUI({
+        get.data.set()
+        isolate({
+          old.visualize.panel.ui(get.data.set())
+        })
+      })
+    })
+  }
+})
+
+
+
+observe({
+  if (!is.null(input$go.to.new) && input$go.to.new > 0) {
+    isolate({
+      output$visualize.panel <- renderUI({
+        get.data.set()
+        isolate({
+          visualize.panel.ui(get.data.set())
+        })
+      })
+    })
+  }
+})
+
+output$old_add_inference = renderUI({
+  get.data.set()
+  input$vari1
+  input$vari2
+  ret = NULL
+  isolate({
+    dafr = get.data.set()
+    add_inference.check = checkboxInput("add.inference",
+                                        label="Add inference",
+                                        value=input$add.inference)
+    mean_median.radio = radioButtons("inference_parameter1",
+                                     label="Parameter",
+                                     choices=c("Mean","Median"),
+                                     selected=input$inference_parameter1,
+                                     inline=T)
+    normal_bootstrap.radio = radioButtons("inference_type1",
+                                          label="Type of inference",
+                                          choices=c("Normal","Bootstrap"),
+                                          selected=input$inference_type1,
+                                          inline=T)
+    confidence.interval.check = checkboxInput("confidence_interval1",
+                                              label="Confidence interval",
+                                              value=input$confidence_interval1)
+    comparison.interval.check = checkboxInput("comparison_interval1",
+                                              label="Comparison interval",
+                                              value=input$comparison_interval1)
+    year12_bootstrap.radio = radioButtons("inference_type2",
+                                          label="Type of inference",
+                                          choices=c("Year 12","Bootstrap"),
+                                          selected=input$inference_type2,
+                                          inline=T)
+    intervals = NULL
+    graphical.par$inference.par = NULL
+    graphical.par$bs.inference = F
+    if((!is.null(input$vari1)&&
+        !is.null(input$vari2))&&
+       (input$vari1%in%colnames(get.data.set())&&
+        (input$vari2%in%colnames(get.data.set())||
+         input$vari2%in%'none'))){
+      if((!is.null(input$confidence_interval1)&&
+          input$confidence_interval1)||
+         (!is.null(input$comparison_interval1)&&
+          input$comparison_interval1)){
+        if(!is.null(input$confidence_interval1)&&
+           input$confidence_interval1){
+          intervals = c(intervals,"conf")
+        }
+        if(!is.null(input$comparison_interval1)&&
+           input$comparison_interval1){
+          intervals = c(intervals,"comp")
+        }
+        if(!is.null(input$inference_parameter1)&&
+           input$inference_parameter1%in%"Mean"){
+          graphical.par$inference.par = "mean"
+        }else if(!is.null(input$inference_parameter1)&&
+                 input$inference_parameter1%in%"Median"){
+          graphical.par$inference.par = "median"
+        }
+        if((!is.null(input$inference_type1)&&
+            input$inference_type1%in%"Bootstrap")||
+           (!is.null(input$inference_type2)&&
+            input$inference_type2%in%"Bootstrap")){
+          graphical.par$bs.inference = T
+        }else{
+          graphical.par$bs.inference = F
+        }
+      }
+      graphical.par$inference.type = intervals
+      # vari1 = numeric; vari2 = numeric
+      if(!input$vari2%in%"none"&&
+         (class(dafr[,input$vari1])%in%"numeric"|
+          class(dafr[,input$vari1])%in%"integer")&&
+         (class(dafr[,input$vari2])%in%"numeric"|
+          class(dafr[,input$vari2])%in%"integer")){
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    conditionalPanel("input.check_linear||
+                                                     input.check_quadratic||
+                                                     input.check_cubic||
+                                                     input.check_smoother",
+                                                     add_inference.check)))
+        # vari1 = numeric; vari2 = factor or 
+        # vari1 = factor; vari2 = numeric
+      }else if(!input$vari2%in%"none"&&
+               (((class(dafr[,input$vari1])%in%"numeric"|
+                  class(dafr[,input$vari1])%in%"integer")&&
+                 (class(dafr[,input$vari2])%in%"factor"|
+                  class(dafr[,input$vari2])%in%"character"))||
+                ((class(dafr[,input$vari1])%in%"factor"|
+                  class(dafr[,input$vari1])%in%"character")&&
+                 (class(dafr[,input$vari2])%in%"numeric"|
+                  class(dafr[,input$vari2])%in%"integer")))){
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    mean_median.radio,
+                                    conditionalPanel("input.inference_parameter1=='Mean'",
+                                                     normal_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Median'",
+                                                     year12_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Mean'||
+                                                     (input.inference_parameter1=='Median'&&
+                                                     input.inference_type2=='Bootstrap')",
+                                                     h5("Type of interval"),
+                                                     confidence.interval.check,
+                                                     comparison.interval.check))
+        )
+        # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
+      }else if((!input$vari2%in%"none"&&
+                ((class(dafr[,input$vari1])%in%"factor"|
+                  class(dafr[,input$vari1])%in%"character")&&
+                 (class(dafr[,input$vari2])%in%"factor"|
+                  class(dafr[,input$vari2])%in%"character")))||
+               (input$vari2%in%"none"&&
+                (class(dafr[,input$vari1])%in%"factor"|
+                 class(dafr[,input$vari1])%in%"character"))){
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    h5("Parameter"),helpText("Proportions"),
+                                    normal_bootstrap.radio,
+                                    h5("Type of interval"),
+                                    confidence.interval.check,
+                                    conditionalPanel("input.inference_type1=='Normal'",
+                                                     comparison.interval.check)))
+        # var1 = numeric; vari2 = none
+      }else if((input$vari2%in%"none"&&
+                (class(dafr[,input$vari1])%in%"numeric"|
+                 class(dafr[,input$vari1])%in%"integer"))){
+        ret = list(conditionalPanel("input.toggle_inference",
+                                    mean_median.radio,
+                                    conditionalPanel("input.inference_parameter1=='Mean'",
+                                                     normal_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Median'",
+                                                     year12_bootstrap.radio),
+                                    conditionalPanel("input.inference_parameter1=='Mean'||
+                                                     (input.inference_parameter1=='Median'&&
+                                                     input.inference_type2=='Bootstrap')",
+                                                     h5("Type of interval"),
+                                                     confidence.interval.check)))
+      }
+    }
+  })
+  ret
+  })
+
+output$old_advanced_options_panel = renderUI({
+  get.data.set()
+  ret = NULL
+  isolate({
+    temp = list()
+    temp$x = get.data.set()[,input$vari1]
+    if(input$vari2%in%'none'){
+      temp$y = NULL
+    }else{
+      temp$y = get.data.set()[,input$vari2]
+    }
+    temp$plot = F
+    temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+    ##################################################################    
+    #    large.sample = T
+    large.sample = search.name(temp,"largesample")[[1]]
+    if(is.null(large.sample)){
+      large.sample=F
+    }
+    ##################################################################
+    if((!is.null(input$vari1)&&
+        !is.null(input$vari2))&&
+       (input$vari1%in%colnames(get.data.set())&&
+        (input$vari2%in%"none"|
+         input$vari2%in%colnames(get.data.set()))))
+      # vari = factor, vari = none
+      if(input$vari2%in%"none"&&
+         (class(get.data.set()[,input$vari1])%in%"factor"|
+          class(get.data.set()[,input$vari1])%in%"character")){
+        ret = selectInput(inputId = "advanced_options",
+                          label = "Options",
+                          choices = c('Code more variables',
+                                      'Change plot appearance',
+                                      'Customize labels',
+                                      'Adjust number of Bars'),
+                          selected = 'Change plot appearance')
+        # vari1 = factor, vari2 = factor
+      }else if(!input$vari2%in%"none"&&
+               ((class(get.data.set()[,input$vari1])%in%"factor"|
+                 class(get.data.set()[,input$vari1])%in%"character")&&
+                (class(get.data.set()[,input$vari2])%in%"factor"|
+                 class(get.data.set()[,input$vari2])%in%"character"))){
+        ret = selectInput(inputId = "advanced_options",
+                          label = "Options",
+                          choices = c('Change plot appearance',
+                                      'Customize labels',
+                                      'Adjust number of Bars'),
+                          selected = 'Change plot appearance')
+        # vari1 = numeric , vari2 = none or
+        # vari1 = numeric , vari2 = factor or
+        # vari1 = factor , vari2 = numeric
+      }else if((input$vari2%in%"none"&&
+                (class(get.data.set()[,input$vari1])%in%"numeric"|
+                 class(get.data.set()[,input$vari1])%in%"integer"))||
+               (!input$vari2%in%"none"&&
+                (class(get.data.set()[,input$vari1])%in%"factor"|
+                 class(get.data.set()[,input$vari1])%in%"character")&&
+                (class(get.data.set()[,input$vari2])%in%"integer"|
+                 class(get.data.set()[,input$vari2])%in%"numeric"))||
+               (!input$vari2%in%"none"&&
+                (class(get.data.set()[,input$vari1])%in%"integer"|
+                 class(get.data.set()[,input$vari1])%in%"numeric")&&
+                (class(get.data.set()[,input$vari2])%in%"character"|
+                 class(get.data.set()[,input$vari2])%in%"factor"))){
+        ret = selectInput(inputId = "advanced_options",
+                          label = "Options",
+                          choices = c('Code more variables',
+                                      'Change plot appearance',
+                                      'Identify points',
+                                      'Customize labels',
+                                      'Adjust axis limits'),
+                          selected = 'Change plot appearance')
+        if(large.sample){
+          ret = selectInput(inputId = "advanced_options",
+                            label = "Options",
+                            choices = c('Change plot appearance',
+                                        'Customize labels',
+                                        'Adjust axis limits'),
+                            selected = 'Change plot appearance')
+        }
+        # vari1 = numeric , vari2 = numeric
+      }else if(!input$vari2%in%"none"&&
+               ((class(get.data.set()[,input$vari1])%in%"numeric"|
+                 class(get.data.set()[,input$vari1])%in%"integer")&&
+                (class(get.data.set()[,input$vari2])%in%"numeric"|
+                 class(get.data.set()[,input$vari2])%in%"integer"))){
+        ret = selectInput(inputId = "advanced_options",
+                          label = "Options",
+                          choices = c('Code more variables',
+                                      'Add trend curves',
+                                      'Add x=y line',
+                                      'Add a jitter',
+                                      'Add rugs',
+                                      'Join points by line',
+                                      'Change plot appearance',
+                                      'Identify points',
+                                      'Customize labels',
+                                      'Adjust axis limits'),
+                          selected = 'Change plot appearance')
+        if(large.sample){
+          ret = selectInput(inputId = "advanced_options",
+                            label = "Options",
+                            choices = c('Add trend curves',
+                                        'Add x=y line',
+                                        'Change plot appearance',
+                                        'Customize labels',
+                                        'Adjust axis limits'),
+                            selected = 'Change plot appearance')
+        }
+      }
+  })
+  list(ret) 
 })
 
