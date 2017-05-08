@@ -20,7 +20,7 @@ library(RJSONIO)
 library(survey)
 library(iNZightMaps)
 library(colorspace)
-#library(readxl)
+library(readxl)
 
 # read in possible command line arguments such as 'vars.path'
 
