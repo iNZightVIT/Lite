@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   May 03, 2017.
+###  Last Modified  :   May 11, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -1074,8 +1074,12 @@ output$visualize.inference = renderPrint({
 
 ##  Reset variable selection and graphical parameters.
 observe({
-#  input$reset.graphics
-  if (!is.null(input$reset.graphics)&&input$reset.graphics > 0) {
+  input$reset.graphics
+  input$go.to.new
+  input$go.to.old
+  if ((!is.null(input$reset.graphics)&&input$reset.graphics > 0) ||
+      (!is.null(input$go.to.new)&&input$go.to.new > 0) ||
+      (!is.null(input$go.to.old)&&input$go.to.old > 0)) {
     isolate({
       graphical.par$alpha = 1
       updateSliderInput(session,"adjust.transparency",
@@ -1123,6 +1127,10 @@ observe({
       
       updateCheckboxInput(session,"colour.palette.reverse", value = F)
       graphical.par$reverse.palette = FALSE
+      
+      updateCheckboxInput(session,"point_size_title", value = F)
+      updateCheckboxInput(session,"point_colour_title", value = F)
+      updateCheckboxInput(session,"point_symbol_title", value = F)
       
       updateSelectInput(session,"select.dotcolor",selected="gray50")
       #graphical.par$fill.pt = "transparent"
@@ -1218,7 +1226,8 @@ output$add_inference = renderUI({
   isolate({
     dafr = get.data.set()
     add_inference.check = checkboxInput("add.inference",
-                                        label="Add inference")
+                                        label="Add inference",
+                                        value=input$add.inference)
     mean_median.radio = radioButtons("inference_parameter1",
                                      label=h5(strong("Parameter")),
                                      choices=c("Mean","Median"),
@@ -1439,7 +1448,12 @@ observe({
                 input$vari2%in%colnames(get.data.set()))&&
                 (is.numeric(get.data.set()[,input$vari1])&&
                    is.numeric(get.data.set()[,input$vari2]))){
-      graphical.par$bs.inference = input$add.inference
+#      graphical.par$bs.inference = input$add.inference
+      if(is.null(input$add.inference))
+        graphical.par$bs.inference = F
+      else
+        graphical.par$bs.inference = input$add.inference
+      
     # vari1 = numeric; vari2 = factor or 
     # vari1 = factor; vari2 = numeric
     }else if((!is.null(input$vari1)&&
@@ -2722,7 +2736,10 @@ observe({
   input$check_linear
   input$color.linear
   isolate({
-    graphical.par$bs.inference = F
+#    graphical.par$bs.inference = F
+#    graphical.par$inference.type = NULL
+
+    
     if(!is.null(input$check_linear)){
       if(input$check_linear){
         if(length(which(graphical.par$trend%in%"linear"))==0){
@@ -2746,6 +2763,7 @@ observe({
   input$check_quadratic
   input$color.quadratic
   isolate({
+#    graphical.par$bs.inference = F
     if(!is.null(input$check_quadratic)){
       if(input$check_quadratic){
         if(length(which(graphical.par$trend%in%"quadratic"))==0){
@@ -2769,6 +2787,7 @@ observe({
   input$check_cubic
   input$color.cubic
   isolate({
+#    graphical.par$bs.inference = F
     if(!is.null(input$check_cubic)){
       if(input$check_cubic){
         if(length(which(graphical.par$trend%in%"cubic"))==0){
@@ -4198,7 +4217,7 @@ output$select_additions_panel = renderUI({
                           choices = c('Customise Plot Appearance',
                                       'Axes and Labels',
                                       'Add Inference Information'),
-                          selected = 'Customise Plot Appearance')
+                          selected = input$select_additions)
         
         # vari1 = factor, vari2 = factor
       }else if(!input$vari2%in%"none"&&
@@ -4211,7 +4230,7 @@ output$select_additions_panel = renderUI({
                           choices = c('Customise Plot Appearance',
                                       'Axes and Labels',
                                       'Add Inference Information'),
-                          selected = 'Customise Plot Appearance')
+                          selected = input$select_additions)
         
         # vari1 = numeric , vari2 = none or
         # vari1 = numeric , vari2 = factor or
@@ -4235,7 +4254,7 @@ output$select_additions_panel = renderUI({
                                       'Axes and Labels',
                                       'Identify Points',
                                       'Add Inference Information'),
-                          selected = 'Customise Plot Appearance')
+                          selected = input$select_additions)
         
         if(large.sample){
           ret = selectInput(inputId = "select_additions",
@@ -4243,7 +4262,7 @@ output$select_additions_panel = renderUI({
                             choices = c('Customise Plot Appearance',
                                         'Axes and Labels',
                                         'Add Inference Information'),
-                            selected = 'Customise Plot Appearance')
+                            selected = input$select_additions)
         }
         
         # vari1 = numeric , vari2 = numeric
@@ -4259,7 +4278,7 @@ output$select_additions_panel = renderUI({
                                       'Axes and Labels',
                                       'Identify Points',
                                       'Add Inference Information'),
-                          selected = 'Customise Plot Appearance')
+                          selected = input$select_additions)
         
         if(large.sample){
           ret = selectInput(inputId = "select_additions",
@@ -4268,7 +4287,7 @@ output$select_additions_panel = renderUI({
                                         'Trend Lines and Curves',
                                         'Axes and Labels',
                                         'Add Inference Information'),
-                            selected = 'Customise Plot Appearance')
+                            selected = input$select_additions)
         }
       }
   })
