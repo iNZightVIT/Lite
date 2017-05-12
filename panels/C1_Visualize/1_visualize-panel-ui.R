@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : May 03, 2017.
+###  Last Modified : May 11, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -63,13 +63,17 @@ vis.sidebarPanel = function() {
         ##########
         
         hr(),
-        actionButton(inputId = "reset.graphics",
-                     label = "Reset To Default"),
+        actionButton(inputId = "go.to.old",
+                     label = "REVERT To Old Version",
+                     icon("paper-plane"), 
+                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+        
         br(),
         br(),
         
-        actionButton(inputId = "go.to.old",
-                     label = "Go To Old Version"),
+        actionButton(inputId = "reset.graphics",
+                     label = "Reset To Default"),
+        
         br(),
         br(),
         
@@ -296,13 +300,18 @@ old.vis.sidebarPanel = function() {
                      "Show" = 2),
                  selected = 1),
     hr(),
-    actionButton(inputId = "reset.graphics",
-                 label = "Reset To Default"),
+    
+    actionButton(inputId = "go.to.new",
+                 label = "revert To New Version",
+                 icon("paper-plane"), 
+                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+    
     br(),
     br(),
     
-    actionButton(inputId = "go.to.new",
-                 label = "Go To New Version"),
+    actionButton(inputId = "reset.graphics",
+                 label = "Reset To Default"),
+    
     br(),
     br(),
     
