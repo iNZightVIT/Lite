@@ -79,10 +79,6 @@ display.missing.categorical = function(dafr, columns) {
   dafr
 }
 
-
-
-
-
 #' Simplifies the input data.frame by keeping only 
 #' columns where NA values are present. Function 
 #' used in get.combinations
