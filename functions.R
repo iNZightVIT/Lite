@@ -1314,9 +1314,9 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
           temp = read.delim(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"))
         }
         else if(tolower(ext)%in%"xls"){
-          temp = read_xls(full.name[indexes[1]], na = c("NULL","NA","N/A","#N/A","","<NA>"))
+          temp = data.frame(read_xls(full.name[indexes[1]], na = c("NULL","NA","N/A","#N/A","","<NA>")))
         }else if(tolower(ext)%in%"xlsx"){
-          temp = read_xlsx(full.name[indexes[1]], na = c("NULL","NA","N/A","#N/A","","<NA>"))
+          temp = data.frame(read_xlsx(full.name[indexes[1]], na = c("NULL","NA","N/A","#N/A","","<NA>")))
         }
       }, warning = function(w) {
         print(w)
