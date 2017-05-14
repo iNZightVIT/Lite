@@ -3,7 +3,7 @@
 ###-------------------------------------###
 ###
 ### Date Created : January 10, 2015
-### Last Modified : March 23, 2015
+### Last Modified : May 14, 2017
 ###
 ### Please consult the comments before editing any code.
 ### This file sources the ui files for each panel separately.
@@ -20,7 +20,6 @@ library(RJSONIO)
 library(survey)
 library(iNZightMaps)
 library(colorspace)
-
 library(readxl)
 
 # read in possible command line arguments such as 'vars.path'
