@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   May 11, 2017.
+###  Last Modified  :   May 14, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -126,6 +126,9 @@ graphical.par = reactiveValues(
   lines.by = FALSE,
   trend.by = FALSE,
   trend.parallel = T,
+  lty.trend = list(linear = 1,
+                   quadratic = 1,
+                   cubic = 1),
   smooth = 0,
   szsym = 1,
   tpsym = 1,
@@ -1093,7 +1096,7 @@ observe({
       graphical.par$bar.fill = colors()[81] # colour for inside of bars in bar plot
       updateSelectInput(session,"select.barcolor",selected=colors()[81])
       ##  Line
-      graphical.par$lwd = 1
+      updateSliderInput(session,"line.width.multiplier",value=1)
       graphical.par$lty = 1
       graphical.par$lwd.pt = 2
       graphical.par$col.line = "blue"
@@ -1146,6 +1149,9 @@ observe({
       updateCheckboxInput(session,"check_linear",value=F)
       updateCheckboxInput(session,"check_quadratic",value=F)
       updateCheckboxInput(session,"check_cubic",value=F)
+      updateSelectInput(session,"type.linear",selected="solid")
+      updateSelectInput(session,"type.quadratic",selected="solid")
+      updateSelectInput(session,"type.cubic",selected="solid")
       updateSelectInput(session,"color.linear",selected="blue")
       updateSelectInput(session,"color.quadratic",selected="red")
       updateSelectInput(session,"color.cubic",selected="green4")
@@ -2642,20 +2648,35 @@ output$trend.curve.panel = renderUI({
     check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = input$check_smoother)
     check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = input$check_quantiles)
     color.linear.select = selectInput("color.linear",label="",
-                                      choices=c("red","black","blue",
+                                      choices=c("blue", "red","black",
                                                 "green4","yellow","pink",
                                                 "grey","orange"),
-                                      selected="blue")
+                                      selected=input$color.linear)
+    type.linear.select = selectInput("type.linear", label = "", 
+                                     choices = c("solid", "dashed",
+                                                 "dotted", "dotdash",
+                                                 "longdash", "twodash"), 
+                                     selected = input$type.linear)
     color.quadratic.select = selectInput("color.quadratic",label="",
                                          choices=c("red","black","blue",
                                                    "green4","yellow","pink",
                                                    "grey","orange"),
-                                         selected="red")
+                                         selected=input$color.quadratic)
+    type.quadratic.select = selectInput("type.quadratic", label = "", 
+                                        choices = c("solid", "dashed",
+                                                    "dotted", "dotdash",
+                                                    "longdash", "twodash"),
+                                        selected = input$type.quadratic)
     color.cubic.select = selectInput("color.cubic",label="",
-                                     choices=c("red","black","blue",
-                                               "green4","yellow","pink",
+                                     choices=c("green4","red","black","blue",
+                                               "yellow","pink",
                                                "grey","orange"),
-                                     selected="green4")
+                                     selected=input$color.cubic)
+    type.cubic.select = selectInput("type.cubic", label = "", 
+                                    choices = c("solid", "dashed",
+                                                "dotted", "dotdash",
+                                                "longdash", "twodash"), 
+                                    selected = input$type.cubic)
     color.smoother.select = selectInput("color.smoother",label="",
                                         choices=c("red","black","blue",
                                                   "green4","yellow","magenta",
@@ -2672,12 +2693,18 @@ output$trend.curve.panel = renderUI({
                                               label="Fit paralell trend lines",
                                               value=T)
     list(trend.curves.title,
+         fixedRow(column(width=3),
+                  column(width=4,"Line colour"),
+                  column(width=4,"Line type")),
          fixedRow(column(width=3,check.linear.object),
-                  column(width=6,color.linear.select)),
+                  column(width=4,color.linear.select),
+                  column(width=4,type.linear.select)),
          fixedRow(column(width=3,check.quadratic.object),
-                  column(width=6,color.quadratic.select)),
+                  column(width=4,color.quadratic.select),
+                  column(width=4,type.quadratic.select)),
          fixedRow(column(width=3,check.cubic.object),
-                  column(width=6,color.cubic.select)),
+                  column(width=4,color.cubic.select),
+                  column(width=4,type.cubic.select)),
          smoother.title,
          fixedRow(column(width=3,check.smoother.object),
                   column(width=6,color.smoother.select)),
@@ -2735,17 +2762,20 @@ observe({
 observe({
   input$check_linear
   input$color.linear
+  input$type.linear
   isolate({
 #    graphical.par$bs.inference = F
 #    graphical.par$inference.type = NULL
-
-    
     if(!is.null(input$check_linear)){
       if(input$check_linear){
         if(length(which(graphical.par$trend%in%"linear"))==0){
           graphical.par$trend=c(graphical.par$trend,"linear")
         }
         graphical.par$col.trend[["linear"]] = input$color.linear
+        graphical.par$lty.trend[["linear"]] = switch(input$type.linear, 
+                                                     "solid" = 1, "dashed" = 2,
+                                                     "dotted" = 3, "dotdash" = 4,
+                                                     "longdash" = 5, "twodash" = 6)
       }else{
         if(length(which(graphical.par$trend%in%"linear"))>0){
           graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"linear")]
@@ -2762,6 +2792,7 @@ observe({
 observe({
   input$check_quadratic
   input$color.quadratic
+  input$type.quadratic
   isolate({
 #    graphical.par$bs.inference = F
     if(!is.null(input$check_quadratic)){
@@ -2770,6 +2801,10 @@ observe({
           graphical.par$trend=c(graphical.par$trend,"quadratic")
         }
         graphical.par$col.trend[["quadratic"]] = input$color.quadratic
+        graphical.par$lty.trend[["quadratic"]] = switch(input$type.quadratic, 
+                                                     "solid" = 1, "dashed" = 2,
+                                                     "dotted" = 3, "dotdash" = 4,
+                                                     "longdash" = 5, "twodash" = 6)
       }else{
         if(length(which(graphical.par$trend%in%"quadratic"))>0){
           graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"quadratic")]
@@ -2786,6 +2821,7 @@ observe({
 observe({
   input$check_cubic
   input$color.cubic
+  input$type.cubic
   isolate({
 #    graphical.par$bs.inference = F
     if(!is.null(input$check_cubic)){
@@ -2794,6 +2830,10 @@ observe({
           graphical.par$trend=c(graphical.par$trend,"cubic")
         }
         graphical.par$col.trend[["cubic"]] = input$color.cubic
+        graphical.par$lty.trend[["cubic"]] = switch(input$type.cubic, 
+                                                        "solid" = 1, "dashed" = 2,
+                                                        "dotted" = 3, "dotdash" = 4,
+                                                        "longdash" = 5, "twodash" = 6)
       }else{
         if(length(which(graphical.par$trend%in%"cubic"))>0){
           graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"cubic")]
@@ -2852,7 +2892,14 @@ output$xy.line.panel = renderUI({
                                                   "green4","yellow","pink",
                                                   "grey","orange"),
                                         selected="black")
+      
       ret = list(xyline.title,
+                 fixedRow(column(width = 3, "Line Width Multiplier:"),
+                          column(width = 6, sliderInput("line.width.multiplier", 
+                                                        label = "", 
+                                                        min = 1, 
+                                                        max = 2, 
+                                                        value = input$line.width.multiplier, step = 0.5, ticks = FALSE))),
                  fixedRow(column(width=3,check.xyline.object),
                           column(width=6,color.xyline.select)))
     }
@@ -2875,6 +2922,14 @@ observe({
     graphical.par$LOE = F
     graphical.par$col.LOE = NULL
   }
+})
+
+
+# trend line width
+observe({
+  input$line.width.multiplier
+  if(!is.null(input$line.width.multiplier))
+    graphical.par$lwd = input$line.width.multiplier
 })
 
 # add jitter to the plot
