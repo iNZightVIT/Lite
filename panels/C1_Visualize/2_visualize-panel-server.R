@@ -563,7 +563,7 @@ output$subs1_conditional_mini = renderUI({
     sliderInput(inputId = "sub1_level_mini",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = v, step = 1,
-                animate = TRUE,ticks=F)
+                animate = TRUE, ticks=F)
   })
 })
 
@@ -883,6 +883,7 @@ output$visualize.plot = renderPlot({
       temp$varnames$y = temp.varnames.x
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        
         tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
                   }, warning = function(w) {
                     print(w)
@@ -895,6 +896,7 @@ output$visualize.plot = renderPlot({
     }else{
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        
         tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
         }, warning = function(w) {
           print(w)
@@ -1084,7 +1086,9 @@ observe({
       (!is.null(input$go.to.new)&&input$go.to.new > 0) ||
       (!is.null(input$go.to.old)&&input$go.to.old > 0)) {
     isolate({
+#      updateRadioButtons(session, "customize_plot", selected = 1)
       graphical.par$alpha = 1
+      
       updateSliderInput(session,"adjust.transparency",
                         value=0)
       graphical.par$bg = "grey93" #background colour
@@ -2692,6 +2696,12 @@ output$trend.curve.panel = renderUI({
     each_level_seperate.check = checkboxInput("each_level_seperate",
                                               label="Fit paralell trend lines",
                                               value=T)
+    line.width.multiplier.object = fixedRow(column(width = 3, "Line Width Multiplier:"),
+                                            column(width = 6, sliderInput("line.width.multiplier", 
+                                                                          label = "", 
+                                                                          min = 1, 
+                                                                          max = 2, 
+                                                                          value = input$line.width.multiplier, step = 0.5, ticks = FALSE)))
     list(trend.curves.title,
          fixedRow(column(width=3),
                   column(width=4,"Line colour"),
@@ -2705,6 +2715,7 @@ output$trend.curve.panel = renderUI({
          fixedRow(column(width=3,check.cubic.object),
                   column(width=4,color.cubic.select),
                   column(width=4,type.cubic.select)),
+         line.width.multiplier.object,
          smoother.title,
          fixedRow(column(width=3,check.smoother.object),
                   column(width=6,color.smoother.select)),
@@ -2894,12 +2905,6 @@ output$xy.line.panel = renderUI({
                                         selected="black")
       
       ret = list(xyline.title,
-                 fixedRow(column(width = 3, "Line Width Multiplier:"),
-                          column(width = 6, sliderInput("line.width.multiplier", 
-                                                        label = "", 
-                                                        min = 1, 
-                                                        max = 2, 
-                                                        value = input$line.width.multiplier, step = 0.5, ticks = FALSE))),
                  fixedRow(column(width=3,check.xyline.object),
                           column(width=6,color.xyline.select)))
     }
@@ -4518,9 +4523,11 @@ output$add.fitted.residuals.panel = renderUI({
   get.data.set()
   isolate({
     add.fitted.values.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
-                                                actionButton("store_fitted_values", "Store fitted values"))
+                                                actionButton("store_fitted_values", "Store fitted values",
+                                                             style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
     add.residuals.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
-                                            actionButton("store_residuals", "Store residuals"))
+                                            actionButton("store_residuals", "Store residuals",
+                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
     
     
     
@@ -4740,6 +4747,7 @@ observe({
 
 
 observe({
+  input$go.to.old
   if (!is.null(input$go.to.old) && input$go.to.old > 0) {
     isolate({
       output$visualize.panel <- renderUI({
@@ -4755,15 +4763,26 @@ observe({
 
 
 observe({
+  input$go.to.new
   if (!is.null(input$go.to.new) && input$go.to.new > 0) {
-    isolate({
-      output$visualize.panel <- renderUI({
-        get.data.set()
-        isolate({
-          visualize.panel.ui(get.data.set())
+    if(!is.null(input$sub1_level_mini) && input$sub1_level_mini != 0) {
+      updateSliderInput(session,"sub1_level_mini", value=0)
+    }
+    if(!is.null(input$sub2_level_mini) && input$sub2_level_mini != 0) {
+      updateSliderInput(session,"sub2_level_mini", value=0)
+    }
+    if((is.null(input$sub1_level_mini) || input$sub1_level_mini == 0) &&
+       (is.null(input$sub2_level_mini) || input$sub2_level_mini == 0)) {
+      isolate({
+        output$visualize.panel <- renderUI({
+          get.data.set()
+          isolate({
+            visualize.panel.ui(get.data.set())
+          })
         })
       })
-    })
+    }
+    
   }
 })
 
