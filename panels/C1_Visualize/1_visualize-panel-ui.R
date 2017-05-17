@@ -82,7 +82,7 @@ vis.sidebarPanel = function() {
       
       tabPanel(
         title = "Add To Plot",
-        
+
         hr(),
 
         
