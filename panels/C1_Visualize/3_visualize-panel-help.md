@@ -7,7 +7,7 @@ you select a numeric variable and a categorical variable (e.g. weight and
 nationality), it will display multiple box plots, depending on the number of 
 categories in the categorial variable.
 
-The module is divided up into up to three distinct vertical *panels*:
+The old module is divided up into up to three distinct vertical *panels*:
 
 - Panel 1: User Input (Left)
 - Panel 2: Statistical Output (Middle)
@@ -15,6 +15,13 @@ The module is divided up into up to three distinct vertical *panels*:
 
 Panel 3 is only displayed if in Panel 1 the "Advanced Options" Radiobutton has 
 the "show" option selected
+
+The new module is divided up into up to two distinct vertical *panels*:
+
+- Panel 1: User Input (Left: **Select Variables**) and Advanced options (Left: **Add To Plot**)
+- Panel 2: Statistical Output (Right)
+
+Users can switch from one module to another by clicking **REVERT TO OLD VERSION** or **REVERT TO NEW VERSION** buttons.
 
 <br>
 
