@@ -79,10 +79,6 @@ display.missing.categorical = function(dafr, columns) {
   dafr
 }
 
-
-
-
-
 #' Simplifies the input data.frame by keeping only 
 #' columns where NA values are present. Function 
 #' used in get.combinations
@@ -1294,7 +1290,7 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
     if(length(indexes[1])>0){
       ext = strsplit(full.name[indexes[1]],".",fixed=T)[[1]]
       ext = ext[length(ext)]
-      if(!(tolower(ext)%in%c("rds","rda","rdata","csv","txt"))){
+      if(!(tolower(ext)%in%c("rds","rda","rdata","csv","txt", "xls", "xlsx"))){
         ext = strsplit(fileID,".",fixed=T)[[1]]
         ext = ext[length(ext)]
       }
@@ -1312,6 +1308,10 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
           temp = read.csv(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"), stringsAsFactors=FALSE)
         }else if(tolower(ext)%in%"txt"){
           temp = read.delim(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"))
+        }else if(tolower(ext)%in%"xls"){
+          temp = data.frame(read_xls(full.name[indexes[1]], na = c("NULL","NA","N/A","#N/A","","<NA>")))
+        }else if(tolower(ext)%in%"xlsx"){
+          temp = data.frame(read_xlsx(full.name[indexes[1]], na = c("NULL","NA","N/A","#N/A","","<NA>")))
         }
       }, warning = function(w) {
         print(w)
