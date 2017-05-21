@@ -2,7 +2,7 @@ iNZight *Lite* version 1.0
 ==============================
 
 
-*Last Updated: 11/03/17*
+*Last Updated: 21/05/17*
 
 This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), with four new modules:
 
@@ -13,6 +13,8 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), 
 
 Recent Updates (Most to least recent):
 ----------------------------------------
+- [visualize] Add a "revert to old version" button to let users go back to the old visualize panel
+- [Visualize] Implement a new version of advanced plot, the "hide" option is repalced by a "Add To Plot" button on the top-left
 - [Maps] Add Maps module
 - [Visualize] Add Save Plot buttons for both main plot and mini plot
 - [Manipulate variables] Fixed the "change to factor" function under "Manipulate variables"
