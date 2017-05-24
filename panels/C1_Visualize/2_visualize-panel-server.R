@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   May 14, 2017.
+###  Last Modified  :   May 24, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -367,7 +367,7 @@ output$vari1_panel = renderUI({
       if(!input$change_var_selection){
         if(is.null(input$vari1) || input$vari1 == "none") {
           selectInput(inputId = "vari1",
-                      label = "Select first variable:",
+                      label = NULL,
                       choices = c("none", colnames(vis.data())),
                       selected = sel,
                       # selectize = T,
@@ -375,7 +375,7 @@ output$vari1_panel = renderUI({
         }
         else {
           selectInput(inputId = "vari1",
-                      label = "Select first variable:",
+                      label = NULL,
                       choices = c(colnames(vis.data())),
                       selected = sel,
                       # selectize = T,
@@ -384,7 +384,7 @@ output$vari1_panel = renderUI({
         
       }else{
         selectInput(inputId = "vari1",
-                    label = "Select first variable:",
+                    label = NULL,
                     choices = c(colnames(vis.data())),
                     selected = sel,
                     selectize=F,
@@ -472,7 +472,7 @@ output$subs1_panel = renderUI({
     }
     sel = input$subs1
     selectInput(inputId = "subs1",
-                label = "Subset by:",
+                label = NULL,
                 choices = c("none", ch),
                 selected = sel,
                 selectize=F)
@@ -532,6 +532,7 @@ observe({
 #  Subset level (Slider) for variable 1.
 output$subs1_conditional = renderUI({
   get.data.set()
+  input$speed1
   isolate({
     choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
     if (is.null(choices1)){
@@ -544,9 +545,35 @@ output$subs1_conditional = renderUI({
     sliderInput(inputId = "sub1_level",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = v, step = 1,
-                animate = TRUE,ticks=F)
+                #animate = TRUE,
+                animate = animationOptions(interval = ifelse(length(input$speed1) == 0, 600, 1000*input$speed1),
+                                           playButton = icon('play', "fa-2x"),
+                                           pauseButton = icon('pause', "fa-2x")),
+                ticks=F)
   })
 })
+
+
+output$speed_value1 <- renderUI({
+  fixedRow((column(5, checkboxInput("select_speed1",
+                                    label = "Time delay between plots (seconds):",
+                                    value = input$select_speed1))),
+            column(3, conditionalPanel("input.select_speed1",
+                                       numericInput("speed1", 
+                                                    "", 
+                                                    value = 0.6, 
+                                                    min = 0.1, 
+                                                    max = 3.0, 
+                                                    step = 0.1))))
+#  numericInput("speed1", 
+#               "Time delay between plots (seconds):", 
+#               value = 0.6, min = 0.1, max = 3.0, step = 0.1)
+#  fixedRow(column(8, HTML("Time delay between plots (seconds):")),
+#           column(4, numericInput("speed1", "", value = 0.6)))
+})
+
+
+
 
 #  Subset level (Slider) for variable 1 (mini plot).
 output$subs1_conditional_mini = renderUI({
@@ -563,7 +590,8 @@ output$subs1_conditional_mini = renderUI({
     sliderInput(inputId = "sub1_level_mini",
                 label = paste0("Subset '", input$subs1, "':"),
                 min = 0, max = choices1, value = v, step = 1,
-                animate = TRUE, ticks=F)
+                animate = TRUE, 
+                ticks=F)
   })
 })
 
@@ -629,13 +657,13 @@ output$vari2_panel = renderUI({
       }
       if(!input$change_var_selection){
         selectInput(inputId = "vari2",
-                    label = "Select second variable:",
+                    label = NULL,
                     choices = c("none",ch),
                     selected = sel,
                     selectize=F)
       }else{
         selectInput(inputId = "vari2",
-                    label = "Select second variable:",
+                    label = NULL,
                     choices = c("none",ch),
                     selected = sel,
                     selectize=F,
@@ -705,7 +733,7 @@ output$subs2_panel = renderUI({
     
     sel = input$subs2
     selectInput(inputId = "subs2",
-                label = "Subset by:",
+                label = NULL,
                 choices = c("none", ch),
                 selected = sel,
                 selectize=F)
@@ -761,9 +789,27 @@ output$subs2_conditional = renderUI({
   sliderInput(inputId = "sub2_level",
               label = paste0("Subset '", input$subs2, "':"),
               min = 0, max = choices2, value = 0, step = 1,
-              animate = TRUE,ticks=F)
+              #animate = TRUE,
+              animate = animationOptions(interval = ifelse(length(input$speed2) == 0, 600, 1000*input$speed2),
+                                         playButton = icon('play', "fa-2x"),
+                                         pauseButton = icon('pause', "fa-2x")),
+              ticks=F)
 })
 
+
+
+output$speed_value2 <- renderUI({
+  fixedRow((column(5, checkboxInput("select_speed2",
+                                    label = "Time delay between plots (seconds):",
+                                    value = input$select_speed2))),
+           column(3, conditionalPanel("input.select_speed2",
+                                      numericInput("speed2", 
+                                                   "", 
+                                                   value = 0.6, 
+                                                   min = 0.1, 
+                                                   max = 3.0, 
+                                                   step = 0.1))))
+})
 
 
 ##  Subset level (Slider) for variable 2.
@@ -1199,6 +1245,12 @@ observe({
                                     xlab = NULL, ylab = NULL,
                                     g1 = NULL, g2 = NULL,
                                     colby=NULL,sizeby=NULL, symbolby = NULL)
+      # time delay between plots
+      updateCheckboxInput(session, "select_speed1", value = F)
+      updateCheckboxInput(session, "select_speed2", value = F)
+      updateNumericInput(session, "speed1", value = 0.6)
+      updateNumericInput(session, "speed2", value = 0.6)
+      
       plot.par$main=NULL
       updateTextInput(session,"main_title_text",value="")
       plot.par$xlab=NULL
@@ -2698,7 +2750,7 @@ output$trend.curve.panel = renderUI({
                                               value=T)
     line.width.multiplier.object = fixedRow(column(width = 3, "Line Width Multiplier:"),
                                             column(width = 6, sliderInput("line.width.multiplier", 
-                                                                          label = "", 
+                                                                          label = NULL, 
                                                                           min = 1, 
                                                                           max = 2, 
                                                                           value = input$line.width.multiplier, step = 0.5, ticks = FALSE)))
@@ -5040,4 +5092,68 @@ output$old_advanced_options_panel = renderUI({
   })
   list(ret) 
 })
+
+
+
+## switch variables selected
+observe({
+  input$switch1
+  isolate({
+    if(!is.null(input$vari2) && input$vari2 != "none") {
+      
+      var1.old = input$vari1
+      var2.old = input$vari2
+      
+      updateSelectInput(session, "vari1", selected = var2.old)
+      
+      ch  = colnames(vis.data())
+#      if(!is.null(input$vari1) && input$vari1 %in% ch){
+        ch  = ch[-which(ch %in% var2.old)]
+#      }
+      ch = c("none", ch)
+
+      updateSelectInput(session,"vari2", choices = ch, selected = var1.old)
+    }
+  })
+})
+
+observe({
+  input$switch2
+  isolate({
+    var2.old = input$vari2
+    var3.old = input$subs1
+    
+    updateSelectInput(session, "vari2", selected = var3.old)
+    
+    ch  = colnames(vis.data())
+    ch  = ch[-which(ch %in% input$vari1)]
+    if(!is.null(var3.old) && var3.old != "none")
+      ch  = ch[-which(ch %in% var3.old)]
+    updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
+  })
+})
+
+observe({
+  input$switch3
+  isolate({
+    var3.old = input$subs1
+    var4.old = input$subs2
+    
+    updateSelectInput(session, "subs1", selected = var4.old)
+    updateSelectInput(session, "subs2", selected = var3.old)
+  })
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
 
