@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : May 14, 2017.
+###  Last Modified : May 24, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -48,16 +48,36 @@ vis.sidebarPanel = function() {
                                         label=""))),
         
         ##  Select the first variable.
-        uiOutput("vari1_panel"),
+        h5("Select first variable:"),
+        fixedRow(column(6, uiOutput("vari1_panel")),
+                 column(2, actionButton("switch1", "", 
+                                        icon = icon("arrow-down"),
+                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+        
+        
+#        uiOutput("vari1_panel"),
         
         ##  Select the second variable.
-        uiOutput("vari2_panel"),
+        h5("Select second variable:"),
+        fixedRow(column(6, uiOutput("vari2_panel")),
+                 column(2, actionButton("switch2", "", 
+                                        icon = icon("arrow-down"),
+                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+
+        #uiOutput("vari2_panel"),
         hr(),
         ## Select desired subset for the first variable.
-        uiOutput("subs1_panel"),
+        h5("Subset by:"),
+        fixedRow(column(6, uiOutput("subs1_panel")),
+                 column(2, actionButton("switch3", "", 
+                                        icon = icon("arrow-down"),
+                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+        #uiOutput("subs1_panel"),
         
         ##  Select desired subset for the second variable.
-        uiOutput("subs2_panel"),
+        h5("Subset by:"),
+        fixedRow(column(6, uiOutput("subs2_panel"))),
+        #uiOutput("subs2_panel"),
         
         
         ##########
@@ -200,7 +220,8 @@ vis.mainPanel = function() {
                        condition = "input.subs1 != 'none'",
                        ##  Slider input GUI for the first variable.
                        br(),
-                       uiOutput("subs1_conditional")
+                       uiOutput("subs1_conditional"),
+                       uiOutput("speed_value1")
                      )
                    ),
                    column(
@@ -209,7 +230,8 @@ vis.mainPanel = function() {
                      conditionalPanel(
                        condition = "input.subs2 != 'none'",
                        br(),
-                       uiOutput("subs2_conditional")
+                       uiOutput("subs2_conditional"),
+                       uiOutput("speed_value2")
                      )
                    )
                  )           
@@ -281,15 +303,19 @@ old.vis.sidebarPanel = function() {
                                     value=F,
                                     label=""))),
     ##  Select the first variable.
+    h5("Select first variable:"),
     uiOutput("vari1_panel"),
     
     ##  Select the second variable.
+    h5("Select second variable:"),
     uiOutput("vari2_panel"),
     hr(),
     ## Select desired subset for the first variable.
+    h5("Subset by:"),
     uiOutput("subs1_panel"),
     
     ##  Select desired subset for the second variable.
+    h5("Subset by:"),
     uiOutput("subs2_panel"),
     hr(),
     ##  Reset graphical parameters.
