@@ -14,6 +14,7 @@ observeEvent(input$files, {
       temp = load.data(get.data.dir.imported(),
                        fileID = input$files[1, "name"],
                        path = input$files[1, "datapath"])[[2]]
+      
       if(!is.null(temp)){  
         plot.par$design=NULL
         values$data.set = temp
@@ -70,6 +71,8 @@ output$filetable <- renderDataTable({
 }, options =
   list(lengthMenu = c(5, 30, 50), pageLength = 5,
        columns.defaultContent="NA", scrollX = TRUE))
+
+
 
 observe({
   input$remove_set
