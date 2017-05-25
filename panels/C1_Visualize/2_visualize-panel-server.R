@@ -5120,16 +5120,19 @@ observe({
 observe({
   input$switch2
   isolate({
-    var2.old = input$vari2
-    var3.old = input$subs1
-    
-    updateSelectInput(session, "vari2", selected = var3.old)
-    
-    ch  = colnames(vis.data())
-    ch  = ch[-which(ch %in% input$vari1)]
-    if(!is.null(var3.old) && var3.old != "none")
-      ch  = ch[-which(ch %in% var3.old)]
-    updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
+    if((!is.null(input$vari2) && input$vari2 != "none") ||
+       (!is.null(input$subs1) && input$subs1 != "none")) {
+      var2.old = input$vari2
+      var3.old = input$subs1
+      
+      updateSelectInput(session, "vari2", selected = var3.old)
+      
+      ch  = colnames(vis.data())
+      ch  = ch[-which(ch %in% input$vari1)]
+      if(!is.null(var3.old) && var3.old != "none")
+        ch  = ch[-which(ch %in% var3.old)]
+      updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
+    }
   })
 })
 
