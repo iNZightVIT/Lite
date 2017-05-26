@@ -22,6 +22,9 @@ library(iNZightMaps)
 library(colorspace)
 #library(readxl)
 library(xlsx)
+library(sas7bdat)
+library(foreign)
+
 
 # read in possible command line arguments such as 'vars.path'
 

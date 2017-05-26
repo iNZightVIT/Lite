@@ -1312,6 +1312,12 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
           temp = read.xlsx(full.name[indexes[1]], 1)
         }else if(tolower(ext)%in%"xlsx"){
           temp = read.xlsx2(full.name[indexes[1]], 1)
+        }else if(tolower(ext)%in%"sas7bdat"){
+          temp = read.sas7bdat(full.name[indexes[1]])
+        }else if(tolower(ext)%in%"dta"){
+          temp = read.dta(full.name[indexes[1]])
+        }else if(tolower(ext)%in%"sav"){
+          temp = read.spss(full.name[indexes[1]], use.value.labels=FALSE,to.data.frame=TRUE)
         }
       }, warning = function(w) {
         print(w)
