@@ -4464,7 +4464,10 @@ output$saveplot = downloadHandler(
           }
         }
       }
-      iNZightPlots:::exportHTML.function(create.html, file = file, width = 10, height = 6)
+      temp.dir = iNZightPlots:::exportHTML.function(create.html, file = file, width = 10, height = 6)
+      file.dir = paste(temp.dir, "/index.html", sep="")
+      file.copy("file.dir", file)
+#      file.remove("file.dir")
     }
     
     if (!is.null(vis.par())) {
@@ -4509,55 +4512,12 @@ output$saveplot = downloadHandler(
   })  
 
 
-observe({
-  if (!is.null(input$gotointeractivehtml)&&input$gotointeractivehtml > 0) {
-    isolate({
-      create.html = function() {
-        if (!is.null(vis.par())) {
-          dafr = get.data.set()
-          if(is.numeric(plot.par$x)&
-             is.numeric(plot.par$y)){
-            temp = vis.par()
-            temp$trend.parallel = TRUE
-            temp.x = temp$x
-            temp$x=temp$y
-            temp$y=temp.x
-            temp.varnames.x = temp$varnames$x
-            temp$varnames$x = temp$varnames$y
-            temp$varnames$y = temp.varnames.x
-            if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-               tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
-              }, warning = function(w) {
-                print(w)
-              }, error = function(e) {
-                print(e)
-              }, finally = {})
-            }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
-            }
-          }else{
-            if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-               tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
-              }, warning = function(w) {
-                print(w)
-              }, error = function(e) {
-                print(e)
-              }, finally = {})
-            }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
-            }
-          }
-        }
-      }
-      iNZightPlots:::exportHTML.function(create.html, width = 10, height = 6)
-    })
-  }
-})
-
 
 output$interactive.plot = renderUI({
+  input$vari1
+  input$vari2
+  input$subs1
+  input$subs2
   isolate({
     create.html = function() {
       if (!is.null(vis.par())) {
@@ -4598,7 +4558,8 @@ output$interactive.plot = renderUI({
         }
       }
     }
-    iNZightPlots:::exportHTML.function(create.html, width = 10, height = 6)
+    temp.dir = iNZightPlots:::exportHTML.function(create.html, width = 10, height = 6)
+    includeHTML(paste(temp.dir, "/index.html", sep=""))
   })
 })
 
