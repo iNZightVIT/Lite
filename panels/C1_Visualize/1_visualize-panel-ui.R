@@ -205,7 +205,7 @@ vis.mainPanel = function() {
                           column(width = 4,
                                  radioButtons(inputId = "saveplottype", 
                                               label = "Select the file type", 
-                                              choices = list("jpg", "png", "pdf"), inline = TRUE)),
+                                              choices = list("jpg", "png", "pdf", "interactive html"), inline = TRUE)),
                           column(width = 5,
                                  uiOutput("add.fitted.residuals.panel"))),
                  
@@ -257,6 +257,12 @@ vis.mainPanel = function() {
         helpText("Statistical Inference for the data."),
         verbatimTextOutput("visualize.inference")
         )
+#      tabPanel(
+#        title = "Interactive Plot",
+#        br(),
+#        helpText("Interactive Plot"),
+#        htmlOutput("interactive.plot")
+#      )
       )
     )
   panel
