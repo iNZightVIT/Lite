@@ -325,7 +325,8 @@ output$multiple_single_plot = renderPlot({
           iNZightTS:::compareplot(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = input$choose_season
+            multiplicative = input$choose_season,
+            t = 100*input$slidersmoothing
           )
         }, warning = function(w) {
           cat("Warning produced in compareplot \n")
@@ -368,7 +369,8 @@ output$multiple_multi_plot = renderPlot({
           multiseries(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = input$choose_season
+            multiplicative = input$choose_season,
+            t = 100*input$slidersmoothing
           )
         }, warning = function(w) {
           cat("Warning produced in multiseries plot \n")
