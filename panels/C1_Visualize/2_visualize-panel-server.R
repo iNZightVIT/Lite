@@ -4466,9 +4466,11 @@ output$saveplot = downloadHandler(
       }
       temp.dir = iNZightPlots:::exportHTML.function(create.html, file = file, width = 10, height = 6)
       #      file.dir = paste(temp.dir, "/index.html", sep="")
+      workingdir = getwd()
       setwd(temp.dir)
       file.copy("index.html", file)
       #      file.remove("file.dir")
+      setwd(workingdir)
     }
     
     if (!is.null(vis.par())) {
