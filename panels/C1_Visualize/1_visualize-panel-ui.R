@@ -256,6 +256,12 @@ vis.mainPanel = function() {
         br(),
         helpText("Statistical Inference for the data."),
         verbatimTextOutput("visualize.inference")
+        ),
+      tabPanel(
+        title = "Interactive Plot",
+        br(),
+        helpText("Interactive Plot"),
+        htmlOutput("interactive.plot")
         )
       )
     )
