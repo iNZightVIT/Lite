@@ -4464,15 +4464,18 @@ output$saveplot = downloadHandler(
           }
         }
       }
-      local.dir = iNZightPlots:::exportHTML.function(create.html, file = file, width = 10, height = 6)
-      local.dir = unclass(local.dir)
-      #      file.dir = paste(temp.dir, "/index.html", sep="")
-      #temp.workingdir = substr(local.dir, 1, nchar(local.dir) - 11)
+      iNZightPlots:::exportHTML.function(create.html, file = file, width = 10, height = 6)
+      #local.dir = unclass(local.dir)
+      #file.dir = paste(temp.dir, "/index.html", sep="")
+      #temp.dir = substr(local.dir, 1, nchar(local.dir) - 11)
+      old.workingdir = getwd()
+      setwd(tempdir())
+      #file.copy(local.dir, paste(old.workingdir, "/tmp_htmls", sep = ""))
       #old.workingdir = getwd()
-      #setwd(temp.workingdir)
-      file.copy("local.dir", file)
-      #      file.remove("file.dir")
-      #setwd(old.workingdir)
+      #setwd(paste(old.workingdir, "/tmp_htmls", sep = ""))
+      file.copy("index.html", file)
+      #file.remove("index.html")
+      setwd(old.workingdir)
     }
     
     if (!is.null(vis.par())) {
