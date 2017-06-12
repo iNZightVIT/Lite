@@ -4470,15 +4470,18 @@ output$saveplot = downloadHandler(
       #local.dir.index = unlist(local.dir.index)
       #temp.dir = substr(local.dir, 1, local.dir.index[length(local.dir.index)]-1)
       #temp.file = substr(local.dir, local.dir.index[length(local.dir.index)]+1, nchar(local.dir))
+      temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
       #print(local.dir)
       #print(temp.dir)
+      output$address1 = renderText({local.dir})
+      output$address2 = renderText({temp.dir})
       #print(temp.file)
       #file.dir = paste(temp.dir, "/index.html", sep="")
       #temp.dir = substr(local.dir, 1, nchar(local.dir) - 11)
       old.workingdir = getwd()
-      #setwd(temp.dir)
-      file.copy(local.dir, paste(old.workingdir, "/tmp_htmls", sep = ""))
-      setwd(paste(old.workingdir, "/tmp_htmls", sep = ""))
+      setwd(temp.dir)
+      #file.copy(local.dir, paste(old.workingdir, "/tmp_htmls", sep = ""))
+      #setwd("/tmp_htmls")
       file.copy("index.html", file)
       #file.remove(temp.file)
       setwd(old.workingdir)
@@ -4580,7 +4583,7 @@ output$interactive.plot = renderUI({
     tags$iframe(
       seamless = "seamless",
       src = "path/index.html",
-      height = 600, width = 800
+      height = 600, width = 1200
       )
   })
 })
