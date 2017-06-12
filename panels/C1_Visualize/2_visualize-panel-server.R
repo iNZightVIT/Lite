@@ -4482,7 +4482,7 @@ output$saveplot = downloadHandler(
       setwd(temp.dir)
       #file.copy(local.dir, paste(old.workingdir, "/tmp_htmls", sep = ""))
       #setwd("/tmp_htmls")
-      file.copy("index.html", file)
+      file.rename("index.html", file)
       #file.remove(temp.file)
       setwd(old.workingdir)
     }
