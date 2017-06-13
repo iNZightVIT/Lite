@@ -201,7 +201,7 @@ vis.mainPanel = function() {
 #                                              label = "Interactive HTML"))),
                  
                  fixedRow(column(width = 2, offset = 1,
-                                 downloadButton(outputId = "saveplot", label = "Save Plot")),
+                                 downloadButton(outputId = "saveplot", label = "Download Plot")),
                           column(width = 4,
                                  radioButtons(inputId = "saveplottype", 
                                               label = "Select the file type", 
