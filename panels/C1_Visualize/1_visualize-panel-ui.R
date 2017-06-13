@@ -209,12 +209,7 @@ vis.mainPanel = function() {
                           column(width = 5,
                                  uiOutput("add.fitted.residuals.panel"))),
 
-                 ## testing local address 
-                 fixedRow(verbatimTextOutput("address1"),
-                          verbatimTextOutput("address2")),
 
-
-                 
 #                 downloadButton(outputId = "saveplot", label = "Save Plot"),
 #                 radioButtons(inputId = "saveplottype", 
 #                              label = "Select the file type", 

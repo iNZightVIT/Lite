@@ -4485,8 +4485,6 @@ output$saveplot = downloadHandler(
       src = normalizePath(local.dir)
       owd = setwd(tempdir())
       on.exit(setwd(owd))
-      output$address1 = renderText({src})
-      output$address2 = renderText({getwd()})
       file.copy(src, "index.html")
       file.copy("index.html", file)
       #file.remove(temp.file)
