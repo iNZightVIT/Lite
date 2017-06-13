@@ -4537,8 +4537,9 @@ output$saveplot = downloadHandler(
 output$interactive.plot = renderUI({
   input$vari1
   input$vari2
-  input$subs1
-  input$subs2
+#  input$subs1
+#  input$subs2
+  input$select.plot.type
   isolate({
     create.html = function() {
       if (!is.null(vis.par())) {
