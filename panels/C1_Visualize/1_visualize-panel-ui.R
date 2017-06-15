@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : June 14, 2017.
+###  Last Modified : June 13, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -199,30 +199,20 @@ vis.mainPanel = function() {
 #                          column(width = 2,
 #                                 actionButton(inputId = "gotointeractivehtml", 
 #                                              label = "Interactive HTML"))),
-
-                 br(),
                  
-                 fixedRow(column(width = 2, 
-                                 # offset = 1,
-                                 downloadButton(outputId = "saveplot", label = "Download Plot")),
+                 fixedRow(column(width = 2, offset = 1,
+                                 downloadButton(outputId = "saveplot", label = "Save Plot")),
                           column(width = 4,
                                  radioButtons(inputId = "saveplottype", 
-                                              label = strong("Select the file type"), 
-                                              choices = list("jpg", "png", "pdf", "svg", "interactive html"), inline = TRUE)),
-                          column(width = 4,
-                                 conditionalPanel(
-                                   condition = "input.saveplottype == 'interactive html'",
-                                   uiOutput("extra.vars.html")
-                                 )),
-                          column(width = 2,
+                                              label = "Select the file type", 
+                                              choices = list("jpg", "png", "pdf", "interactive html"), inline = TRUE)),
+                          column(width = 5,
                                  uiOutput("add.fitted.residuals.panel"))),
-
-
+                 
 #                 downloadButton(outputId = "saveplot", label = "Save Plot"),
 #                 radioButtons(inputId = "saveplottype", 
 #                              label = "Select the file type", 
 #                              choices = list("jpg", "png", "pdf"), inline = TRUE),
-
                  fixedRow(
                    column(
                      width = 5, offset = 1,
@@ -266,12 +256,6 @@ vis.mainPanel = function() {
         br(),
         helpText("Statistical Inference for the data."),
         verbatimTextOutput("visualize.inference")
-        ),
-      tabPanel(
-        title = "Interactive Plot",
-        br(),
-        helpText("Interactive Plot"),
-        htmlOutput("interactive.plot")
         )
       )
     )
