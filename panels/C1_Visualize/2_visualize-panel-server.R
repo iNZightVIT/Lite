@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   June 13, 2017.
+###  Last Modified  :   June 14, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -132,10 +132,10 @@ graphical.par = reactiveValues(
   smooth = 0,
   szsym = 1,
   tpsym = 1,
-  plottype="default",
-  hist.bins=NULL,
-  scatter.grid.bins=50,
-  hex.bins=20,
+  plottype = "default",
+  hist.bins = NULL,
+  scatter.grid.bins = 50,
+  hex.bins = 20,
   hex.style = "size",
   bs.inference=F,
   reverse.palette = FALSE,
@@ -4410,109 +4410,275 @@ output$select_additions_panel = renderUI({
 # save main plot;
 output$saveplot = downloadHandler(
   filename = function() {
-    if(input$saveplottype == "interactive html")
-      paste("Plot.html")
-    else
-      paste("Plot", input$saveplottype, sep = ".")
+    paste("Plot", 
+          switch(input$saveplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf", 
+                 "svg" = "svg", 
+                 "interactive html" = "html"),
+          sep = ".")
+#    if(input$saveplottype == "interactive html")
+#      paste("Plot.html")
+#    else
+#      paste("Plot", input$saveplottype, sep = ".")
   },
   
   content = function(file) {
     
-    if(input$saveplottype == "jpg")
-      jpeg(file)
-    else if(input$saveplottype == "png")
-      png(file)
-    else if(input$saveplottype == "pdf")
-      pdf(file, useDingbats = FALSE)
-    else if(input$saveplottype == "interactive html") {
-      create.html = function() {
+    if(input$saveplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveplottype == "jpg")
+        jpeg(file)
+      else if(input$saveplottype == "png")
+        png(file)
+      else if(input$saveplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if (!is.null(vis.par())) {
+        dafr = get.data.set()
+        if(is.numeric(plot.par$x)&
+           is.numeric(plot.par$y)){
+          temp = vis.par()
+          temp$trend.parallel = TRUE
+          temp.x = temp$x
+          temp$x=temp$y
+          temp$y=temp.x
+          temp.varnames.x = temp$varnames$x
+          temp$varnames$x = temp$varnames$y
+          temp$varnames$y = temp.varnames.x
+          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+            }, warning = function(w) {
+              print(w)
+            }, error = function(e) {
+              print(e)
+            }, finally = {})
+          }else{
+            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+          }
+        }else{
+          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+            }, warning = function(w) {
+              print(w)
+            }, error = function(e) {
+              print(e)
+            }, finally = {})
+          }else{
+            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+          }
+        }
+      }
+      dev.off()
+    }
+
+    else if(input$saveplottype %in% c("svg", "interactive html")) {
+      create.fun = function() {
         if (!is.null(vis.par())) {
           dafr = get.data.set()
-          if(is.numeric(plot.par$x)&
+          if(is.numeric(plot.par$x) &
              is.numeric(plot.par$y)){
             temp = vis.par()
             temp$trend.parallel = TRUE
             temp.x = temp$x
-            temp$x=temp$y
-            temp$y=temp.x
+            temp$x = temp$y
+            temp$y = temp.x
             temp.varnames.x = temp$varnames$x
             temp$varnames$x = temp$varnames$y
             temp$varnames$y = temp.varnames.x
-            if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-               tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+            if(!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+               tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true"){
+              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, temp)
               }, warning = function(w) {
                 print(w)
               }, error = function(e) {
                 print(e)
               }, finally = {})
             }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, temp))
             }
           }else{
             if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
                tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, vis.par())
               }, warning = function(w) {
                 print(w)
               }, error = function(e) {
                 print(e)
               }, finally = {})
             }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
             }
           }
         }
       }
-      temp.dir = iNZightPlots:::exportHTML.function(create.html, file = file, width = 10, height = 6)
-      #      file.dir = paste(temp.dir, "/index.html", sep="")
-      workingdir = getwd()
-      setwd(temp.dir)
-      file.copy("index.html", file)
-      #      file.remove("file.dir")
-      setwd(workingdir)
+      
+      if(input$saveplottype == "svg") {
+        local.dir = iNZightPlots:::exportSVG.function(create.fun)
+        src = normalizePath(local.dir)
+        owd = setwd(tempdir())
+        on.exit(setwd(owd))
+        file.copy(src, "inzightplot.svg")
+        file.copy("inzightplot.svg", file)
+      }
+      else if(input$saveplottype == "interactive html") {
+        if(!is.null(input$export.extra.vars.html) &&
+           any(input$export.extra.vars.html %in% colnames(vis.data()))) {
+          data = get.data.set()
+          extra.vars = input$export.extra.vars.html
+        }
+        else {
+          data = NULL
+          extra.vars = NULL
+        }
+        local.dir = iNZightPlots:::exportHTML.function(create.fun, 
+                                                       data = data,
+                                                       extra.vars = extra.vars,
+                                                       width = 10, height = 6)
+        #local.dir = as.character(local.dir)
+        #local.dir.index = gregexpr("/", local.dir)
+        #local.dir.index = unlist(local.dir.index)
+        #temp.dir = substr(local.dir, 1, local.dir.index[length(local.dir.index)]-1)
+        #temp.file = substr(local.dir, local.dir.index[length(local.dir.index)]+1, nchar(local.dir))
+        #temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+        #file.dir = paste(temp.dir, "/index.html", sep="")
+        #temp.dir = substr(local.dir, 1, nchar(local.dir) - 11)
+        #old.workingdir = getwd()
+        #setwd(temp.dir)
+        #file.copy(local.dir, paste(old.workingdir, "/tmp_htmls", sep = ""))
+        #setwd("/tmp_htmls")
+        src = normalizePath(local.dir)
+        owd = setwd(tempdir())
+        on.exit(setwd(owd))
+        file.copy(src, "index.html")
+        file.copy("index.html", file)
+        #file.remove(temp.file)
+        #setwd(old.workingdir)
+      }
+    }
+  })  
+
+
+
+
+## select additional variables to export in dynamic plot
+output$extra.vars.html = renderUI({
+  get.data.set()
+  isolate({
+    ch = colnames(vis.data())
+    
+    if(!is.null(input$vari1) &&
+       input$vari1 %in% colnames(vis.data())){
+      ch = ch[-which(ch %in% input$vari1)]
+    }
+    if(!is.null(input$vari2) &&
+       input$vari2 %in% colnames(vis.data())){
+      ch = ch[-which(ch %in% input$vari2)]
     }
     
-    if (!is.null(vis.par())) {
-      dafr = get.data.set()
-      if(is.numeric(plot.par$x)&
-         is.numeric(plot.par$y)){
-        temp = vis.par()
-        temp$trend.parallel = TRUE
-        temp.x = temp$x
-        temp$x=temp$y
-        temp$y=temp.x
-        temp.varnames.x = temp$varnames$x
-        temp$varnames$x = temp$varnames$y
-        temp$varnames$y = temp.varnames.x
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
-          }, warning = function(w) {
-            print(w)
-          }, error = function(e) {
-            print(e)
-          }, finally = {})
+    extra.vars.html.panel = selectInput(inputId = "export.extra.vars.html",
+                                        label = strong("Select additional variables to export"),
+                                        choices = ch,
+                                        multiple = TRUE,
+                                        selected = NULL,
+                                        size = 2,
+                                        selectize = FALSE)
+    
+    list(extra.vars.html.panel)
+    
+  })
+})
+
+
+## update extra.vars.html.panel when var1 or var2 changes
+observe({
+  input$vari1
+  input$vari2
+  isolate({
+    ch = colnames(vis.data())
+    
+    if(!is.null(input$vari1) &&
+       input$vari1 %in% colnames(vis.data())){
+      ch = ch[-which(ch %in% input$vari1)]
+    }
+    if(!is.null(input$vari2) &&
+       input$vari2 %in% colnames(vis.data())){
+      ch = ch[-which(ch %in% input$vari2)]
+    }
+    
+    updateSelectInput(session, "export.extra.vars.html", choices = ch,selected = NULL)
+  })
+})
+
+  
+  
+  
+  
+  
+
+output$interactive.plot = renderUI({
+  input$vari1
+  input$vari2
+#  input$subs1
+#  input$subs2
+  input$select.plot.type
+  isolate({
+    create.html = function() {
+      if (!is.null(vis.par())) {
+        dafr = get.data.set()
+        if(is.numeric(plot.par$x)&
+           is.numeric(plot.par$y)){
+          temp = vis.par()
+          temp$trend.parallel = TRUE
+          temp.x = temp$x
+          temp$x=temp$y
+          temp$y=temp.x
+          temp.varnames.x = temp$varnames$x
+          temp$varnames$x = temp$varnames$y
+          temp$varnames$y = temp.varnames.x
+          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+            }, warning = function(w) {
+              print(w)
+            }, error = function(e) {
+              print(e)
+            }, finally = {})
+          }else{
+            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+          }
         }else{
-          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
-        }
-      }else{
-        if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-          tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
-          }, warning = function(w) {
-            print(w)
-          }, error = function(e) {
-            print(e)
-          }, finally = {})
-        }else{
-          plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+            }, warning = function(w) {
+              print(w)
+            }, error = function(e) {
+              print(e)
+            }, finally = {})
+          }else{
+            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+          }
         }
       }
     }
-    
-    dev.off()
-  })  
+    local.dir = iNZightPlots:::exportHTML.function(create.html, width = 10, height = 6)
+    local.dir = unclass(local.dir)
+    temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+#    setwd(temp.dir)
+#    includeHTML("index.html")
+#    file.dir = paste(temp.dir, "/index.html", sep="")
+    addResourcePath("path", temp.dir)
+    tags$iframe(
+      seamless = "seamless",
+      src = "path/index.html",
+      height = 600, width = 1200
+      )
+  })
+})
 
 
 
@@ -4544,9 +4710,13 @@ output$add.fitted.residuals.panel = renderUI({
     
     
    
-    list(fixedRow(column(width = 6, add.fitted.values.button),
-                  column(width = 6, add.residuals.button))
-         )
+#    list(fixedRow(column(width = 6, add.fitted.values.button),
+#                  column(width = 6, add.residuals.button))
+#         )
+    
+    list(add.fitted.values.button,
+         br(),
+         add.residuals.button)
   })
 })
 
