@@ -1506,8 +1506,22 @@ get.data.from.URL = function(URL,data.dir.import){
   #URL = gsub(" ", "%20", URL)
   URL = URLencode(URL)
   #print(URL)
-  name = strsplit(URL,"/")[[1]]
-  name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+  
+  if(grepl("docs.google.com", URL)) {
+    url.index = gregexpr("output=", URL)
+    url.index = unlist(url.index)
+    file.type = substr(URL, url.index+7, nchar(URL))
+    temp.file.name = tempfile()
+    temp.file.name.index = gregexpr("file", temp.file.name)
+    temp.file.name.index = unlist(temp.file.name.index)
+    file.name = substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+    name = paste(file.name, file.type, sep = ".")
+  }
+  else {
+    name = strsplit(URL,"/")[[1]]
+    name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+  }
+  
   if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
         file.writable(data.dir.import)) {
     dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
@@ -1536,49 +1550,6 @@ get.data.from.URL = function(URL,data.dir.import){
   },finally = {})
 }
 
-# get data from google docs urls
-get.data.from.googledocs = function(URL,data.dir.import){
-  ret = list()
-  #URL = gsub(" ", "%20", URL)
-  URL = URLencode(URL)
-  #print(URL)
-  #name = strsplit(URL,"/")[[1]]
-  #name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
-  url.index = gregexpr("output=", URL)
-  url.index = unlist(url.index)
-  file.type = substr(URL, url.index+7, nchar(URL))
-  temp.file.name = tempfile()
-  temp.file.name.index = gregexpr("file", temp.file.name)
-  temp.file.name.index = unlist(temp.file.name.index)
-  file.name = substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
-  name = paste(file.name, file.type, sep = ".")
-  if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
-      file.writable(data.dir.import)) {
-    dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
-  }
-  tryCatch({
-    if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    else
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="curl")
-    
-    temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
-    if(!is.null(temp[[2]])){
-      ret$data.set = temp[[2]]
-      ret$data.name = name
-    }else{
-      return(NULL)
-    }
-    ret
-  },error = function(e){
-    if(file.exists(paste0(data.dir.import,"/Imported/",name))){
-      unlink(paste0(data.dir.import,"Imported/",name))
-    }
-    print(e)
-  },warning = function(w) {
-    print(w)
-  },finally = {})
-}
 
 #' Connerts transparency or alpha value to a 
 #' percentage integer.
