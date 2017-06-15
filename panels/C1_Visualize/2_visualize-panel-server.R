@@ -132,10 +132,10 @@ graphical.par = reactiveValues(
   smooth = 0,
   szsym = 1,
   tpsym = 1,
-  plottype="default",
-  hist.bins=NULL,
-  scatter.grid.bins=50,
-  hex.bins=20,
+  plottype = "default",
+  hist.bins = NULL,
+  scatter.grid.bins = 50,
+  hex.bins = 20,
   hex.style = "size",
   bs.inference=F,
   reverse.palette = FALSE,
@@ -4479,38 +4479,38 @@ output$saveplot = downloadHandler(
       create.fun = function() {
         if (!is.null(vis.par())) {
           dafr = get.data.set()
-          if(is.numeric(plot.par$x)&
+          if(is.numeric(plot.par$x) &
              is.numeric(plot.par$y)){
             temp = vis.par()
             temp$trend.parallel = TRUE
             temp.x = temp$x
-            temp$x=temp$y
-            temp$y=temp.x
+            temp$x = temp$y
+            temp$y = temp.x
             temp.varnames.x = temp$varnames$x
             temp$varnames$x = temp$varnames$y
             temp$varnames$y = temp.varnames.x
-            if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-               tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+            if(!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+               tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true"){
+              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, temp)
               }, warning = function(w) {
                 print(w)
               }, error = function(e) {
                 print(e)
               }, finally = {})
             }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, temp))
             }
           }else{
             if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
                tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, vis.par())
               }, warning = function(w) {
                 print(w)
               }, error = function(e) {
                 print(e)
               }, finally = {})
             }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
             }
           }
         }
@@ -4534,7 +4534,6 @@ output$saveplot = downloadHandler(
           data = NULL
           extra.vars = NULL
         }
-        print(extra.vars)
         local.dir = iNZightPlots:::exportHTML.function(create.fun, 
                                                        data = data,
                                                        extra.vars = extra.vars,

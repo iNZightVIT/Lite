@@ -40,8 +40,12 @@ observeEvent(input$import_set, {
     isolate({
       if(!is.null(input$files)&&file.exists(input$files[1, "datapath"]))
         unlink(input$files[1, "datapath"])
-        
-      data.vals = get.data.from.URL(input$URLtext,get.data.dir.imported())
+      
+      if(grepl("docs.google.com", input$URLtext))
+        data.vals = get.data.from.googledocs(input$URLtext, get.data.dir.imported())
+      else
+        data.vals = get.data.from.URL(input$URLtext, get.data.dir.imported())
+      
       design.parameters$data.name = NULL
       values$data.set = data.vals$data.set
       updatePanel$doit = updatePanel$doit+1
