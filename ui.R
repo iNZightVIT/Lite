@@ -111,7 +111,7 @@ shinyUI(
                                 uiOutput("remove.data.panel")),
                        tabPanel("Dataset Examples",
                                 uiOutput('switch.data.panel'))),
-            tabPanel("Visualize", value="visualize",
+            tabPanel("Visualize",value="visualize",
                      uiOutput("visualize.panel")),
             ## Row operations tab
             navbarMenu("Dataset",

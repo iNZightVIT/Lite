@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   June 14, 2017.
+###  Last Modified  :   June 18, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -4407,6 +4407,51 @@ output$select_additions_panel = renderUI({
 })
 
 
+
+# function for creating html and svg files
+
+create.html = function() {
+  if (!is.null(vis.par())) {
+    dafr = get.data.set()
+    if(is.numeric(plot.par$x)&
+       is.numeric(plot.par$y)){
+      temp = vis.par()
+      temp$trend.parallel = TRUE
+      temp.x = temp$x
+      temp$x=temp$y
+      temp$y=temp.x
+      temp.varnames.x = temp$varnames$x
+      temp$varnames$x = temp$varnames$y
+      temp$varnames$y = temp.varnames.x
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+      }else{
+        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      }
+    }else{
+      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+      }else{
+        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+      }
+    }
+  }
+} 
+
+
+
 # save main plot;
 output$saveplot = downloadHandler(
   filename = function() {
@@ -4415,8 +4460,7 @@ output$saveplot = downloadHandler(
                  "jpg" = "jpg", 
                  "png" = "png", 
                  "pdf" = "pdf", 
-                 "svg" = "svg", 
-                 "interactive html" = "html"),
+                 "svg" = "svg"),
           sep = ".")
 #    if(input$saveplottype == "interactive html")
 #      paste("Plot.html")
@@ -4475,210 +4519,496 @@ output$saveplot = downloadHandler(
       dev.off()
     }
 
-    else if(input$saveplottype %in% c("svg", "interactive html")) {
-      create.fun = function() {
-        if (!is.null(vis.par())) {
-          dafr = get.data.set()
-          if(is.numeric(plot.par$x) &
-             is.numeric(plot.par$y)){
-            temp = vis.par()
-            temp$trend.parallel = TRUE
-            temp.x = temp$x
-            temp$x = temp$y
-            temp$y = temp.x
-            temp.varnames.x = temp$varnames$x
-            temp$varnames$x = temp$varnames$y
-            temp$varnames$y = temp.varnames.x
-            if(!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-               tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, temp)
-              }, warning = function(w) {
-                print(w)
-              }, error = function(e) {
-                print(e)
-              }, finally = {})
-            }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, temp))
-            }
-          }else{
-            if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-               tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, vis.par())
-              }, warning = function(w) {
-                print(w)
-              }, error = function(e) {
-                print(e)
-              }, finally = {})
-            }else{
-              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
-            }
-          }
-        }
-      }
-      
-      if(input$saveplottype == "svg") {
-        local.dir = iNZightPlots:::exportSVG.function(create.fun)
-        src = normalizePath(local.dir)
-        owd = setwd(tempdir())
-        on.exit(setwd(owd))
-        file.copy(src, "inzightplot.svg")
-        file.copy("inzightplot.svg", file)
-      }
-      else if(input$saveplottype == "interactive html") {
-        if(!is.null(input$export.extra.vars.html) &&
-           any(input$export.extra.vars.html %in% colnames(vis.data()))) {
-          data = get.data.set()
-          extra.vars = input$export.extra.vars.html
-        }
-        else {
-          data = NULL
-          extra.vars = NULL
-        }
-        local.dir = iNZightPlots:::exportHTML.function(create.fun, 
-                                                       data = data,
-                                                       extra.vars = extra.vars,
-                                                       width = 10, height = 6)
-        #local.dir = as.character(local.dir)
-        #local.dir.index = gregexpr("/", local.dir)
-        #local.dir.index = unlist(local.dir.index)
-        #temp.dir = substr(local.dir, 1, local.dir.index[length(local.dir.index)]-1)
-        #temp.file = substr(local.dir, local.dir.index[length(local.dir.index)]+1, nchar(local.dir))
-        #temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
-        #file.dir = paste(temp.dir, "/index.html", sep="")
-        #temp.dir = substr(local.dir, 1, nchar(local.dir) - 11)
-        #old.workingdir = getwd()
-        #setwd(temp.dir)
-        #file.copy(local.dir, paste(old.workingdir, "/tmp_htmls", sep = ""))
-        #setwd("/tmp_htmls")
-        src = normalizePath(local.dir)
-        owd = setwd(tempdir())
-        on.exit(setwd(owd))
-        file.copy(src, "index.html")
-        file.copy("index.html", file)
-        #file.remove(temp.file)
-        #setwd(old.workingdir)
-      }
+    else if(input$saveplottype == "svg") {
+      local.dir = iNZightPlots:::exportSVG.function(create.html)
+      src = normalizePath(local.dir)
+      owd = setwd(tempdir())
+      on.exit(setwd(owd))
+      file.copy(src, "inzightplot.svg")
+      file.copy("inzightplot.svg", file)
     }
   })  
 
 
 
+# save interactive plot
+output$save_interactive_plot_beta2 = downloadHandler(
+  filename = "Plot.html",
+  content = function(file) {
+    local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                   data = data_html_beta2(),
+                                                   extra.vars = extra.vars_html_beta2(),
+                                                   width = 10, height = 6)
 
-## select additional variables to export in dynamic plot
-output$extra.vars.html = renderUI({
+    src = normalizePath(local.dir)
+    owd = setwd(tempdir())
+    on.exit(setwd(owd))
+    file.copy(src, "index.html")
+    file.copy("index.html", file)
+  })  
+
+output$save_interactive_plot = downloadHandler(
+  filename = "Plot.html",
+  content = function(file) {
+    local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                   data = data_html(),
+                                                   extra.vars = extra.vars_html(),
+                                                   width = 10, height = 6)
+    
+    src = normalizePath(local.dir)
+    owd = setwd(tempdir())
+    on.exit(setwd(owd))
+    file.copy(src, "index.html")
+    file.copy("index.html", file)
+  })  
+
+
+## the selection panel for the interactive plot tabpanel
+output$interactive.plot.select = renderUI({
   get.data.set()
   isolate({
-    ch = colnames(vis.data())
-    
-    if(!is.null(input$vari1) &&
-       input$vari1 %in% colnames(vis.data())){
-      ch = ch[-which(ch %in% input$vari1)]
-    }
-    if(!is.null(input$vari2) &&
-       input$vari2 %in% colnames(vis.data())){
-      ch = ch[-which(ch %in% input$vari2)]
-    }
-    
-    extra.vars.html.panel = selectInput(inputId = "export.extra.vars.html",
-                                        label = strong("Select additional variables to export"),
-                                        choices = ch,
-                                        multiple = TRUE,
-                                        selected = NULL,
-                                        size = 2,
-                                        selectize = FALSE)
-    
-    list(extra.vars.html.panel)
-    
+    ret = fixedRow(column(width = 3, 
+                          downloadButton(outputId = "save_interactive_plot", 
+                                         label = "Download Plot")),
+
+                   column(width = 3,
+                          conditionalPanel("input.vari2 != 'none'",
+                                           uiOutput("extra_vars_check_panel"))),
+                   
+                   column(width = 4,
+                          conditionalPanel("input.extra_vars_check",
+                                           uiOutput("extra.vars.html"))),
+                   
+                   column(width = 2,
+                          uiOutput("extra_vars_confirm"))
+                   )
+    ret
   })
 })
 
 
-## update extra.vars.html.panel when var1 or var2 changes
+
+output$interactive.plot.select.beta2 = renderUI({
+  get.data.set()
+  isolate({
+    ret = fixedRow(column(width = 3, 
+                          downloadButton(outputId = "save_interactive_plot_beta2", 
+                                         label = "Download Plot")),
+      
+                   column(width = 2,
+                          actionButton("produce_interactive_plot",
+                                       "Produce Plot",
+                                       style="color: #fff; background-color: #337ab7; border-color: #2e6da4")),
+                   
+                   column(width = 3,
+                          conditionalPanel("input.vari2 != 'none'",
+                                           uiOutput("extra_vars_check_panel_beta2"))),
+                   
+
+                   column(width = 4,
+                          conditionalPanel("input.extra_vars_check_beta2",
+                                           uiOutput("extra.vars.html.beta2"))))
+    ret
+  })
+})
+
+
+## the check box for selecting extra variables
+
+
+#output$extra_vars_check_panel = renderUI({
+#  get.data.set()
+#  input$vari2
+#  isolate({
+#    if(!is.null(input$vari2) && input$vari2 != "none")
+#      ret = checkboxInput("extra_vars_check", 
+#                          strong("Select additional variables:"), 
+#                          value = input$extra_vars_check)
+#    else
+#      ret = NULL
+#    
+#    ret
+#  })
+#})
+
+output$extra_vars_check_panel = renderUI({
+  get.data.set()
+#  input$vari2
+  isolate({
+    ret = checkboxInput("extra_vars_check", 
+                        strong("Select additional variables:"), 
+                        value = input$extra_vars_check)
+  })
+})
+
+output$extra_vars_check_panel_beta2 = renderUI({
+  get.data.set()
+  #  input$vari2
+  isolate({
+    ret = checkboxInput("extra_vars_check_beta2", 
+                        strong("Select additional variables:"), 
+                        value = input$extra_vars_check_beta2)
+  })
+})
+
+
+observe({
+  input$vari2
+  isolate({
+    if(!is.null(input$vari2) && input$vari2 == "none")
+      updateCheckboxInput(session, "extra_vars_check", value = FALSE)
+  })
+})
+
+
+observe({
+  input$vari2
+  isolate({
+    if(!is.null(input$vari2) && input$vari2 == "none")
+      updateCheckboxInput(session, "extra_vars_check_beta2", value = FALSE)
+  })
+})
+
+
+
+## select additional variables to export in dynamic plot
+
+#output$extra.vars.html = renderUI({
+#  get.data.set()
+#  input$extra_vars_check
+#  input$vari2
+#  isolate({
+#    if(!is.null(input$extra_vars_check) && 
+#       input$extra_vars_check &&
+#       !is.null(input$vari2) &&
+#       input$vari2 %in% colnames(vis.data())) {
+#      ch = colnames(vis.data())
+#      ch = ch[-which(ch %in% input$vari1)]
+#      ch = ch[-which(ch %in% input$vari2)]
+#      
+#      extra.vars.html.panel = selectInput(inputId = "export.extra.vars.html",
+#                                          #label = strong("Select additional variables to export"),
+#                                          label = NULL,
+#                                          choices = ch,
+#                                          multiple = TRUE,
+#                                          selected = input$export.extra.vars.html,
+#                                          size = 2,
+#                                          selectize = FALSE)
+#    }
+#    else
+#      extra.vars.html.panel = NULL
+#    
+#    extra.vars.html.panel
+#  })
+#})
+
+
+
+output$extra.vars.html = renderUI({
+  get.data.set()
+  #input$extra_vars_check
+  #input$vari2
+  isolate({
+    ch = colnames(vis.data())
+    ch = ch[-which(ch %in% input$vari1)]
+    ch = ch[-which(ch %in% input$vari2)]
+    
+    selectInput(inputId = "export.extra.vars.html",
+                #label = strong("Select additional variables to export"),
+                label = NULL,
+                choices = ch,
+                multiple = TRUE,
+                selected = input$export.extra.vars.html,
+                size = 3,
+                selectize = FALSE)
+  })
+})
+
+
+
+output$extra.vars.html.beta2 = renderUI({
+  get.data.set()
+  #input$extra_vars_check
+  #input$vari2
+  isolate({
+    ch = colnames(vis.data())
+    ch = ch[-which(ch %in% input$vari1)]
+    ch = ch[-which(ch %in% input$vari2)]
+    
+    selectInput(inputId = "export.extra.vars.html.beta2",
+                #label = strong("Select additional variables to export"),
+                label = NULL,
+                choices = ch,
+                multiple = TRUE,
+                selected = input$export.extra.vars.html.beta2,
+                size = 3,
+                selectize = FALSE)
+  })
+})
+
+
+## update extra.vars.html.panel
 observe({
   input$vari1
   input$vari2
+  input$extra_vars_check
   isolate({
     ch = colnames(vis.data())
-    
-    if(!is.null(input$vari1) &&
-       input$vari1 %in% colnames(vis.data())){
-      ch = ch[-which(ch %in% input$vari1)]
-    }
+    ch = ch[-which(ch %in% input$vari1)]
     if(!is.null(input$vari2) &&
        input$vari2 %in% colnames(vis.data())){
       ch = ch[-which(ch %in% input$vari2)]
     }
-    
-    updateSelectInput(session, "export.extra.vars.html", choices = ch,selected = NULL)
+    updateSelectInput(session, "export.extra.vars.html", choices = ch, selected = NULL)
   })
 })
 
-  
-  
-  
-  
-  
 
-output$interactive.plot = renderUI({
+observe({
   input$vari1
   input$vari2
-#  input$subs1
-#  input$subs2
-  input$select.plot.type
+  input$extra_vars_check_beta2
   isolate({
-    create.html = function() {
-      if (!is.null(vis.par())) {
+    ch = colnames(vis.data())
+    ch = ch[-which(ch %in% input$vari1)]
+    if(!is.null(input$vari2) &&
+       input$vari2 %in% colnames(vis.data())){
+      ch = ch[-which(ch %in% input$vari2)]
+    }
+    updateSelectInput(session, "export.extra.vars.html.beta2", choices = ch, selected = NULL)
+  })
+})
+
+
+
+
+## the confirm button for selecting extra variables
+output$extra_vars_confirm = renderUI({
+  get.data.set()
+  input$extra_vars_check
+  input$export.extra.vars.html
+  input$vari2
+  isolate({
+    if(!is.null(input$extra_vars_check) &&
+       input$extra_vars_check &&
+       !is.null(input$vari2) &&
+       input$vari2 %in% colnames(vis.data()) &&
+       !is.null(input$export.extra.vars.html) && 
+       all(input$export.extra.vars.html %in% colnames(vis.data())))
+      ret = actionButton("extra_vars_confirm_button",
+                         "Confirm selection",
+                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+    else 
+      ret = NULL
+    ret
+  })
+})
+
+
+data_html = reactive({
+  if(!is.null(input$vari2) &&
+     input$vari2 %in% colnames(vis.data())) {
+    
+    if(!is.null(input$extra_vars_check) &&
+       input$extra_vars_check) {
+      
+      if(!is.null(input$export.extra.vars.html) && 
+         all(input$export.extra.vars.html %in% colnames(vis.data())))
+        return(get.data.set())
+      
+      else
+        return(NULL)
+    }
+    
+    else
+      return(NULL)
+  }
+  
+  else
+    return(NULL)
+})
+
+
+data_html_beta2 = reactive({
+  if(!is.null(input$vari2) &&
+     input$vari2 %in% colnames(vis.data())) {
+    
+    if(!is.null(input$extra_vars_check_beta2) &&
+       input$extra_vars_check_beta2) {
+      
+      if(!is.null(input$export.extra.vars.html.beta2) && 
+         all(input$export.extra.vars.html.beta2 %in% colnames(vis.data())))
+        return(get.data.set())
+      
+      else
+        return(NULL)
+    }
+    
+    else
+      return(NULL)
+  }
+  
+  else
+    return(NULL)
+})
+
+extra.vars_html = reactive({
+  if(!is.null(input$vari2) &&
+     input$vari2 %in% colnames(vis.data())) {
+    
+    if(!is.null(input$extra_vars_check) &&
+       input$extra_vars_check) {
+      
+      if(!is.null(input$export.extra.vars.html) && 
+         all(input$export.extra.vars.html %in% colnames(vis.data())))
+        return(input$export.extra.vars.html)
+      
+      else
+        return(NULL)
+    }
+    
+    else
+      return(NULL)
+  }
+  
+  else
+    return(NULL)
+})
+
+
+extra.vars_html_beta2 = reactive({
+  if(!is.null(input$vari2) &&
+     input$vari2 %in% colnames(vis.data())) {
+    
+    if(!is.null(input$extra_vars_check_beta2) &&
+       input$extra_vars_check_beta2) {
+      
+      if(!is.null(input$export.extra.vars.html.beta2) && 
+         all(input$export.extra.vars.html.beta2 %in% colnames(vis.data())))
+        return(input$export.extra.vars.html.beta2)
+      
+      else
+        return(NULL)
+    }
+    
+    else
+      return(NULL)
+  }
+  
+  else
+    return(NULL)
+})
+
+
+observe({
+  input$produce_interactive_plot 
+  isolate({
+    if(!is.null(input$produce_interactive_plot) && input$produce_interactive_plot > 0) {
+      output$interactive.plot.beta2 = renderUI({
         dafr = get.data.set()
-        if(is.numeric(plot.par$x)&
-           is.numeric(plot.par$y)){
-          temp = vis.par()
-          temp$trend.parallel = TRUE
-          temp.x = temp$x
-          temp$x=temp$y
-          temp$y=temp.x
-          temp.varnames.x = temp$varnames$x
-          temp$varnames$x = temp$varnames$y
-          temp$varnames$y = temp.varnames.x
-          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
-            }, warning = function(w) {
-              print(w)
-            }, error = function(e) {
-              print(e)
-            }, finally = {})
-          }else{
-            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
-          }
-        }else{
-          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
-            }, warning = function(w) {
-              print(w)
-            }, error = function(e) {
-              print(e)
-            }, finally = {})
-          }else{
-            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
-          }
+        # vis.par()
+        # input$vari1
+        # input$vari2
+        # input$extra_vars_check
+        # input$extra_vars_confirm_button
+        # input$subs1
+        # input$subs2
+        isolate({
+          if((!is.null(input$subs1) &&
+              input$subs1 %in% colnames(vis.data())) ||
+             (!is.null(input$subs2) &&
+              input$subs2 %in% colnames(vis.data()))) {
+            h4("iNZight doesn't handle interactive panel plots ... yet! 
+               Please remove the subset variable(s)")
+          } 
+          else {
+            if(!is.null(input$select.plot.type) &&
+               input$select.plot.type == "grid-density plot") {
+              h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+                 Please select other plot types")
+            }
+            else {
+              if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
+                  (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
+                 !is.null(input$export.extra.vars.html.beta2) && 
+                 all(input$export.extra.vars.html.beta2 %in% colnames(vis.data()))) {
+                h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+              }
+              else {
+                local.dir = iNZightPlots:::exportHTML.function(create.html,
+                                                               data = data_html_beta2(),
+                                                               extra.vars = extra.vars_html_beta2(),
+                                                               width = 10, height = 6)
+                
+                local.dir = unclass(local.dir)
+                temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+                addResourcePath("path", temp.dir)
+                tags$iframe(
+                  seamless = "seamless",
+                  src = "path/index.html",
+                  height = 600, width = 1200
+                )
+              }
+            }
+            }
+        })
+    })
+      
+    }
+  })
+})
+
+## the display the interactive plot tabpanel
+output$interactive.plot = renderUI({
+  dafr = get.data.set()
+  vis.par()
+  input$vari1
+  input$vari2
+  # input$extra_vars_check
+  input$extra_vars_confirm_button
+  input$subs1
+  input$subs2
+  isolate({
+    if((!is.null(input$subs1) &&
+       input$subs1 %in% colnames(vis.data())) ||
+       (!is.null(input$subs2) &&
+        input$subs2 %in% colnames(vis.data()))) {
+      h4("iNZight doesn't handle interactive panel plots ... yet! 
+         Please remove the subset variable(s)")
+    } 
+    else {
+      if(!is.null(input$select.plot.type) &&
+         input$select.plot.type == "grid-density plot") {
+        h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+         Please select other plot types")
+      }
+      else {
+        if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
+            (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
+           !is.null(input$export.extra.vars.html) && 
+           all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+             h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+        }
+        else {
+          local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                         data = data_html(),
+                                                         extra.vars = extra.vars_html(),
+                                                         width = 10, height = 6)
+          
+          local.dir = unclass(local.dir)
+          temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+          addResourcePath("path", temp.dir)
+          tags$iframe(
+            seamless = "seamless",
+            src = "path/index.html",
+            height = 600, width = 1200
+          )
         }
       }
     }
-    local.dir = iNZightPlots:::exportHTML.function(create.html, width = 10, height = 6)
-    local.dir = unclass(local.dir)
-    temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
-#    setwd(temp.dir)
-#    includeHTML("index.html")
-#    file.dir = paste(temp.dir, "/index.html", sep="")
-    addResourcePath("path", temp.dir)
-    tags$iframe(
-      seamless = "seamless",
-      src = "path/index.html",
-      height = 600, width = 1200
-      )
   })
 })
+
 
 
 
@@ -4699,15 +5029,21 @@ observe({
 output$add.fitted.residuals.panel = renderUI({
   get.data.set()
   isolate({
-    add.fitted.values.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
-                                                actionButton("store_fitted_values", "Store fitted values",
+    add.fitted.values.button = conditionalPanel("input.check_linear ||  
+                                                input.check_quadratic || 
+                                                input.check_cubic || 
+                                                input.check_smoother",
+                                                actionButton("store_fitted_values", 
+                                                             "Store fitted values",
                                                              style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-    add.residuals.button = conditionalPanel("input.check_linear ||  input.check_quadratic || input.check_cubic || input.check_smoother",
-                                            actionButton("store_residuals", "Store residuals",
+    
+    add.residuals.button = conditionalPanel("input.check_linear ||  
+                                            input.check_quadratic || 
+                                            input.check_cubic || 
+                                            input.check_smoother",
+                                            actionButton("store_residuals", 
+                                                         "Store residuals",
                                                          style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-    
-    
-    
     
    
 #    list(fixedRow(column(width = 6, add.fitted.values.button),

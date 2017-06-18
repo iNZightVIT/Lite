@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : June 14, 2017.
+###  Last Modified : June 18, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -208,12 +208,12 @@ vis.mainPanel = function() {
                           column(width = 4,
                                  radioButtons(inputId = "saveplottype", 
                                               label = strong("Select the file type"), 
-                                              choices = list("jpg", "png", "pdf", "svg", "interactive html"), inline = TRUE)),
-                          column(width = 4,
-                                 conditionalPanel(
-                                   condition = "input.saveplottype == 'interactive html'",
-                                   uiOutput("extra.vars.html")
-                                 )),
+                                              choices = list("jpg", "png", "pdf", "svg"), inline = TRUE)),
+                          #column(width = 4,
+                          #       conditionalPanel(
+                          #         condition = "input.saveplottype == 'interactive html'",
+                          #         uiOutput("extra.vars.html")
+                          #       )),
                           column(width = 2,
                                  uiOutput("add.fitted.residuals.panel"))),
 
@@ -268,11 +268,20 @@ vis.mainPanel = function() {
         verbatimTextOutput("visualize.inference")
         ),
       tabPanel(
-        title = "Interactive Plot",
+        title = "Interactive Plot (Beta 1)",
         br(),
-        helpText("Interactive Plot"),
+        uiOutput("interactive.plot.select"),
+        # helpText("Interactive Plot"),
+        br(),
         htmlOutput("interactive.plot")
-        )
+        ),
+      tabPanel(
+        title = "Interactive Plot (Beta 2)",
+        br(),
+        uiOutput("interactive.plot.select.beta2"),
+        br(),
+        htmlOutput("interactive.plot.beta2")
+      )
       )
     )
   panel
