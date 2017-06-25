@@ -4927,6 +4927,13 @@ observe({
               h4("iNZight doesn't handle interactive grid-density plots ... yet! 
                  Please select other plot types")
             }
+            else if(!is.null(input$select.plot.type) &&
+                    (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+                    !is.null(input$color_by_select) &&
+                    input$color_by_select != " ") {
+              h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+                 Please select other plot types")
+            }
             else {
               if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
                   (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
@@ -4980,6 +4987,13 @@ output$interactive.plot = renderUI({
       if(!is.null(input$select.plot.type) &&
          input$select.plot.type == "grid-density plot") {
         h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+         Please select other plot types")
+      }
+      else if(!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+              !is.null(input$color_by_select) &&
+              input$color_by_select != " ") {
+        h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
          Please select other plot types")
       }
       else {
