@@ -4785,19 +4785,15 @@ observe({
 ## the confirm button for selecting extra variables
 output$extra_vars_confirm = renderUI({
   get.data.set()
-  input$extra_vars_check
-  input$export.extra.vars.html
-  input$vari2
+#  input$extra_vars_check
+#  input$export.extra.vars.html
+#  input$vari2
   isolate({
-    if(!is.null(input$extra_vars_check) &&
-       input$extra_vars_check &&
-       !is.null(input$vari2) &&
-       input$vari2 %in% colnames(vis.data()) &&
-       !is.null(input$export.extra.vars.html) && 
-       all(input$export.extra.vars.html %in% colnames(vis.data())))
-      ret = actionButton("extra_vars_confirm_button",
-                         "Confirm selection",
-                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+    if(nrow(vis.data()) > 200)
+      ret = list(actionButton("extra_vars_confirm_button",
+                              "Produce Plot",
+                              style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                 helpText("Large samples: click to produce interactive plot"))
     else 
       ret = NULL
     ret
@@ -4967,60 +4963,114 @@ observe({
 
 ## the display the interactive plot tabpanel
 output$interactive.plot = renderUI({
-  dafr = get.data.set()
-  vis.par()
-  input$vari1
-  input$vari2
-  # input$extra_vars_check
-  input$extra_vars_confirm_button
-  input$subs1
-  input$subs2
-  isolate({
-    if((!is.null(input$subs1) &&
-       input$subs1 %in% colnames(vis.data())) ||
-       (!is.null(input$subs2) &&
-        input$subs2 %in% colnames(vis.data()))) {
-      h4("iNZight doesn't handle interactive panel plots ... yet! 
-         Please remove the subset variable(s)")
-    } 
-    else {
-      if(!is.null(input$select.plot.type) &&
-         input$select.plot.type == "grid-density plot") {
-        h4("iNZight doesn't handle interactive grid-density plots ... yet! 
-         Please select other plot types")
-      }
-      else if(!is.null(input$select.plot.type) &&
-              (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-              !is.null(input$color_by_select) &&
-              input$color_by_select != " ") {
-        h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
-         Please select other plot types")
-      }
+  if(nrow(vis.data()) > 200) {
+    dafr = get.data.set()
+    input$extra_vars_confirm_button
+    isolate({
+      if((!is.null(input$subs1) &&
+          input$subs1 %in% colnames(vis.data())) ||
+         (!is.null(input$subs2) &&
+          input$subs2 %in% colnames(vis.data()))) {
+        h4("iNZight doesn't handle interactive panel plots ... yet! 
+           Please remove the subset variable(s)")
+      } 
       else {
-        if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
-            (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
-           !is.null(input$export.extra.vars.html) && 
-           all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-             h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+        if(!is.null(input$select.plot.type) &&
+           input$select.plot.type == "grid-density plot") {
+          h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+             Please select other plot types")
+        }
+        else if(!is.null(input$select.plot.type) &&
+                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+                !is.null(input$color_by_select) &&
+                input$color_by_select != " ") {
+          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+         Please select other plot types")
         }
         else {
-          local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                         data = data_html(),
-                                                         extra.vars = extra.vars_html(),
-                                                         width = 10, height = 6)
-          
-          local.dir = unclass(local.dir)
-          temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
-          addResourcePath("path", temp.dir)
-          tags$iframe(
-            seamless = "seamless",
-            src = "path/index.html",
-            height = 600, width = 1200
-          )
+          if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
+              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
+             !is.null(input$export.extra.vars.html) && 
+             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+          }
+          else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
+            local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                           data = data_html(),
+                                                           extra.vars = extra.vars_html(),
+                                                           width = 10, height = 6)
+            
+            local.dir = unclass(local.dir)
+            temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+            addResourcePath("path", temp.dir)
+            tags$iframe(
+              seamless = "seamless",
+              src = "path/index.html",
+              height = 600, width = 1200
+            )
+          }
         }
-      }
-    }
-  })
+        }
+      })
+  }
+    
+  else {
+    dafr = get.data.set()
+    vis.par()
+    input$vari1
+    input$vari2
+    # input$extra_vars_check
+    input$export.extra.vars.html
+    # input$extra_vars_confirm_button
+    input$subs1
+    input$subs2
+    isolate({
+      if((!is.null(input$subs1) &&
+          input$subs1 %in% colnames(vis.data())) ||
+         (!is.null(input$subs2) &&
+          input$subs2 %in% colnames(vis.data()))) {
+        h4("iNZight doesn't handle interactive panel plots ... yet! 
+           Please remove the subset variable(s)")
+      } 
+      else {
+        if(!is.null(input$select.plot.type) &&
+           input$select.plot.type == "grid-density plot") {
+          h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+             Please select other plot types")
+        }
+        else if(!is.null(input$select.plot.type) &&
+                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+                !is.null(input$color_by_select) &&
+                input$color_by_select != " ") {
+          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+         Please select other plot types")
+        }
+        else {
+          if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
+              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
+             !is.null(input$export.extra.vars.html) && 
+             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+          }
+          else {
+            local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                           data = data_html(),
+                                                           extra.vars = extra.vars_html(),
+                                                           width = 10, height = 6)
+            
+            local.dir = unclass(local.dir)
+            temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+            addResourcePath("path", temp.dir)
+            tags$iframe(
+              seamless = "seamless",
+              src = "path/index.html",
+              height = 600, width = 1200
+            )
+          }
+        }
+        }
+      })
+  }
 })
 
 

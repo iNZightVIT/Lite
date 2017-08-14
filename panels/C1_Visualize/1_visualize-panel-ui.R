@@ -268,20 +268,20 @@ vis.mainPanel = function() {
         verbatimTextOutput("visualize.inference")
         ),
       tabPanel(
-        title = "Interactive Plot (Beta 1)",
+        title = "Interactive Plot (Beta)",
         br(),
         uiOutput("interactive.plot.select"),
         # helpText("Interactive Plot"),
         br(),
         htmlOutput("interactive.plot")
-        ),
-      tabPanel(
-        title = "Interactive Plot (Beta 2)",
-        br(),
-        uiOutput("interactive.plot.select.beta2"),
-        br(),
-        htmlOutput("interactive.plot.beta2")
-      )
+        )
+      #tabPanel(
+      #  title = "Interactive Plot (Beta 2)",
+      #  br(),
+      #  uiOutput("interactive.plot.select.beta2"),
+      #  br(),
+      #  htmlOutput("interactive.plot.beta2")
+      #)
       )
     )
   panel
