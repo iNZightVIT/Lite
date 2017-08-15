@@ -275,6 +275,7 @@ vis.mainPanel = function() {
         br(),
         htmlOutput("interactive.plot")
         )
+
       #tabPanel(
       #  title = "Interactive Plot (Beta 2)",
       #  br(),
