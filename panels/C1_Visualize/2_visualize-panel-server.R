@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   June 18, 2017.
+###  Last Modified  :   August 27, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -3003,10 +3003,12 @@ output$add.jitter.panel = renderUI({
 #      title.jitter = h5("Add a jitter")
       axis.features.title = h5(strong("Axis Features"))
       check.jitter.x.object = checkboxInput("check.jitter.x",
-                                            label="height",
+                                            label = plot.par$varnames$y,
+                                            #label="height",
                                             value=F)
       check.jitter.y.object = checkboxInput("check.jitter.y",
-                                            label="rightfoot",
+                                            #label="rightfoot",
+                                            label = plot.par$varnames$x,
                                             value=F)
       ret = list(axis.features.title,
                  fixedRow(column(2, h5("Jitter:")),
@@ -3070,10 +3072,10 @@ output$add.rugs.panel = renderUI({
          class(get.data.set()[,input$vari2])%in%"integer"))) {
 #      title.rugs = h5("Add rugs")
       check.rugs.x.object = checkboxInput("check.rugs.x",
-                                          label="height",
+                                          label=plot.par$varnames$y,
                                           value=F)
       check.rugs.y.object = checkboxInput("check.rugs.y",
-                                          label="rightfoot",
+                                          label=plot.par$varnames$x,
                                           value=F)
       
       ret = list(
@@ -4567,10 +4569,9 @@ output$save_interactive_plot = downloadHandler(
 output$interactive.plot.select = renderUI({
   get.data.set()
   isolate({
-    ret = fixedRow(column(width = 3, 
-                          downloadButton(outputId = "save_interactive_plot", 
-                                         label = "Download Plot")),
-
+    ret = fixedRow(column(width = 2,
+                          uiOutput("extra_vars_confirm")),
+                          
                    column(width = 3,
                           conditionalPanel("input.vari2 != 'none'",
                                            uiOutput("extra_vars_check_panel"))),
@@ -4579,8 +4580,9 @@ output$interactive.plot.select = renderUI({
                           conditionalPanel("input.extra_vars_check",
                                            uiOutput("extra.vars.html"))),
                    
-                   column(width = 2,
-                          uiOutput("extra_vars_confirm"))
+                   column(width = 3, 
+                          downloadButton(outputId = "save_interactive_plot", 
+                                         label = "Download Plot"))
                    )
     ret
   })
@@ -4792,7 +4794,7 @@ output$extra_vars_confirm = renderUI({
     if(nrow(vis.data()) > 200)
       ret = list(actionButton("extra_vars_confirm_button",
                               "Produce Plot",
-                              style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                              style="color: #424242; background-color: #E9E9E9; border-color: #E9E9E9"),
                  helpText("Large samples: click to produce interactive plot"))
     else 
       ret = NULL
@@ -4988,8 +4990,8 @@ output$interactive.plot = renderUI({
          Please select other plot types")
         }
         else {
-          if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
-              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
+          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
+              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
              !is.null(input$export.extra.vars.html) && 
              all(input$export.extra.vars.html %in% colnames(vis.data()))) {
             h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
@@ -5046,8 +5048,8 @@ output$interactive.plot = renderUI({
          Please select other plot types")
         }
         else {
-          if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
-              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
+          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
+              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
              !is.null(input$export.extra.vars.html) && 
              all(input$export.extra.vars.html %in% colnames(vis.data()))) {
             h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
@@ -5072,7 +5074,6 @@ output$interactive.plot = renderUI({
       })
   }
 })
-
 
 
 

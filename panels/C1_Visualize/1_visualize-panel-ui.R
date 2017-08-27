@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : June 18, 2017.
+###  Last Modified : August 27, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -275,7 +275,6 @@ vis.mainPanel = function() {
         br(),
         htmlOutput("interactive.plot")
         )
-
       #tabPanel(
       #  title = "Interactive Plot (Beta 2)",
       #  br(),
