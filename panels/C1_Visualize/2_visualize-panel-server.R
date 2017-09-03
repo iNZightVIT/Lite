@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   August 27, 2017.
+###  Last Modified  :   September 3, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -398,13 +398,23 @@ output$vari1_panel = renderUI({
 observe({  
   input$vari1
   isolate({
+    ## fix the axis limit bug
+    plot.par$xlim = NULL
+    plot.par$ylim = NULL
     if((is.null(input$vari1) || input$vari1 == "none") && (!is.null(input$change_var_selection) && !input$change_var_selection)) {
       updateSelectInput(session, "vari1", choices = colnames(vis.data()), selected = colnames(vis.data())[1])
     }    
   })  
 })
 
-
+observe({  
+  input$vari2
+  isolate({
+    ## fix the axis limit bug
+    plot.par$xlim = NULL
+    plot.par$ylim = NULL
+  })  
+})
 
 ##  Update plot.par$x.
 observe({
@@ -927,6 +937,7 @@ output$visualize.plot = renderPlot({
       temp.varnames.x = temp$varnames$x
       temp$varnames$x = temp$varnames$y
       temp$varnames$y = temp.varnames.x
+
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
         
@@ -1624,11 +1635,11 @@ output$plot.appearance.panel = renderUI({
     
     point.size.title = checkboxInput(inputId = "point_size_title",
                                      label = strong("Point Size"),
-                                     value = FALSE)
+                                     value = input$point_size_title)
     
     point.colour.title = checkboxInput(inputId = "point_colour_title",
                                        label = strong("Point Colour"),
-                                       value = FALSE)
+                                       value = input$point_colour_title)
     
     select.bg.object = fixedRow(column(3, h5("Background colour:")),
                                 column(6, selectInput(inputId="select.bg1",
@@ -2105,6 +2116,26 @@ observe({
 })
 
 
+# select the point size
+
+observe({
+  input$adjust.size.points.dot
+#  input$adjust.size.points.scatter
+  isolate({
+    if(!is.null(input$adjust.size.points.dot))
+      graphical.par$cex.dotpt = input$adjust.size.points.dot
+  })
+})
+
+observe({
+  input$adjust.size.points.scatter
+  isolate({
+    if(!is.null(input$adjust.size.points.scatter))
+      graphical.par$cex.dotpt = input$adjust.size.points.scatter
+  })
+})
+
+
 # select the colur palette
 
 observe({
@@ -2447,7 +2478,7 @@ output$code.variables.panel = renderUI({
         }else{
           point.symbol.title = checkboxInput(inputId = "point_symbol_title",
                                              label = strong("Point Symbol"),
-                                             value = FALSE)
+                                             value = input$point_symbol_title)
           
           
           color.by.object = list(conditionalPanel(condition = "input.point_colour_title == true",
@@ -2992,6 +3023,8 @@ observe({
 # add jitter to the plot
 output$add.jitter.panel = renderUI({
   get.data.set()
+  input$vari1
+  input$vari2
   ret = NULL
   
   isolate({
@@ -3005,11 +3038,11 @@ output$add.jitter.panel = renderUI({
       check.jitter.x.object = checkboxInput("check.jitter.x",
                                             label = plot.par$varnames$y,
                                             #label="height",
-                                            value=F)
+                                            value=input$check.jitter.x)
       check.jitter.y.object = checkboxInput("check.jitter.y",
                                             #label="rightfoot",
                                             label = plot.par$varnames$x,
-                                            value=F)
+                                            value=input$check.jitter.y)
       ret = list(axis.features.title,
                  fixedRow(column(2, h5("Jitter:")),
                           column(width=4,check.jitter.x.object),
@@ -3061,6 +3094,8 @@ observe({
 # add rugs to plot
 output$add.rugs.panel = renderUI({
   get.data.set()
+  input$vari1
+  input$vari2
   ret = NULL
   
   isolate({
@@ -3073,10 +3108,10 @@ output$add.rugs.panel = renderUI({
 #      title.rugs = h5("Add rugs")
       check.rugs.x.object = checkboxInput("check.rugs.x",
                                           label=plot.par$varnames$y,
-                                          value=F)
+                                          value=input$check.rugs.x)
       check.rugs.y.object = checkboxInput("check.rugs.y",
                                           label=plot.par$varnames$x,
-                                          value=F)
+                                          value=input$check.rugs.y)
       
       ret = list(
                  fixedRow(column(2, h5("Rugs:")),
@@ -3194,7 +3229,7 @@ output$adjust.axis.panel = renderUI({
   ret = NULL
   input$vari1
   input$vari2
-#   plot.ret.para$parameters
+#  plot.ret.para$parameters
   isolate({
     
     if((input$vari2%in%"none"&&
@@ -3225,19 +3260,22 @@ output$adjust.axis.panel = renderUI({
            input$vari2%in%colnames(get.data.set())))){
         ret = list(h5(strong('Axis Limits')))
         temp = list()
-        temp$x = get.data.set()[,input$vari1]
+#        temp$x = get.data.set()[,input$vari1]
+        temp$x = plot.par$x
+        
         if(input$vari2%in%'none'){
           temp$y = NULL
         }else{
-          temp$y = get.data.set()[,input$vari2]
+#          temp$y = get.data.set()[,input$vari2]
+          temp$y = plot.par$y
         }
         temp$plot = F
         tester = try(do.call(iNZightPlots:::iNZightPlot, temp))
         ###################################################################
         #      large.sample = T
         large.sample = search.name(tester,"largesample")[[1]]
-#        limits.x = search.name(tester,"xlim")[[1]]
-#        limits.y = search.name(tester,"ylim")[[1]]
+#        limits.x = search.name(tester,"ylim")[[1]]
+#        limits.y = search.name(tester,"xlim")[[1]]
         if(is.null(large.sample)){
           large.sample = F
         }
@@ -4789,9 +4827,12 @@ output$extra_vars_confirm = renderUI({
   get.data.set()
 #  input$extra_vars_check
 #  input$export.extra.vars.html
-#  input$vari2
+  input$vari1
+  input$vari2
   isolate({
-    if(nrow(vis.data()) > 200)
+    if(nrow(vis.data()) > 200  &&
+       any(!is.null(input$vari1) && is.numeric(plot.par$x), 
+           !is.null(input$vari2) && input$vari2 != "none" && is.numeric(plot.par$y)))
       ret = list(actionButton("extra_vars_confirm_button",
                               "Produce Plot",
                               style="color: #424242; background-color: #E9E9E9; border-color: #E9E9E9"),
@@ -4965,7 +5006,68 @@ observe({
 
 ## the display the interactive plot tabpanel
 output$interactive.plot = renderUI({
-  if(nrow(vis.data()) > 200) {
+  
+  if(nrow(vis.data()) <= 200  ||
+     !any(!is.null(input$vari1) && is.numeric(plot.par$x), 
+          !is.null(input$vari2) && input$vari2 != "none" && is.numeric(plot.par$y))) {
+    dafr = get.data.set()
+    vis.par()
+    input$vari1
+    input$vari2
+    # input$extra_vars_check
+    input$export.extra.vars.html
+    # input$extra_vars_confirm_button
+    input$subs1
+    input$subs2
+    isolate({
+      if((!is.null(input$subs1) &&
+          input$subs1 %in% colnames(vis.data())) ||
+         (!is.null(input$subs2) &&
+          input$subs2 %in% colnames(vis.data()))) {
+        h4("iNZight doesn't handle interactive panel plots ... yet! 
+           Please remove the subset variable(s)")
+      } 
+      else {
+        if(!is.null(input$select.plot.type) &&
+           input$select.plot.type == "grid-density plot") {
+          h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+             Please select other plot types")
+        }
+        else if(!is.null(input$select.plot.type) &&
+                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+                !is.null(input$color_by_select) &&
+                input$color_by_select != " ") {
+          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+             Please select other plot types")
+        }
+        else {
+          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
+              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
+             !is.null(input$export.extra.vars.html) && 
+             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+          }
+          else {
+            local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                           data = data_html(),
+                                                           extra.vars = extra.vars_html(),
+                                                           width = 10, height = 6)
+            
+            local.dir = unclass(local.dir)
+            temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+            addResourcePath("path", temp.dir)
+            tags$iframe(
+              seamless = "seamless",
+              src = "path/index.html",
+              height = 600, width = 1200
+            )
+          }
+        }
+        }
+      })
+  }
+  
+  else {
     dafr = get.data.set()
     input$extra_vars_confirm_button
     isolate({
@@ -4997,64 +5099,6 @@ output$interactive.plot = renderUI({
             h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
           }
           else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
-            local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                           data = data_html(),
-                                                           extra.vars = extra.vars_html(),
-                                                           width = 10, height = 6)
-            
-            local.dir = unclass(local.dir)
-            temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
-            addResourcePath("path", temp.dir)
-            tags$iframe(
-              seamless = "seamless",
-              src = "path/index.html",
-              height = 600, width = 1200
-            )
-          }
-        }
-        }
-      })
-  }
-    
-  else {
-    dafr = get.data.set()
-    vis.par()
-    input$vari1
-    input$vari2
-    # input$extra_vars_check
-    input$export.extra.vars.html
-    # input$extra_vars_confirm_button
-    input$subs1
-    input$subs2
-    isolate({
-      if((!is.null(input$subs1) &&
-          input$subs1 %in% colnames(vis.data())) ||
-         (!is.null(input$subs2) &&
-          input$subs2 %in% colnames(vis.data()))) {
-        h4("iNZight doesn't handle interactive panel plots ... yet! 
-           Please remove the subset variable(s)")
-      } 
-      else {
-        if(!is.null(input$select.plot.type) &&
-           input$select.plot.type == "grid-density plot") {
-          h4("iNZight doesn't handle interactive grid-density plots ... yet! 
-             Please select other plot types")
-        }
-        else if(!is.null(input$select.plot.type) &&
-                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-                !is.null(input$color_by_select) &&
-                input$color_by_select != " ") {
-          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
-         Please select other plot types")
-        }
-        else {
-          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-             !is.null(input$export.extra.vars.html) && 
-             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-          }
-          else {
             local.dir = iNZightPlots:::exportHTML.function(create.html, 
                                                            data = data_html(),
                                                            extra.vars = extra.vars_html(),
