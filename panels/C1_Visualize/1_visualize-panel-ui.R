@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : August 27, 2017.
+###  Last Modified : September 3, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
