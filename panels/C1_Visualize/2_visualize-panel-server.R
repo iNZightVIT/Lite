@@ -125,7 +125,7 @@ graphical.par = reactiveValues(
   join = FALSE,
   lines.by = FALSE,
   trend.by = FALSE,
-  trend.parallel = T,
+  trend.parallel = TRUE,
   lty.trend = list(linear = 1,
                    quadratic = 1,
                    cubic = 1),
@@ -348,7 +348,7 @@ vis.par = reactive({
 ##  Select variable 1.
 output$vari1_panel = renderUI({
   get.data.set()
-  input$change_var_selection
+#  input$change_var_selection
   isolate({    
     sel = input$vari1    
     get.vars = parseQueryString(session$clientData$url_search)
@@ -363,34 +363,33 @@ output$vari1_panel = renderUI({
             !get.vars$x%in%"")){
       sel=get.vars$x
     }   
-    if(!is.null(input$change_var_selection)){
-      if(!input$change_var_selection){
-        if(is.null(input$vari1) || input$vari1 == "none") {
-          selectInput(inputId = "vari1",
-                      label = NULL,
-                      choices = c("none", colnames(vis.data())),
-                      selected = sel,
-                      # selectize = T,
-                      selectize=F)
-        }
-        else {
-          selectInput(inputId = "vari1",
-                      label = NULL,
-                      choices = c(colnames(vis.data())),
-                      selected = sel,
-                      # selectize = T,
-                      selectize=F)
-        }
+#    if(!is.null(input$change_var_selection)){
+#      if(!input$change_var_selection){
+#        if(is.null(input$vari1) || input$vari1 == "none") {
+#          selectInput(inputId = "vari1",
+#                      label = NULL,
+#                      choices = c("none", colnames(vis.data())),
+#                      selected = sel,
+#                      # selectize = T,
+#                      selectize=F)
+#        }
+#        else {
+#          selectInput(inputId = "vari1",
+#                      label = NULL,
+#                      choices = c(colnames(vis.data())),
+#                      selected = sel,
+#                      # selectize = T,
+#                      selectize=F)
+#        }
         
-      }else{
+#      }else{
         selectInput(inputId = "vari1",
                     label = NULL,
                     choices = c(colnames(vis.data())),
                     selected = sel,
-                    selectize=F,
-                    size=2)
-      }
-    }
+                    selectize = F)
+#      }
+#    }
   })
 })
 
@@ -401,9 +400,9 @@ observe({
     ## fix the axis limit bug
     plot.par$xlim = NULL
     plot.par$ylim = NULL
-    if((is.null(input$vari1) || input$vari1 == "none") && (!is.null(input$change_var_selection) && !input$change_var_selection)) {
-      updateSelectInput(session, "vari1", choices = colnames(vis.data()), selected = colnames(vis.data())[1])
-    }    
+#    if((is.null(input$vari1) || input$vari1 == "none") && (!is.null(input$change_var_selection) && !input$change_var_selection)) {
+#      updateSelectInput(session, "vari1", choices = colnames(vis.data()), selected = colnames(vis.data())[1])
+#    }    
   })  
 })
 
@@ -642,7 +641,7 @@ observe({
 ##  Select variable 2.
 output$vari2_panel = renderUI({
   get.data.set()
-  input$change_var_selection
+#  input$change_var_selection
 
   isolate({
     
@@ -659,27 +658,32 @@ output$vari2_panel = renderUI({
             !get.vars$y%in%"")){
       sel=get.vars$y
     }
-    if(!is.null(input$change_var_selection)){
-      ch = colnames(vis.data())
-      if(!is.null(input$vari1)&&
-           input$vari1%in%colnames(vis.data())){
-        ch = ch[-which(ch%in%input$vari1)]
-      }
-      if(!input$change_var_selection){
+#    if(!is.null(input$change_var_selection)){
+#      ch = colnames(vis.data())
+#      if(!is.null(input$vari1)&&
+#           input$vari1%in%colnames(vis.data())){
+#        ch = ch[-which(ch%in%input$vari1)]
+#      }
+#      if(!input$change_var_selection){
+#        selectInput(inputId = "vari2",
+#                    label = NULL,
+#                    choices = c("none",ch),
+#                    selected = sel,
+#                    selectize=F)
+#      }else{
+    
+          ch = colnames(vis.data())
+          if(!is.null(input$vari1)&&
+               input$vari1%in%colnames(vis.data())){
+            ch = ch[-which(ch%in%input$vari1)]
+          }
         selectInput(inputId = "vari2",
                     label = NULL,
                     choices = c("none",ch),
                     selected = sel,
-                    selectize=F)
-      }else{
-        selectInput(inputId = "vari2",
-                    label = NULL,
-                    choices = c("none",ch),
-                    selected = sel,
-                    selectize=F,
-                    size=2)
-      }
-    }
+                    selectize = F)
+#      }
+#    }
   })
 })
 
@@ -930,7 +934,7 @@ output$visualize.plot = renderPlot({
     if(is.numeric(plot.par$x)&
          is.numeric(plot.par$y)){
       temp = vis.par()
-      temp$trend.parallel = TRUE
+      temp$trend.parallel = graphical.par$trend.parallel
       temp.x = temp$x
       temp$x=temp$y
       temp$y=temp.x
@@ -990,7 +994,7 @@ output$mini.plot = renderPlot({
     if(is.numeric(plot.par$x)&
          is.numeric(plot.par$y)){
       temp = vis.par()
-      temp$trend.parallel = TRUE
+      temp$trend.parallel = graphical.par$trend.parallel
       temp.x = temp$x
       temp$x=temp$y
       temp$y=temp.x
@@ -2777,8 +2781,8 @@ output$trend.curve.panel = renderUI({
                                      label=paste("Fit trend for every level of",
                                                  input$color_by_select))
     each_level_seperate.check = checkboxInput("each_level_seperate",
-                                              label="Fit paralell trend lines",
-                                              value=T)
+                                              label="Fit parallel trend lines",
+                                              value = T)
     line.width.multiplier.object = fixedRow(column(width = 3, "Line Width Multiplier:"),
                                             column(width = 6, sliderInput("line.width.multiplier", 
                                                                           label = NULL, 
@@ -4456,7 +4460,7 @@ create.html = function() {
     if(is.numeric(plot.par$x)&
        is.numeric(plot.par$y)){
       temp = vis.par()
-      temp$trend.parallel = TRUE
+      temp$trend.parallel = graphical.par$trend.parallel
       temp.x = temp$x
       temp$x=temp$y
       temp$y=temp.x
@@ -4524,7 +4528,7 @@ output$saveplot = downloadHandler(
         if(is.numeric(plot.par$x)&
            is.numeric(plot.par$y)){
           temp = vis.par()
-          temp$trend.parallel = TRUE
+          temp$trend.parallel = graphical.par$trend.parallel
           temp.x = temp$x
           temp$x=temp$y
           temp$y=temp.x
