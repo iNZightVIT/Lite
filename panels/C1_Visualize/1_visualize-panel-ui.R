@@ -42,11 +42,17 @@ vis.sidebarPanel = function() {
         
         hr(),
         
-        fixedRow(column(10,h5(strong("Variable selection"))),
-                 column(2,checkboxInput("change_var_selection",
-                                        value=F,
-                                        label=""))),
+        h5(strong("Variable selection")),
         
+        br(),
+        
+        #fixedRow(column(10,h5(strong("Variable selection"))),
+        #         column(2,checkboxInput("change_var_selection",
+        #                                value=F,
+        #                                label=""))),
+        
+        
+
         ##  Select the first variable.
         h5("Select first variable:"),
         fixedRow(column(6, uiOutput("vari1_panel")),
@@ -296,7 +302,7 @@ vis.mainPanel = function() {
 ###  selected, we display a helpful warning message.
 
 visualize.panel.ui = function(data.set) {
-  fluidPage(  
+  fixedPage(  
     if (is.null(data.set)) {
       fixedRow(
         includeMarkdown(
