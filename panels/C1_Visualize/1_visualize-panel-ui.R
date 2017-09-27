@@ -302,7 +302,7 @@ vis.mainPanel = function() {
 ###  selected, we display a helpful warning message.
 
 visualize.panel.ui = function(data.set) {
-  fixedPage(  
+  fluidPage(  
     if (is.null(data.set)) {
       fixedRow(
         includeMarkdown(
