@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   September 3, 2017.
+###  Last Modified  :   September 29, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -5376,6 +5376,8 @@ observe({
 })
 
 
+
+########################## revert to old button has been removed ###################
 observe({
   input$go.to.old
   if (!is.null(input$go.to.old) && input$go.to.old > 0) {
@@ -5670,7 +5672,7 @@ output$old_advanced_options_panel = renderUI({
   })
   list(ret) 
 })
-
+########################## revert to old button has been removed ###################
 
 
 ## switch variables selected

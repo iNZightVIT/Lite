@@ -13,7 +13,6 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), 
 
 Recent Updates (Most to least recent):
 ----------------------------------------
-- [visualize] A panel for displaying interactive plots available
 - [Import dataset ] Now is able to read excel, sas, spss and stata files 
 - [visualize] Add time delay between plots options
 - [visualize] Add "switch" option among selected variables
