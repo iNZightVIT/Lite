@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : September 3, 2017.
+###  Last Modified : September 29, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -51,8 +51,6 @@ vis.sidebarPanel = function() {
         #                                value=F,
         #                                label=""))),
         
-        
-
         ##  Select the first variable.
         h5("Select first variable:"),
         fixedRow(column(6, uiOutput("vari1_panel")),
@@ -60,8 +58,7 @@ vis.sidebarPanel = function() {
                                         icon = icon("arrow-down"),
                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
         
-        
-#        uiOutput("vari1_panel"),
+        #uiOutput("vari1_panel"),
         
         ##  Select the second variable.
         h5("Select second variable:"),
@@ -71,13 +68,16 @@ vis.sidebarPanel = function() {
                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
 
         #uiOutput("vari2_panel"),
+        
         hr(),
+        
         ## Select desired subset for the first variable.
         h5("Subset by:"),
         fixedRow(column(6, uiOutput("subs1_panel")),
                  column(2, actionButton("switch3", "", 
                                         icon = icon("arrow-down"),
                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+        
         #uiOutput("subs1_panel"),
         
         ##  Select desired subset for the second variable.
@@ -85,20 +85,18 @@ vis.sidebarPanel = function() {
         fixedRow(column(6, uiOutput("subs2_panel"))),
         #uiOutput("subs2_panel"),
         
-        
-        ##########
-        
         hr(),
-        actionButton(inputId = "go.to.old",
-                     label = "REVERT To Old Version",
-                     icon("paper-plane"), 
-                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+        #actionButton(inputId = "go.to.old",
+        #             label = "REVERT To Old Version",
+        #             icon("paper-plane"), 
+        #             style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
         
-        br(),
-        br(),
+        #br(),
+        #br(),
         
         actionButton(inputId = "reset.graphics",
-                     label = "Reset To Default"),
+                     label = "Reset To Default",
+                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
         
         br(),
         br(),
@@ -168,7 +166,6 @@ vis.sidebarPanel = function() {
           fixedRow(column(width = 8,
                           uiOutput("add_inference")))
         )
-
       )
     )
   )
@@ -179,7 +176,7 @@ vis.sidebarPanel = function() {
 ###  We set up the main panel.
 vis.mainPanel = function() {
   toggle_advanced_options = T
-  if(!is.null(input$toggle_advanced_options)){
+  if(!is.null(input$toggle_advanced_options)) {
     toggle_advanced_options = input$toggle_advanced_options
   }
   panel = list(
