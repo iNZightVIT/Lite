@@ -247,7 +247,11 @@ vis.mainPanel = function() {
                        uiOutput("speed_value2")
                      )
                    )
-                 )           
+                 ),
+
+                 br(),
+
+                 includeMarkdown("panels/C1_Visualize/5_visualize-panel-note.md")
                 )
           )
         ),
@@ -306,7 +310,7 @@ visualize.panel.ui = function(data.set) {
           "panels/C1_Visualize/4_visualize-panel-null.md")
       )
     } else {
-      fixedRow(
+      fluidRow(
         column(4, vis.sidebarPanel()),
         column(8, vis.mainPanel())
       )
