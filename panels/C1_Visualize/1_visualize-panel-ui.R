@@ -39,15 +39,16 @@ vis.sidebarPanel = function() {
                        tabPanel(
                          title = "Select Variables",
                          
-                         fixedRow(column(10, hr()),
-                                  column(2, conditionalPanel(condition = "output.showsidebar == 1",
-                                                             actionButton("hideSidebar", 
-                                                                          icon("arrow-circle-left", "fa-2x"),
-                                                                          style = "color: #337ab7; 
-                                           background-color: #ffffff;  
-                                           border-color: #ffffff;
-                                           padding:4px; 
-                                           font-size:100%")))),
+                         fixedRow(column(9, hr()),
+                                  column(3, align = "left",
+                                         conditionalPanel(condition = "output.showsidebar == 1",
+                                                          actionButton("hideSidebar", 
+                                                                        icon("arrow-circle-left", "fa-2x"),
+                                                                        style = "color: #337ab7; 
+                                                                                background-color: #ffffff;  
+                                                                                border-color: #ffffff;
+                                                                                padding:4px; 
+                                                                                font-size:100%")))),
                          
                          h5(strong("Variable selection")),
                          
@@ -60,19 +61,27 @@ vis.sidebarPanel = function() {
                          
                          ##  Select the first variable.
                          h5("Select first variable:"),
-                         fixedRow(column(6, uiOutput("vari1_panel")),
+                         fixedRow(column(8, uiOutput("vari1_panel")),
                                   column(2, actionButton("switch1", "", 
-                                                         icon = icon("arrow-down"),
-                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                                                         icon = icon("arrow-down", "fa-2x"),
+                                                         style="color: #337ab7; 
+                                                                background-color: #ffffff;  
+                                                                border-color: #ffffff;
+                                                                padding:4px; 
+                                                                font-size:60%"))),
                          
                          #uiOutput("vari1_panel"),
                          
                          ##  Select the second variable.
                          h5("Select second variable:"),
-                         fixedRow(column(6, uiOutput("vari2_panel")),
+                         fixedRow(column(8, uiOutput("vari2_panel")),
                                   column(2, actionButton("switch2", "", 
-                                                         icon = icon("arrow-down"),
-                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                                                         icon = icon("arrow-down", "fa-2x"),
+                                                         style="color: #337ab7; 
+                                                                background-color: #ffffff;  
+                                                                border-color: #ffffff;
+                                                                padding:4px; 
+                                                                font-size:60%"))),
                          
                          #uiOutput("vari2_panel"),
                          
@@ -81,16 +90,20 @@ vis.sidebarPanel = function() {
                          
                          ## Select desired subset for the first variable.
                          h5("Subset by:"),
-                         fixedRow(column(6, uiOutput("subs1_panel")),
+                         fixedRow(column(8, uiOutput("subs1_panel")),
                                   column(2, actionButton("switch3", "", 
-                                                         icon = icon("arrow-down"),
-                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                                                         icon = icon("arrow-down", "fa-2x"),
+                                                         style="color: #337ab7; 
+                                                                background-color: #ffffff;  
+                                                                border-color: #ffffff;
+                                                                padding:4px; 
+                                                                font-size:60%"))),
                          
                          #uiOutput("subs1_panel"),
                          
                          ##  Select desired subset for the second variable.
                          h5("Subset by:"),
-                         fixedRow(column(6, uiOutput("subs2_panel"))),
+                         fixedRow(column(8, uiOutput("subs2_panel"))),
                          #uiOutput("subs2_panel"),
                          
                          fixedRow(column(10, hr())),
@@ -116,8 +129,8 @@ vis.sidebarPanel = function() {
                        tabPanel(
                          title = "Add To Plot",
                          
-                         fixedRow(column(10, hr()),
-                                  column(2, conditionalPanel(condition = "output.showsidebar == 1",
+                         fixedRow(column(9, hr()),
+                                  column(3, conditionalPanel(condition = "output.showsidebar == 1",
                                                              actionButton("hideSidebar2", 
                                                                           icon("arrow-circle-left", "fa-2x"),
                                                                           style = "color: #337ab7; 
@@ -230,7 +243,7 @@ vis.mainPanel = function() {
           column(width = 12,
                  
                  
-                 fixedRow(column(1, fixedRow(column(5, 
+                 fixedRow(column(2, fixedRow(column(5, 
                                                     conditionalPanel(condition = "output.showsidebar == 0",
                                                                         actionButton("showSidebar", 
                                                                                      icon("arrow-circle-right", "fa-2x"),
@@ -248,7 +261,7 @@ vis.mainPanel = function() {
                                                                           padding:4px; 
                                                                           font-size:90%")))
                                  ),
-                          column(11, hr())
+                          column(10, hr())
                           ),
                  
                  helpText("Plots for visualizing data."),
@@ -269,7 +282,7 @@ vis.mainPanel = function() {
                  fixedRow(column(width = 4, 
                                  # offset = 1,
                                  downloadButton(outputId = "saveplot", label = "Download Plot")),
-                          column(width = 4,
+                          column(width = 5,
                                  radioButtons(inputId = "saveplottype", 
                                               label = strong("Select the file type"), 
                                               choices = list("jpg", "png", "pdf", "svg"), inline = TRUE)),
@@ -278,7 +291,7 @@ vis.mainPanel = function() {
                           #         condition = "input.saveplottype == 'interactive html'",
                           #         uiOutput("extra.vars.html")
                           #       )),
-                          column(width = 4,
+                          column(width = 3,
                                  uiOutput("add.fitted.residuals.panel"))),
 
 
@@ -320,7 +333,7 @@ vis.mainPanel = function() {
       tabPanel(
         title = "Summary",
         
-        fixedRow(column(1, conditionalPanel(condition = "output.showsidebar == 0",
+        fixedRow(column(2, conditionalPanel(condition = "output.showsidebar == 0",
                                             actionButton("showSidebar2", 
                                                          icon("arrow-circle-right", "fa-2x"),
                                                          style = "color: #337ab7; 
@@ -329,7 +342,7 @@ vis.mainPanel = function() {
                                                          padding:4px; 
                                                          font-size:100%"))
         ),
-        column(11, hr())
+        column(10, hr())
         ),
         
         
@@ -341,7 +354,7 @@ vis.mainPanel = function() {
       tabPanel(
         title = "Inference",
         
-        fixedRow(column(1, conditionalPanel(condition = "output.showsidebar == 0",
+        fixedRow(column(2, conditionalPanel(condition = "output.showsidebar == 0",
                                             actionButton("showSidebar3", 
                                                          icon("arrow-circle-right", "fa-2x"),
                                                          style = "color: #337ab7; 
@@ -350,7 +363,7 @@ vis.mainPanel = function() {
                                                          padding:4px; 
                                                          font-size:100%"))
         ),
-        column(11, hr())
+        column(10, hr())
         ),
         
         #br(),
@@ -365,7 +378,7 @@ vis.mainPanel = function() {
       tabPanel(
         title = "Interactive Plot",
         
-        fixedRow(column(1, conditionalPanel(condition = "output.showsidebar == 0",
+        fixedRow(column(2, conditionalPanel(condition = "output.showsidebar == 0",
                                             actionButton("showSidebar4", 
                                                          icon("arrow-circle-right", "fa-2x"),
                                                          style = "color: #337ab7; 
@@ -374,7 +387,7 @@ vis.mainPanel = function() {
                                                          padding:4px; 
                                                          font-size:100%"))
         ),
-        column(11, hr())
+        column(10, hr())
         ),
         
         #br(),

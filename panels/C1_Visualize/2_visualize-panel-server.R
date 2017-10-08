@@ -1662,7 +1662,8 @@ output$plot.appearance.panel = renderUI({
                                 column(6, selectInput(inputId="select.bg1",
                                                       label=NULL,
                                                       choices=cols1,
-                                                      selected=graphical.par$bg)))
+                                                      selected=graphical.par$bg,
+                                                      selectize = F)))
     
     select.plot.type.object = NULL
     
@@ -1672,7 +1673,8 @@ output$plot.appearance.panel = renderUI({
       fixedRow(column(3, h5("Bar Colour:")),
                column(6, selectInput(inputId="select.barcolor",label=NULL,
                                      choices=cols2,
-                                     selected=graphical.par$bar.fill)))
+                                     selected=graphical.par$bar.fill,
+                                     selectize = F)))
     )
       
 #    select.barcolor.object = fixedRow(column(3, h5("Bar Colour:")),
@@ -1684,7 +1686,8 @@ output$plot.appearance.panel = renderUI({
                                               fixedRow(column(3, h5("Point Colour:")),
                                                        column(6, selectInput(inputId="select.dotcolor",label=NULL,
                                                                              choices=cols3,
-                                                                             selected=graphical.par$col.pt))))  
+                                                                             selected=graphical.par$col.pt,
+                                                                             selectize = F))))  
 #    select.dotcolor.object = fixedRow(column(3, h5("Point Colour:")),
 #                                      column(6, selectInput(inputId="select.dotcolor",label=NULL,
 #                                                            choices=cols3,
@@ -1841,7 +1844,8 @@ output$plot.appearance.panel = renderUI({
         select.bg.object = fixedRow(column(3, h5("Background colour:")),
                                     column(6, selectInput(inputId="select.bg1",label=NULL,
                                                           choices=cols1,
-                                                          selected=graphical.par$bg)))
+                                                          selected=graphical.par$bg,
+                                                          selectize = F)))
         ret = list(general.appearance.title,
                    select.bg.object,
                    adjust.size.scale.object,
@@ -1870,7 +1874,8 @@ output$plot.appearance.panel = renderUI({
                                                                  choices=c("default",
                                                                            "dot plot",
                                                                            "histogram"),
-                                                                 selected=input$select.plot.type)))
+                                                                 selected=input$select.plot.type,
+                                                                 selectize = F)))
         ret = list(general.appearance.title,
                    select.plot.type.object,
                    select.bg.object,
@@ -1948,13 +1953,15 @@ output$plot.appearance.panel = renderUI({
                                                                            "hexbin plot-size",
                                                                            "hexbin plot-alpha",
                                                                            "grid-density plot"),
-                                                                 selected=input$select.plot.type)))
+                                                                 selected=input$select.plot.type,
+                                                                 selectize = F)))
         resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
                                             fixedRow(column(3, h5("Resize points by:")),
                                                      column(6, selectInput("resize.by.select",
                                                                            label=NULL,
                                                                            choices=c(" ",get.numeric.column.names(vis.data())),
-                                                                           selected = "input$resize.by.select"))))
+                                                                           selected = "input$resize.by.select",
+                                                                           selectize = F))))
 #                resize.by.object = fixedRow(column(3, h5("Resize points by:")),
 #                                    column(6, selectInput("resize.by.select",
 #                                                          label=NULL,
@@ -2475,7 +2482,8 @@ output$code.variables.panel = renderUI({
                                           column(6, selectInput("color_by_select",
                                                                 label=NULL,
                                                                 choices = c(" ",get.categorical.column.names(vis.data())),
-                                                                selected = input$color_by_select))),
+                                                                selected = input$color_by_select,
+                                                                selectize = F))),
                                  
                                  conditionalPanel("input.color_by_select != ' '",
                                                   fixedRow(column(3, h5("Colour palette:")),
@@ -2503,7 +2511,8 @@ output$code.variables.panel = renderUI({
                                                            column(6, selectInput("color_by_select",
                                                                                  label=NULL,
                                                                                  choices=c(" ",colnames(vis.data())),
-                                                                                 selected = input$color_by_select)))),
+                                                                                 selected = input$color_by_select,
+                                                                                 selectize = F)))),
 
                                  conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                   fixedRow(column(3, h5("Colour palette:")),
@@ -2536,7 +2545,8 @@ output$code.variables.panel = renderUI({
                                                     column(6, selectInput("point_symbol",
                                                                           label=NULL,
                                                                           choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
-                                                                          selected = "circle"))))
+                                                                          selected = "circle",
+                                                                          selectize = F))))
           
 #          symbol.object = fixedRow(column(3, h5("Point Symbol:")),
 #                                   column(6, selectInput("point_symbol",
@@ -2550,7 +2560,8 @@ output$code.variables.panel = renderUI({
                                                        column(6, selectInput("point_symbol_by",
                                                                              label=NULL,
                                                                              choices = c(" ", get.categorical.column.names(vis.data())),
-                                                                             selected = " "))))
+                                                                             selected = " ",
+                                                                             selectize = F))))
 #          symbol.by.object = fixedRow(column(3, h5("Symbol by:")),
 #                                      column(6, selectInput("point_symbol_by",
 #                                                            label=NULL,
@@ -2755,37 +2766,44 @@ output$trend.curve.panel = renderUI({
                                       choices=c("blue", "red","black",
                                                 "green4","yellow","pink",
                                                 "grey","orange"),
-                                      selected=input$color.linear)
+                                      selected=input$color.linear,
+                                      selectize = F)
     type.linear.select = selectInput("type.linear", label = "", 
                                      choices = c("solid", "dashed",
                                                  "dotted", "dotdash",
                                                  "longdash", "twodash"), 
-                                     selected = input$type.linear)
+                                     selected = input$type.linear,
+                                     selectize = F)
     color.quadratic.select = selectInput("color.quadratic",label="",
                                          choices=c("red","black","blue",
                                                    "green4","yellow","pink",
                                                    "grey","orange"),
-                                         selected=input$color.quadratic)
+                                         selected=input$color.quadratic,
+                                         selectize = F)
     type.quadratic.select = selectInput("type.quadratic", label = "", 
                                         choices = c("solid", "dashed",
                                                     "dotted", "dotdash",
                                                     "longdash", "twodash"),
-                                        selected = input$type.quadratic)
+                                        selected = input$type.quadratic,
+                                        selectize = F)
     color.cubic.select = selectInput("color.cubic",label="",
                                      choices=c("green4","red","black","blue",
                                                "yellow","pink",
                                                "grey","orange"),
-                                     selected=input$color.cubic)
+                                     selected=input$color.cubic,
+                                     selectize = F)
     type.cubic.select = selectInput("type.cubic", label = "", 
                                     choices = c("solid", "dashed",
                                                 "dotted", "dotdash",
                                                 "longdash", "twodash"), 
-                                    selected = input$type.cubic)
+                                    selected = input$type.cubic,
+                                    selectize = F)
     color.smoother.select = selectInput("color.smoother",label="",
                                         choices=c("red","black","blue",
                                                   "green4","yellow","magenta",
                                                   "grey","orange"),
-                                        selected="magenta")
+                                        selected="magenta",
+                                        selectize = F)
     smoother.smooth.slider = sliderInput("smoother.smooth",
                                          label="",min=0.01,max=1,value=0.7,
                                          step=0.01,ticks=F)
@@ -3002,7 +3020,8 @@ output$xy.line.panel = renderUI({
                                         choices=c("red","black","blue",
                                                   "green4","yellow","pink",
                                                   "grey","orange"),
-                                        selected="black")
+                                        selected="black",
+                                        selectize = F)
       
       ret = list(xyline.title,
                  fixedRow(column(width=3,check.xyline.object),
@@ -3199,7 +3218,8 @@ output$join.points.panel = renderUI({
                                       choices=c("red","black","blue",
                                                 "green4","yellow","pink",
                                                 "grey","orange"),
-                                      selected="blue")
+                                      selected="blue",
+                                      selectize = F)
       ret = list(join.points.title,
                  fixedRow(column(width=3,check.join.object),
                           column(width=6,color.join.select)))
@@ -3620,7 +3640,8 @@ output$points.identify.panel = renderUI({
                                                   selectInput("label.select",
                                                               label="",
                                                               choices=c("id",
-                                                                        colnames(get.data.set()))))))
+                                                                        colnames(get.data.set())),
+                                                              selectize = F))))
       
       ret[[3]] = fixedRow(column(4,
                                  checkboxInput("color_points_check",
@@ -3632,7 +3653,8 @@ output$points.identify.panel = renderUI({
                                                               label="Select Colour",
                                                               choices=c("red",
                                                                         "blue",
-                                                                        "green4")))))
+                                                                        "green4"),
+                                                              selectize = F))))
       ret[[4]] = fixedRow(column(4,
                                  checkboxInput("same_level_of_check",
                                                label="With the same level of",
@@ -3641,7 +3663,8 @@ output$points.identify.panel = renderUI({
                                  conditionalPanel("input.same_level_of_check",
                                                   selectInput("same.level.of.select",
                                                               label="",
-                                                              choices=colnames(get.data.set())))))
+                                                              choices=colnames(get.data.set()),
+                                                              selectize = F))))
       ret[[5]] = radioButtons("select_identify_method",
                               label = h5(strong("Select method of selection")),
                               choices = c("Select by value",
@@ -3664,7 +3687,8 @@ output$points.identify.panel = renderUI({
                                                        fixedRow(column(6,
                                                                        selectInput("by.value.column.select",
                                                                                    label="Select a column",
-                                                                                   choices=colnames(get.data.set()))),
+                                                                                   choices=colnames(get.data.set()),
+                                                                                   selectize = F)),
                                                                 column(4,
                                                                        selectInput("value.select",
                                                                                    label="Select multiple values",
@@ -3736,7 +3760,8 @@ output$points.identify.panel = renderUI({
                                                column(5,
                                                       selectInput("range.column.select",
                                                                   label="Select column",
-                                                                  choices=colnames(get.data.set())))))
+                                                                  choices=colnames(get.data.set()),
+                                                                  selectize = F))))
           ret[[9]] = fixedRow(column(3,checkboxInput("show.stored.check",
                                                      label="Show stored",
                                                      value=T)),
@@ -4386,7 +4411,8 @@ output$select_additions_panel = renderUI({
                           choices = c('Customise Plot Appearance',
                                       'Axes and Labels',
                                       'Add Inference Information'),
-                          selected = input$select_additions)
+                          selected = input$select_additions,
+                          selectize = F)
         
         # vari1 = factor, vari2 = factor
       }else if(!input$vari2%in%"none"&&
@@ -4399,7 +4425,8 @@ output$select_additions_panel = renderUI({
                           choices = c('Customise Plot Appearance',
                                       'Axes and Labels',
                                       'Add Inference Information'),
-                          selected = input$select_additions)
+                          selected = input$select_additions,
+                          selectize = F)
         
         # vari1 = numeric , vari2 = none or
         # vari1 = numeric , vari2 = factor or
@@ -4423,7 +4450,8 @@ output$select_additions_panel = renderUI({
                                       'Axes and Labels',
                                       'Identify Points',
                                       'Add Inference Information'),
-                          selected = input$select_additions)
+                          selected = input$select_additions,
+                          selectize = F)
         
         if(large.sample){
           ret = selectInput(inputId = "select_additions",
@@ -4431,7 +4459,8 @@ output$select_additions_panel = renderUI({
                             choices = c('Customise Plot Appearance',
                                         'Axes and Labels',
                                         'Add Inference Information'),
-                            selected = input$select_additions)
+                            selected = input$select_additions,
+                            selectize = F)
         }
         
         # vari1 = numeric , vari2 = numeric
@@ -4447,7 +4476,8 @@ output$select_additions_panel = renderUI({
                                       'Axes and Labels',
                                       'Identify Points',
                                       'Add Inference Information'),
-                          selected = input$select_additions)
+                          selected = input$select_additions,
+                          selectize = F)
         
         if(large.sample){
           ret = selectInput(inputId = "select_additions",
@@ -4456,7 +4486,8 @@ output$select_additions_panel = renderUI({
                                         'Trend Lines and Curves',
                                         'Axes and Labels',
                                         'Add Inference Information'),
-                            selected = input$select_additions)
+                            selected = input$select_additions,
+                            selectize = F)
         }
       }
   })
