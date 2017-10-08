@@ -266,7 +266,7 @@ vis.mainPanel = function() {
 
                  br(),
                  
-                 fixedRow(column(width = 2, 
+                 fixedRow(column(width = 4, 
                                  # offset = 1,
                                  downloadButton(outputId = "saveplot", label = "Download Plot")),
                           column(width = 4,
@@ -278,7 +278,7 @@ vis.mainPanel = function() {
                           #         condition = "input.saveplottype == 'interactive html'",
                           #         uiOutput("extra.vars.html")
                           #       )),
-                          column(width = 2,
+                          column(width = 4,
                                  uiOutput("add.fitted.residuals.panel"))),
 
 
@@ -363,7 +363,7 @@ vis.mainPanel = function() {
         verbatimTextOutput("visualize.inference")
         ),
       tabPanel(
-        title = "Interactive Plot (Beta)",
+        title = "Interactive Plot",
         
         fixedRow(column(1, conditionalPanel(condition = "output.showsidebar == 0",
                                             actionButton("showSidebar4", 
