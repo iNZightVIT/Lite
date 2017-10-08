@@ -24,6 +24,8 @@ library(colorspace)
 library(xlsx)
 library(sas7bdat)
 library(foreign)
+#library(shinydashboard)
+library(shinyjs)
 
 
 # read in possible command line arguments such as 'vars.path'

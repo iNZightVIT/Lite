@@ -4,7 +4,7 @@
 ###---------------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
-###  Last Modified : October 8, 2017.
+###  Last Modified : October 7, 2017.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -30,149 +30,163 @@ visualize.help = function() {
 
 ###  Next, we set up the sidebar panel with "vis.sidebarPanel()".
 vis.sidebarPanel = function() {
-  
-  sidebarPanelUI = list(
-    
-    tabsetPanel(
-      id = "visualize_sidebar_tabs",
-      type = "pills",
-      
-      tabPanel(
-        title = "Select Variables",
-        
-        hr(),
-        
-        h5(strong("Variable selection")),
-        
-        br(),
-        
-        #fixedRow(column(10,h5(strong("Variable selection"))),
-        #         column(2,checkboxInput("change_var_selection",
-        #                                value=F,
-        #                                label=""))),
-        
-        
-
-        ##  Select the first variable.
-        h5("Select first variable:"),
-        fixedRow(column(6, uiOutput("vari1_panel")),
-                 column(2, actionButton("switch1", "", 
-                                        icon = icon("arrow-down"),
-                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
-        
-        
-#        uiOutput("vari1_panel"),
-        
-        ##  Select the second variable.
-        h5("Select second variable:"),
-        fixedRow(column(6, uiOutput("vari2_panel")),
-                 column(2, actionButton("switch2", "", 
-                                        icon = icon("arrow-down"),
-                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
-
-        #uiOutput("vari2_panel"),
-        hr(),
-        ## Select desired subset for the first variable.
-        h5("Subset by:"),
-        fixedRow(column(6, uiOutput("subs1_panel")),
-                 column(2, actionButton("switch3", "", 
-                                        icon = icon("arrow-down"),
-                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
-        #uiOutput("subs1_panel"),
-        
-        ##  Select desired subset for the second variable.
-        h5("Subset by:"),
-        fixedRow(column(6, uiOutput("subs2_panel"))),
-        #uiOutput("subs2_panel"),
-        
-        
-        ##########
-        
-#        hr(),
-#        actionButton(inputId = "go.to.old",
-#                     label = "REVERT To Old Version",
-#                     icon("paper-plane"), 
-#                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-        
-#        br(),
-#        br(),
-        
-        actionButton(inputId = "reset.graphics",
-                     label = "Reset To Default",
-                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-        
-        br(),
-        br(),
-        
-        visualize.help()
-      ),
-      
-      tabPanel(
-        title = "Add To Plot",
-
-        hr(),
-
-        
-#        fixedRow(column(8,h4("Inference")),
-#                 column(2,
-#                        checkboxInput("toggle_inference",
-#                                      label="",
-#                                      value=input$toggle_inference))),
-#        fixedRow(column(width = 8,
-#                        uiOutput("add_inference"))),
-        
-#        hr(),
-        
-#        h4("Select Additions"),
-        
-        uiOutput("select_additions_panel"),
-        
-        conditionalPanel(
-          condition = "input.select_additions=='Customise Plot Appearance'",
-          
-          uiOutput("plot.appearance.panel"),
-          uiOutput("code.variables.panel")
-        ),
-        
-        conditionalPanel(
-          condition = "input.select_additions=='Trend Lines and Curves'",
-          
-          uiOutput("trend.curve.panel"),
-          uiOutput("join.points.panel"),
-          uiOutput("xy.line.panel")
-        ),
-        
-        conditionalPanel(
-          condition = "input.select_additions=='Axes and Labels'",
-          
-          uiOutput("customize.labels.panel"),
-          uiOutput("add.jitter.panel"),
-          uiOutput("add.rugs.panel"),
-          uiOutput("adjust.axis.panel"),
-          uiOutput("adjust.number.bars.panel")
-        ),
-        
-        conditionalPanel(
-          condition = "input.select_additions=='Identify Points'",
-          
-          uiOutput("points.identify.panel")
-        ),
-
-        conditionalPanel(
-          condition = "input.select_additions=='Add Inference Information'",
-  
-#          fixedRow(column(8,h4("Inference")),
-#                   column(2,
-#                          checkboxInput("toggle_inference",
-#                                        label="",
-#                                        value=TRUE))),
-          fixedRow(column(width = 8,
-                          uiOutput("add_inference")))
-        )
-
-      )
-    )
-  )
+#  conditionalPanel(condition = "output.showsidebar == 1",
+                   sidebarPanelUI = list(
+                     tabsetPanel(
+                       id = "visualize_sidebar_tabs",
+                       type = "pills",
+                       
+                       tabPanel(
+                         title = "Select Variables",
+                         
+                         fixedRow(column(10, hr()),
+                                  column(2, conditionalPanel(condition = "output.showsidebar == 1",
+                                                             actionButton("hideSidebar", 
+                                                                          icon("arrow-circle-left", "fa-2x"),
+                                                                          style = "color: #337ab7; 
+                                           background-color: #ffffff;  
+                                           border-color: #ffffff;
+                                           padding:4px; 
+                                           font-size:100%")))),
+                         
+                         h5(strong("Variable selection")),
+                         
+                         #br(),
+                         
+                         #fixedRow(column(10,h5(strong("Variable selection"))),
+                         #         column(2,checkboxInput("change_var_selection",
+                         #                                value=F,
+                         #                                label=""))),
+                         
+                         ##  Select the first variable.
+                         h5("Select first variable:"),
+                         fixedRow(column(6, uiOutput("vari1_panel")),
+                                  column(2, actionButton("switch1", "", 
+                                                         icon = icon("arrow-down"),
+                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                         
+                         #uiOutput("vari1_panel"),
+                         
+                         ##  Select the second variable.
+                         h5("Select second variable:"),
+                         fixedRow(column(6, uiOutput("vari2_panel")),
+                                  column(2, actionButton("switch2", "", 
+                                                         icon = icon("arrow-down"),
+                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                         
+                         #uiOutput("vari2_panel"),
+                         
+                         fixedRow(column(10, hr())),
+                         
+                         
+                         ## Select desired subset for the first variable.
+                         h5("Subset by:"),
+                         fixedRow(column(6, uiOutput("subs1_panel")),
+                                  column(2, actionButton("switch3", "", 
+                                                         icon = icon("arrow-down"),
+                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                         
+                         #uiOutput("subs1_panel"),
+                         
+                         ##  Select desired subset for the second variable.
+                         h5("Subset by:"),
+                         fixedRow(column(6, uiOutput("subs2_panel"))),
+                         #uiOutput("subs2_panel"),
+                         
+                         fixedRow(column(10, hr())),
+                         
+                         #actionButton(inputId = "go.to.old",
+                         #             label = "REVERT To Old Version",
+                         #             icon("paper-plane"), 
+                         #             style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                         
+                         #br(),
+                         #br(),
+                         
+                         actionButton(inputId = "reset.graphics",
+                                      label = "Reset To Default",
+                                      style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                         
+                         br(),
+                         br(),
+                         
+                         visualize.help()
+                       ),
+                       
+                       tabPanel(
+                         title = "Add To Plot",
+                         
+                         fixedRow(column(10, hr()),
+                                  column(2, conditionalPanel(condition = "output.showsidebar == 1",
+                                                             actionButton("hideSidebar2", 
+                                                                          icon("arrow-circle-left", "fa-2x"),
+                                                                          style = "color: #337ab7; 
+                                                                          background-color: #ffffff;  
+                                                                          border-color: #ffffff;
+                                                                          padding:4px; 
+                                                                          font-size:100%")))),
+                         
+                         
+                         #        fixedRow(column(8,h4("Inference")),
+                         #                 column(2,
+                         #                        checkboxInput("toggle_inference",
+                         #                                      label="",
+                         #                                      value=input$toggle_inference))),
+                         #        fixedRow(column(width = 8,
+                         #                        uiOutput("add_inference"))),
+                         
+                         #        hr(),
+                         
+                         #        h4("Select Additions"),
+                         
+                         uiOutput("select_additions_panel"),
+                         
+                         conditionalPanel(
+                           condition = "input.select_additions=='Customise Plot Appearance'",
+                           
+                           uiOutput("plot.appearance.panel"),
+                           uiOutput("code.variables.panel")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.select_additions=='Trend Lines and Curves'",
+                           
+                           uiOutput("trend.curve.panel"),
+                           uiOutput("join.points.panel"),
+                           uiOutput("xy.line.panel")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.select_additions=='Axes and Labels'",
+                           
+                           uiOutput("customize.labels.panel"),
+                           uiOutput("add.jitter.panel"),
+                           uiOutput("add.rugs.panel"),
+                           uiOutput("adjust.axis.panel"),
+                           uiOutput("adjust.number.bars.panel")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.select_additions=='Identify Points'",
+                           
+                           uiOutput("points.identify.panel")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.select_additions=='Add Inference Information'",
+                           
+                           #          fixedRow(column(8,h4("Inference")),
+                           #                   column(2,
+                           #                          checkboxInput("toggle_inference",
+                           #                                        label="",
+                           #                                        value=TRUE))),
+                           fixedRow(column(width = 8,
+                                           uiOutput("add_inference")))
+                         )
+                       )
+                     )
+                   )
+#                   )
 }
 
 
@@ -180,20 +194,63 @@ vis.sidebarPanel = function() {
 ###  We set up the main panel.
 vis.mainPanel = function() {
   toggle_advanced_options = T
-  if(!is.null(input$toggle_advanced_options)){
+  if(!is.null(input$toggle_advanced_options)) {
     toggle_advanced_options = input$toggle_advanced_options
   }
   panel = list(
-    br(),
+    ## action button: hide/show sidebar menu
+#    conditionalPanel(condition = "output.showsidebar == 1",
+#                     actionButton("hideSidebar", 
+#                                  icon("arrow-circle-left", "fa-2x"),
+#                                  style = "color: #337ab7; 
+#                                           background-color: #ffffff;  
+#                                           border-color: #ffffff;
+#                                           padding:4px; 
+#                                           font-size:100%")),
+    
+#    conditionalPanel(condition = "output.showsidebar == 0",
+#                     actionButton("showSidebar", 
+#                                  icon("arrow-circle-right", "fa-2x"),
+#                                  style = "color: #337ab7; 
+#                                           background-color: #ffffff; 
+#                                           border-color: #ffffff;
+#                                           padding:4px; 
+#                                           font-size:100%")),
+    
+#    br(),
+#    br(),
     tabsetPanel(
       id = "plot_selector",
       type = "pills",
       ##  Plot Panel
       tabPanel(
         title = "Plot",
-        br(),
+        #br(),
         fixedRow(
           column(width = 12,
+                 
+                 
+                 fixedRow(column(1, fixedRow(column(5, 
+                                                    conditionalPanel(condition = "output.showsidebar == 0",
+                                                                        actionButton("showSidebar", 
+                                                                                     icon("arrow-circle-right", "fa-2x"),
+                                                                                     style = "color: #337ab7; 
+                                                                                     background-color: #ffffff; 
+                                                                                     border-color: #ffffff;
+                                                                                     padding:4px; 
+                                                                                     font-size:100%"))),
+                                             column(7, 
+                                                    actionButton("refreshplot", 
+                                                                 icon("refresh", "fa-2x"),
+                                                                 style = "color: #337ab7; 
+                                                                          background-color: #ffffff; 
+                                                                          border-color: #ffffff;
+                                                                          padding:4px; 
+                                                                          font-size:90%")))
+                                 ),
+                          column(11, hr())
+                          ),
+                 
                  helpText("Plots for visualizing data."),
                  plotOutput("visualize.plot"),
                  
@@ -251,21 +308,52 @@ vis.mainPanel = function() {
                        uiOutput("speed_value2")
                      )
                    )
-                 )           
+                 ),
+
+                 br(),
+
+                 includeMarkdown("panels/C1_Visualize/5_visualize-panel-note.md")
                 )
           )
         ),
       ##  Summary Panel
       tabPanel(
         title = "Summary",
-        br(),
+        
+        fixedRow(column(1, conditionalPanel(condition = "output.showsidebar == 0",
+                                            actionButton("showSidebar2", 
+                                                         icon("arrow-circle-right", "fa-2x"),
+                                                         style = "color: #337ab7; 
+                                                         background-color: #ffffff; 
+                                                         border-color: #ffffff;
+                                                         padding:4px; 
+                                                         font-size:100%"))
+        ),
+        column(11, hr())
+        ),
+        
+        
+        #br(),
         helpText("Statistical Sumary for the data."),
         verbatimTextOutput("visualize.summary")
         ),
       ##  Inference Panel
       tabPanel(
         title = "Inference",
-        br(),
+        
+        fixedRow(column(1, conditionalPanel(condition = "output.showsidebar == 0",
+                                            actionButton("showSidebar3", 
+                                                         icon("arrow-circle-right", "fa-2x"),
+                                                         style = "color: #337ab7; 
+                                                         background-color: #ffffff; 
+                                                         border-color: #ffffff;
+                                                         padding:4px; 
+                                                         font-size:100%"))
+        ),
+        column(11, hr())
+        ),
+        
+        #br(),
         selectInput("type.inference.select",
                     choices = c("normal",
                                 "bootstrap"),
@@ -276,7 +364,20 @@ vis.mainPanel = function() {
         ),
       tabPanel(
         title = "Interactive Plot (Beta)",
-        br(),
+        
+        fixedRow(column(1, conditionalPanel(condition = "output.showsidebar == 0",
+                                            actionButton("showSidebar4", 
+                                                         icon("arrow-circle-right", "fa-2x"),
+                                                         style = "color: #337ab7; 
+                                                         background-color: #ffffff; 
+                                                         border-color: #ffffff;
+                                                         padding:4px; 
+                                                         font-size:100%"))
+        ),
+        column(11, hr())
+        ),
+        
+        #br(),
         uiOutput("interactive.plot.select"),
         # helpText("Interactive Plot"),
         br(),
@@ -294,6 +395,8 @@ vis.mainPanel = function() {
   panel
 }
 
+
+
 ###----------------------###
 ###  Visualize Panel UI  ###
 ###----------------------###
@@ -303,23 +406,51 @@ vis.mainPanel = function() {
 ###  selected, we display a helpful warning message.
 
 visualize.panel.ui = function(data.set) {
-  fixedPage(  
+  fluidPage(
+    
+    useShinyjs(),
+    
+    if (is.null(data.set)) {
+      fixedRow(
+        includeMarkdown(
+          "panels/C1_Visualize/4_visualize-panel-null.md")
+      )
+    } 
+    else {
+      
+      fluidRow(
+        column(width = 4, id = "Sidebar", vis.sidebarPanel()),
+        column(width = 8, id = "Main", vis.mainPanel())
+      )
+      
+      
+      
+#      tabPanel(NULL,
+#               div( id ="Sidebar", sidebarPanel(vis.sidebarPanel())),
+#               
+#               
+#               mainPanel(vis.mainPanel())
+#      )
+
+    }
+  )
+}
+
+
+hidesidebar.visualize.panel.ui = function(data.set) {
+  fluidPage(  
     if (is.null(data.set)) {
       fixedRow(
         includeMarkdown(
           "panels/C1_Visualize/4_visualize-panel-null.md")
       )
     } else {
-      fixedRow(
-        column(4, vis.sidebarPanel()),
-        column(8, vis.mainPanel())
+      fluidRow(
+        column(12, vis.mainPanel())
       )
     }
   )
 }
-
-
-
 
 
 
@@ -527,21 +658,21 @@ old.vis.mainPanel = function() {
 }
 
 
-#old.visualize.panel.ui = function(data.set) {
-#  fluidPage(  
-#    if (is.null(data.set)) {
-#      fixedRow(
-#        includeMarkdown(
-#          "panels/C1_Visualize/4_visualize-panel-null.md")
-#      )
-#    } else {
-#      fixedRow(
-#        column(4, old.vis.sidebarPanel()),
-#        column(8, old.vis.mainPanel())
-#      )
-#    }
-#  )
-#}
+old.visualize.panel.ui = function(data.set) {
+  fluidPage(  
+    if (is.null(data.set)) {
+      fixedRow(
+        includeMarkdown(
+          "panels/C1_Visualize/4_visualize-panel-null.md")
+      )
+    } else {
+      fixedRow(
+        column(4, old.vis.sidebarPanel()),
+        column(8, old.vis.mainPanel())
+      )
+    }
+  )
+}
 
 
 

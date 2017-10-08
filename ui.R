@@ -96,6 +96,7 @@ shinyUI(
             id = "selector",
             ##  Set custom colour and collapse options.
             inverse = TRUE, collapsible = TRUE,
+
             ##  "About" tab.
             tabPanel("About",
                      uiOutput('about.panel')),
