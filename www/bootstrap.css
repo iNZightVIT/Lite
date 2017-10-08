@@ -7007,25 +7007,25 @@ a.list-group-item-danger.active:focus {
 
 @media screen and (max-width: 767px) {
   html {
-    font-size: 6px !important;
+    font-size: 12px !important;
   }
   body {
-    font-size: 0.9em !important;
+    font-size: 12px !important;
   }
   .nav {
-    font-size: 0.9em !important;
+    font-size: 12px !important;
   }
   .dropdown-menu {
-    font-size: 0.9em !important;
+    font-size: 12px !important;
   }
   .btn {
     font-size: 0.9em !important;
     padding: 0.6em 0.6em !important;
   }
 /*  img {
-    width: 100px !important;
+    width: auto !important;
     height: auto !important;
-  }*/  
+  }*/ 
 
 }
 
