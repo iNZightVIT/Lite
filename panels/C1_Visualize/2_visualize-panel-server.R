@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   October 8, 2017.
+###  Last Modified  :   October 7, 2017.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -83,6 +83,7 @@ get.default.num.bins = reactive({
 
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par = reactiveValues(
+  showsidebar = TRUE,
   alpha = 1,
   bg = "grey93", #background colour
   ##  Box
@@ -267,12 +268,24 @@ handle.input = function(input, subs = FALSE) {
     list(input.out = input.out, factor.levels = factor.levels)
 }
 
+
+
+
+
+
 output$visualize.panel <- renderUI({
   get.data.set()
   isolate({
     visualize.panel.ui(get.data.set())
   })
 })
+
+
+
+
+
+
+
 
 x.class = reactive({
     determine.class(plot.par$x)
@@ -1181,7 +1194,7 @@ observe({
       updateSelectInput(session,"point_symbol", selected = "circle")
       graphical.par$pch = 21
       
-      updateSliderInput(session,"symbol_linewidth",value = 2)
+      updateSliderInput(session,"symbol_linewidth", value = 2)
       graphical.par$lwd.pt = 2
       
       
@@ -5376,6 +5389,8 @@ observe({
 })
 
 
+
+########################## revert to old button has been removed ###################
 observe({
   input$go.to.old
   if (!is.null(input$go.to.old) && input$go.to.old > 0) {
@@ -5391,7 +5406,7 @@ observe({
 })
 
 
-######################################old version panel removed ############################################
+
 observe({
   input$go.to.new
   if (!is.null(input$go.to.new) && input$go.to.new > 0) {
@@ -5670,9 +5685,7 @@ output$old_advanced_options_panel = renderUI({
   })
   list(ret) 
 })
-
-##########################################################################################################
-
+########################## revert to old button has been removed ###################
 
 
 ## switch variables selected
@@ -5726,6 +5739,153 @@ observe({
     updateSelectInput(session, "subs2", selected = var3.old)
   })
 })
+
+
+
+## show/hide sidebar menu
+
+observe({
+  input$hideSidebar
+  input$hideSidebar2
+  if ((!is.null(input$hideSidebar) && input$hideSidebar > 0) ||
+      (!is.null(input$hideSidebar2) && input$hideSidebar2 > 0)) {
+    isolate({
+      graphical.par$showsidebar = FALSE
+    })
+  }
+})
+
+
+
+observe({
+  input$showSidebar
+  input$showSidebar2
+  input$showSidebar3
+  input$showSidebar4
+  if ((!is.null(input$showSidebar) && input$showSidebar > 0) ||
+      (!is.null(input$showSidebar2) && input$showSidebar2 > 0) ||
+      (!is.null(input$showSidebar3) && input$showSidebar3 > 0) ||
+      (!is.null(input$showSidebar4) && input$showSidebar4 > 0)) {
+    isolate({
+      graphical.par$showsidebar = TRUE
+    })
+  }
+})
+
+
+output$showsidebar <- reactive({
+  if (graphical.par$showsidebar) 
+    1  
+  else 
+    0
+})
+outputOptions(output, "showsidebar", suspendWhenHidden = FALSE)
+
+
+observeEvent(input$hideSidebar, {
+  shinyjs::hide(id = "Sidebar")
+  shinyjs::toggleClass("Main", "col-sm-8")
+  shinyjs::toggleClass("Main", "col-sm-12")
+})
+
+observeEvent(input$hideSidebar2, {
+  shinyjs::hide(id = "Sidebar")
+  shinyjs::toggleClass("Main", "col-sm-8")
+  shinyjs::toggleClass("Main", "col-sm-12")
+})
+
+observeEvent(input$showSidebar, {
+  shinyjs::show(id = "Sidebar")
+  shinyjs::toggleClass("Main", "col-sm-8")
+})
+
+observeEvent(input$showSidebar2, {
+  shinyjs::show(id = "Sidebar")
+  shinyjs::toggleClass("Main", "col-sm-8")
+})
+
+observeEvent(input$showSidebar3, {
+  shinyjs::show(id = "Sidebar")
+  shinyjs::toggleClass("Main", "col-sm-8")
+})
+
+observeEvent(input$showSidebar4, {
+  shinyjs::show(id = "Sidebar")
+  shinyjs::toggleClass("Main", "col-sm-8")
+})
+
+## refresh the plot after click the "refresh" button
+observe({
+  input$refreshplot
+  if (!is.null(input$hideSidebar) && input$hideSidebar > 0) {
+    isolate({
+      output$visualize.plot = renderPlot({
+        isolate({
+          # some of the graphical parameters need 
+          # to be reminded what there default 
+          # values are
+          if(is.null(graphical.par$cex.dotpt)){
+            graphical.par$cex.dotpt  = 0.5
+          }
+          if(is.null(graphical.par$alpha)){
+            graphical.par$alpha  = 1
+          }
+          if(is.null(graphical.par$scatter.grid.bins)){
+            graphical.par$scatter.grid.bins  = 50
+          }
+        })
+        # plot it
+        if (!is.null(vis.par())) {
+          dafr = get.data.set()
+          if(is.numeric(plot.par$x)&
+             is.numeric(plot.par$y)){
+            temp = vis.par()
+            temp$trend.parallel = graphical.par$trend.parallel
+            temp.x = temp$x
+            temp$x=temp$y
+            temp$y=temp.x
+            temp.varnames.x = temp$varnames$x
+            temp$varnames$x = temp$varnames$y
+            temp$varnames$y = temp.varnames.x
+            
+            if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+               tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+              
+              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+              }, warning = function(w) {
+                print(w)
+              }, error = function(e) {
+                print(e)
+              }, finally = {})
+            }else{
+              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+            }
+          }else{
+            if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+               tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+              
+              tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+              }, warning = function(w) {
+                print(w)
+              }, error = function(e) {
+                print(e)
+              }, finally = {})
+            }else{
+              plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+            }
+          }
+          #     print(plot.ret.para$parameters)
+          #     print('###########################################################################')
+        }
+      })
+    })
+  }
+})
+
+
+
+
+
 
 
 
