@@ -36,6 +36,7 @@ args = reactiveValues(
   g2.level = NULL,
   variable = NULL,
   col = NULL,
+  col.fun = NULL,
   na.fill = NULL,
   name = NULL
 )
@@ -754,7 +755,11 @@ output$plotlabels_panel = renderUI({
 observe({
   input$plot_region_colour
   isolate({
-    if(!is.null(input$plot_region_colour))
+    if(!is.null(input$plot_region_colour) && input$plot_region_colour %in% c("heat", "terrain")) {
+      args$col.fun = input$plot_region_colour
+    }
+    else if(!is.null(input$plot_region_colour) && !(input$plot_region_colour %in% c("heat", "terrian")))
+      args$col.fun <- NULL
       args$col = input$plot_region_colour
   })
 })
