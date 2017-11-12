@@ -26,7 +26,7 @@ library(sas7bdat)
 library(foreign)
 #library(shinydashboard)
 library(shinyjs)
-library(iNZightTools)
+#library(iNZightTools)
 
 
 # read in possible command line arguments such as 'vars.path'
