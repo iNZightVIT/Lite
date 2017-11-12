@@ -1693,3 +1693,34 @@ search.name = function(list.search,search.name=NULL){
   }
 }
 
+
+
+## From iNZightTools
+newdevice <- function(width = 7, height = 7, ...) {
+  
+  if (.Platform$OS.type == "windows") {
+    ## Windows
+    grDevices::dev.new(width = width, height = height, ...)
+  } else if (Sys.info()["sysname"] == "Darwin") {
+    ## Mac - prefer Acinonyx if installed
+    if (requireNamespace("Acinonyx", quietly = TRUE)) {
+      # Acinonyx uses pixels rather than inches, convert inches to
+      # pixels to determine dims. Assume 90 dpi.
+      width.in <- round(width * 90)
+      height.in <- round(height * 90)
+      Acinonyx::idev(width = width.in, height = height.in, ...)
+    } else {
+      grDevices::dev.new(width = width, height = height, ...)
+    }
+  } else {
+    ## Linux - prefer cairoDevice over default
+    if (requireNamespace("cairoDevice", quietly = TRUE)) {
+      cairoDevice::Cairo(width = width, height = height, ...)
+    } else {
+      grDevices::dev.new(width = width, height = height, ...)
+    }
+  }
+  
+  invisible(NULL)
+  
+}
