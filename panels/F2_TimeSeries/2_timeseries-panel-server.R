@@ -9,7 +9,7 @@
 ###
 ###
 ###  * Note: This is to be sourced within "server.R" *
-
+newdevice <- iNZightTools:::newdevice
 # initialize gui
 output$timeseries.panel <- renderUI({
   timeseries.panel.ui(get.data.set())
@@ -86,7 +86,7 @@ observe({
                                                format="%j"))
                                }))
       }else if (!is.null(input$provide_frequency)&&
-                  input$provide_frequency%in%"Month"){
+                  input$provide_frequency%in%"Month") {
         time = seq(as.Date(input$provide_startdate), 
                    by='month', 
                    length=nrow(get.data.set()))
@@ -129,7 +129,7 @@ output$timeseries_plot = renderPlot({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           rawplot(
             iNZightTS(temp,
                       var = variable.names()),
@@ -139,13 +139,15 @@ output$timeseries_plot = renderPlot({
             multiplicative = input$choose_season,
             t = 100*input$slidersmoothing
           )
-        }, warning = function(w) {
-          cat("Warning produced in timseries plot\n")
-          print(w)
-        }, error = function(e) {
+        }, 
+#        warning = function(w) {
+#          cat("Warning produced in timseries plot\n")
+#          print(w)
+#        }, 
+        error = function(e) {
           cat("Handled error in timseries plot\n")
           print(e)
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       plot.new()
@@ -162,7 +164,7 @@ output$seasonal_plot = renderPlot({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           seasonplot(
             iNZightTS(temp,
                       var = variable.names()),
@@ -171,13 +173,15 @@ output$seasonal_plot = renderPlot({
             multiplicative = input$choose_season,
             t = 100*input$slidersmoothing
           )
-        }, warning = function(w) {
-          cat("Warning produced in seasonplot\n")
-          print(w)
-        }, error = function(e) {
+        }, 
+#        warning = function(w) {
+#          cat("Warning produced in seasonplot\n")
+#          print(w)
+#        }, 
+        error = function(e) {
           cat("Handled error in seasonplot\n")
           print(e)
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       plot.new()
@@ -194,7 +198,7 @@ output$decomposed_plot = renderPlot({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           decompositionplot(
             iNZightTS(temp,
                       var = variable.names()),
@@ -203,13 +207,15 @@ output$decomposed_plot = renderPlot({
             multiplicative = input$choose_season,
             t = 100*input$slidersmoothing
           )
-        }, warning = function(w) {
-          cat("Warning produced in decompositionplot \n")
-          print(w)
-        }, error = function(e) {
+        }, 
+#        warning = function(w) {
+#          cat("Warning produced in decompositionplot \n")
+#          print(w)
+#        }, 
+      error = function(e) {
           cat("Handled error in decompositionplot \n")
           print(e)
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       plot.new()
@@ -226,7 +232,7 @@ output$trSeasonal_plot = renderPlot({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           iNZightTS:::recompose(
             iNZightTS:::decompositionplot(
               iNZightTS(temp,
@@ -238,13 +244,15 @@ output$trSeasonal_plot = renderPlot({
             ),
             animate = FALSE
           )
-        }, warning = function(w) {
-          cat("Warning produced in recompose plot \n")
-          print(w)
-        }, error = function(e) {
+        }, 
+#        warning = function(w) {
+#          cat("Warning produced in recompose plot \n")
+#          print(w)
+#        }, 
+        error = function(e) {
           cat("Handled error in recompose plot \n")
           print(e)
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       plot.new()
@@ -261,19 +269,21 @@ output$forecast_plot = renderPlot({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           forecastplot(
             iNZightTS(temp,
                       var = variable.names()),
             multiplicative = input$choose_season
           )
-        }, warning = function(w) {
-          cat("Warning produced in forecastplot \n")
-          print(w)
-        }, error = function(e) {
+        }, 
+#        warning = function(w) {
+#          cat("Warning produced in forecastplot \n")
+#          print(w)
+#        }, 
+        error = function(e) {
           cat("Handled error in forecastplot \n")
           print(e)
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       plot.new()
@@ -288,18 +298,20 @@ output$forecast_summary = renderPrint({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           forecastplot(
             iNZightTS(temp,
                       var = variable.names()),
             multiplicative = input$choose_season,
             show = FALSE
           )
-        }, warning = function(w) {
+        }, 
+#        warning = function(w) {
+#          cat("")
+#        }, 
+        error = function(e) {
           cat("")
-        }, error = function(e) {
-          cat("")
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       cat("No time variable found.")
@@ -321,20 +333,22 @@ output$multiple_single_plot = renderPlot({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           iNZightTS:::compareplot(
             iNZightTS(temp,
                       var = variable.names()),
             multiplicative = input$choose_season,
             t = 100*input$slidersmoothing
           )
-        }, warning = function(w) {
-          cat("Warning produced in compareplot \n")
-          print(w)
-        }, error = function(e) {
+        }, 
+#        warning = function(w) {
+#          cat("Warning produced in compareplot \n")
+#          print(w)
+#        }, 
+        error = function(e) {
           cat("Handled error in compareplot \n")
           print(e)
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       plot.new()
@@ -365,20 +379,22 @@ output$multiple_multi_plot = renderPlot({
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
-        tryCatch({
+        suppressWarnings(tryCatch({
           multiseries(
             iNZightTS(temp,
                       var = variable.names()),
             multiplicative = input$choose_season,
             t = 100*input$slidersmoothing
           )
-        }, warning = function(w) {
-          cat("Warning produced in multiseries plot \n")
-          print(w)
-        }, error = function(e) {
+        }, 
+#        warning = function(w) {
+#          cat("Warning produced in multiseries plot \n")
+#          print(w)
+#        }, 
+        error = function(e) {
           cat("Handled error in multiseries plot \n")
           print(e)
-        }, finally = {})
+        }, finally = {}))
       }
     }else{
       plot.new()
