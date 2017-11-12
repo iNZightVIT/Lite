@@ -9,7 +9,7 @@
 ###
 ###
 ###  * Note: This is to be sourced within "server.R" *
-newdevice <- iNZightTools:::newdevice
+
 # initialize gui
 output$timeseries.panel <- renderUI({
   timeseries.panel.ui(get.data.set())
