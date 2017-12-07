@@ -11,6 +11,34 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), 
 - Model Fitting
 - Maps
 
+
+## To run locally:
+
+iNZight Lite is a shiny app, so you can run it locally if you have R installed.
+
+1. [Download and unzip](https://github.com/iNZightVIT/Lite/archive/master.zip) or clone this repository
+
+    _Note: if you use Git to clone the repository, you can easily keep Lite updated via `git pull`_
+
+2. Open R/RStudio and set the working directory/Project to the Lite folder
+3. Install the `devtools` R package (if you don't already have it):
+```{r}
+install.packages("devtools")
+```
+4. Install package dependencies (NOTE: we host iNZight packages on our own server, see below)
+```{r}
+devtools::install_deps(repos = c("http://r.docker.stat.auckland.ac.nz/R", 
+                                 "https://cloud.r-project.org/"))
+```
+5. Run the iNZight Lite app!
+```{r}
+shiny::runApp()
+```
+
+Send bug reports/errors to inzightlite_support@stat.auckland.ac.nz.
+
+
+
 Recent Updates (Most to least recent):
 ----------------------------------------
 - [Import dataset ] Now is able to read excel, sas, spss and stata files 
