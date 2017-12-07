@@ -2,8 +2,10 @@ Package: iNZightLite
 Type: Shiny Application
 Title: iNZight Lite
 Version: 0.9.6
-Date: 2015-02-25
-Authors@R: c(person("Chris", "Park", role = c("aut", "cre"),
+Date: 2017-12-08
+Authors@R: c(person("Shengwei", "Hu", role = c("aut", "cre"),
+                    email = "shengwei.hu@auckland.ac.nz"),
+             person("Chris", "Park", role = c("aut"),
              email = "cpar137@aucklanduni.ac.nz"),
              person("Christoph", "Knapp", role = c("aut"),
              email = "c.knapp@auckland.ac.nz"),
