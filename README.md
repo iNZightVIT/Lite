@@ -14,13 +14,17 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), 
 
 ## To run locally:
 
-iNZight Lite is a shiny app, so you can run it locally if you have R installed.
+iNZight Lite is a shiny app, so you can run it locally if you have R installed. If you use RStudio, see instructions further down.
 
 1. [Download and unzip](https://github.com/iNZightVIT/Lite/archive/master.zip) or clone this repository
 
     _Note: if you use Git to clone the repository, you can easily keep Lite updated via `git pull`_
 
-2. Open R/RStudio and set the working directory/Project to the Lite folder
+2. Open R and set the working directory to the Lite folder
+```{r}
+setwd("/path/to/Lite")
+```
+
 3. Install the `devtools` R package (if you don't already have it):
 ```{r}
 install.packages("devtools")
@@ -34,6 +38,29 @@ devtools::install_deps(repos = c("http://r.docker.stat.auckland.ac.nz/R",
 ```{r}
 shiny::runApp()
 ```
+
+### RStudio users:
+
+1. __If you have git installed__: in RStudio > File > New Project > Version Control > Git 
+
+    - For the URL, enter: `https://github.com/iNZightVIT/Lite.git`
+    - And choose a location to save the app
+    - Then Create Project    
+ 
+    __If you don't have git__: 
+    
+    - [Download and unzip](https://github.com/iNZightVIT/Lite/archive/master.zip) the app
+    - In the folder, double click `Lite.rproj` to open the project in RStudio
+
+2. To install the dependencies, enter the following into the Console:
+```{r}
+install.packages("devtools")  ## skip if you know you already have devtools
+devtools::install_deps(repos = c("http://r.docker.stat.auckland.ac.nz/R", 
+                                 "https://cloud.r-project.org/"))
+```
+    
+3. To run iNZight Lite, open the `ui.R` file and click the __Run App__ button at the top.
+
 
 Send bug reports/errors to inzightlite_support@stat.auckland.ac.nz.
 
