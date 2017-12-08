@@ -11,6 +11,62 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), 
 - Model Fitting
 - Maps
 
+
+## To run locally:
+
+iNZight Lite is a shiny app, so you can run it locally if you have R installed. If you use RStudio, see instructions further down.
+
+1. [Download and unzip](https://github.com/iNZightVIT/Lite/archive/runlocal.zip) or clone this repository
+
+    _Note: if you use Git to clone the repository, you can easily keep Lite updated via `git pull`_
+
+2. Open R and set the working directory to the Lite folder
+```{r}
+setwd("/path/to/Lite")
+```
+
+3. Install the `devtools` R package (if you don't already have it):
+```{r}
+install.packages("devtools")
+```
+4. Install package dependencies (NOTE: we host iNZight packages on our own server, see below)
+```{r}
+devtools::install_deps(repos = c("http://r.docker.stat.auckland.ac.nz/R", 
+                                 "https://cloud.r-project.org/"))
+```
+5. Run the iNZight Lite app!
+```{r}
+shiny::runApp()
+```
+
+### RStudio users:
+
+1. __If you have git installed__: in RStudio > File > New Project > Version Control > Git 
+
+    - For the URL, enter: `https://github.com/iNZightVIT/Lite.git`
+    - And choose a location to save the app
+    - Then Create Project
+    - __Under the "Git" tab on the top-right of the screen__: click "master" and choose "runlocal" from the drop down.
+ 
+    __If you don't have git__: 
+    
+    - [Download and unzip](https://github.com/iNZightVIT/Lite/archive/runlocal.zip) the app
+    - In the folder, double click `Lite.rproj` to open the project in RStudio
+
+2. To install the dependencies, enter the following into the Console:
+```{r}
+install.packages("devtools")  ## skip if you know you already have devtools
+devtools::install_deps(repos = c("http://r.docker.stat.auckland.ac.nz/R", 
+                                 "https://cloud.r-project.org/"))
+```
+    
+3. To run iNZight Lite, open the `ui.R` file and click the __Run App__ button at the top.
+
+
+Send bug reports/errors to inzightlite_support@stat.auckland.ac.nz.
+
+
+
 Recent Updates (Most to least recent):
 ----------------------------------------
 - [Import dataset ] Now is able to read excel, sas, spss and stata files 

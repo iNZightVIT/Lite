@@ -1,9 +1,11 @@
-Package: iNZight-Lite
+Package: iNZightLite
 Type: Shiny Application
 Title: iNZight Lite
 Version: 0.9.6
-Date: 2015-02-25
-Authors@R: c(person("Chris", "Park", role = c("aut", "cre")
+Date: 2017-12-08
+Authors@R: c(person("Shengwei", "Hu", role = c("aut", "cre"),
+                    email = "shengwei.hu@auckland.ac.nz"),
+             person("Chris", "Park", role = c("aut"),
              email = "cpar137@aucklanduni.ac.nz"),
              person("Christoph", "Knapp", role = c("aut"),
              email = "c.knapp@auckland.ac.nz"),
@@ -11,6 +13,6 @@ Authors@R: c(person("Chris", "Park", role = c("aut", "cre")
              email = "jzen188@aucklanduni.ac.nz"))
 Description: A web implementation of iNZight, a simple data analysis tool designed for high school students in New Zealand.
 License: GPL-3
-Imports: gpairs, iNZightPlots, Markdown, Shiny
-Depends: R (>= 3.1.0)
-Suggests: None
+Depends: R (>= 3.1.0), shiny, markdown
+Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps
+RoxygenNote: 6.0.1
