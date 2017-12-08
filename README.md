@@ -16,7 +16,7 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz), 
 
 iNZight Lite is a shiny app, so you can run it locally if you have R installed. If you use RStudio, see instructions further down.
 
-1. [Download and unzip](https://github.com/iNZightVIT/Lite/archive/runlocal.zip) or clone this repository
+1. [Download and unzip](https://github.com/iNZightVIT/Lite/archive/master.zip) or clone this repository
 
     _Note: if you use Git to clone the repository, you can easily keep Lite updated via `git pull`_
 
@@ -46,11 +46,10 @@ shiny::runApp()
     - For the URL, enter: `https://github.com/iNZightVIT/Lite.git`
     - And choose a location to save the app
     - Then Create Project
-    - __Under the "Git" tab on the top-right of the screen__: click "master" and choose "runlocal" from the drop down.
  
     __If you don't have git__: 
     
-    - [Download and unzip](https://github.com/iNZightVIT/Lite/archive/runlocal.zip) the app
+    - [Download and unzip](https://github.com/iNZightVIT/Lite/archive/master.zip) the app
     - In the folder, double click `Lite.rproj` to open the project in RStudio
 
 2. To install the dependencies, enter the following into the Console:
