@@ -740,7 +740,7 @@ output$continentsoptions_panel = renderUI({
                             "Africa", "Asia", "Europe", "North America", "Oceania", "South America"), 
                 multiple = FALSE,
                 selectize = FALSE,
-                size = 2)
+                size = 4)
   })
 })
 
@@ -759,7 +759,7 @@ output$countriesoptions_panel = renderUI({
                             "US States (Contiguous)"), 
                 multiple = FALSE,
                 selectize = FALSE,
-                size = 2)
+                size = 4)
   })
 })
 
@@ -774,7 +774,7 @@ output$worldoptions_panel = renderUI({
                             "World Map (Thematic Mapping)"), 
                 multiple = FALSE,
                 selectize = FALSE,
-                size = 2)
+                size = 4)
   })
 })
 
@@ -976,6 +976,7 @@ output$maps_plot = renderPlot({
       if(!is.null(mapData) &&
          !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
          !is.null(input$mapvariable)) {
+        
         ## update "match.list" information after loading data        
         match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
                                                  as.data.frame(mapData)[, input$mapvariable])
@@ -983,7 +984,8 @@ output$maps_plot = renderPlot({
         args2$match.list = match.list
         
         if(!is.null(temp$combinedData) &&
-           !is.null(input$vartodisplay) && all(input$vartodisplay %in% colnames(temp.data))) {
+           !is.null(input$vartodisplay) && 
+           all(input$vartodisplay %in% colnames(temp.data))) {
           
           temp$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
                                           "point", "region")
@@ -992,6 +994,7 @@ output$maps_plot = renderPlot({
             temp$combinedData$type = "sparklines"
           
           ## multiple varibles to display ?
+
           if(length(input$vartodisplay) > 1)
             multiple.variables = TRUE
           else
@@ -1009,8 +1012,6 @@ output$maps_plot = renderPlot({
             else
               aggregate.logical = FALSE
           }
-            
-          
 
           grid::grid.draw(plot(temp$combinedData, 
                                main = temp$plotTitle,
@@ -1056,6 +1057,7 @@ observe({
   input$datavariable
   input$mapvariable
   input$sequencevariable
+
   
   isolate({
     temp.data = get.data.set()
@@ -1071,7 +1073,7 @@ observe({
         has.multipleobs = TRUE
       else
         has.multipleobs = FALSE
-
+      
       args2$combinedData = suppressWarnings(iNZightMaps::iNZightMapPlot(data = temp.data,
                                                                         map = mapData,
                                                                         type = "region",
@@ -1080,6 +1082,9 @@ observe({
                                                                         simplification.level = 0.01,
                                                                         multiple.obs = has.multipleobs,
                                                                         sequence.var = input$sequencevariable))
+        
+
+      
     }
     
   })
@@ -1732,23 +1737,22 @@ output$plotas_panel = renderUI({
       ## conditional when "Single Value" or "Aggregate" is selected
       if((!is.null(input$multipleobsoption) && length(input$multipleobsoption) > 0 && input$multipleobsoption != 2) ||
          (!is.null(temp$match.list) && !temp$match.list$multiple.obs)) {
-        plotas.options = fixedRow(column(3, h5("Plot as:")),
-                                  column(6, radioButtons(inputId = "plotas_options",
-                                                         label = NULL,
-                                                         choices = c("Regions" = 1, "Centroids" = 2),
-                                                         selected = input$plotas_options,
-                                                         inline = TRUE)))
+        ret = list(fixedRow(column(3, h5("Plot as:")),
+                            column(6, radioButtons(inputId = "plotas_options",
+                                                   label = NULL,
+                                                   choices = c("Regions" = 1, "Centroids" = 2),
+                                                   selected = input$plotas_options,
+                                                   inline = TRUE))),
+                   
+                   conditionalPanel(condition = "input.plotas_options == 2",
+                                        fixedRow(column(3, h5("Size by:")),
+                                                 column(6, selectInput(inputId = "plotas_sizeby",
+                                                                       label = NULL,
+                                                                       choices = c(" ", sort(iNZightMaps::iNZightMapVars(temp$combinedData, TRUE)[temp$combinedData$var.types %in% c("numeric", "integer")])),
+                                                                       selected = input$plotas_sizeby,
+                                                                       selectize = F)))))
         
-        plotas.sizeby = conditionalPanel(condition = "input.plotas_options == 2",
-                                         fixedRow(column(3, h5("Size by:")),
-                                                  column(6, selectInput(inputId = "plotas_sizeby",
-                                                                        label = NULL,
-                                                                        choices = c("", sort(iNZightMaps::iNZightMapVars(temp$combinedData, TRUE)[temp$combinedData$var.types %in% c("numeric", "integer")])),
-                                                                        selected = input$plotas_sizeby,
-                                                                        selectize = F))))
-        
-        ret = list(plotas.options,
-                   plotas.sizeby)
+
       }
     
     
@@ -1774,7 +1778,10 @@ observe({
 observe({
   input$plotas_sizeby
   isolate({
-    args2$mapSizeVar = input$plotas_sizeby
+    if(length(input$plotas_sizeby) > 0 && input$plotas_sizeby == " ")
+      args2$mapSizeVar = NULL
+    else
+      args2$mapSizeVar = input$plotas_sizeby
   })
 })
 
@@ -1792,7 +1799,7 @@ output$sizeandtransparency_panel = renderUI({
     temp = plot.args2()
     ## conditional when "allvalues" or ""centroids" is selected 
     
-    if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 2 ||
+    if((length(input$multipleobsoption) > 0 && input$multipleobsoption == 2) ||
        length(input$plotas_options) > 0 && input$plotas_options == 2 && 
        (length(input$multipleobsoption) > 0 && (input$multipleobsoption == 1 | input$multipleobsoption == 3) ||
        !is.null(temp$match.list) && !temp$match.list$multiple.obs)) {

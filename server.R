@@ -27,9 +27,8 @@ library(foreign)
 #library(shinydashboard)
 library(shinyjs)
 #library(iNZightTools)
-
-library(ggplot2)
-library(grid)
+#library(ggplot2)
+#library(grid)
 
 
 # read in possible command line arguments such as 'vars.path'
