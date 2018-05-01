@@ -4534,6 +4534,13 @@ create.html = function() {
       }else{
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
       }
+      
+       ## add to fix interactive dotplot bug ..
+       result = plot.ret.para$parameters  
+       if(is.null(attributes(result)$varnames$y))
+         attributes(result)$varnames$y = " "
+       return(result)
+      
     }
   }
 } 
