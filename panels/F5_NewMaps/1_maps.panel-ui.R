@@ -105,9 +105,12 @@ maps.sidebarPanel = function(data.set) {
             fileInput("loadshapefiles", label = "",  multiple = F)
           ),
           
-          actionButton(inputId = "importmap",
-                       label = "Import Map",
-                       style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+          conditionalPanel(
+            condition = "input.selectshapefile == 1",
+            actionButton(inputId = "importmap",
+                         label = "Import Map",
+                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+          ),
           
           hr(),
           

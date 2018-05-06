@@ -986,7 +986,7 @@ output$maps_plot = renderPlot({
   
   input$check_regions
   
-  input$loadshapefiles
+#  input$loadshapefiles
   
   isolate({
     if(input$map_type == 1) {
@@ -1131,6 +1131,8 @@ output$sequencevariable_panel = renderUI({
   get.data.set()
   input$datavariable
   input$mapvariable
+  
+  input$loadshapefiles
   ret = NULL
   
   isolate({
@@ -1180,6 +1182,8 @@ output$unmatched_panel = renderUI({
   input$datavariable
   input$mapvariable
   
+  input$loadshapefiles
+  
   ret = NULL
   isolate({
     temp = plot.args2()
@@ -1207,6 +1211,8 @@ output$unmatchedcounts_panel = renderText({
   input$importmap
   input$datavariable
   input$mapvariable
+  
+  input$loadshapefiles
   
   ret = NULL
   isolate({
