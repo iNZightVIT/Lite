@@ -100,6 +100,11 @@ maps.sidebarPanel = function(data.set) {
             uiOutput("worldoptions_panel")
           ),
           
+          conditionalPanel(
+            condition = "input.selectshapefile == 2",
+            fileInput("loadshapefiles", label = "",  multiple = F)
+          ),
+          
           actionButton(inputId = "importmap",
                        label = "Import Map",
                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),

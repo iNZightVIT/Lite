@@ -84,6 +84,9 @@ args2 = reactiveValues(
   
   plotLabelScale = 4,
   plotAxisScale = 11, 
+
+  mapRegionsPlot = NULL,
+  mapExcludedRegions = TRUE,
   
   proj.df = iNZightMaps::iNZightMapProjections()
 )
@@ -870,6 +873,35 @@ observe({
 })
 
 
+## observe shapefiles loaded by users
+observeEvent(input$loadshapefiles, { 
+  
+  temp.data = get.data.set()
+  
+  isolate({
+    
+    filepath = input$loadshapefiles$datapath
+    mapData = iNZightMaps::retrieveMap(filepath)
+    args2$mapData = mapData
+    map.vars = as.data.frame(mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
+    ## get the choices for mapvairable_panel
+    mapvars.update = colnames(map.vars[, !(apply(map.vars, 2, anyDuplicated, incomparables = c(NA, ""))), drop = FALSE])
+    
+    ## Find the pair of variables with the highest number of matches
+    best.vars = iNZightMaps::findBestMatch(temp.data, map.vars)
+    best.data.var = best.vars[1]
+    best.map.var =  best.vars[2]
+    
+    ## update mapvairable_panel after map file selected
+    updateSelectInput(session, "mapvariable", choices = mapvars.update, selected = best.map.var)
+    ## update datavariable_panel
+    updateSelectInput(session, "datavariable", selected = best.data.var)
+    
+  })
+
+})
+
+
 
 ## everything reset to default when a new dataset is loaded
 observe({
@@ -924,11 +956,9 @@ output$maps_plot = renderPlot({
   
   plot.args()
   
-#  input$importmap
   input$datavariable
   input$mapvariable
-#  input$sequencevariable
-  
+
   input$vartodisplay
   
   input$advancedmapoptions_projection
@@ -953,6 +983,10 @@ output$maps_plot = renderPlot({
   
   input$advancedplotoptions_mapscales
   input$scales_confirm
+  
+  input$check_regions
+  
+  input$loadshapefiles
   
   isolate({
     if(input$map_type == 1) {
@@ -1012,7 +1046,7 @@ output$maps_plot = renderPlot({
             else
               aggregate.logical = FALSE
           }
-
+#          print(temp)
           grid::grid.draw(plot(temp$combinedData, 
                                main = temp$plotTitle,
                                axis.labels = TRUE, xlab = temp$plotXLab, ylab = temp$plotYLab,
@@ -1031,7 +1065,9 @@ output$maps_plot = renderPlot({
                                scale.limits = temp$plotScaleLimits,
                                label.var = temp$plotLabelVar,
                                scale.label = temp$plotLabelScale,
-                               scale.axis = temp$plotAxisScale))
+                               scale.axis = temp$plotAxisScale,
+                               regions.to.plot = temp$mapRegionsPlot, 
+                               keep.other.regions = temp$mapExcludedRegions))
           
         }
         
@@ -1223,6 +1259,8 @@ output$checkregion_panel = renderUI({
   input$datavariable
   input$mapvariable
   input$sequencevariable
+  input$importmap
+  input$loadshapefiles
   
   ret = NULL
   
@@ -1242,6 +1280,24 @@ output$checkregion_panel = renderUI({
   })
   
   ret
+})
+
+
+
+## observe checkregion_panel
+observe({
+  input$check_regions
+  isolate({
+    temp = plot.args2()
+    options = iNZightMaps::iNZightMapRegions(temp$combinedData)
+    if(!is.null(input$check_regions) && length(input$check_regions) > 0 &&
+       length(input$check_regions) != length(options)) {
+      args2$mapRegionsPlot = input$check_regions
+      args2$mapExcludedRegions = TRUE
+    }
+    else
+      args2$mapRegionsPlot = NULL
+  })
 })
 
 
@@ -1493,7 +1549,10 @@ observe({
 observe({
   input$advancedplotoptions_transparency
   isolate({
-    args2$plotConstantAlpha = input$advancedplotoptions_transparency
+    if(length(input$advancedplotoptions_transparency) > 0)
+      args2$plotConstantAlpha = input$advancedplotoptions_transparency
+    else
+      args2$plotConstantAlpha = 1.0
   })
 })
 
@@ -1502,7 +1561,10 @@ observe({
 observe({
   input$advancedplotoptions_size
   isolate({
-    args2$plotConstantSize = input$advancedplotoptions_size
+    if(length(input$advancedplotoptions_size) > 0)
+      args2$plotConstantSize = input$advancedplotoptions_size
+    else 
+      args2$plotConstantSize = 1.0
   })
 })
 
