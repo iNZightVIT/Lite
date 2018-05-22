@@ -383,7 +383,7 @@ output$multiple_multi_plot = renderPlot({
           multiseries(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = input$choose_season,
+            multiplicative = ifelse(input$choose_season, TRUE, FALSE),
             t = 100*input$slidersmoothing
           )
         }, 
