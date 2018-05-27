@@ -3,7 +3,7 @@
 ###-------------------------------------------------###
 ###
 ###  Date Created   :   January 16, 2015
-###  Last Modified  :   March 26, 2017
+###  Last Modified  :   May 27, 2018
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -130,7 +130,7 @@ output$timeseries_plot = renderPlot({
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
         suppressWarnings(tryCatch({
-          rawplot(
+          plot(
             iNZightTS(temp,
                       var = variable.names()),
             ## start = start),
@@ -154,6 +154,69 @@ output$timeseries_plot = renderPlot({
       text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
     }
 })
+
+
+### download Time Series Plot
+output$saveTimeplot = downloadHandler(
+  filename = function() {
+    paste("TimeSeriesPlot", 
+          switch(input$saveTimeplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+    #    if(input$saveplottype == "interactive html")
+    #      paste("Plot.html")
+    #    else
+    #      paste("Plot", input$saveplottype, sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveTimeplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveTimeplottype == "jpg")
+        jpeg(file)
+      else if(input$saveTimeplottype == "png")
+        png(file)
+      else if(input$saveTimeplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if(date_check(get.data.set(),input$select_timevars)){
+        if (length(input$singleSeriesTabs) > 0) {
+          temp = get.data.set()
+          if(!input$select_timevars%in%"time"){
+            colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+          }
+          suppressWarnings(tryCatch({
+            plot(
+              iNZightTS(temp,
+                        var = variable.names()),
+              ## start = start),
+              xlab = input$provide_xlab,
+              ylab = input$provide_ylab,
+              multiplicative = input$choose_season,
+              t = 100*input$slidersmoothing
+            )
+          }, 
+          #        warning = function(w) {
+          #          cat("Warning produced in timseries plot\n")
+          #          print(w)
+          #        }, 
+          error = function(e) {
+            cat("Handled error in timseries plot\n")
+            print(e)
+          }, finally = {}))
+        }
+      }else{
+        plot.new()
+        text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      }
+      dev.off()
+    }
+  })  
+
+
 
 ###  Seasonal Plot
 output$seasonal_plot = renderPlot({
@@ -189,6 +252,73 @@ output$seasonal_plot = renderPlot({
     }
 })
 
+
+###  download Seasonal Plot
+output$saveSeasonalplot = downloadHandler(
+  filename = function() {
+    paste("TimeSeriesPlot", 
+          switch(input$saveSeasonalplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+    #    if(input$saveplottype == "interactive html")
+    #      paste("Plot.html")
+    #    else
+    #      paste("Plot", input$saveplottype, sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveSeasonalplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveSeasonalplottype == "jpg")
+        jpeg(file)
+      else if(input$saveSeasonalplottype == "png")
+        png(file)
+      else if(input$saveSeasonalplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if(date_check(get.data.set(),input$select_timevars)){
+        if (length(input$singleSeriesTabs) > 0) {
+          temp = get.data.set()
+          if(!input$select_timevars%in%"time"){
+            colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+          }
+          suppressWarnings(tryCatch({
+            seasonplot(
+              iNZightTS(temp,
+                        var = variable.names()),
+              ylab = input$provide_ylab,
+              xlab = input$provide_xlab,
+              multiplicative = input$choose_season,
+              t = 100*input$slidersmoothing
+            )
+          }, 
+          #        warning = function(w) {
+          #          cat("Warning produced in seasonplot\n")
+          #          print(w)
+          #        }, 
+          error = function(e) {
+            cat("Handled error in seasonplot\n")
+            print(e)
+          }, finally = {}))
+        }
+      }else{
+        plot.new()
+        text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      }
+      dev.off()
+    }
+  })  
+
+
+
+
+
+
+
+
 ###  Decomposed Plot
 output$decomposed_plot = renderPlot({
 #     input$selector
@@ -222,6 +352,69 @@ output$decomposed_plot = renderPlot({
       text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
     }
 })
+
+
+
+### download Decomposed Plot
+output$saveDecomposedplot = downloadHandler(
+  filename = function() {
+    paste("TimeSeriesPlot", 
+          switch(input$saveDecomposedplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+    #    if(input$saveplottype == "interactive html")
+    #      paste("Plot.html")
+    #    else
+    #      paste("Plot", input$saveplottype, sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveDecomposedplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveDecomposedplottype == "jpg")
+        jpeg(file)
+      else if(input$saveDecomposedplottype == "png")
+        png(file)
+      else if(input$saveDecomposedplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if(date_check(get.data.set(),input$select_timevars)){
+        if (length(input$singleSeriesTabs) > 0) {
+          temp = get.data.set()
+          if(!input$select_timevars%in%"time"){
+            colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+          }
+          suppressWarnings(tryCatch({
+            decompositionplot(
+              iNZightTS(temp,
+                        var = variable.names()),
+              xlab = input$provide_xlab,
+              ylab = input$provide_ylab,
+              multiplicative = input$choose_season,
+              t = 100*input$slidersmoothing
+            )
+          }, 
+          #        warning = function(w) {
+          #          cat("Warning produced in decompositionplot \n")
+          #          print(w)
+          #        }, 
+          error = function(e) {
+            cat("Handled error in decompositionplot \n")
+            print(e)
+          }, finally = {}))
+        }
+      }else{
+        plot.new()
+        text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      }
+      dev.off()
+    }
+  })  
+
+
 
 ###  Trend + Seasonal Plot
 output$trSeasonal_plot = renderPlot({
@@ -260,6 +453,76 @@ output$trSeasonal_plot = renderPlot({
     }
 })
 
+
+### download Trend + Seasonal Plot
+output$saveRecomposedplot = downloadHandler(
+  filename = function() {
+    paste("TimeSeriesPlot", 
+          switch(input$saveRecomposedplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+    #    if(input$saveplottype == "interactive html")
+    #      paste("Plot.html")
+    #    else
+    #      paste("Plot", input$saveplottype, sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveRecomposedplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveRecomposedplottype == "jpg")
+        jpeg(file)
+      else if(input$saveRecomposedplottype == "png")
+        png(file)
+      else if(input$saveRecomposedplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if(date_check(get.data.set(),input$select_timevars)){
+        if (length(input$singleSeriesTabs) > 0) {
+          temp = get.data.set()
+          if(!input$select_timevars%in%"time"){
+            colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+          }
+          suppressWarnings(tryCatch({
+            iNZightTS:::recompose(
+              iNZightTS:::decompositionplot(
+                iNZightTS(temp,
+                          var = variable.names()),
+                xlab = input$provide_xlab,
+                ylab = input$provide_ylab,
+                multiplicative = input$choose_season,
+                t = 100*input$slidersmoothing
+              ),
+              animate = FALSE
+            )
+          }, 
+          #        warning = function(w) {
+          #          cat("Warning produced in recompose plot \n")
+          #          print(w)
+          #        }, 
+          error = function(e) {
+            cat("Handled error in recompose plot \n")
+            print(e)
+          }, finally = {}))
+        }
+      }else{
+        plot.new()
+        text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      }
+      dev.off()
+    }
+  })  
+
+
+
+
+
+
+
+
 ###  Forecast Plot
 output$forecast_plot = renderPlot({
 #     input$selector
@@ -290,6 +553,67 @@ output$forecast_plot = renderPlot({
       text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
     }
 })
+
+
+###  download Forecast Plot
+output$saveForecastplot = downloadHandler(
+  filename = function() {
+    paste("TimeSeriesPlot", 
+          switch(input$saveForecastplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+    #    if(input$saveplottype == "interactive html")
+    #      paste("Plot.html")
+    #    else
+    #      paste("Plot", input$saveplottype, sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveForecastplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveForecastplottype == "jpg")
+        jpeg(file)
+      else if(input$saveForecastplottype == "png")
+        png(file)
+      else if(input$saveForecastplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if(date_check(get.data.set(),input$select_timevars)){
+        if (length(input$singleSeriesTabs) > 0) {
+          temp = get.data.set()
+          if(!input$select_timevars%in%"time"){
+            colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+          }
+          suppressWarnings(tryCatch({
+            forecastplot(
+              iNZightTS(temp,
+                        var = variable.names()),
+              multiplicative = input$choose_season
+            )
+          }, 
+          #        warning = function(w) {
+          #          cat("Warning produced in forecastplot \n")
+          #          print(w)
+          #        }, 
+          error = function(e) {
+            cat("Handled error in forecastplot \n")
+            print(e)
+          }, finally = {}))
+        }
+      }else{
+        plot.new()
+        text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      }
+      dev.off()
+    }
+  })  
+
+
+
+
 
 output$forecast_summary = renderPrint({
     if(date_check(get.data.set(),input$select_timevars)){
@@ -334,7 +658,7 @@ output$multiple_single_plot = renderPlot({
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
         suppressWarnings(tryCatch({
-          iNZightTS:::compareplot(
+          plot(
             iNZightTS(temp,
                       var = variable.names()),
             multiplicative = input$choose_season,
@@ -355,6 +679,65 @@ output$multiple_single_plot = renderPlot({
       text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
     }
 })
+
+output$saveSingleplot = downloadHandler(
+  filename = function() {
+    paste("TimeSeriesPlot", 
+          switch(input$saveSingleplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+    #    if(input$saveplottype == "interactive html")
+    #      paste("Plot.html")
+    #    else
+    #      paste("Plot", input$saveplottype, sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveSingleplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveSingleplottype == "jpg")
+        jpeg(file)
+      else if(input$saveSingleplottype == "png")
+        png(file)
+      else if(input$saveSingleplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if(date_check(get.data.set(),input$select_timevars)){
+        if (length(input$singleSeriesTabs) > 0) {
+          temp = get.data.set()
+          if(!input$select_timevars%in%"time"){
+            colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+          }
+          suppressWarnings(tryCatch({
+            plot(
+              iNZightTS(temp,
+                        var = variable.names()),
+              multiplicative = input$choose_season,
+              t = 100*input$slidersmoothing
+            )
+          }, 
+          #        warning = function(w) {
+          #          cat("Warning produced in compareplot \n")
+          #          print(w)
+          #        }, 
+          error = function(e) {
+            cat("Handled error in compareplot \n")
+            print(e)
+          }, finally = {}))
+        }
+      }else{
+        plot.new()
+        text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      }
+      dev.off()
+    }
+  })  
+
+
+
 
 output$multipleSeries_single_layout = renderUI({
 #     input$selctor
@@ -380,11 +763,12 @@ output$multiple_multi_plot = renderPlot({
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
         suppressWarnings(tryCatch({
-          multiseries(
+          plot(
             iNZightTS(temp,
                       var = variable.names()),
             multiplicative = ifelse(input$choose_season, TRUE, FALSE),
-            t = 100*input$slidersmoothing
+            t = 100*input$slidersmoothing,
+            compare = FALSE
           )
         }, 
 #        warning = function(w) {
@@ -402,6 +786,65 @@ output$multiple_multi_plot = renderPlot({
     }
 })
 
+
+output$saveMultiplot = downloadHandler(
+  filename = function() {
+    paste("TimeSeriesPlot", 
+          switch(input$saveMultiplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+    #    if(input$saveplottype == "interactive html")
+    #      paste("Plot.html")
+    #    else
+    #      paste("Plot", input$saveplottype, sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveMultiplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveMultiplottype == "jpg")
+        jpeg(file)
+      else if(input$saveMultiplottype == "png")
+        png(file)
+      else if(input$saveMultiplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      
+      if(date_check(get.data.set(),input$select_timevars)){
+        if (length(input$multipleSeriesTabs) > 0) {
+          temp = get.data.set()
+          if(!input$select_timevars%in%"time"){
+            colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+          }
+          suppressWarnings(tryCatch({
+            plot(
+              iNZightTS(temp,
+                        var = variable.names()),
+              multiplicative = ifelse(input$choose_season, TRUE, FALSE),
+              t = 100*input$slidersmoothing,
+              compare = FALSE
+            )
+          }, 
+          #        warning = function(w) {
+          #          cat("Warning produced in multiseries plot \n")
+          #          print(w)
+          #        }, 
+          error = function(e) {
+            cat("Handled error in multiseries plot \n")
+            print(e)
+          }, finally = {}))
+        }
+      }else{
+        plot.new()
+        text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      }
+      dev.off()
+    }
+  })  
+
+
 output$multipleSeries_multi_layout = renderUI({
 #     input$selector
     if (length(input$multipleSeriesTabs) > 0) {
@@ -413,6 +856,8 @@ output$multipleSeries_multi_layout = renderUI({
         }
     }
 })
+
+
 
 output$time.select = renderUI({
   sel = ""

@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created  : January 16, 2015.
-###  Last Modified : March 30, 2017.
+###  Last Modified : May 27, 2018.
 ###
 ###  The UI is divided into two panels:
 ###
@@ -179,7 +179,18 @@ ts.mainPanel = function() {
                         "for",
                         strong("single"),
                         "series."),
-                    plotOutput("timeseries_plot")
+                    plotOutput("timeseries_plot"),
+                    
+                    br(),
+                    
+                    fixedRow(column(width = 3, 
+                                    NULL),
+                             column(width = 3, 
+                                    downloadButton(outputId = "saveTimeplot", label = "Download Plot")),
+                             column(width = 3,
+                                    radioButtons(inputId = "saveTimeplottype", 
+                                                 label = strong("Select the file type"), 
+                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
                 ),
                 ## uiOutput("timeseries_layout")),
                 ## actionButton(inputId = "start_animate",
@@ -197,7 +208,18 @@ ts.mainPanel = function() {
                         strong("single"),
                         "series.",
                         br()),
-                    plotOutput(outputId = "seasonal_plot")
+                    plotOutput(outputId = "seasonal_plot"),
+                    
+                    br(),
+                    
+                    fixedRow(column(width = 3, 
+                                    NULL),
+                             column(width = 3, 
+                                    downloadButton(outputId = "saveSeasonalplot", label = "Download Plot")),
+                             column(width = 3,
+                                    radioButtons(inputId = "saveSeasonalplottype", 
+                                                 label = strong("Select the file type"), 
+                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
                 ),
 
                 ##  Tab 3: Decomposed Plot
@@ -212,7 +234,18 @@ ts.mainPanel = function() {
                         "series.",
                         br(),
                         br()),
-                    plotOutput(outputId = "decomposed_plot")
+                    plotOutput(outputId = "decomposed_plot"),
+                    
+                    br(),
+                    
+                    fixedRow(column(width = 3, 
+                                    NULL),
+                             column(width = 3, 
+                                    downloadButton(outputId = "saveDecomposedplot", label = "Download Plot")),
+                             column(width = 3,
+                                    radioButtons(inputId = "saveDecomposedplottype", 
+                                                 label = strong("Select the file type"), 
+                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
                 ),
 
                 ##  Tab 4: Trend + Seasonal Plot
@@ -227,7 +260,18 @@ ts.mainPanel = function() {
                         "series.",
                         br(),
                         br()),
-                    plotOutput(outputId = "trSeasonal_plot")
+                    plotOutput(outputId = "trSeasonal_plot"),
+                    
+                    br(),
+                    
+                    fixedRow(column(width = 3, 
+                                    NULL),
+                             column(width = 3, 
+                                    downloadButton(outputId = "saveRecomposedplot", label = "Download Plot")),
+                             column(width = 3,
+                                    radioButtons(inputId = "saveRecomposedplottype", 
+                                                 label = strong("Select the file type"), 
+                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
                 ),
 
                 ##  Tab 5: Forecast Plot
@@ -243,7 +287,18 @@ ts.mainPanel = function() {
                         br(),
                         br()
                     ),
-                    plotOutput(outputId = "forecast_plot")
+                    plotOutput(outputId = "forecast_plot"),
+                    
+                    br(),
+                    
+                    fixedRow(column(width = 3, 
+                                    NULL),
+                             column(width = 3, 
+                                    downloadButton(outputId = "saveForecastplot", label = "Download Plot")),
+                             column(width = 3,
+                                    radioButtons(inputId = "saveForecastplottype", 
+                                                 label = strong("Select the file type"), 
+                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
                 ),
 
                 ##  Tab 6: Forecast Summary
@@ -282,7 +337,18 @@ ts.mainPanel = function() {
                         br(),
                         br()
                     ),
-                    uiOutput("multipleSeries_single_layout")
+                    uiOutput("multipleSeries_single_layout"),
+                    
+                    br(),
+                    
+                    fixedRow(column(width = 3, 
+                                    NULL),
+                             column(width = 3, 
+                                    downloadButton(outputId = "saveSingleplot", label = "Download Plot")),
+                             column(width = 3,
+                                    radioButtons(inputId = "saveSingleplottype", 
+                                                 label = strong("Select the file type"), 
+                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
                 ),
                 ##  Tab 2:  Multiple Plot Layout
                 tabPanel(
@@ -297,10 +363,22 @@ ts.mainPanel = function() {
                         br(),
                         br()
                     ),
-                    uiOutput("multipleSeries_multi_layout")
+                    uiOutput("multipleSeries_multi_layout"),
+                    
+                    br(),
+                    
+                    fixedRow(column(width = 3, 
+                                    NULL),
+                             column(width = 3, 
+                                    downloadButton(outputId = "saveMultiplot", label = "Download Plot")),
+                             column(width = 3,
+                                    radioButtons(inputId = "saveMultiplottype", 
+                                                 label = strong("Select the file type"), 
+                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
                 )
             )
         )
+
     )
 }
 
