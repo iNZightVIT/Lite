@@ -3,7 +3,7 @@
 ###---------------------------------------------------###
 ###
 ###  Date Created  : Feb 22, 2017.
-###  Last Modified : Apr 22, 2018.
+###  Last Modified : May 20, 2018.
 ###  
 ###
 ###  * Note: This is to be sourced within "server.R" *
@@ -954,29 +954,34 @@ observe({
 
 
 ## update "combinedData" information after loading data
-
 observe({
   get.data.set()
   input$datavariable
   input$mapvariable
   input$sequencevariable
-
+  input$unmatched
+#  args2$mapData
   
   isolate({
     temp.data = get.data.set()
     temp = plot.args2()
     mapData = temp$mapData
-    
-    if(!is.null(mapData) && !is.null(temp$match.list) &&
+    match.list = temp$match.list
+    sequence.var = NULL
+    if(!is.null(mapData) && !is.null(match.list) &&
        !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
-       !is.null(input$mapvariable) && input$mapvariable != "" &&
-       !is.null(input$sequencevariable) && input$sequencevariable %in% colnames(temp.data)) {
+       !is.null(input$mapvariable) && input$mapvariable != "") {
       
-      if(temp$match.list$multiple.obs)
+      if(match.list$multiple.obs) {
         has.multipleobs = TRUE
-      else
-        has.multipleobs = FALSE
+        if(!is.null(input$sequencevariable) && input$sequencevariable %in% colnames(temp.data))
+          sequence.var = input$sequencevariable
+      }
       
+      else {
+        has.multipleobs = FALSE
+      }
+    
       args2$combinedData = suppressWarnings(iNZightMaps::iNZightMapPlot(data = temp.data,
                                                                         map = mapData,
                                                                         type = "region",
@@ -984,13 +989,13 @@ observe({
                                                                         by.map = input$mapvariable,
                                                                         simplification.level = 0.01,
                                                                         multiple.obs = has.multipleobs,
-                                                                        sequence.var = input$sequencevariable))
+                                                                        sequence.var = sequence.var))
         
-
       
     }
     
   })
+  
 })
 
 
@@ -998,45 +1003,42 @@ output$sequencevariable_panel = renderUI({
   get.data.set()
   input$datavariable
   input$mapvariable
-  
   input$loadshapefiles
   ret = NULL
   
   isolate({
     temp.data = get.data.set()
     temp = plot.args2()
-    
-    if(!is.null(temp$match.list)) {
-    
-    if(!is.null(temp$match.list) && temp$match.list$multiple.obs)
-      textpanel = h5(strong("Multiple observations for each region were found!"))
-    else
-      textpanel = ""
-    
-      timevar = grepl("(year|date)", colnames(temp.data), ignore.case = TRUE)
-      
-      if(any(timevar)) {
+    match.list = temp$match.list
+    if(!is.null(match.list)) {
+      if(match.list$multiple.obs) {
         
-        ret = list(textpanel,
-                   fixedRow(column(5, h5("Sequence Variable:")),
-                            column(7, selectInput(inputId = "sequencevariable", 
-                                                  label = NULL, 
-                                                  choices = colnames(vis.data()),
-                                                  selected = colnames(vis.data())[timevar][1],
-                                                  selectize = F))))
+        textpanel = h5(strong("Multiple observations for each region were found!"))
+        timevar = grepl("(year|date)", colnames(temp.data), ignore.case = TRUE)
+        
+        if(any(timevar)) {
+          
+          ret = list(textpanel,
+                     fixedRow(column(5, h5("Sequence Variable:")),
+                              column(7, selectInput(inputId = "sequencevariable", 
+                                                    label = NULL, 
+                                                    choices = colnames(vis.data()),
+                                                    selected = colnames(vis.data())[timevar][1],
+                                                    selectize = F))))
+        }
+        else {
+          ret = list(textpanel,
+                     fixedRow(column(5, h5("Sequence Variable:")),
+                              column(7, selectInput(inputId = "sequencevariable", 
+                                                    label = NULL, 
+                                                    choices = colnames(vis.data()),
+                                                    selectize = F))))
+        }
       }
-      else {
-        ret = list(textpanel,
-                   fixedRow(column(5, h5("Sequence Variable:")),
-                            column(7, selectInput(inputId = "sequencevariable", 
-                                                  label = NULL, 
-                                                  choices = colnames(vis.data()),
-                                                  selectize = F))))
-      }
+      else
+        textpanel = ""
     }
-    
   })
-  
   ret
 })
 
@@ -1369,18 +1371,6 @@ observe({
 
 
 
-
-
-## observe advancedplotoptions_plottitle
-observe({
-  input$advancedplotoptions_plottitle
-  isolate({
-    args2$plotTitle = input$advancedplotoptions_plottitle
-  })
-})
-
-
-
 ## observe advancedplotoptions_mappalette
 observe({
   input$advancedplotoptions_mappalette
@@ -1436,23 +1426,23 @@ observe({
 
 
 ## observe advancedplotoptions_transparency
-observe({
-  input$advancedplotoptions_transparency
-  isolate({
-    if(length(input$advancedplotoptions_transparency) > 0)
-      args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
-  })
-})
+#observe({
+#  input$advancedplotoptions_transparency
+#  isolate({
+#    if(length(input$advancedplotoptions_transparency) > 0)
+#      args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+#  })
+#})
 
 
 ## observe advancedplotoptions_size
-observe({
-  input$advancedplotoptions_size
-  isolate({
-    if(length(input$advancedplotoptions_size) > 0)
-      args2$plotConstantSize = input$advancedplotoptions_size
-  })
-})
+#observe({
+#  input$advancedplotoptions_size
+#  isolate({
+#    if(length(input$advancedplotoptions_size) > 0)
+#      args2$plotConstantSize = input$advancedplotoptions_size
+#  })
+#})
 
 
 ## set up variabletodisplay_panel
@@ -1590,7 +1580,7 @@ output$seqvar_slider_panel = renderUI({
 
 ## observe multipleobsoption and seqvar_slider
 observe({
-#  input$multipleobsoption
+  input$multipleobsoption
   input$seqvar_slider
   
   isolate({
@@ -1603,10 +1593,13 @@ observe({
         
         args2$multipleObsOption = "singleval"
         #      args2$combinedData$type = ifelse(input$plotas_options == 1, "region", "points")
-        args2$plotCurrentSeqVal = unique.singlevals[input$seqvar_slider]
-        args2$combinedData = iNZightMaps::iNZightMapAggregation(temp$combinedData,
-                                                                "singlevalue",
-                                                                single.value = unique.singlevals[input$seqvar_slider])
+        if(!is.null(input$seqvar_slider) && length(input$seqvar_slider) > 0) {
+          args2$plotCurrentSeqVal = unique.singlevals[input$seqvar_slider]
+          args2$combinedData = iNZightMaps::iNZightMapAggregation(temp$combinedData,
+                                                                  "singlevalue",
+                                                                  single.value = unique.singlevals[input$seqvar_slider])
+        }
+        
         
         #      print(temp$combinedData$sequence.var)
         #      print(unique.singlevals[input$seqvar_slider])
@@ -1973,7 +1966,57 @@ output$savemaps = downloadHandler(
     }
     
     dev.off()
-  })    
+  }) 
+
+
+## observe advancedplotoptions_plottitle
+observe({
+  input$advancedplotoptions_plottitle
+  isolate({
+    args2$plotTitle = input$advancedplotoptions_plottitle
+  })
+})
+
+## update plot title
+observe({
+  input$vartodisplay
+  input$multipleobsoption
+  input$seqvar_slider
+  
+  isolate({
+    temp = plot.args2()
+    if(!is.null(input$vartodisplay) && length(input$vartodisplay) > 0) {
+      
+      if(length(input$vartodisplay) > 1) {
+        args2$plotTitle = ""
+        updateTextInput(session, "advancedplotoptions_plottitle", value = "")
+      }
+      else {
+        if(!is.null(temp$match.list) && temp$match.list$multiple.obs) {
+          if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 1) {
+            #                  temp = plot.args2()
+            args2$plotTitle = paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")")
+            updateTextInput(session, "advancedplotoptions_plottitle", 
+                            value = paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")"))
+          } 
+          else if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 3) {
+            args2$plotTitle = value = paste(input$vartodisplay, " (", input$aggregateoption, ")")
+            updateTextInput(session, "advancedplotoptions_plottitle", 
+                            value = paste(input$vartodisplay, " (", input$aggregateoption, ")"))
+          } 
+          else {
+            args2$plotTitle = input$vartodisplay
+            updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
+          }
+        }
+        else {
+          args2$plotTitle = input$vartodisplay
+          updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
+        }
+      }
+    }
+  })
+})
 
 
 
@@ -1981,7 +2024,7 @@ output$savemaps = downloadHandler(
 output$maps_plot = renderPlot({
   get.data.set()
   #  plot.args2()
-  
+  args2$plotTitle
   plot.args()
   
   input$datavariable
@@ -2081,38 +2124,19 @@ output$maps_plot = renderPlot({
               aggregate.logical = FALSE
           }
           
+          ## update plotConstantSize (size for points)
+          if(!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0)
+            args2$plotConstantSize = input$advancedplotoptions_size
           
-          ## update plot title
-          if(!is.null(input$vartodisplay) && length(input$vartodisplay) > 0) {
-            temp = plot.args2()
-            if(length(input$vartodisplay) > 1) {
-              args2$plotTitle = ""
-              updateTextInput(session, "advancedplotoptions_plottitle", value = "")
-            }
-            else {
-              if(!is.null(temp$match.list) && temp$match.list$multiple.obs) {
-                if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 1) {
-                  temp = plot.args2()
-                  args2$plotTitle = paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")")
-                  updateTextInput(session, "advancedplotoptions_plottitle", 
-                                  value = paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")"))
-                } 
-                else if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 3) {
-                  args2$plotTitle = value = paste(input$vartodisplay, " (", input$aggregateoption, ")")
-                  updateTextInput(session, "advancedplotoptions_plottitle", 
-                                  value = paste(input$vartodisplay, " (", input$aggregateoption, ")"))
-                } 
-                else {
-                  args2$plotTitle = input$vartodisplay
-                  updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
-                }
-              }
-              else {
-                args2$plotTitle = input$vartodisplay
-                updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
-              }
-            }
-          }
+          
+          ## update plotConstantAlpha
+          if(!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0)
+            args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+          
+          ## update advancedplotoptions_plottitle
+#          if(!is.null(input$advancedplotoptions_plottitle))
+#            args2$plotTitle = input$advancedplotoptions_plottitle
+          
           
           
           temp = plot.args2()
@@ -2156,5 +2180,151 @@ output$maps_plot = renderPlot({
 
 
 
-
+## to display the interactive maps
+output$interactive.maps = renderUI({
+  get.data.set()
+  args2$plotTitle
+  input$datavariable
+  input$mapvariable
+  
+  input$vartodisplay
+  
+  input$advancedmapoptions_projection
+  input$advancedplotoptions_mappalette
+  input$advancedplotoptions_dark
+  input$advancedplotoptions_gridlines
+  
+  input$advancedplotoptions_transparency
+  input$advancedplotoptions_size
+  
+  input$plotas_options
+  input$plotas_sizeby
+  
+  input$multipleobsoption
+  input$aggregateoption
+  input$linecharttypeoption
+  input$advancedplotoptions_regionlabels
+  input$regionlabels_click
+  input$regionlabels_slider
+  input$plottitlefontsize_slider
+  input$seqvar_slider
+  
+  input$advancedplotoptions_mapscales
+  input$scales_confirm
+  
+  input$advancedplotoptions_axislabels
+  
+  input$check_regions
+  isolate({
+    
+    if(input$map_type == 2) {
+      
+      temp.data = get.data.set()
+      temp = plot.args2()
+      mapData = temp$mapData
+      
+      if(!is.null(mapData) &&
+         !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+         !is.null(input$mapvariable)) {
+        
+        ## update "match.list" information after loading data        
+        match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
+                                                 as.data.frame(mapData)[, input$mapvariable])
+        
+        args2$match.list = match.list
+        
+        if(!is.null(temp$combinedData) &&
+           !is.null(input$vartodisplay) && 
+           all(input$vartodisplay %in% colnames(temp.data))) {
+          
+          args2$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
+                                           "point", "region")
+          
+          args2$mapType = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+                                 "point", "region")
+          
+          if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 2)
+            args2$combinedData$type = "sparklines"
+          
+          ## multiple varibles to display ?
+          if(length(input$vartodisplay) > 1)
+            h4("iNZight doesn't handle interactive maps for multiple variables ... yet! 
+               Please select only one variable")
+#            multiple.variables = TRUE
+          else {
+            multiple.variables = FALSE
+            
+            if(is.null(temp$multipleObsOption)) {
+              if(multiple.variables)
+                aggregate.logical = TRUE
+              else
+                aggregate.logical = FALSE
+            }
+            else {
+              if(multiple.variables && temp$multipleObsOption != "allvalues")
+                aggregate.logical = TRUE
+              else
+                aggregate.logical = FALSE
+            }
+            
+            ## update plotConstantSize (size for points)
+            if(!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0)
+              args2$plotConstantSize = input$advancedplotoptions_size
+            
+            
+            ## update plotConstantAlpha
+            if(!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0)
+              args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+            
+            ## update advancedplotoptions_plottitle
+#            if(!is.null(input$advancedplotoptions_plottitle))
+#              args2$plotTitle = input$advancedplotoptions_plottitle
+            
+            temp = plot.args2()
+            x = plot(temp$combinedData, 
+                     main = temp$plotTitle,
+                     axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+                     datum.lines = temp$plotDatumLines, 
+                     projection = temp$plotProjection,
+                     multiple.vars = multiple.variables, 
+                     colour.var = input$vartodisplay,
+                     size.var = temp$mapSizeVar, 
+                     aggregate = aggregate.logical,
+                     darkTheme = temp$plotTheme, 
+                     alpha.const = temp$plotConstantAlpha, 
+                     size.const = temp$plotConstantSize,
+                     current.seq = temp$plotCurrentSeqVal, 
+                     palette = temp$plotPalette,
+                     sparkline.type = temp$plotSparklinesType,
+                     scale.limits = temp$plotScaleLimits,
+                     label.var = temp$plotLabelVar,
+                     scale.label = temp$plotLabelScale,
+                     scale.axis = temp$plotAxisScale,
+                     regions.to.plot = temp$mapRegionsPlot, 
+                     keep.other.regions = temp$mapExcludedRegions)            
+            
+            addr = iNZightPlots::exportHTML(x = x, 
+                                            mapObj = temp$combinedData,
+                                            file = tempfile(fileext = ".html"))
+            
+            
+            
+            addr = unclass(addr)
+            #          temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+            #          addResourcePath("path", temp.dir)
+            temp.dir = substring(addr, 1, regexpr("file", addr)-1)
+            addResourcePath("path", temp.dir)
+            filename = substring(addr, regexpr("file", addr))
+            tags$iframe(
+              seamless = "seamless",
+              #            src = "path/index.html",
+              src = paste("path/", filename, sep = ""),
+              height = 600, width = 2000
+            )
+          }
+        }
+      }
+    }
+  })
+})
 
