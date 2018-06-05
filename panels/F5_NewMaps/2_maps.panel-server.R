@@ -2023,7 +2023,6 @@ observe({
 ## plot when map information obtained
 output$maps_plot = renderPlot({
   get.data.set()
-  #  plot.args2()
   args2$plotTitle
   plot.args()
   
