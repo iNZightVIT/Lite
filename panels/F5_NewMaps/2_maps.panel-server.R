@@ -2302,6 +2302,7 @@ output$interactive.maps = renderUI({
                      regions.to.plot = temp$mapRegionsPlot, 
                      keep.other.regions = temp$mapExcludedRegions)            
             
+            pdf(NULL)
             addr = iNZightPlots::exportHTML(x = x, 
                                             mapObj = temp$combinedData,
                                             file = tempfile(fileext = ".html"))
