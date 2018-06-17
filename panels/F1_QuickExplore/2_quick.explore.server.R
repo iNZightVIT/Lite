@@ -296,7 +296,8 @@ output$plot.matrix = renderPlot({
                                               combo="box"),
                                    upper=list(continous="points",
                                               combo="dot"),
-                                   color=grpVar)))
+#                                   color=grpVar,
+                                   mapping=ggplot2::aes_string(colour = as.name(grpVar)))))
     }else{
       try(suppressWarnings(ggpairs(get.data.set(),
                                    columns=which(colnames(get.data.set()) %in% choices),

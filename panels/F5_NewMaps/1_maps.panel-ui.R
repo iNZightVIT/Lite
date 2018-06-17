@@ -3,7 +3,7 @@
 ###----------------------------------------###
 ###
 ###  Date Created  : Feb 22, 2017.
-###  Last Modified : May 20, 2018.
+###  Last Modified : Apr 22, 2018.
 
 
 
@@ -235,59 +235,47 @@ maps.sidebarPanel = function(data.set) {
 ###  We now set up the main panel with "maps.mainpanel()":
 maps.mainPanel = function() {
   fluidPage(
+    plotOutput("maps_plot", height = "600px"),
     
-    ## add a tabset for interactive maps
-    tabsetPanel(
-      id = "maps_selector",
-      type = "pills",
-      ##  Plot Panel
-      tabPanel(
-        title = "Maps",
-        plotOutput("maps_plot", height = "600px"),
-        conditionalPanel(
-          condition = "input.map_type == 1 &
-          input.select_latitude != 'Select Latitude Information' &
-          input.select_longitude != 'Select Longitude Information'",
-          
-          fixedRow(
-            column(
-              width = 5, offset = 1,
-              uiOutput("mapssubset1_panel"),
-              conditionalPanel(
-                condition = "input.mapssubset1 != 'None'",
-                ##  Slider input GUI for the first subset variable
-                br(),
-                uiOutput("mapssubset1_slider_panel")
-              )
-            ),
-            column(
-              width = 5, offset = 1,
-              uiOutput("mapssubset2_panel"),
-              ##  Slider input GUI for the second subset variable.
-              conditionalPanel(
-                condition = "input.mapssubset2 != 'None'",
-                br(),
-                uiOutput("mapssubset2_slider_panel")
-              )
-            )
-          ),
-          
-          fixedRow(column(width = 2, offset = 1,
-                          downloadButton(outputId = "savemaps", label = "Save Maps")),
-                   column(width = 5,
-                          radioButtons(inputId = "savemapstype", 
-                                       label = "Select the file type", 
-                                       choices = list("jpg", "png", "pdf"), inline = TRUE)))
-        )
+    conditionalPanel(
+      condition = "input.map_type == 1 &
+                   input.select_latitude != 'Select Latitude Information' &
+                   input.select_longitude != 'Select Longitude Information'",
+  
+      
+#      downloadButton(outputId = "savemaps", label = "Save Maps"),
+#      radioButtons(inputId = "savemapstype", 
+#                   label = "Select the file type", 
+#                   choices = list("jpg", "png", "pdf"), inline = TRUE),
+      fixedRow(
+        column(
+          width = 5, offset = 1,
+          uiOutput("mapssubset1_panel"),
+          conditionalPanel(
+            condition = "input.mapssubset1 != 'None'",
+            ##  Slider input GUI for the first subset variable
+            br(),
+            uiOutput("mapssubset1_slider_panel")
+          )
         ),
+        column(
+          width = 5, offset = 1,
+          uiOutput("mapssubset2_panel"),
+          ##  Slider input GUI for the second subset variable.
+          conditionalPanel(
+            condition = "input.mapssubset2 != 'None'",
+            br(),
+            uiOutput("mapssubset2_slider_panel")
+          )
+        )
+      ),
 
-      tabPanel(
-        title = "Interactive Maps",
-
-#        uiOutput("interactive.plot.select"), 
-        br(),
-        htmlOutput("interactive.maps")
-      )
+      fixedRow(column(width = 2, offset = 1,
+                      downloadButton(outputId = "savemaps", label = "Save Maps")),
+               column(width = 5,
+                      radioButtons(inputId = "savemapstype", 
+                                   label = "Select the file type", 
+                                   choices = list("jpg", "png", "pdf"), inline = TRUE)))
     )
   )
 }
