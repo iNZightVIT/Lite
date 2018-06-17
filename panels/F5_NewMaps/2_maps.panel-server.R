@@ -1748,12 +1748,9 @@ output$sizeandtransparency_panel = renderUI({
   isolate({
     
     temp = plot.args2()
-    ## conditional when "allvalues" or ""centroids" is selected 
+    ## conditional when "allvalues" is selected 
     
-    if((length(input$multipleobsoption) > 0 && input$multipleobsoption == 2) ||
-       length(input$plotas_options) > 0 && input$plotas_options == 2 && 
-       (length(input$multipleobsoption) > 0 && (input$multipleobsoption == 1 | input$multipleobsoption == 3) ||
-       !is.null(temp$match.list) && !temp$match.list$multiple.obs)) {
+    if((length(input$multipleobsoption) > 0 && input$multipleobsoption == 2)) {
       ret = list(fixedRow(column(3, h5("Transparency:")),
                           column(6, sliderInput("advancedplotoptions_transparency", 
                                                 label = NULL, 
@@ -1765,9 +1762,18 @@ output$sizeandtransparency_panel = renderUI({
                                                 label = NULL, 
                                                 min = 1, 
                                                 max = 10, 
-                                                value = 5, step = 1, ticks = FALSE))))
+                                                value = 2, step = 1, ticks = FALSE))))
     }
-    
+    else if(length(input$plotas_options) > 0 && input$plotas_options == 2 && 
+            (length(input$multipleobsoption) > 0 && (input$multipleobsoption == 1 | input$multipleobsoption == 3) ||
+             !is.null(temp$match.list) && !temp$match.list$multiple.obs)) {
+      ret = fixedRow(column(3, h5("Size:")),
+                     column(6, sliderInput("advancedplotoptions_size", 
+                                           label = NULL, 
+                                           min = 1, 
+                                           max = 10, 
+                                           value = 5, step = 1, ticks = FALSE)))
+    }
 
     
   })
