@@ -75,7 +75,7 @@ args2 = reactiveValues(
   plotTheme = FALSE,
   plotPalette = "Default",
   plotConstantAlpha = 1.0,
-  plotConstantSize = 5.0,
+  plotConstantSize = 2.0,
   plotCurrentSeqVal = NULL,
   timer = NULL,
   
@@ -869,6 +869,7 @@ observe({
       updateSelectInput(session, "mapvariable", choices = mapvars.update, selected = best.map.var)
       ## update datavariable_panel
       updateSelectInput(session, "datavariable", selected = best.data.var)
+
     }
     
   })
@@ -1056,6 +1057,7 @@ output$unmatched_panel = renderUI({
   ret = NULL
   isolate({
     temp = plot.args2()
+  
     if(!is.null(temp$match.list)) {
       match.list = temp$match.list
       table.nonmatched = match.list$data.vect[!(match.list$data.matched)]
@@ -1067,8 +1069,7 @@ output$unmatched_panel = renderUI({
                              multiple = FALSE,
                              selectize = FALSE,
                              size = 3))
-        
-    }
+      }
         
     ret
   })
@@ -1745,6 +1746,7 @@ output$sizeandtransparency_panel = renderUI({
   input$multipleobsoption
   input$plotas_options
   ret = NULL
+  
   isolate({
     
     temp = plot.args2()
@@ -1756,13 +1758,13 @@ output$sizeandtransparency_panel = renderUI({
                                                 label = NULL, 
                                                 min = 0, 
                                                 max = 1, 
-                                                value = 0, step = 0.1, ticks = FALSE))),
+                                                value = input$advancedplotoptions_transparency, step = 0.1, ticks = FALSE))),
                  fixedRow(column(3, h5("Size:")),
                           column(6, sliderInput("advancedplotoptions_size", 
                                                 label = NULL, 
                                                 min = 1, 
                                                 max = 10, 
-                                                value = 2, step = 1, ticks = FALSE))))
+                                                value = temp$plotConstantSize, step = 1, ticks = FALSE))))
     }
     else if(length(input$plotas_options) > 0 && input$plotas_options == 2 && 
             (length(input$multipleobsoption) > 0 && (input$multipleobsoption == 1 | input$multipleobsoption == 3) ||
@@ -1772,7 +1774,7 @@ output$sizeandtransparency_panel = renderUI({
                                            label = NULL, 
                                            min = 1, 
                                            max = 10, 
-                                           value = 5, step = 1, ticks = FALSE)))
+                                           value = temp$plotConstantSize, step = 1, ticks = FALSE)))
     }
 
     
