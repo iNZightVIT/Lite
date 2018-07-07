@@ -4666,8 +4666,7 @@ output$interactive.plot.select = renderUI({
                           uiOutput("extra_vars_confirm")),
                           
                    column(width = 3,
-                          conditionalPanel("input.vari2 != 'none'",
-                                           uiOutput("extra_vars_check_panel"))),
+                          uiOutput("extra_vars_check_panel")),
                    
                    column(width = 4,
                           conditionalPanel("input.extra_vars_check",
@@ -4728,11 +4727,20 @@ output$interactive.plot.select.beta2 = renderUI({
 
 output$extra_vars_check_panel = renderUI({
   get.data.set()
-#  input$vari2
+  input$vari1
+  input$vari2
   isolate({
-    ret = checkboxInput("extra_vars_check", 
-                        strong("Select additional variables:"), 
-                        value = input$extra_vars_check)
+    if((!is.null(input$vari1) && !is.numeric(plot.par$x) &&
+       !is.null(input$vari2) && input$vari2 == "none") | 
+       (!is.null(input$vari1) && !is.numeric(plot.par$x) &&
+        !is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y)))
+      ret = NULL
+    else
+      ret = checkboxInput("extra_vars_check", 
+                          strong("Select additional variables:"), 
+                          value = input$extra_vars_check)
+    
+    ret
   })
 })
 
@@ -4806,7 +4814,8 @@ output$extra.vars.html = renderUI({
   isolate({
     ch = colnames(vis.data())
     ch = ch[-which(ch %in% input$vari1)]
-    ch = ch[-which(ch %in% input$vari2)]
+    if(!is.null(input$vari2) && input$vari2 != 'none')
+      ch = ch[-which(ch %in% input$vari2)]
     
     selectInput(inputId = "export.extra.vars.html",
                 #label = strong("Select additional variables to export"),
