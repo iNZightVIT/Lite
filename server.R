@@ -27,8 +27,6 @@ library(foreign)
 #library(shinydashboard)
 library(shinyjs)
 #library(iNZightTools)
-#library(ggplot2)
-#library(grid)
 
 
 # read in possible command line arguments such as 'vars.path'
@@ -318,16 +316,8 @@ shinyServer(function(input, output, session) {
   ##---------------##
   ##  Maps Module  ##
   ##---------------##
-#  source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
-#  source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
-  
-  #   Advanced --> NewMaps
-  
-  ##------------------##
-  ##  NewMaps Module  ##
-  ##------------------##
-  source("panels/F5_NewMaps//1_maps.panel-ui.R", local = TRUE)
-  source("panels/F5_NewMaps//2_maps.panel-server.R", local = TRUE)
+  source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
+  source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
 
 #   Help
 

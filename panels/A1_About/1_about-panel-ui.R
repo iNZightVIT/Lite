@@ -13,6 +13,14 @@ about.panel.ui = function(lite.version,lite.update) {
     ##  We manually set the page width to be 10 columns so that it looks
     ##  (rougly) centred.
     fixedPage(
+      column(
+        width = 12,
+        HTML(
+          '<div class="NoticeBox">
+         Our website is being hosted on a new server. If there is any problem, please let us know. 
+          </div>'
+          )
+        ),
         column(
             width = 10, offset = 1,
             ##  We include the markdown document that contains the

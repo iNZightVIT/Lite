@@ -7070,6 +7070,17 @@ a.list-group-item-danger.active:focus {
 
 
 
+.NoticeBox {
+    width:850px;
+    height:30px;
+    background-color: #4682B4;
+    color:White;
+    margin:10 auto;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
 
 
 
