@@ -14,13 +14,16 @@ about.panel.ui = function(lite.version,lite.update) {
     ##  (rougly) centred.
     fixedPage(
       column(
-        width = 12,
+        width = 10, offset = 1,
         HTML(
           '<div class="NoticeBox">
-         Our website is being hosted on a new server. If there is any problem, please let us know. 
+         Our website is being hosted on a new server. If you have any problems, please feel free to contact us. 
           </div>'
           )
         ),
+      
+        br(),
+      br(),
         column(
             width = 10, offset = 1,
             ##  We include the markdown document that contains the
