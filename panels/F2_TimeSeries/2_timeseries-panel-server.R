@@ -866,18 +866,20 @@ output$time.select = renderUI({
   }else{
     sel = colnames(get.data.set())[1]
   }
+  
   get.vars = parseQueryString(session$clientData$url_search)
   if(!is.null(get.vars$url)) {
     temp = session$clientData$url_search
     get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
   }
   if(length(get.vars)>0&&
-       (any(names(get.vars)%in%"url")||
-          any(names(get.vars)%in%"example"))&&
-       (any(names(get.vars)%in%"time")&&
-          !get.vars$time%in%"")){
+     (any(names(get.vars)%in%"url")||
+      any(names(get.vars)%in%"example"))&&
+     (any(names(get.vars)%in%"time")&&
+      !get.vars$time%in%"")){
     sel=get.vars$time
   }
+
   selectInput(
     inputId = "select_timevars",
     label = "Select time variable: ",
@@ -889,18 +891,20 @@ output$time.select = renderUI({
 
 output$time.plot.select = renderUI({
   sel = rev(get.numeric.column.names(get.data.set()))[1]
+  
   get.vars = parseQueryString(session$clientData$url_search)
   if(!is.null(get.vars$url)) {
     temp = session$clientData$url_search
     get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
   }
   if(length(get.vars)>0&&
-       (any(names(get.vars)%in%"url")||
-          any(names(get.vars)%in%"example"))&&
-       (any(names(get.vars)%in%"seriesVars")&&
-          !get.vars$seriesVars%in%"")){
+     (any(names(get.vars)%in%"url")||
+      any(names(get.vars)%in%"example"))&&
+     (any(names(get.vars)%in%"seriesVars")&&
+      !get.vars$seriesVars%in%"")){
     sel = strsplit(get.vars$seriesVars,",")[[1]]
   }
+
   selectInput(inputId = "select_variables",
               label = "Series Variables: ",
               choices =  rev(get.numeric.column.names(get.data.set())),
