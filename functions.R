@@ -1506,6 +1506,8 @@ get.data.from.URL = function(URL, data.dir.import){
   URL = URLencode(URL)
 
   if(grepl("docs.google.com", URL)) {
+    if(!grepl("output=csv", URL))
+      URL = paste(URL, "=0&single=true&output=csv", sep = "")
     url.index = gregexpr("output=", URL)
     url.index = unlist(url.index)
     file.type = substr(URL, url.index+7, nchar(URL))
@@ -1525,8 +1527,8 @@ get.data.from.URL = function(URL, data.dir.import){
     dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
   }
   
-#  print(URL)
-#  print(name)
+  print(URL)
+  print(name)
   
   tryCatch({
     if(Sys.info()["sysname"] %in% c("Windows", "Linux"))

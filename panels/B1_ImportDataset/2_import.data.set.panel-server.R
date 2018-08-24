@@ -65,6 +65,8 @@ observeEvent(input$import_set, {
 output$load.data.panel = renderUI({
   input$selector
   isolate({
+    print(session$clientData$url_search)
+    
     # looks for get requests to pass in an URL for a dataset 
     if(grepl("docs.google.com", session$clientData$url_search)) {
       URL = session$clientData$url_search
