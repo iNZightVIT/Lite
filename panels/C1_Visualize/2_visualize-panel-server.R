@@ -18,8 +18,6 @@ vis.data <- reactive({
 })
 
 
-
-
 ###  Then on the second day, he siad let there be parameters for
 ###  iNZightPlot():
 
@@ -363,12 +361,14 @@ output$vari1_panel = renderUI({
   get.data.set()
 #  input$change_var_selection
   isolate({    
-    sel = input$vari1    
+    sel = input$vari1  
+
     get.vars = parseQueryString(session$clientData$url_search)
     if(!is.null(get.vars$url)) {
       temp = session$clientData$url_search
       get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
-    }
+    }  
+ 
     if(length(get.vars)>0&&
          (any(names(get.vars)%in%"url")||
             any(names(get.vars)%in%"example"))&&
@@ -968,17 +968,18 @@ output$visualize.plot = renderPlot({
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
       }
     }else{
+      
       if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
            tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
         
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, vis.par())
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       }else{
-        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
       }
     }
 #     print(plot.ret.para$parameters)
@@ -5864,7 +5865,7 @@ observeEvent(input$showSidebar4, {
 ## refresh the plot after click the "refresh" button
 observe({
   input$refreshplot
-  if (!is.null(input$hideSidebar) && input$hideSidebar > 0) {
+#  if (!is.null(input$hideSidebar) && input$hideSidebar > 0) {
     isolate({
       output$visualize.plot = renderPlot({
         isolate({
@@ -5926,7 +5927,7 @@ observe({
         }
       })
     })
-  }
+#  }
 })
 
 
