@@ -41,10 +41,12 @@ observeEvent(input$import_set, {
       if(!is.null(input$files)&&file.exists(input$files[1, "datapath"]))
         unlink(input$files[1, "datapath"])
       
-      if(grepl("docs.google.com", input$URLtext))
-        data.vals = get.data.from.googledocs(input$URLtext, get.data.dir.imported())
-      else
+#      if(grepl("docs.google.com", input$URLtext))
+#        data.vals = get.data.from.googledocs(input$URLtext, get.data.dir.imported())
+#      else
         data.vals = get.data.from.URL(input$URLtext, get.data.dir.imported())
+      
+      get.data.dir.imported()
       
       design.parameters$data.name = NULL
       values$data.set = data.vals$data.set
@@ -64,7 +66,19 @@ output$load.data.panel = renderUI({
   input$selector
   isolate({
     # looks for get requests to pass in an URL for a dataset 
-    load.data.panel(parseQueryString(session$clientData$url_search))
+    if(grepl("docs.google.com", session$clientData$url_search)) {
+      URL = session$clientData$url_search
+      url.index1 = gregexpr("url=", URL)
+      url.index1 = unlist(url.index1)
+      url.index2 = gregexpr("&land=", URL)
+      url.index2 = unlist(url.index2)
+      temp = list()
+      temp$url = substr(URL, url.index1+4, url.index2-1)
+      temp$land = substr(URL, url.index2+6, nchar(URL))
+      load.data.panel(temp)
+    }
+    else
+      load.data.panel(parseQueryString(session$clientData$url_search))
   })
 })
 
