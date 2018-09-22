@@ -367,10 +367,13 @@ vis.mainPanel = function() {
         ),
         
         #br(),
-        selectInput("type.inference.select",
-                    choices = c("normal",
-                                "bootstrap"),
-                    label = "Select type of inference"),
+        
+        fixedRow(column(4, selectInput("type.inference.select",
+                                       choices = c("normal",
+                                                   "bootstrap"),
+                                       label = "Select type of inference")),
+                 column(6, uiOutput("interence_test"))),
+      
         br(),
         helpText("Statistical Inference for the data."),
         verbatimTextOutput("visualize.inference")

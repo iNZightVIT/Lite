@@ -1087,6 +1087,74 @@ output$visualize.summary = renderPrint({
 
 
 
+output$interence_test = renderUI({
+  get.data.set()
+  ret = NULL
+  input$vari1
+  input$vari2
+   
+  isolate({
+    if (!is.null(vis.par())) {
+      if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y)) |
+         (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x))) {
+        
+        main_test_panel = checkboxInput("inference_twosampletest",
+                                        label = "Two Sample t-test",
+                                        value = input$inference_twosampletest)
+        
+        menu_test_panel = conditionalPanel("input.inference_twosampletest",
+                                           fixedRow(column(4, h5("Null Value:")),
+                                                    column(6, textInput(inputId = "null_twosample", value = 0, label = NULL))),
+                                           fixedRow(column(4, h5("Alternative Hypothesis:")),
+                                                    column(6, selectInput(inputId = "hypothesis_twosample",
+                                                                          label = NULL,
+                                                                          choices = c("two sided", "greater than", "less than"),
+                                                                          #selected = input$hypothesis_twosample,
+                                                                          selectize = F))),
+                                           fixedRow(column(4, NULL),
+                                                    column(6, checkboxInput("use_equalvar",
+                                                                            label = "Use equal-variance"))),
+                                           
+                                           fixedRow(column(4, NULL),
+                                                    column(6, actionButton(inputId = "confirm_twosample",
+                                                                           label = "Confirm",
+                                                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))))
+        
+        ret = list(main_test_panel,
+                   menu_test_panel)
+      }
+      
+      else if(is.numeric(plot.par$x) & is.null(plot.par$y)) {
+        
+        main_test_panel = checkboxInput("inference_onesampletest",
+                                        label = "One Sample t-test",
+                                        value = input$inference_onesampletest)
+        
+        menu_test_panel = conditionalPanel("input.inference_onesampletest",
+                                           fixedRow(column(4, h5("Null Value:")),
+                                                    column(6, textInput(inputId = "null_onesample", value = 0, label = NULL))),
+                                           fixedRow(column(4, h5("Alternative Hypothesis:")),
+                                                    column(6, selectInput(inputId = "hypothesis_onesample",
+                                                                          label = NULL,
+                                                                          choices = c("two sided", "greater than", "less than"),
+                                                                          #selected = input$hypothesis_onesample,
+                                                                          selectize = F))),
+                                           fixedRow(column(4, NULL),
+                                                    column(6, actionButton(inputId = "confirm_onesample",
+                                                                           label = "Confirm",
+                                                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))))
+        
+        ret = list(main_test_panel,
+                   menu_test_panel)
+        
+      }
+    }
+  })
+  
+  ret
+})
+
+
 
 output$visualize.inference = renderPrint({
   if(input$plot_selector%in%"Inference"){
@@ -1094,6 +1162,8 @@ output$visualize.inference = renderPrint({
     input$vari1
     input$vari2
     input$subs1
+    input$confirm_twosample
+    input$confirm_onesample
     isolate({
       if (is.null(plot.par$x)) {
         return(cat("Please select a variable"))
@@ -1124,6 +1194,40 @@ output$visualize.inference = renderPrint({
       }
       dafr = get.data.set()
       
+      
+      ## add information for one sample t-test and two sample t-test
+      if (!is.null(vis.par())) {
+        
+        if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y)) |
+           (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x))) {
+          
+          if(length(input$inference_twosampletest) > 0 && input$inference_twosampletest)
+            values.list = modifyList(
+              values.list,
+              list(hypothesis.value = as.numeric(input$null_twosample),
+                   hypothesis.alt = switch(input$hypothesis_twosample, 
+                                           "two sided" = "two.sided", 
+                                           "greater than" = "greater", 
+                                           "less than" = "less"),
+                   hypothesis.var.equal = input$use_equalvar,
+                   hypothesis.test = "t.test")
+            )
+        }
+        
+        else if(is.numeric(plot.par$x) & is.null(plot.par$y)) {
+          if(length(input$inference_onesampletest) > 0 && input$inference_onesampletest)
+            values.list = modifyList(
+              values.list,
+              list(hypothesis.value = as.numeric(input$null_onesample),
+                   hypothesis.alt = switch(input$hypothesis_onesample, 
+                                           "two sided" = "two.sided", 
+                                           "greater than" = "greater", 
+                                           "less than" = "less"),
+                   hypothesis.test = "t.test")
+            )
+        }
+      }
+        
       pdf(NULL)
       
       tryCatch({
