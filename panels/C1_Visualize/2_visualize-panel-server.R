@@ -982,7 +982,6 @@ output$visualize.plot = renderPlot({
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
       }
     }
-#     print(plot.ret.para$parameters)
 #     print('###########################################################################')
   }
 })
@@ -1413,6 +1412,7 @@ observe({
 })
 
 # This refreshes the infernce parameters.
+# add "get values" button
 output$add_inference = renderUI({
   get.data.set()
   input$vari1
@@ -1444,6 +1444,13 @@ output$add_inference = renderUI({
                                           choices=c("Year 12","Bootstrap"),
                                           selected=input$inference_type2,
                                           inline=T)
+    
+    get_conf_values_button = actionButton(inputId = "get_conf_values",
+                                   label = "Get values",
+                                   style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+    
+  
+      
     intervals = NULL
     graphical.par$inference.par = NULL
     graphical.par$bs.inference = F
@@ -1514,7 +1521,11 @@ output$add_inference = renderUI({
                                                      input.inference_type2=='Bootstrap')",
                                     h5(strong("Type of interval")),
                                     confidence.interval.check,
-                                    comparison.interval.check)
+                                    comparison.interval.check),
+                                    get_conf_values_button,
+                                    br(),
+                                    br(),
+                                    verbatimTextOutput("display_conf_values")
         )
       # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
       }else if((!input$vari2%in%"none"&&
@@ -1546,12 +1557,40 @@ output$add_inference = renderUI({
                                                    (input.inference_parameter1=='Median'&&
                                                    input.inference_type2=='Bootstrap')",
                                     h5(strong("Type of interval")),
-                                    confidence.interval.check))
+                                    confidence.interval.check),
+                                    get_conf_values_button,
+                                    br(), br(),
+                                    verbatimTextOutput("display_conf_values"))
       }
     }
   })
   ret
 })
+
+
+
+output$display_conf_values = renderPrint({
+  
+  input$get_conf_values
+  
+  isolate({
+    temp = unclass(plot.ret.para$parameters)
+    temp.type = names(temp$all$all$inference.info)
+    if(length(temp.type) == 0)
+      cat("No values")
+    else if(temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0)
+      print(temp$all$all$inference.info$mean)
+    else if(temp.type == "median" && length(temp$all$all$inference.info$median) > 0)
+      print(temp$all$all$inference.info$median)
+    else
+      cat("No values")
+  })
+
+})
+
+  
+  
+  
 
 # inference handles
 observe({
