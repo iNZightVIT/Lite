@@ -1094,8 +1094,8 @@ output$interence_test = renderUI({
    
   isolate({
     if (!is.null(vis.par())) {
-      if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y)) |
-         (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x))) {
+      if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y) & length(unique(plot.par$y)) == 2) |
+         (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x) & length(unique(plot.par$x)) == 2)) {
         
         main_test_panel = checkboxInput("inference_twosampletest",
                                         label = "Two Sample t-test",
@@ -1197,8 +1197,8 @@ output$visualize.inference = renderPrint({
       ## add information for one sample t-test and two sample t-test
       if (!is.null(vis.par())) {
         
-        if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y)) |
-           (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x))) {
+        if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y) & length(unique(plot.par$y)) == 2) |
+           (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x) & length(unique(plot.par$x)) == 2)) {
           
           if(length(input$inference_twosampletest) > 0 && input$inference_twosampletest)
             values.list = modifyList(
