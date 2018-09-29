@@ -1091,9 +1091,10 @@ output$interence_test = renderUI({
   ret = NULL
   input$vari1
   input$vari2
+  input$type.inference.select
    
   isolate({
-    if (!is.null(vis.par())) {
+    if (!is.null(vis.par()) & (length(input$type.inference.select) > 0 && input$type.inference.select == "normal")) {
       if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y) & length(unique(plot.par$y)) == 2) |
          (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x) & length(unique(plot.par$x)) == 2)) {
         
@@ -1126,7 +1127,7 @@ output$interence_test = renderUI({
       else if(is.numeric(plot.par$x) & is.null(plot.par$y)) {
         
         main_test_panel = checkboxInput("inference_onesampletest",
-                                        label = "One Sample t-test",
+                                        label = "Change Hypothesis",
                                         value = input$inference_onesampletest)
         
         menu_test_panel = conditionalPanel("input.inference_onesampletest",
@@ -1163,6 +1164,7 @@ output$visualize.inference = renderPrint({
     input$subs1
     input$confirm_twosample
     input$confirm_onesample
+    
     isolate({
       if (is.null(plot.par$x)) {
         return(cat("Please select a variable"))
@@ -1195,7 +1197,7 @@ output$visualize.inference = renderPrint({
       
       
       ## add information for one sample t-test and two sample t-test
-      if (!is.null(vis.par())) {
+      if (!is.null(vis.par()) & (length(input$type.inference.select) > 0 && input$type.inference.select == "normal")) {
         
         if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y) & length(unique(plot.par$y)) == 2) |
            (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x) & length(unique(plot.par$x)) == 2)) {
@@ -1569,26 +1571,98 @@ output$add_inference = renderUI({
 
 
 
-output$display_conf_values = renderPrint({
+
+#output$display_conf_values = renderPrint({
   
+#  input$get_conf_values
+  
+#  isolate({
+#    temp = unclass(plot.ret.para$parameters)
+#    temp.type = names(temp$all$all$inference.info)
+#    if(length(temp.type) == 0)
+#      cat("No values")
+#    else if(temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0)
+#      print(temp$all$all$inference.info$mean)
+#    else if(temp.type == "median" && length(temp$all$all$inference.info$median) > 0)
+#      print(temp$all$all$inference.info$median)
+#    else
+#      cat("No values")
+#  })
+
+#})
+
+
+
+
+
+
+observe({
+  input$inference_parameter1
+  input$inference_type1
+  input$inference_type2
+  
+  isolate({
+    output$display_conf_values = renderPrint({
+      cat("No values")
+    })
+  })
+})
+
+
+
+observe({
   input$get_conf_values
   
   isolate({
     temp = unclass(plot.ret.para$parameters)
     temp.type = names(temp$all$all$inference.info)
     if(length(temp.type) == 0)
-      cat("No values")
-    else if(temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0)
-      print(temp$all$all$inference.info$mean)
-    else if(temp.type == "median" && length(temp$all$all$inference.info$median) > 0)
-      print(temp$all$all$inference.info$median)
+      output$display_conf_values = renderPrint({
+        cat("No values")
+      })
+
+    else if(temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0) {
+      output$display_conf_values = renderPrint({
+        names.table = names(temp$all$all$inference.info$mean)
+        for(index.table in 1:length(names.table)) {
+          if(names.table[index.table] == "conf") {
+            cat("Conf :", "\r")
+            print(temp$all$all$inference.info$mean$conf[, 1:2])
+          }
+          else if(names.table[index.table] == "comp") {
+            cat("Comp :", "\r")
+            print(temp$all$all$inference.info$mean$comp[, 1:2])
+          }
+        }
+      })
+    }
+      
+    else if(temp.type == "median" && length(temp$all$all$inference.info$median) > 0) {
+      output$display_conf_values = renderPrint({
+        names.table = names(temp$all$all$inference.info$median)
+        for(index.table in 1:length(names.table)) {
+          if(names.table[index.table] == "conf") {
+            cat("Conf :", "\r")
+            print(temp$all$all$inference.info$median$conf[, 1:2])
+          }
+          else if(names.table[index.table] == "comp") {
+            cat("Comp :", "\r")
+            print(temp$all$all$inference.info$median$comp[, 1:2])
+          }
+        }
+ 
+      })
+    }
+      
+      
     else
-      cat("No values")
+      output$display_conf_values = renderPrint({
+        cat("No values")
+      })
+
   })
-
-})
-
   
+})  
   
   
 
