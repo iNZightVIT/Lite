@@ -3841,7 +3841,7 @@ output$points.identify.panel = renderUI({
           class(get.data.set()[,input$vari1])%in%"integer")&&
          (class(get.data.set()[,input$vari2])%in%"numeric"|
           class(get.data.set()[,input$vari2])%in%"integer")))) {
-      plot.par$locate=NULL
+#      plot.par$locate=NULL
       plot.par$locate.id=NULL
       plot.par$locate.col=NULL
       plot.par$locate.extreme=NULL
@@ -3852,7 +3852,7 @@ output$points.identify.panel = renderUI({
       ret[[2]] = fixedRow(column(4,
                                  checkboxInput("label_observation_check",
                                                label="Text label",
-                                               value=F)),
+                                               value=input$label_observation_check)),
                           column(6,
                                  conditionalPanel("input.label_observation_check",
                                                   selectInput("label.select",
@@ -3945,26 +3945,42 @@ output$points.identify.panel = renderUI({
                                                     value=0,
                                                     ticks=F))
           }else if((!input$vari2%in%"none"&&
-                    ((is.factor(get.data.set()[,input$vari1])&&
+                    ((!is.numeric(get.data.set()[,input$vari1])&&
                       is.numeric(get.data.set()[,input$vari2]))||
                      (is.numeric(get.data.set()[,input$vari1])&&
-                      is.factor(get.data.set()[,input$vari2]))))||
+                      !is.numeric(get.data.set()[,input$vari2]))))||
                    (input$vari2%in%"none"&&
                     is.numeric(get.data.set()[,input$vari1]))){
-            ret[[7]] = conditionalPanel("input.select_identify_method=='Extremes'&&
+            ret[[7]] = conditionalPanel("input.select_identify_method == 'Extremes' &&
                                         (input.label_observation_check||input.color_points_check)",
-                                        fixedRow(column(4,numericInput("extreme.lower",
-                                                                       label="Lower",
-                                                                       value=0,
-                                                                       min=0,
-                                                                       max=nrow(get.data.set()),
-                                                                       step=1)),
-                                                 column(4,numericInput("extreme.upper",
-                                                                       label="Upper",
-                                                                       value=0,
-                                                                       min=0,
-                                                                       max=nrow(get.data.set()),
-                                                                       step=1))))
+                                        sliderInput("extreme.lower",
+                                                    label="Select lower range",
+                                                    min=0,
+                                                    max=nrow(get.data.set()),
+                                                    step=1,
+                                                    value=0,
+                                                    ticks=F),
+                                        sliderInput("extreme.upper",
+                                                    label="Select upper range",
+                                                    min=0,
+                                                    max=nrow(get.data.set()),
+                                                    step=1,
+                                                    value=0,
+                                                    ticks=F)
+                                        
+#                                        fixedRow(column(4,numericInput("extreme.lower",
+#                                                                       label="Lower",
+#                                                                       value=0,
+#                                                                       min=0,
+#                                                                       max=nrow(get.data.set()),
+#                                                                       step=1)),
+#                                                 column(4,numericInput("extreme.upper",
+#                                                                       label="Upper",
+#                                                                       value=0,
+#                                                                       min=0,
+#                                                                       max=nrow(get.data.set()),
+#                                                                       step=1)))
+                                        )
           }
           ret[[8]] = conditionalPanel("input.select_identify_method=='Range of values'&&
                                       (input.label_observation_check||input.color_points_check)",
@@ -4011,7 +4027,8 @@ observe({
         }else{
           plot.par$locate=get.data.set()[,input$label.select]
         }
-      }else{
+      }
+      else{
         plot.par$locate=NULL
       }
     }
