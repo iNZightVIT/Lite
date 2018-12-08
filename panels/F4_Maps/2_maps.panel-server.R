@@ -3,15 +3,17 @@
 ###---------------------------------------------------###
 ###
 ###  Date Created  : Feb 22, 2017.
-###  Last Modified : Mar 19, 2017.
+###  Last Modified : May 20, 2018.
 ###  
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
+
+
 ## initialize gui
-output$maps.panel = renderUI({
+output$newmaps.panel = renderUI({
   get.data.set()
-  maps.panel.ui(get.data.set())
+  newmaps.panel.ui(get.data.set())
 })
 
 ## parameters for plotting maps
@@ -24,6 +26,7 @@ args = reactiveValues(
   colby = NULL,
   sizeby = NULL,
   opacity = NULL,
+  reverse.opacity = NULL,
   type = NULL,
   col.pt = NULL,
   cex.pt = NULL,
@@ -38,8 +41,77 @@ args = reactiveValues(
   col = NULL,
   col.fun = NULL,
   na.fill = NULL,
-  name = NULL
+  name = NULL,
+  main = NULL,
+  cex = NULL,
+  resizemethod = NULL,
+  pch = NULL,
+  symbolby = NULL,
+  lwd.pt = NULL
 )
+
+
+colourPalettes =
+  list(cat = c(
+    #      if (.rcb)
+    list("contrast (max 8)" =
+           function(n)
+             if (n > 8) inzpar()$col.default$cat(n)
+         else RColorBrewer::brewer.pal(n, "Set2")[1:n],
+         "bright (max 9)" =
+           function(n)
+             if (n > 9) inzpar()$col.default$cat(n)
+         else RColorBrewer::brewer.pal(n, "Set1")[1:n],
+         "light (max 12)" =
+           function(n)
+             if (n > 12) inzpar()$col.default$cat(n)
+         else RColorBrewer::brewer.pal(n, "Set3")[1:n]),
+    #      if (.viridis)
+    list(viridis = viridis::viridis,
+         magma = viridis::magma,
+         plasma = viridis::plasma,
+         inferno = viridis::inferno),
+    list("Colourblind Friendly" = inzpar()$col.default$cat,
+         'rainbow (hcl)' = function(n) hcl((1:n) / n * 360, c = 80, l = 50))
+  ),
+  cont = c(
+    #      if (.viridis)
+    list(viridis = viridis::viridis,
+         magma = viridis::magma,
+         plasma = viridis::plasma,
+         inferno = viridis::inferno),
+    list(
+      'rainbow (hcl)' = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
+      blue =
+        function(n) sequential_hcl(n, h = 260, c. = c(80, 10), l = c(30, 95), power = 0.7),
+      green =
+        function(n) sequential_hcl(n, h = 135, c. = c(50, 10), l = c(40, 95), power = 0.4),
+      red =
+        function(n) sequential_hcl(n, h = 10, c. = c(80, 10), l = c(30, 95), power = 0.7),
+      "green-yellow" =
+        function(n) terrain_hcl(n, h = c(130, 30), c. = c(65, 0), l = c(45, 90),
+                                power = c(0.5, 1.5)),
+      "red-blue" =
+        function(n) terrain_hcl(n, h = c(0, -100), c. = c(80, 40), l = c(40, 75),
+                                power = c(1, 1)),
+      terrain = terrain_hcl,
+      heat = heat_hcl,
+      "blue/white/pink" =
+        function(n) diverge_hcl(n, h = c(180, 330), c = 59, l = c(75, 95), power = 1.5),
+      "blue/white/red" =
+        function(n) diverge_hcl(n, h = c(260, 0), c = 100, l = c(50, 90), power = 1))
+  ),
+  emphasize = function(n, k, cat = TRUE, ncat = 5,
+                       fn = if (cat) inzpar()$col.default$cat else inzpar()$col.default$cont) {
+    cols <- fn(n)
+    if (!cat) {
+      ks <- floor(seq(1, n, length = ncat + 1))
+      k <- ks[k]:ks[k+1]
+    }
+    #cols[k] <- iNZightPlots:::shade(cols[k], -0.4)
+    cols[-k] <- iNZightPlots:::shade(cols[-k], 0.7)
+    cols
+  })
 
 
 plot.args = reactive({
@@ -47,37 +119,91 @@ plot.args = reactive({
 })
 
 
-## maps plot
-output$maps_plot = renderPlot({
-  if(input$map_type == 1) {
-    condition1 = !is.null(input$select_latitude) &&
-      input$select_latitude %in% colnames(get.data.set()) &&
-      !is.null(input$select_longitude) &&
-      input$select_longitude %in% colnames(get.data.set())
-    if(condition1) {
-      temp = plot.args()
-      tryCatch({do.call(plot, temp)}, 
-               error = function(e) {
-                 print(e)
-               }, finally = {})
-    }
-  }
-  else if(input$map_type == 2) {
-    condition2 = !is.null(input$maplocation) &&
-      input$maplocation != "Select Map Location" && 
-      !is.null(input$locationvariable) &&
-      input$locationvariable %in% colnames(get.data.set()) &&
-      !is.null(input$plottingvariable) &&
-      input$plottingvariable %in% colnames(get.data.set())
-    if(condition2) {
-      temp = plot.args()
-      tryCatch({do.call(plot, temp)}, 
-               error = function(e) {
-                 print(e)
-               }, finally = {})
-    }
-  }
+
+
+## arguments for a new version of map module (Regions)
+args2 = reactiveValues(
+  
+  updateplot = 0,
+  updateplot1 = 0,
+  
+  combinedData = NULL,
+  mapData = NULL,
+  
+  mapName = "",
+  mapType = NULL,
+  mapVars = NULL,
+  mapSizeVar = NULL,
+  mapSequenceVar = NULL,
+  
+  match.list = NULL,
+#  has.multipleobs = FALSE,
+  
+  plotTitle = "",
+  plotAxes = FALSE,
+  plotXLab = "Longitude",
+  plotYLab = "Latitude",
+  plotDatumLines = FALSE,
+  plotProjection = NULL,
+  plotTheme = FALSE,
+  plotPalette = "Default",
+  plotConstantAlpha = 1.0,
+  plotConstantSize = 2.0,
+  plotCurrentSeqVal = NULL,
+  timer = NULL,
+  
+  multipleObsOption = NULL,
+  plotSparklinesType = "Absolute",
+  plotScaleLimits = NULL, 
+  plotLabelVar = NULL,
+  
+  plotLabelScale = 4,
+  plotAxisScale = 11, 
+
+  mapRegionsPlot = NULL,
+  mapExcludedRegions = TRUE,
+  
+  proj.df = iNZightMaps::iNZightMapProjections()
+)
+
+
+plot.args2 = reactive({
+  plot.args2 = modifyList(list(), reactiveValuesToList(args2), keep.null = FALSE)
 })
+
+
+
+## maps plot
+#output$maps_plot = renderPlot({
+#  if(input$map_type == 1) {
+#    condition1 = !is.null(input$select_latitude) &&
+#      input$select_latitude %in% colnames(get.data.set()) &&
+#      !is.null(input$select_longitude) &&
+#      input$select_longitude %in% colnames(get.data.set())
+#    if(condition1) {
+#      temp = plot.args()
+#      tryCatch({do.call(plot, temp)}, 
+#               error = function(e) {
+#                 print(e)
+#               }, finally = {})
+#    }
+#  }
+#  else if(input$map_type == 2) {
+#    condition2 = !is.null(input$maplocation) &&
+#      input$maplocation != "Select Map Location" && 
+#      !is.null(input$locationvariable) &&
+#      input$locationvariable %in% colnames(get.data.set()) &&
+#      !is.null(input$plottingvariable) &&
+#      input$plottingvariable %in% colnames(get.data.set())
+#    if(condition2) {
+#      temp = plot.args()
+#      tryCatch({do.call(plot, temp)}, 
+#               error = function(e) {
+#                 print(e)
+#               }, finally = {})
+#    }
+#  }
+#})
 
 
 ## get only numeric type variables
@@ -185,36 +311,8 @@ observe({
   })
 })
 
-## set up colourby_panel, sizeby_panel and opacifyby_panel
-output$colourby_panel = renderUI({
-  get.data.set()
-  isolate({
-    selectInput(inputId = "colourby",
-                label = "Colour by:",
-                choices = c("", colnames(get.data.set())),
-                selectize = FALSE)
-  })
-})
 
-output$sizeby_panel = renderUI({
-  get.data.set()
-  isolate({
-    selectInput(inputId = "sizeby",
-                label = "Size by:",
-                choices = c("", numericVars()),
-                selectize = FALSE)
-  })
-})
 
-output$opacifyby_panel = renderUI({
-  get.data.set()
-  isolate({
-    selectInput(inputId = "opacifyby",
-                label = "Opacify by:",
-                choices = c("", numericVars()),
-                selectize = FALSE)
-  })
-})
 
 ## update args$colby, args$sizeby, args$opacifyby
 observe({
@@ -276,7 +374,7 @@ output$plot_maptype_panel = renderUI({
   isolate({
     selectInput(inputId = "plot_maptype",
                 label = "Map type:",
-                choices = c("roadmap", "satellite", "terrain", "hybrid"),
+                choices = c("terrain", "terrain-background", "toner-lite", "toner"),
                 selectize = FALSE)
   })
 })
@@ -284,12 +382,104 @@ output$plot_maptype_panel = renderUI({
 output$plot_colour_panel = renderUI({
   get.data.set()
   isolate({
-    selectInput(inputId = "plot_colour",
-                label = "Colour:",
-                choices = c("grey50", "black", "darkblue", "darkgreen", "darkmagenta",
-                            "darkslateblue", "hotpink4", "lightsalmon2", "palegreen3",
-                            "steelblue3"),
-                selectize = FALSE)
+    list(fixedRow(column(3, h5("Point colour:")),
+                  column(6, selectInput(inputId = "plot_colour",
+                                        label = NULL,
+                                        choices = c("grey50", "black", "darkblue", "darkgreen", "darkmagenta",
+                                                    "darkslateblue", "hotpink4", "lightsalmon2", "palegreen3",
+                                                    "steelblue3"),
+                                        selectize = FALSE))),
+         
+         fixedRow(column(3, h5("Colour by:")),
+                  column(6, selectInput(inputId = "colourby",
+                                        label = NULL,
+                                        choices = c("", colnames(get.data.set())),
+                                        selectize = FALSE))))
+    
+  })
+})
+
+
+output$plot_colpalette_panel = renderUI({
+  get.data.set()
+  input$colourby
+  ret = NULL
+  
+  isolate({
+    if(!is.null(input$colourby) && input$colourby %in% numericVars())
+      ret = colpalette.cont = fixedRow(column(3, h5("Palette:")),
+                                       column(6, selectInput(inputId = "select.colour.palette", 
+                                                             label=NULL,
+                                                             choices = names(colourPalettes$cont),
+                                                             selectize = FALSE)))
+    else if(!is.null(input$colourby) && input$colourby %in% characterVars())
+      ret = colpalette.cat = fixedRow(column(3, h5("Palette:")),
+                                      column(6, selectInput(inputId = "select.colour.palette", 
+                                                            label=NULL,
+                                                            choices = names(colourPalettes$cat),
+                                                            selectize = FALSE)))
+  })
+  
+  ret
+})
+
+
+observe({
+  input$select.colour.palette
+  isolate({
+    if(!is.null(input$select.colour.palette))
+      if(input$select.colour.palette %in% names(colourPalettes$cat))
+        args$col.fun = colourPalettes$cat[[input$select.colour.palette]]
+      else if(input$select.colour.palette %in% names(colourPalettes$cont))
+        args$col.fun = colourPalettes$cont[[input$select.colour.palette]]
+  })
+})
+
+## set up plot_plottitle_panel
+output$plot_plottitle_panel = renderUI({
+  get.data.set()
+  isolate({
+    list(textInput("type1_plottitle",
+                   label = "Plot title:",
+                   value = input$type1_plottitle),
+         
+         actionButton(inputId = "type1_plottitle_confirm",
+                      label = "Confirm",
+                      style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+    
+  })
+})
+
+## update args$main when observe input$type1_plottitle_confirm
+observe({
+  input$type1_plottitle_confirm
+  isolate({
+    if(length(input$type1_plottitle) > 0 && input$type1_plottitle != "") 
+      args$main = input$type1_plottitle
+    else
+      args$main = NULL
+  })
+})
+
+
+## set up plot_overallsize_panel
+output$plot_overallsize_panel = renderUI({
+  get.data.set()
+  isolate({
+    sliderInput("type1_overallsize_slider", 
+                label = "Overall size scale:", 
+                min = 0.5, 
+                max = 2, 
+                value = 1, step = 0.05, ticks = FALSE)
+  })
+})
+
+## update args$cex
+observe({
+  input$type1_overallsize_slider
+  isolate({
+    if(!is.null(input$type1_overallsize_slider)) 
+      args$cex = input$type1_overallsize_slider
   })
 })
 
@@ -312,6 +502,41 @@ observe({
 })
 
 
+
+## set up plot_size_panel
+output$plot_size_panel = renderUI({
+  get.data.set()
+  isolate({
+    list(fixedRow(column(3, h5("Overall:")),
+                  column(6, sliderInput(inputId = "pointsize", 
+                                        label = NULL, 
+                                        min = 0.05, max = 3.5, 
+                                        value = 1.1, step = 0.05, ticks = FALSE))),
+         fixedRow(column(3, h5("Size by:")),
+                  column(6, selectInput(inputId = "sizeby",
+                                        label = NULL,
+                                        choices = c("", numericVars()),
+                                        selectize = FALSE))),
+         conditionalPanel("input.sizeby != ''",
+                          fixedRow(column(3, h5("Resize method:")),
+                                   column(6, selectInput(inputId = "resizemethod",
+                                                         label = NULL,
+                                                         choices = c("proportional", "emphasize"),
+                                                         selectize = FALSE)))))
+  })
+})
+
+
+## update args$resize.method
+observe({
+  input$resizemethod
+  isolate({
+    if(!is.null(input$resizemethod))
+      args$resize.method = input$resizemethod
+  })
+})
+
+
 ## update args$cex.pt, args$alpha, args$join
 observe({
   input$pointsize
@@ -321,13 +546,133 @@ observe({
   })
 })
 
-observe({
-  input$transparency
+
+
+## set up plot_trans_panel
+output$plot_trans_panel = renderUI({
+  get.data.set()
   isolate({
-    if(!is.null(input$transparency))
-      args$alpha = 1 - input$transparency/100
+    list(fixedRow(column(3, h5("Overall:")),
+                  column(6, sliderInput(inputId = "transparency", 
+                                        label = NULL, 
+                                        min = 0, max = 100, 
+                                        value = 0, step = 1, ticks = FALSE))),
+         
+         fixedRow(column(3, h5("Opacify by:")),
+                  column(6, selectInput(inputId = "opacifyby",
+                                        label = NULL,
+                                        choices = c("", numericVars()),
+                                        selectize = FALSE))),
+         checkboxInput(inputId = "reverseop",
+                       label = "Reverse Opacification",
+                       value = input$reverseop))
   })
 })
+
+
+
+## update args$reverse.opacity
+observe({
+  input$reverseop
+  isolate({
+    if(!is.null(input$reverseop))
+      args$reverse.opacity = input$reverseop
+  })
+})
+
+
+
+
+#observe({
+#  input$transparency
+#  isolate({
+#    if(!is.null(input$transparency))
+#      args$alpha = 1 - input$transparency/100
+#  })
+#})
+
+
+## set up plot_pointsymbol_panel
+output$plot_pointsymbol_panel = renderUI({
+  get.data.set()
+  isolate({
+    list(fixedRow(column(3, h5("Symbol:")),
+                  column(6, selectInput(inputId = "symbol",
+                                        label = NULL,
+                                        choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
+                                        selectize = FALSE))),
+         
+         checkboxInput(inputId = "filledin",
+                       label = "Filled in symbols",
+                       value = input$filledin),
+         
+         fixedRow(column(3, h5("Symbol by:")),
+                  column(6, selectInput(inputId = "symbolby",
+                                        label = NULL,
+                                        choices = c("", characterVars()),
+                                        selectize = FALSE))),
+         
+         fixedRow(column(3, h5("Symbol line width:")),
+                  column(6, selectInput(inputId = "symbollwd",
+                                        label = NULL,
+                                        choices = c(1:4),
+                                        selectize = FALSE,
+                                        selected = 2))))
+  })
+})
+
+
+observe({
+  input$symbol
+  isolate({
+    if(!is.null(input$symbol))
+      args$pch = switch(input$symbol,
+                        "circle"            = 21,
+                        "square"            = 22,
+                        "diamond"           = 23,
+                        "triangle"          = 24,
+                        "inverted triangle" = 25)
+  })
+})
+
+
+observe({
+  input$filledin
+  input$transparency
+  isolate({
+    if(!is.null(input$filledin) && !is.null(input$transparency)) {
+      if(input$filledin && input$transparency == 0)
+        args$alpha = 0.999
+      else
+        args$alpha = 1 - input$transparency/100
+    }
+  })
+})
+
+
+observe({
+  input$symbolby
+  isolate({
+    if(!is.null(input$symbolby)) {
+      if(input$symbolby == "")
+        args$symbolby = NULL
+      else
+        args$symbolby = input$symbolby
+    }
+  })
+})
+
+
+observe({
+  input$symbollwd
+  isolate({
+    if(!is.null(input$symbollwd))
+      args$lwd.pt = input$symbollwd
+  })
+})
+
+
+
 
 observe({
   input$connectpoints
@@ -344,7 +689,7 @@ output$linescolour_panel = renderUI({
   isolate({
     selectInput(inputId = "linescolour",
                 label = "Lines colour:",
-                choices = c("red", "black", "blue", "green4", "yellow",
+                choices = c("blue", "black", "red", "green4", "yellow",
                             "pink", "grey", "orange"),
                 selectize = FALSE)
   })
@@ -649,6 +994,1105 @@ observe({
 })
 
 
+
+## set up selectmap_panel, inbuiltmap_panel
+
+output$selectmap_panel = renderUI({
+  get.data.set()
+  isolate({
+    radioButtons(
+      inputId = "selectshapefile",
+      label = NULL,
+      choices =
+        c("Use Inbuilt Map" = 1,
+          "Import Shapefile" = 2),
+      selected = 1,
+      inline = TRUE
+    )
+  })
+})
+
+
+output$inbuiltmap_panel = renderUI({
+  get.data.set()
+  isolate({
+    radioButtons(inputId = "selectinbuiltmap",
+                 label = NULL,
+                 choices =
+                   c("Continents" = 1,
+                     "Countries" = 2,
+                     "World" = 3),
+                 selected = 1,
+                 inline = TRUE)
+  })
+})
+
+
+output$continentsoptions_panel = renderUI({
+  get.data.set()
+  isolate({
+    selectInput(inputId = "continentsmap", 
+                label = NULL, 
+                choices = c( 
+                            "Africa", "Asia", "Europe", "North America", "Oceania", "South America"), 
+                multiple = FALSE,
+                selectize = FALSE,
+                size = 4)
+  })
+})
+
+
+output$countriesoptions_panel = renderUI({
+  get.data.set()
+  isolate({
+    selectInput(inputId = "countriesmap", 
+                label = NULL, 
+                choices = c( 
+                            "New Zealand General Electoral Districts (2017)",
+                            "New Zealand DHBs (2012)",
+                            "New Zealand Regional Councils (2017)",
+                            "New Zealand Territorial Authorities (2017)",
+                            "US States",
+                            "US States (Contiguous)"), 
+                multiple = FALSE,
+                selectize = FALSE,
+                size = 4)
+  })
+})
+
+
+output$worldoptions_panel = renderUI({
+  get.data.set()
+  isolate({
+    selectInput(inputId = "worldmap", 
+                label = NULL, 
+                choices = c(
+                            "World Map (Natural Earth) (incl. Antarctica)", 
+                            "World Map (Thematic Mapping)"), 
+                multiple = FALSE,
+                selectize = FALSE,
+                size = 4)
+  })
+})
+
+
+## set up select variables panel
+
+output$datavariable_panel = renderUI({
+  get.data.set()
+  isolate({
+    fixedRow(column(5, h5("Data Variable:")),
+             column(7, selectInput(inputId = "datavariable", 
+                                   label = NULL, 
+                                   choices = colnames(vis.data()),
+                                   selectize = F)))
+  })
+})
+
+
+output$mapvairable_panel = renderUI({
+  get.data.set()
+  isolate({
+    fixedRow(column(5, h5("Map Variable:")),
+             column(7, selectInput(inputId = "mapvariable", 
+                                   label = NULL, 
+                                   choices = "",
+                                   selectize = F)))
+  })
+})
+
+
+## update datavariable_panel and mapvairable_panel 
+## after shapefiles selected and "import map" clicked
+observe({
+  get.data.set()
+  input$importmap
+#  input$datavariable
+#  input$mapvariable
+#  input$sequencevariable
+  isolate({
+    
+    temp.data = get.data.set()
+    
+    if(!is.null(input$selectinbuiltmap) && input$selectinbuiltmap %in% 1:3) {
+      
+      if(input$selectinbuiltmap == 1) {
+        dirpath = "shapefiles/continents/"
+        filename = switch(input$continentsmap,
+                          "Africa" = "africa.rds", 
+                          "Asia" = "asia.rds", 
+                          "Europe" = "europe.rds", 
+                          "North America" = "northamerica.rds", 
+                          "Oceania" = "oceania.rds", 
+                          "South America" = "southamerica.rds")
+        
+      }
+      else if(input$selectinbuiltmap == 2) {
+        dirpath = "shapefiles/countries/"
+        filename = switch(input$countriesmap,
+                          "New Zealand General Electoral Districts (2017)" = "nzl/constituency-2018.rds",
+                          "New Zealand DHBs (2012)" = "nzl/dhb-2012.rds",
+                          "New Zealand Regional Councils (2017)" = "nzl/regional-council-2018.rds",
+                          "New Zealand Territorial Authorities (2017)" = "nzl/territorial-authority-2018.rds",
+                          "US States" = "usa/states-2016.rds",
+                          "US States (Contiguous)" = "usa/states-contig-2016.rds")
+      }
+      else if(input$selectinbuiltmap == 3) {
+        dirpath = "shapefiles/world/"
+        filename = switch(input$worldmap,
+                          "World Map (Natural Earth) (incl. Antarctica)" = "natural-earth-4.0.rds", 
+                          "World Map (Thematic Mapping)" = "thematic-mapping-0.3.rds")
+      }
+      
+      ## obtain the filepath and read the map file
+      filepath = paste(dirpath, filename, sep = "")
+      mapData = iNZightMaps::retrieveMap(filepath)
+      args2$mapData = mapData
+      map.vars = as.data.frame(mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
+      ## get the choices for mapvairable_panel
+      mapvars.update = colnames(map.vars[, !(apply(map.vars, 2, anyDuplicated, incomparables = c(NA, ""))), drop = FALSE])
+      
+      ## Find the pair of variables with the highest number of matches
+      best.vars = iNZightMaps::findBestMatch(temp.data, map.vars)
+      best.data.var = best.vars[1]
+      best.map.var =  best.vars[2]
+      
+      if(length(input$mapvariable) > 0 && length(input$datavariable) > 0 &&
+         input$mapvariable == best.map.var && input$datavariable == best.data.var) {
+        temp = plot.args2()
+        args2$updateplot = temp$updateplot + 1
+      }
+      
+      ## update mapvairable_panel after map file selected
+      updateSelectInput(session, "mapvariable", choices = mapvars.update, selected = best.map.var)
+      ## update datavariable_panel
+      updateSelectInput(session, "datavariable", selected = best.data.var)
+
+    }
+    
+  })
+})
+
+
+## observe shapefiles loaded by users
+observeEvent(input$loadshapefiles, { 
+  
+  temp.data = get.data.set()
+  
+  isolate({
+    
+    filepath = input$loadshapefiles$datapath
+    mapData = iNZightMaps::retrieveMap(filepath)
+    args2$mapData = mapData
+    map.vars = as.data.frame(mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
+    ## get the choices for mapvairable_panel
+    mapvars.update = colnames(map.vars[, !(apply(map.vars, 2, anyDuplicated, incomparables = c(NA, ""))), drop = FALSE])
+    
+    ## Find the pair of variables with the highest number of matches
+    best.vars = iNZightMaps::findBestMatch(temp.data, map.vars)
+    best.data.var = best.vars[1]
+    best.map.var =  best.vars[2]
+    
+    ## update mapvairable_panel after map file selected
+    updateSelectInput(session, "mapvariable", choices = mapvars.update, selected = best.map.var)
+    ## update datavariable_panel
+    updateSelectInput(session, "datavariable", selected = best.data.var)
+    
+  })
+
+})
+
+
+
+## everything reset to default when a new dataset is loaded
+observe({
+  get.data.set()
+  
+  isolate({
+    
+    args2$combinedData = NULL
+#    mapData = NULL,
+    
+#    mapName = "",
+#    mapType = NULL,
+#    mapVars = NULL,
+#    mapSizeVar = NULL,
+#    mapSequenceVar = NULL,
+    
+    args2$match.list = NULL
+    #  has.multipleobs = FALSE,
+    
+#    plotTitle = "",
+#    plotAxes = FALSE,
+#    plotXLab = "",
+#    plotYLab = "",
+#    plotDatumLines = FALSE,
+#    plotProjection = NULL,
+#    plotTheme = FALSE,
+#    plotPalette = "Default",
+#    plotConstantAlpha = 1.0,
+#    plotConstantSize = 1.0,
+#    plotCurrentSeqVal = NULL,
+#    timer = NULL,
+    
+#    multipleObsOption = NULL,
+#    plotSparklinesType = "Absolute",
+#    plotScaleLimits = NULL, 
+#    plotLabelVar = NULL,
+    
+#    plotLabelScale = 4,
+#    plotAxisScale = 11, 
+    
+#    proj.df = iNZightMaps::iNZightMapProjections()
+  })
+})
+
+
+
+
+
+
+## update "combinedData" information after loading data
+observe({
+  get.data.set()
+  input$datavariable
+  input$mapvariable
+  input$sequencevariable
+#  input$unmatched
+#  args2$mapData
+  
+  args2$updateplot
+  
+  isolate({
+    temp.data = get.data.set()
+    temp = plot.args2()
+    mapData = temp$mapData
+    match.list = temp$match.list
+    sequence.var = NULL
+    if(!is.null(mapData) && !is.null(match.list) &&
+       !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+       !is.null(input$mapvariable) && input$mapvariable != "") {
+      
+      if(match.list$multiple.obs) {
+        has.multipleobs = TRUE
+        if(!is.null(input$sequencevariable) && input$sequencevariable %in% colnames(temp.data))
+          sequence.var = input$sequencevariable
+      }
+      
+      else {
+        has.multipleobs = FALSE
+      }
+    
+      args2$combinedData = suppressWarnings(iNZightMaps::iNZightMapPlot(data = temp.data,
+                                                                        map = mapData,
+                                                                        type = "region",
+                                                                        by.data = input$datavariable,
+                                                                        by.map = input$mapvariable,
+                                                                        simplification.level = 0.01,
+                                                                        multiple.obs = has.multipleobs,
+                                                                        sequence.var = sequence.var))
+      
+      args2$updateplot1 = temp$updateplot1 + 1
+        
+      
+    }
+    
+  })
+  
+})
+
+
+output$sequencevariable_panel = renderUI({
+  get.data.set()
+  input$datavariable
+  input$mapvariable
+  input$loadshapefiles
+  ret = NULL
+  
+  isolate({
+    temp.data = get.data.set()
+    temp = plot.args2()
+    match.list = temp$match.list
+    if(!is.null(match.list)) {
+      if(match.list$multiple.obs) {
+        
+        textpanel = h5(strong("Multiple observations for each region were found!"))
+        timevar = grepl("(year|date)", colnames(temp.data), ignore.case = TRUE)
+        
+        if(any(timevar)) {
+          
+          ret = list(textpanel,
+                     fixedRow(column(5, h5("Sequence Variable:")),
+                              column(7, selectInput(inputId = "sequencevariable", 
+                                                    label = NULL, 
+                                                    choices = colnames(vis.data()),
+                                                    selected = colnames(vis.data())[timevar][1],
+                                                    selectize = F))))
+        }
+        else {
+          ret = list(textpanel,
+                     fixedRow(column(5, h5("Sequence Variable:")),
+                              column(7, selectInput(inputId = "sequencevariable", 
+                                                    label = NULL, 
+                                                    choices = colnames(vis.data()),
+                                                    selectize = F))))
+        }
+      }
+      else
+        textpanel = ""
+    }
+  })
+  ret
+})
+
+
+## setup unmateched data panel
+
+output$unmatched_panel = renderUI({
+  get.data.set()
+#  input$importmap
+#  input$datavariable
+#  input$mapvariable
+  
+#  input$loadshapefiles
+  args2$match.list
+  
+  ret = NULL
+  isolate({
+    temp = plot.args2()
+  
+    if(!is.null(temp$match.list)) {
+      match.list = temp$match.list
+      table.nonmatched = match.list$data.vect[!(match.list$data.matched)]
+      ret = list(h4("Unmatched Data"),
+                 h5("Observations in the dataset with no corresponding region in the map file"),
+                 selectInput(inputId = "unmatched", 
+                             label = NULL, 
+                             choices = table.nonmatched, 
+                             multiple = FALSE,
+                             selectize = FALSE,
+                             size = 3))
+      }
+        
+    ret
+  })
+})
+
+
+output$unmatchedcounts_panel = renderText({
+  get.data.set()
+#  input$importmap
+#  input$datavariable
+#  input$mapvariable
+  
+#  input$loadshapefiles
+  
+  args2$match.list
+  
+  ret = NULL
+  isolate({
+    temp = plot.args2()
+    if(!is.null(temp$match.list)) {
+      match.list = temp$match.list
+      matchedcount = sum(match.list$data.matched)
+      unmatchedcount = sum(!match.list$data.matched)
+      ret = paste("Matched Count:", matchedcount, "\n", "Unmatched Count:", unmatchedcount, sep = "")
+      
+    }
+    
+    ret
+  })
+})
+
+
+
+## set up advancedmapoptions_panel
+output$advancedmapoptions_panel = renderUI({
+  get.data.set()
+  
+#  proj.df = iNZightMaps::iNZightMapProjections() 
+  ret = NULL
+  isolate({
+    advancedmapoptions.title = checkboxInput(inputId = "advancedmapoptions_title",
+                                             label = strong("Advanced Map Options"),
+                                             value = input$advancedmapoptions_title)
+    
+    advancedmapoptions.contents = conditionalPanel(condition = "input.advancedmapoptions_title",
+                                                   fixedRow(column(3, h5("Projection:")),
+                                                            column(6, selectInput(inputId = "advancedmapoptions_projection",
+                                                                                  label = NULL,
+                                                                                  choices = plot.args2()$proj.df$Name,
+                                                                                  selected = input$advancedmapoptions_projection,
+                                                                                  selectize = F))),
+                                                   uiOutput("checkregion_panel"))
+    ret = list(advancedmapoptions.title, 
+               advancedmapoptions.contents)
+    
+  })
+  
+  ret
+})
+
+
+## set up checkregion_panel
+output$checkregion_panel = renderUI({
+  get.data.set()
+  input$datavariable
+  input$mapvariable
+  input$sequencevariable
+  input$importmap
+  input$loadshapefiles
+  
+  ret = NULL
+  
+  isolate({
+    temp = plot.args2()
+    if(!is.null(temp$combinedData)) {
+      options = iNZightMaps::iNZightMapRegions(temp$combinedData)
+      ret = selectInput(inputId = "check_regions", 
+                        label = NULL, 
+                        choices = options, 
+                        selected = options,
+                        multiple = TRUE,
+                        selectize = FALSE,
+                        size = 4)
+    }
+      
+  })
+  
+  ret
+})
+
+
+
+## observe checkregion_panel
+observe({
+  input$check_regions
+  isolate({
+    temp = plot.args2()
+    options = iNZightMaps::iNZightMapRegions(temp$combinedData)
+    if(!is.null(input$check_regions) && length(input$check_regions) > 0 &&
+       length(input$check_regions) != length(options)) {
+      args2$mapRegionsPlot = input$check_regions
+      args2$mapExcludedRegions = TRUE
+    }
+    else
+      args2$mapRegionsPlot = NULL
+  })
+})
+
+
+## observe advancedmapoptions_projection
+observe({
+  input$advancedmapoptions_projection
+  isolate({
+    projection.index = match(input$advancedmapoptions_projection, plot.args2()$proj.df$Name)
+    
+    args2$plotProjection = plot.args2()$proj.df[projection.index, "PROJ4"]
+  })
+})
+
+
+
+## set up advancedplotoptions_panel
+output$advancedplotoptions_panel = renderUI({
+  get.data.set()
+  input$datavariable
+  input$mapvariable
+  input$sequencevariable
+
+    
+  ret = NULL
+  isolate({
+    temp = plot.args2()
+    if(!is.null(temp$combinedData)) {
+      advancedplotoptions.title = checkboxInput(inputId = "advancedplotoptions_title",
+                                                label = strong("Advanced Plot Options"),
+                                                value = input$advancedplotoptions_title)
+      
+      advancedplotoptions.contents = conditionalPanel(condition = "input.advancedplotoptions_title",
+                                                      list(fixedRow(column(3, h5("Plot Title:")),
+                                                                    column(6, textInput("advancedplotoptions_plottitle",
+                                                                                        label = NULL,
+                                                                                        value = input$advancedplotoptions_plottitle))),
+                                                           
+                                                           fixedRow(column(3, h5("Map Palette:")),
+                                                                    column(6, selectInput(inputId = "advancedplotoptions_mappalette",
+                                                                                          label = NULL,
+                                                                                          choices = c("Default", "Viridis", 
+                                                                                                      "Magma", "Plasma", 
+                                                                                                      "Inferno", "BrBG", 
+                                                                                                      "PiYG", "PRGn", 
+                                                                                                      "Accent", "Dark2", 
+                                                                                                      "Paired", "Pastel1", 
+                                                                                                      "Set1", "Blues", 
+                                                                                                      "BuGn", "BuPu", "GnBu"),
+                                                                                          selected = input$advancedplotoptions_mappalette,
+                                                                                          selectize = F))),
+                                                           fixedRow(column(3, NULL),
+                                                                    column(2, checkboxInput(inputId = "advancedplotoptions_dark",
+                                                                                            label = "Dark",
+                                                                                            value = input$advancedplotoptions_dark)),
+                                                                    column(2, checkboxInput(inputId = "advancedplotoptions_gridlines",
+                                                                                            label = "Grid Lines",
+                                                                                            value = input$advancedplotoptions_gridlines)),
+                                                                    column(2, checkboxInput(inputId = "advancedplotoptions_axislabels",
+                                                                                            label = "Axis Labels",
+                                                                                            value = input$advancedplotoptions_axislabels))),
+                                                           
+                                                           fixedRow(column(3, NULL),
+                                                                    column(6, conditionalPanel(condition = "input.advancedplotoptions_axislabels & input.advancedplotoptions_title",
+                                                                                               fixedRow(column(6, h5("x-axis Label:")),
+                                                                                                        column(6, textInput("advancedplotoptions_xaxislabel",
+                                                                                                                            label = NULL,
+                                                                                                                            value = temp$plotXLab))),
+                                                                                               fixedRow(column(6, h5("y-axis Label:")),
+                                                                                                        column(6, textInput("advancedplotoptions_yaxislabel",
+                                                                                                                            label = NULL,
+                                                                                                                            value = temp$plotYLab)))))),
+                                                           
+                                                           fixedRow(column(3, h5("Map Scales:")),
+                                                                    column(6, selectInput(inputId = "advancedplotoptions_mapscales",
+                                                                                          label = NULL,
+                                                                                          choices = c("Independent scales",
+                                                                                                      "Same for all plots",
+                                                                                                      "Scales fixed at 0-1",
+                                                                                                      "Scales fixed at 0-100",
+                                                                                                      "Scales fixed at custom range"),
+                                                                                          selected = input$advancedplotoptions_mapscales,
+                                                                                          selectize = F))),
+                                                           conditionalPanel(condition = "input.advancedplotoptions_mapscales == 'Scales fixed at custom range'",
+                                                                            fixedRow(column(3, textInput("scales_min",
+                                                                                                         label = NULL,
+                                                                                                         value = "")),
+                                                                                     column(3, textInput("scales_max",
+                                                                                                         label = NULL,
+                                                                                                         value = "")),
+                                                                                     column(3, actionButton(inputId = "scales_confirm",
+                                                                                                            label = "Confirm",
+                                                                                                            style="color: #fff; background-color: #337ab7; border-color: #2e6da4")))),
+                                                           fixedRow(column(3, h5("Plot title font size:")),
+                                                                    column(6, sliderInput("plottitlefontsize_slider", 
+                                                                                          label = NULL, 
+                                                                                          min = 7, 
+                                                                                          max = 17, 
+                                                                                          value = 11, step = 1, ticks = FALSE))),
+                                                           fixedRow(column(3, checkboxInput(inputId = "regionlabels_click",
+                                                                                            label = "Region Labels:",
+                                                                                            value = input$advancedplotoptions_dark)),
+                                                                    column(6, conditionalPanel(condition = "input.regionlabels_click & input.advancedplotoptions_title",
+                                                                                               selectInput(inputId = "advancedplotoptions_regionlabels",
+                                                                                                           label = NULL,
+                                                                                                           choices = c("Current Variable", iNZightMaps::iNZightMapVars(temp$combinedData, map.vars = TRUE)),
+                                                                                                           selected = input$advancedplotoptions_regionlabels,
+                                                                                                           selectize = F),
+                                                                                               fixedRow(column(5, h5("Label font size:")),
+                                                                                                        column(7, sliderInput("regionlabels_slider", 
+                                                                                                                              label = NULL, 
+                                                                                                                              min = 1, 
+                                                                                                                              max = 10, 
+                                                                                                                              value = 4, step = 0.5, ticks = FALSE))))))))
+      
+      ret = list(advancedplotoptions.title,
+                 advancedplotoptions.contents)  
+      
+    }
+    
+    
+  })
+  
+  ret
+})
+
+
+## observe scales_confirm
+observe({
+  input$scales_confirm
+  isolate({
+    if(!is.null(input$scales_min) && length(input$scales_min) > 0 &&
+       !is.null(input$scales_max) && length(input$scales_max) >0) {
+      args2$plotScaleLimits = as.numeric(c(input$scales_min, input$scales_max))
+    } 
+  })
+  
+})
+
+
+## observe plottitlefontsize_slider
+## observe regionlabels_slider
+observe({
+  input$plottitlefontsize_slider
+  isolate({
+    args2$plotAxisScale  = input$plottitlefontsize_slider
+  })
+})
+
+
+## observe regionlabels_slider
+observe({
+  input$regionlabels_slider
+  isolate({
+    args2$plotLabelScale = input$regionlabels_slider
+  })
+})
+
+
+## observe regionlabels_click and advancedplotoptions_regionlabels
+observe({
+  input$regionlabels_click
+  input$advancedplotoptions_regionlabels
+  
+  isolate({
+    if(!is.null(input$regionlabels_click) && input$regionlabels_click) {
+      if(!is.null(input$advancedplotoptions_regionlabels) && length(input$advancedplotoptions_regionlabels) > 0) {
+        if(input$advancedplotoptions_regionlabels == "Current Variable")
+          args2$plotLabelVar = "use_colour_var"
+        else
+          args2$plotLabelVar = input$advancedplotoptions_regionlabels
+      }
+    }
+    else 
+      args2$plotLabelVar = NULL
+  })
+})
+
+
+## observe advancedplotoptions_mapscales
+observe({
+  input$advancedplotoptions_mapscales
+  isolate({
+    if(!is.null(input$advancedplotoptions_mapscales) && length(input$advancedplotoptions_mapscales) > 0) {
+      if(!is.null(input$vartodisplay) && length(input$vartodisplay) > 0)
+        args2$plotScaleLimits = switch(input$advancedplotoptions_mapscales,
+                                       "Independent scales" = NULL,
+                                       "Same for all plots" = iNZightMaps::getMinMax(plot.args2()$combinedData, input$vartodisplay),
+                                       "Scales fixed at 0-1" = c(0, 1),
+                                       "Scales fixed at 0-100" = c(0, 100)
+                                       )  
+         
+    }
+    
+  })
+})
+
+
+
+## observe advancedplotoptions_mappalette
+observe({
+  input$advancedplotoptions_mappalette
+  isolate({
+    args2$plotPalette = input$advancedplotoptions_mappalette
+  })
+})
+
+
+## observe advancedplotoptions_dark
+observe({
+  input$advancedplotoptions_dark
+  isolate({
+    args2$plotTheme = input$advancedplotoptions_dark
+  })
+})
+
+## observe advancedplotoptions_gridlines
+observe({
+  input$advancedplotoptions_gridlines
+  isolate({
+    args2$plotDatumLines = input$advancedplotoptions_gridlines
+  })
+})
+
+
+
+## observe advancedplotoptions_axislabels
+observe({
+  input$advancedplotoptions_axislabels
+  isolate({
+    args2$plotAxes = input$advancedplotoptions_axislabels
+  })
+})
+
+
+## observe advancedplotoptions_xaxislabel and advancedplotoptions_yaxislabel
+observe({
+  input$advancedplotoptions_xaxislabel
+  isolate({
+    if(length(input$advancedplotoptions_xaxislabel) > 0)
+      args2$plotXLab = input$advancedplotoptions_xaxislabel
+  })
+})
+
+observe({
+  input$advancedplotoptions_yaxislabel
+  isolate({
+    if(length(input$advancedplotoptions_yaxislabel) > 0)
+      args2$plotYLab = input$advancedplotoptions_yaxislabel
+  })
+})
+
+
+## observe advancedplotoptions_transparency
+#observe({
+#  input$advancedplotoptions_transparency
+#  isolate({
+#    if(length(input$advancedplotoptions_transparency) > 0)
+#      args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+#  })
+#})
+
+
+## observe advancedplotoptions_size
+#observe({
+#  input$advancedplotoptions_size
+#  isolate({
+#    if(length(input$advancedplotoptions_size) > 0)
+#      args2$plotConstantSize = input$advancedplotoptions_size
+#  })
+#})
+
+
+## set up variabletodisplay_panel
+output$variabletodisplay_panel = renderUI({
+  get.data.set()
+  input$importmap
+  input$datavariable
+  input$mapvariable
+  
+  ret = NULL
+  isolate({
+    temp = plot.args2()
+    if(!is.null(temp$combinedData)) {
+      var.vect = iNZightMaps::iNZightMapVars(temp$combinedData)
+      ret = list(h4("Select Variable/s to Display"),
+                 h5("(Use Ctrl+Click to select multiple variables)"),
+                 selectInput(inputId = "vartodisplay", 
+                             label = NULL, 
+                             choices = var.vect, 
+                             multiple = TRUE,
+                             selected = input$vartodisplay,
+                             selectize = FALSE,
+                             size = 4))
+    }
+  
+    ret
+  })
+})
+
+
+## set up multipleobsoption_panel
+
+output$multipleobsoption_panel = renderUI({
+  get.data.set()
+#  plot.args2()
+  input$datavariable
+  input$mapvariable
+  
+  ret = NULL
+  isolate({
+    temp.data = get.data.set()
+    temp = plot.args2()
+    
+    if(!is.null(temp$match.list) && temp$match.list$multiple.obs) {
+#      unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
+#      unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
+      
+      ret = list(h5(strong("Dataset has multiple observations for regions:")),
+                 radioButtons(inputId = "multipleobsoption",
+                              label = NULL,
+                              choices =
+                                c("Single Value" = 1,
+                                  "All Values" = 2,
+                                  "Aggregate" = 3),
+                              selected = input$multipleobsoption,
+                              inline = TRUE),
+                 
+                 ## a slider for the sequence variables
+                 
+                 conditionalPanel(condition = "input.multipleobsoption == 1",
+                                  fixedRow(column(3, textOutput("printseqvar")),
+                                           column(6, uiOutput("seqvar_slider_panel")))),
+                 
+                 conditionalPanel(condition = "input.multipleobsoption == 2",
+                                  
+                                  fixedRow(column(3, h5("")),
+                                           column(6, radioButtons(inputId = "Sparklinesoption",
+                                                                  label = NULL,
+                                                                  choices = c("Sparklines" = 1),
+                                                                  selected = 1,
+                                                                  inline = TRUE))),
+                                  
+                                  fixedRow(column(3, h5("Line Chart Type:")),
+                                           column(6, selectInput(inputId = "linecharttypeoption", 
+                                                                 label = NULL, 
+                                                                 choices = c("Absolute", "Relative", "Percent Change"),
+                                                                 selected = input$linecharttypeoption,
+                                                                 selectize = F)))),
+                 
+                 conditionalPanel(condition = "input.multipleobsoption == 3",
+                                  selectInput(inputId = "aggregateoption", 
+                                              label = NULL, 
+                                              choices = c("Mean", "Median"),
+                                              selected = input$aggregateoption,
+                                              selectize = F)))
+    }
+
+
+  })
+  
+  ret
+})
+
+
+## print out sequence variable and show slider
+output$printseqvar = renderText({
+  get.data.set()
+  input$sequencevariable
+  input$seqvar_slider
+  isolate({
+    temp = plot.args2()
+    unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
+    unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
+    if(!is.null(input$sequencevariable) && length(input$sequencevariable) > 0)
+      paste("Value of", input$sequencevariable, ":", unique.singlevals[input$seqvar_slider])
+  })
+  
+})
+
+output$seqvar_slider_panel = renderUI({
+  get.data.set()
+  input$sequencevariable
+  ret = NULL
+  isolate({
+    temp = plot.args2()
+    
+    if(!is.null(temp$match.list) && temp$match.list$multiple.obs) {
+      unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
+      unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
+      n.unique.singlevals = length(unique.singlevals)
+      if(!is.null(input$sequencevariable) && length(input$sequencevariable) > 0) 
+        ret = sliderInput("seqvar_slider", 
+                          label = NULL, 
+                          min = 1, 
+                          max = n.unique.singlevals, 
+                          value = n.unique.singlevals, step = 1, ticks = FALSE)
+    }
+    
+  })
+  
+  ret
+})
+
+
+
+## observe multipleobsoption and seqvar_slider
+observe({
+  input$multipleobsoption
+  input$seqvar_slider
+  
+  isolate({
+    temp = plot.args2()
+    if(!is.null(temp$match.list) && temp$match.list$multiple.obs)
+      if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 1) {
+        
+        unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
+        unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
+        
+        args2$multipleObsOption = "singleval"
+        #      args2$combinedData$type = ifelse(input$plotas_options == 1, "region", "points")
+        if(!is.null(input$seqvar_slider) && length(input$seqvar_slider) > 0) {
+          args2$plotCurrentSeqVal = unique.singlevals[input$seqvar_slider]
+          args2$combinedData = iNZightMaps::iNZightMapAggregation(temp$combinedData,
+                                                                  "singlevalue",
+                                                                  single.value = unique.singlevals[input$seqvar_slider])
+        }
+        
+        
+        #      print(temp$combinedData$sequence.var)
+        #      print(unique.singlevals[input$seqvar_slider])
+        #      print(plot.args2()$plotCurrentSeqVal)
+        
+        ## update the plot title 
+        if(!is.null(input$vartodisplay) && length(input$vartodisplay) == 1) {
+          args2$plotTitle = paste(input$vartodisplay, " (", unique.singlevals[input$seqvar_slider], ")")
+          updateTextInput(session, "advancedplotoptions_plottitle", 
+                          value = paste(input$vartodisplay, " (", unique.singlevals[input$seqvar_slider], ")"))
+        }
+        
+      }
+    
+    
+    
+  })
+})
+
+
+## observe multipleobsoption and linecharttypeoption
+observe({
+  input$multipleobsoption
+  input$linecharttypeoption
+  
+  isolate({
+    if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 2) {
+      args2$multipleObsOption = "allvalues"
+      args2$combinedData$type = "sparklines"
+      args2$plotCurrentSeqVal = NULL
+      args2$plotSparklinesType = input$linecharttypeoption
+      
+      if(!is.null(input$vartodisplay) && length(input$vartodisplay) > 0) {
+        vars.to.keep = sapply(as.data.frame(plot.args2()$combinedData$region.data)[, input$vartodisplay, drop = FALSE], is.numeric)
+        if(sum(vars.to.keep) > 0)
+          updateSelectInput(session, "vartodisplay", selected = input$vartodisplay[vars.to.keep])
+        else
+          updateSelectInput(session, "vartodisplay", selected = NULL)
+      }
+      
+    }
+    
+  })
+})
+
+
+
+## observe multipleobsoption and aggregateoption
+observe({
+  input$multipleobsoption
+  input$aggregateoption
+  
+  isolate({
+#    temp = plot.args2()
+    if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 3) {
+      args2$multipleObsOption = "aggregate"
+      args2$plotCurrentSeqVal = input$aggregateoption
+      args2$combinedData = iNZightMaps::iNZightMapAggregation(args2$combinedData,
+                                                              tolower(input$aggregateoption))
+    }
+  })
+})
+
+
+
+
+
+## set up plotas_panel
+output$plotas_panel = renderUI({
+  get.data.set()
+#  plot.args2()
+  input$multipleobsoption
+  input$datavariable
+  input$mapvariable
+  input$sequencevariable
+  
+  ret = NULL
+  isolate({
+    
+    temp = plot.args2()
+    
+    if(!is.null(temp$combinedData))
+      ## conditional when "Single Value" or "Aggregate" is selected
+      if((!is.null(input$multipleobsoption) && length(input$multipleobsoption) > 0 && input$multipleobsoption != 2) ||
+         (!is.null(temp$match.list) && !temp$match.list$multiple.obs)) {
+        ret = list(fixedRow(column(3, h5("Plot as:")),
+                            column(6, radioButtons(inputId = "plotas_options",
+                                                   label = NULL,
+                                                   choices = c("Regions" = 1, "Centroids" = 2),
+                                                   selected = input$plotas_options,
+                                                   inline = TRUE))),
+                   
+                   conditionalPanel(condition = "input.plotas_options == 2",
+                                        fixedRow(column(3, h5("Size by:")),
+                                                 column(6, selectInput(inputId = "plotas_sizeby",
+                                                                       label = NULL,
+                                                                       choices = c(" ", sort(iNZightMaps::iNZightMapVars(temp$combinedData, TRUE)[temp$combinedData$var.types %in% c("numeric", "integer")])),
+                                                                       selected = input$plotas_sizeby,
+                                                                       selectize = F)))))
+        
+
+      }
+    
+    
+      
+  })
+  
+  ret
+})
+
+
+## observe plotas_options
+#observe({
+#  input$plotas_options
+#  isolate({
+#    if(length(input$plotas_options) > 0 && input$plotas_options == 2)
+#      args2$mapType = "point"
+#    else
+#      args2$mapType = "region"
+#  })
+#})
+
+## observe plotas_sizeby
+observe({
+  input$plotas_sizeby
+  isolate({
+    if(length(input$plotas_sizeby) > 0) {
+      if(input$plotas_sizeby == " ")
+        args2$mapSizeVar = NULL
+      else
+        args2$mapSizeVar = input$plotas_sizeby
+    }
+    
+  })
+})
+
+
+
+## set up sizeandtransparency_panel
+output$sizeandtransparency_panel = renderUI({
+  get.data.set()
+#  plot.args2()
+  input$multipleobsoption
+  input$plotas_options
+  ret = NULL
+  
+  isolate({
+    
+    temp = plot.args2()
+    ## conditional when "allvalues" is selected 
+    
+    if((length(input$multipleobsoption) > 0 && input$multipleobsoption == 2)) {
+      ret = list(fixedRow(column(3, h5("Transparency:")),
+                          column(6, sliderInput("advancedplotoptions_transparency", 
+                                                label = NULL, 
+                                                min = 0, 
+                                                max = 1, 
+                                                value = input$advancedplotoptions_transparency, step = 0.1, ticks = FALSE))),
+                 fixedRow(column(3, h5("Size:")),
+                          column(6, sliderInput("advancedplotoptions_size", 
+                                                label = NULL, 
+                                                min = 1, 
+                                                max = 10, 
+                                                value = temp$plotConstantSize, step = 1, ticks = FALSE))))
+    }
+    else if(length(input$plotas_options) > 0 && input$plotas_options == 2 && 
+            (length(input$multipleobsoption) > 0 && (input$multipleobsoption == 1 | input$multipleobsoption == 3) ||
+             !is.null(temp$match.list) && !temp$match.list$multiple.obs)) {
+      ret = fixedRow(column(3, h5("Size:")),
+                     column(6, sliderInput("advancedplotoptions_size", 
+                                           label = NULL, 
+                                           min = 1, 
+                                           max = 10, 
+                                           value = temp$plotConstantSize, step = 1, ticks = FALSE)))
+    }
+
+    
+  })
+  
+  ret
+})
+
+
+
+
+
+
 ## set up maplocation_panel and locationvariable_panel
 
 output$maplocation_panel = renderUI({
@@ -835,13 +2279,374 @@ output$savemaps = downloadHandler(
     }
     
     dev.off()
-  })    
+  }) 
+
+
+## observe advancedplotoptions_plottitle
+observe({
+  input$advancedplotoptions_plottitle
+  isolate({
+    args2$plotTitle = input$advancedplotoptions_plottitle
+  })
+})
+
+## update plot title
+observe({
+  input$vartodisplay
+  input$multipleobsoption
+  input$seqvar_slider
+  
+  isolate({
+    temp = plot.args2()
+    if(!is.null(input$vartodisplay) && length(input$vartodisplay) > 0) {
+      
+      if(length(input$vartodisplay) > 1) {
+        args2$plotTitle = ""
+        updateTextInput(session, "advancedplotoptions_plottitle", value = "")
+      }
+      else {
+        if(!is.null(temp$match.list) && temp$match.list$multiple.obs) {
+          if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 1) {
+            #                  temp = plot.args2()
+            args2$plotTitle = paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")")
+            updateTextInput(session, "advancedplotoptions_plottitle", 
+                            value = paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")"))
+          } 
+          else if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 3) {
+            args2$plotTitle = value = paste(input$vartodisplay, " (", input$aggregateoption, ")")
+            updateTextInput(session, "advancedplotoptions_plottitle", 
+                            value = paste(input$vartodisplay, " (", input$aggregateoption, ")"))
+          } 
+          else {
+            args2$plotTitle = input$vartodisplay
+            updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
+          }
+        }
+        else {
+          args2$plotTitle = input$vartodisplay
+          updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
+        }
+      }
+    }
+  })
+})
 
 
 
+## plot when map information obtained
+output$maps_plot = renderPlot({
+  get.data.set()
+  
+  ## coordinate
+#  input$type1_plottitle_confirm
+  
+  
+  
+  args2$plotTitle
+  plot.args()
+  
+  args2$updateplot1
+  
+  input$datavariable
+  input$mapvariable
+  
+  input$vartodisplay
+  
+  input$advancedmapoptions_projection
+  input$advancedplotoptions_mappalette
+  input$advancedplotoptions_dark
+  input$advancedplotoptions_gridlines
+  
+  input$advancedplotoptions_transparency
+  input$advancedplotoptions_size
+  
+  input$plotas_options
+  input$plotas_sizeby
+  
+  input$multipleobsoption
+  input$aggregateoption
+  input$linecharttypeoption
+  input$advancedplotoptions_regionlabels
+  input$regionlabels_click
+  input$regionlabels_slider
+  input$plottitlefontsize_slider
+  input$seqvar_slider
+  
+  input$advancedplotoptions_mapscales
+  input$scales_confirm
+  
+  input$advancedplotoptions_axislabels
+  
+  input$check_regions
+  
+  #  input$loadshapefiles
+  
+  isolate({
+    if(input$map_type == 1) {
+      condition1 = !is.null(input$select_latitude) &&
+        input$select_latitude %in% colnames(get.data.set()) &&
+        !is.null(input$select_longitude) &&
+        input$select_longitude %in% colnames(get.data.set())
+      if(condition1) {
+        temp = plot.args()
+        tryCatch({do.call(plot, temp)}, 
+                 error = function(e) {
+                   print(e)
+                 }, finally = {})
+      }
+    }
+    else if(input$map_type == 2) {
+      temp.data = get.data.set()
+      temp = plot.args2()
+      mapData = temp$mapData
+      
+      if(!is.null(mapData) &&
+         !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+         !is.null(input$mapvariable)) {
+        
+        ## update "match.list" information after loading data        
+        match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
+                                                 as.data.frame(mapData)[, input$mapvariable])
+        
+        args2$match.list = match.list
+          
+        
+        if(!is.null(temp$combinedData) &&
+           !is.null(input$vartodisplay) && 
+           all(input$vartodisplay %in% colnames(temp.data))) {
+          
+          #          temp$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
+          #                                          "point", "region")
+          args2$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
+                                           "point", "region")
+          
+          args2$mapType = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+                                 "point", "region")
+          
+          if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 2)
+            args2$combinedData$type = "sparklines"
+          
+          ## multiple varibles to display ?
+          if(length(input$vartodisplay) > 1)
+            multiple.variables = TRUE
+          else
+            multiple.variables = FALSE
+          
+          if(is.null(temp$multipleObsOption)) {
+            if(multiple.variables)
+              aggregate.logical = TRUE
+            else
+              aggregate.logical = FALSE
+          }
+          else {
+            if(multiple.variables && temp$multipleObsOption != "allvalues")
+              aggregate.logical = TRUE
+            else
+              aggregate.logical = FALSE
+          }
+          
+          ## update plotConstantSize (size for points)
+          if(!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0)
+            args2$plotConstantSize = input$advancedplotoptions_size
+          
+          
+          ## update plotConstantAlpha
+          if(!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0)
+            args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+          
+          ## update advancedplotoptions_plottitle
+#          if(!is.null(input$advancedplotoptions_plottitle))
+#            args2$plotTitle = input$advancedplotoptions_plottitle
+          
+          
+          
+          temp = plot.args2()
+          grid::grid.draw(plot(temp$combinedData, 
+                               main = temp$plotTitle,
+                               axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+                               datum.lines = temp$plotDatumLines, 
+                               projection = temp$plotProjection,
+                               multiple.vars = multiple.variables, 
+                               colour.var = input$vartodisplay,
+                               size.var = temp$mapSizeVar, 
+                               aggregate = aggregate.logical,
+                               darkTheme = temp$plotTheme, 
+                               alpha.const = temp$plotConstantAlpha, 
+                               size.const = temp$plotConstantSize,
+                               current.seq = temp$plotCurrentSeqVal, 
+                               palette = temp$plotPalette,
+                               sparkline.type = temp$plotSparklinesType,
+                               scale.limits = temp$plotScaleLimits,
+                               label.var = temp$plotLabelVar,
+                               scale.label = temp$plotLabelScale,
+                               scale.axis = temp$plotAxisScale,
+                               regions.to.plot = temp$mapRegionsPlot, 
+                               keep.other.regions = temp$mapExcludedRegions))
+          
+        }
+        
+        else {
+          matchplot.colours = c("#d95f02", "#1b9e77", "#7570b3")
+          plot(mapData$geometry, col = matchplot.colours[match.list$map.matched + 1])
+          legend("topleft", legend = c("Data present for region",
+                                       "Data missing for region"),
+                 fill = matchplot.colours[2:1])
+        }
+        
+      }
+      
+    }
+  })
+})
 
 
 
-
-
+## to display the interactive maps
+output$interactive.maps = renderUI({
+  get.data.set()
+  args2$plotTitle
+  input$datavariable
+  input$mapvariable
+  
+  input$vartodisplay
+  
+  input$advancedmapoptions_projection
+  input$advancedplotoptions_mappalette
+  input$advancedplotoptions_dark
+  input$advancedplotoptions_gridlines
+  
+  input$advancedplotoptions_transparency
+  input$advancedplotoptions_size
+  
+  input$plotas_options
+  input$plotas_sizeby
+  
+  input$multipleobsoption
+  input$aggregateoption
+  input$linecharttypeoption
+  input$advancedplotoptions_regionlabels
+  input$regionlabels_click
+  input$regionlabels_slider
+  input$plottitlefontsize_slider
+  input$seqvar_slider
+  
+  input$advancedplotoptions_mapscales
+  input$scales_confirm
+  
+  input$advancedplotoptions_axislabels
+  
+  input$check_regions
+  isolate({
+    
+    if(input$map_type == 2) {
+      
+      temp.data = get.data.set()
+      temp = plot.args2()
+      mapData = temp$mapData
+      
+      if(!is.null(mapData) &&
+         !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+         !is.null(input$mapvariable)) {
+        
+        ## update "match.list" information after loading data        
+        match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
+                                                 as.data.frame(mapData)[, input$mapvariable])
+        
+        args2$match.list = match.list
+        
+        if(!is.null(temp$combinedData) &&
+           !is.null(input$vartodisplay) && 
+           all(input$vartodisplay %in% colnames(temp.data))) {
+          
+          args2$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
+                                           "point", "region")
+          
+          args2$mapType = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+                                 "point", "region")
+          
+          if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 2)
+            args2$combinedData$type = "sparklines"
+          
+          ## multiple varibles to display ?
+          if(length(input$vartodisplay) > 1)
+            h4("iNZight doesn't handle interactive maps for multiple variables ... yet! 
+               Please select only one variable")
+#            multiple.variables = TRUE
+          else {
+            multiple.variables = FALSE
+            
+            if(is.null(temp$multipleObsOption)) {
+              if(multiple.variables)
+                aggregate.logical = TRUE
+              else
+                aggregate.logical = FALSE
+            }
+            else {
+              if(multiple.variables && temp$multipleObsOption != "allvalues")
+                aggregate.logical = TRUE
+              else
+                aggregate.logical = FALSE
+            }
+            
+            ## update plotConstantSize (size for points)
+            if(!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0)
+              args2$plotConstantSize = input$advancedplotoptions_size
+            
+            
+            ## update plotConstantAlpha
+            if(!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0)
+              args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+            
+            ## update advancedplotoptions_plottitle
+#            if(!is.null(input$advancedplotoptions_plottitle))
+#              args2$plotTitle = input$advancedplotoptions_plottitle
+            
+            temp = plot.args2()
+            x = plot(temp$combinedData, 
+                     main = temp$plotTitle,
+                     axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+                     datum.lines = temp$plotDatumLines, 
+                     projection = temp$plotProjection,
+                     multiple.vars = multiple.variables, 
+                     colour.var = input$vartodisplay,
+                     size.var = temp$mapSizeVar, 
+                     aggregate = aggregate.logical,
+                     darkTheme = temp$plotTheme, 
+                     alpha.const = temp$plotConstantAlpha, 
+                     size.const = temp$plotConstantSize,
+                     current.seq = temp$plotCurrentSeqVal, 
+                     palette = temp$plotPalette,
+                     sparkline.type = temp$plotSparklinesType,
+                     scale.limits = temp$plotScaleLimits,
+                     label.var = temp$plotLabelVar,
+                     scale.label = temp$plotLabelScale,
+                     scale.axis = temp$plotAxisScale,
+                     regions.to.plot = temp$mapRegionsPlot, 
+                     keep.other.regions = temp$mapExcludedRegions)            
+            
+            pdf(NULL)
+            addr = iNZightPlots::exportHTML(x = x, 
+                                            mapObj = temp$combinedData,
+                                            file = tempfile(fileext = ".html"))
+            
+            
+            
+            addr = unclass(addr)
+            #          temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+            #          addResourcePath("path", temp.dir)
+            temp.dir = substring(addr, 1, regexpr("file", addr)-1)
+            addResourcePath("path", temp.dir)
+            filename = substring(addr, regexpr("file", addr))
+            tags$iframe(
+              seamless = "seamless",
+              #            src = "path/index.html",
+              src = paste("path/", filename, sep = ""),
+              height = 600, width = 2000
+            )
+          }
+        }
+      }
+    }
+  })
+})
 

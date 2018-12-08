@@ -162,7 +162,7 @@ shinyUI(
                        tabPanel("Model Fitting",value="regression",
                                 uiOutput("modelfitting.panel")),
                        tabPanel("Maps",
-                                uiOutput("maps.panel"))
+                                uiOutput("newmaps.panel"))
             )
             
             ## Backup Link
