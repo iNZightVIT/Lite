@@ -2487,7 +2487,7 @@ output$maps_plot = renderPlot({
         
         else {
           matchplot.colours = c("#d95f02", "#1b9e77", "#7570b3")
-          plot(mapData$geometry, col = matchplot.colours[match.list$map.matched + 1])
+          plot(sf::st_geometry(mapData$geometry), col = matchplot.colours[match.list$map.matched + 1])
           legend("topleft", legend = c("Data present for region",
                                        "Data missing for region"),
                  fill = matchplot.colours[2:1])

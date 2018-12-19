@@ -45,8 +45,8 @@ maps.sidebarPanel = function(data.set) {
           inputId = "map_type",
           label = NULL,
           choices =
-            c("Coordinate (latitude, longitude)" = 1),
-       ##       "Regions (country, state, county, etc.)" = 2),
+            c("Coordinate (latitude, longitude)" = 1,
+              "Regions (country, state, county, etc.)" = 2),
           selected = 1
         ),
         
