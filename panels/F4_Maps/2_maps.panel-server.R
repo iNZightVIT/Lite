@@ -47,7 +47,9 @@ args = reactiveValues(
   resizemethod = NULL,
   pch = NULL,
   symbolby = NULL,
-  lwd.pt = NULL
+  lwd.pt = NULL,
+  reverse.palette = NULL,
+  col.method = NULL
 )
 
 
@@ -368,6 +370,11 @@ observe({
 })
 
 
+
+
+
+
+
 ## set up plot_maptype_panel and plot_colour_panel
 output$plot_maptype_panel = renderUI({
   get.data.set()
@@ -379,45 +386,86 @@ output$plot_maptype_panel = renderUI({
   })
 })
 
-output$plot_colour_panel = renderUI({
+
+
+## set up plot_colourcheck_panel
+output$plot_colourcheck_panel = renderUI({
   get.data.set()
   isolate({
-    list(fixedRow(column(3, h5("Point colour:")),
-                  column(6, selectInput(inputId = "plot_colour",
-                                        label = NULL,
-                                        choices = c("grey50", "black", "darkblue", "darkgreen", "darkmagenta",
-                                                    "darkslateblue", "hotpink4", "lightsalmon2", "palegreen3",
-                                                    "steelblue3"),
-                                        selectize = FALSE))),
-         
-         fixedRow(column(3, h5("Colour by:")),
-                  column(6, selectInput(inputId = "colourby",
-                                        label = NULL,
-                                        choices = c("", colnames(get.data.set())),
-                                        selectize = FALSE))))
+    checkboxInput(inputId = "map1_colourcheck",
+                  label = "Colour",
+                  value = input$map1_colourcheck)
     
   })
 })
 
 
-output$plot_colpalette_panel = renderUI({
+
+
+output$plot_colour_panel = renderUI({
   get.data.set()
-  input$colourby
+  input$map1_colourcheck
   ret = NULL
   
   isolate({
-    if(!is.null(input$colourby) && input$colourby %in% numericVars())
-      ret = colpalette.cont = fixedRow(column(3, h5("Palette:")),
-                                       column(6, selectInput(inputId = "select.colour.palette", 
-                                                             label=NULL,
-                                                             choices = names(colourPalettes$cont),
-                                                             selectize = FALSE)))
-    else if(!is.null(input$colourby) && input$colourby %in% characterVars())
-      ret = colpalette.cat = fixedRow(column(3, h5("Palette:")),
-                                      column(6, selectInput(inputId = "select.colour.palette", 
-                                                            label=NULL,
-                                                            choices = names(colourPalettes$cat),
-                                                            selectize = FALSE)))
+    if(!is.null(input$map1_colourcheck) && input$map1_colourcheck)
+      ret = list(fixedRow(column(3, h5("Point colour:")),
+                          column(6, selectInput(inputId = "plot_colour",
+                                                label = NULL,
+                                                choices = c("grey50", "black", "darkblue", "darkgreen", "darkmagenta",
+                                                            "darkslateblue", "hotpink4", "lightsalmon2", "palegreen3",
+                                                            "steelblue3"),
+                                                selectize = FALSE))),
+                 
+                 fixedRow(column(3, h5("Colour by:")),
+                          column(6, selectInput(inputId = "colourby",
+                                                label = NULL,
+                                                choices = c("", colnames(get.data.set())),
+                                                selectize = FALSE))))
+    
+  })
+  
+  ret 
+})
+
+
+output$plot_colpalette_panel = renderUI({
+  get.data.set()
+  input$map1_colourcheck
+  input$colourby
+  ret0 = NULL
+  ret1 = NULL
+#  ret = NULL
+  
+  isolate({
+    if(!is.null(input$map1_colourcheck) && input$map1_colourcheck) {
+      if(!is.null(input$colourby) && input$colourby %in% numericVars()) {
+        ret0 = fixedRow(column(3, h5("Palette:")),
+                        column(6, selectInput(inputId = "select.colour.palette", 
+                                              label=NULL,
+                                              choices = names(colourPalettes$cont),
+                                              selectize = FALSE)))
+      }
+      else if(!is.null(input$colourby) && input$colourby %in% characterVars()) {
+        ret0 = fixedRow(column(3, h5("Palette:")),
+                        column(6, selectInput(inputId = "select.colour.palette", 
+                                              label=NULL,
+                                              choices = names(colourPalettes$cat),
+                                              selectize = FALSE)))
+      }
+      
+      if(!is.null(input$colourby) && input$colourby != "")
+        ret1 = list(fixedRow(column(5, checkboxInput(inputId = "reversepalette",
+                                                     label = "Reverse palette",
+                                                     value = input$reversepalette)),
+                             column(5, checkboxInput(inputId = "usepercentiles",
+                                                     label = "Use Percentiles",
+                                                     value = input$usepercentiles))))
+    }
+    
+    
+    ret = list(ret0,
+               ret1)
   })
   
   ret
@@ -434,6 +482,33 @@ observe({
         args$col.fun = colourPalettes$cont[[input$select.colour.palette]]
   })
 })
+
+
+observe({
+  input$reversepalette
+  isolate({
+    if(length(input$reversepalette) > 0) 
+      args$reverse.palette = input$reversepalette
+    else
+      args$reverse.palette = NULL
+  })
+})
+
+
+observe({
+  input$usepercentiles
+  isolate({
+    if(length(input$usepercentiles) > 0) 
+      args$col.method = ifelse(input$usepercentiles, "rank", "linear")
+    else
+      args$col.method = NULL
+  })
+})
+
+
+
+
+
 
 ## set up plot_plottitle_panel
 output$plot_plottitle_panel = renderUI({
@@ -503,27 +578,44 @@ observe({
 
 
 
-## set up plot_size_panel
+## set up plot_size_panel and plot_sizecheck_panel
+
+output$plot_sizecheck_panel = renderUI({
+  get.data.set()
+  
+  isolate({
+    checkboxInput(inputId = "map1_sizecheck",
+                  label = "Size",
+                  value = input$map1_sizecheck)
+  })
+})
+
+
 output$plot_size_panel = renderUI({
   get.data.set()
+  input$map1_sizecheck
+  ret = NULL
+  
   isolate({
-    list(fixedRow(column(3, h5("Overall:")),
-                  column(6, sliderInput(inputId = "pointsize", 
-                                        label = NULL, 
-                                        min = 0.05, max = 3.5, 
-                                        value = 1.1, step = 0.05, ticks = FALSE))),
-         fixedRow(column(3, h5("Size by:")),
-                  column(6, selectInput(inputId = "sizeby",
-                                        label = NULL,
-                                        choices = c("", numericVars()),
-                                        selectize = FALSE))),
-         conditionalPanel("input.sizeby != ''",
-                          fixedRow(column(3, h5("Resize method:")),
-                                   column(6, selectInput(inputId = "resizemethod",
-                                                         label = NULL,
-                                                         choices = c("proportional", "emphasize"),
-                                                         selectize = FALSE)))))
+    if(!is.null(input$map1_sizecheck) && input$map1_sizecheck)
+      ret = list(fixedRow(column(3, h5("Overall:")),
+                          column(6, sliderInput(inputId = "pointsize", 
+                                                label = NULL, 
+                                                min = 0.05, max = 3.5, 
+                                                value = 1.1, step = 0.05, ticks = FALSE))),
+                 fixedRow(column(3, h5("Size by:")),
+                          column(6, selectInput(inputId = "sizeby",
+                                                label = NULL,
+                                                choices = c("", numericVars()),
+                                                selectize = FALSE))),
+                 conditionalPanel("input.sizeby != ''",
+                                  fixedRow(column(3, h5("Resize method:")),
+                                           column(6, selectInput(inputId = "resizemethod",
+                                                                 label = NULL,
+                                                                 choices = c("proportional", "emphasize"),
+                                                                 selectize = FALSE)))))
   })
+  ret
 })
 
 
@@ -548,25 +640,43 @@ observe({
 
 
 
-## set up plot_trans_panel
+## set up plot_trans_panel and plot_transcheck_panel
+
+output$plot_transcheck_panel = renderUI({
+  get.data.set()
+  
+  isolate({
+    checkboxInput(inputId = "map1_transcheck",
+                  label = "Transparency",
+                  value = input$map1_transcheck)
+  })
+})
+
 output$plot_trans_panel = renderUI({
   get.data.set()
+  input$map1_transcheck
+  ret = NULL
+  
   isolate({
-    list(fixedRow(column(3, h5("Overall:")),
-                  column(6, sliderInput(inputId = "transparency", 
-                                        label = NULL, 
-                                        min = 0, max = 100, 
-                                        value = 0, step = 1, ticks = FALSE))),
-         
-         fixedRow(column(3, h5("Opacify by:")),
-                  column(6, selectInput(inputId = "opacifyby",
-                                        label = NULL,
-                                        choices = c("", numericVars()),
-                                        selectize = FALSE))),
-         checkboxInput(inputId = "reverseop",
-                       label = "Reverse Opacification",
-                       value = input$reverseop))
+    if(!is.null(input$map1_transcheck) && input$map1_transcheck)
+      ret = list(fixedRow(column(3, h5("Overall:")),
+                          column(6, sliderInput(inputId = "transparency", 
+                                                label = NULL, 
+                                                min = 0, max = 100, 
+                                                value = 0, step = 1, ticks = FALSE))),
+                 
+                 fixedRow(column(3, h5("Opacify by:")),
+                          column(6, selectInput(inputId = "opacifyby",
+                                                label = NULL,
+                                                choices = c("", numericVars()),
+                                                selectize = FALSE))),
+                 checkboxInput(inputId = "reverseop",
+                               label = "Reverse Opacification",
+                               value = input$reverseop))
+    
   })
+  
+  ret
 })
 
 
@@ -592,33 +702,52 @@ observe({
 #})
 
 
-## set up plot_pointsymbol_panel
+## set up plot_pointsymbol_panel and plot_symbolcheck_panel
+
+output$plot_symbolcheck_panel = renderUI({
+  get.data.set()
+  
+  isolate({
+    checkboxInput(inputId = "map1_symbolcheck",
+                  label = "Point Symbol",
+                  value = input$map1_symbolcheck)
+  })
+})
+
+
 output$plot_pointsymbol_panel = renderUI({
   get.data.set()
+  input$map1_symbolcheck
+  ret = NULL
+  
   isolate({
-    list(fixedRow(column(3, h5("Symbol:")),
-                  column(6, selectInput(inputId = "symbol",
-                                        label = NULL,
-                                        choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
-                                        selectize = FALSE))),
-         
-         checkboxInput(inputId = "filledin",
-                       label = "Filled in symbols",
-                       value = input$filledin),
-         
-         fixedRow(column(3, h5("Symbol by:")),
-                  column(6, selectInput(inputId = "symbolby",
-                                        label = NULL,
-                                        choices = c("", characterVars()),
-                                        selectize = FALSE))),
-         
-         fixedRow(column(3, h5("Symbol line width:")),
-                  column(6, selectInput(inputId = "symbollwd",
-                                        label = NULL,
-                                        choices = c(1:4),
-                                        selectize = FALSE,
-                                        selected = 2))))
+    if(!is.null(input$map1_symbolcheck) && input$map1_symbolcheck)
+      ret = list(fixedRow(column(3, h5("Symbol:")),
+                          column(6, selectInput(inputId = "symbol",
+                                                label = NULL,
+                                                choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
+                                                selectize = FALSE))),
+                 
+                 checkboxInput(inputId = "filledin",
+                               label = "Filled in symbols",
+                               value = input$filledin),
+                 
+                 fixedRow(column(3, h5("Symbol by:")),
+                          column(6, selectInput(inputId = "symbolby",
+                                                label = NULL,
+                                                choices = c("", characterVars()),
+                                                selectize = FALSE))),
+                 
+                 fixedRow(column(3, h5("Symbol line width:")),
+                          column(6, selectInput(inputId = "symbollwd",
+                                                label = NULL,
+                                                choices = c(1:4),
+                                                selectize = FALSE,
+                                                selected = 2))))
+    
   })
+  
+  ret 
 })
 
 

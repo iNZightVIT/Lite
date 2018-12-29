@@ -181,29 +181,33 @@ maps.sidebarPanel = function(data.set) {
           ## plot options
 #          h4("Plot Options"),
           
-#          uiOutput("plot_maptype_panel"),
-          h4("Colour (Depth)"),
+          uiOutput("plot_colourcheck_panel"),
+
+#          h4("Colour"),
           uiOutput("plot_colour_panel"),
           uiOutput("plot_colpalette_panel"),
 
           hr(),
           
-          h4("Size (Magnitude)"),
+#          h4("Size"),
+          uiOutput("plot_sizecheck_panel"),
           uiOutput("plot_size_panel"),
 
           hr(),
           
-          h4("Transparency (Depth)"),
+#          h4("Transparency"),
+          uiOutput("plot_transcheck_panel"),
           uiOutput("plot_trans_panel"),
 
           hr(),
 
-          h4("Point Symbol"),
+#          h4("Point Symbol"),
+          uiOutput("plot_symbolcheck_panel"),
           uiOutput("plot_pointsymbol_panel"),
 
           hr(),
 
-          h4("Connect Points"),
+#          h4("Connect Points"),
           
           checkboxInput(inputId = "connectpoints",
                         label = "Connect points with lines",
