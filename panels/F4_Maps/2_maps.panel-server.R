@@ -2633,7 +2633,12 @@ output$maps_plot = renderPlot({
 ## to display the interactive maps
 output$interactive.maps = renderUI({
   get.data.set()
+  
   args2$plotTitle
+  plot.args()
+  
+  args2$updateplot1
+  
   input$datavariable
   input$mapvariable
   
@@ -2776,6 +2781,237 @@ output$interactive.maps = renderUI({
         }
       }
     }
+    
+    else if(input$map_type == 1) {
+      condition1 = !is.null(input$select_latitude) &&
+        input$select_latitude %in% colnames(get.data.set()) &&
+        !is.null(input$select_longitude) &&
+        input$select_longitude %in% colnames(get.data.set())
+      if(condition1) {
+        
+        local.dir = iNZightPlots:::exportHTML.function(createmap.html,
+                                                       width = 10, height = 6)
+        
+        local.dir = unclass(local.dir)
+        temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+        addResourcePath("path", temp.dir)
+        tags$iframe(
+          seamless = "seamless",
+          src = "path/index.html",
+          height = 600, width = 1200
+        )
+#        temp1 = plot.args()
+        
+#        tryCatch({do.call(plot, temp1)}, 
+#                 error = function(e) {
+#                   print(e)
+#                 }, finally = {})
+        
+#        pdf(NULL)
+#        addr = iNZightPlots::exportHTML(x = x, 
+#                                        file = tempfile(fileext = ".html"))
+        
+        
+        
+#        addr = unclass(addr)
+        
+#        temp.dir = substring(addr, 1, regexpr("file", addr)-1)
+#        addResourcePath("path", temp.dir)
+#        filename = substring(addr, regexpr("file", addr))
+#        tags$iframe(
+#          seamless = "seamless",
+          #            src = "path/index.html",
+#          src = paste("path/", filename, sep = ""),
+#          height = 600, width = 2000
+#        )
+      }
+    }
   })
 })
+
+
+
+## the download button for the interactive plot
+output$interactive.plot.download = renderUI({
+  get.data.set()
+  input$map_type
+  isolate({
+    if(input$map_type == 1)
+      ret = fixedRow(column(width = 9,
+                            NULL),
+                     
+                     column(width = 3, 
+                            downloadButton(outputId = "save_interactive_mapplot1", 
+                                           label = "Download Plot"))
+      )
+    else if(input$map_type == 2)
+      ret = fixedRow(column(width = 9,
+                            NULL),
+                     
+                     column(width = 3, 
+                            downloadButton(outputId = "save_interactive_mapplot2", 
+                                           label = "Download Plot"))
+      )
+    ret
+  })
+})
+
+
+## reaction to the "save_interactive_mapplot" button
+output$save_interactive_mapplot1 = downloadHandler(
+  filename = substring(tempfile(pattern = "file", tmpdir = "", fileext = ".html"), 2),
+  content = function(file) {
+    
+      condition1 = !is.null(input$select_latitude) &&
+        input$select_latitude %in% colnames(get.data.set()) &&
+        !is.null(input$select_longitude) &&
+        input$select_longitude %in% colnames(get.data.set())
+      if(condition1) {
+        
+        local.dir = iNZightPlots:::exportHTML.function(createmap.html,
+                                                       width = 10, height = 6)
+        
+        src = normalizePath(local.dir)
+        owd = setwd(tempdir())
+        on.exit(setwd(owd))
+        file.copy(src, "index.html")
+        file.copy("index.html", file)
+
+      }
+  })  
+
+
+output$save_interactive_mapplot2 = downloadHandler(
+  filename = substring(tempfile(pattern = "file", tmpdir = "", fileext = ".html"), 2),
+  content = function(file) {
+
+      temp.data = get.data.set()
+      temp = plot.args2()
+      mapData = temp$mapData
+      
+      if(!is.null(mapData) &&
+         !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+         !is.null(input$mapvariable)) {
+        
+        ## update "match.list" information after loading data        
+        match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
+                                                 as.data.frame(mapData)[, input$mapvariable])
+        
+        args2$match.list = match.list
+        
+        if(!is.null(temp$combinedData) &&
+           !is.null(input$vartodisplay) && 
+           all(input$vartodisplay %in% colnames(temp.data))) {
+          
+          args2$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
+                                           "point", "region")
+          
+          args2$mapType = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+                                 "point", "region")
+          
+          if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 2)
+            args2$combinedData$type = "sparklines"
+          
+          ## multiple varibles to display ?
+          if(length(input$vartodisplay) > 1)
+            h4("iNZight doesn't handle interactive maps for multiple variables ... yet! 
+               Please select only one variable")
+          #            multiple.variables = TRUE
+          else {
+            multiple.variables = FALSE
+            
+            if(is.null(temp$multipleObsOption)) {
+              if(multiple.variables)
+                aggregate.logical = TRUE
+              else
+                aggregate.logical = FALSE
+            }
+            else {
+              if(multiple.variables && temp$multipleObsOption != "allvalues")
+                aggregate.logical = TRUE
+              else
+                aggregate.logical = FALSE
+            }
+            
+            ## update plotConstantSize (size for points)
+            if(!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0)
+              args2$plotConstantSize = input$advancedplotoptions_size
+            
+            
+            ## update plotConstantAlpha
+            if(!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0)
+              args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+            
+            ## update advancedplotoptions_plottitle
+            #            if(!is.null(input$advancedplotoptions_plottitle))
+            #              args2$plotTitle = input$advancedplotoptions_plottitle
+            
+            temp = plot.args2()
+            x = plot(temp$combinedData, 
+                     main = temp$plotTitle,
+                     axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+                     datum.lines = temp$plotDatumLines, 
+                     projection = temp$plotProjection,
+                     multiple.vars = multiple.variables, 
+                     colour.var = input$vartodisplay,
+                     size.var = temp$mapSizeVar, 
+                     aggregate = aggregate.logical,
+                     darkTheme = temp$plotTheme, 
+                     alpha.const = temp$plotConstantAlpha, 
+                     size.const = temp$plotConstantSize,
+                     current.seq = temp$plotCurrentSeqVal, 
+                     palette = temp$plotPalette,
+                     sparkline.type = temp$plotSparklinesType,
+                     scale.limits = temp$plotScaleLimits,
+                     label.var = temp$plotLabelVar,
+                     scale.label = temp$plotLabelScale,
+                     scale.axis = temp$plotAxisScale,
+                     regions.to.plot = temp$mapRegionsPlot, 
+                     keep.other.regions = temp$mapExcludedRegions)            
+            
+            pdf(NULL)
+            addr = iNZightPlots::exportHTML(x = x, 
+                                            mapObj = temp$combinedData,
+                                            file = tempfile(fileext = ".html"))
+            
+            
+            src = normalizePath(addr)
+            owd = setwd(tempdir())
+            on.exit(setwd(owd))
+            file.copy(src, "index.html")
+            file.copy("index.html", file)
+          }
+        }
+      }
+  })  
+
+
+
+
+# function for creating html files (maps with coordinate)
+
+createmap.html = function() {
+  condition1 = !is.null(input$select_latitude) &&
+    input$select_latitude %in% colnames(get.data.set()) &&
+    !is.null(input$select_longitude) &&
+    input$select_longitude %in% colnames(get.data.set())
+  if(condition1) {
+    temp = plot.args()
+    tryCatch({do.call(plot, temp)}, 
+             error = function(e) {
+               print(e)
+             }, finally = {})
+  }
+} 
+
+
+
+
+
+
+
+
+
+
+
 
