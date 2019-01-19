@@ -2970,16 +2970,27 @@ output$save_interactive_mapplot2 = downloadHandler(
                      keep.other.regions = temp$mapExcludedRegions)            
             
             pdf(NULL)
+#            addr = iNZightPlots::exportHTML(x = x, 
+#                                            mapObj = temp$combinedData,
+#                                            file = tempfile(fileext = ".html"))
+            
+            
+#            src = normalizePath(addr)
+#            owd = setwd(tempdir())
+#            on.exit(setwd(owd))
+#            file.copy(src, "index.html")
+#            file.copy("index.html", file)
+            temp.name = tempfile(fileext = ".html")
             addr = iNZightPlots::exportHTML(x = x, 
                                             mapObj = temp$combinedData,
-                                            file = tempfile(fileext = ".html"))
+                                            file = temp.name)
             
             
             src = normalizePath(addr)
             owd = setwd(tempdir())
             on.exit(setwd(owd))
-            file.copy(src, "index.html")
-            file.copy("index.html", file)
+            file.copy(src, temp.name)
+            file.copy(temp.name, file)
           }
         }
       }
