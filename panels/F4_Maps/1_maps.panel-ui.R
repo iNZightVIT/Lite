@@ -309,7 +309,7 @@ maps.mainPanel = function() {
       tabPanel(
         title = "Interactive Maps",
 
-#        uiOutput("interactive.plot.select"), 
+        uiOutput("interactive.plot.download"), 
         br(),
         htmlOutput("interactive.maps")
       )
