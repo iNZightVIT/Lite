@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   October 7, 2017.
+###  Last Modified  :   Feb 15, 2019.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -4893,6 +4893,13 @@ output$save_interactive_plot = downloadHandler(
   })  
 
 
+
+
+
+
+
+
+
 ## the selection panel for the interactive plot tabpanel
 output$interactive.plot.select = renderUI({
   get.data.set()
@@ -5355,11 +5362,15 @@ output$interactive.plot = renderUI({
             local.dir = unclass(local.dir)
             temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
             addResourcePath("path", temp.dir)
-            tags$iframe(
+            tags$div(tags$a(href = "path/index.html", 
+                            "OPEN IN A NEW WINDOW", 
+                            target="_blank"),
+              tags$iframe(
               seamless = "seamless",
               src = "path/index.html",
               height = 600, width = 1200
-            )
+            ))
+            
           }
         }
         }
@@ -5406,17 +5417,29 @@ output$interactive.plot = renderUI({
             local.dir = unclass(local.dir)
             temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
             addResourcePath("path", temp.dir)
-            tags$iframe(
-              seamless = "seamless",
-              src = "path/index.html",
-              height = 600, width = 1200
-            )
+            
+            tags$div(tags$a(href = "path/index.html", 
+                            "OPEN IN A NEW WINDOW", 
+                            target="_blank"),
+                     tags$iframe(
+                       seamless = "seamless",
+                       src = "path/index.html",
+                       height = 600, width = 1200
+                     ))
           }
         }
         }
       })
   }
 })
+
+
+
+
+
+
+
+
 
 
 
