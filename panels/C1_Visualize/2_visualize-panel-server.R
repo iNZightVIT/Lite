@@ -5363,7 +5363,7 @@ output$interactive.plot = renderUI({
             temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
             addResourcePath("path", temp.dir)
             tags$div(tags$a(href = "path/index.html", 
-                            "OPEN IN A NEW WINDOW", 
+                            "Open in a new window", 
                             target="_blank"),
               tags$iframe(
               seamless = "seamless",
