@@ -2771,12 +2771,20 @@ output$interactive.maps = renderUI({
             temp.dir = substring(addr, 1, regexpr("file", addr)-1)
             addResourcePath("path", temp.dir)
             filename = substring(addr, regexpr("file", addr))
-            tags$iframe(
-              seamless = "seamless",
-              #            src = "path/index.html",
-              src = paste("path/", filename, sep = ""),
-              height = 600, width = 2000
-            )
+            tags$div(tags$a(href = paste("path/", filename, sep = ""), 
+                            "Open in a new window", 
+                            target="_blank"),
+                     tags$iframe(
+                       seamless = "seamless",
+                       src = paste("path/", filename, sep = ""),
+                       height = 600, width = 1200
+                     ))
+            #tags$iframe(
+            #  seamless = "seamless",
+            #  #            src = "path/index.html",
+            #  src = paste("path/", filename, sep = ""),
+            #  height = 600, width = 2000
+            #)
           }
         }
       }
@@ -2795,11 +2803,19 @@ output$interactive.maps = renderUI({
         local.dir = unclass(local.dir)
         temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
         addResourcePath("path", temp.dir)
-        tags$iframe(
-          seamless = "seamless",
-          src = "path/index.html",
-          height = 600, width = 1200
-        )
+        tags$div(tags$a(href = "path/index.html", 
+                        "Open in a new window", 
+                        target="_blank"),
+                 tags$iframe(
+                   seamless = "seamless",
+                   src = "path/index.html",
+                   height = 600, width = 1200
+                 ))
+        #tags$iframe(
+        #  seamless = "seamless",
+        #  src = "path/index.html",
+        #  height = 600, width = 1200
+        #)
 #        temp1 = plot.args()
         
 #        tryCatch({do.call(plot, temp1)}, 
