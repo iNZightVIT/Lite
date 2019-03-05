@@ -366,8 +366,9 @@ output$vari1_panel = renderUI({
     get.vars = parseQueryString(session$clientData$url_search)
     if(!is.null(get.vars$url)) {
       temp = session$clientData$url_search
-      get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
-    }  
+      ## get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
+      get.vars$url = sub(".*?url=(.*?)&land.*", "\\1", temp)
+    } 
  
     if(length(get.vars)>0&&
          (any(names(get.vars)%in%"url")||
@@ -662,7 +663,8 @@ output$vari2_panel = renderUI({
     get.vars = parseQueryString(session$clientData$url_search)
     if(!is.null(get.vars$url)) {
       temp = session$clientData$url_search
-      get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
+      ## get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
+      get.vars$url = sub(".*?url=(.*?)&land.*", "\\1", temp)
     }
     if(length(get.vars)>0&&
          (any(names(get.vars)%in%"url")||

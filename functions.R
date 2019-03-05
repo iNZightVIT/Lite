@@ -1503,13 +1503,25 @@ get.quantiles = function(subx){
 #' This might not work in all possible cases.
 #' 
 #' @author Christoph Knapp
+
+parseQueryString = function(str) {
+  if(grepl("docs.google.com", str)) {
+    return(list(url = sub(".*?url=(.*?)&land.*", "\\1", str),
+                land = sub(".*?&land=(.*?)", "\\1", str)))
+  }
+  else
+    shiny::parseQueryString(str)
+}
+
 get.data.from.URL = function(URL, data.dir.import){
   ret = list()
   URL = URLencode(URL)
 
   if(grepl("docs.google.com", URL)) {
-    if(!grepl("output=csv", URL))
-      URL = paste(URL, "=0&single=true&output=csv", sep = "")
+    #if(!grepl("output=csv", URL)) {
+    #  URL = paste(URL, "=0&single=true&output=csv", sep = "")
+    #}
+      
     url.index = gregexpr("output=", URL)
     url.index = unlist(url.index)
     file.type = substr(URL, url.index+7, nchar(URL))
@@ -1529,8 +1541,8 @@ get.data.from.URL = function(URL, data.dir.import){
     dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
   }
   
-  print(URL)
-  print(name)
+#  print(URL)
+#  print(name)
   
   tryCatch({
     if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
