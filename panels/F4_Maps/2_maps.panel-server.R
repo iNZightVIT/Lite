@@ -28,7 +28,7 @@ args = reactiveValues(
   opacity = NULL,
   reverse.opacity = NULL,
   type = NULL,
-  col.pt = NULL,
+  col.pt = "mediumvioletred",
   cex.pt = NULL,
   alpha = NULL,
   join = NULL,
@@ -412,9 +412,9 @@ output$plot_colour_panel = renderUI({
       ret = list(fixedRow(column(3, h5("Point colour:")),
                           column(6, selectInput(inputId = "plot_colour",
                                                 label = NULL,
-                                                choices = c("grey50", "black", "darkblue", "darkgreen", "darkmagenta",
-                                                            "darkslateblue", "hotpink4", "lightsalmon2", "palegreen3",
-                                                            "steelblue3"),
+                                                choices = c("mediumvioletred", "grey50", "black", "darkblue", "darkgreen",
+                                                            "darkmagenta", "darkslateblue", "hotpink4",
+                                                            "lightsalmon2", "palegreen3", "steelblue3"),
                                                 selectize = FALSE))),
                  
                  fixedRow(column(3, h5("Colour by:")),
@@ -443,7 +443,7 @@ output$plot_colpalette_panel = renderUI({
         ret0 = fixedRow(column(3, h5("Palette:")),
                         column(6, selectInput(inputId = "select.colour.palette", 
                                               label=NULL,
-                                              choices = names(colourPalettes$cont),
+                                              choices = c("inferno", names(colourPalettes$cont)[-4]),
                                               selectize = FALSE)))
       }
       else if(!is.null(input$colourby) && input$colourby %in% characterVars()) {
@@ -475,11 +475,13 @@ output$plot_colpalette_panel = renderUI({
 observe({
   input$select.colour.palette
   isolate({
-    if(!is.null(input$select.colour.palette))
+    if(!is.null(input$select.colour.palette)) {
       if(input$select.colour.palette %in% names(colourPalettes$cat))
         args$col.fun = colourPalettes$cat[[input$select.colour.palette]]
       else if(input$select.colour.palette %in% names(colourPalettes$cont))
         args$col.fun = colourPalettes$cont[[input$select.colour.palette]]
+    }
+      
   })
 })
 
@@ -519,7 +521,7 @@ output$plot_plottitle_panel = renderUI({
                    value = input$type1_plottitle),
          
          actionButton(inputId = "type1_plottitle_confirm",
-                      label = "Confirm",
+                      label = "Confirm Title",
                       style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
     
   })
@@ -785,8 +787,12 @@ observe({
     if(!is.null(input$symbolby)) {
       if(input$symbolby == "")
         args$symbolby = NULL
-      else
-        args$symbolby = input$symbolby
+      else {
+        temp.data = get.data.set()
+        args$symbolby = temp.data[[input$symbolby]]
+        args$varnames$symbolby = input$symbolby
+      }
+        
     }
   })
 })
