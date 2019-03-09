@@ -271,7 +271,7 @@ maps.mainPanel = function() {
         
         fixedRow(column(2, fixedRow(column(5, NULL),
                                     column(7, 
-                                           actionButton("refreshplot", 
+                                           actionButton("refreshmap", 
                                                         icon("refresh", "fa-2x"),
                                                         style = "color: #337ab7; 
                                                         background-color: #ffffff; 

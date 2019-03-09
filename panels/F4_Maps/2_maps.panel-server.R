@@ -2680,6 +2680,8 @@ output$maps_plot = renderPlot({
 output$interactive.maps = renderUI({
   get.data.set()
   
+  input$export.extra.mapvars.html
+  
   args2$plotTitle
   plot.args()
   
@@ -2844,6 +2846,8 @@ output$interactive.maps = renderUI({
       if(condition1) {
         
         local.dir = iNZightPlots:::exportHTML.function(createmap.html,
+                                                       ## data = data_html(),
+                                                       extra.vars = extra.mapvars_html(),
                                                        width = 10, height = 6)
         
         local.dir = unclass(local.dir)
@@ -2890,6 +2894,9 @@ output$interactive.maps = renderUI({
     }
   })
 })
+
+
+
 
 
 
@@ -2979,6 +2986,18 @@ observe({
     updateSelectInput(session, "export.extra.mapvars.html", choices = ch, selected = NULL)
   })
 })
+
+
+extra.mapvars_html = reactive({
+  if(length(input$export.extra.mapvars.html) > 0) {
+    return(input$export.extra.mapvars.html)
+  }
+  else
+    return(NULL)
+})
+
+
+
 
 
 ## reaction to the "save_interactive_mapplot" button
@@ -3139,6 +3158,180 @@ createmap.html = function() {
   }
 } 
 
+
+
+## refresh the map after click the "refresh" button
+observe({
+  input$refreshmap
+  
+  isolate({
+    output$maps_plot = renderPlot({
+      get.data.set()
+      
+      ## coordinate
+      #  input$type1_plottitle_confirm
+      
+      
+      
+      args2$plotTitle
+      plot.args()
+      
+      args2$updateplot1
+      
+      input$datavariable
+      input$mapvariable
+      
+      input$vartodisplay
+      
+      input$advancedmapoptions_projection
+      input$advancedplotoptions_mappalette
+      input$advancedplotoptions_dark
+      input$advancedplotoptions_gridlines
+      
+      input$advancedplotoptions_transparency
+      input$advancedplotoptions_size
+      
+      input$plotas_options
+      input$plotas_sizeby
+      
+      input$multipleobsoption
+      input$aggregateoption
+      input$linecharttypeoption
+      input$advancedplotoptions_regionlabels
+      input$regionlabels_click
+      input$regionlabels_slider
+      input$plottitlefontsize_slider
+      input$seqvar_slider
+      
+      input$advancedplotoptions_mapscales
+      input$scales_confirm
+      
+      input$advancedplotoptions_axislabels
+      
+      input$check_regions
+      
+      #  input$loadshapefiles
+      
+      isolate({
+        if(input$map_type == 1) {
+          condition1 = !is.null(input$select_latitude) &&
+            input$select_latitude %in% colnames(get.data.set()) &&
+            !is.null(input$select_longitude) &&
+            input$select_longitude %in% colnames(get.data.set())
+          if(condition1) {
+            temp = plot.args()
+            tryCatch({do.call(plot, temp)}, 
+                     error = function(e) {
+                       print(e)
+                     }, finally = {})
+          }
+        }
+        else if(input$map_type == 2) {
+          temp.data = get.data.set()
+          temp = plot.args2()
+          mapData = temp$mapData
+          
+          if(!is.null(mapData) &&
+             !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+             !is.null(input$mapvariable)) {
+            
+            ## update "match.list" information after loading data        
+            match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
+                                                     as.data.frame(mapData)[, input$mapvariable])
+            
+            args2$match.list = match.list
+            
+            
+            if(!is.null(temp$combinedData) &&
+               !is.null(input$vartodisplay) && 
+               all(input$vartodisplay %in% colnames(temp.data))) {
+              
+              #          temp$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
+              #                                          "point", "region")
+              args2$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2, 
+                                               "point", "region")
+              
+              args2$mapType = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+                                     "point", "region")
+              
+              if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 2)
+                args2$combinedData$type = "sparklines"
+              
+              ## multiple varibles to display ?
+              if(length(input$vartodisplay) > 1)
+                multiple.variables = TRUE
+              else
+                multiple.variables = FALSE
+              
+              if(is.null(temp$multipleObsOption)) {
+                if(multiple.variables)
+                  aggregate.logical = TRUE
+                else
+                  aggregate.logical = FALSE
+              }
+              else {
+                if(multiple.variables && temp$multipleObsOption != "allvalues")
+                  aggregate.logical = TRUE
+                else
+                  aggregate.logical = FALSE
+              }
+              
+              ## update plotConstantSize (size for points)
+              if(!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0)
+                args2$plotConstantSize = input$advancedplotoptions_size
+              
+              
+              ## update plotConstantAlpha
+              if(!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0)
+                args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
+              
+              ## update advancedplotoptions_plottitle
+              #          if(!is.null(input$advancedplotoptions_plottitle))
+              #            args2$plotTitle = input$advancedplotoptions_plottitle
+              
+              
+              
+              temp = plot.args2()
+              grid::grid.draw(plot(temp$combinedData, 
+                                   main = temp$plotTitle,
+                                   axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+                                   datum.lines = temp$plotDatumLines, 
+                                   projection = temp$plotProjection,
+                                   multiple.vars = multiple.variables, 
+                                   colour.var = input$vartodisplay,
+                                   size.var = temp$mapSizeVar, 
+                                   aggregate = aggregate.logical,
+                                   darkTheme = temp$plotTheme, 
+                                   alpha.const = temp$plotConstantAlpha, 
+                                   size.const = temp$plotConstantSize,
+                                   current.seq = temp$plotCurrentSeqVal, 
+                                   palette = temp$plotPalette,
+                                   sparkline.type = temp$plotSparklinesType,
+                                   scale.limits = temp$plotScaleLimits,
+                                   label.var = temp$plotLabelVar,
+                                   scale.label = temp$plotLabelScale,
+                                   scale.axis = temp$plotAxisScale,
+                                   regions.to.plot = temp$mapRegionsPlot, 
+                                   keep.other.regions = temp$mapExcludedRegions))
+              
+            }
+            
+            else {
+              matchplot.colours = c("#d95f02", "#1b9e77", "#7570b3")
+              plot(sf::st_geometry(mapData$geometry), col = matchplot.colours[match.list$map.matched + 1])
+              legend("topleft", legend = c("Data present for region",
+                                           "Data missing for region"),
+                     fill = matchplot.colours[2:1])
+            }
+            
+          }
+          
+        }
+      })
+    })
+    
+  })
+})
 
 
 
