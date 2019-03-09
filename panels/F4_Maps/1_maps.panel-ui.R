@@ -268,6 +268,17 @@ maps.mainPanel = function() {
       ##  Plot Panel
       tabPanel(
         title = "Maps",
+        
+        fixedRow(column(2, fixedRow(column(5, NULL),
+                                    column(7, 
+                                           actionButton("refreshplot", 
+                                                        icon("refresh", "fa-2x"),
+                                                        style = "color: #337ab7; 
+                                                        background-color: #ffffff; 
+                                                        border-color: #ffffff;
+                                                        padding:4px; 
+                                                        font-size:90%")))),
+                 column(10, hr())),
         plotOutput("maps_plot", height = "600px"),
         conditionalPanel(
           condition = "input.map_type == 1 &
@@ -282,7 +293,8 @@ maps.mainPanel = function() {
                 condition = "input.mapssubset1 != 'None'",
                 ##  Slider input GUI for the first subset variable
                 br(),
-                uiOutput("mapssubset1_slider_panel")
+                uiOutput("mapssubset1_slider_panel"),
+                uiOutput("speed_delay1")
               )
             ),
             column(
@@ -292,7 +304,8 @@ maps.mainPanel = function() {
               conditionalPanel(
                 condition = "input.mapssubset2 != 'None'",
                 br(),
-                uiOutput("mapssubset2_slider_panel")
+                uiOutput("mapssubset2_slider_panel"),
+                uiOutput("speed_delay2")
               )
             )
           ),
