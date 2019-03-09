@@ -361,6 +361,7 @@ observe({
       temp.data = get.data.set()
       index = which(colnames(temp.data) == input$opacifyby)
       args$opacity = input$opacifyby
+      args$varnames$opacity = input$opacifyby
     }
     else if(!is.null(input$opacifyby) &&
             input$opacifyby == "") {
@@ -771,7 +772,10 @@ observe({
   input$filledin
   input$transparency
   isolate({
-    if(!is.null(input$filledin) && !is.null(input$transparency)) {
+    if(!is.null(input$opacifyby) && input$opacifyby %in% colnames(get.data.set()) && !is.null(input$transparency)) {
+      args$alpha = 1 - input$transparency/100
+    }
+    else if(!is.null(input$filledin) && !is.null(input$transparency)){
       if(input$filledin && input$transparency == 0)
         args$alpha = 0.999
       else
@@ -903,6 +907,7 @@ observe({
 
 output$mapssubset1_slider_panel = renderUI({
   get.data.set()
+  input$delay1
   if(!is.null(input$mapssubset1) &&
      input$mapssubset1 %in% colnames(get.data.set())) {
     isolate({
@@ -926,7 +931,10 @@ output$mapssubset1_slider_panel = renderUI({
       sliderInput(inputId = "mapssubset1_slider",
                   label = paste("Subset '", input$mapssubset1, "':", "_MULTI"),
                   min = 0, max = n.levels, value = 0, step = 1,
-                  animate = TRUE, ticks = F)
+                  animate = animationOptions(interval = ifelse(length(input$delay1) == 0, 600, 1000*input$delay1),
+                                             playButton = icon('play', "fa-2x"),
+                                             pauseButton = icon('pause', "fa-2x")),
+                  ticks = F)
     })
   }
 })
@@ -985,6 +993,20 @@ observe({
       }
     }
   })
+})
+
+
+output$speed_delay1 = renderUI({
+  fixedRow((column(5, checkboxInput("select_delay1",
+                                    label = "Time delay between plots (seconds):",
+                                    value = input$select_delay1))),
+           column(3, conditionalPanel("input.select_delay1",
+                                      numericInput("delay1", 
+                                                   "", 
+                                                   value = 0.6, 
+                                                   min = 0.1, 
+                                                   max = 3.0, 
+                                                   step = 0.1))))
 })
 
 
@@ -1048,6 +1070,7 @@ observe({
 
 output$mapssubset2_slider_panel = renderUI({
   get.data.set()
+  input$delay2
   if(!is.null(input$mapssubset2) &&
      input$mapssubset2 %in% colnames(get.data.set())) {
     isolate({
@@ -1067,7 +1090,10 @@ output$mapssubset2_slider_panel = renderUI({
       sliderInput(inputId = "mapssubset2_slider",
                   label = paste("Subset '", input$mapssubset2, "': ", "_ALL"),
                   min = 0, max = n.levels + 1, value = 0, step = 1,
-                  animate = TRUE, ticks = F)
+                  animate = animationOptions(interval = ifelse(length(input$delay2) == 0, 600, 1000*input$delay2),
+                                             playButton = icon('play', "fa-2x"),
+                                             pauseButton = icon('pause', "fa-2x")),
+                  ticks = F)
     })
   }
 })
@@ -1126,6 +1152,20 @@ observe({
       }
     }
   })
+})
+
+
+output$speed_delay2 = renderUI({
+  fixedRow((column(5, checkboxInput("select_delay2",
+                                    label = "Time delay between plots (seconds):",
+                                    value = input$select_delay2))),
+           column(3, conditionalPanel("input.select_delay2",
+                                      numericInput("delay2", 
+                                                   "", 
+                                                   value = 0.6, 
+                                                   min = 0.1, 
+                                                   max = 3.0, 
+                                                   step = 0.1))))
 })
 
 
@@ -2859,8 +2899,15 @@ output$interactive.plot.download = renderUI({
   input$map_type
   isolate({
     if(input$map_type == 1)
-      ret = fixedRow(column(width = 9,
+      ret = fixedRow(column(width = 2,
                             NULL),
+                     
+                     column(width = 3,
+                            uiOutput("extra_mapvars_check_panel")),
+                     
+                     column(width = 4,
+                            conditionalPanel("input.extra_mapvars_check",
+                                             uiOutput("extra.mapvars.html"))),
                      
                      column(width = 3, 
                             downloadButton(outputId = "save_interactive_mapplot1", 
@@ -2875,6 +2922,61 @@ output$interactive.plot.download = renderUI({
                                            label = "Download Plot"))
       )
     ret
+  })
+})
+
+
+output$extra_mapvars_check_panel = renderUI({
+  get.data.set()
+  input$select_latitude
+  input$select_longitude
+  isolate({
+    if(!is.null(input$select_latitude) && input$select_latitude != "Select Latitude Information" &&
+       !is.null(input$select_longitude) && input$select_longitude != "Select Longitude Information")
+      ret = checkboxInput("extra_mapvars_check", 
+                          strong("Select additional variables:"), 
+                          value = input$extra_mapvars_check)
+    else
+      ret = NULL
+    
+    ret
+  })
+})
+
+
+output$extra.mapvars.html = renderUI({
+  get.data.set()
+  isolate({
+    ch = colnames(get.data.set())
+    if(!is.null(input$select_latitude) && input$select_latitude != "Select Latitude Information" &&
+       !is.null(input$select_longitude) && input$select_longitude != "Select Longitude Information") {
+      ch = ch[-which(ch %in% c(input$select_latitude, input$select_longitude))]
+    }
+      
+    
+    selectInput(inputId = "export.extra.mapvars.html",
+                #label = strong("Select additional variables to export"),
+                label = NULL,
+                choices = ch,
+                multiple = TRUE,
+                selected = input$export.extra.mapvars.html,
+                size = 3,
+                selectize = FALSE)
+  })
+})
+
+## update extra.mapvars.html.panel
+observe({
+  input$select_latitude
+  input$select_longitude
+  input$extra_mapvars_check
+  isolate({
+    ch = colnames(get.data.set())
+    if(!is.null(input$select_latitude) && input$select_latitude != "Select Latitude Information" &&
+       !is.null(input$select_longitude) && input$select_longitude != "Select Longitude Information") {
+      ch = ch[-which(ch %in% c(input$select_latitude, input$select_longitude))]
+    }
+    updateSelectInput(session, "export.extra.mapvars.html", choices = ch, selected = NULL)
   })
 })
 
