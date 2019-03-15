@@ -1985,7 +1985,9 @@ output$multipleobsoption_panel = renderUI({
                  
                  conditionalPanel(condition = "input.multipleobsoption == 1",
                                   fixedRow(column(3, textOutput("printseqvar")),
-                                           column(6, uiOutput("seqvar_slider_panel")))),
+                                           column(6, uiOutput("seqvar_slider_panel"))),
+                                  fixedRow(column(3, NULL),
+                                           column(6, uiOutput("seqvar_slidertimer_panel")))),
                  
                  conditionalPanel(condition = "input.multipleobsoption == 2",
                                   
@@ -2036,6 +2038,7 @@ output$printseqvar = renderText({
 output$seqvar_slider_panel = renderUI({
   get.data.set()
   input$sequencevariable
+  input$slidertimer
   ret = NULL
   isolate({
     temp = plot.args2()
@@ -2049,7 +2052,11 @@ output$seqvar_slider_panel = renderUI({
                           label = NULL, 
                           min = 1, 
                           max = n.unique.singlevals, 
-                          value = n.unique.singlevals, step = 1, ticks = FALSE)
+                          value = n.unique.singlevals, step = 1, 
+                          animate = animationOptions(interval = ifelse(length(input$slidertimer) == 0, 600, 1000*input$slidertimer),
+                                                     playButton = icon('play', "fa-2x"),
+                                                     pauseButton = icon('pause', "fa-2x")),
+                          ticks = FALSE)
     }
     
   })
@@ -2057,6 +2064,21 @@ output$seqvar_slider_panel = renderUI({
   ret
 })
 
+
+
+
+output$seqvar_slidertimer_panel = renderUI({
+  fixedRow((column(6, checkboxInput("seqvar_slidertimer",
+                                    label = "Time delay between plots (seconds):",
+                                    value = input$seqvar_slidertimer))),
+           column(6, conditionalPanel("input.seqvar_slidertimer",
+                                      numericInput("slidertimer", 
+                                                   "", 
+                                                   value = 0.6, 
+                                                   min = 0.1, 
+                                                   max = 3.0, 
+                                                   step = 0.1))))
+})
 
 
 ## observe multipleobsoption and seqvar_slider
