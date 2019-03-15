@@ -150,7 +150,7 @@ args2 = reactiveValues(
   plotTheme = FALSE,
   plotPalette = "Default",
   plotConstantAlpha = 1.0,
-  plotConstantSize = 2.0,
+  plotConstantSize = 5.0,
   plotCurrentSeqVal = NULL,
   timer = NULL,
   
