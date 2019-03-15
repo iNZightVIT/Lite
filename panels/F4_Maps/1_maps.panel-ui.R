@@ -47,7 +47,8 @@ maps.sidebarPanel = function(data.set) {
           choices =
             c("Coordinate (latitude, longitude)" = 1,
               "Regions (country, state, county, etc.)" = 2),
-          selected = 1
+          selected = ifelse(("latitude" %in% tolower(colnames(data.set))) & ("longitude" %in% tolower(colnames(data.set))), 
+                            1, 2)
         ),
         
         hr(),
@@ -124,7 +125,7 @@ maps.sidebarPanel = function(data.set) {
           
           ## select variables
           
-          h4("Select Variables"),
+          h4("Select matching Name Variables"),
           
           uiOutput("datavariable_panel"),
           uiOutput("mapvairable_panel"),
@@ -280,6 +281,10 @@ maps.mainPanel = function() {
                                                         font-size:90%")))),
                  column(10, hr())),
         plotOutput("maps_plot", height = "600px"),
+        
+        ## to remove flickerings when plot parameters change
+        tags$style(type="text/css", "#maps_plot.recalculating { opacity: 1.0; }"),
+        
         conditionalPanel(
           condition = "input.map_type == 1 &
           input.select_latitude != 'Select Latitude Information' &
