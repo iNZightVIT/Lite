@@ -16,6 +16,7 @@ output$newmaps.panel = renderUI({
   newmaps.panel.ui(get.data.set())
 })
 
+
 ## parameters for plotting maps
 args = reactiveValues(
   x = NULL,
@@ -997,16 +998,21 @@ observe({
 
 
 output$speed_delay1 = renderUI({
-  fixedRow((column(5, checkboxInput("select_delay1",
-                                    label = "Time delay between plots (seconds):",
-                                    value = input$select_delay1))),
-           column(3, conditionalPanel("input.select_delay1",
-                                      numericInput("delay1", 
-                                                   "", 
-                                                   value = 0.6, 
-                                                   min = 0.1, 
-                                                   max = 3.0, 
-                                                   step = 0.1))))
+  get.data.set()
+  
+  isolate({
+    fixedRow((column(5, checkboxInput("select_delay1",
+                                      label = "Time delay between plots (seconds):",
+                                      value = input$select_delay1))),
+             column(3, conditionalPanel("input.select_delay1",
+                                        numericInput("delay1", 
+                                                     "", 
+                                                     value = 0.6, 
+                                                     min = 0.1, 
+                                                     max = 3.0, 
+                                                     step = 0.1))))
+  })
+  
 })
 
 
@@ -1156,16 +1162,19 @@ observe({
 
 
 output$speed_delay2 = renderUI({
-  fixedRow((column(5, checkboxInput("select_delay2",
-                                    label = "Time delay between plots (seconds):",
-                                    value = input$select_delay2))),
-           column(3, conditionalPanel("input.select_delay2",
-                                      numericInput("delay2", 
-                                                   "", 
-                                                   value = 0.6, 
-                                                   min = 0.1, 
-                                                   max = 3.0, 
-                                                   step = 0.1))))
+  get.data.set()
+  isolate({
+    fixedRow((column(5, checkboxInput("select_delay2",
+                                      label = "Time delay between plots (seconds):",
+                                      value = input$select_delay2))),
+             column(3, conditionalPanel("input.select_delay2",
+                                        numericInput("delay2", 
+                                                     "", 
+                                                     value = 0.6, 
+                                                     min = 0.1, 
+                                                     max = 3.0, 
+                                                     step = 0.1))))
+  })
 })
 
 
@@ -1437,6 +1446,7 @@ observe({
 #  args2$mapData
   
   args2$updateplot
+  args2$match.list
   
   isolate({
     temp.data = get.data.set()
@@ -1444,6 +1454,7 @@ observe({
     mapData = temp$mapData
     match.list = temp$match.list
     sequence.var = NULL
+    
     if(!is.null(mapData) && !is.null(match.list) &&
        !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
        !is.null(input$mapvariable) && input$mapvariable != "") {
@@ -1675,11 +1686,12 @@ output$advancedplotoptions_panel = renderUI({
   input$datavariable
   input$mapvariable
   input$sequencevariable
-
+  
     
   ret = NULL
   isolate({
     temp = plot.args2()
+
     if(!is.null(temp$combinedData)) {
       advancedplotoptions.title = checkboxInput(inputId = "advancedplotoptions_title",
                                                 label = strong("Advanced Plot Options"),
@@ -2068,16 +2080,20 @@ output$seqvar_slider_panel = renderUI({
 
 
 output$seqvar_slidertimer_panel = renderUI({
-  fixedRow((column(6, checkboxInput("seqvar_slidertimer",
-                                    label = "Time delay between plots (seconds):",
-                                    value = input$seqvar_slidertimer))),
-           column(6, conditionalPanel("input.seqvar_slidertimer",
-                                      numericInput("slidertimer", 
-                                                   "", 
-                                                   value = 0.6, 
-                                                   min = 0.1, 
-                                                   max = 3.0, 
-                                                   step = 0.1))))
+  get.data.set()
+  isolate({
+    fixedRow((column(6, checkboxInput("seqvar_slidertimer",
+                                      label = "Time delay between plots (seconds):",
+                                      value = input$seqvar_slidertimer))),
+             column(6, conditionalPanel("input.seqvar_slidertimer",
+                                        numericInput("slidertimer", 
+                                                     "", 
+                                                     value = 0.6, 
+                                                     min = 0.1, 
+                                                     max = 3.0, 
+                                                     step = 0.1))))
+  })
+  
 })
 
 
