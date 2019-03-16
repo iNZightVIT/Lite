@@ -1393,7 +1393,6 @@ observe({
   get.data.set()
   
   isolate({
-    
     args2$combinedData = NULL
 #    mapData = NULL,
     
@@ -1404,8 +1403,8 @@ observe({
 #    mapSequenceVar = NULL,
     
     args2$match.list = NULL
-    #  has.multipleobs = FALSE,
     
+    #  has.multipleobs = FALSE,
 #    plotTitle = "",
 #    plotAxes = FALSE,
 #    plotXLab = "",
@@ -2603,8 +2602,11 @@ output$maps_plot = renderPlot({
       if(condition1) {
         temp = plot.args()
         tryCatch({do.call(plot, temp)}, 
+                 warning = function(w) {
+                   print(w)
+                 }, 
                  error = function(e) {
-                   print(e)
+                   
                  }, finally = {})
       }
     }
@@ -2700,7 +2702,8 @@ output$maps_plot = renderPlot({
         
         else {
           matchplot.colours = c("#d95f02", "#1b9e77", "#7570b3")
-          plot(sf::st_geometry(mapData$geometry), col = matchplot.colours[match.list$map.matched + 1])
+          tryCatch(plot(sf::st_geometry(mapData$geometry), col = matchplot.colours[match.list$map.matched + 1]), error=function(e){})
+          
           legend("topleft", legend = c("Data present for region",
                                        "Data missing for region"),
                  fill = matchplot.colours[2:1])
