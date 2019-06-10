@@ -1,26 +1,84 @@
 ##  Row operations (Perform row operations) --> Aggregate data
 
+output$aggros1_panel = renderUI({
+  get.data.set()
+  isolate({    
+    selectInput(inputId = "aggros1",
+                label = NULL,
+                choices = c("", get.categorical.column.names(get.data.set())),
+                selected = input$aggros1,
+                selectize = F)
+
+  })
+})
+
+output$aggros2_panel = renderUI({
+  get.data.set()
+  isolate({    
+    selectInput(inputId = "aggros2",
+                label = NULL,
+                choices = c("", get.categorical.column.names(get.data.set())),
+                selected = input$aggros2,
+                selectize = F)
+    
+  })
+})
+
+output$aggros3_panel = renderUI({
+  get.data.set()
+  isolate({    
+    selectInput(inputId = "aggros3",
+                label = NULL,
+                choices = c("", get.categorical.column.names(get.data.set())),
+                selected = input$aggros3,
+                selectize = F)
+    
+  })
+})
+
+
+
 observe({
   input$aggregate_vars
   isolate({
-    if(!is.null(input$aggregate_vars)&&input$aggregate_vars>0){
-      vars = input$aggros
-      rem = which(vars%in%"")
-      if(length(rem)>0){
-        vars = vars[-rem]
+    if(!is.null(input$aggregate_vars) && input$aggregate_vars > 0){
+#      vars = input$aggros
+#      rem = which(vars %in% "")
+#      if(length(rem)>0){
+#        vars = vars[-rem]
+#      }
+      
+      vars = NULL
+      if(!is.null(input$aggros1) && input$aggros1 != "")
+        vars = c(vars, input$aggros1)
+      if(!is.null(input$aggros2) && input$aggros2 != "")
+        vars = c(vars, input$aggros2)
+      if(!is.null(input$aggros3) && input$aggros3 != "")
+        vars = c(vars, input$aggros3)
+      
+      if(!is.null(input$aggregate.method) && length(input$aggregate.method) > 0) {
+        methods = input$aggregate.method
+        methods = tolower(methods)
+        if("iqr" %in% methods)
+          methods[methods == "iqr"] = "IQR"
       }
-      methods = input$aggregate.method
-      rem  = which(methods%in%"")
-      if(length(rem)>0){
-        methods = methods[-rem]
-      }
-      if(length(vars)>0&length(methods)>0&!is.null(get.data.set())){
-        temp = aggregate.data(aggregate.over=unique(vars),methods=methods,dafr=get.data.set())
+      
+#      rem  = which(methods %in% "")
+#      if(length(rem) > 0){
+#        methods = methods[-rem]
+#      }
+#      print(vars)
+#      print(methods)
+#      print(get.data.set())
+      if(length(vars) > 0 & length(methods) > 0 & !is.null(get.data.set())) {
+        temp = aggregate.data(aggregate.over = unique(vars), methods = methods, dafr = get.data.set())
         if(!is.null(temp)){
           updatePanel$datachanged = updatePanel$datachanged+1
-          values$data.set = temp          
-          updateSelectInput(session,"aggros",selected=0,choices=get.categorical.column.names(get.data.set()))
-          updateSelectInput(session,"aggregate.method",selected=0)
+          values$data.set = unlist.data.frame(temp)          
+          updateSelectInput(session,"aggros1", selected = 0, choices = get.categorical.column.names(get.data.set()))
+          updateSelectInput(session,"aggros2", selected = 0, choices = get.categorical.column.names(get.data.set()))
+          updateSelectInput(session,"aggros3", selected = 0, choices = get.categorical.column.names(get.data.set()))
+          updateSelectInput(session,"aggregate.method", selected = 0)
         }
       }
     }
@@ -28,10 +86,22 @@ observe({
 })
 
 output$aggregate.variable = renderUI({
-  aggregate.variable(get.data.set())
+  aggregate.variable()
 })
 
 output$aggregate.table = renderDataTable({
   get.data.set()
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, 
-               columns.defaultContent="NA",scrollX=T))
+               columns.defaultContent = "NA",scrollX = T))
+
+
+
+
+
+
+
+
+
+
+
+

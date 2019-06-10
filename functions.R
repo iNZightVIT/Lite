@@ -528,7 +528,7 @@ aggregate.data= function(aggregate.over,
                                         },d))], 
                        by=b, FUN=m[i],na.rm=T,simplify = FALSE)
     }
-    
+
     colnames(temp)[(length(b)+1):ncol(temp)] = paste(m[i],
                                                      colnames(temp)[(length(b)+1):ncol(temp)],sep=".")
     temp
@@ -540,6 +540,19 @@ aggregate.data= function(aggregate.over,
     }
   }
   temp
+}
+
+## unlist list columns in a dataset
+unlist.data.frame = function(data) {
+  col_names = colnames(data)
+  temp1 = sapply(data, is.list)
+  temp2 = do.call(
+    cbind, lapply(data[temp1], function(x) 
+      data.frame(do.call(rbind, x), check.names=FALSE)))
+  result = cbind(data[!temp1], temp2)
+  colnames(result) = col_names
+  
+  result
 }
 
 ##########################################################
