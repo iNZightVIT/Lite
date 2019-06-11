@@ -1,33 +1,118 @@
 ##  Row operations (Perform row operations) --> Sort data by variables
 
+output$sort1_panel = renderUI({
+  get.data.set()
+  isolate({    
+    selectInput(inputId = "sort1",
+                label = NULL,
+                choices = c("", colnames(get.data.set())),
+                selected = input$sort1,
+                selectize = F)
+    
+  })
+})
+
+output$sort2_panel = renderUI({
+  get.data.set()
+  isolate({    
+    selectInput(inputId = "sort2",
+                label = NULL,
+                choices = c("", colnames(get.data.set())),
+                selected = input$sort2,
+                selectize = F)
+    
+  })
+})
+
+output$sort3_panel = renderUI({
+  get.data.set()
+  isolate({    
+    selectInput(inputId = "sort3",
+                label = NULL,
+                choices = c("", colnames(get.data.set())),
+                selected = input$sort3,
+                selectize = F)
+    
+  })
+})
+
+output$sort4_panel = renderUI({
+  get.data.set()
+  isolate({    
+    selectInput(inputId = "sort4",
+                label = NULL,
+                choices = c("", colnames(get.data.set())),
+                selected = input$sort4,
+                selectize = F)
+    
+  })
+})
+
+
+
 observe({
   input$sort_vars
   isolate({
-    if(!is.null(input$sort_vars)&&input$sort_vars>0){
-      indexes1= grep("^sort[0-9]+$",names(input))
-      vars = unlist(lapply(indexes1,function(i,nams){
-        input[[nams[i]]]
-      },names(input)))
-      indexes2 = grep("^increasing[0-9]+$",names(input))
-      sort.type = unlist(lapply(indexes2,function(i,nams){
-        input[[nams[i]]]
-      },names(input)))
-      if(anyDuplicated(vars)){
-        dups = which(duplicated(vars))
-        vars = vars[-dups]
-        sort.type =sort.type[-dups]
+#    if(!is.null(input$sort_vars) && input$sort_vars>0){
+#      indexes1 = grep("^sort[0-9]+$",names(input))
+#      vars = unlist(lapply(indexes1, function(i,nams){
+#        input[[nams[i]]]
+#      },names(input)))
+#      indexes2 = grep("^increasing[0-9]+$",names(input))
+#      sort.type = unlist(lapply(indexes2, function(i,nams){
+#        input[[nams[i]]]
+#      },names(input)))
+#      if(anyDuplicated(vars)){
+#        dups = which(duplicated(vars))
+#        vars = vars[-dups]
+#        sort.type =sort.type[-dups]
+#      }
+#      if("" %in% vars){
+#        empties = which(vars %in% "")
+#        vars = vars[-empties]
+#        sort.type =sort.type[-empties]
+#      }
+#      print(str(vars))
+#      print(vars)
+#      print(sort.type)
+      
+    vars = NULL; sort.type = NULL
+    if(!is.null(input$sort1) && input$sort1 != "") {
+      vars = c(vars, input$sort1)
+      sort.type = c(sort.type, ifelse(input$sort1_order == 1, TRUE, FALSE))
+    }
+    if(!is.null(input$sort2) && input$sort2 != "") {
+      if(! input$sort2 %in% vars) {
+        vars = c(vars, input$sort2)
+        sort.type = c(sort.type, ifelse(input$sort2_order == 1, TRUE, FALSE))
       }
-      if(""%in%vars){
-        empties = which(vars%in%"")
-        vars = vars[-empties]
-        sort.type =sort.type[-empties]
+    }
+    if(!is.null(input$sort3) && input$sort3 != "") {
+      if(! input$sort3 %in% vars) {
+        vars = c(vars, input$sort3)
+        sort.type = c(sort.type, ifelse(input$sort3_order == 1, TRUE, FALSE))
       }
-      temp = sort.data(vars,sort.type,get.data.set())
+    }
+    if(!is.null(input$sort4) && input$sort4 != "") {
+      if(! input$sort4 %in% vars) {
+        vars = c(vars, input$sort4)
+        sort.type = c(sort.type, ifelse(input$sort4_order == 1, TRUE, FALSE))
+      }
+    }
+    
+    if(!is.null(vars)) {
+      temp = sort.data(vars, sort.type, get.data.set())
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
+        updateSelectInput(session,"sort1", selected = 0, choices = colnames(get.data.set()))
+        updateSelectInput(session,"sort2", selected = 0, choices = colnames(get.data.set()))
+        updateSelectInput(session,"sort3", selected = 0, choices = colnames(get.data.set()))
+        updateSelectInput(session,"sort4", selected = 0, choices = colnames(get.data.set()))
       }
     }
+    
+#    }
   })
 })
 
@@ -37,15 +122,12 @@ output$sort.table = renderDataTable({
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
 output$sort.variables = renderUI({
-  get.data.set()
-  isolate({
-    sort.variables(get.data.set())
-  })
+  sort.variables()
 })
 
-output$num.select = renderUI({
-  input$num_columns_sort
-  isolate({
-    num.select.panel(input$num_columns_sort,get.data.set())
-  })
-})
+#output$num.select = renderUI({
+#  input$num_columns_sort
+#  isolate({
+#    num.select.panel(input$num_columns_sort,get.data.set())
+#  })
+#})
