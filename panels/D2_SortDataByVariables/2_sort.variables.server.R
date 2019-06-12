@@ -122,7 +122,7 @@ output$sort.table = renderDataTable({
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
 output$sort.variables = renderUI({
-  sort.variables()
+  sort.variables.panel()
 })
 
 #output$num.select = renderUI({

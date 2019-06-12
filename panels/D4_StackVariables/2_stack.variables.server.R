@@ -9,36 +9,36 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
-        updateSelectInput(session,"stack_vars_which",selected=0)
-        updateSelectInput(session,inputId="stack_vars_column",
-                          choices=get.categorical.column.names(get.data.set()),
-                          selected=0)
+#        updateSelectInput(session,"stack_vars_which",selected=0)
+        updateSelectInput(session, "stack_vars_column",
+                          choices = get.numeric.column.names(get.data.set()),
+                          selected = 0)
       }
     }
   })
 })
 
-observe({
-  input$stack_vars_which
-  isolate({
-    if(!is.null(input$stack_vars_which)&&!""%in%input$stack_vars_which){
-      if("categorical"%in%input$stack_vars_which){
-        updateSelectInput(session,inputId="stack_vars_column",
-                          choices=get.categorical.column.names(get.data.set()),
-                          selected=1)
-      }else{
-        updateSelectInput(session,inputId="stack_vars_column",
-                          choices=get.numeric.column.names(get.data.set()),
-                          selected=1)
-      }
-    }
-  })
-})
+#observe({
+#  input$stack_vars_which
+#  isolate({
+#    if(!is.null(input$stack_vars_which)&&!""%in%input$stack_vars_which){
+#      if("categorical"%in%input$stack_vars_which){
+#        updateSelectInput(session,inputId="stack_vars_column",
+#                          choices=get.categorical.column.names(get.data.set()),
+#                          selected=1)
+#      }else{
+#        updateSelectInput(session,inputId="stack_vars_column",
+#                          choices=get.numeric.column.names(get.data.set()),
+#                          selected=1)
+#      }
+#    }
+#  })
+#})
 
 output$stack.table = renderDataTable({
   get.data.set()
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
 output$stack.variables = renderUI({
-  stack.variables.panel(get.data.set())
+  stack.variables.panel()
 })

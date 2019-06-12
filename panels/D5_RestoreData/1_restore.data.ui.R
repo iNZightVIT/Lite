@@ -1,6 +1,8 @@
 restore.data.sidebar =  function(){
   list(
-    actionButton("restore_data_button","Restore data"),br(),br(),
+    actionButton("restore_data_button","Restore data",
+                 style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+    br(),br(),
     help.display('Restore data','restore_data_help',
                  "panels/D5_RestoreData/3_restore.data.help.md"),
     br())
