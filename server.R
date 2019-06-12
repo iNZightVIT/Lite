@@ -27,6 +27,7 @@ library(foreign)
 #library(shinydashboard)
 library(shinyjs)
 #library(iNZightTools)
+library(dplyr)
 
 
 # read in possible command line arguments such as 'vars.path'
@@ -224,10 +225,22 @@ shinyServer(function(input, output, session) {
   source("panels/D4_StackVariables/2_stack.variables.server.R", local = TRUE)
   
   ##-----------------------------##
-  ##  D8. Reshape data        ##
+  ##  D8. Reshape data           ##
   ##-----------------------------##
   source("panels/D8_ReshapeData/1_reshape.dataset.ui.R", local = TRUE)
   source("panels/D8_ReshapeData/2_reshape.dataset.server.R", local = TRUE)
+  
+  ##-----------------------------##
+  ##  D9.  Separate columns      ##
+  ##-----------------------------##
+  source("panels/D9_SeparateColumns/1_separate.columns.ui.R", local = TRUE)
+  source("panels/D9_SeparateColumns/2_separate.columns.server.R", local = TRUE)
+  
+  ##-----------------------------##
+  ##  D10. Unite columns        ##
+  ##-----------------------------##
+  source("panels/D10_UniteColumns/1_unite.columns.ui.R", local = TRUE)
+  source("panels/D10_UniteColumns/2_unite.columns.server.R", local = TRUE)
 
   ##-----------------------------##
   ##  D5. Restore data           ##

@@ -33,7 +33,7 @@ reshape.dataset.panel =function(){
       mainPanel(h5(strong("Original dataset")),
                 dataTableOutput("reshape.table"),
                 h5(strong("New dataset")),
-                dataTableOutput("preview.table"))
+                dataTableOutput("preview.reshape.table"))
     )
   }
 }
