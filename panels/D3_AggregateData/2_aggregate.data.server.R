@@ -86,7 +86,7 @@ observe({
 })
 
 output$aggregate.variable = renderUI({
-  aggregate.variable()
+  aggregate.variable.panel()
 })
 
 output$aggregate.table = renderDataTable({

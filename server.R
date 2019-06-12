@@ -222,6 +222,12 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   source("panels/D4_StackVariables/1_stack.variables.ui.R", local = TRUE)
   source("panels/D4_StackVariables/2_stack.variables.server.R", local = TRUE)
+  
+  ##-----------------------------##
+  ##  D8. Reshape data        ##
+  ##-----------------------------##
+  source("panels/D8_ReshapeData/1_reshape.dataset.ui.R", local = TRUE)
+  source("panels/D8_ReshapeData/2_reshape.dataset.server.R", local = TRUE)
 
   ##-----------------------------##
   ##  D5. Restore data           ##

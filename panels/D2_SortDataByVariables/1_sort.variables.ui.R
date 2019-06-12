@@ -70,7 +70,7 @@ sort.variables.sidebar =  function(){
 #         br()))
 }
 
-sort.variables = function(){
+sort.variables.panel = function(){
   if(is.null(get.data.set())){
     sidebarLayout(
       sidebarPanel(help.display('Sort data by variables','sort_vars_help',

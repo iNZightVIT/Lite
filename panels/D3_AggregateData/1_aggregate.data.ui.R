@@ -33,7 +33,7 @@ aggregate.data.sidebar =  function(){
        br())
 }
 
-aggregate.variable =function(){
+aggregate.variable.panel =function(){
   if(is.null(get.data.set())){
     sidebarLayout(
       sidebarPanel(help.display('Aggregate data','aggregate_help',"panels/D3_AggregateData/3_aggregate.data.help.md")),

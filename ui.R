@@ -126,6 +126,8 @@ shinyUI(
                                 uiOutput('aggregate.variable')),
                        tabPanel("Stack variables",
                                 uiOutput('stack.variables')),
+                       tabPanel("Reshape data",
+                                uiOutput('reshape.dataset')),
                        tabPanel("Restore data",
                                 uiOutput('restore.data')),
                        tabPanel("Survey design (beta)",
