@@ -1,4 +1,7 @@
 
+separate_colns = reactiveValues(
+  n.colnames = 0
+)
 
 ## when click "preview" button
 observe({
@@ -26,6 +29,7 @@ observe({
             temp
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
           numcol = sum(grepl("^col[1-9]+$", names(temp)))
+          separate_colns$n.colnames = numcol
           output$separate_change_column_names = renderUI({
             ret = NULL
             isolate({
@@ -35,9 +39,9 @@ observe({
                 ret[[1]] = h5("Change column names (Click SEPARATE to apply)")
                 for(i in 1:numcol) {
                   ret[[i+1]] = fixedRow(column(3, h5(paste("Column", i, sep = " "))),
-                                      column(9, textInput(paste("changecolname", i, sep = ""),
-                                                          label = NULL,
-                                                          value = "")))
+                                        column(9, textInput(paste("changecolname", i, sep = ""),
+                                                            label = NULL,
+                                                            value = "")))
                 }
               }
             })
@@ -86,9 +90,33 @@ observe({
             num = num + 1
           }
           temp = data
+          
+          if(separate_colns$n.colnames > 0) {
+            vec.index = NULL
+            vec.colnames = NULL
+            for(i in 1:separate_colns$n.colnames) {
+              if(!is.null(eval(parse(text = paste0("input$changecolname", i)))) 
+                 && length(eval(parse(text = paste0("input$changecolname", i)))) > 0
+                 && !grepl("^\\s*$", eval(parse(text = paste0("input$changecolname", i))))) {
+                vec.index = c(vec.index, i)
+                vec.colnames = c(vec.colnames, eval(parse(text = paste0("input$changecolname", i))))
+              }
+            }
+            if(length(vec.index) > 0)
+              colnames(temp)[vec.index] = vec.colnames
+          }
+          
           output$previewseparatecolumns.table = renderDataTable({
             NULL
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
+          
+          output$separate_change_column_names = renderUI({
+            ret = NULL
+            isolate({
+        
+            })
+            ret
+          })
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = temp
         }

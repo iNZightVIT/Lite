@@ -237,10 +237,16 @@ shinyServer(function(input, output, session) {
   source("panels/D9_SeparateColumns/2_separate.columns.server.R", local = TRUE)
   
   ##-----------------------------##
-  ##  D10. Unite columns        ##
+  ##  D10. Unite columns         ##
   ##-----------------------------##
   source("panels/D10_UniteColumns/1_unite.columns.ui.R", local = TRUE)
   source("panels/D10_UniteColumns/2_unite.columns.server.R", local = TRUE)
+  
+  ##-----------------------------##
+  ##  D11. Merge/Join Datasets   ##
+  ##-----------------------------##
+  source("panels/D11_MergeJoinDatasets/1_mergejoin.datasets.ui.R", local = TRUE)
+  source("panels/D11_MergeJoinDatasets/2_mergejoin.datasets.server.R", local = TRUE)
 
   ##-----------------------------##
   ##  D5. Restore data           ##
