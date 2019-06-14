@@ -1,8 +1,9 @@
 
 filter.data.sidebar =  function(data.set){
   list(
+    h5(strong("Select Filter to apply")),
     selectInput(inputId="select_filter",
-                label="Select Filter to apply",
+                label=NULL,
                 choices=c("","levels of categorical variable",
                           "numeric condition","row indices",
                           "randomly"),selected=1),
@@ -34,7 +35,10 @@ filter.data.sidebar =  function(data.set){
                      textInput(inputId="numeric_input3",label="Specify the number of samples to take"),
                      checkboxInput("bootstrap_check",label="Check to sample with replacement", value=F),
                      verbatimTextOutput("message3")),
-    actionButton("filter_data_perform","PERFORM OPERATION"),br(),br(),textOutput("op_status"),br(),br(),
+    actionButton("filter_data_perform","PERFORM OPERATION",
+                 style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+    br(),br(),
+    ## textOutput("op_status"),br(),br(),
     help.display('Filter datset','row_op_help',"panels/D1_FilterDataset/3_filter.dataset-help.md"),br())
 }
 

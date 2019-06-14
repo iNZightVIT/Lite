@@ -2,7 +2,7 @@
 unite.columns.sidebar = function(){
   list(h5(strong("Unite columns")),
        
-       selectInput(inputId="select_unite_columns",
+       selectInput(inputId = "select_unite_columns",
                 label = "Select columns to unite",
                 choices = colnames(get.data.set()),
                 selectize = FALSE,

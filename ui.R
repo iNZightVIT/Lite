@@ -132,12 +132,14 @@ shinyUI(
                                 uiOutput('separate.columns')),
                        tabPanel("Unite columns",
                                 uiOutput('unite.columns')),
+                       tabPanel("Merge/Join datasets",
+                                uiOutput('mergejoin.datasets')),
+                       tabPanel("Alphabetise Variables",
+                                uiOutput('alphabetise.variables')),
                        tabPanel("Restore data",
                                 uiOutput('restore.data')),
                        tabPanel("Survey design (beta)",
-                                uiOutput('survey.design')),
-                       tabPanel("Alphabetise Variables",
-                                uiOutput('alphabetise.variables'))
+                                uiOutput('survey.design'))
             ),
             ##  "Manipulate variables" tab.
             navbarMenu("Manipulate variables",

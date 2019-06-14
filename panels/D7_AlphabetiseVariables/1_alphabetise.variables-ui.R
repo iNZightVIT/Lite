@@ -1,11 +1,13 @@
 
 alphabetise.variables.sidebar =  function(data.set){
-  list(selectInput(inputId="select.alphabetical.order",
+  list(h5(strong("Select alphabetical order")),
+       selectInput(inputId="select.alphabetical.order",
                    choices=c("", "A(a) To Z(z)", "Z(z) To A(a)"),
                    selected=1,
                    multiple=FALSE,
-                   label="Select alphabetical order"),
-       actionButton("alphabetise.var.button", "Alphabetise Variables"),
+                   label=NULL),
+       actionButton("alphabetise.var.button", "Alphabetise Variables",
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),
        br(),br(),
        help.display('Alphabetise Variables', 'alphabetise_variables_help',
                     "panels/D7_AlphabetiseVariables/3_alphabetise.variables-help.md"),
