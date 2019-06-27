@@ -261,11 +261,17 @@ shinyServer(function(input, output, session) {
   source("panels/D6_SurveyDesign/2_survey.design.server.R", local = TRUE)
   
   ##-----------------------------##
-  ##  D7. Alphabetise Variables   ##
+  ##  D7. Alphabetise Variables  ##
   ##-----------------------------##
   source("panels/D7_AlphabetiseVariables/1_alphabetise.variables-ui.R", local = TRUE)
   source("panels/D7_AlphabetiseVariables/2_alphabetise.variables-server.R", local = TRUE)
-
+  
+  ##-----------------------------##
+  ##  E0. Convert to Categorical ##
+  ##-----------------------------##
+  source("panels/E0_ConvertToCategorical/1_convert.to.categorical.ui.R", local = TRUE)
+  source("panels/E0_ConvertToCategorical/2_convert.to.categorical.server.R", local = TRUE)
+  
   ##-----------------------------##
   ##  E1. Categorical Variables  ##
   ##-----------------------------##
@@ -299,14 +305,14 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   ##  E6. Add Columns            ##
   ##-----------------------------##
-  source("panels/E6_AddColumns/1_add.columns.panel.ui.R", local = TRUE)
-  source("panels/E6_AddColumns/2_add.columns.panel.server.R", local = TRUE)
+#  source("panels/E6_AddColumns/1_add.columns.panel.ui.R", local = TRUE)
+#  source("panels/E6_AddColumns/2_add.columns.panel.server.R", local = TRUE)
 
   ##-----------------------------##
   ##  E7. Reshape dataset        ##
   ##-----------------------------##
-  source("panels/E7_ReshapeDataset/1_reshape.data.panel.ui.R", local = TRUE)
-  source("panels/E7_ReshapeDataset/2_reshape.data.panel.server.R", local = TRUE)
+#  source("panels/E7_ReshapeDataset/1_reshape.data.panel.ui.R", local = TRUE)
+#  source("panels/E7_ReshapeDataset/2_reshape.data.panel.server.R", local = TRUE)
 
   ##-----------------------------##
   ##  E8. Remove columns         ##
