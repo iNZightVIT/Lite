@@ -1,23 +1,24 @@
-get.rename.variables.panel = function(data.set){
-  if(is.null(data.set)){
+
+rename.variables.sidebar = function(){
+  list(uiOutput("rename_variables_two_columns"),
+       
+       actionButton("rename_variables_two_columns","Rename",
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+}
+
+
+rename.variables.panel = function(){
+  if(is.null(get.data.set())){
     sidebarLayout(
-      sidebarPanel(help.display('Rename variables','rename_variable',
-                           "panels/E3_RenameVariables/3_rename.variables.help.md"),
-                      br(),HTML("")),
-      mainPanel(h1("Please select or import a data set.")))
+      sidebarPanel(),
+      mainPanel(
+        h1("Please select or import a data set.")
+      )
+    )
   }else{
     sidebarLayout(
-      sidebarPanel(selectInput(inputId="rename.variables.column.select",
-                               label="Select a column to rename",
-                               choices=colnames(data.set),selected=1),
-                   textInput("rename.variables.new.name",
-                             label="Type in a new name for the column",
-                             value=colnames(data.set)[1]),
-                   actionButton(inputId="rename.variables",
-                                label="Rename Variable"),br(),br(),
-                   help.display('Rename variables','rename_variable',
-                                "panels/E3_RenameVariables/3_rename.variables.help.md")),
-      mainPanel(verbatimTextOutput("rename.variables.out"))
-    )  
+      sidebarPanel(rename.variables.sidebar()),
+      mainPanel(dataTableOutput("rename.variables.table"))
+    )
   }
 }

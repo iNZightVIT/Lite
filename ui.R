@@ -143,6 +143,8 @@ shinyUI(
             ),
             ##  "Manipulate variables" tab.
             navbarMenu("Manipulate variables",
+                       tabPanel("Convert to Categorical",
+                                uiOutput('convert.to.categorical')),
                        tabPanel("Categorical variables",
                                   uiOutput('categorical.variables')),
                        tabPanel("Numeric variables",
@@ -153,10 +155,10 @@ shinyUI(
                                 uiOutput("create.variables")),
                        tabPanel("Missing to category",
                                 uiOutput("missing.categorical")),
-                       tabPanel("Add columns",
-                                uiOutput("add.columns")),
-                       tabPanel("Reshape dataset",
-                                uiOutput("reshape.data")),
+                       #tabPanel("Add columns",
+                      #          uiOutput("add.columns")),
+                       #tabPanel("Reshape dataset",
+                      #          uiOutput("reshape.data")),
                        tabPanel("Delete variables",
                                 uiOutput("remove.columns"))
             ),
