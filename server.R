@@ -319,6 +319,12 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   source("panels/E8_RemoveColumns/1_remove.columns.panel.ui.R", local = TRUE)
   source("panels/E8_RemoveColumns/2_remove.columns.panel.server.R", local = TRUE)
+  
+  ##-----------------------------##
+  ##  E9. Dates and Times        ##
+  ##-----------------------------##
+  source("panels/E9_DatesTimes/1_datestimes.ui.R", local = TRUE)
+  source("panels/E9_DatesTimes/2_datestimes.server.R", local = TRUE)
 
   ##-----------------------------##
   ##  F1. Qick explore           ##
