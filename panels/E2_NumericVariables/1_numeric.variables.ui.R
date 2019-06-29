@@ -9,22 +9,23 @@ numeric.variables.panel = function(data.set){
     choices=c("Transform variables",
               "Form Class interval",
               "Rank numeric")
-    temp = list(list(selectInput(inputId="numeric_variables_select",
-                                 label="Numeric variables",
+    temp = list(list(h5(strong("Numeric variables")),
+                     selectInput(inputId="numeric_variables_select1",
+                                 label=NULL,
                                  choices=choices,
                                  selectize=F),
-                     conditionalPanel("input.numeric_variables_select=='Transform variables'",
+                     conditionalPanel("input.numeric_variables_select1=='Transform variables'",
                                       uiOutput("transform.columns.side")),
-                     conditionalPanel("input.numeric_variables_select=='Form Class interval'",
+                     conditionalPanel("input.numeric_variables_select1=='Form Class interval'",
                                       uiOutput("form.class.interval.side")),
-                     conditionalPanel("input.numeric_variables_select=='Rank numeric'",
+                     conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
                                       uiOutput("rank.numeric.side"))
                      ),
-                list(conditionalPanel("input.numeric_variables_select=='Transform variables'",
+                list(conditionalPanel("input.numeric_variables_select1=='Transform variables'",
                                       uiOutput("transform.columns.main")),
-                     conditionalPanel("input.numeric_variables_select=='Form Class interval'",
+                     conditionalPanel("input.numeric_variables_select1=='Form Class interval'",
                                       uiOutput("form.class.interval.main")),
-                     conditionalPanel("input.numeric_variables_select=='Rank numeric'",
+                     conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
                                       uiOutput("rank.numeric.main"))))
   }
   if(!is.null(temp)){
@@ -36,12 +37,13 @@ numeric.variables.panel = function(data.set){
 }
 
 get.transform.sidebar =  function(data.set){
-  list(selectInput("select.columns.transform", "Select Columns", choices = c("",colnames(data.set)),multiple=T,selectize=T),br(),
+  list(selectInput("select.columns.transform", "Select Columns", choices = colnames(data.set),multiple=T,selectize=F,size=7),
        selectInput("select.transform", "Select Transformation", 
                    choices = c("", "change to factor","add","subtract","multiply","divide","log","root","square","abs","center",
                                "standardize","median split","reverse-coding","copy","change sign"),
-                   multiple=F,selectize=F),br(),
-       actionButton("transform","Transform"),br(),br(),textOutput("status"),br(),br(),
+                   multiple=F,selectize=F),
+       actionButton("transform","Transform",
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br(),textOutput("status"),br(),br(),
        help.display('Modify data','transform_columns',"panels/E2_NumericVariables/4_transform.variables.help.md"),br())
 }
 

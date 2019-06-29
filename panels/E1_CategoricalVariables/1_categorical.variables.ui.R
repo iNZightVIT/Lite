@@ -100,11 +100,15 @@ combine.sidebar.panel =  function(data.set){
   }else{
     choices1 = c()
   }
-  list(helpText("Select factor columns to combine. All combined 
-                columns will be added as additional column to 
-                the data."),
-       selectInput("select.combine.columns", "Select columns to combine",choices=choices1,multiple=T,selectize=T),br(),
-       actionButton("combine","Combine levels"),br(),br(),
+  list(
+       #helpText("Select factor columns to combine. All combined 
+       #         columns will be added as additional column to 
+       #         the data."),
+       selectInput("select.combine.columns", "Choose 2 or more variables you want to combine",
+                   choices=choices1,multiple=T,selectize=F, size = 7),
+       
+       actionButton("combine","Combine",
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br(),
        help.display('Combine Levels','combine_levels',"panels/E1_CategoricalVariables/7_combine.levels.help.md"),br(),HTML(""))
 }
 
@@ -121,14 +125,15 @@ rename.levels.sidebar.panel = function(data.set){
   }else{
     choices1 = c()
   }
-  list(helpText("Select a column from the first dropdown menu. As many input 
-                variable will appear as there are factors in the selected 
-                column. Rename the factors using the text files next to it."),
-       selectInput("select.rename.column","Select Column",
+  list(
+       #helpText("Select a column from the first dropdown menu. As many input 
+       #         variable will appear as there are factors in the selected 
+       #         column. Rename the factors using the text files next to it."),
+       selectInput("select.rename.column","Choose variable",
                    choices=c("",choices1),multiple=F,selectize=F,selected=1),
-       br(),
        uiOutput(outputId="rename.factors.inputs"),
-       actionButton("rename.levs","Rename levels"),br(),br(),
+       actionButton("rename.levs","Rename levels",
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br(),
        help.display('Rename Levels','rename_levels',"panels/E1_CategoricalVariables/6_rename.levels.help.md"),br(),HTML(""))
 }
 

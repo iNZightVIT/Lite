@@ -33,7 +33,10 @@ dates.times.panel =function(){
                                  dataTableOutput("convert.datestimes.table")),
                                 
                 conditionalPanel("input.select_datestimes == 'Aggregate datetimes to monthly or quarterly'",
-                                 h5(strong("Original dataset"))))
+                                 h5(strong("Original dataset")),
+                                 dataTableOutput("aggregate_datestimes.table"),
+                                 h5(strong("New dataset")),
+                                 dataTableOutput("previewaggregate_datestimes.table")))
     )
   }
 }
