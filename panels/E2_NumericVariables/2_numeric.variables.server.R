@@ -152,10 +152,10 @@ observe({
   input$form_class_interval_number
   isolate({
     if((!is.null(input$form_class_interval_number)&&
-          !all(is.convertable.integer(input$form_class_interval_number)))||(
-            !is.null(input$form_class_interval_number)&&
-              all(is.convertable.integer(input$form_class_interval_number))&&
-              as.numeric(input$form_class_interval_number)<=1)){
+        !all(is.convertable.integer(input$form_class_interval_number)))||(
+          !is.null(input$form_class_interval_number)&&
+          all(is.convertable.integer(input$form_class_interval_number))&&
+          as.numeric(input$form_class_interval_number)<=1)){
       updateTextInput(session,inputId="form_class_interval_number",
                       value="")
     }
@@ -181,18 +181,18 @@ output$form.class.interval.table = renderDataTable({
         labels[i] = input[[labels[i]]]
       }
       if(any(is.null(labels))||
-           any(labels%in%"")){
+         any(labels%in%"")){
         labels=NULL
       }
     }
     if(all(is.convertable.numeric(intervals))){
       ret = get.form.class.interval(dafr=get.data.set(),
-                                                intervals=sort(as.numeric(intervals)),
-                                                method=input$form_class_interval_method_select,
-                                                column=input$form.class.interval.column.select,
-                                                num.intervals=as.numeric(input$form_class_interval_number),
-                                                open.left.closed.right=input$form.class.interval.format,
-                                                labels=labels)
+                                    intervals=sort(as.numeric(intervals)),
+                                    method=input$form_class_interval_method_select,
+                                    column=input$form.class.interval.column.select,
+                                    num.intervals=as.numeric(input$form_class_interval_number),
+                                    open.left.closed.right=input$form.class.interval.format,
+                                    labels=labels)
     }
   }
   ret
@@ -205,8 +205,8 @@ observe({
   input$form.class.interval.submit
   isolate({
     if(!is.null(input$form.class.interval.submit)&&
-         input$form.class.interval.submit>0&&
-         all(is.convertable.integer(input$form_class_interval_number))){
+       input$form.class.interval.submit>0&&
+       all(is.convertable.integer(input$form_class_interval_number))){
       intervals = NULL
       labels=NULL
       if(input$form_class_interval_method_select%in%"specified"){
@@ -223,7 +223,7 @@ observe({
           labels[i] = input[[labels[i]]]
         }
         if(any(is.null(labels))||
-             any(labels%in%"")){
+           any(labels%in%"")){
           labels=NULL
         }
       }
@@ -248,7 +248,7 @@ output$specified.range = renderUI({
   isolate({
     ret = NULL
     if(all(is.convertable.integer(input$form_class_interval_number))&&
-         !is.null(input$form.class.interval.column.select)){
+       !is.null(input$form.class.interval.column.select)){
       ret = list(helpText(paste("Fill in the text fields below with numeric 
                                 range cuttoffs. The minimum in the selected 
                                 column is ",
@@ -280,9 +280,8 @@ output$labels.provide = renderUI({
       }
     }
     ret
-  })
 })
-
+  })
 ## Manipulate variables -> Numeric variables -> Rank numeric
 
 output$rank.numeric.table = renderDataTable({
@@ -307,9 +306,9 @@ observe({
     if(!is.null(input$rank.numeric.submit)&&
          input$rank.numeric.submit>0&&
          !is.null(input$rank.numeric.select.column)){
+      data = iNZightTools::rankVars(get.data.set(), input$rank.numeric.select.column)
       updatePanel$datachanged = updatePanel$datachanged+1
-      values$data.set = get.rank.numeric(get.data.set(),
-                                         input$rank.numeric.select.column)
+      values$data.set = data
     }
   })
 })
