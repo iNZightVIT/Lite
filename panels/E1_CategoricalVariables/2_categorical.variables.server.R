@@ -4,45 +4,45 @@ output$categorical.variables = renderUI({
   get.data.set()
   isolate({
     if(input$selector%in%"Categorical variables"){
-      categorical.variables.panel(input$categorical_variables_select,get.data.set())
+      categorical.variables.panel(get.data.set())
     }
   })
 })
 
 output$categorical.main.panel = renderUI({
-  input$categorical_variables_select
+  input$categorical_variables_select1
   isolate({
-    if(!is.null(input$categorical_variables_select)&&
-         input$categorical_variables_select%in%"Reorder levels"){
+    if(!is.null(input$categorical_variables_select1)&&
+         input$categorical_variables_select1%in%"Reorder levels"){
       reorder.main.panel()
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Collapse levels"){
+    }else if(!is.null(input$categorical_variables_select1)&&
+               input$categorical_variables_select1%in%"Collapse levels"){
       collapse.main.panel()
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Rename levels"){
+    }else if(!is.null(input$categorical_variables_select1)&&
+               input$categorical_variables_select1%in%"Rename levels"){
       rename.levels.main.panel()
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Combine categorical"){
+    }else if(!is.null(input$categorical_variables_select1)&&
+               input$categorical_variables_select1%in%"Combine categorical"){
       combine.main.panel()
     }
   })
 })
 
 output$categorical.side.panel = renderUI({
-  input$categorical_variables_select
+  input$categorical_variables_select1
   get.data.set()
   isolate({
-    if(!is.null(input$categorical_variables_select)&&
-         input$categorical_variables_select%in%"Reorder levels"){
+    if(!is.null(input$categorical_variables_select1)&&
+         input$categorical_variables_select1%in%"Reorder levels"){
       reorder.sidebar.panel(get.data.set())
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Collapse levels"){
+    }else if(!is.null(input$categorical_variables_select1)&&
+               input$categorical_variables_select1%in%"Collapse levels"){
       collapse.sidebar.panel(get.data.set())
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Rename levels"){
+    }else if(!is.null(input$categorical_variables_select1)&&
+               input$categorical_variables_select1%in%"Rename levels"){
       rename.levels.sidebar.panel(get.data.set())
-    }else if(!is.null(input$categorical_variables_select)&&
-               input$categorical_variables_select%in%"Combine categorical"){
+    }else if(!is.null(input$categorical_variables_select1)&&
+               input$categorical_variables_select1%in%"Combine categorical"){
       combine.sidebar.panel(get.data.set())
     }
   })
@@ -50,29 +50,47 @@ output$categorical.side.panel = renderUI({
 
 ## Manipulate variables --> Categorical variables --> Reorder levels
 
+
+observe({
+  input$select.reorder.column
+  isolate({
+    if(!is.null(input$select.reorder.column) && input$select.reorder.column %in% colnames(get.data.set())) {
+      updateTextInput(session, "recorder_variable_newname", 
+                      value = paste0(input$select.reorder.column, ".reord", sep = ""))
+    }
+  })
+})
+
+
+
+
 observe({
   input$reorder
   isolate({
-    items = input$select.reorder.item
-    if(!is.null(items)&!is.null(input$select.reorder.column)){
-      column = get.data.set()[,input$select.reorder.column]
-      if(length(items)<length(unique(column))){
-        not.in = sort(unique(get.data.set()[,input$select.reorder.column])
-                      [which(!unique(get.data.set()[,input$select.reorder.column])%in%items)])
-        levels.new = c(items,as.character(not.in))
-      }else{
-        levels.new = items
-      }
-      temp = reorder.levels(get.data.set(),input$select.reorder.column,levels.new)
-      if(!is.null(temp)){
-        updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = temp
-        updateSelectInput(session=session,inputId="select.reorder.item",selected="",choices="")
-        updateSelectInput(session=session,inputId="select.reorder.column",selected="")
+    if(!is.null(input$select.reorder.column) && input$select.reorder.column %in% colnames(get.data.set())) {
+      var = input$select.reorder.column
+      if(!is.null(input$recorder_variable_newname) && !grepl("^\\s*$", input$recorder_variable_newname)) {
+        name = input$recorder_variable_newname
+        if(!is.null(input$recorder_sort_levels) && input$recorder_sort_levels == "manually") {
+          if(!is.null(input$select.reorder.item) && length(input$select.reorder.item) == length(unique(get.data.set()[[input$select.reorder.column]]))) {
+            levels = as.character(input$select.reorder.item)
+            data = iNZightTools::reorderLevels(get.data.set(), var, levels, name = name)
+            updatePanel$datachanged = updatePanel$datachanged+1
+            values$data.set = data
+          }
+          
+        }
+        else {
+          data = iNZightTools::reorderLevels(get.data.set(), var, freq = TRUE, name = name)
+          updatePanel$datachanged = updatePanel$datachanged+1
+          values$data.set = data
+        } 
       }
     }
   })
 })
+
+
 
 output$text_reorder = renderPrint({
   if(!is.null(input$select.reorder.column)&&!""%in%input$select.reorder.column){
@@ -99,6 +117,17 @@ observe({
 ## Manipulate variables --> Categorical variables --> Collapse levels
 
 observe({
+  input$select.collapse.column
+  isolate({
+    if(!is.null(input$select.collapse.column) && input$select.collapse.column %in% colnames(get.data.set())) {
+      updateTextInput(session, "collapse_variable_newname", 
+                      value = paste0(input$select.collapse.column, ".coll", sep = ""))
+    }
+  })
+})
+
+
+observe({
   if(!is.null(input$select.collapse.column)){
     choices=""
     if(!"" %in% input$select.collapse.column){
@@ -111,6 +140,24 @@ observe({
     updateSelectInput(session=session,inputId="select.collapse.item",selected="",choices=choices)
   }
 })
+
+
+observe({
+  input$select.collapse.item
+  isolate({
+    if(!is.null(input$select.collapse.item) && length(input$select.collapse.item) > 0) {
+      if(length(input$select.collapse.item) == 1) {
+        updateTextInput(session, "collapse_level_newname", 
+                        value = input$select.collapse.item)
+      }
+      else if(length(input$select.collapse.item) > 1) {
+        updateTextInput(session, "collapse_level_newname", 
+                        value = paste0(input$select.collapse.item, collapse = "_"))
+      }
+    }
+  })
+})
+
 
 output$text_collapse_1st = renderPrint({
   input$collapse
@@ -131,25 +178,32 @@ output$text_collapse_2nd = renderPrint({
   }
 })
 
+
+
 observe({
   input$collapse
   isolate({
-    if(!is.null(input$collapse)&&input$collapse>0&&
-         input$select.collapse.column%in%colnames(get.data.set())){
-      if(any(input$select.collapse.item%in%
-               get.data.set()[,which(colnames(get.data.set())%in%
-                                       input$select.collapse.column)])){
-        temp = get.collapsed.column(
-          get.data.set()[,which(colnames(get.data.set())%in%input$select.collapse.column)],
-          input$select.collapse.item)
-        if(!is.null(temp)){
-          values$data.set[,which(colnames(get.data.set())%in%input$select.collapse.column)] = temp
-          updateSelectInput(session,"select.collapse.column",selected=NULL)
+    if(!is.null(input$select.collapse.column) && input$select.collapse.column %in% colnames(get.data.set())) {
+      var = input$select.collapse.column 
+      if(!is.null(input$select.collapse.item) && length(input$select.collapse.item) > 1) {
+        lvls = input$select.collapse.item
+        if(!is.null(input$collapse_variable_newname) && !grepl("^\\s*$", input$collapse_variable_newname)
+           && !is.null(input$collapse_level_newname) && !grepl("^\\s*$", input$collapse_level_newname)) {
+          name = input$collapse_variable_newname
+          lvlname = input$collapse_level_newname
+          data = iNZightTools::collapseLevels(get.data.set(), var, lvls, lvlname, name)
+          updatePanel$datachanged = updatePanel$datachanged+1
+          values$data.set = data
         }
       }
     }
   })
 })
+
+
+
+
+
 
 output$rename.factors.inputs = renderUI({
   input$select.rename.column
