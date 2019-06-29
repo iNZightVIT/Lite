@@ -126,6 +126,38 @@ observe({
 
 
 
+output$aggregate_datestimes_panel = renderUI({
+  get.data.set()
+  
+  ret = NULL
+  isolate({
+    ret = list(selectInput(inputId = "aggregate_datestimes_selectvars",
+                           label = "Select a column",
+                           choices = c("", colnames(get.data.set())),
+                           selectize = FALSE,
+                           multiple = FALSE),
+               
+               selectInput(inputId = "aggregate_datestimes_format",
+                           label = "Choose a format",
+                           choices = c("",
+                                       "Weekly", "Monthly", "Quarterly", "Yearly"),
+                           selectize = FALSE,
+                           multiple = FALSE),
+               
+               selectInput(inputId = "aggregate_datestimes_how",
+                           label = "How to aggregate",
+                           choices = c("Sum", "Mean", "Median"),
+                           selectize = FALSE,
+                           multiple = FALSE),
+               
+               fixedRow(column(3, actionButton("preview_aggregate_datestimes", "Preview",
+                                               style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
+                        column(3, actionButton("aggregate_datestimes_button", "Aggregate",
+                                               style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))))
+  })
+  ret
+})
+
 
 
 
@@ -142,6 +174,9 @@ output$dates.times = renderUI({
   dates.times.panel()
 })
 
+output$aggregate_datestimes.table = renderDataTable({
+  get.data.set()
+},options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 
 
