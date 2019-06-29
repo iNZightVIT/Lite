@@ -8,7 +8,7 @@ numeric.variables.panel = function(data.set){
   }else{
     choices=c("Transform variables",
               "Standardise variables",
-              "Form Class interval",
+              "Form class intervals",
               "Rank numeric",
               "Convert to categorical type")
     temp = list(list(h5(strong("Numeric variables")),
@@ -20,7 +20,7 @@ numeric.variables.panel = function(data.set){
                                       uiOutput("transform.columns.side")),
                      conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
                                       uiOutput("standardise.variables.side")),
-                     conditionalPanel("input.numeric_variables_select1=='Form Class interval'",
+                     conditionalPanel("input.numeric_variables_select1=='Form class intervals'",
                                       uiOutput("form.class.interval.side")),
                      conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
                                       uiOutput("rank.numeric.side")),
@@ -31,7 +31,7 @@ numeric.variables.panel = function(data.set){
                                       uiOutput("transform.columns.main")),
                      conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
                                       dataTableOutput("standardise.variables.table")),
-                     conditionalPanel("input.numeric_variables_select1=='Form Class interval'",
+                     conditionalPanel("input.numeric_variables_select1=='Form class intervals'",
                                       uiOutput("form.class.interval.main")),
                      conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
                                       uiOutput("rank.numeric.main")),
@@ -66,7 +66,7 @@ get.form.class.interval.side = function(data.set){
                 method of forming class intervals. The output can be poduced in two 
                 different formats. See help for more information."),
        selectInput(inputId="form.class.interval.column.select",
-                   label="Form Class interval",
+                   label="Choose variable",
                    choices=get.numeric.column.names(data.set),
                    selected=1),
        textInput(inputId="form_class_interval_number",
@@ -88,7 +88,8 @@ get.form.class.interval.side = function(data.set){
        conditionalPanel("input.form_class_interval_labels_provide==true",
                         uiOutput("labels.provide")),
        actionButton(inputId="form.class.interval.submit",
-                    label="Form Class interval"),br(),br(),
+                    label="Proceed",
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br(),
        help.display('Form Class interval','form_class_interval',
                     "panels/E2_NumericVariables/5_form.class.interval.help.md")
   )
@@ -98,13 +99,17 @@ get.form.class.interval.main = function(){
   dataTableOutput("form.class.interval.table")
 }
 
+
+
 rank.numeric.sidebar = function(data.set){
   list(selectInput("rank.numeric.select.column",
-                   label="Select one or more columns",
-                   selected=NULL,multiple=T,
-                   choices=get.numeric.column.names(data.set)),
-       br(),
-       actionButton("rank.numeric.submit",label="Rank Numeric"),
+                   label="Rank the numerical variables X (vector, matrix)",
+                   multiple=T,
+                   choices=get.numeric.column.names(data.set),
+                   selectize = F,
+                   size = 7),
+       actionButton("rank.numeric.submit",label="Rank",
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),
        br(),br(),
        help.display('Rank Numeric','rank_numeric',
                     "panels/E2_NumericVariables/6_rank.numeric.help.md"))
