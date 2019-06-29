@@ -7,8 +7,10 @@ numeric.variables.panel = function(data.set){
                 h1("Please select or import a data set."))
   }else{
     choices=c("Transform variables",
+              "Standardise variables",
               "Form Class interval",
-              "Rank numeric")
+              "Rank numeric",
+              "Convert to categorical type")
     temp = list(list(h5(strong("Numeric variables")),
                      selectInput(inputId="numeric_variables_select1",
                                  label=NULL,
@@ -16,17 +18,25 @@ numeric.variables.panel = function(data.set){
                                  selectize=F),
                      conditionalPanel("input.numeric_variables_select1=='Transform variables'",
                                       uiOutput("transform.columns.side")),
+                     conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
+                                      uiOutput("standardise.variables.side")),
                      conditionalPanel("input.numeric_variables_select1=='Form Class interval'",
                                       uiOutput("form.class.interval.side")),
                      conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
-                                      uiOutput("rank.numeric.side"))
+                                      uiOutput("rank.numeric.side")),
+                     conditionalPanel("input.numeric_variables_select1=='Convert to categorical type'",
+                                      uiOutput("convert.to.cate.side"))
                      ),
                 list(conditionalPanel("input.numeric_variables_select1=='Transform variables'",
                                       uiOutput("transform.columns.main")),
+                     conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
+                                      dataTableOutput("standardise.variables.table")),
                      conditionalPanel("input.numeric_variables_select1=='Form Class interval'",
                                       uiOutput("form.class.interval.main")),
                      conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
-                                      uiOutput("rank.numeric.main"))))
+                                      uiOutput("rank.numeric.main")),
+                     conditionalPanel("input.numeric_variables_select1=='Convert to categorical type'",
+                                      dataTableOutput("convert.to.cate.table"))))
   }
   if(!is.null(temp)){
     sidebarLayout(

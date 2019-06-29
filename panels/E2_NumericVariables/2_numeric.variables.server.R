@@ -46,6 +46,97 @@ output$transform.columns.main = renderUI({
   get.transform.main()
 })
 
+
+output$standardise.variables.side = renderUI({
+  get.data.set()
+  
+  ret = NULL
+  isolate({
+    ret = list(selectInput(inputId="standardise.variables.select",
+                           label="Choose variables you want to standardise",
+                           choices=get.numeric.column.names(get.data.set()),
+                           multiple=T,
+                           selectize=F,
+                           size=7),
+               
+               actionButton("standardise.variables.button","Standardise",
+                            style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+  })
+  ret
+})
+
+
+output$standardise.variables.table = renderDataTable({
+  get.data.set()
+},options=list(lengthMenu = c(5, 30, 50), 
+               pageLength = 5, 
+               columns.defaultContent="NA",
+               scrollX=T))
+
+
+observe({
+  input$standardise.variables.button
+  
+  isolate({
+    if(!is.null(input$standardise.variables.select) && length(input$standardise.variables.select) > 0) {
+      varnames = input$standardise.variables.select
+      names = paste0(varnames, ".std")
+      data = iNZightTools::standardizeVars(get.data.set(), varnames, names)
+      updatePanel$datachanged = updatePanel$datachanged+1
+      values$data.set = data
+    }
+  })
+})
+
+
+
+
+output$convert.to.cate.side = renderUI({
+  get.data.set()
+  
+  ret = NULL
+  isolate({
+    ret = list(selectInput(inputId="convert.to.cate.select",
+                           label="Choose variables you want to convert",
+                           choices=get.numeric.column.names(get.data.set()),
+                           multiple=T,
+                           selectize=F,
+                           size=7),
+               
+               actionButton("convert.to.cate.button","Convert",
+                            style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+  })
+  ret
+})
+
+
+
+output$convert.to.cate.table = renderDataTable({
+  get.data.set()
+},options=list(lengthMenu = c(5, 30, 50), 
+               pageLength = 5, 
+               columns.defaultContent="NA",
+               scrollX=T))
+
+
+
+observe({
+  input$convert.to.cate.button
+  
+  isolate({
+    if(!is.null(input$convert.to.cate.select) && length(input$convert.to.cate.select) > 0) {
+      vars = input$convert.to.cate.select
+      varnames = paste(vars, "cat", sep = ".")
+      data = iNZightTools::convertToCat(get.data.set(), vars, varnames)
+      updatePanel$datachanged = updatePanel$datachanged+1
+      values$data.set = data
+    }
+  })
+})
+  
+  
+  
+
 ## Manipulate variables -> Numeric variables -> Form Class interval
 
 output$form.class.interval.side = renderUI({
