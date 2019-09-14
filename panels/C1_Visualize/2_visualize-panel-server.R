@@ -18,6 +18,94 @@ vis.data <- reactive({
 })
 
 
+plot_list <- function(plot_type, x, y) {
+  if (plot_type %in% c(
+    "scatter", 
+    "hex", 
+    "grid"
+  )) {
+    return_list <- list(
+      scatter = "scatter",
+      hex = "hexagonal binning",
+      grid = "grid-density"
+    )
+  } else if (plot_type %in% c(
+    "dot", 
+    "hist", 
+    "gg_boxplot", 
+    "gg_column2", 
+    "gg_cumcurve", 
+    "gg_violin", 
+    "gg_barcode", 
+    "gg_barcode2",
+    "gg_dotstrip",
+    "gg_lollipop", 
+    "gg_poppyramid",
+    "gg_density"
+  )) {
+    return_list <- list(
+      dot  = "dot plot",
+      hist = "histogram",
+      gg_dotstrip = "dot strip",
+      gg_barcode2 = "barcode",
+      gg_boxplot = "boxplot",
+      gg_violin = "violin",
+      gg_density = "density",
+      gg_cumcurve = "cumulative curve"
+    )
+    
+    if (is.null(y)) {
+      return_list <- append(return_list, list(gg_column2 = "column/row bar"), length(return_list) - 1)
+      return_list <- append(return_list, list(gg_lollipop = "lollipop"), length(return_list) - 1)
+    }
+    
+    if ((!is.numeric(y) && nlevels(y) == 2) || (!is.numeric(x) && nlevels(x) == 2)) {
+      return_list <- append(return_list, list(gg_poppyramid = "pyramid"))
+    }
+    
+    attr(return_list, "cat.levels") <- ifelse(is.numeric(x), nlevels(y), nlevels(x))
+  } else if (plot_type %in% c(
+    "gg_mosaic",
+    "gg_lollipop2",
+    "gg_stackedbar", 
+    "gg_stackedcolumn", 
+    "gg_column", 
+    "gg_bar", 
+    "gg_pie", 
+    "gg_donut", 
+    "gg_freqpolygon",
+    "gg_heatmap",
+    "gg_spine",
+    "gg_gridplot",
+    "gg_divergingstackedbar",
+    "bar"
+  )) {
+    return_list <- list(
+      bar = "barplot", 
+      gg_column = "column/row bar",
+      gg_stackedcolumn = "stacked column/row",
+      gg_lollipop2 = "lollipop"
+    )
+    
+    if (is.null(y)) {
+      return_list <- append(return_list, list(gg_pie = "pie", gg_donut = "donut", gg_gridplot = "gridplot"))
+    } else {
+      return_list <- append(return_list, list(gg_freqpolygon = "frequency polygons", gg_heatmap = "heatmap"))
+      if (is.factor(y) && nlevels(y) == 2) {
+        return_list <- append(return_list, list(gg_spine = "spine"), length(return_list) - 1)
+      } 
+      
+      if (is.factor(x) && nlevels(x) >= 3) {
+        return_list <- append(return_list, list(gg_divergingstackedbar = "diverging stacked bar (likert)"), length(return_list) - 1)
+      }
+    }
+  }
+  
+  attr(return_list, "null.y") <- is.null(y)
+  
+  return_list
+}
+
 ###  Then on the second day, he siad let there be parameters for
 ###  iNZightPlot():
 
@@ -26,6 +114,7 @@ plot.par.stored = reactiveValues(
   )
 
 plot.par <- reactiveValues(
+  data_name = "data_name",
   x = NULL,
   y = NULL,
   varnames = list(x = NULL, y = NULL,
@@ -65,6 +154,11 @@ plot.ret.para = reactiveValues(
   default.num.bins=NULL
   )
 
+plot.type.para = reactiveValues(
+  plotTypes = NULL,
+  plotTypeValues=NULL
+)
+
 get.plottype = reactive({
   attr(plot.ret.para$parameters,"plottype")
 })
@@ -81,6 +175,21 @@ get.default.num.bins = reactive({
 
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par = reactiveValues(
+  boxplot = TRUE,
+  mean_indicator = FALSE,
+  fill_colour = "",
+  rotation = FALSE,
+  gg_size = 5,
+  gg_theme = "grey",
+  gg_width = 1,
+  gg_height = 1,
+  gg_lwd = 1,
+  adjust = 1,
+  palette = "default",
+  ordered = FALSE,
+  
+  
+  
   showsidebar = TRUE,
   alpha = 1,
   bg = "grey93", #background colour
@@ -414,9 +523,7 @@ observe({
     ## fix the axis limit bug
     plot.par$xlim = NULL
     plot.par$ylim = NULL
-#    if((is.null(input$vari1) || input$vari1 == "none") && (!is.null(input$change_var_selection) && !input$change_var_selection)) {
-#      updateSelectInput(session, "vari1", choices = colnames(vis.data()), selected = colnames(vis.data())[1])
-#    }    
+    graphical.par$plottype = "default"
   })  
 })
 
@@ -426,6 +533,7 @@ observe({
     ## fix the axis limit bug
     plot.par$xlim = NULL
     plot.par$ylim = NULL
+    graphical.par$plottype = "default"
   })  
 })
 
@@ -967,7 +1075,13 @@ output$visualize.plot = renderPlot({
                     print(e)
                   }, finally = {})
       }else{
-        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+        
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
       }
     }else{
       
@@ -980,12 +1094,22 @@ output$visualize.plot = renderPlot({
         }, error = function(e) {
           print(e)
         }, finally = {})
+        
       }else{
-        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
+
+        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, vis.par())
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
+        
       }
     }
-#     print('###########################################################################')
   }
+  
+#  print(plot.ret.para$parameters)
+#  saveRDS(vis.par(), file = "/Users/wilson/Dropbox/vis_plot.rds")
 })
 
 output$mini.plot = renderPlot({
@@ -1268,11 +1392,25 @@ observe({
       (!is.null(input$go.to.new)&&input$go.to.new > 0) ||
       (!is.null(input$go.to.old)&&input$go.to.old > 0)) {
     isolate({
+      updateCheckboxInput(session, "show_boxplot_title", value = T)
+      updateCheckboxInput(session, "show_mean_title", value = F)
+      updateSelectInput(session,"fill.color",selected = "")
+      updateCheckboxInput(session,"rotation", value = F)
+      updateSliderInput(session,"fill.transparency",value=0)
+      updateSliderInput(session,"gg.size",value = 5)
+      updateSelectInput(session,"gg.theme",selected="Default")
+      updateSliderInput(session,"bar.width",value = 1)
+      updateSliderInput(session,"bar.height",value = 1)
+      updateSliderInput(session,"line.width",value = 1)
+      updateSliderInput(session,"smooth.adjust",value = 1)
+      updateSelectInput(session,"colourpalette",selected = "default")
+      updateCheckboxInput(session,"sort.by.size", value = F)
+      
+      
 #      updateRadioButtons(session, "customize_plot", selected = 1)
       graphical.par$alpha = 1
       
-      updateSliderInput(session,"adjust.transparency",
-                        value=0)
+      updateSliderInput(session,"adjust.transparency", value=0)
       graphical.par$bg = "grey93" #background colour
       updateSelectInput(session,"select.bg1",selected="grey93")
       ##  Box
@@ -1858,7 +1996,22 @@ output$plot.appearance.panel = renderUI({
   input$vari2
   input$select.plot.type
   plot.par$design
+
   isolate({
+    if(!is.null(plot.ret.para$parameters)) {
+      ##print(plot.ret.para$parameters)
+      varnames = unlist(attr(plot.ret.para$parameters, "varnames"))
+      TYPE = attr(plot.ret.para$parameters, "plottype")
+      ##print(TYPE)
+      PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
+      plot.type.para$plotTypes = unname(do.call(c, PLOTTYPES))
+      ##print(str(plotTypes))
+      plot.type.para$plotTypeValues = names(PLOTTYPES)
+      #print(plot.type.para$plotTypeValues)
+    }
+    
+    
+    
     # barplot with one factor variable the other one not specified
     cols1 = colors()[c(354, 1,3,16,19,63,87,109,259,
                        399,419,558,600,626,647)]
@@ -1884,6 +2037,97 @@ output$plot.appearance.panel = renderUI({
                                                       choices=cols1,
                                                       selected=graphical.par$bg,
                                                       selectize = F)))
+    
+    show.boxplot.title = checkboxInput(inputId = "show_boxplot_title",
+                                     label = "Show boxplot",
+                                     value = TRUE)
+    
+    show.mean.title = checkboxInput(inputId = "show_mean_title",
+                                    label = "Show mean",
+                                    value = FALSE)
+    
+    fill.color.object = fixedRow(column(3, h5("Fill colour:")),
+                                 column(6, selectInput(inputId="fill.color",label=NULL,
+                                                       choices=c("", "darkgreen", "lightgreen", "darkblue",
+                                                                 "lightblue", "red", "pink", 
+                                                                 "lightpink", "grey", "darkgrey"),
+                                                       selected=graphical.par$fill_colour,
+                                                       selectize = F))) 
+    
+    rotation.object = fixedRow(column(3, h5("Rotation:")),
+                               column(6, checkboxInput(inputId = "rotation",
+                                                       label = NULL,
+                                                       value = FALSE)))
+    
+    sortbysize.object = fixedRow(column(3, h5("Sort by size:")),
+                                 column(6, checkboxInput(inputId = "sort.by.size",
+                                                       label = NULL,
+                                                       value = FALSE)))
+    ggsize.object = fixedRow(column(3, h5("Point size:")),
+                             column(6, sliderInput("gg.size", 
+                                                   label = NULL, 
+                                                   min = 1, 
+                                                   max = 10, 
+                                                   value=graphical.par$gg_size,
+                                                   step=1, 
+                                                   ticks = FALSE)))
+    
+    ggtheme.object = fixedRow(column(3, h5("Theme:")),
+                              column(6, selectInput(inputId="gg.theme",label=NULL,
+                                                    choices=c("Default", 
+                                                              "Black & White", 
+                                                              "Light", 
+                                                              "Dark", 
+                                                              "Minimal", 
+                                                              "Classic", 
+                                                              "Void"),
+                                                    selected=input$gg.theme,
+                                                    selectize = F))) 
+    
+    barwidth.object = fixedRow(column(3, h5("Bar width:")),
+                               column(6, sliderInput("bar.width", 
+                                                     label = NULL, 
+                                                     min = 1, 
+                                                     max = 5, 
+                                                     value = graphical.par$gg_width,
+                                                     step=1, 
+                                                     ticks = FALSE)))
+    
+    barheight.object = fixedRow(column(3, h5("Bar height:")),
+                                column(6, sliderInput("bar.height", 
+                                                      label = NULL, 
+                                                      min = 0.1, 
+                                                      max = 1, 
+                                                      value = graphical.par$gg_height,
+                                                      step = 0.1, 
+                                                      ticks = FALSE)))
+    
+    line.width.object = fixedRow(column(3, h5("Line width:")),
+                                 column(6, sliderInput("line.width", 
+                                                       label = NULL, 
+                                                       min = 1, 
+                                                      max = 5, 
+                                                      value = graphical.par$gg_lwd,
+                                                      step = 1, 
+                                                      ticks = FALSE)))
+    
+    smooth.adjust.object = fixedRow(column(3, h5("Smoothing:")),
+                                    column(6, sliderInput("smooth.adjust", 
+                                                          label = NULL, 
+                                                          min = 0.25, 
+                                                          max = 4, 
+                                                          value = graphical.par$adjust,
+                                                          step = 0.25, 
+                                                          ticks = FALSE)))
+    
+    colourpalette.object = fixedRow(column(3, h5("Colour palette:")),
+                                    column(6, selectInput(inputId="colourpalette",label=NULL,
+                                                          choices=c("default", "greyscale", "viridis", "magma", "plasma", "inferno", "BrBG", "PiYG", "PRGn",
+                                                                    "Accent", "Dark2", "Paired", "Pastel1", "Set1",
+                                                                    "Blues", "BuGn", "BuPu", "GnBu"),
+                                                          selected=graphical.par$palette,
+                                                          selectize = F))) 
+  
     
     select.plot.type.object = NULL
     
@@ -2002,6 +2246,13 @@ output$plot.appearance.panel = renderUI({
                                                                                  max = 100, 
                                                                                  value=convert.to.percent(graphical.par$alpha),
                                                                                  step=1, ticks = FALSE))))
+    
+    fillin.transparency.object = fixedRow(column(3, h5("Transparency:")),
+                                          column(6, sliderInput("fill.transparency", 
+                                                                label = NULL, min = 0, 
+                                                                max = 100, 
+                                                                value=convert.to.percent(graphical.par$alpha),
+                                                                step=1, ticks = FALSE)))
 #    adjust.transparency.object = fixedRow(column(3, h5("Transparency:")),
 #                                          column(6, sliderInput("adjust.transparency", 
 #                                                                label = NULL, min = 0, 
@@ -2048,12 +2299,68 @@ output$plot.appearance.panel = renderUI({
       if(input$vari2%in%"none"&&
            (class(get.data.set()[,input$vari1])%in%"factor"|
               class(get.data.set()[,input$vari1])%in%"character")){
+        select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
+                                           column(6, selectInput(inputId = "select.plot.type",
+                                                                 label = NULL,
+                                                                 choices=plot.type.para$plotTypes,
+                                                                 selected=input$select.plot.type,
+                                                                 selectize = F)))
         ret = list(general.appearance.title,
+                   select.plot.type.object,
                    select.bg.object,
                    adjust.size.scale.object,
                    bar.colour.title,
-                   select.barcolor.object
-        )
+                   select.barcolor.object)
+        
+        if(!is.null(input$select.plot.type) && input$select.plot.type == "column/row bar") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     sortbysize.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "stacked column/row") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "lollipop") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     fill.color.object,
+                     rotation.object,
+                     ggsize.object,
+                     line.width.object,
+                     sortbysize.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("pie", "donut")) {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     sortbysize.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "gridplot") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     rotation.object,
+                     ggtheme.object)
+          
+        }
       # bar plot with two factor variables
       # vari1 = factor , vari2 = factor
       }else if(!input$vari2%in%"none"&&
@@ -2066,10 +2373,88 @@ output$plot.appearance.panel = renderUI({
                                                           choices=cols1,
                                                           selected=graphical.par$bg,
                                                           selectize = F)))
+        select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
+                                           column(6, selectInput(inputId = "select.plot.type",
+                                                                 label = NULL,
+                                                                 choices=plot.type.para$plotTypes,
+                                                                 selected=input$select.plot.type,
+                                                                 selectize = F)))
         ret = list(general.appearance.title,
+                   select.plot.type.object,
                    select.bg.object,
                    adjust.size.scale.object,
                    bar.colour.title)
+        
+        if(!is.null(input$select.plot.type) && input$select.plot.type == "column/row bar") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     sortbysize.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "stacked column/row") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "lollipop") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     ggsize.object,
+                     line.width.object,
+                     sortbysize.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "frequency polygons") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     ggsize.object,
+                     line.width.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "heatmap") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "spine") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "diverging stacked bar (likert)") {
+          ret = list(general.appearance.title,
+                     select.plot.type.object,
+                     select.bg.object,
+                     adjust.size.scale.object,
+                     colourpalette.object,
+                     rotation.object,
+                     ggtheme.object)
+          
+        } 
       # dotplot or histogram for numeric varible in x or 
       # dotplot or histogram for one numeric one factor variable
       # vari1 = numeric , vari2 = none
@@ -2091,15 +2476,15 @@ output$plot.appearance.panel = renderUI({
         select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
                                            column(6, selectInput(inputId = "select.plot.type",
                                                                  label = NULL,
-                                                                 choices=c("default",
-                                                                           "dot plot",
-                                                                           "histogram"),
+                                                                 choices=plot.type.para$plotTypes,
                                                                  selected=input$select.plot.type,
                                                                  selectize = F)))
         ret = list(general.appearance.title,
                    select.plot.type.object,
                    select.bg.object,
                    adjust.size.scale.object,
+                   show.boxplot.title,
+                   show.mean.title,
                    point.size.title,
                    adjust.size.points.dot.object,
                    point.colour.title,
@@ -2147,7 +2532,9 @@ output$plot.appearance.panel = renderUI({
                      bar.colour.title,
                      select.barcolor.object,
                      adjust.num.bins.title,
-                     adjust.num.bins.object)
+                     adjust.num.bins.object,
+                     show.boxplot.title,
+                     show.mean.title)
           }else{
             ret=list(general.appearance.title,
                      select.bg.object,
@@ -2155,9 +2542,174 @@ output$plot.appearance.panel = renderUI({
                      bar.colour.title,
                      select.barcolor.object,
                      adjust.num.bins.title,
-                     adjust.num.bins.object)
+                     adjust.num.bins.object,
+                     show.boxplot.title,
+                     show.mean.title)
           }
-        }
+        } else {
+          
+          if(input$vari2%in%"none"&&
+             (class(get.data.set()[,input$vari1])%in%"numeric"|
+              class(get.data.set()[,input$vari1])%in%"integer")) {
+            
+            if(!is.null(input$select.plot.type) &&
+               (input$select.plot.type == "dot strip")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       rotation.object,
+                       fillin.transparency.object,
+                       ggsize.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "barcode")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       rotation.object,
+                       fillin.transparency.object,
+                       barwidth.object,
+                       barheight.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "boxplot")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       rotation.object,
+                       line.width.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "violin")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       rotation.object,
+                       smooth.adjust.object,
+                       fillin.transparency.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "density")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       rotation.object,
+                       smooth.adjust.object,
+                       fillin.transparency.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "column/row bar")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       rotation.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "lollipop")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       rotation.object,
+                       ggsize.object,
+                       line.width.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "cumulative curve")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       line.width.object,
+                       ggtheme.object)
+            }
+            
+            
+          } else {
+            
+            if(!is.null(input$select.plot.type) &&
+               (input$select.plot.type == "dot strip")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       rotation.object,
+                       fillin.transparency.object,
+                       ggsize.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "barcode")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       rotation.object,
+                       fillin.transparency.object,
+                       barwidth.object,
+                       barheight.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "boxplot")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       colourpalette.object,
+                       rotation.object,
+                       line.width.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "violin")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       colourpalette.object,
+                       rotation.object,
+                       smooth.adjust.object,
+                       fillin.transparency.object,
+                       ggtheme.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "density")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       colourpalette.object,
+                       rotation.object,
+                       smooth.adjust.object,
+                       fillin.transparency.object,
+                       ggtheme.object)
+            }  else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "cumulative curve")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       colourpalette.object,
+                       line.width.object,
+                       ggtheme.object)
+            }
+          }
+          
+          
+        } 
+          
+          
       # scatter plot
       # vari1 = numeric , vari2 = numeric
       }else if(!input$vari2%in%"none"&&
@@ -2168,11 +2720,7 @@ output$plot.appearance.panel = renderUI({
         select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
                                            column(6, selectInput(inputId = "select.plot.type",
                                                                  label = NULL,
-                                                                 choices=c("default",
-                                                                           "scatter plot",
-                                                                           "hexbin plot-size",
-                                                                           "hexbin plot-alpha",
-                                                                           "grid-density plot"),
+                                                                 choices=plot.type.para$plotTypes,
                                                                  selected=input$select.plot.type,
                                                                  selectize = F)))
         resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
@@ -2360,6 +2908,138 @@ observe({
 })
 
 
+output$plotly_inter = renderPlotly({
+  vis.par()
+  isolate({
+    do.call(iNZightPlots:::iNZightPlot, vis.par())
+    print(plotly::ggplotly())
+  })
+
+})
+
+# observe({
+#   input$interactiveplotly 
+#   isolate({
+#     output$plotly_inter = renderPlotly({
+#       print(plotly::ggplotly())
+#     })
+#   })
+# })
+
+observe({
+  input$vari1
+  input$select.plot.type
+  isolate({
+    if(!is.null(input$select.plot.type) && 
+       input$select.plot.type %in% c("dot strip", "boxplot",
+                                     "violin", "density",
+                                     "column/row bar", "lollipop",
+                                     "cumulative curve", "stacked column/row",
+                                     "")) {
+      hideTab(inputId = "plot_selector", target = "1")
+      showTab(inputId = "plot_selector", target = "2")
+    } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("pie", "donut", "gridplot",
+                                                                                 "barcode")) {
+    hideTab(inputId = "plot_selector", target = "1")
+    hideTab(inputId = "plot_selector", target = "2")
+    } else {
+      hideTab(inputId = "plot_selector", target = "2")
+      showTab(inputId = "plot_selector", target = "1")
+    }
+  })
+})
+    
+
+
+
+observe({
+  input$fill.color
+  isolate({
+    if(!is.null(input$fill.color))
+      graphical.par$fill_colour = input$fill.color
+  })
+})
+
+observe({
+  input$rotation
+  isolate({
+    if(!is.null(input$rotation))
+      graphical.par$rotation = input$rotation
+  })
+})
+
+observe({
+  input$gg.size
+  isolate({
+    if(!is.null(input$gg.size))
+      graphical.par$gg_size = input$gg.size
+  })
+})
+
+observe({
+  input$bar.width
+  isolate({
+    if(!is.null(input$bar.width))
+      graphical.par$gg_width = input$bar.width
+  })
+})
+
+observe({
+  input$sort.by.size
+  isolate({
+    if(!is.null(input$sort.by.size))
+      graphical.par$ordered = input$sort.by.size
+  })
+})
+
+observe({
+  input$line.width
+  isolate({
+    if(!is.null(input$line.width))
+      graphical.par$gg_lwd = input$line.width
+  })
+})
+
+observe({
+  input$smooth.adjust
+  isolate({
+    if(!is.null(input$smooth.adjust))
+      graphical.par$adjust = input$smooth.adjust
+  })
+})
+
+observe({
+  input$colourpalette
+  isolate({
+    if(!is.null(input$colourpalette))
+      graphical.par$palette = input$colourpalette
+  })
+})
+
+observe({
+  input$bar.height
+  isolate({
+    if(!is.null(input$bar.height))
+      graphical.par$gg_height = input$bar.height
+  })
+})
+
+observe({
+  input$gg.theme
+  isolate({
+    if(!is.null(input$gg.theme)) {
+      graphical.par$gg_theme = switch(input$gg.theme, 
+                                      "Default" = "grey", 
+                                      "Black & White" = "bw", 
+                                      "Light" = "light", 
+                                      "Dark" = "dark", 
+                                      "Minimal" = "minimal", 
+                                      "Classic" = "classic", 
+                                      "Void" = "void")
+    }
+  })
+})
+
 # select the point size
 
 observe({
@@ -2438,22 +3118,31 @@ observe({
 observe({
   input$select.plot.type
   isolate({
-    if(!is.null(input$select.plot.type))
-      if(input$select.plot.type%in%"dot plot"){
-        graphical.par$plottype = "dot"
-      }else if(input$select.plot.type%in%"histogram"){
-        graphical.par$plottype = "hist"
-      }else if(input$select.plot.type%in%"scatter plot"){
-        graphical.par$plottype = "scatter"
-      }else if(input$select.plot.type%in%"grid-density plot"){
-        graphical.par$plottype = "grid"
-      }else if(input$select.plot.type%in%"hexbin plot-size" || input$select.plot.type%in%"hexbin plot-alpha"){
-        graphical.par$plottype = "hex"
-      }else{
-        graphical.par$plottype = "default"
-      }
+    if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
+      graphical.par$plottype = plot.type.para$plotTypeValues[[which(plot.type.para$plotTypes == input$select.plot.type)]]
+    }
+
   })
 })
+
+
+observe({
+  input$show_boxplot_title
+  isolate({
+    if(!is.null(input$show_boxplot_title) && length(input$show_boxplot_title) > 0)
+      graphical.par$boxplot = input$show_boxplot_title
+  })
+})
+
+observe({
+  input$show_mean_title
+  isolate({
+    if(!is.null(input$show_mean_title) && length(input$show_mean_title) > 0)
+      graphical.par$mean_indicator = input$show_mean_title
+  })
+})
+
+
 
 # change whether the points interior is drawn.
 observe({
@@ -2527,6 +3216,20 @@ observe({
 #      }
 #    }
     graphical.par$alpha = convert.to.percent(input$adjust.transparency,T)
+  })
+})
+
+observe({
+  input$fill.transparency
+  isolate({
+    #    if(!is.null(input$adjust.transparency)){
+    #      if(input$adjust.transparency==0){
+    #        graphical.par$pch=1
+    #      }else{
+    #        graphical.par$pch=19
+    #      }
+    #    }
+    graphical.par$alpha = convert.to.percent(input$fill.transparency, T)
   })
 })
 
@@ -2674,9 +3377,14 @@ output$code.variables.panel = renderUI({
                                                column(6, checkboxInput(inputId = "colour.palette.reverse", label = "Reverse palette",
                                                                        value = FALSE)))
       
-      ret = list(
-                 select.colour.palette.object,
+      ret = list(select.colour.palette.object,
                  colour.palette.reverse.object)
+      
+      if(length(input$select.plot.type) != 0 && 
+         (input$select.plot.type %in% c("column/row bar", "stacked column/row", "lollipop", "frequency polygons", 
+                                        "heatmap", "diverging stacked bar (likert)", "spine"))) {
+        ret = NULL
+      }
     }
       
     else {
@@ -2814,10 +3522,15 @@ output$code.variables.panel = renderUI({
            input$select.plot.type %in% "hexbin plot-size" ||
            input$select.plot.type %in% "hexbin plot-alpha"))
           ret = list(color.by.object)
-        else
+        else if (length(input$select.plot.type) != 0 && 
+                 (input$select.plot.type %in% c("dot strip", "barcode", "boxplot", "violin", 
+                                                "density", "column/row bar", "lollipop", "cumulative curve",
+                                                "stacked column/row", "pie", "donut", "gridplot"))) {
+          ret = NULL
+          
+        } else
           ret = list(color.by.object,
                      color.use.ranks.object,
-                     #                   resize.by.object,
                      point.symbol.title,
                      symbol.object,
                      symbol.by.object,
