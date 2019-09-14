@@ -378,7 +378,7 @@ vis.mainPanel = function() {
         helpText("Statistical Inference for the data."),
         verbatimTextOutput("visualize.inference")
         ),
-      tabPanel(
+      tabPanel(value = 1,
         title = "Interactive Plot",
         
         fixedRow(column(2, conditionalPanel(condition = "output.showsidebar == 0",
@@ -402,14 +402,16 @@ vis.mainPanel = function() {
 #        actionButton("popup_html",
 #                     "POP UP",
 #                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
-        )
-      #tabPanel(
-      #  title = "Interactive Plot (Beta 2)",
-      #  br(),
-      #  uiOutput("interactive.plot.select.beta2"),
-      #  br(),
-      #  htmlOutput("interactive.plot.beta2")
-      #)
+        ),
+      tabPanel(value = 2,
+        title = "Interactive Plot (via plotly)",
+        
+        # actionButton("interactiveplotly",
+        #              "Refresh",
+        #              style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+
+        plotlyOutput("plotly_inter")
+      )
       )
     )
   panel

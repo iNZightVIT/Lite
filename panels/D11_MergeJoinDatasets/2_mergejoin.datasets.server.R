@@ -23,6 +23,8 @@ output$join_data_panel = renderUI({
                
                uiOutput("match_columns_panel"),
                
+               verbatimTextOutput("join_true_false"),
+               
                fixedRow(column(3, actionButton("preview_join_button", "Preview",
                                                style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
                         column(3, actionButton("join_data_button", "Join",
@@ -74,55 +76,135 @@ observeEvent(input$import_to_join, {
 })
 
 
-##observe({
-##  input$preview_join_button
-##  isolate({
-##    join_method = "left_join"; left_col = ""; right_col = ""; left_name = "Orig"; right_name = "New"
-##    d1 = tryCatch(
-##      joinData(),
-##      error = function(e) {
-##        if (e$message == "`by` required, because the data sources have no common variables") {
-##          a = tibble::tibble()
-##          attr(a, "join_cols") = ""
-##        }
-##      }
-##    )
-##    attr = attr(d1, "join_cols")
-##    left_col = as.character(attr)
-##    right_col = left_col
-##    print(left_col)
-##    if(!is.null(mergejoin$data.to.join)) {
-##      if(!is.null(input$select_join_methods) && length(input$select_join_methods) > 0) {
-##        join_method = switch(input$select_join_methods, 
-##                             "Inner Join" = "inner_join", 
-##                             "Left Join" = "left_join", 
-##                             "Full Join" = "full_join", 
-##                             "Semi Join" = "semi_join", 
-##                             "Anti Join" = "anti_join")
-##      }
-##      if(!is.null(input$dup_original) && length(input$dup_original) > 0) {
-##        left_name = input$dup_original
-##      }
-##      if(!is.null(input$dup_new) && length(input$dup_new) > 0) {
-##        right_name = input$dup_new
-##      }
-##      if(!is.null(input$select_matchcolumn1) && input$select_matchcolumn1 != "") {
-##        left_col = input$select_matchcolumn1
-##      }
-##      if(!is.null(input$select_matchcolumn2) && input$select_matchcolumn2 != "") {
-##        right_col = input$select_matchcolumn2
-##      }
-##      data = get.data.set()
-##      newdata = mergejoin$data.to.join
-##      
-##      
-##      temp.join = iNZightTools::joindata(data, newdata, left_col, right_col, join_method, left_name, right_name)
-##      output$previewjoin.table = renderDataTable({
-##        temp.join
-##      },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
-##    }
-##  })
-##})
+observe({
+  input$preview_join_button
+  isolate({
+    join_method = "left_join"; left_col = ""; right_col = ""; left_name = "Orig"; right_name = "New"
+    d1 = tryCatch(
+      joinData(),
+      error = function(e) {
+        if (e$message == "`by` required, because the data sources have no common variables") {
+          a = tibble::tibble()
+          attr(a, "join_cols") = ""
+        }
+      }
+    )
+    attr = attr(d1, "join_cols")
+    left_col = as.character(attr)
+    right_col = left_col
+    if(!is.null(mergejoin$data.to.join)) {
+      if(!is.null(input$select_join_methods) && length(input$select_join_methods) > 0) {
+        join_method = switch(input$select_join_methods, 
+                             "Inner Join" = "inner_join", 
+                             "Left Join" = "left_join", 
+                             "Full Join" = "full_join", 
+                             "Semi Join" = "semi_join", 
+                             "Anti Join" = "anti_join")
+      }
+      if(!is.null(input$dup_original) && length(input$dup_original) > 0) {
+        left_name = input$dup_original
+      }
+      if(!is.null(input$dup_new) && length(input$dup_new) > 0) {
+        right_name = input$dup_new
+      }
+      if(!is.null(input$select_matchcolumn1) && input$select_matchcolumn1 != "") {
+        left_col = input$select_matchcolumn1
+      }
+      if(!is.null(input$select_matchcolumn2) && input$select_matchcolumn2 != "") {
+        right_col = input$select_matchcolumn2
+      }
+      data = get.data.set()
+      newdata = mergejoin$data.to.join
+      
+      orig_type = class(data[[left_col]])
+      new_type = class(newdata[[right_col]])
+      
+      if(orig_type == new_type|orig_type == "character" & new_type == "factor"|orig_type == "factor" & new_type == "character") {
+        temp.join = iNZightTools::joindata(data, newdata, left_col, right_col, join_method, left_name, right_name)
+        output$previewjoin.table = renderDataTable({
+          temp.join
+        },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
+        output$join_true_false = renderPrint({
+        })
+      }
+      else {
+        output$join_true_false = renderPrint({
+          cat("Selected columns are of different types")
+        })
+      }
+    }
+  })
+})
+
+
+
+observe({
+  input$join_data_button
+  isolate({
+    join_method = "left_join"; left_col = ""; right_col = ""; left_name = "Orig"; right_name = "New"
+    d1 = tryCatch(
+      joinData(),
+      error = function(e) {
+        if (e$message == "`by` required, because the data sources have no common variables") {
+          a = tibble::tibble()
+          attr(a, "join_cols") = ""
+        }
+      }
+    )
+    attr = attr(d1, "join_cols")
+    left_col = as.character(attr)
+    right_col = left_col
+    if(!is.null(mergejoin$data.to.join)) {
+      if(!is.null(input$select_join_methods) && length(input$select_join_methods) > 0) {
+        join_method = switch(input$select_join_methods, 
+                             "Inner Join" = "inner_join", 
+                             "Left Join" = "left_join", 
+                             "Full Join" = "full_join", 
+                             "Semi Join" = "semi_join", 
+                             "Anti Join" = "anti_join")
+      }
+      if(!is.null(input$dup_original) && length(input$dup_original) > 0) {
+        left_name = input$dup_original
+      }
+      if(!is.null(input$dup_new) && length(input$dup_new) > 0) {
+        right_name = input$dup_new
+      }
+      if(!is.null(input$select_matchcolumn1) && input$select_matchcolumn1 != "") {
+        left_col = input$select_matchcolumn1
+      }
+      if(!is.null(input$select_matchcolumn2) && input$select_matchcolumn2 != "") {
+        right_col = input$select_matchcolumn2
+      }
+      data = get.data.set()
+      newdata = mergejoin$data.to.join
+      
+      orig_type = class(data[[left_col]])
+      new_type = class(newdata[[right_col]])
+      
+      if(orig_type == new_type|orig_type == "character" & new_type == "factor"|orig_type == "factor" & new_type == "character") {
+        temp.join = iNZightTools::joindata(data, newdata, left_col, right_col, join_method, left_name, right_name)
+        output$previewimport.table = renderDataTable({
+          NULL
+        },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
+        mergejoin$data.to.join = NULL
+        output$previewjoin.table = renderDataTable({
+          NULL
+        },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
+        updatePanel$datachanged = updatePanel$datachanged+1
+        values$data.set = temp.join
+        output$join_true_false = renderPrint({
+        })
+      }
+      else {
+        output$join_true_false = renderPrint({
+          cat("Selected columns are of different types")
+        })
+      }
+    }
+  })
+})
+
+
 
 
 
@@ -216,6 +298,7 @@ observe({
         }
       }
       temp.append = iNZightTools::appendrows(data, newdata, date)
+      mergejoin$data.to.append = NULL
       output$previewappend.table = renderDataTable({
         NULL
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))

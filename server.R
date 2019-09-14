@@ -28,6 +28,7 @@ library(foreign)
 library(shinyjs)
 #library(iNZightTools)
 library(dplyr)
+library(plotly)
 
 
 # read in possible command line arguments such as 'vars.path'
