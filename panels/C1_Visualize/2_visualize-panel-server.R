@@ -1999,15 +1999,13 @@ output$plot.appearance.panel = renderUI({
 
   isolate({
     if(!is.null(plot.ret.para$parameters)) {
-      ##print(plot.ret.para$parameters)
       varnames = unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE = attr(plot.ret.para$parameters, "plottype")
-      ##print(TYPE)
       PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
       plot.type.para$plotTypes = unname(do.call(c, PLOTTYPES))
-      ##print(str(plotTypes))
+      ## print(str(plotTypes))
       plot.type.para$plotTypeValues = names(PLOTTYPES)
-      #print(plot.type.para$plotTypeValues)
+      ## print(plot.type.para$plotTypeValues)
     }
     
     
@@ -2507,9 +2505,12 @@ output$plot.appearance.panel = renderUI({
           }else{
             nbins = get.nbins()
           }
-          if(is.null(nbins)|is.na(nbins)){
+          if(is.null(nbins)||is.na(nbins)){
             nbins=50
           }
+          
+          ## print(length(nbins))
+          
           m = length(unique(get.data.set()[,input$vari1]))
           if(!is.null(input$vari2)&&
                !input$vari2%in%"none"&&
@@ -2910,9 +2911,26 @@ observe({
 
 output$plotly_inter = renderPlotly({
   vis.par()
+  input$vari1
+  input$vari2
+  input$subs1
+  input$subs2
+  
   isolate({
-    do.call(iNZightPlots:::iNZightPlot, vis.par())
-    print(plotly::ggplotly())
+    temp = vis.par()
+    #temp.x = temp$x
+    #temp$x=temp$y
+    #temp$y=temp.x
+    #temp.varnames.x = temp$varnames$x
+    #temp$varnames$x = temp$varnames$y
+    #temp$varnames$y = temp.varnames.x
+    if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
+      temp$plottype = plot.type.para$plotTypeValues[[which(plot.type.para$plotTypes == input$select.plot.type)]]
+      print(temp$plottype)
+      do.call(iNZightPlots:::iNZightPlot, temp)
+      print(plotly::ggplotly())
+    }
+    
   })
 
 })
