@@ -2928,6 +2928,7 @@ output$plotly_inter = renderPlotly({
       temp$plottype = plot.type.para$plotTypeValues[[which(plot.type.para$plotTypes == input$select.plot.type)]]
       print(temp$plottype)
       do.call(iNZightPlots:::iNZightPlot, temp)
+      dev.off()
       pdf(NULL)
       print(plotly::ggplotly())
     }
