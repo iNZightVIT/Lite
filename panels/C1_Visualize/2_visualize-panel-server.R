@@ -2926,11 +2926,10 @@ output$plotly_inter = renderPlotly({
     #temp$varnames$y = temp.varnames.x
     if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
       temp$plottype = plot.type.para$plotTypeValues[[which(plot.type.para$plotTypes == input$select.plot.type)]]
-      print(temp$plottype)
-      do.call(iNZightPlots:::iNZightPlot, temp)
-      dev.off()
+      #print(temp$plottype)
       pdf(NULL)
-      print(plotly::ggplotly())
+      do.call(iNZightPlots:::iNZightPlot, temp)
+      plotly::ggplotly()
     }
     
   })
