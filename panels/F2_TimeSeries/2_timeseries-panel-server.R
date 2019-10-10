@@ -137,7 +137,8 @@ output$timeseries_plot = renderPlot({
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = input$choose_season,
-            t = 100*input$slidersmoothing
+            t = 100*input$slidersmoothing,
+            smoother = input$timeseries_smoother
           )
         }, 
 #        warning = function(w) {

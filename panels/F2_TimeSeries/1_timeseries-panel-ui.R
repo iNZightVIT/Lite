@@ -179,6 +179,9 @@ ts.mainPanel = function() {
                         "for",
                         strong("single"),
                         "series."),
+                    
+                    checkboxInput("timeseries_smoother", label = "Add smoother"),
+                    
                     plotOutput("timeseries_plot"),
                     
                     br(),
