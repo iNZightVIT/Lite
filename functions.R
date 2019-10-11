@@ -1681,7 +1681,6 @@ get.transformation.string = function(transform_select,
   }
   transformation.string
 }
-
 #' Searches a list recursivly for a name and
 #' returns the value associated with the name
 #' 
