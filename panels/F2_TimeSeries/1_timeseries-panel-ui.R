@@ -82,6 +82,14 @@ ts.sidebarPanel = function(data.set) {
                        label = "Provide time information")
       ),
       hr(),
+      checkboxInput("timeseries_smoother", label = "Add smoother"),
+      ##  A slider bar for smoothing parameter.
+      sliderInput(inputId = "slidersmoothing", 
+                  label = "Smoothness:", 
+                  min = 0, 
+                  max = 1, 
+                  value = 0.1, 
+                  step = 0.01),
       ##  Section 2: Seasonal Pattern
       ##
       ##  Next, we ask the user to specify a seasonal pattern.
@@ -92,13 +100,7 @@ ts.sidebarPanel = function(data.set) {
                        c("Additive" = FALSE,
                          "Multiplicative" = TRUE)
                    ),
-      ##  A slider bar for smoothing parameter.
-      sliderInput(inputId = "slidersmoothing", 
-                  label = "Smoothness:", 
-                  min = 0, 
-                  max = 1, 
-                  value = 0.1, 
-                  step = 0.01),
+      hr(),
       ##  Section 3: Select Variables
       ##
       ##  We then ask the user to select the variables to plot in the
@@ -179,8 +181,6 @@ ts.mainPanel = function() {
                         "for",
                         strong("single"),
                         "series."),
-                    
-                    checkboxInput("timeseries_smoother", label = "Add smoother"),
                     
                     plotOutput("timeseries_plot"),
                     
