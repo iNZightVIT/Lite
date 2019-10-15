@@ -732,9 +732,15 @@ observe({
   input$subs1
   g1_level = input$sub1_level
   isolate({
+    #if (is.null(g1_level) || g1_level == 0) {
+    #  g1_level = NULL
+    #}
     if ((is.null(g1_level) || g1_level == 0) && !is.null(input$subs1) && input$subs1 != "none") {
-      g1_level = "_MULTI"
+        g1_level = "_MULTI"
     } 
+    if ((is.null(g1_level) || g1_level == 0)){
+      g1_level = NULL
+    }
     plot.par$g1.level = g1_level
     if(is.null(g1_level)){
       g1_level = 0
