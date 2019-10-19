@@ -29,7 +29,7 @@ library(shinyjs)
 #library(iNZightTools)
 library(dplyr)
 library(plotly)
-
+library(shinyWidgets)
 
 # read in possible command line arguments such as 'vars.path'
 
