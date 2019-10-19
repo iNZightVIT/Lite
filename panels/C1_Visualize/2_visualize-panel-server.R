@@ -622,17 +622,19 @@ observe({
       varnames.g1 = NULL
     }
     plot.par$varnames$g1 = varnames.g1
-    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    #choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    choices1 = c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
     if(is.null(choices1)){
       choices1 = 1
     }
     if(!is.null(input$subs1)&&
          !input$subs1%in%""&&
          !input$subs1%in%"none"){
-      updateSliderInput(session,"sub1_level",
-                        label = paste0("Subset '", input$subs1, "':"),
-                        min = 0, max = choices1, value = 0,step=1)
+      updateSliderTextInput(session,"sub1_level",
+                            label = paste0("Subset '", input$subs1, "':"),
+                            choices = choices1, selected = choices1[1])
     }
+   # print(input$sub1_level)
   })
 })
 
@@ -665,7 +667,8 @@ output$subs1_conditional = renderUI({
   get.data.set()
   input$speed1
   isolate({
-    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    #choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+    choices1 = c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
     if (is.null(choices1)){
       choices1 = 1
     }
@@ -673,15 +676,14 @@ output$subs1_conditional = renderUI({
     if(!is.null(input$sub1_level_mini)){
       v = input$sub1_level_mini
     }
-    sliderInput(inputId = "sub1_level",
-                label = paste0("Subset '", input$subs1, "':"),
-                min = 0, max = choices1, value = v, step = 1,
+    sliderTextInput(inputId = "sub1_level",
+                    label = paste0("Subset '", input$subs1, "':"),
+                    choices = choices1, selected = choices1[1],
                 #animate = TRUE,
-                animate = animationOptions(interval = ifelse(length(input$speed1) == 0, 600, 1000*input$speed1),
-                                           playButton = icon('play', "fa-2x"),
-                                           pauseButton = icon('pause', "fa-2x")),
-                ticks=F)
-  })
+                    animate = animationOptions(interval = ifelse(length(input$speed1) == 0, 600, 1000*input$speed1),
+                                               playButton = icon('play', "fa-2x"),
+                                               pauseButton = icon('pause', "fa-2x")))
+  }) 
 })
 
 
@@ -738,8 +740,8 @@ observe({
     if ((is.null(g1_level) || g1_level == 0) && !is.null(input$subs1) && input$subs1 != "none") {
         g1_level = "_MULTI"
     } 
-    if ((is.null(g1_level) || g1_level == 0)){
-      g1_level = NULL
+    if ((is.null(g1_level) || g1_level == 0 || input$subs1 == "none")){
+        g1_level = NULL
     }
     plot.par$g1.level = g1_level
     if(is.null(g1_level)){
