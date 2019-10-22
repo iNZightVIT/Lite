@@ -164,7 +164,6 @@ get.plottype = reactive({
 })
 
 get.nbins = reactive({
-#   print(attr(plot.ret.para$parameters,"nbins"))
   attr(plot.ret.para$parameters,"nbins")
 })
 
@@ -634,7 +633,6 @@ observe({
                             label = paste0("Subset '", input$subs1, "':"),
                             choices = choices1, selected = choices1[1])
     }
-   # print(input$sub1_level)
   })
 })
 
@@ -654,8 +652,6 @@ observe({
     if(is.null(choices1)){
       choices1 = 1
     }
-#     print(choices1)
-#     print("--mini--")
     updateSliderInput(session,"sub1_level_mini",
                       label = paste0("Subset '", input$subs1, "':"),
                       min = 0, max = choices1, value = 0,step=1)
@@ -887,6 +883,7 @@ output$subs2_panel = renderUI({
 })
 
 
+
 ##  Update plot.par$g2.
 observe({
   subs2.par = handle.input(input$subs2, subs = TRUE)$input.out
@@ -927,19 +924,18 @@ observe({
 
 output$subs2_conditional = renderUI({
   get.data.set()
-  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
+  choices2 = levels(handle.input(input$subs2, subs = TRUE)$input.out)
   if (is.null(choices2))
     choices2 = 2
   else
-    choices2 = choices2 + 1
-  sliderInput(inputId = "sub2_level",
-              label = paste0("Subset '", input$subs2, "':"),
-              min = 0, max = choices2, value = 0, step = 1,
-              #animate = TRUE,
-              animate = animationOptions(interval = ifelse(length(input$speed2) == 0, 600, 1000*input$speed2),
-                                         playButton = icon('play', "fa-2x"),
-                                         pauseButton = icon('pause', "fa-2x")),
-              ticks=F)
+    choices2 = c("_ALL", choices2, "_MULTI")
+  sliderTextInput(inputId = "sub2_level",
+                  label = paste0("Subset '", input$subs2, "':"),
+                  choices = choices2,
+                  #animate = TRUE,
+                  animate = animationOptions(interval = ifelse(length(input$speed2) == 0, 600, 1000*input$speed2),
+                                             playButton = icon('play', "fa-2x"),
+                                             pauseButton = icon('pause', "fa-2x")))
 })
 
 
@@ -977,8 +973,12 @@ output$subs2_conditional_mini = renderUI({
 observe({
     g2_level = input$sub2_level
     g2 = handle.input(input$subs2, subs = TRUE)$input.out
-
-    if (is.null(g2_level) || g2_level == 0) {
+    
+    if ((is.null(g2_level) || g2_level == 0) && !is.null(input$subs2) && input$subs2 != "none") {
+      g2_level = "_ALL"
+    } 
+    
+    if (is.null(g2_level) || g2_level == 0 || input$subs2 == "none") {
         g2_level = NULL
         g2 = NULL
     }
@@ -992,7 +992,6 @@ observe({
     }
     plot.par$g2.level = g2_level
     plot.par$g2 = g2
-
 })
 
 
@@ -1116,8 +1115,6 @@ output$visualize.plot = renderPlot({
       }
     }
   }
-  
-#  print(plot.ret.para$parameters)
 #  saveRDS(vis.par(), file = "/Users/wilson/Dropbox/vis_plot.rds")
 })
 
@@ -1174,8 +1171,6 @@ output$mini.plot = renderPlot({
         plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
       }
     }
-#     print(plot.ret.para$parameters)
-#     print('###########################################################################')
   }
 })
 
@@ -2012,9 +2007,7 @@ output$plot.appearance.panel = renderUI({
       TYPE = attr(plot.ret.para$parameters, "plottype")
       PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
       plot.type.para$plotTypes = unname(do.call(c, PLOTTYPES))
-      ## print(str(plotTypes))
       plot.type.para$plotTypeValues = names(PLOTTYPES)
-      ## print(plot.type.para$plotTypeValues)
     }
     
     
@@ -2518,8 +2511,6 @@ output$plot.appearance.panel = renderUI({
             nbins=50
           }
           
-          ## print(length(nbins))
-          
           m = length(unique(get.data.set()[,input$vari1]))
           if(!is.null(input$vari2)&&
                !input$vari2%in%"none"&&
@@ -2935,7 +2926,6 @@ output$plotly_inter = renderPlotly({
     #temp$varnames$y = temp.varnames.x
     if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
       temp$plottype = plot.type.para$plotTypeValues[[which(plot.type.para$plotTypes == input$select.plot.type)]]
-      #print(temp$plottype)
       pdf(NULL)
       do.call(iNZightPlots:::iNZightPlot, temp)
       plotly::ggplotly()
@@ -6922,8 +6912,6 @@ observe({
               plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
             }
           }
-          #     print(plot.ret.para$parameters)
-          #     print('###########################################################################')
         }
       })
     })
