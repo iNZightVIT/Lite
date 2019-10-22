@@ -886,6 +886,10 @@ output$subs2_panel = renderUI({
   })
 })
 
+observe({
+  input$subs2
+    print(vis.par())
+  })
 
 ##  Update plot.par$g2.
 observe({
