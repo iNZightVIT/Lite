@@ -1301,6 +1301,8 @@ output$visualize.inference = renderPrint({
       }
       values.list = modifyList(reactiveValuesToList(plot.par),
                                reactiveValuesToList(graphical.par), keep.null = TRUE)
+      ## need to reset the plottype to default
+      values.list$plottype = "default"
       bs.inf= T
       if(input$type.inference.select%in%"normal"){
         bs.inf = F
@@ -1362,7 +1364,8 @@ output$visualize.inference = renderPrint({
       pdf(NULL)
       
       tryCatch({
-        cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
+        do.call(iNZightPlots:::getPlotSummary, values.list)
+        #saveRDS(values.list, file = "/Users/tongchen/Documents/work/Lite/b.rds")
       }, warning = function(w) {
         print(w)
       }, error = function(e) {
