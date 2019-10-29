@@ -2009,6 +2009,7 @@ observe({
 })
 
 
+
 # Advanced options panel -> 
 output$plot.appearance.panel = renderUI({
   get.data.set()
@@ -2942,7 +2943,7 @@ output$plotly_inter = renderPlotly({
     #temp$varnames$x = temp$varnames$y
     #temp$varnames$y = temp.varnames.x
     if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
-      temp$plottype = plot.type.para$plotTypeValues[[which(plot.type.para$plotTypes == input$select.plot.type)]]
+      temp$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
       pdf(NULL)
       do.call(iNZightPlots:::iNZightPlot, temp)
       plotly::ggplotly()
@@ -2966,10 +2967,9 @@ observe({
   input$select.plot.type
   isolate({
     if(!is.null(input$select.plot.type) && 
-       input$select.plot.type %in% c("dot strip", "boxplot",
-                                     "violin", "density",
-                                     "column/row bar", "lollipop",
-                                     "cumulative curve", "stacked column/row",
+       input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot",
+                                     "(gg) beeswarm", "(gg) violin", "(gg) density",
+                                     "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
                                      "")) {
       hideTab(inputId = "plot_selector", target = "1")
       showTab(inputId = "plot_selector", target = "2")
@@ -3154,7 +3154,7 @@ observe({
   input$select.plot.type
   isolate({
     if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
-      graphical.par$plottype = plot.type.para$plotTypeValues[[which(plot.type.para$plotTypes == input$select.plot.type)]]
+      graphical.par$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
     }
 
   })
@@ -5529,7 +5529,6 @@ create.html = function() {
     }
   }
 } 
-
 
 
 # save main plot;
