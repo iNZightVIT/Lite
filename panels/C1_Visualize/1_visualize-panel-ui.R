@@ -128,7 +128,7 @@ vis.sidebarPanel = function() {
                        
                        tabPanel(
                          title = "Add To Plot",
-                         
+                         id = "add.to.plot",
                          fixedRow(column(9, hr()),
                                   column(3, conditionalPanel(condition = "output.showsidebar == 1",
                                                              actionButton("hideSidebar2", 
@@ -156,7 +156,6 @@ vis.sidebarPanel = function() {
                          
                          conditionalPanel(
                            condition = "input.select_additions=='Customise Plot Appearance'",
-                           
                            uiOutput("plot.appearance.panel"),
                            uiOutput("code.variables.panel")
                          ),

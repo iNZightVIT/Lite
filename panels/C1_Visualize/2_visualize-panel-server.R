@@ -120,6 +120,18 @@ valid_colour <- function(colour) {
   !inherits(try(col2rgb(colour), silent = TRUE), "try-error")
 }
 
+n_fun <- function(n) {
+  if (n > 1000) {
+    if (n > 5 * 10^ceiling(log10(n) - 1) && n > 5 * 10^ceiling(log10(n + 1) - 1)) {
+      10^(floor(log10(n)) - 1)
+    } else {
+      10^(floor(log10(n)) - 2)
+    }
+  } else {
+    1
+  }
+}
+
 ###  Then on the second day, he siad let there be parameters for
 ###  iNZightPlot():
 
@@ -192,17 +204,19 @@ graphical.par = reactiveValues(
   mean_indicator = FALSE,
   fill_colour = "",
   rotation = FALSE,
+  rotate_labels = list(y = FALSE,
+                       x = FALSE),
   gg_size = 5,
+  gg_method = "quasirandom",
   gg_theme = "grey",
   gg_width = 1,
   gg_height = 1,
   gg_lwd = 1,
+  gg_swarmwidth = 0.4,
   adjust = 1,
   palette = "default",
-  ordered = FALSE,
-  
-  
-  
+  ordered = "None",
+  gg_perN = 1,
   showsidebar = TRUE,
   alpha = 1,
   bg = "grey93", #background colour
@@ -2008,7 +2022,12 @@ observe({
   })
 })
 
-
+observe({
+  get.data.set()
+  input$vari1
+  input$vari2
+  shinyjs::reset("add.to.plot")
+})
 
 # Advanced options panel -> 
 output$plot.appearance.panel = renderUI({
@@ -2041,6 +2060,20 @@ output$plot.appearance.panel = renderUI({
     
     bar.colour.title = h5(strong("Bar Colour"))
     
+    point.options.title = h5(strong("Point Options"))
+    
+    barchart.title = h5(strong("Barchart Options"))
+    
+    barcode.title = h5(strong("Barcode Options"))
+    
+    line.title = h5(strong("Line Options"))
+    
+    Beeswarm.title = h5(strong("Beeswarm Options"))
+    
+    density.title = h5(strong("Density Options"))
+    
+    sorting.title = h5(strong("Sorting"))
+    
     point.size.title = checkboxInput(inputId = "point_size_title",
                                      label = strong("Point Size"),
                                      value = input$point_size_title)
@@ -2055,6 +2088,7 @@ output$plot.appearance.panel = renderUI({
                                                       choices=cols1,
                                                       selected=graphical.par$bg,
                                                       selectize = F)))
+    
     
     show.boxplot.title = checkboxInput(inputId = "show_boxplot_title",
                                      label = "Show boxplot",
@@ -2071,16 +2105,48 @@ output$plot.appearance.panel = renderUI({
                                                                  "lightpink", "grey", "darkgrey"),
                                                        selected=graphical.par$fill_colour,
                                                        selectize = F))) 
+
     
     rotation.object = fixedRow(column(3, h5("Rotation:")),
                                column(6, checkboxInput(inputId = "rotation",
-                                                       label = NULL,
-                                                       value = FALSE)))
+                                                       label = "Plot",
+                                                       value = FALSE)),
+                               column(3, checkboxInput(inputId = "rotationx",
+                                                       label = "x-axis Labels",
+                                                       value = FALSE), offset = 3),
+                               column(3, checkboxInput(inputId = "rotationy",
+                                                       label = "y-axis Labels",
+                                                       value = FALSE))
+                               )
+    
+    swarmWidth = fixedRow(column(3, h5("Swarm width:")),
+                          column(6, sliderInput("gg.swarmwidth", 
+                                                label = NULL, 
+                                                min = 0.1, 
+                                                max = 1, 
+                                                value=graphical.par$gg_swarmwidth,
+                                                step=0.1, 
+                                                ticks = FALSE)))                                                           
+    
+    swarmMethod = fixedRow(column(3, h5("Methods:")),
+                           column(6, selectInput(inputId="gg.swarmMethod",label=NULL,
+                                                 choices=c("quasirandom", 
+                                                           "pseudorandom", 
+                                                           "smiley", 
+                                                           "frowney"),
+                                                 selected=input$gg.swarmMethod,
+                                                 selectize = F))) 
+    
+    
     
     sortbysize.object = fixedRow(column(3, h5("Sort by size:")),
-                                 column(6, checkboxInput(inputId = "sort.by.size",
-                                                       label = NULL,
-                                                       value = FALSE)))
+                                 column(6,selectInput(inputId="sort.by.size",label=NULL,
+                                             choices=c("None", 
+                                                       "Ascending", 
+                                                       "Descending"),
+                                             selected=input$sort.by.size,
+                                             selectize = F)))
+    
     ggsize.object = fixedRow(column(3, h5("Point size:")),
                              column(6, sliderInput("gg.size", 
                                                    label = NULL, 
@@ -2089,6 +2155,11 @@ output$plot.appearance.panel = renderUI({
                                                    value=graphical.par$gg_size,
                                                    step=1, 
                                                    ticks = FALSE)))
+    
+    gridplot.object = fixedRow(column(3, h5("Observations/square:")),
+                               column(6, numericInput("grid.square", 
+                                                     label = NULL, 
+                                                     value=n_fun(nrow(vis.data())))))
     
     ggtheme.object = fixedRow(column(3, h5("Theme:")),
                               column(6, selectInput(inputId="gg.theme",label=NULL,
@@ -2137,6 +2208,7 @@ output$plot.appearance.panel = renderUI({
                                                           value = graphical.par$adjust,
                                                           step = 0.25, 
                                                           ticks = FALSE)))
+    
     
     colourpalette.object = fixedRow(column(3, h5("Colour palette:")),
                                     column(6, selectInput(inputId="colourpalette",label=NULL,
@@ -2204,6 +2276,7 @@ output$plot.appearance.panel = renderUI({
                                                                                     value=graphical.par$cex.dotpt,
                                                                                     step=.05, 
                                                                                     ticks = FALSE))))
+    grid.title = h5(strong("Gridplot Options"))
     
 #    adjust.size.points.dot.object = fixedRow(column(3, h5("Point size:")),
 #                                              column(6, sliderInput("adjust.size.points.dot", 
@@ -2330,53 +2403,60 @@ output$plot.appearance.panel = renderUI({
                    bar.colour.title,
                    select.barcolor.object)
         
-        if(!is.null(input$select.plot.type) && input$select.plot.type == "column/row bar") {
+        if(!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
+                     ggtheme.object,
                      rotation.object,
-                     sortbysize.object,
-                     ggtheme.object)
+                     sorting.title,
+                     sortbysize.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "stacked column/row") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
-                     rotation.object,
-                     ggtheme.object)
+                     ggtheme.object,
+                     rotation.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "lollipop") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      fill.color.object,
+                     ggtheme.object,
                      rotation.object,
+                     point.options.title,
                      ggsize.object,
+                     line.title,
                      line.width.object,
-                     sortbysize.object,
-                     ggtheme.object)
+                     sorting.title,
+                     sortbysize.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("pie", "donut")) {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("(gg) pie", "(gg) donut")) {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
-                     sortbysize.object,
-                     ggtheme.object)
+                     ggtheme.object,
+                     sorting.title,
+                     sortbysize.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "gridplot") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) gridplot") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
+                     ggtheme.object,
                      rotation.object,
-                     ggtheme.object)
+                     grid.title,
+                     gridplot.object)
           
         }
       # bar plot with two factor variables
@@ -2403,67 +2483,83 @@ output$plot.appearance.panel = renderUI({
                    adjust.size.scale.object,
                    bar.colour.title)
         
-        if(!is.null(input$select.plot.type) && input$select.plot.type == "column/row bar") {
+        if(!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
+                     ggtheme.object,
                      rotation.object,
-                     sortbysize.object,
-                     ggtheme.object)
+                     sorting.title,
+                     sortbysize.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "stacked column/row") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
-                     rotation.object,
-                     ggtheme.object)
+                     ggtheme.object,
+                     rotation.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "lollipop") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
+                     ggtheme.object,
                      rotation.object,
+                     point.options.title,
                      ggsize.object,
+                     line.title,
                      line.width.object,
-                     sortbysize.object,
-                     ggtheme.object)
+                     sorting.title,
+                     sortbysize.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "frequency polygons") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) frequency polygons") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
+                     ggtheme.object,
                      rotation.object,
+                     point.options.title,
                      ggsize.object,
-                     line.width.object,
-                     ggtheme.object)
-          
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "heatmap") {
+                     line.title,
+                     line.width.object)
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) diverging stacked bar (likert)") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
+                     ggtheme.object,
                      rotation.object,
-                     ggtheme.object)
+                     )
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "spine") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) heatmap") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
-                     rotation.object,
-                     ggtheme.object)
+                     ggtheme.object,
+                     rotation.object
+                     )
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "diverging stacked bar (likert)") {
+     #   } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) spine") {
+    #      ret = list(general.appearance.title,
+    #                 select.plot.type.object,
+    #                 select.bg.object,
+    #                 adjust.size.scale.object,
+    #                 colourpalette.object,
+    #                 rotation.object,
+    #                 ggtheme.object)
+          
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) diverging stacked bar (likert)") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
@@ -2572,157 +2668,227 @@ output$plot.appearance.panel = renderUI({
               class(get.data.set()[,input$vari1])%in%"integer")) {
             
             if(!is.null(input$select.plot.type) &&
-               (input$select.plot.type == "dot strip")) {
+               (input$select.plot.type == "(gg) dot strip")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
+                       ggtheme.object,
                        rotation.object,
-                       fillin.transparency.object,
+                       point.options.title,
                        ggsize.object,
-                       ggtheme.object)
+                       fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "barcode")) {
+                      (input$select.plot.type == "(gg) barcode")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
                        rotation.object,
+                       barcode.title,
                        fillin.transparency.object,
                        barwidth.object,
-                       barheight.object,
-                       ggtheme.object)
+                       barheight.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "boxplot")) {
+                      (input$select.plot.type == "(gg) boxplot")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
+                       ggtheme.object,
                        rotation.object,
-                       line.width.object,
-                       ggtheme.object)
+                       line.title,
+                       line.width.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "violin")) {
+                      (input$select.plot.type == "(gg) beeswarm")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
+                       ggtheme.object,
                        rotation.object,
+                       Beeswarm.title,
+                       swarmWidth,
+                       swarmMethod
+                       )
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "(gg) violin")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
+                       rotation.object,
+                       density.title,
                        smooth.adjust.object,
-                       fillin.transparency.object,
-                       ggtheme.object)
+                       fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "density")) {
+                      (input$select.plot.type == "(gg) density")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
+                       ggtheme.object,
                        rotation.object,
+                       density.title,
                        smooth.adjust.object,
-                       fillin.transparency.object,
-                       ggtheme.object)
+                       fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "column/row bar")) {
+                      (input$select.plot.type == "(gg) column/row bar")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
-                       rotation.object,
-                       ggtheme.object)
+                       ggtheme.object,
+                       rotation.object
+                       )
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "lollipop")) {
+                      (input$select.plot.type == "(gg) lollipop")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
+                       ggtheme.object,
                        rotation.object,
+                       point.options.title,
                        ggsize.object,
-                       line.width.object,
-                       ggtheme.object)
+                       line.title,
+                       line.width.object
+                       )
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "cumulative curve")) {
+                      (input$select.plot.type == "(gg) cumulative curve")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
-                       line.width.object,
-                       ggtheme.object)
+                       ggtheme.object,
+                       rotation.object,
+                       line.title,
+                       line.width.object
+                       )
             }
             
             
           } else {
             
             if(!is.null(input$select.plot.type) &&
-               (input$select.plot.type == "dot strip")) {
+               (input$select.plot.type == "(gg) dot strip")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
+                       ggtheme.object,
                        rotation.object,
-                       fillin.transparency.object,
+                       point.options.title,
                        ggsize.object,
-                       ggtheme.object)
+                       fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "barcode")) {
+                      (input$select.plot.type == "(gg) barcode")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
                        rotation.object,
+                       barcode.title,
                        fillin.transparency.object,
                        barwidth.object,
-                       barheight.object,
-                       ggtheme.object)
+                       barheight.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "boxplot")) {
+                      (input$select.plot.type == "(gg) boxplot")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
-                       colourpalette.object,
+                       fill.color.object,
+                       ggtheme.object,
                        rotation.object,
-                       line.width.object,
-                       ggtheme.object)
+                       line.title,
+                       line.width.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "violin")) {
+                      (input$select.plot.type == "(gg) violin")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
-                       colourpalette.object,
+                       fill.color.object,
+                       ggtheme.object,
                        rotation.object,
+                       density.title,
                        smooth.adjust.object,
-                       fillin.transparency.object,
-                       ggtheme.object)
+                       fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "density")) {
+                      (input$select.plot.type == "(gg) density")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
-                       colourpalette.object,
+                       fill.color.object,
+                       ggtheme.object,
                        rotation.object,
+                       density.title,
                        smooth.adjust.object,
-                       fillin.transparency.object,
-                       ggtheme.object)
+                       fillin.transparency.object)
             }  else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "cumulative curve")) {
+                      (input$select.plot.type == "(gg) cumulative curve")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
                        adjust.size.scale.object,
-                       colourpalette.object,
-                       line.width.object,
-                       ggtheme.object)
-            }
+                       fill.color.object,
+                       ggtheme.object,
+                       rotation.object,
+                       line.title,
+                       line.width.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "(gg) lollipop")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
+                       rotation.object,
+                       point.options.title,
+                       ggsize.object,
+                       line.title,
+                       line.width.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "(gg) column/row bar")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
+                       rotation.object
+              )
+            } else if(!is.null(input$select.plot.type) &&
+                                   (input$select.plot.type == "(gg) beeswarm")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
+                       rotation.object,
+                       Beeswarm.title,
+                       swarmWidth,
+                       swarmMethod
+              )
+            } 
           }
           
           
@@ -2948,9 +3114,7 @@ output$plotly_inter = renderPlotly({
       do.call(iNZightPlots:::iNZightPlot, temp)
       plotly::ggplotly()
     }
-    
   })
-
 })
 
 # observe({
@@ -2968,15 +3132,13 @@ observe({
   isolate({
     if(!is.null(input$select.plot.type) && 
        input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot",
-                                     "(gg) beeswarm", "(gg) violin", "(gg) density",
+                                     "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
                                      "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
+                                     "(gg) pie", "(gg) donut", "(gg) gridplot", "(gg) diverging stacked bar (likert)",
+                                     "(gg) barcode",
                                      "")) {
       hideTab(inputId = "plot_selector", target = "1")
       showTab(inputId = "plot_selector", target = "2")
-    } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("pie", "donut", "gridplot",
-                                                                                 "barcode")) {
-    hideTab(inputId = "plot_selector", target = "1")
-    hideTab(inputId = "plot_selector", target = "2")
     } else {
       hideTab(inputId = "plot_selector", target = "2")
       showTab(inputId = "plot_selector", target = "1")
@@ -2984,8 +3146,6 @@ observe({
   })
 })
     
-
-
 
 observe({
   input$fill.color
@@ -3012,6 +3172,39 @@ observe({
 })
 
 observe({
+  input$gg.swarmMethod
+  isolate({
+    if(!is.null(input$gg.swarmMethod))
+      graphical.par$gg_method = input$gg.swarmMethod
+  })
+})
+
+observe({
+  input$rotationx
+  isolate({
+    if(!is.null(input$rotationx))
+      graphical.par$rotate_labels$x = input$rotationx
+  })
+})
+
+
+observe({
+  input$grid.square
+  isolate({
+    if(!is.null(input$grid.square))
+      graphical.par$gg_perN = input$grid.square
+  })
+})
+
+observe({
+  input$rotationy
+  isolate({
+    if(!is.null(input$rotationy))
+      graphical.par$rotate_labels$y = input$rotationy
+  })
+})
+
+observe({
   input$bar.width
   isolate({
     if(!is.null(input$bar.width))
@@ -3019,11 +3212,23 @@ observe({
   })
 })
 
+
+observe({
+  input$gg.swarmwidth
+  isolate({
+    if(!is.null(input$gg.swarmwidth))
+      graphical.par$gg_swarmwidth = input$gg.swarmwidth
+  })
+})
+
 observe({
   input$sort.by.size
   isolate({
     if(!is.null(input$sort.by.size))
-      graphical.par$ordered = input$sort.by.size
+      graphical.par$ordered = switch(input$sort.by.size, 
+                                     "None" = FALSE, 
+                                     "Ascending" = "asc", 
+                                     "Descending" = "desc")
   })
 })
 
@@ -3416,8 +3621,8 @@ output$code.variables.panel = renderUI({
                  colour.palette.reverse.object)
       
       if(length(input$select.plot.type) != 0 && 
-         (input$select.plot.type %in% c("column/row bar", "stacked column/row", "lollipop", "frequency polygons", 
-                                        "heatmap", "diverging stacked bar (likert)", "spine"))) {
+         (input$select.plot.type %in% c("(gg) column/row bar", "(gg) stacked column/row", "(gg) lollipop", "(gg) frequency polygons", 
+                                        "(gg) heatmap", "(gg) diverging stacked bar (likert)", "(gg) spine"))) {
         ret = NULL
       }
     }
@@ -3558,9 +3763,10 @@ output$code.variables.panel = renderUI({
            input$select.plot.type %in% "hexbin plot-alpha"))
           ret = list(color.by.object)
         else if (length(input$select.plot.type) != 0 && 
-                 (input$select.plot.type %in% c("dot strip", "barcode", "boxplot", "violin", 
-                                                "density", "column/row bar", "lollipop", "cumulative curve",
-                                                "stacked column/row", "pie", "donut", "gridplot"))) {
+                 (input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin", 
+                                                "(gg) density", "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
+                                                "(gg) stacked column/row", "(gg) pie", "(gg) donut", "(gg) gridplot",
+                                                "(gg) beeswarm"))) {
           ret = NULL
           
         } else
