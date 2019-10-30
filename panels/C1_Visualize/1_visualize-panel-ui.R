@@ -230,7 +230,7 @@ vis.mainPanel = function() {
 #                                           font-size:100%")),
     
 #    br(),
-#    br(),
+#    br()
     tabsetPanel(
       id = "plot_selector",
       type = "pills",
