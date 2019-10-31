@@ -2975,8 +2975,8 @@ observe({
   if(!is.null(input$vari1)&!is.null(input$vari2)){
     isolate({
       if(input$vari1%in%colnames(get.data.set())&&
-           (input$vari2%in%colnames(get.data.set())||
-              input$vari2%in%"none")){
+         (input$vari2%in%colnames(get.data.set())||
+          input$vari2%in%"none")){
         temp = list()
         temp$x = get.data.set()[,input$vari1]
         if(input$vari2%in%'none'){
@@ -2986,20 +2986,20 @@ observe({
         }
         temp$plot = F
         tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
-####################################################################
-#        large.sample = T
+        ####################################################################
+        #        large.sample = T
         large.sample = search.name(tester,"largesample")[[1]]
         if(is.null(large.sample)){
           large.sample = F
         }
-####################################################################
+        ####################################################################
         if(!is.null(input$advanced_options)){
           sel = input$advanced_options
           ch = NULL
           # vari1 = factor, vari2 = none
           if((class(get.data.set()[,input$vari1])%in%"factor"|
-                class(get.data.set()[,input$vari1])%in%"character")&
-               input$vari2%in%"none"){
+              class(get.data.set()[,input$vari1])%in%"character")&
+             input$vari2%in%"none"){
             ch = c('Code more variables',
                    'Change plot appearance',
                    'Customize labels',
@@ -3007,43 +3007,43 @@ observe({
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
-          # vari1 = factor, vari2 = factor
+            # vari1 = factor, vari2 = factor
           }else if((class(get.data.set()[,input$vari1])%in%"factor"|
-                      class(get.data.set()[,input$vari1])%in%"character")&
-                     !input$vari2%in%"none"&&
-                     (class(get.data.set()[,input$vari2])%in%"factor"|
-                        class(get.data.set()[,input$vari2])%in%"character")){
+                    class(get.data.set()[,input$vari1])%in%"character")&
+                   !input$vari2%in%"none"&&
+                   (class(get.data.set()[,input$vari2])%in%"factor"|
+                    class(get.data.set()[,input$vari2])%in%"character")){
             ch = c('Change plot appearance',
                    'Customize labels',
                    'Adjust number of Bars')
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
-          # vari1 = numeric, vari2 = none or
-          # vari1 = factor, vari2 = numeric or
-          # vari1 = numeric, vari2 = factor
+            # vari1 = numeric, vari2 = none or
+            # vari1 = factor, vari2 = numeric or
+            # vari1 = numeric, vari2 = factor
           }else if(((class(get.data.set()[,input$vari1])%in%"numeric"|
-                       class(get.data.set()[,input$vari1])%in%"integer")&
-                      input$vari2%in%"none")|
-                     ((class(get.data.set()[,input$vari1])%in%"factor"|
-                         class(get.data.set()[,input$vari1])%in%"character")&
-                        !input$vari2%in%"none"&&
-                        (class(get.data.set()[,input$vari2])%in%"integer"|
-                           class(get.data.set()[,input$vari2])%in%"numeric"))|
-                     ((class(get.data.set()[,input$vari1])%in%"integer"|
-                         class(get.data.set()[,input$vari1])%in%"numeric")&
-                        !input$vari2%in%"none"&&
-                        (class(get.data.set()[,input$vari2])%in%"factor"|
-                           class(get.data.set()[,input$vari2])%in%"character"))){
+                     class(get.data.set()[,input$vari1])%in%"integer")&
+                    input$vari2%in%"none")|
+                   ((class(get.data.set()[,input$vari1])%in%"factor"|
+                     class(get.data.set()[,input$vari1])%in%"character")&
+                    !input$vari2%in%"none"&&
+                    (class(get.data.set()[,input$vari2])%in%"integer"|
+                     class(get.data.set()[,input$vari2])%in%"numeric"))|
+                   ((class(get.data.set()[,input$vari1])%in%"integer"|
+                     class(get.data.set()[,input$vari1])%in%"numeric")&
+                    !input$vari2%in%"none"&&
+                    (class(get.data.set()[,input$vari2])%in%"factor"|
+                     class(get.data.set()[,input$vari2])%in%"character"))){
             ch = c('Code more variables',
                    'Change plot appearance',
                    'Identify points',
                    'Customize labels',
                    'Adjust axis limits')
             if(!is.null(input$select.plot.type)&&
-                 (input$select.plot.type%in%"histogram"||
-                 (large.sample&&
-                    input$select.plot.type%in%"default"))){
+               (input$select.plot.type%in%"histogram"||
+                (large.sample&&
+                 input$select.plot.type%in%"default"))){
               ch = c('Change plot appearance',
                      'Customize labels',
                      'Adjust axis limits')
@@ -3051,28 +3051,28 @@ observe({
             if(!sel%in%ch){
               sel = 'Change plot appearance'
             }
-          # vari1 = numeric, vari2 = numeric
+            # vari1 = numeric, vari2 = numeric
           }else if((class(get.data.set()[,input$vari1])%in%"numeric"|
-                      class(get.data.set()[,input$vari1])%in%"integer")&
-                     !input$vari2%in%"none"&&
-                     (class(get.data.set()[,input$vari2])%in%"numeric"|
-                        class(get.data.set()[,input$vari2])%in%"integer")){
+                    class(get.data.set()[,input$vari1])%in%"integer")&
+                   !input$vari2%in%"none"&&
+                   (class(get.data.set()[,input$vari2])%in%"numeric"|
+                    class(get.data.set()[,input$vari2])%in%"integer")){
             ch = c('Code more variables',
                    'Add trend curves',
-                  'Add x=y line',
-                  'Add a jitter',
-                  'Add rugs',
-                  'Join points by line',
-                  'Change plot appearance',
-                  'Identify points',
-                  'Customize labels',
-                  'Adjust axis limits')
+                   'Add x=y line',
+                   'Add a jitter',
+                   'Add rugs',
+                   'Join points by line',
+                   'Change plot appearance',
+                   'Identify points',
+                   'Customize labels',
+                   'Adjust axis limits')
             if(!is.null(input$select.plot.type)&&
-                 ((input$select.plot.type%in%"grid-density plot"|
-                    input$select.plot.type%in%"hexbin plot-size"|
-                   input$select.plot.type%in%"hexbin plot-alpha")||
-                    large.sample&&
-                    input$select.plot.type%in%"default")){
+               ((input$select.plot.type%in%"grid-density plot"|
+                 input$select.plot.type%in%"hexbin plot-size"|
+                 input$select.plot.type%in%"hexbin plot-alpha")||
+                large.sample&&
+                input$select.plot.type%in%"default")){
               ch = c('Add trend curves',
                      'Add x=y line',
                      'Change plot appearance',
@@ -3129,16 +3129,26 @@ output$plotly_inter = renderPlotly({
 observe({
   input$vari1
   input$select.plot.type
+  input$sub1_level
+  input$subs1
+  input$sub2_level
+  input$subs2
   isolate({
     if(!is.null(input$select.plot.type) && 
        input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot",
                                      "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
                                      "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
-                                     "(gg) pie", "(gg) donut", "(gg) gridplot", "(gg) diverging stacked bar (likert)",
-                                     "(gg) barcode",
+                                     "(gg) diverging stacked bar (likert)",
+                                     "(gg) barcode", "(gg) heatmap",
                                      "")) {
       hideTab(inputId = "plot_selector", target = "1")
       showTab(inputId = "plot_selector", target = "2")
+    } else if ((!is.null(input$select.plot.type) &&  input$select.plot.type %in% c("(gg) pie", "(gg) gridplot",
+                                                                                  "(gg) donut")) ||
+               (!is.null(input$sub1_level) && input$sub1_level == "_MULTI" && input$subs1 != "none") ||
+               !is.null(input$sub2_level) && input$subs2 != "none") {
+      hideTab(inputId = "plot_selector", target = "2")
+      hideTab(inputId = "plot_selector", target = "1")
     } else {
       hideTab(inputId = "plot_selector", target = "2")
       showTab(inputId = "plot_selector", target = "1")
@@ -6214,34 +6224,31 @@ observe({
         # input$subs1
         # input$subs2
         isolate({
-          if((!is.null(input$subs1) &&
-              input$subs1 %in% colnames(vis.data())) ||
-             (!is.null(input$subs2) &&
-              input$subs2 %in% colnames(vis.data()))) {
-            h4("iNZight doesn't handle interactive panel plots ... yet! 
-               Please remove the subset variable(s)")
-          } 
-          else {
-            if(!is.null(input$select.plot.type) &&
-               input$select.plot.type == "grid-density plot") {
-              h4("iNZight doesn't handle interactive grid-density plots ... yet! 
-                 Please select other plot types")
-            }
-            else if(!is.null(input$select.plot.type) &&
-                    (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-                    !is.null(input$color_by_select) &&
-                    input$color_by_select != " ") {
-              h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
-                 Please select other plot types")
-            }
-            else {
-              if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
-                  (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
-                 !is.null(input$export.extra.vars.html.beta2) && 
-                 all(input$export.extra.vars.html.beta2 %in% colnames(vis.data()))) {
-                h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-              }
-              else {
+ #         if((!is.null(input$subs1) &&
+#              input$subs1 %in% colnames(vis.data())) ||
+#             (!is.null(input$subs2) &&
+#              input$subs2 %in% colnames(vis.data()))) {
+#            h4("iNZight doesn't handle interactive panel plots ... yet! 
+#               Please remove the subset variable(s)")
+#          } else {
+#            if(!is.null(input$select.plot.type) &&
+#               input$select.plot.type == "grid-density plot") {
+#              h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+#                 Please select other plot types")
+#            }else if(!is.null(input$select.plot.type) &&
+#                    (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+#                    !is.null(input$color_by_select) &&
+#                    input$color_by_select != " ") {
+#              h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+#                 Please select other plot types")
+#            } else {
+#              if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
+#                  (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
+#                 !is.null(input$export.extra.vars.html.beta2) && 
+#                 all(input$export.extra.vars.html.beta2 %in% colnames(vis.data()))) {
+#                h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+#              }
+#              else {
                 local.dir = iNZightPlots:::exportHTML.function(create.html,
                                                                data = data_html_beta2(),
                                                                extra.vars = extra.vars_html_beta2(),
@@ -6255,12 +6262,11 @@ observe({
                   src = "path/index.html",
                   height = 600, width = 1200
                 )
-              }
-            }
-            }
+#              }
+#            }
+            #}
         })
     })
-      
     }
   })
 })
@@ -6281,34 +6287,34 @@ output$interactive.plot = renderUI({
     input$subs1
     input$subs2
     isolate({
-      if((!is.null(input$subs1) &&
-          input$subs1 %in% colnames(vis.data())) ||
-         (!is.null(input$subs2) &&
-          input$subs2 %in% colnames(vis.data()))) {
-        h4("iNZight doesn't handle interactive panel plots ... yet! 
-           Please remove the subset variable(s)")
-      } 
-      else {
-        if(!is.null(input$select.plot.type) &&
-           input$select.plot.type == "grid-density plot") {
-          h4("iNZight doesn't handle interactive grid-density plots ... yet! 
-             Please select other plot types")
-        }
-        else if(!is.null(input$select.plot.type) &&
-                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-                !is.null(input$color_by_select) &&
-                input$color_by_select != " ") {
-          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
-             Please select other plot types")
-        }
-        else {
-          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-             !is.null(input$export.extra.vars.html) && 
-             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-          }
-          else {
+#      if((!is.null(input$subs1) &&
+#          input$subs1 %in% colnames(vis.data())) ||
+#         (!is.null(input$subs2) &&
+#          input$subs2 %in% colnames(vis.data()))) {
+#        h4("iNZight doesn't handle interactive panel plots ... yet! 
+#           Please remove the subset variable(s)")
+##      } 
+#      else {
+#        if(!is.null(input$select.plot.type) &&
+#           input$select.plot.type == "grid-density plot") {
+#          h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+#             Please select other plot types")
+#        }
+#        else if(!is.null(input$select.plot.type) &&
+#                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+#                !is.null(input$color_by_select) &&
+#                input$color_by_select != " ") {
+#          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+#             Please select other plot types")
+#        }
+#        else {
+#          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
+#              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
+#             !is.null(input$export.extra.vars.html) && 
+#             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+#            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+#          }
+#          else {
             local.dir = iNZightPlots:::exportHTML.function(create.html, 
                                                            data = data_html(),
                                                            extra.vars = extra.vars_html(),
@@ -6326,9 +6332,9 @@ output$interactive.plot = renderUI({
               height = 600, width = 1200
             ))
             
-          }
-        }
-        }
+ #         }
+#        }
+#        }
       })
   }
   
