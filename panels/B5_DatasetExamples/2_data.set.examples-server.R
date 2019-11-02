@@ -9,7 +9,7 @@ output$switch.data.panel = renderUI({
                       get.data.dir.imported())
   })
 })
-
+options(htmlwidgets.TOJSON_ARGS = list(na = 'string'))
 
 output$temp_table = renderDataTable({
   if (!is.null(input[[input$data_select]])){
@@ -28,7 +28,8 @@ output$temp_table = renderDataTable({
     NULL
   }
 }, options = list(lengthMenu = c(5, 30, 50), pageLength = 5,
-                  columns.defaultContent = "NA", scrollX = TRUE, htmlwidgets.TOJSON_ARGS = list(na = 'string')))
+                  columns.defaultContent = "NA", scrollX = TRUE,
+                  columnDefs = list(list(className = 'dt-center', targets = "_all")), filter = 'bottom'))
 
 set_to_change_reac <- reactive({
   if (is.null(input[[input$data_select]])){
