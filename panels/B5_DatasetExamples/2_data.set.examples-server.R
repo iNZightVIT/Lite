@@ -9,7 +9,6 @@ output$switch.data.panel = renderUI({
                       get.data.dir.imported())
   })
 })
-options(htmlwidgets.TOJSON_ARGS = list(na = 'string'))
 
 output$temp_table = renderDataTable({
   if (!is.null(input[[input$data_select]])){
