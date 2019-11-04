@@ -72,12 +72,13 @@ observe({
       if(!is.null(input$recorder_variable_newname) && !grepl("^\\s*$", input$recorder_variable_newname)) {
         name = input$recorder_variable_newname
         if(!is.null(input$recorder_sort_levels) && input$recorder_sort_levels == "manually") {
-#          if(!is.null(input$select.reorder.item) && length(input$select.reorder.item) == length(unique(get.data.set()[[input$select.reorder.column]]))) {
+          rm.na.name = unique(get.data.set()[[input$select.reorder.column]])[!is.na(unique(get.data.set()[[input$select.reorder.column]]))]
+          if(!is.null(input$select.reorder.item) && length(input$select.reorder.item) == length(rm.na.name)) {
             levels = as.character(input$select.reorder.item)
             data = iNZightTools::reorderLevels(get.data.set(), var, levels, name = name)
             updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = data
-#          }
+          }
         }
         else {
           data = iNZightTools::reorderLevels(get.data.set(), var, freq = TRUE, name = name)
