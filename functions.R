@@ -1334,8 +1334,6 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
         }else if(tolower(ext)%in%"sav"){
           temp = read.spss(full.name[indexes[1]], use.value.labels=FALSE,to.data.frame=TRUE)
         }
-      }, warning = function(w) {
-        print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
