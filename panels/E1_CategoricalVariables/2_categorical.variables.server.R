@@ -208,19 +208,29 @@ observe({
 })
 
 
+rename.levels.main.panel = function(){
+  verbatimTextOutput("text_rename")
+}
 
-
+rename.factors.textfields = function(factors){
+  ret = list()
+  for(fac in 1:length(factors)){
+    ret[[fac]] = textInput(inputId=paste0("factor",fac),label=factors[fac],value=factors[fac])
+  }
+  ret
+}
 
 
 output$rename.factors.inputs = renderUI({
   input$select.rename.column
   get.data.set()
   isolate({
-    if(!is.null(input$select.rename.column)&&!input$select.rename.column%in%""){
+    if(!is.null(input$select.rename.column)&&!input$select.rename.column == ""){
       rename.factors.textfields(levels(get.data.set()[,input$select.rename.column]))
     }
   })
 })
+
 
 output$text_rename = renderPrint({
   input$select.rename.column
@@ -236,12 +246,16 @@ output$text_rename = renderPrint({
 
 observe({
   input$rename.levs
+  input$select.rename.column
   isolate({
     if(!is.null(input$rename.levs)&&input$rename.levs>0){
+      num = length(levels(get.data.set()[,input$select.rename.column]))
       indexes1= grep("^factor[0-9]+$",names(input))
+      indexes1 = names(input)[indexes1]
+      indexes1 = indexes1[indexes1 %in% paste0("factor", 1:num)]
       new.levels = c()
       for(i in 1:length(indexes1)){
-        new.levels[i] = input[[names(input)[indexes1[i]]]]
+        new.levels[i] = input[[indexes1[i]]]
         if(is.null(new.levels[i])||new.levels[i]%in%""){
           new.levels[i] = levels(get.data.set()[,input$select.rename.column])[i]
         }
@@ -255,6 +269,8 @@ observe({
     }
   })
 })
+
+
 
 ## Manipulate variables --> Categorical variables --> Combine levels
 

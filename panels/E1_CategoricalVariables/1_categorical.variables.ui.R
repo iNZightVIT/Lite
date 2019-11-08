@@ -137,14 +137,3 @@ rename.levels.sidebar.panel = function(data.set){
        help.display('Rename Levels','rename_levels',"panels/E1_CategoricalVariables/6_rename.levels.help.md"),br(),HTML(""))
 }
 
-rename.levels.main.panel = function(){
-  verbatimTextOutput("text_rename")
-}
-
-rename.factors.textfields = function(factors){
-  ret = list()
-  for(fac in 1:length(factors)){
-    ret[[fac]] = textInput(inputId=paste0("factor",fac),label=factors[fac],value=factors[fac])
-  }
-  ret
-}
