@@ -147,6 +147,13 @@ shinyServer(function(input, output, session) {
     values$create.variables.expression.text
   })
   
+  ## code list
+  code.save <- reactiveValues(
+    variable = "\n",
+    name = "",
+    datacode = ""
+  )
+  
   #################################
   
   ##  Turn errors and warnings off
@@ -356,8 +363,18 @@ shinyServer(function(input, output, session) {
   ##---------------##
   source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
   source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
+  
+  
+  #   Show code history
+  
+  ##---------------##
+  ##  Code Module  ##
+  ##---------------##
+  source("panels/G1_Code//1_code.panel-ui.R", local = TRUE)
+  source("panels/G1_Code//2_code.panel-server.R", local = TRUE)
 
-#   Help
+  
+#     Help
 
 #     ##---------------##
 #     ##  Help Module  ##

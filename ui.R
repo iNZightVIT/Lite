@@ -175,7 +175,10 @@ shinyUI(
                                 uiOutput("modelfitting.panel")),
                        tabPanel("Maps",
                                 uiOutput("newmaps.panel"))
-            )
+            ),
+            
+            tabPanel("R code history", value = "rhistory",
+                     uiOutput("code.panel"))
             
             ## Backup Link
 #            navbarMenu("Backup Link",
