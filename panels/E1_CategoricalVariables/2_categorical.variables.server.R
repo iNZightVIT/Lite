@@ -249,22 +249,30 @@ observe({
   input$select.rename.column
   isolate({
     if(!is.null(input$rename.levs)&&input$rename.levs>0){
-      num = length(levels(get.data.set()[,input$select.rename.column]))
+      num = levels(get.data.set()[,input$select.rename.column])
       indexes1= grep("^factor[0-9]+$",names(input))
       indexes1 = names(input)[indexes1]
-      indexes1 = indexes1[indexes1 %in% paste0("factor", 1:num)]
-      new.levels = c()
+      indexes1 = indexes1[indexes1 %in% paste0("factor", 1:length(num))]
+      idxmch = as.numeric(gsub("factor", "", indexes1))
+      new.levels = list()
       for(i in 1:length(indexes1)){
-        new.levels[i] = input[[indexes1[i]]]
+        new.levels[i] = num[idxmch[i]]
+        names(new.levels)[i] = input[[indexes1[i]]]
         if(is.null(new.levels[i])||new.levels[i]%in%""){
-          new.levels[i] = levels(get.data.set()[,input$select.rename.column])[i]
+          new.levels[i] = num[idxmch]
+          names(new.levels)[i] = levels(get.data.set()[,input$select.rename.column])[i]
         }
       }
-      temp = rename.levels(get.data.set(),input$select.rename.column,new.levels)
+      temp = iNZightTools::renameLevels(get.data.set(),var = input$select.rename.column,
+                                        to_be_renamed = new.levels)
+      print(new.levels)
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
         updateSelectInput(session,"select.rename.column",selected=0)
+        ## code history
+        code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+        code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
       }
     }
   })
