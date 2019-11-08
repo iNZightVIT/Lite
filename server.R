@@ -147,6 +147,14 @@ shinyServer(function(input, output, session) {
     values$create.variables.expression.text
   })
   
+  ## code list
+  code.save <- reactiveValues(
+    variable = "\n",
+    name = "",
+    datacode = ""
+  )
+  
+  
   #################################
   
   ##  Turn errors and warnings off

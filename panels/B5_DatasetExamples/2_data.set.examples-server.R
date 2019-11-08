@@ -130,6 +130,22 @@ output$data_name_show <- renderText({
   change_data_name_reac()
 })
 
+
+pkgname = reactive({
+  pkgsL <- list(
+    "iNZight" = "Examples",
+    "iNZightMR" = "Multiple-Response",
+    "iNZightTS" = "Time-Series",
+    "iNZightMaps" = "Maps",
+    "survey" = "Survey",
+    "FutureLearnData" = "Future-Learn"
+  )
+  named.pkg <- unlist(pkgsL)
+  names(named.pkg[named.pkg %in% input$data_select])
+})
+
+
+
 observe({
   if (!is.null(input$change_set)) {
     isolate({
@@ -151,6 +167,14 @@ observe({
         values$data.set = new.data[[2]]
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
+        ## code history
+        code.save$name = sprintf("%s_ex", values$data.name)
+        code.save$datacode = sprintf(".dataset <- %s", values$data.name)
+        code.save$variable = c(code.save$variable, list(c("\n", sprintf("## Load example data set\n data(%s, package = '%s')",
+                                                                        values$data.name, pkgname()), "\n")))
+        code.save$variable = c(code.save$variable, list(c("\n", sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
+                                                                              "\n"))))
+        code.save$variable = c(code.save$variable, list(c("\n", sprintf("%s <- %s", code.save$name, values$data.name), "\n")))
       }
     })
   }
