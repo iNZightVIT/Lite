@@ -78,12 +78,16 @@ observe({
             data = iNZightTools::reorderLevels(get.data.set(), var, levels, name = name)
             updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = data
+            code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+            code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
           }
         }
         else {
           data = iNZightTools::reorderLevels(get.data.set(), var, freq = TRUE, name = name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
+          code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+          code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
         } 
       }
     }
@@ -194,6 +198,9 @@ observe({
           data = iNZightTools::collapseLevels(get.data.set(), var, lvls, lvlname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
+          ## code history
+          code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+          code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
         }
       }
     }
@@ -201,19 +208,29 @@ observe({
 })
 
 
+rename.levels.main.panel = function(){
+  verbatimTextOutput("text_rename")
+}
 
-
+rename.factors.textfields = function(factors){
+  ret = list()
+  for(fac in 1:length(factors)){
+    ret[[fac]] = textInput(inputId=paste0("factor",fac),label=factors[fac],value=factors[fac])
+  }
+  ret
+}
 
 
 output$rename.factors.inputs = renderUI({
   input$select.rename.column
   get.data.set()
   isolate({
-    if(!is.null(input$select.rename.column)&&!input$select.rename.column%in%""){
+    if(!is.null(input$select.rename.column)&&!input$select.rename.column == ""){
       rename.factors.textfields(levels(get.data.set()[,input$select.rename.column]))
     }
   })
 })
+
 
 output$text_rename = renderPrint({
   input$select.rename.column
@@ -229,25 +246,39 @@ output$text_rename = renderPrint({
 
 observe({
   input$rename.levs
+  input$select.rename.column
   isolate({
     if(!is.null(input$rename.levs)&&input$rename.levs>0){
+      num = levels(get.data.set()[,input$select.rename.column])
       indexes1= grep("^factor[0-9]+$",names(input))
-      new.levels = c()
+      indexes1 = names(input)[indexes1]
+      indexes1 = indexes1[indexes1 %in% paste0("factor", 1:length(num))]
+      idxmch = as.numeric(gsub("factor", "", indexes1))
+      new.levels = list()
       for(i in 1:length(indexes1)){
-        new.levels[i] = input[[names(input)[indexes1[i]]]]
+        new.levels[i] = num[idxmch[i]]
+        names(new.levels)[i] = input[[indexes1[i]]]
         if(is.null(new.levels[i])||new.levels[i]%in%""){
-          new.levels[i] = levels(get.data.set()[,input$select.rename.column])[i]
+          new.levels[i] = num[idxmch]
+          names(new.levels)[i] = levels(get.data.set()[,input$select.rename.column])[i]
         }
       }
-      temp = rename.levels(get.data.set(),input$select.rename.column,new.levels)
+      temp = iNZightTools::renameLevels(get.data.set(),var = input$select.rename.column,
+                                        to_be_renamed = new.levels)
+      print(new.levels)
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
         updateSelectInput(session,"select.rename.column",selected=0)
+        ## code history
+        code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+        code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
       }
     }
   })
 })
+
+
 
 ## Manipulate variables --> Categorical variables --> Combine levels
 
@@ -264,10 +295,13 @@ observe({
   input$combine
   isolate({
     if(!is.null(input$combine)&&input$combine>0){
-      temp = combine.levels(get.data.set(),input$select.combine.columns)
+      temp = iNZightTools::combineCatVars(get.data.set(),input$select.combine.columns)
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
+        ## code history
+        code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+        code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
       }
     }
   })
