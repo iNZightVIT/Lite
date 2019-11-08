@@ -25,6 +25,8 @@ observe({
       temp = iNZightTools::convertToCat(get.data.set(), orgVar, name)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = temp
+      code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+      code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
     }
   })
 })

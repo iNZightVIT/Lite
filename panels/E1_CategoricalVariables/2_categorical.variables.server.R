@@ -78,12 +78,16 @@ observe({
             data = iNZightTools::reorderLevels(get.data.set(), var, levels, name = name)
             updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = data
+            code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+            code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
           }
         }
         else {
           data = iNZightTools::reorderLevels(get.data.set(), var, freq = TRUE, name = name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
+          code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+          code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
         } 
       }
     }
@@ -194,6 +198,9 @@ observe({
           data = iNZightTools::collapseLevels(get.data.set(), var, lvls, lvlname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
+          ## code history
+          code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+          code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
         }
       }
     }
@@ -264,10 +271,13 @@ observe({
   input$combine
   isolate({
     if(!is.null(input$combine)&&input$combine>0){
-      temp = combine.levels(get.data.set(),input$select.combine.columns)
+      temp = iNZightTools::combineCatVars(get.data.set(),input$select.combine.columns)
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
+        ## code history
+        code = tidy_assign_pipe(iNZightTools::code(values$data.set))
+        code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
       }
     }
   })
