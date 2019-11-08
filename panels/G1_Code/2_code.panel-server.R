@@ -42,12 +42,12 @@ packages.call <- reactive({
     }
   }
   if (any(grepl("library\\([a-zA-Z0-9]+\\)", code.list()))) {
-      m <- regexpr("library\\([a-zA-Z0-9]+\\)", code.list())
-      pkg <- gsub(".*library\\(|\\).*", "", substr(code.list(), m, m + attr(m, "match.length")))
-      for(i in 1:length(pkg)){
-        if (!pkg[i] %in% package.load) package.load = c(package.load, pkg[i])
-      }
+    m <- regexpr("library\\([a-zA-Z0-9]+\\)", code.list())
+    pkg <- gsub(".*library\\(|\\).*", "", substr(code.list(), m, m + attr(m, "match.length")))
+    for(i in 1:length(pkg)){
+      if (!pkg[i] %in% package.load) package.load = c(package.load, pkg[i])
     }
+  }
   package.load
 })
 
@@ -89,3 +89,4 @@ tidy_assign_pipe = function(code){
                paste(code, collapse = ""))
   gsub("%>%", "%<>%", code)
 }
+
