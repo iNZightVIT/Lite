@@ -12,8 +12,7 @@ output$r.show.code <- renderUI({
   tags$div(style = "min-width: 80%;
                   white-space: nowrap;
                   display: inline-block;",
-           verbatimTextOutput("r.code.history")      )
-  
+           verbatimTextOutput("r.code.history"))
 })
 
 code.list <- reactive({
@@ -21,14 +20,13 @@ code.list <- reactive({
     return(x)
     y <- try({
       iNZightTools::tidy_all_code(
-        paste(x, sep = "\n", collapse = "\n"),
+        paste(x, collapse = "\n"),
         width = 80,
         indent = 4
       )
     }, silent = TRUE)
     if (inherits(y, "try-error")) x else c(y, "\n")
   }))
-  
 })
 
 
@@ -70,7 +68,13 @@ output$r.code.history <- renderText({
     "#               'https://cran.rstudio.com'))\n",
     "\n",
     sep(),
-    "",
+    "\n",
+    "Lite cannot access the local directory, so you have to set the the working\n directory to the folder contains data if the data is imported.\n",
+    "\n",
+    sep(),
+    "\n",
+    "library(magrittr)  # enabled the pipe (%>%) operator",
+    "\n",
     code.list())
 })
 ## initialize 
@@ -87,6 +91,7 @@ keep.last <- reactive(TRUE)
 tidy_assign_pipe = function(code){
   code <- gsub("\ +", " ", # one or more spaces with just one space!
                paste(code, collapse = ""))
-  gsub("%>%", "%<>%", code)
+  code <- gsub("%>%", "%<>%", code)
+  unlist(strsplit(gsub("(\\) %<>%)", "\\1~\n    ", code), "~"))
 }
 
