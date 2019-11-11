@@ -75,19 +75,21 @@ observe({
           rm.na.name = unique(get.data.set()[[input$select.reorder.column]])[!is.na(unique(get.data.set()[[input$select.reorder.column]]))]
           if(!is.null(input$select.reorder.item) && length(input$select.reorder.item) == length(rm.na.name)) {
             levels = as.character(input$select.reorder.item)
-            data = iNZightTools::reorderLevels(get.data.set(), var, levels, name = name)
+            temp = iNZightTools::reorderLevels(get.data.set(), var, levels, name = name)
             updatePanel$datachanged = updatePanel$datachanged+1
-            values$data.set = data
-            code = tidy_assign_pipe(iNZightTools::code(values$data.set))
-            code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
+            values$data.set = temp
+            ## code history
+            code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+            code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
           }
         }
         else {
           data = iNZightTools::reorderLevels(get.data.set(), var, freq = TRUE, name = name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
-          code = tidy_assign_pipe(iNZightTools::code(values$data.set))
-          code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
+          ## code history
+          code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+          code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
         } 
       }
     }
@@ -195,12 +197,12 @@ observe({
            && !is.null(input$collapse_level_newname) && !grepl("^\\s*$", input$collapse_level_newname)) {
           name = input$collapse_variable_newname
           lvlname = input$collapse_level_newname
-          data = iNZightTools::collapseLevels(get.data.set(), var, lvls, lvlname, name)
+          temp = iNZightTools::collapseLevels(get.data.set(), var, lvls, lvlname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
-          values$data.set = data
+          values$data.set = temp
           ## code history
-          code = tidy_assign_pipe(iNZightTools::code(values$data.set))
-          code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
+          code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+          code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
         }
       }
     }
@@ -248,33 +250,43 @@ observe({
   input$rename.levs
   input$select.rename.column
   isolate({
-    if(!is.null(input$rename.levs)&&input$rename.levs>0){
-      num = levels(get.data.set()[,input$select.rename.column])
-      indexes1= grep("^factor[0-9]+$",names(input))
-      indexes1 = names(input)[indexes1]
-      indexes1 = indexes1[indexes1 %in% paste0("factor", 1:length(num))]
-      idxmch = as.numeric(gsub("factor", "", indexes1))
-      new.levels = list()
-      for(i in 1:length(indexes1)){
-        new.levels[i] = num[idxmch[i]]
-        names(new.levels)[i] = input[[indexes1[i]]]
-        if(is.null(new.levels[i])||new.levels[i]%in%""){
-          new.levels[i] = num[idxmch]
-          names(new.levels)[i] = levels(get.data.set()[,input$select.rename.column])[i]
+    tryCatch({
+      if(!is.null(input$rename.levs)&&input$rename.levs>0){
+        num = levels(get.data.set()[,input$select.rename.column])
+        indexes1= grep("^factor[0-9]+$",names(input))
+        indexes1 = names(input)[indexes1]
+        indexes1 = indexes1[indexes1 %in% paste0("factor", 1:length(num))]
+        idxmch = as.numeric(gsub("factor", "", indexes1))
+        new.levels = list()
+        for(i in 1:length(indexes1)){
+          if(is.null(input[[indexes1[i]]])||input[[indexes1[i]]]%in%""){
+            new.levels[i] = num[idxmch[i]]
+            names(new.levels)[i] = num[idxmch[i]]
+          } else{
+            new.levels[i] = num[idxmch[i]]
+            names(new.levels)[i] = input[[indexes1[i]]]
+          }
+        }
+        changed <- sapply(seq_along(new.levels), function(i){
+          names(new.levels)[i] != new.levels[i]
+        })
+        new.levels = new.levels[changed]
+        if(!is.null(new.levels)){
+          temp = iNZightTools::renameLevels(get.data.set(),var = input$select.rename.column,
+                                            to_be_renamed = new.levels)
+        }
+        if(!is.null(temp)){
+          updatePanel$datachanged = updatePanel$datachanged+1
+          values$data.set = temp
+          updateSelectInput(session,"select.rename.column",selected=0)
+          ## code history
+          code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+          code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
         }
       }
-      temp = iNZightTools::renameLevels(get.data.set(),var = input$select.rename.column,
-                                        to_be_renamed = new.levels)
-      print(new.levels)
-      if(!is.null(temp)){
-        updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = temp
-        updateSelectInput(session,"select.rename.column",selected=0)
-        ## code history
-        code = tidy_assign_pipe(iNZightTools::code(values$data.set))
-        code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
-      }
-    }
+    }, error = function(e) {
+      print(e)
+    }, finally = {})
   })
 })
 
@@ -300,8 +312,8 @@ observe({
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
         ## code history
-        code = tidy_assign_pipe(iNZightTools::code(values$data.set))
-        code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
+        code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
       }
     }
   })
