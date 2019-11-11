@@ -21,12 +21,13 @@ observe({
        && !is.null(input$convert_to_name) && !grepl("^\\s*$", input$convert_to_name)) {
       orgVar = input$select.to.convert
       name = gsub('\\n+', "", input$convert_to_name, perl = TRUE)
-
+      
       temp = iNZightTools::convertToCat(get.data.set(), orgVar, name)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = temp
-      code = tidy_assign_pipe(iNZightTools::code(values$data.set))
-      code.save$variable = c(code.save$variable, list(c("\n", paste0(gsub("get.data.set\\()", code.save$name, code), "\n"))))
+      ## code history
+      code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+      code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
     }
   })
 })
