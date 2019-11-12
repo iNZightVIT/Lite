@@ -2157,7 +2157,7 @@ output$plot.appearance.panel = renderUI({
                                                    step=1, 
                                                    ticks = FALSE)))
     
-    gridplot.object = fixedRow(column(3, h5("Observations/square:")),
+    gridplot.object = fixedRow(column(3, h5("Observations / square:")),
                                column(6, numericInput("grid.square", 
                                                       label = NULL, 
                                                       value=n_fun(nrow(vis.data())))))
