@@ -7159,7 +7159,12 @@ observe({
   isolate({
     if(input$get_code_plot > 0 && !is.null(input$get_code_plot)){
       if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))){
-       code = paste0(attr(do.call(iNZightPlots:::iNZightPlot,vis.par()), "code"), collapse = "\n\n ")
+        tryCatch({code = paste0(attr(do.call(iNZightPlots:::iNZightPlot,vis.par()), "code"), collapse = "\n\n ")
+        }, warning = function(w) {
+          print(w)
+        }, error = function(e) {
+          print(e)
+        }, finally = {})
        code = gsub("data_name", code.save$name, code)
        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
       }
