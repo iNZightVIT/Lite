@@ -2538,8 +2538,7 @@ output$plot.appearance.panel = renderUI({
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
-                     rotation.object,
-          )
+                     rotation.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) heatmap") {
           ret = list(general.appearance.title,
@@ -2568,7 +2567,6 @@ output$plot.appearance.panel = renderUI({
                      colourpalette.object,
                      rotation.object,
                      ggtheme.object)
-          
         } 
         # dotplot or histogram for numeric varible in x or 
         # dotplot or histogram for one numeric one factor variable
@@ -3836,7 +3834,11 @@ output$code.variables.panel = renderUI({
        fixedRow(column(10, hr())),
        actionButton(inputId = "get_code_plot",
                     label = "Store code",
-                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+       br(),
+       br(),
+       br(),
+       br())
   } else {
     ret
   }
@@ -6344,34 +6346,34 @@ output$interactive.plot = renderUI({
     dafr = get.data.set()
     input$extra_vars_confirm_button
     isolate({
-      if((!is.null(input$subs1) &&
-          input$subs1 %in% colnames(vis.data())) ||
-         (!is.null(input$subs2) &&
-          input$subs2 %in% colnames(vis.data()))) {
-        h4("iNZight doesn't handle interactive panel plots ... yet! 
-           Please remove the subset variable(s)")
-      } 
-      else {
-        if(!is.null(input$select.plot.type) &&
-           input$select.plot.type == "grid-density plot") {
-          h4("iNZight doesn't handle interactive grid-density plots ... yet! 
-             Please select other plot types")
-        }
-        else if(!is.null(input$select.plot.type) &&
-                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-                !is.null(input$color_by_select) &&
-                input$color_by_select != " ") {
-          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
-         Please select other plot types")
-        }
-        else {
-          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-             !is.null(input$export.extra.vars.html) && 
-             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-          }
-          else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
+     # if((!is.null(input$subs1) &&
+    #      input$subs1 %in% colnames(vis.data())) ||
+    #     (!is.null(input$subs2) &&
+    #      input$subs2 %in% colnames(vis.data()))) {
+    #    h4("iNZight doesn't handle interactive panel plots ... yet! 
+    #       Please remove the subset variable(s)")
+    #  } 
+    #  else {
+    #    if(!is.null(input$select.plot.type) &&
+    #       input$select.plot.type == "grid-density plot") {
+    #      h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+    #         Please select other plot types")
+    #    }
+    #    else if(!is.null(input$select.plot.type) &&
+    #            (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+    #            !is.null(input$color_by_select) &&
+    #            input$color_by_select != " ") {
+    #      h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+    #     Please select other plot types")
+    #    }
+    #    else {
+    #      if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
+    #          (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
+    #         !is.null(input$export.extra.vars.html) && 
+    #         all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+    #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+    #      }
+    #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
             local.dir = iNZightPlots:::exportHTML.function(create.html, 
                                                            data = data_html(),
                                                            extra.vars = extra.vars_html(),
@@ -6389,9 +6391,9 @@ output$interactive.plot = renderUI({
                        src = "path/index.html",
                        height = 600, width = 1200
                      ))
-          }
-        }
-      }
+    #       }
+    #   }
+    #  }
     })
   }
 })
@@ -7159,7 +7161,7 @@ observe({
   isolate({
     if(input$get_code_plot > 0 && !is.null(input$get_code_plot)){
       if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))){
-        tryCatch({code = paste0(attr(do.call(iNZightPlots:::iNZightPlot,vis.par()), "code"), collapse = "\n\n ")
+        tryCatch({code = paste0(attr(plot.ret.para$parameters, "code"), collapse = "\n\n ")
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -7171,9 +7173,6 @@ observe({
     }
   })
 })
-
-
-
 
 
 
