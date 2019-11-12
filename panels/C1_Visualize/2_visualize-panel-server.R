@@ -1146,6 +1146,7 @@ output$visualize.plot = renderPlot({
   #  saveRDS(vis.par(), file = "/Users/wilson/Dropbox/vis_plot.rds")
 })
 
+
 output$mini.plot = renderPlot({
   isolate({
     # some of the graphical parameters need 
@@ -3117,14 +3118,6 @@ output$plotly_inter = renderPlotly({
   })
 })
 
-# observe({
-#   input$interactiveplotly 
-#   isolate({
-#     output$plotly_inter = renderPlotly({
-#       print(plotly::ggplotly())
-#     })
-#   })
-# })
 
 observe({
   input$vari1
@@ -3838,8 +3831,17 @@ output$code.variables.panel = renderUI({
     }
     
   })
-  ret
+  if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))){
+  list(ret,
+       fixedRow(column(10, hr())),
+       actionButton(inputId = "get_code_plot",
+                    label = "Store code",
+                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+  } else {
+    ret
+  }
 })
+
 
 # The variable the points are colored by has changed
 observe({
@@ -7150,9 +7152,20 @@ observe({
 
 
 
+## generate code history
 
-
-
+observe({
+  input$get_code_plot
+  isolate({
+    if(input$get_code_plot > 0 && !is.null(input$get_code_plot)){
+      if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))){
+       code = paste0(attr(do.call(iNZightPlots:::iNZightPlot,vis.par()), "code"), collapse = "\n\n ")
+       code = gsub("data_name", code.save$name, code)
+       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+      }
+    }
+  })
+})
 
 
 
