@@ -3130,7 +3130,7 @@ observe({
                                      "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
                                      "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
                                      "(gg) diverging stacked bar (likert)",
-                                     "(gg) barcode", "(gg) heatmap",
+                                     "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons",
                                      "")) {
       hideTab(inputId = "plot_selector", target = "1")
       showTab(inputId = "plot_selector", target = "2")
