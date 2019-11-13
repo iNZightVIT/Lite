@@ -217,6 +217,7 @@ graphical.par = reactiveValues(
   palette = "default",
   ordered = "None",
   gg_perN = 1,
+  gg_bins = 30,
   showsidebar = TRUE,
   alpha = 1,
   bg = "grey93", #background colour
@@ -2075,6 +2076,8 @@ output$plot.appearance.panel = renderUI({
     
     sorting.title = h5(strong("Sorting"))
     
+    pyramid.title = h5(strong("Pyramid Options"))
+
     point.size.title = checkboxInput(inputId = "point_size_title",
                                      label = strong("Point Size"),
                                      value = input$point_size_title)
@@ -2157,10 +2160,19 @@ output$plot.appearance.panel = renderUI({
                                                    step=1, 
                                                    ticks = FALSE)))
     
+    pyramid.slider.object = fixedRow(column(3, h5("Number of bins:")),
+                               column(6, sliderInput("pyramid.bins", 
+                                                     label = NULL, 
+                                                     value = graphical.par$gg_bins,
+                                                     min = 5,
+                                                     max = 50,
+                                                     step = 5)))
+                              
     gridplot.object = fixedRow(column(3, h5("Observations / square:")),
                                column(6, numericInput("grid.square", 
                                                       label = NULL, 
                                                       value=n_fun(nrow(vis.data())))))
+    
     
     ggtheme.object = fixedRow(column(3, h5("Theme:")),
                               column(6, selectInput(inputId="gg.theme",label=NULL,
@@ -2852,7 +2864,7 @@ output$plot.appearance.panel = renderUI({
                        line.title,
                        line.width.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) lollipop")) {
+                      (input$select.plot.type == "(gg) pyramid")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
@@ -2860,10 +2872,8 @@ output$plot.appearance.panel = renderUI({
                        fill.color.object,
                        ggtheme.object,
                        rotation.object,
-                       point.options.title,
-                       ggsize.object,
-                       line.title,
-                       line.width.object)
+                       pyramid.title,
+                       pyramid.slider.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) column/row bar")) {
               ret=list(general.appearance.title,
@@ -3131,6 +3141,7 @@ observe({
                                      "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
                                      "(gg) diverging stacked bar (likert)",
                                      "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons", "(gg) spine/pyramid",
+                                     "(gg) pyramid",
                                      "")) {
       hideTab(inputId = "plot_selector", target = "1")
       showTab(inputId = "plot_selector", target = "2")
@@ -3187,6 +3198,15 @@ observe({
       graphical.par$rotate_labels$x = input$rotationx
   })
 })
+
+observe({
+  input$pyramid.bins
+  isolate({
+    if(!is.null(input$pyramid.bins))
+      graphical.par$gg_bins = as.numeric(input$pyramid.bins)
+  })
+})
+
 
 
 observe({
@@ -3771,7 +3791,7 @@ output$code.variables.panel = renderUI({
                  (input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin", 
                                                 "(gg) density", "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
                                                 "(gg) stacked column/row", "(gg) pie", "(gg) donut", "(gg) gridplot",
-                                                "(gg) beeswarm"))) {
+                                                "(gg) beeswarm", "(gg) pyramid"))) {
           ret = list(fixedRow(column(10, hr())),
                      actionButton(inputId = "get_code_plot",
                                   label = "Store code",
