@@ -3136,6 +3136,52 @@ output$plotly_inter = renderPlotly({
 })
 
 
+output$plotly_nw = renderUI({
+  vis.par()
+  input$vari1
+  input$vari2
+  input$subs1
+  input$subs2
+  
+  isolate({
+    temp = vis.par()
+    #temp.x = temp$x
+    #temp$x=temp$y
+    #temp$y=temp.x
+    #temp.varnames.x = temp$varnames$x
+    #temp$varnames$x = temp$varnames$y
+    #temp$varnames$y = temp.varnames.x
+    if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
+      temp$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
+      
+      
+      curdir <- getwd()
+      on.exit(setwd(curdir))
+      tdir <- tempdir()
+      setwd(tdir)
+      do.call(iNZightPlots:::iNZightPlot, temp)
+      htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
+      addResourcePath("path", normalizePath(tdir))
+      list(
+        br(),
+        br(),
+        tags$a(href = "path/index.html", 
+                  "Open in a new window", 
+                   target="_blank"), 
+           br(),
+           br())
+    }
+  })
+})
+
+
+
+
+
+
+
+
+
 observe({
   input$vari1
   input$select.plot.type
@@ -6435,9 +6481,6 @@ output$interactive.plot = renderUI({
 
 
 
-
-
-
 observe({
   input$select.plot.type
   isolate({
@@ -7203,11 +7246,6 @@ observe({
     }
   })
 })
-
-
-
-
-
 
 
 
