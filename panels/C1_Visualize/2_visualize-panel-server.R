@@ -2864,6 +2864,15 @@ output$plot.appearance.panel = renderUI({
                        line.title,
                        line.width.object)
             } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "(gg) density (ridgeline)")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
+                       rotation.object)
+            } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) pyramid")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
@@ -3146,7 +3155,7 @@ observe({
       hideTab(inputId = "plot_selector", target = "1")
       showTab(inputId = "plot_selector", target = "2")
     } else if ((!is.null(input$select.plot.type) &&  input$select.plot.type %in% c("(gg) pie", "(gg) gridplot",
-                                                                                   "(gg) donut")) ||
+                                                                                   "(gg) donut", "(gg) density (ridgeline)")) ||
                (!is.null(input$sub1_level) && input$sub1_level == "_MULTI" && input$subs1 != "none") ||
                !is.null(input$sub2_level) && input$subs2 != "none") {
       hideTab(inputId = "plot_selector", target = "2")
@@ -3791,7 +3800,7 @@ output$code.variables.panel = renderUI({
                  (input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin", 
                                                 "(gg) density", "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
                                                 "(gg) stacked column/row", "(gg) pie", "(gg) donut", "(gg) gridplot",
-                                                "(gg) beeswarm", "(gg) pyramid"))) {
+                                                "(gg) beeswarm", "(gg) pyramid", "(gg) density (ridgeline)"))) {
           ret = list(fixedRow(column(10, hr())),
                      actionButton(inputId = "get_code_plot",
                                   label = "Store code",
