@@ -408,7 +408,7 @@ vis.mainPanel = function() {
         # actionButton("interactiveplotly",
         #              "Refresh",
         #              style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-
+        uiOutput("plotly_nw"),
         plotlyOutput("plotly_inter")
       )
       )

@@ -217,6 +217,7 @@ graphical.par = reactiveValues(
   palette = "default",
   ordered = "None",
   gg_perN = 1,
+  gg_bins = 30,
   showsidebar = TRUE,
   alpha = 1,
   bg = "grey93", #background colour
@@ -2075,6 +2076,8 @@ output$plot.appearance.panel = renderUI({
     
     sorting.title = h5(strong("Sorting"))
     
+    pyramid.title = h5(strong("Pyramid Options"))
+
     point.size.title = checkboxInput(inputId = "point_size_title",
                                      label = strong("Point Size"),
                                      value = input$point_size_title)
@@ -2157,10 +2160,19 @@ output$plot.appearance.panel = renderUI({
                                                    step=1, 
                                                    ticks = FALSE)))
     
-    gridplot.object = fixedRow(column(3, h5("Observations/square:")),
+    pyramid.slider.object = fixedRow(column(3, h5("Number of bins:")),
+                               column(6, sliderInput("pyramid.bins", 
+                                                     label = NULL, 
+                                                     value = graphical.par$gg_bins,
+                                                     min = 5,
+                                                     max = 50,
+                                                     step = 5)))
+                              
+    gridplot.object = fixedRow(column(3, h5("Observations / square:")),
                                column(6, numericInput("grid.square", 
                                                       label = NULL, 
                                                       value=n_fun(nrow(vis.data())))))
+    
     
     ggtheme.object = fixedRow(column(3, h5("Theme:")),
                               column(6, selectInput(inputId="gg.theme",label=NULL,
@@ -2229,7 +2241,7 @@ output$plot.appearance.panel = renderUI({
                column(6, selectInput(inputId="select.barcolor",label=NULL,
                                      choices=cols2,
                                      selected=graphical.par$bar.fill,
-                                     selectize = F)))
+                                     selectize = T)))
     )
     
     #    select.barcolor.object = fixedRow(column(3, h5("Bar Colour:")),
@@ -2559,15 +2571,15 @@ output$plot.appearance.panel = renderUI({
           #                 rotation.object,
           #                 ggtheme.object)
           
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) diverging stacked bar (likert)") {
+        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) spine/pyramid") {
           ret = list(general.appearance.title,
                      select.plot.type.object,
                      select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
-                     rotation.object,
-                     ggtheme.object)
-        } 
+                     ggtheme.object,
+                     rotation.object)
+        }
         # dotplot or histogram for numeric varible in x or 
         # dotplot or histogram for one numeric one factor variable
         # vari1 = numeric , vari2 = none
@@ -2852,7 +2864,16 @@ output$plot.appearance.panel = renderUI({
                        line.title,
                        line.width.object)
             } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) lollipop")) {
+                      (input$select.plot.type == "(gg) density (ridgeline)")) {
+              ret=list(general.appearance.title,
+                       select.plot.type.object,
+                       select.bg.object,
+                       adjust.size.scale.object,
+                       fill.color.object,
+                       ggtheme.object,
+                       rotation.object)
+            } else if(!is.null(input$select.plot.type) &&
+                      (input$select.plot.type == "(gg) pyramid")) {
               ret=list(general.appearance.title,
                        select.plot.type.object,
                        select.bg.object,
@@ -2860,10 +2881,8 @@ output$plot.appearance.panel = renderUI({
                        fill.color.object,
                        ggtheme.object,
                        rotation.object,
-                       point.options.title,
-                       ggsize.object,
-                       line.title,
-                       line.width.object)
+                       pyramid.title,
+                       pyramid.slider.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) column/row bar")) {
               ret=list(general.appearance.title,
@@ -3117,6 +3136,52 @@ output$plotly_inter = renderPlotly({
 })
 
 
+output$plotly_nw = renderUI({
+  vis.par()
+  input$vari1
+  input$vari2
+  input$subs1
+  input$subs2
+  
+  isolate({
+    temp = vis.par()
+    #temp.x = temp$x
+    #temp$x=temp$y
+    #temp$y=temp.x
+    #temp.varnames.x = temp$varnames$x
+    #temp$varnames$x = temp$varnames$y
+    #temp$varnames$y = temp.varnames.x
+    if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
+      temp$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
+      
+      
+      curdir <- getwd()
+      on.exit(setwd(curdir))
+      tdir <- tempdir()
+      setwd(tdir)
+      do.call(iNZightPlots:::iNZightPlot, temp)
+      htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
+      addResourcePath("path", normalizePath(tdir))
+      list(
+        br(),
+        br(),
+        tags$a(href = "path/index.html", 
+                  "Open in a new window", 
+                   target="_blank"), 
+           br(),
+           br())
+    }
+  })
+})
+
+
+
+
+
+
+
+
+
 observe({
   input$vari1
   input$select.plot.type
@@ -3130,12 +3195,13 @@ observe({
                                      "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
                                      "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
                                      "(gg) diverging stacked bar (likert)",
-                                     "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons",
+                                     "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons", "(gg) spine/pyramid",
+                                     "(gg) pyramid",
                                      "")) {
       hideTab(inputId = "plot_selector", target = "1")
       showTab(inputId = "plot_selector", target = "2")
     } else if ((!is.null(input$select.plot.type) &&  input$select.plot.type %in% c("(gg) pie", "(gg) gridplot",
-                                                                                   "(gg) donut")) ||
+                                                                                   "(gg) donut", "(gg) density (ridgeline)")) ||
                (!is.null(input$sub1_level) && input$sub1_level == "_MULTI" && input$subs1 != "none") ||
                !is.null(input$sub2_level) && input$subs2 != "none") {
       hideTab(inputId = "plot_selector", target = "2")
@@ -3187,6 +3253,15 @@ observe({
       graphical.par$rotate_labels$x = input$rotationx
   })
 })
+
+observe({
+  input$pyramid.bins
+  isolate({
+    if(!is.null(input$pyramid.bins))
+      graphical.par$gg_bins = as.numeric(input$pyramid.bins)
+  })
+})
+
 
 
 observe({
@@ -3612,7 +3687,6 @@ output$code.variables.panel = renderUI({
                                               column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                     choices=names(graphical.par$colourPalettes$cat),
                                                                     selected = "Colourblind Friendly",
-                                                                    size = 2,
                                                                     selectize = FALSE)))
       colour.palette.reverse.object = fixedRow(column(3),
                                                column(6, checkboxInput(inputId = "colour.palette.reverse", label = "Reverse palette",
@@ -3623,8 +3697,15 @@ output$code.variables.panel = renderUI({
       
       if(length(input$select.plot.type) != 0 && 
          (input$select.plot.type %in% c("(gg) column/row bar", "(gg) stacked column/row", "(gg) lollipop", "(gg) frequency polygons", 
-                                        "(gg) heatmap", "(gg) diverging stacked bar (likert)", "(gg) spine"))) {
-        ret = NULL
+                                        "(gg) heatmap", "(gg) diverging stacked bar (likert)", "(gg) spine/pyramid"))) {
+        ret = list(fixedRow(column(10, hr())),
+                   actionButton(inputId = "get_code_plot",
+                                label = "Store code",
+                                style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                   br(),
+                   br(),
+                   br(),
+                   br()) 
       }
     }
     
@@ -3659,8 +3740,7 @@ output$code.variables.panel = renderUI({
                                                            column(6, selectInput(inputId="select.colour.palette",label=NULL,
                                                                                  choices=names(graphical.par$colourPalettes$cat),
                                                                                  selected = "Colourblind Friendly",
-                                                                                 selectize=FALSE,
-                                                                                 size = 2))),
+                                                                                 selectize=FALSE))),
                                                   conditionalPanel("input.color_by_select != ' '",
                                                                    fixedRow(column(3),
                                                                             column(6, checkboxInput(inputId = "colour.palette.reverse",
@@ -3692,8 +3772,7 @@ output$code.variables.panel = renderUI({
                                                                                                   "TRUE" = names(graphical.par$colourPalettes$cont),
                                                                                                   "FALSE" = names(graphical.par$colourPalettes$cat)),
                                                                                  selected = input$select.colour.palette,
-                                                                                 selectize = FALSE,
-                                                                                 size = 2))),
+                                                                                 selectize = FALSE))),
                                                   conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
                                                                    fixedRow(column(3),
                                                                             column(6, checkboxInput(inputId = "colour.palette.reverse",
@@ -3767,8 +3846,15 @@ output$code.variables.panel = renderUI({
                  (input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin", 
                                                 "(gg) density", "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
                                                 "(gg) stacked column/row", "(gg) pie", "(gg) donut", "(gg) gridplot",
-                                                "(gg) beeswarm"))) {
-          ret = NULL
+                                                "(gg) beeswarm", "(gg) pyramid", "(gg) density (ridgeline)"))) {
+          ret = list(fixedRow(column(10, hr())),
+                     actionButton(inputId = "get_code_plot",
+                                  label = "Store code",
+                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                     br(),
+                     br(),
+                     br(),
+                     br())  
           
         } else
           ret = list(color.by.object,
@@ -3829,19 +3915,7 @@ output$code.variables.panel = renderUI({
     }
     
   })
-  if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))){
-  list(ret,
-       fixedRow(column(10, hr())),
-       actionButton(inputId = "get_code_plot",
-                    label = "Store code",
-                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-       br(),
-       br(),
-       br(),
-       br())
-  } else {
-    ret
-  }
+  ret
 })
 
 
@@ -4042,6 +4116,8 @@ output$trend.curve.panel = renderUI({
                           each_level_seperate.check))
   })
 })
+
+
 
 # update whether trend curves are parallel or not
 observe({
@@ -6405,9 +6481,6 @@ output$interactive.plot = renderUI({
 
 
 
-
-
-
 observe({
   input$select.plot.type
   isolate({
@@ -7173,11 +7246,6 @@ observe({
     }
   })
 })
-
-
-
-
-
 
 
 
