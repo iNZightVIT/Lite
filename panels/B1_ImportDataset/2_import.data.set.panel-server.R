@@ -11,25 +11,43 @@ observeEvent(input$files, {
   
   if(file.exists(input$files[1, "datapath"])) {
     isolate({
-      temp = load.data(get.data.dir.imported(),
-                       fileID = input$files[1, "name"],
-                       path = input$files[1, "datapath"])[[2]]
+      #temp = load.data(get.data.dir.imported(),
+      #                 fileID = input$files[1, "name"],
+      #                 path = input$files[1, "datapath"])[[2]]
+      fpath = input$files[1, "datapath"]
+      fext = tools::file_ext(fpath)
+      if(fext %in% c("RData", "rda")){
+        temp = as.data.frame(iNZightTools::load_rda(input$files[1, "datapath"])[[1]])
+      } else {
+        temp = as.data.frame(iNZightTools::smart_read(input$files[1, "datapath"]))
+      }
       
       if(!is.null(temp)){  
         plot.par$design=NULL
         values$data.set = temp
         updatePanel$doit = updatePanel$doit+1
         values$data.restore <<- get.data.set()
-        temp = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
-        if(length(temp)>1){
-          temp = temp[1:(length(temp)-1)]
-        } 
-        values$data.name = paste(temp,collapse=".")
-        import_reactives$success = T        
+        temp.name = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
+        if(length(temp.name)>1){
+          temp.name = temp.name[1:(length(temp.name)-1)]
+        }
+        values$data.name = temp.name
+        import_reactives$success = T
+        code.save$name = temp.name
+        code.save$variable = c(code.save$variable, list(c("\n", sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
+                                                                                    "\n"))))
+        code = c(paste0(code.save$name, " <- \n"), gsub(paste0("\".*(?=.", fext, ")"), paste0("\"", values$data.name), iNZightTools::code(temp), perl = T))
+        code = do.call(c, lapply(code, function(x) {
+          y <- try({
+            formatR::tidy_source(text = x, width.cutoff = 80, output = F, indent = 4)$text.tidy
+          }, silent = TRUE)
+          if (inherits(y, "try-error")) x else c(y, "\n")
+        }))
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+        values$name.restore = code.save$name
       }      
     })
   }
-  
 })
 
 
@@ -65,8 +83,6 @@ observeEvent(input$import_set, {
 output$load.data.panel = renderUI({
   input$selector
   isolate({
-    print(session$clientData$url_search)
-    
     # looks for get requests to pass in an URL for a dataset 
     if(grepl("docs.google.com", session$clientData$url_search)) {
       URL = session$clientData$url_search
