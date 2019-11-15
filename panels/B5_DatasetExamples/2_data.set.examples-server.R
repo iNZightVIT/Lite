@@ -37,10 +37,10 @@ set_to_change_reac <- reactive({
     temp=NULL
     if("Imported"%in%input$data_select){
       if(!file.exists(get.data.dir.imported())&&
-           file.writable(dirname(get.data.dir.imported()))){
+         file.writable(dirname(get.data.dir.imported()))){
         dir.create(get.data.dir.imported())
       }else if(!file.exists(get.data.dir.imported())&&
-                 !file.writable(dirname(get.data.dir.imported()))){
+               !file.writable(dirname(get.data.dir.imported()))){
         warning(paste("Directory : ",get.data.dir.imported(),
                       " : is not writable. Reset Imported dir 
                       to global dir",sep=""))
@@ -57,7 +57,7 @@ set_to_change_reac <- reactive({
     }else{
       paste0("Data: ", input[[input$data_select]])  
     }
-    }
+  }
 })
 
 output$set_to_change <- renderText({
@@ -173,8 +173,10 @@ observe({
         code.save$variable = c(code.save$variable, list(c("\n", sprintf("## Load example data set\n data(%s, package = '%s')",
                                                                         values$data.name, pkgname()), "\n")))
         code.save$variable = c(code.save$variable, list(c("\n", sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
-                                                                              "\n"))))
+                                                                                    "\n"))))
         code.save$variable = c(code.save$variable, list(c("\n", sprintf("%s <- %s", code.save$name, values$data.name), "\n")))
+        values$data.name = code.save$name
+        values$name.restore = code.save$name
       }
     })
   }

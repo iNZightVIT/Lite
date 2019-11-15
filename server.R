@@ -60,6 +60,7 @@ shinyServer(function(input, output, session) {
   values$data.dir.imported = "data"
   values$data.set = NULL
   values$data.restore = NULL
+  values$name.restore = NULL
   values$lite.version = "iNZight Lite Version 0.9.7.5"
   values$lite.update = "Last Updated: 30/09/16"
   values$button = F
@@ -80,15 +81,15 @@ shinyServer(function(input, output, session) {
   vars = get.vars(vars.path)
   if(!is.null(vars)){
     if("data.dir.global"%in%names(vars)&&
-         file.exists(vars$data.dir.global)){
+       file.exists(vars$data.dir.global)){
       values$data.dir.global = vars[["data.dir.global"]]
     }else if(!file.writable(vars$data.dir.global)){
       warning(paste("The directory : ",vars$data.dir.global,
                     " : is not writable."))
     }
     if("data.dir.imported"%in%names(vars)&&
-         dir.create.logical(paste0(vars$data.dir.imported,"/Imported"),
-                            recursive=T)){
+       dir.create.logical(paste0(vars$data.dir.imported,"/Imported"),
+                          recursive=T)){
       if(file.writable(vars$data.dir.imported)){
         values$data.dir.imported = vars[["data.dir.imported"]]
       }
@@ -118,13 +119,17 @@ shinyServer(function(input, output, session) {
   get.data.dir.imported = reactive({
     values$data.dir.imported
   })
-
+  
   get.data.set = reactive({
     values$data.set
   })
   
   get.data.restore = reactive({
     values$data.restore
+  })
+  
+  get.name.restore = reactive({
+    values$name.restore
   })
   
   get.lite.version = reactive({
@@ -142,7 +147,7 @@ shinyServer(function(input, output, session) {
   get.transform.text = reactive({
     values$transform.text
   })
-
+  
   get.create.variables.expression.text = reactive({
     values$create.variables.expression.text
   })
@@ -166,7 +171,7 @@ shinyServer(function(input, output, session) {
                           path = "gui-elements/",
                           full.names = TRUE)
   sapply(filepaths, source)
-
+  
   ##----------------------##
   ##  A1. "About" Module  ##
   ##----------------------##
@@ -178,13 +183,13 @@ shinyServer(function(input, output, session) {
   ##---------------------------------------##
   source("panels/B1_ImportDataset/1_import.data.set.panel-ui.R", local = TRUE)
   source("panels/B1_ImportDataset/2_import.data.set.panel-server.R", local = TRUE)
-
+  
   ##---------------------------------------##
   ##  B2. "File -> Import Dataset" Module  ##
   ##---------------------------------------##
   source("panels/B2_ExportDataset/1_export.dataset.panel-ui.R", local = TRUE)
   source("panels/B2_ExportDataset/2_export.dataset.panel-server.R", local = TRUE)
-
+  
   ##---------------------------------------##
   ##  B3. "File -> Export Dataset" Module  ##
   ##---------------------------------------##
@@ -202,7 +207,7 @@ shinyServer(function(input, output, session) {
   ##-----------------------------------------##
   source("panels/B5_DatasetExamples/1_data.set.examples-ui.R", local = TRUE)
   source("panels/B5_DatasetExamples/2_data.set.examples-server.R", local = TRUE)
-
+  
   ##------------------------##
   ##  C1. Visualize Module  ##
   ##------------------------##
@@ -220,7 +225,7 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   source("panels/D2_SortDataByVariables/1_sort.variables.ui.R", local = TRUE)
   source("panels/D2_SortDataByVariables/2_sort.variables.server.R", local = TRUE)
-
+  
   ##-----------------------------##
   ##  D3. Aggregate data         ##
   ##-----------------------------##
@@ -256,7 +261,7 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   source("panels/D11_MergeJoinDatasets/1_mergejoin.datasets.ui.R", local = TRUE)
   source("panels/D11_MergeJoinDatasets/2_mergejoin.datasets.server.R", local = TRUE)
-
+  
   ##-----------------------------##
   ##  D5. Restore data           ##
   ##-----------------------------##
@@ -314,15 +319,15 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   ##  E6. Add Columns            ##
   ##-----------------------------##
-#  source("panels/E6_AddColumns/1_add.columns.panel.ui.R", local = TRUE)
-#  source("panels/E6_AddColumns/2_add.columns.panel.server.R", local = TRUE)
-
+  #  source("panels/E6_AddColumns/1_add.columns.panel.ui.R", local = TRUE)
+  #  source("panels/E6_AddColumns/2_add.columns.panel.server.R", local = TRUE)
+  
   ##-----------------------------##
   ##  E7. Reshape dataset        ##
   ##-----------------------------##
-#  source("panels/E7_ReshapeDataset/1_reshape.data.panel.ui.R", local = TRUE)
-#  source("panels/E7_ReshapeDataset/2_reshape.data.panel.server.R", local = TRUE)
-
+  #  source("panels/E7_ReshapeDataset/1_reshape.data.panel.ui.R", local = TRUE)
+  #  source("panels/E7_ReshapeDataset/2_reshape.data.panel.server.R", local = TRUE)
+  
   ##-----------------------------##
   ##  E8. Remove columns         ##
   ##-----------------------------##
@@ -334,21 +339,21 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   source("panels/E9_DatesTimes/1_datestimes.ui.R", local = TRUE)
   source("panels/E9_DatesTimes/2_datestimes.server.R", local = TRUE)
-
+  
   ##-----------------------------##
   ##  F1. Qick explore           ##
   ##-----------------------------##
   source("panels/F1_QuickExplore/1_quick.explore.ui.R", local = TRUE)
   source("panels/F1_QuickExplore/2_quick.explore.server.R", local = TRUE)
-
-#   Advanced --> Time Series
-
+  
+  #   Advanced --> Time Series
+  
   ##----------------------##
   ##  Time Series Module  ##
   ##----------------------##
   source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
   source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
-
+  
   #   Advanced --> Model Fitting
   
   ##------------------------##
@@ -373,15 +378,15 @@ shinyServer(function(input, output, session) {
   ##---------------##
   source("panels/G1_Code//1_code.panel-ui.R", local = TRUE)
   source("panels/G1_Code//2_code.panel-server.R", local = TRUE)
-
   
-#     Help
-
-#     ##---------------##
-#     ##  Help Module  ##
-#     ##---------------##
-#     source("panels/7_Help/1_help-panel-ui.R", local = TRUE)
-#     output$help.panel <- renderUI({
-#         help.panel.ui(get.lite.version(),get.lite.update())
-#     })
+  
+  #     Help
+  
+  #     ##---------------##
+  #     ##  Help Module  ##
+  #     ##---------------##
+  #     source("panels/7_Help/1_help-panel-ui.R", local = TRUE)
+  #     output$help.panel <- renderUI({
+  #         help.panel.ui(get.lite.version(),get.lite.update())
+  #     })
 })
