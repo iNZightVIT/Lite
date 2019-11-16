@@ -63,7 +63,6 @@ Send bug reports/errors to inzightlite_support@stat.auckland.ac.nz.
 
 Recent Updates (Most to least recent):
 ----------------------------------------
-- [Import dataset] Now is able to read excel, sas, spss and stata file 
 - [visualize] Add various new plot types
 - [R code history] now, we have code history for ggplot, Import dataset, Example dataset, and some panels under manipulate variables
 
@@ -83,6 +82,7 @@ Please install all dependencies.
 - survey
 - shinyWidges
 - iNZightTools
+
 Directories:
 ------------
 - data:
