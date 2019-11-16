@@ -80,7 +80,7 @@ Please install all dependencies.
 - iNZightRegression
 - RJSONIO
 - survey
-- shinyWidges
+- shinyWidgets
 - iNZightTools
 
 Directories:
