@@ -26,17 +26,17 @@ numeric.variables.panel = function(data.set){
                                       uiOutput("rank.numeric.side")),
                      conditionalPanel("input.numeric_variables_select1=='Convert to categorical type'",
                                       uiOutput("convert.to.cate.side"))
-                     ),
-                list(conditionalPanel("input.numeric_variables_select1=='Transform variables'",
-                                      uiOutput("transform.columns.main")),
-                     conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
-                                      dataTableOutput("standardise.variables.table")),
-                     conditionalPanel("input.numeric_variables_select1=='Form class intervals'",
-                                      uiOutput("form.class.interval.main")),
-                     conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
-                                      uiOutput("rank.numeric.main")),
-                     conditionalPanel("input.numeric_variables_select1=='Convert to categorical type'",
-                                      dataTableOutput("convert.to.cate.table"))))
+    ),
+    list(conditionalPanel("input.numeric_variables_select1=='Transform variables'",
+                          uiOutput("transform.columns.main")),
+         conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
+                          dataTableOutput("standardise.variables.table")),
+         conditionalPanel("input.numeric_variables_select1=='Form class intervals'",
+                          uiOutput("form.class.interval.main")),
+         conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
+                          uiOutput("rank.numeric.main")),
+         conditionalPanel("input.numeric_variables_select1=='Convert to categorical type'",
+                          dataTableOutput("convert.to.cate.table"))))
   }
   if(!is.null(temp)){
     sidebarLayout(
@@ -47,11 +47,14 @@ numeric.variables.panel = function(data.set){
 }
 
 get.transform.sidebar =  function(data.set){
-  list(selectInput("select.columns.transform", "Select Columns", choices = colnames(data.set),multiple=T,selectize=F,size=7),
+  choice1 = colnames(data.set)
+  type = unname(sapply(data.set, class))
+  list(selectInput("select.columns.transform", "Select Columns", choices = choice1[type %in% c("numeric", 'integer')], multiple=F,selectize=F),
        selectInput("select.transform", "Select Transformation", 
-                   choices = c("", "change to factor","add","subtract","multiply","divide","log","root","square","abs","center",
-                               "standardize","median split","reverse-coding","copy","change sign"),
-                   multiple=F,selectize=F),
+                   choices = c("LOG (e)" = "log",  "LOG (10)" = "log10",
+                               "EXPONENTIAL" = "exp", "SQUARE (X^2)" = "square",
+                               "SQUARE ROOT" = "sqrt", "RECIPROCAL (1/X)" = "reciprocal"),
+                   multiple=F),
        actionButton("transform","Transform",
                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br(),textOutput("status"),br(),br(),
        help.display('Modify data','transform_columns',"panels/E2_NumericVariables/4_transform.variables.help.md"),br())

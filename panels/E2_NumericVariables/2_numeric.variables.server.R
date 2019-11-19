@@ -13,13 +13,16 @@ observe({
   input$transform
   isolate({
     if(!is.null(input$transform)&&input$transform>0){
-      temp = transform.perform(get.data.set(),
-                               input$select.transform,
-                               input$select.columns.transform)
+      temp = iNZightTools::transformVar(get.data.set(),
+                                        input$select.columns.transform,
+                                        input$select.transform)
       #         print(head(temp))
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
+        ## code history
+        code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
         values$transform.text = "The transformation of the columns was succesful!"
       }
     }
@@ -27,7 +30,9 @@ observe({
 })
 
 output$table_part <- renderDataTable({
-  transform.tempTable(get.data.set(),input$select.transform,input$select.columns.transform)
+  if(!is.null(input$select.transform) && !is.null(input$select.columns.transform)){
+    transform.tempTable(get.data.set(),input$select.transform,input$select.columns.transform)
+  }
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
 output$status = renderText({
@@ -84,6 +89,9 @@ observe({
       data = iNZightTools::standardizeVars(get.data.set(), varnames, names)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
+      ## code history
+      code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+      code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
     }
   })
 })
@@ -130,12 +138,15 @@ observe({
       data = iNZightTools::convertToCat(get.data.set(), vars, varnames)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
+      ## code history
+      code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+      code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
     }
   })
 })
-  
-  
-  
+
+
+
 
 ## Manipulate variables -> Numeric variables -> Form Class interval
 
@@ -280,8 +291,8 @@ output$labels.provide = renderUI({
       }
     }
     ret
-})
   })
+})
 ## Manipulate variables -> Numeric variables -> Rank numeric
 
 output$rank.numeric.table = renderDataTable({
@@ -304,11 +315,14 @@ observe({
   input$rank.numeric.submit
   isolate({
     if(!is.null(input$rank.numeric.submit)&&
-         input$rank.numeric.submit>0&&
-         !is.null(input$rank.numeric.select.column)){
+       input$rank.numeric.submit>0&&
+       !is.null(input$rank.numeric.select.column)){
       data = iNZightTools::rankVars(get.data.set(), input$rank.numeric.select.column)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
+      ## code history
+      code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+      code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
     }
   })
 })
