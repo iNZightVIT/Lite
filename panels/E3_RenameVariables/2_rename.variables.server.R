@@ -5,9 +5,10 @@ rename_variables = reactiveValues(
 )
 
 
+
 output$rename_variables_two_columns = renderUI({
   get.data.set()
-  ret = NULL
+  ret = list()
   isolate({
     old.variable.names = colnames(get.data.set())
     num.variables = length(old.variable.names)
@@ -27,29 +28,45 @@ output$rename_variables_two_columns = renderUI({
 
 
 observe({
-  input$rename_variables_two_columns
+  input$rename_variables_two_columns_but
   isolate({
-    if(rename_variables$num.cols > 0) {
-      rename.variables.test = FALSE
-      namelist = c()
+    tryCatch({
+    if(rename_variables$num.cols > 0 && !is.null(input$rename_variables_two_columns_but) &&
+       input$rename_variables_two_columns_but > 0) {
+#      rename.variables.test = FALSE
+      old.variable.names = colnames(get.data.set())
+      indexes1= grep("^variablenames[0-9]+$",names(input))
+      indexes1 = names(input)[indexes1]
+      indexes1 = indexes1[indexes1 %in% paste0("variablenames", 1:length(old.variable.names))]
+      idxmch = as.numeric(gsub("variablenames", "", indexes1))
+      namelist = list()
       for(i in 1:rename_variables$num.cols) {
         if(!is.null(eval(parse(text = paste0("input$variablenames", i)))) 
            && length(eval(parse(text = paste0("input$variablenames", i)))) > 0
            && !grepl("^\\s*$", eval(parse(text = paste0("input$variablenames", i))))) {
-          rename.variables.test = TRUE
-          namelist[i] = eval(parse(text = paste0("input$variablenames", i)))
+#          rename.variables.test = TRUE
+          namelist[i] = input[[indexes1[i]]]
+          names(namelist)[i] = colnames(get.data.set())[idxmch[i]]
         }
-        else
-          rename.variables.test = FALSE
       }
-      
-      if(rename.variables.test) {
-        temp = get.data.set()
-        names(temp) = namelist
-        updatePanel$datachanged = updatePanel$datachanged+1
+      changed <- sapply(seq_along(namelist), function(i){
+        names(namelist)[i] != namelist[i]
+      })
+      namelist = namelist[changed]
+      if(!is.null(namelist)){
+        temp = iNZightTools::renameVars(get.data.set(), namelist)
+      }
+      if(!is.null(temp)){
+        updatePanel$datachanged = updatePanel$datachanged + 1
         values$data.set = temp
+        ## code history
+        code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
       }
     }
+    }, error = function(e) {
+      print(e)
+    }, finally = {})
   })
 })
 
