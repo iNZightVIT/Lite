@@ -38,19 +38,19 @@ observe({
   input$create.variables.submit
   isolate({
     if(!is.null(input$create.variables.submit)&&
-         input$create.variables.submit>0){
-      temp = get.create.variables(get.data.set(),
-                                  get.create.variables.expression.text(),
-                                  input$create.variables.name)
-      if(is.null(temp)){
-        
-      }else{
+       input$create.variables.submit>0){
+      temp = iNZightTools::createNewVar(get.data.set(),
+                                        new_var = input$create.variables.name,
+                                        get.create.variables.expression.text())
+      if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
         values$create.variables.expression.text = "";
+        ## code history
+        code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
       }
     }
-    
   })
 })
 
@@ -73,7 +73,7 @@ output$create.variables.status.message = renderPrint({
     if(is.null(get.create.variables(get.data.set(),
                                     get.create.variables.expression.text(),
                                     input$create.variables.name))||
-         input$create.variables.name%in%c("",colnames(get.data.set()))){
+       input$create.variables.name%in%c("",colnames(get.data.set()))){
       cat("This input can't be processed.")
     }else{
       cat("The expression is valid.")
