@@ -45,6 +45,7 @@ observeEvent(input$files, {
             if (inherits(y, "try-error")) x else c(y, "\n")
           }))
           code = paste0(code, collapse = "\n ")
+          print(gsub("(.*)\\).*","\\1)", code))
           code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
         }
         values$name.restore = temp.name
