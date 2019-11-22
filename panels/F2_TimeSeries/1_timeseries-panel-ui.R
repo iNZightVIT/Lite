@@ -50,14 +50,16 @@ ts.sidebarPanel = function(data.set) {
       ##  of variables extracted from the dataset, or providing one
       ##  manually.
       hr(),
+      h5(strong("Time Information: ")),
       #uiOutput("time_info"),
+      div(style = "padding: 0px 0px; margin-top:-1.5em", 
        radioButtons(
            inputId = "time_info",
-           label = "Time Information: ",
+           label = "",
            choices =
                c("Select time variable" = 1,
                  "Provide time manually" = 2)
-       ),
+       )),
       ##  If the user decides to select a variable, then load a panel
       ##  which contains the list of variables extracted from the
       ##  dataset.
@@ -82,7 +84,19 @@ ts.sidebarPanel = function(data.set) {
                        label = "Provide time information")
       ),
       hr(),
-      checkboxInput("timeseries_smoother", label = "Add smoother"),
+      h5(strong("Model Settings:")),
+      ##  Section 2: Seasonal Pattern
+      ##
+      ##  Next, we ask the user to specify a seasonal pattern.
+      ##  This can be either additive or multiplicative.
+      checkboxInput("timeseries_smoother", label = "Show smoother"),
+      radioButtons(inputId = "choose_season",
+                   label = "Seasonal Pattern: ",
+                   choices =
+                   c("Additive" = FALSE,
+                     "Multiplicative" = TRUE),
+                   inline = T),
+      
       ##  A slider bar for smoothing parameter.
       sliderInput(inputId = "slidersmoothing", 
                   label = "Smoothness:", 
@@ -90,16 +104,7 @@ ts.sidebarPanel = function(data.set) {
                   max = 1, 
                   value = 0.1, 
                   step = 0.01),
-      ##  Section 2: Seasonal Pattern
-      ##
-      ##  Next, we ask the user to specify a seasonal pattern.
-      ##  This can be either additive or multiplicative.
-      radioButtons(inputId = "choose_season",
-                   label = "Seasonal Pattern: ",
-                   choices =
-                       c("Additive" = FALSE,
-                         "Multiplicative" = TRUE)
-                   ),
+     
       hr(),
       ##  Section 3: Select Variables
       ##
@@ -108,7 +113,26 @@ ts.sidebarPanel = function(data.set) {
       ##  on the y-axis. "rev()" is used so that a non-time variable is
       ##  selected (since time is on the x-axis), since the time
       ##  variable is often the first element of "colnames(data)".
-      uiOutput("time.plot.select"),
+      
+      fixedRow(column(width = 6, uiOutput("time.plot.select")),
+               column(width = 6, 
+                      h5(strong("Plot Type Options:")),
+                      div(style = "padding: 0px 0px; margin-top:-1.5em",
+                        conditionalPanel(condition = "input.select_variables.length == 1",
+                                         radioButtons(inputId = "time_plot_info1", label = "", 
+                                                      choices = c("Standard" = 1,
+                                                                  "Decomposed" = 2,
+                                                                  "Recomposed" = 3,
+                                                                  "Seasonal" = 4,
+                                                                  "Forecast" = 5,
+                                                                  "Summary" = 6),
+                                                      selected  = 1)),
+                        conditionalPanel(condition = "input.select_variables.length > 1",
+                                         radioButtons(inputId = "time_plot_info", label = "", 
+                                                      choices = c("Single graph" = 1,
+                                                                  "Separate graphs" = 2),
+                                                      selected  = 1))
+               ))),
 
       ##  Section 4: Select Labels
       ##
@@ -121,7 +145,8 @@ ts.sidebarPanel = function(data.set) {
                    choices =
                        c("No" = 1,
                          "Yes" = 2),
-                   selected = 1),
+                   selected = 1,
+                   inline = T),
       ## hr(),
       conditionalPanel(
           condition = "input.customize_labels == 2",
@@ -133,7 +158,19 @@ ts.sidebarPanel = function(data.set) {
                     value = "")
       ),
       hr(),
-      ts.help()
+      radioButtons(inputId = "customize_adjust_limits",
+                   label =  "Adjust Limits: ",
+                   choices = c("No" = 1, "Yes" = 2),
+                   selected = 1,
+                   inline = T),
+      conditionalPanel(
+        condition = "input.customize_adjust_limits == 2",
+        uiOutput("time.range.var")
+        ),
+      hr(),
+      ts.help(),
+      br(),
+      br()
   )
 }
 
@@ -154,234 +191,7 @@ ts.mainPanel = function() {
     ##  Note the use of "br()" (= line break) for vertical spacing.
 
     mainPanelUI = list(
-        ##  Section 1: Data Validation
-        ##
-        ##  First, we add a data validation mechanism.
-        ## h3(textOutput(outputId = "validate"), style = "color:red"),
-        ## h3(textOutput(outputId = "variable_message"), style = "color:red"),
-
-        ##  Section 2: Single Series Plots
-        ##
-        ##  Next, we create a tabset panel for Single Series Plots.
-        ##  This panel appears if the user selects only ONE variable to
-        ##  plot. Note that each tab (within a panel) has some help text
-        ##  preceding any output produced.
-        conditionalPanel(
-            condition = "input.select_variables.length == 1",
-            tabsetPanel(
-                id = "singleSeriesTabs",
-                type = "pills", # Try type = "tabs" is you wish...
-                ##  Tab 1: Time Series Plot
-                tabPanel(
-                    title = "Time",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Time Plot"),
-                        "for",
-                        strong("single"),
-                        "series."),
-                    
-                    plotOutput("timeseries_plot"),
-                    
-                    br(),
-                    
-                    fixedRow(column(width = 3, 
-                                    NULL),
-                             column(width = 3, 
-                                    downloadButton(outputId = "saveTimeplot", label = "Download Plot")),
-                             column(width = 3,
-                                    radioButtons(inputId = "saveTimeplottype", 
-                                                 label = strong("Select the file type"), 
-                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
-                ),
-                ## uiOutput("timeseries_layout")),
-                ## actionButton(inputId = "start_animate",
-                ##              label = "Start Animation"),
-                ## actionButton(inputId = "stop_animate",
-                ##              label = "Stop Animation")
-                ##  Tab 2: Seasonal Plot
-                tabPanel(
-                    title = "Seasonal",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Seasonal Plot"),
-                        "for",
-                        strong("single"),
-                        "series.",
-                        br()),
-                    plotOutput(outputId = "seasonal_plot"),
-                    
-                    br(),
-                    
-                    fixedRow(column(width = 3, 
-                                    NULL),
-                             column(width = 3, 
-                                    downloadButton(outputId = "saveSeasonalplot", label = "Download Plot")),
-                             column(width = 3,
-                                    radioButtons(inputId = "saveSeasonalplottype", 
-                                                 label = strong("Select the file type"), 
-                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
-                ),
-
-                ##  Tab 3: Decomposed Plot
-                tabPanel(
-                    title = "Decomposed",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Decomposed Plot"),
-                        "for",
-                        strong("single"),
-                        "series.",
-                        br(),
-                        br()),
-                    plotOutput(outputId = "decomposed_plot", height = "600px"),
-                    
-                    br(),
-                    
-                    fixedRow(column(width = 3, 
-                                    NULL),
-                             column(width = 3, 
-                                    downloadButton(outputId = "saveDecomposedplot", label = "Download Plot")),
-                             column(width = 3,
-                                    radioButtons(inputId = "saveDecomposedplottype", 
-                                                 label = strong("Select the file type"), 
-                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
-                ),
-
-                ##  Tab 4: Trend + Seasonal Plot
-                tabPanel(
-                    title = "Recomposed",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Recomposed Plot"),
-                        "for",
-                        strong("single"),
-                        "series.",
-                        br(),
-                        br()),
-                    plotOutput(outputId = "trSeasonal_plot", height = "600px"),
-                    
-                    br(),
-                    
-                    fixedRow(column(width = 3, 
-                                    NULL),
-                             column(width = 3, 
-                                    downloadButton(outputId = "saveRecomposedplot", label = "Download Plot")),
-                             column(width = 3,
-                                    radioButtons(inputId = "saveRecomposedplottype", 
-                                                 label = strong("Select the file type"), 
-                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
-                ),
-
-                ##  Tab 5: Forecast Plot
-                tabPanel(
-                    title = "Forecast",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Forecast Plot"),
-                        "for",
-                        strong("single"),
-                        "series.",
-                        br(),
-                        br()
-                    ),
-                    plotOutput(outputId = "forecast_plot"),
-                    
-                    br(),
-                    
-                    fixedRow(column(width = 3, 
-                                    NULL),
-                             column(width = 3, 
-                                    downloadButton(outputId = "saveForecastplot", label = "Download Plot")),
-                             column(width = 3,
-                                    radioButtons(inputId = "saveForecastplottype", 
-                                                 label = strong("Select the file type"), 
-                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
-                ),
-
-                ##  Tab 6: Forecast Summary
-                tabPanel(
-                    title = "Summary",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Forecast Summary"),
-                        "for",
-                        strong("single"),
-                        "series.",
-                        br(),
-                        br()
-                    ),
-                    verbatimTextOutput(outputId = "forecast_summary")
-                )
-            )
-        ),
-        ##  Section 3: Multiple Series Plots
-        conditionalPanel(
-            condition = "input.select_variables.length > 1",
-            tabsetPanel(
-                id = "multipleSeriesTabs",
-                type = "pills", # Try type = "tabs" if you wish...
-                ##  Tab 1:  Single Plot Layout
-                tabPanel(
-                    title = "Single Plot",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Single-Plot"),
-                        "for",
-                        strong("several"),
-                        "series.",
-                        br(),
-                        br()
-                    ),
-                    uiOutput("multipleSeries_single_layout"),
-                    
-                    br(),
-                    
-                    fixedRow(column(width = 3, 
-                                    NULL),
-                             column(width = 3, 
-                                    downloadButton(outputId = "saveSingleplot", label = "Download Plot")),
-                             column(width = 3,
-                                    radioButtons(inputId = "saveSingleplottype", 
-                                                 label = strong("Select the file type"), 
-                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
-                ),
-                ##  Tab 2:  Multiple Plot Layout
-                tabPanel(
-                    title = "Multiple Plot",
-                    helpText(
-                        br(),
-                        "A",
-                        strong("Multi-Plot"),
-                        "for",
-                        strong("several"),
-                        "series.",
-                        br(),
-                        br()
-                    ),
-                    uiOutput("multipleSeries_multi_layout"),
-                    
-                    br(),
-                    
-                    fixedRow(column(width = 3, 
-                                    NULL),
-                             column(width = 3, 
-                                    downloadButton(outputId = "saveMultiplot", label = "Download Plot")),
-                             column(width = 3,
-                                    radioButtons(inputId = "saveMultiplottype", 
-                                                 label = strong("Select the file type"), 
-                                                 choices = list("jpg", "png", "pdf"), inline = TRUE)))
-                )
-            )
-        )
-
+         uiOutput("ts.main.ui")
     )
 }
 
