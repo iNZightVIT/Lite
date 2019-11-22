@@ -51,6 +51,32 @@ output$provide_xlab_ts <- renderUI({
             value = getTime(get.data.set(), index = FALSE))
 })
 
+ts.para = reactiveValues()
+ts.para$tsObj = NULL
+
+observe(
+  if(date_check(get.data.set(),input$select_timevars)){
+    temp = get.data.set()
+    if(!input$select_timevars%in%"time"){
+      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+    }
+    ts.para$tsObj = iNZightTS(temp,
+                              var = variable.names())
+  }
+)
+
+
+
+mod.lim.ts <- reactive({
+  xr =  range(time(tsObj$tsObj))
+  if(input$check_lim_fit == TRUE){
+    input$adjust_limit_range
+  } else if(input$check_lim_fit == FALSE) {
+    input$fit_ts_limit
+  }
+})
+
+
 
 ## main UI
 output$ts.main.ui <- renderUI({
@@ -419,20 +445,16 @@ variable.names = reactive({
 ###  Time Series Plot
 output$timeseries_plot = renderPlot({
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     suppressWarnings(tryCatch({
       plot(
-        iNZightTS(temp,
-                  var = variable.names()),
+        ts.para$tsObj,
         ## start = start),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
         multiplicative = as.logical(input$choose_season),
         t = 100*input$slidersmoothing,
-        smoother = input$timeseries_smoother
+        smoother = input$timeseries_smoother,
+        mod.lim = mod.lim.ts()
       )
     }, 
     #        warning = function(w) {
@@ -477,14 +499,9 @@ output$saveTimeplot = downloadHandler(
         pdf(file, useDingbats = FALSE)
       
       if(date_check(get.data.set(),input$select_timevars)){
-        temp = get.data.set()
-        if(!input$select_timevars%in%"time"){
-          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-        }
         suppressWarnings(tryCatch({
           plot(
-            iNZightTS(temp,
-                      var = variable.names()),
+            ts.para$tsObj,
             ## start = start),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
@@ -526,15 +543,10 @@ output$plotly_tsmain = renderPlotly({
   input$time_plot_info1
   isolate({
     if(date_check(get.data.set(),input$select_timevars)){
-      temp = get.data.set()
-      if(!input$select_timevars%in%"time"){
-        colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-      }
       pdf(NULL)
       suppressWarnings(tryCatch({
         plot(
-          iNZightTS(temp,
-                    var = variable.names()),
+          ts.para$tsObj,
           ## start = start),
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
@@ -559,10 +571,6 @@ output$plotly_tsmain = renderPlotly({
 # open in new window
 output$plotly_tsmainnw = renderUI({
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     curdir <- getwd()
     on.exit(setwd(curdir))
     #set to temp directory
@@ -572,8 +580,7 @@ output$plotly_tsmainnw = renderUI({
     on.exit(dev.off(cdev), add = TRUE)
     suppressWarnings(tryCatch({
       plot(
-        iNZightTS(temp,
-                  var = variable.names()),
+        ts.para$tsObj,
         ## start = start),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
@@ -608,14 +615,9 @@ output$plotly_tsmainnw = renderUI({
 output$seasonal_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     suppressWarnings(tryCatch({
       seasonplot(
-        iNZightTS(temp,
-                  var = variable.names()),
+        ts.para$tsObj,
         ylab = input$provide_ylab,
         xlab = input$provide_xlab,
         multiplicative = as.logical(input$choose_season),
@@ -664,14 +666,9 @@ output$saveSeasonalplot = downloadHandler(
         pdf(file, useDingbats = FALSE)
       
       if(date_check(get.data.set(),input$select_timevars)){
-        temp = get.data.set()
-        if(!input$select_timevars%in%"time"){
-          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-        }
         suppressWarnings(tryCatch({
           seasonplot(
-            iNZightTS(temp,
-                      var = variable.names()),
+            ts.para$tsObj,
             ylab = input$provide_ylab,
             xlab = input$provide_xlab,
             multiplicative = as.logical(input$choose_season),
@@ -705,14 +702,9 @@ output$saveSeasonalplot = downloadHandler(
 output$decomposed_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     suppressWarnings(tryCatch({
       plot(iNZightTS::decompose(
-        iNZightTS(temp,
-                  var = variable.names()),
+        ts.para$tsObj,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
         multiplicative = as.logical(input$choose_season),
@@ -762,14 +754,9 @@ output$saveDecomposedplot = downloadHandler(
         pdf(file, useDingbats = FALSE)
       
       if(date_check(get.data.set(),input$select_timevars)){
-        temp = get.data.set()
-        if(!input$select_timevars%in%"time"){
-          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-        }
         suppressWarnings(tryCatch({
           plot(iNZightTS::decompose(
-            iNZightTS(temp,
-                      var = variable.names()),
+            ts.para$tsObj,
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             multiplicative = as.logical(input$choose_season),
@@ -798,20 +785,15 @@ output$saveDecomposedplot = downloadHandler(
 output$trSeasonal_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     suppressWarnings(tryCatch({
       plot(iNZightTS::decompose(
-        iNZightTS(temp,
-                  var = variable.names()),
+        ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
         t = 100*input$slidersmoothing,
       ),
       xlab = input$provide_xlab,
       ylab = input$provide_ylab,
-      recompose.progress = c(1, nrow(temp)))
+      recompose.progress = c(1, nrow(get.data.set())))
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in recompose plot \n")
@@ -855,20 +837,15 @@ output$saveRecomposedplot = downloadHandler(
         pdf(file, useDingbats = FALSE)
       
       if(date_check(get.data.set(),input$select_timevars)){
-        temp = get.data.set()
-        if(!input$select_timevars%in%"time"){
-          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-        }
         suppressWarnings(tryCatch({
           plot(iNZightTS::decompose(
-            iNZightTS(temp,
-                      var = variable.names()),
+            ts.para$tsObj,
             multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing,
           ),
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
-          recompose.progress = c(1, nrow(temp)))
+          recompose.progress = c(1, nrow(get.data.set())))
         }, 
         #        warning = function(w) {
         #          cat("Warning produced in recompose plot \n")
@@ -897,19 +874,13 @@ output$saveRecomposedplot = downloadHandler(
 output$forecast_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
-    tsObj = iNZightTS(temp,
-                      var = variable.names())
     suppressWarnings(tryCatch({
       plot(
-        tsObj,
+        ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
-        forecast = tsObj$freq * 2
+        forecast = ts.para$tsObj$freq * 2
       )
     }, 
     #        warning = function(w) {
@@ -941,20 +912,14 @@ output$plotly_tsforecast = renderPlotly({
   input$time_plot_info1
   isolate({
     if(date_check(get.data.set(),input$select_timevars)){
-      temp = get.data.set()
-      if(!input$select_timevars%in%"time"){
-        colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-      }
-      tsObj = iNZightTS(temp,
-                        var = variable.names())
       pdf(NULL)
       suppressWarnings(tryCatch({
         plot(
-          tsObj,
+          ts.para$tsObj,
           multiplicative = as.logical(input$choose_season),
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
-          forecast = tsObj$freq * 2
+          forecast = ts.para$tsObj$freq * 2
         )}, 
         #        warning = function(w) {
         #          cat("Warning produced in forecastplot \n")
@@ -973,12 +938,6 @@ output$plotly_tsforecast = renderPlotly({
 ## open in new window
 output$plotly_tsforecastnw = renderUI({
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
-    tsObj = iNZightTS(temp,
-                      var = variable.names())
     curdir <- getwd()
     on.exit(setwd(curdir))
     #set to temp directory
@@ -988,11 +947,11 @@ output$plotly_tsforecastnw = renderUI({
     on.exit(dev.off(cdev), add = TRUE)
     suppressWarnings(tryCatch({
       plot(
-        tsObj,
+        ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
-        forecast = tsObj$freq * 2
+        forecast = ts.para$tsObj$freq * 2
       )}, 
       #        warning = function(w) {
       #          cat("Warning produced in forecastplot \n")
@@ -1048,14 +1007,12 @@ output$saveForecastplot = downloadHandler(
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
         suppressWarnings(tryCatch({
-          tsObj = iNZightTS(temp,
-                            var = variable.names())
           plot(
-            tsObj,
+            ts.para$tsObj,
             multiplicative = as.logical(input$choose_season),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
-            forecast = tsObj$freq * 2
+            forecast = ts.para$tsObj$freq * 2
           )
         }, 
         #        warning = function(w) {
@@ -1080,20 +1037,13 @@ output$saveForecastplot = downloadHandler(
 
 output$forecast_summary = renderPrint({
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     suppressWarnings(tryCatch({
-      tsObj = iNZightTS(temp,
-                        var = variable.names())
-      
       iNZightTS::pred(plot(
-        tsObj,
+        ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
-        forecast = tsObj$freq * 2
+        forecast = ts.para$tsObj$freq * 2
       ))
     }, 
     #        warning = function(w) {
@@ -1117,14 +1067,9 @@ output$forecast_summary = renderPrint({
 output$multiple_single_plot = renderPlot({
   #     input$selctor
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     suppressWarnings(tryCatch({
       plot(
-        iNZightTS(temp,
-                  var = variable.names()),
+        ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
         t = 100*input$slidersmoothing
       )
@@ -1169,14 +1114,9 @@ output$saveSingleplot = downloadHandler(
         pdf(file, useDingbats = FALSE)
       
       if(date_check(get.data.set(),input$select_timevars)){
-        temp = get.data.set()
-        if(!input$select_timevars%in%"time"){
-          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-        }
         suppressWarnings(tryCatch({
           plot(
-            iNZightTS(temp,
-                      var = variable.names()),
+            ts.para$tsObj,
             multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing
           )
@@ -1214,14 +1154,9 @@ output$multipleSeries_single_layout = renderUI({
 output$multiple_multi_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars)){
-    temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-    }
     suppressWarnings(tryCatch({
       plot(
-        iNZightTS(temp,
-                  var = variable.names()),
+        ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
         t = 100*input$slidersmoothing,
         compare = FALSE
@@ -1268,14 +1203,9 @@ output$saveMultiplot = downloadHandler(
         pdf(file, useDingbats = FALSE)
       
       if(date_check(get.data.set(),input$select_timevars)){
-        temp = get.data.set()
-        if(!input$select_timevars%in%"time"){
-          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-        }
         suppressWarnings(tryCatch({
           plot(
-            iNZightTS(temp,
-                      var = variable.names()),
+            ts.para$tsObj,
             multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing,
             compare = FALSE
