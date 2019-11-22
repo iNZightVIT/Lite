@@ -136,7 +136,7 @@ output$timeseries_plot = renderPlot({
             ## start = start),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
-            multiplicative = input$choose_season,
+            multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing,
             smoother = input$timeseries_smoother
           )
@@ -196,7 +196,7 @@ output$saveTimeplot = downloadHandler(
               ## start = start),
               xlab = input$provide_xlab,
               ylab = input$provide_ylab,
-              multiplicative = input$choose_season,
+              multiplicative = as.logical(input$choose_season),
               t = 100*input$slidersmoothing
             )
           }, 
@@ -218,7 +218,6 @@ output$saveTimeplot = downloadHandler(
   })  
 
 
-
 ###  Seasonal Plot
 output$seasonal_plot = renderPlot({
 #     input$selector
@@ -234,7 +233,7 @@ output$seasonal_plot = renderPlot({
                       var = variable.names()),
             ylab = input$provide_ylab,
             xlab = input$provide_xlab,
-            multiplicative = input$choose_season,
+            multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing
           )
         }, 
@@ -292,7 +291,7 @@ output$saveSeasonalplot = downloadHandler(
                         var = variable.names()),
               ylab = input$provide_ylab,
               xlab = input$provide_xlab,
-              multiplicative = input$choose_season,
+              multiplicative = as.logical(input$choose_season),
               t = 100*input$slidersmoothing
             )
           }, 
@@ -335,7 +334,7 @@ output$decomposed_plot = renderPlot({
                     var = variable.names()),
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
-          multiplicative = input$choose_season,
+          multiplicative = as.logical(input$choose_season),
           t = 100*input$slidersmoothing
         ))
       }, 
@@ -394,7 +393,7 @@ output$saveDecomposedplot = downloadHandler(
                         var = variable.names()),
               xlab = input$provide_xlab,
               ylab = input$provide_ylab,
-              multiplicative = input$choose_season,
+              multiplicative = as.logical(input$choose_season),
               t = 100*input$slidersmoothing
             ))
           }, 
@@ -430,7 +429,7 @@ output$trSeasonal_plot = renderPlot({
           plot(iNZightTS::decompose(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = input$choose_season,
+            multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing,
           ),
           xlab = input$provide_xlab,
@@ -489,7 +488,7 @@ output$saveRecomposedplot = downloadHandler(
             plot(iNZightTS::decompose(
               iNZightTS(temp,
                         var = variable.names()),
-              multiplicative = input$choose_season,
+              multiplicative = as.logical(input$choose_season),
               t = 100*input$slidersmoothing,
             ),
             xlab = input$provide_xlab,
@@ -533,7 +532,7 @@ output$forecast_plot = renderPlot({
           forecastplot(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = input$choose_season
+            multiplicative = as.logical(input$choose_season)
           )
         }, 
 #        warning = function(w) {
@@ -588,7 +587,7 @@ output$saveForecastplot = downloadHandler(
             forecastplot(
               iNZightTS(temp,
                         var = variable.names()),
-              multiplicative = input$choose_season
+              multiplicative = as.logical(input$choose_season)
             )
           }, 
           #        warning = function(w) {
@@ -623,7 +622,7 @@ output$forecast_summary = renderPrint({
           forecastplot(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = input$choose_season,
+            multiplicative = as.logical(input$choose_season),
             show = FALSE
           )
         }, 
@@ -658,7 +657,7 @@ output$multiple_single_plot = renderPlot({
           plot(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = input$choose_season,
+            multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing
           )
         }, 
@@ -712,7 +711,7 @@ output$saveSingleplot = downloadHandler(
             plot(
               iNZightTS(temp,
                         var = variable.names()),
-              multiplicative = input$choose_season,
+              multiplicative = as.logical(input$choose_season),
               t = 100*input$slidersmoothing
             )
           }, 
@@ -763,7 +762,7 @@ output$multiple_multi_plot = renderPlot({
           plot(
             iNZightTS(temp,
                       var = variable.names()),
-            multiplicative = ifelse(input$choose_season, TRUE, FALSE),
+            multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing,
             compare = FALSE
           )
@@ -819,7 +818,7 @@ output$saveMultiplot = downloadHandler(
             plot(
               iNZightTS(temp,
                         var = variable.names()),
-              multiplicative = ifelse(input$choose_season, TRUE, FALSE),
+              multiplicative = as.logical(input$choose_season),
               t = 100*input$slidersmoothing,
               compare = FALSE
             )
