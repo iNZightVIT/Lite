@@ -150,9 +150,7 @@ ts.sidebarPanel = function(data.set) {
       ## hr(),
       conditionalPanel(
           condition = "input.customize_labels == 2",
-          textInput(inputId = "provide_xlab",
-                    label = "Label for the x-axis:",
-                    value = ""),
+          uiOutput("provide_xlab_ts"),
           textInput(inputId = "provide_ylab",
                     label = "Label for the y-axis:",
                     value = "")

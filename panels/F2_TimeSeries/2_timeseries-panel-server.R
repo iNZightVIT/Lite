@@ -43,7 +43,14 @@ output$time.range.var <- renderUI({
   )
 })
 
-observe({print(input$adjust_limit_range)})
+
+
+output$provide_xlab_ts <- renderUI({
+  textInput(inputId = "provide_xlab",
+            label = "Label for the x-axis:",
+            value = getTime(get.data.set(), index = FALSE))
+})
+
 
 ## main UI
 output$ts.main.ui <- renderUI({
