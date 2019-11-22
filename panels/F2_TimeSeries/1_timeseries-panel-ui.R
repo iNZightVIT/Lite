@@ -237,7 +237,7 @@ ts.mainPanel = function() {
                         "series.",
                         br(),
                         br()),
-                    plotOutput(outputId = "decomposed_plot"),
+                    plotOutput(outputId = "decomposed_plot", height = "600px"),
                     
                     br(),
                     
@@ -263,7 +263,7 @@ ts.mainPanel = function() {
                         "series.",
                         br(),
                         br()),
-                    plotOutput(outputId = "trSeasonal_plot"),
+                    plotOutput(outputId = "trSeasonal_plot", height = "600px"),
                     
                     br(),
                     
