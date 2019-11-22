@@ -322,36 +322,36 @@ output$saveSeasonalplot = downloadHandler(
 
 ###  Decomposed Plot
 output$decomposed_plot = renderPlot({
-#     input$selector
-    if(date_check(get.data.set(),input$select_timevars)){
-      if (length(input$singleSeriesTabs) > 0) {
-        temp = get.data.set()
-        if(!input$select_timevars%in%"time"){
-          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
-        }
-        suppressWarnings(tryCatch({
-          decompositionplot(
-            iNZightTS(temp,
-                      var = variable.names()),
-            xlab = input$provide_xlab,
-            ylab = input$provide_ylab,
-            multiplicative = input$choose_season,
-            t = 100*input$slidersmoothing
-          )
-        }, 
-#        warning = function(w) {
-#          cat("Warning produced in decompositionplot \n")
-#          print(w)
-#        }, 
-      error = function(e) {
-          cat("Handled error in decompositionplot \n")
-          print(e)
-        }, finally = {}))
+  #     input$selector
+  if(date_check(get.data.set(),input$select_timevars)){
+    if (length(input$singleSeriesTabs) > 0) {
+      temp = get.data.set()
+      if(!input$select_timevars%in%"time"){
+        colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
       }
-    }else{
-      plot.new()
-      text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+      suppressWarnings(tryCatch({
+        plot(iNZightTS::decompose(
+          iNZightTS(temp,
+                    var = variable.names()),
+          xlab = input$provide_xlab,
+          ylab = input$provide_ylab,
+          multiplicative = input$choose_season,
+          t = 100*input$slidersmoothing
+        ))
+      }, 
+      #        warning = function(w) {
+      #          cat("Warning produced in decompositionplot \n")
+      #          print(w)
+      #        }, 
+      error = function(e) {
+        cat("Handled error in decompositionplot \n")
+        print(e)
+      }, finally = {}))
     }
+  }else{
+    plot.new()
+    text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
+  }
 })
 
 
@@ -389,14 +389,14 @@ output$saveDecomposedplot = downloadHandler(
             colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
           }
           suppressWarnings(tryCatch({
-            decompositionplot(
+            plot(iNZightTS::decompose(
               iNZightTS(temp,
                         var = variable.names()),
               xlab = input$provide_xlab,
               ylab = input$provide_ylab,
               multiplicative = input$choose_season,
               t = 100*input$slidersmoothing
-            )
+            ))
           }, 
           #        warning = function(w) {
           #          cat("Warning produced in decompositionplot \n")
