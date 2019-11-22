@@ -31,9 +31,15 @@ observe({
   input$missing.categorical.submit
   isolate({
     if(!is.null(input$missing.categorical.submit)&&input$missing.categorical.submit>0){
-      updatePanel$datachanged = updatePanel$datachanged+1
-      values$data.set = display.missing.categorical(get.data.set(),columns=input$missing.categorical.column.select)
-      newvariablesadded_reactives$success = T
+      temp = iNZightTools::missingToCat(get.data.set(), vars = input$missing.categorical.column.select)
+      if(!is.null(temp)){
+        updatePanel$datachanged = updatePanel$datachanged+1
+        values$data.set = temp
+        newvariablesadded_reactives$success = T
+        ## code history
+        code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+      }
     }
   })
 })
