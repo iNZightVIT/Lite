@@ -427,17 +427,15 @@ output$trSeasonal_plot = renderPlot({
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
         suppressWarnings(tryCatch({
-          iNZightTS:::recompose(
-            iNZightTS:::decompositionplot(
-              iNZightTS(temp,
-                        var = variable.names()),
-              xlab = input$provide_xlab,
-              ylab = input$provide_ylab,
-              multiplicative = input$choose_season,
-              t = 100*input$slidersmoothing
-            ),
-            animate = FALSE
-          )
+          plot(iNZightTS::decompose(
+            iNZightTS(temp,
+                      var = variable.names()),
+            multiplicative = input$choose_season,
+            t = 100*input$slidersmoothing,
+          ),
+          xlab = input$provide_xlab,
+          ylab = input$provide_ylab,
+          recompose.progress = c(1, nrow(temp)))
         }, 
 #        warning = function(w) {
 #          cat("Warning produced in recompose plot \n")
@@ -488,17 +486,15 @@ output$saveRecomposedplot = downloadHandler(
             colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
           }
           suppressWarnings(tryCatch({
-            iNZightTS:::recompose(
-              iNZightTS:::decompositionplot(
-                iNZightTS(temp,
-                          var = variable.names()),
-                xlab = input$provide_xlab,
-                ylab = input$provide_ylab,
-                multiplicative = input$choose_season,
-                t = 100*input$slidersmoothing
-              ),
-              animate = FALSE
-            )
+            plot(iNZightTS::decompose(
+              iNZightTS(temp,
+                        var = variable.names()),
+              multiplicative = input$choose_season,
+              t = 100*input$slidersmoothing,
+            ),
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
+            recompose.progress = c(1, nrow(temp)))
           }, 
           #        warning = function(w) {
           #          cat("Warning produced in recompose plot \n")
