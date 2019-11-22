@@ -588,6 +588,8 @@ output$saveForecastplot = downloadHandler(
             colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
           }
           suppressWarnings(tryCatch({
+            tsObj = iNZightTS(temp,
+                              var = variable.names())
             plot(
               tsObj,
               multiplicative = as.logical(input$choose_season),
@@ -625,12 +627,16 @@ output$forecast_summary = renderPrint({
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
         suppressWarnings(tryCatch({
-          forecastplot(
-            iNZightTS(temp,
-                      var = variable.names()),
+          tsObj = iNZightTS(temp,
+                            var = variable.names())
+          
+          iNZightTS::pred(plot(
+            tsObj,
             multiplicative = as.logical(input$choose_season),
-            show = FALSE
-          )
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
+            forecast = tsObj$freq * 2
+          ))
         }, 
 #        warning = function(w) {
 #          cat("")
