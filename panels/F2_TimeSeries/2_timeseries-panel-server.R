@@ -1218,7 +1218,7 @@ output$saveForecastplot = downloadHandler(
 
 output$forecast_summary = renderPrint({
   if(date_check(get.data.set(),input$select_timevars)){
-    
+    pdf(NULL)
     suppressWarnings(tryCatch({
       pl <- try(plot(
         ts.para$tsObj,
@@ -1233,12 +1233,12 @@ output$forecast_summary = renderPrint({
         visible(forecastError) <<- TRUE
         return()
       }
-      pdf(NULL)
+
       iNZightTS::pred(pl)
     }, warning = function(w) {
-      cat(w) 
+      print(w) 
     }, error = function(e) {
-      cat(e)
+      print(e)
     }, finally = {}))
   } else {
     cat("No time variable found.")
