@@ -1218,22 +1218,27 @@ output$saveForecastplot = downloadHandler(
 
 output$forecast_summary = renderPrint({
   if(date_check(get.data.set(),input$select_timevars)){
+    
     suppressWarnings(tryCatch({
-      iNZightTS::pred(
-        plot(
-          ts.para$tsObj,
-          multiplicative = as.logical(input$choose_season),
-          xlab = input$provide_xlab,
-          ylab = input$provide_ylab,
-          forecast = ts.para$tsObj$freq * 2,
-          model.lim = ts.para$mod.lim,
-          xlim = ts.para$xlim
-        )
-      )
+      pl <- try(plot(
+        ts.para$tsObj,
+        multiplicative = as.logical(input$choose_season),
+        xlab = input$provide_xlab,
+        ylab = input$provide_ylab,
+        forecast = ts.para$tsObj$freq * 2,
+        model.lim = ts.para$mod.lim,
+        xlim = ts.para$xlim
+      ), silent = TRUE)
+      if (inherits(pl, "try-error")) {
+        visible(forecastError) <<- TRUE
+        return()
+      }
+      pdf(NULL)
+      iNZightTS::pred(pl)
     }, warning = function(w) {
-      print(w) 
+      cat(w) 
     }, error = function(e) {
-      print(e)
+      cat(e)
     }, finally = {}))
   } else {
     cat("No time variable found.")
