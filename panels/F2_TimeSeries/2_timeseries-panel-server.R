@@ -1219,13 +1219,17 @@ output$saveForecastplot = downloadHandler(
 output$forecast_summary = renderPrint({
   if(date_check(get.data.set(),input$select_timevars)){
     suppressWarnings(tryCatch({
-      iNZightTS::pred(plot(
-        ts.para$tsObj,
-        multiplicative = as.logical(input$choose_season),
-        xlab = input$provide_xlab,
-        ylab = input$provide_ylab,
-        forecast = ts.para$tsObj$freq * 2
-      ))
+      iNZightTS::pred(
+        plot(
+          ts.para$tsObj,
+          multiplicative = as.logical(input$choose_season),
+          xlab = input$provide_xlab,
+          ylab = input$provide_ylab,
+          forecast = ts.para$tsObj$freq * 2,
+          model.lim = ts.para$mod.lim,
+          xlim = ts.para$xlim
+        )
+      )
     }, 
     #        warning = function(w) {
     #          cat("")

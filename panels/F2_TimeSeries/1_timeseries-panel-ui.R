@@ -159,7 +159,7 @@ ts.sidebarPanel = function(data.set) {
       radioButtons(inputId = "customize_adjust_limits",
                    label =  "Adjust Limits: ",
                    choices = c("No" = 1, "Yes" = 2),
-                   selected = 1,
+                   selected = 2,
                    inline = T),
       conditionalPanel(
         condition = "input.customize_adjust_limits == 2",
