@@ -25,23 +25,91 @@ getTime = function(data, index = TRUE) {
 }
 
 output$time.range.var <- renderUI({
-  list(
-    sliderTextInput(
-      inputId = "adjust_limit_range",
-      label = "Display data in the range:", 
-      choices = get.data.set()[[getTime(get.data.set(), index = FALSE)]],
-      selected = get.data.set()[[getTime(get.data.set(), index = FALSE)]][c(1, length(get.data.set()[[getTime(get.data.set(), index = FALSE)]]))]
-    ),
-    checkboxInput("check_lim_fit", label = "Use above limits for fitting model", value = TRUE),
-    conditionalPanel(condition = "input.check_lim_fit == false",
-                     sliderTextInput(
-                       inputId = "fit_ts_limit",
-                       label = "Fit model to data in the range:", 
-                       choices = get.data.set()[[getTime(get.data.set(), index = FALSE)]],
-                       selected = get.data.set()[[getTime(get.data.set(), index = FALSE)]][c(1, length(get.data.set()[[getTime(get.data.set(), index = FALSE)]]))]
-                     ))
-  )
+  if(date_check(get.data.set(),input$select_timevars) && !is.null(ts.para$tsObj$tsObj)){
+    xr <- range(time(ts.para$tsObj$tsObj))
+    xby <- 1 / ts.para$tsObj$freq
+    xx <- seq(xr[1], xr[2], by = xby)
+    timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
+    xd <- as.character(ts.para$tsObj$data[[timeVar]])
+    list(
+      fixedRow(column(width = 6, 
+                      sliderTextInput(
+                        inputId = "adjust_limit_from",
+                        label = "Display data from...", 
+                        choices = xd,
+                        selected = xd[1]
+                      )),
+               column(width = 6, 
+                      sliderTextInput(
+                        inputId = "adjust_limit_until",
+                        label = "until...", 
+                        choices = xd,
+                        selected = xd[length(xd)]
+                      ))
+      ),
+      checkboxInput("check_lim_fit", label = "Use above limits for fitting model", value = TRUE),
+      conditionalPanel(condition = "input.check_lim_fit == false",
+                       sliderTextInput(
+                         inputId = "fit_ts_limit",
+                         label = "Fit model to data in the range:", 
+                         choices = get.data.set()[[getTime(get.data.set(), index = FALSE)]],
+                         selected = get.data.set()[[getTime(get.data.set(), index = FALSE)]][c(1, length(get.data.set()[[getTime(get.data.set(), index = FALSE)]]))]
+                       ))
+    )
+  }
 })
+
+observe({
+  input$adjust_limit_from
+  isolate({
+    if(!is.null(ts.para$tsObj$tsObj)){
+      xr <- range(time(ts.para$tsObj$tsObj))
+      xby <- 1 / ts.para$tsObj$freq
+      xx <- seq(xr[1], xr[2], by = xby)
+      timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
+      xd <- as.character(ts.para$tsObj$data[[timeVar]])
+      lim1 = xd[which(xx == (xx[xd == input$adjust_limit_from] + 2)):length(xd)]
+      updateSliderTextInput(session,
+                            inputId = "adjust_limit_until",
+                            label = "Display data from...", 
+                            choices = lim1,
+                            selected = input$adjust_limit_until)
+      if(input$adjust_limit_from == xd[which(xx == (xx[xd == input$adjust_limit_until] - 2))]){
+        shinyjs::disable("adjust_limit_until") 
+        } else {
+          shinyjs::enable("adjust_limit_until") 
+        }
+      }
+  })
+})
+
+
+
+observe({
+  input$adjust_limit_until
+  isolate({
+    if(!is.null(ts.para$tsObj$tsObj)){
+      xr <- range(time(ts.para$tsObj$tsObj))
+      xby <- 1 / ts.para$tsObj$freq
+      xx <- seq(xr[1], xr[2], by = xby)
+      timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
+      xd <- as.character(ts.para$tsObj$data[[timeVar]])
+      lim2 = xd[1:which(xx == (xx[xd == input$adjust_limit_until] - 2))]
+      updateSliderTextInput(session,
+                            inputId = "adjust_limit_from",
+                            label = "Display data from...", 
+                            choices = lim2,
+                            selected = input$adjust_limit_from)
+      if(input$adjust_limit_until == xd[which(xx == (xx[xd == input$adjust_limit_from] + 2))]){
+        shinyjs::disable("adjust_limit_from") 
+      } else {
+        shinyjs::enable("adjust_limit_from") 
+      }
+    }
+  })
+})
+
+
 
 
 
@@ -53,8 +121,10 @@ output$provide_xlab_ts <- renderUI({
 
 ts.para = reactiveValues()
 ts.para$tsObj = NULL
+ts.para$mod.lim = vector()
 
 observe(
+  ## create tsObj
   if(date_check(get.data.set(),input$select_timevars)){
     temp = get.data.set()
     if(!input$select_timevars%in%"time"){
@@ -62,19 +132,19 @@ observe(
     }
     ts.para$tsObj = iNZightTS(temp,
                               var = variable.names())
+    if(!is.null(input$adjust_limit_range)
+       && length(input$adjust_limit_range) > 0){
+      xr <- range(time(ts.para$tsObj$tsObj))
+      xby <- 1 / ts.para$tsObj$freq
+      xx <- seq(xr[1], xr[2], by = xby)
+      timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
+      xd <- as.character(ts.para$tsObj$data[[timeVar]])
+      ts.para$mod.lim[1] = xx[xd == input$adjust_limit_range[1]]
+      ts.para$mod.lim[2] = xx[xd == input$adjust_limit_range[2]]
+    }
   }
 )
 
-
-
-mod.lim.ts <- reactive({
-  xr =  range(time(tsObj$tsObj))
-  if(input$check_lim_fit == TRUE){
-    input$adjust_limit_range
-  } else if(input$check_lim_fit == FALSE) {
-    input$fit_ts_limit
-  }
-})
 
 
 
@@ -454,7 +524,8 @@ output$timeseries_plot = renderPlot({
         multiplicative = as.logical(input$choose_season),
         t = 100*input$slidersmoothing,
         smoother = input$timeseries_smoother,
-        mod.lim = mod.lim.ts()
+        model.lim = ts.para$mod.lim,
+        xlim = ts.para$mod.lim
       )
     }, 
     #        warning = function(w) {

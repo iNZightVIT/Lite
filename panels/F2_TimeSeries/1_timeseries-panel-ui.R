@@ -204,6 +204,7 @@ ts.mainPanel = function() {
 
 timeseries.panel.ui = function(data.set) {
   fluidPage(  
+    shinyjs::useShinyjs(),
     if (is.null(data.set)) {
       fluidRow(
         includeMarkdown(
