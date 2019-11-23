@@ -1230,14 +1230,12 @@ output$forecast_summary = renderPrint({
           xlim = ts.para$xlim
         )
       )
-    }, 
-    #        warning = function(w) {
-    #          cat("")
-    #        }, 
-    error = function(e) {
-      cat("")
+    }, warning = function(w) {
+      print(w) 
+    }, error = function(e) {
+      print(e)
     }, finally = {}))
-  }else{
+  } else {
     cat("No time variable found.")
     #       plot.new()
     #       text(0.5,0.5,"No time variable found.\nPlease generate a time variable.",cex=2)
