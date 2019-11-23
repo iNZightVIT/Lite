@@ -212,8 +212,8 @@ timeseries.panel.ui = function(data.set) {
       )
     } else {
       fluidRow(
-        column(2, ts.sidebarPanel(data.set)),
-        column(10, ts.mainPanel())
+        column(3, ts.sidebarPanel(data.set)),
+        column(9, ts.mainPanel())
       )
     }
   )
