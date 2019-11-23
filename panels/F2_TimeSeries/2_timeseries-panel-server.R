@@ -73,7 +73,7 @@ output$time.range.var <- renderUI({
 observe({
   input$adjust_limit_from
   isolate({
-    if(!is.null(ts.para$tsObj$tsObj)){
+    if(!is.null(ts.para$tsObj) && length(input$adjust_limit_from) > 0){
       xr <- range(time(ts.para$tsObj$tsObj))
       xby <- 1 / ts.para$tsObj$freq
       xx <- seq(xr[1], xr[2], by = xby)
@@ -82,7 +82,7 @@ observe({
       lim1 = xd[which(xx == (xx[xd == input$adjust_limit_from] + 2)):length(xd)]
       updateSliderTextInput(session,
                             inputId = "adjust_limit_until",
-                            label = "Display data from...", 
+                            label = "until...", 
                             choices = lim1,
                             selected = input$adjust_limit_until)
       if(input$adjust_limit_from == xd[which(xx == (xx[xd == input$adjust_limit_until] - 2))]){
@@ -106,7 +106,7 @@ observe({
       lim1 = xd[which(xx == (xx[xd == input$mod_limit_from] + 2)):length(xd)]
       updateSliderTextInput(session,
                             inputId = "mod_limit_until",
-                            label = "Display data from...", 
+                            label = "until...", 
                             choices = lim1,
                             selected = input$mod_limit_until)
       if(input$mod_limit_from == xd[which(xx == (xx[xd == input$mod_limit_until] - 2))]){
@@ -776,7 +776,8 @@ output$seasonal_plot = renderPlot({
         ylab = input$provide_ylab,
         xlab = input$provide_xlab,
         multiplicative = as.logical(input$choose_season),
-        t = 100*input$slidersmoothing
+        t = 100*input$slidersmoothing,
+        model.lim = ts.para$mod.lim
       )
     }, 
     #        warning = function(w) {
@@ -827,7 +828,8 @@ output$saveSeasonalplot = downloadHandler(
             ylab = input$provide_ylab,
             xlab = input$provide_xlab,
             multiplicative = as.logical(input$choose_season),
-            t = 100*input$slidersmoothing
+            t = 100*input$slidersmoothing,
+            model.lim = ts.para$mod.lim
           )
         }, 
         #        warning = function(w) {
@@ -858,13 +860,16 @@ output$decomposed_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars)){
     suppressWarnings(tryCatch({
-      plot(iNZightTS::decompose(
-        ts.para$tsObj,
-        xlab = input$provide_xlab,
-        ylab = input$provide_ylab,
-        multiplicative = as.logical(input$choose_season),
-        t = 100*input$slidersmoothing
-      ))
+      plot(
+        iNZightTS::decompose(
+          ts.para$tsObj,
+          multiplicative = as.logical(input$choose_season),
+          t = 100*input$slidersmoothing,
+          model.lim = ts.para$mod.lim),
+          xlab = input$provide_xlab,
+          ylab = input$provide_ylab,
+          xlim = ts.para$xlim
+      )
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in decompositionplot \n")
@@ -910,13 +915,16 @@ output$saveDecomposedplot = downloadHandler(
       
       if(date_check(get.data.set(),input$select_timevars)){
         suppressWarnings(tryCatch({
-          plot(iNZightTS::decompose(
-            ts.para$tsObj,
+          plot(
+            iNZightTS::decompose(
+              ts.para$tsObj,
+              multiplicative = as.logical(input$choose_season),
+              t = 100*input$slidersmoothing,
+              model.lim = ts.para$mod.lim),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
-            multiplicative = as.logical(input$choose_season),
-            t = 100*input$slidersmoothing
-          ))
+            xlim = ts.para$xlim
+          )
         }, 
         #        warning = function(w) {
         #          cat("Warning produced in decompositionplot \n")
@@ -941,14 +949,17 @@ output$trSeasonal_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars)){
     suppressWarnings(tryCatch({
-      plot(iNZightTS::decompose(
-        ts.para$tsObj,
-        multiplicative = as.logical(input$choose_season),
-        t = 100*input$slidersmoothing,
-      ),
-      xlab = input$provide_xlab,
-      ylab = input$provide_ylab,
-      recompose.progress = c(1, nrow(get.data.set())))
+      plot(
+        iNZightTS::decompose(
+          ts.para$tsObj,
+          multiplicative = as.logical(input$choose_season),
+          t = 100*input$slidersmoothing,
+          model.lim = ts.para$mod.lim),
+        xlab = input$provide_xlab,
+        ylab = input$provide_ylab,
+        xlim = ts.para$xlim,
+        recompose.progress = c(1, nrow(get.data.set()))
+      )
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in recompose plot \n")
@@ -993,14 +1004,17 @@ output$saveRecomposedplot = downloadHandler(
       
       if(date_check(get.data.set(),input$select_timevars)){
         suppressWarnings(tryCatch({
-          plot(iNZightTS::decompose(
-            ts.para$tsObj,
-            multiplicative = as.logical(input$choose_season),
-            t = 100*input$slidersmoothing,
-          ),
-          xlab = input$provide_xlab,
-          ylab = input$provide_ylab,
-          recompose.progress = c(1, nrow(get.data.set())))
+          plot(
+            iNZightTS::decompose(
+              ts.para$tsObj,
+              multiplicative = as.logical(input$choose_season),
+              t = 100*input$slidersmoothing,
+              model.lim = ts.para$mod.lim),
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
+            xlim = ts.para$xlim,
+            recompose.progress = c(1, nrow(get.data.set()))
+          )
         }, 
         #        warning = function(w) {
         #          cat("Warning produced in recompose plot \n")
@@ -1035,7 +1049,9 @@ output$forecast_plot = renderPlot({
         multiplicative = as.logical(input$choose_season),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
-        forecast = ts.para$tsObj$freq * 2
+        forecast = ts.para$tsObj$freq * 2,
+        model.lim = ts.para$mod.lim,
+        xlim = ts.para$xlim
       )
     }, 
     #        warning = function(w) {
@@ -1078,7 +1094,9 @@ output$plotly_tsforecast = renderPlotly({
           multiplicative = as.logical(input$choose_season),
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
-          forecast = ts.para$tsObj$freq * 2
+          forecast = ts.para$tsObj$freq * 2,
+          model.lim = ts.para$mod.lim,
+          xlim = ts.para$xlim
         )}, 
         #        warning = function(w) {
         #          cat("Warning produced in forecastplot \n")
@@ -1110,7 +1128,9 @@ output$plotly_tsforecastnw = renderUI({
         multiplicative = as.logical(input$choose_season),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
-        forecast = ts.para$tsObj$freq * 2
+        forecast = ts.para$tsObj$freq * 2,
+        model.lim = ts.para$mod.lim,
+        xlim = ts.para$xlim
       )}, 
       #        warning = function(w) {
       #          cat("Warning produced in forecastplot \n")
@@ -1171,7 +1191,9 @@ output$saveForecastplot = downloadHandler(
             multiplicative = as.logical(input$choose_season),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
-            forecast = ts.para$tsObj$freq * 2
+            forecast = ts.para$tsObj$freq * 2,
+            model.lim = ts.para$mod.lim,
+            xlim = ts.para$xlim
           )
         }, 
         #        warning = function(w) {
@@ -1230,7 +1252,12 @@ output$multiple_single_plot = renderPlot({
       plot(
         ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
-        t = 100*input$slidersmoothing
+        t = 100*input$slidersmoothing,
+        xlab = input$provide_xlab,
+        ylab = input$provide_ylab,
+        smoother = input$timeseries_smoother,
+        model.lim = ts.para$mod.lim,
+        xlim = ts.para$xlim
       )
     }, 
     #        warning = function(w) {
@@ -1277,7 +1304,12 @@ output$saveSingleplot = downloadHandler(
           plot(
             ts.para$tsObj,
             multiplicative = as.logical(input$choose_season),
-            t = 100*input$slidersmoothing
+            t = 100*input$slidersmoothing,
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
+            smoother = input$timeseries_smoother,
+            model.lim = ts.para$mod.lim,
+            xlim = ts.para$xlim
           )
         }, 
         #        warning = function(w) {
@@ -1318,6 +1350,11 @@ output$multiple_multi_plot = renderPlot({
         ts.para$tsObj,
         multiplicative = as.logical(input$choose_season),
         t = 100*input$slidersmoothing,
+        xlab = input$provide_xlab,
+        ylab = input$provide_ylab,
+        smoother = input$timeseries_smoother,
+        model.lim = ts.para$mod.lim,
+        xlim = ts.para$xlim,
         compare = FALSE
       )
     }, 
@@ -1367,6 +1404,11 @@ output$saveMultiplot = downloadHandler(
             ts.para$tsObj,
             multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing,
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
+            smoother = input$timeseries_smoother,
+            model.lim = ts.para$mod.lim,
+            xlim = ts.para$xlim,
             compare = FALSE
           )
         }, 
