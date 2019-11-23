@@ -24,6 +24,7 @@ getTime = function(data, index = TRUE) {
   return(names(data)[ind])
 }
 
+## create sliderInput
 output$time.range.var <- renderUI({
   if(date_check(get.data.set(),input$select_timevars) && !is.null(ts.para$tsObj$tsObj)){
     xr <- range(time(ts.para$tsObj$tsObj))
@@ -49,16 +50,26 @@ output$time.range.var <- renderUI({
       ),
       checkboxInput("check_lim_fit", label = "Use above limits for fitting model", value = TRUE),
       conditionalPanel(condition = "input.check_lim_fit == false",
-                       sliderTextInput(
-                         inputId = "fit_ts_limit",
-                         label = "Fit model to data in the range:", 
-                         choices = get.data.set()[[getTime(get.data.set(), index = FALSE)]],
-                         selected = get.data.set()[[getTime(get.data.set(), index = FALSE)]][c(1, length(get.data.set()[[getTime(get.data.set(), index = FALSE)]]))]
+                       fixedRow(column(width = 6, 
+                                       sliderTextInput(
+                                         inputId = "mod_limit_from",
+                                         label = "Display data from...", 
+                                         choices = xd,
+                                         selected = xd[1]
+                                       )),
+                                column(width = 6, 
+                                       sliderTextInput(
+                                         inputId = "mod_limit_until",
+                                         label = "until...", 
+                                         choices = xd,
+                                         selected = xd[length(xd)]
+                                       ))
                        ))
     )
   }
 })
 
+## update sliders
 observe({
   input$adjust_limit_from
   isolate({
@@ -80,6 +91,30 @@ observe({
           shinyjs::enable("adjust_limit_until") 
         }
       }
+  })
+})
+
+observe({
+  input$mod_limit_from
+  isolate({
+    if(!is.null(ts.para$tsObj$tsObj)){
+      xr <- range(time(ts.para$tsObj$tsObj))
+      xby <- 1 / ts.para$tsObj$freq
+      xx <- seq(xr[1], xr[2], by = xby)
+      timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
+      xd <- as.character(ts.para$tsObj$data[[timeVar]])
+      lim1 = xd[which(xx == (xx[xd == input$mod_limit_from] + 2)):length(xd)]
+      updateSliderTextInput(session,
+                            inputId = "mod_limit_until",
+                            label = "Display data from...", 
+                            choices = lim1,
+                            selected = input$mod_limit_until)
+      if(input$mod_limit_from == xd[which(xx == (xx[xd == input$mod_limit_until] - 2))]){
+        shinyjs::disable("mod_limit_until") 
+      } else {
+        shinyjs::enable("mod_limit_until") 
+      }
+    }
   })
 })
 
@@ -110,6 +145,29 @@ observe({
 })
 
 
+observe({
+  input$mod_limit_until
+  isolate({
+    if(!is.null(ts.para$tsObj$tsObj)){
+      xr <- range(time(ts.para$tsObj$tsObj))
+      xby <- 1 / ts.para$tsObj$freq
+      xx <- seq(xr[1], xr[2], by = xby)
+      timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
+      xd <- as.character(ts.para$tsObj$data[[timeVar]])
+      lim2 = xd[1:which(xx == (xx[xd == input$mod_limit_until] - 2))]
+      updateSliderTextInput(session,
+                            inputId = "mod_limit_from",
+                            label = "Display data from...", 
+                            choices = lim2,
+                            selected = input$mod_limit_from)
+      if(input$mod_limit_until == xd[which(xx == (xx[xd == input$mod_limit_from] + 2))]){
+        shinyjs::disable("mod_limit_from") 
+      } else {
+        shinyjs::enable("mod_limit_from") 
+      }
+    }
+  })
+})
 
 
 
@@ -119,9 +177,11 @@ output$provide_xlab_ts <- renderUI({
             value = getTime(get.data.set(), index = FALSE))
 })
 
+## create xlim and modlim
 ts.para = reactiveValues()
 ts.para$tsObj = NULL
 ts.para$mod.lim = vector()
+ts.para$xlim = vector()
 
 observe(
   ## create tsObj
@@ -132,19 +192,33 @@ observe(
     }
     ts.para$tsObj = iNZightTS(temp,
                               var = variable.names())
-    if(!is.null(input$adjust_limit_range)
-       && length(input$adjust_limit_range) > 0){
+    
+    ## modlim and xlim
+    if(!is.null(input$adjust_limit_from) && !is.null(input$adjust_limit_until) &&
+       length(input$adjust_limit_until) > 0 && length(input$adjust_limit_from) > 0 &&
+       !is.null(input$mod_limit_from) && !is.null(input$mod_limit_until) &&
+       length(input$mod_limit_until) > 0 && length(input$mod_limit_from) > 0){
       xr <- range(time(ts.para$tsObj$tsObj))
       xby <- 1 / ts.para$tsObj$freq
       xx <- seq(xr[1], xr[2], by = xby)
       timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
       xd <- as.character(ts.para$tsObj$data[[timeVar]])
-      ts.para$mod.lim[1] = xx[xd == input$adjust_limit_range[1]]
-      ts.para$mod.lim[2] = xx[xd == input$adjust_limit_range[2]]
+      
+      if(is.null(ts.para$xlim)){
+        ts.para$xlim = xr
+      } else {
+        ts.para$xlim[1] = xx[xd == input$adjust_limit_from]
+        ts.para$xlim[2] = xx[xd == input$adjust_limit_until]
+      }
+      if(input$check_lim_fit == TRUE){
+        ts.para$mod.lim = ts.para$xlim
+      } else if (input$check_lim_fit == FALSE) {
+        ts.para$mod.lim[1] = xx[xd == input$mod_limit_from]
+        ts.para$mod.lim[2] = xx[xd == input$mod_limit_until]
+      }
     }
   }
 )
-
 
 
 
@@ -525,7 +599,7 @@ output$timeseries_plot = renderPlot({
         t = 100*input$slidersmoothing,
         smoother = input$timeseries_smoother,
         model.lim = ts.para$mod.lim,
-        xlim = ts.para$mod.lim
+        xlim = ts.para$xlim
       )
     }, 
     #        warning = function(w) {
@@ -578,7 +652,9 @@ output$saveTimeplot = downloadHandler(
             ylab = input$provide_ylab,
             multiplicative = as.logical(input$choose_season),
             t = 100*input$slidersmoothing,
-            smoother = input$timeseries_smoother
+            smoother = input$timeseries_smoother,
+            model.lim = ts.para$mod.lim,
+            xlim = ts.para$xlim
           )
         }, 
         #        warning = function(w) {
@@ -612,6 +688,10 @@ output$plotly_tsmain = renderPlotly({
   input$provide_xlab
   input$provide_ylab
   input$time_plot_info1
+  input$adjust_limit_from
+  input$adjust_limit_until
+  input$mod_limit_from
+  input$mod_limit_until
   isolate({
     if(date_check(get.data.set(),input$select_timevars)){
       pdf(NULL)
@@ -623,7 +703,9 @@ output$plotly_tsmain = renderPlotly({
           ylab = input$provide_ylab,
           multiplicative = as.logical(input$choose_season),
           t = 100*input$slidersmoothing,
-          smoother = input$timeseries_smoother
+          smoother = input$timeseries_smoother,
+          model.lim = ts.para$mod.lim,
+          xlim = ts.para$xlim
         )
       }, 
       #        warning = function(w) {
@@ -657,7 +739,9 @@ output$plotly_tsmainnw = renderUI({
         ylab = input$provide_ylab,
         multiplicative = as.logical(input$choose_season),
         t = 100*input$slidersmoothing,
-        smoother = input$timeseries_smoother
+        smoother = input$timeseries_smoother,
+        model.lim = ts.para$mod.lim,
+        xlim = ts.para$xlim
       )
     }, 
     #        warning = function(w) {
@@ -980,7 +1064,11 @@ output$plotly_tsforecast = renderPlotly({
   input$slidersmoothing
   input$provide_xlab
   input$provide_ylab
-  input$time_plot_info1
+  input$time_plot_info1  
+  input$adjust_limit_from
+  input$adjust_limit_until
+  input$mod_limit_from
+  input$mod_limit_until
   isolate({
     if(date_check(get.data.set(),input$select_timevars)){
       pdf(NULL)
