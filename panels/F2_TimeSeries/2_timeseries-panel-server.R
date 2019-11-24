@@ -71,6 +71,7 @@ output$time.range.var <- renderUI({
 
 ## update sliders
 observe({
+  get.data.set()
   input$adjust_limit_from
   isolate({
     if(!is.null(ts.para$tsObj) && length(input$adjust_limit_from) > 0){
@@ -95,6 +96,7 @@ observe({
 })
 
 observe({
+  get.data.set()
   input$mod_limit_from
   isolate({
     if(!is.null(ts.para$tsObj$tsObj)){
@@ -121,6 +123,7 @@ observe({
 
 
 observe({
+  get.data.set()
   input$adjust_limit_until
   isolate({
     if(!is.null(ts.para$tsObj$tsObj)){
@@ -146,6 +149,7 @@ observe({
 
 
 observe({
+  get.data.set()
   input$mod_limit_until
   isolate({
     if(!is.null(ts.para$tsObj$tsObj)){
@@ -183,15 +187,21 @@ ts.para$tsObj = NULL
 ts.para$mod.lim = vector()
 ts.para$xlim = vector()
 
-observe(
+observe({
+  get.data.set()
   ## create tsObj
   if(date_check(get.data.set(),input$select_timevars)){
     temp = get.data.set()
     if(!input$select_timevars%in%"time"){
       colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
     }
-    ts.para$tsObj = iNZightTS(temp,
-                              var = variable.names())
+    tryCatch({ts.para$tsObj = iNZightTS(temp,
+                                       var = variable.names(),
+                                       time.col =
+                                         which(colnames(temp) == "time"))}, 
+             warning = function(w) {print(w)},
+             error = function(e) {print(e)})
+    
     
     ## modlim and xlim
     if(!is.null(input$adjust_limit_from) && !is.null(input$adjust_limit_until) &&
@@ -203,13 +213,12 @@ observe(
       xx <- seq(xr[1], xr[2], by = xby)
       timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
       xd <- as.character(ts.para$tsObj$data[[timeVar]])
-      
-      if(is.null(ts.para$xlim)){
-        ts.para$xlim = xr
-      } else {
+      tryCatch({
         ts.para$xlim[1] = xx[xd == input$adjust_limit_from]
-        ts.para$xlim[2] = xx[xd == input$adjust_limit_until]
-      }
+        ts.para$xlim[2] = xx[xd == input$adjust_limit_until]}, 
+      warning = function(w) {print(w)},
+      error = function(e) {print(e)})
+      
       if(input$check_lim_fit == TRUE){
         ts.para$mod.lim = ts.para$xlim
       } else if (input$check_lim_fit == FALSE) {
@@ -218,7 +227,7 @@ observe(
       }
     }
   }
-)
+})
 
 
 
@@ -534,6 +543,7 @@ output$time_info = renderUI({
 # example 2004Q2 (quarter 2 of the year 2004)
 #         2002M7 (July 2002)
 observe({
+  get.data.set()
   input$provide_actionButton
   isolate({
     if(!is.null(input$provide_actionButton)&&
