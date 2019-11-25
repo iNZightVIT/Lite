@@ -127,22 +127,25 @@ observe({
   input$adjust_limit_until
   isolate({
     if(!is.null(ts.para$tsObj$tsObj)){
-      xr <- range(time(ts.para$tsObj$tsObj))
-      xby <- 1 / ts.para$tsObj$freq
-      xx <- seq(xr[1], xr[2], by = xby)
-      timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
-      xd <- as.character(ts.para$tsObj$data[[timeVar]])
-      lim2 = xd[1:which(xx == (xx[xd == input$adjust_limit_until] - 2))]
-      updateSliderTextInput(session,
-                            inputId = "adjust_limit_from",
-                            label = "Display data from...", 
-                            choices = lim2,
-                            selected = input$adjust_limit_from)
+      tryCatch({
+        xr <- range(time(ts.para$tsObj$tsObj))
+        xby <- 1 / ts.para$tsObj$freq
+        xx <- seq(xr[1], xr[2], by = xby)
+        timeVar <- getTime(ts.para$tsObj$data, index = FALSE)
+        xd <- as.character(ts.para$tsObj$data[[timeVar]])
+        lim2 = xd[1:which(xx == (xx[xd == input$adjust_limit_until] - 2))]
+        updateSliderTextInput(session,
+                              inputId = "adjust_limit_from",
+                              label = "Display data from...", 
+                              choices = lim2,
+                              selected = input$adjust_limit_from)
       if(input$adjust_limit_until == xd[which(xx == (xx[xd == input$adjust_limit_from] + 2))]){
-        shinyjs::disable("adjust_limit_from") 
-      } else {
-        shinyjs::enable("adjust_limit_from") 
-      }
+          shinyjs::disable("adjust_limit_from") 
+        } else {
+          shinyjs::enable("adjust_limit_from") 
+        }
+      },  warning = function(w) {print(w)},
+      error = function(e) {print(e)})
     }
   })
 })
