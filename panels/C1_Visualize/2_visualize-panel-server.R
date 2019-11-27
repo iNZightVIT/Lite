@@ -7232,7 +7232,7 @@ observe({
   isolate({
     if(input$get_code_plot > 0 && !is.null(input$get_code_plot)){
       if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))){
-        tryCatch({code = paste0(attr(plot.ret.para$parameters, "code"), collapse = "\n\n ")
+        tryCatch({code = paste0(attr(plot.ret.para$parameters, "code"), collapse = "\n\n")
         }, warning = function(w) {
           print(w)
         }, error = function(e) {

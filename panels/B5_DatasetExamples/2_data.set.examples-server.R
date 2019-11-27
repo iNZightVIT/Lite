@@ -170,7 +170,7 @@ observe({
         ## code history
         code.save$name = sprintf("%s_ex", values$data.name)
         code.save$datacode = sprintf(".dataset <- %s", values$data.name)
-        code.save$variable = c(code.save$variable, list(c("\n", sprintf("## Load example data set\n data(%s, package = '%s')",
+        code.save$variable = c(code.save$variable, list(c("\n", sprintf("## Load example data set\ndata(%s, package = '%s')",
                                                                         values$data.name, pkgname()), "\n")))
         code.save$variable = c(code.save$variable, list(c("\n", sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
                                                                                     "\n"))))
