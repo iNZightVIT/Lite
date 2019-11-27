@@ -53,7 +53,7 @@ output$time.range.var <- renderUI({
                        fixedRow(column(width = 6, 
                                        sliderTextInput(
                                          inputId = "mod_limit_from",
-                                         label = "Display data from...", 
+                                         label = "Fit model to data from ... ", 
                                          choices = xd,
                                          selected = xd[1]
                                        )),
@@ -164,7 +164,7 @@ observe({
       lim2 = xd[1:which(xx == (xx[xd == input$mod_limit_until] - 2))]
       updateSliderTextInput(session,
                             inputId = "mod_limit_from",
-                            label = "Display data from...", 
+                            label = "Fit model to data from ... ", 
                             choices = lim2,
                             selected = input$mod_limit_from)
       if(input$mod_limit_until == xd[which(xx == (xx[xd == input$mod_limit_from] + 2))]){
