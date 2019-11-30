@@ -92,6 +92,6 @@ tidy_assign_pipe = function(code){
   code <- gsub("\ +", " ", # one or more spaces with just one space!
                paste(code, collapse = ""))
   code <- gsub("%>%", "%<>%", code)
-  unlist(strsplit(gsub("(\\) %<>%)", "\\1~\n    ", code), "~"))
+  unlist(strsplit(gsub("(\\) %<>%)", "\\1\n~   ", code), "~"))
 }
 
