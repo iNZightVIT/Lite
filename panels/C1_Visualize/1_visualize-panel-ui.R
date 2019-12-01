@@ -156,6 +156,7 @@ vis.sidebarPanel = function() {
                          
                          conditionalPanel(
                            condition = "input.select_additions=='Customise Plot Appearance'",
+                           uiOutput("plot.appearance.panel.title"),
                            uiOutput("plot.appearance.panel"),
                            uiOutput("code.variables.panel")
                          ),

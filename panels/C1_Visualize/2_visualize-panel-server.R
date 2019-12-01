@@ -2031,6 +2031,62 @@ observe({
   shinyjs::reset("add.to.plot")
 })
 
+
+
+output$plot.appearance.panel.title = renderUI({
+  get.data.set()
+  ret=NULL
+  input$vari1
+  input$vari2
+  plot.par$design
+  isolate({
+    if(!is.null(plot.ret.para$parameters)) {
+      varnames = unlist(attr(plot.ret.para$parameters, "varnames"))
+      TYPE = attr(plot.ret.para$parameters, "plottype")
+      PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
+      plot.type.para$plotTypes = unname(do.call(c, PLOTTYPES))
+      plot.type.para$plotTypeValues = names(PLOTTYPES)
+    }
+    
+    general.appearance.title = h5(strong("General Appearance"))
+    
+    adjust.num.bins.object = NULL
+    if((!is.null(input$vari1)&
+        !is.null(input$vari2))&&
+       (input$vari1%in%colnames(get.data.set())&&
+        (input$vari2%in%colnames(get.data.set())|
+         input$vari2%in%"none"))){
+      temp = list()
+      temp$x = get.data.set()[,input$vari1]
+      if(input$vari2%in%'none'){
+        temp$y = NULL
+      }else{
+        temp$y = get.data.set()[,input$vari2]
+      }
+      temp$plot = F
+      tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      #####################################################################
+      #      large.sample = T
+      large.sample = search.name(tester,"largesample")[[1]]
+      if(is.null(large.sample)){
+        large.sample = F
+      }
+    }
+    select.plot.type.object = NULL
+    #####################################################################
+    select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
+                                       column(6, selectInput(inputId = "select.plot.type",
+                                                             label = NULL,
+                                                             choices=plot.type.para$plotTypes,
+                                                             selected=plot.type.para$plotTypes[1],
+                                                             selectize = F)))
+    ret = list(general.appearance.title, 
+               select.plot.type.object)
+  })
+  ret 
+  
+})
+
 # Advanced options panel -> 
 output$plot.appearance.panel = renderUI({
   get.data.set()
@@ -2056,9 +2112,6 @@ output$plot.appearance.panel = renderUI({
                        399,419,558,600,626,647)]
     cols2 = colors()[c(81,73,84,107,371,426,517,617)]
     cols3 = colors()[c(203,73,81,84,107,371,425,517,617)]
-    
-    
-    general.appearance.title = h5(strong("General Appearance"))
     
     bar.colour.title = h5(strong("Bar Colour"))
     
@@ -2232,7 +2285,6 @@ output$plot.appearance.panel = renderUI({
                                                           selectize = F))) 
     
     
-    select.plot.type.object = NULL
     
     select.barcolor.object = conditionalPanel(
       condition = "input.color_by_select == ' '",
@@ -2403,23 +2455,14 @@ output$plot.appearance.panel = renderUI({
       if(input$vari2%in%"none"&&
          (class(get.data.set()[,input$vari1])%in%"factor"|
           class(get.data.set()[,input$vari1])%in%"character")){
-        select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
-                                           column(6, selectInput(inputId = "select.plot.type",
-                                                                 label = NULL,
-                                                                 choices=plot.type.para$plotTypes,
-                                                                 selected=input$select.plot.type,
-                                                                 selectize = F)))
-        ret = list(general.appearance.title,
-                   select.plot.type.object,
-                   select.bg.object,
+
+        ret = list(select.bg.object,
                    adjust.size.scale.object,
                    bar.colour.title,
                    select.barcolor.object)
         
         if(!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
@@ -2428,18 +2471,14 @@ output$plot.appearance.panel = renderUI({
                      sortbysize.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
                      rotation.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      fill.color.object,
                      ggtheme.object,
@@ -2452,9 +2491,7 @@ output$plot.appearance.panel = renderUI({
                      sortbysize.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("(gg) pie", "(gg) donut")) {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
@@ -2462,9 +2499,7 @@ output$plot.appearance.panel = renderUI({
                      sortbysize.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) gridplot") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
@@ -2485,22 +2520,12 @@ output$plot.appearance.panel = renderUI({
                                                           choices=cols1,
                                                           selected=graphical.par$bg,
                                                           selectize = F)))
-        select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
-                                           column(6, selectInput(inputId = "select.plot.type",
-                                                                 label = NULL,
-                                                                 choices=plot.type.para$plotTypes,
-                                                                 selected=input$select.plot.type,
-                                                                 selectize = F)))
-        ret = list(general.appearance.title,
-                   select.plot.type.object,
-                   select.bg.object,
+        ret = list(select.bg.object,
                    adjust.size.scale.object,
                    bar.colour.title)
         
         if(!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
@@ -2509,18 +2534,14 @@ output$plot.appearance.panel = renderUI({
                      sortbysize.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
                      rotation.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
@@ -2533,9 +2554,7 @@ output$plot.appearance.panel = renderUI({
                      sortbysize.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) frequency polygons") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
@@ -2545,37 +2564,22 @@ output$plot.appearance.panel = renderUI({
                      line.title,
                      line.width.object)
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) diverging stacked bar (likert)") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
                      rotation.object)
           
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) heatmap") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
                      rotation.object
           )
           
-          #   } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) spine") {
-          #      ret = list(general.appearance.title,
-          #                 select.plot.type.object,
-          #                 select.bg.object,
-          #                 adjust.size.scale.object,
-          #                 colourpalette.object,
-          #                 rotation.object,
-          #                 ggtheme.object)
-          
         } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) spine/pyramid") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      colourpalette.object,
                      ggtheme.object,
@@ -2599,15 +2603,8 @@ output$plot.appearance.panel = renderUI({
                   class(get.data.set()[,input$vari1])%in%"numeric")&
                  (class(get.data.set()[,input$vari2])%in%"character"|
                   class(get.data.set()[,input$vari2])%in%"factor")))){
-        select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
-                                           column(6, selectInput(inputId = "select.plot.type",
-                                                                 label = NULL,
-                                                                 choices=plot.type.para$plotTypes,
-                                                                 selected=input$select.plot.type,
-                                                                 selectize = F)))
-        ret = list(general.appearance.title,
-                   select.plot.type.object,
-                   select.bg.object,
+
+        ret = list(select.bg.object,
                    adjust.size.scale.object,
                    show.boxplot.title,
                    show.mean.title,
@@ -2652,9 +2649,7 @@ output$plot.appearance.panel = renderUI({
                                             column(6, sliderInput("adjust.num.bins", label = NULL, min = 1, 
                                                                   max = m, value=nbins,step=1, ticks = FALSE)))
           if(is.null(plot.par$design)){
-            ret=list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+            ret=list(select.bg.object,
                      adjust.size.scale.object,
                      bar.colour.title,
                      select.barcolor.object,
@@ -2681,9 +2676,7 @@ output$plot.appearance.panel = renderUI({
             
             if(!is.null(input$select.plot.type) &&
                (input$select.plot.type == "(gg) dot strip")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2693,9 +2686,7 @@ output$plot.appearance.panel = renderUI({
                        fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) barcode")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2706,9 +2697,7 @@ output$plot.appearance.panel = renderUI({
                        barheight.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) boxplot")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2717,9 +2706,7 @@ output$plot.appearance.panel = renderUI({
                        line.width.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) beeswarm")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2730,9 +2717,7 @@ output$plot.appearance.panel = renderUI({
               )
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) violin")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2742,9 +2727,7 @@ output$plot.appearance.panel = renderUI({
                        fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) density")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2754,9 +2737,7 @@ output$plot.appearance.panel = renderUI({
                        fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) column/row bar")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2764,9 +2745,7 @@ output$plot.appearance.panel = renderUI({
               )
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) lollipop")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2778,9 +2757,7 @@ output$plot.appearance.panel = renderUI({
               )
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) cumulative curve")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        fill.color.object,
                        ggtheme.object,
@@ -2795,9 +2772,7 @@ output$plot.appearance.panel = renderUI({
             
             if(!is.null(input$select.plot.type) &&
                (input$select.plot.type == "(gg) dot strip")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2807,9 +2782,7 @@ output$plot.appearance.panel = renderUI({
                        fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) barcode")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2820,9 +2793,7 @@ output$plot.appearance.panel = renderUI({
                        barheight.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) boxplot")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2831,9 +2802,7 @@ output$plot.appearance.panel = renderUI({
                        line.width.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) violin")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2843,9 +2812,7 @@ output$plot.appearance.panel = renderUI({
                        fillin.transparency.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) density")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2855,9 +2822,7 @@ output$plot.appearance.panel = renderUI({
                        fillin.transparency.object)
             }  else if(!is.null(input$select.plot.type) &&
                        (input$select.plot.type == "(gg) cumulative curve")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2866,18 +2831,14 @@ output$plot.appearance.panel = renderUI({
                        line.width.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) density (ridgeline)")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
                        rotation.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) pyramid")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2886,9 +2847,7 @@ output$plot.appearance.panel = renderUI({
                        pyramid.slider.object)
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) column/row bar")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2896,9 +2855,7 @@ output$plot.appearance.panel = renderUI({
               )
             } else if(!is.null(input$select.plot.type) &&
                       (input$select.plot.type == "(gg) beeswarm")) {
-              ret=list(general.appearance.title,
-                       select.plot.type.object,
-                       select.bg.object,
+              ret=list(select.bg.object,
                        adjust.size.scale.object,
                        colourpalette.object,
                        ggtheme.object,
@@ -2921,12 +2878,7 @@ output$plot.appearance.panel = renderUI({
                  class(get.data.set()[,input$vari1])%in%"integer")&&
                 (class(get.data.set()[,input$vari1])%in%"numeric"|
                  class(get.data.set()[,input$vari1])%in%"integer"))){
-        select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
-                                           column(6, selectInput(inputId = "select.plot.type",
-                                                                 label = NULL,
-                                                                 choices=plot.type.para$plotTypes,
-                                                                 selected=input$select.plot.type,
-                                                                 selectize = F)))
+
         resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
                                             fixedRow(column(3, h5("Resize points by:")),
                                                      column(6, selectInput("resize.by.select",
@@ -2939,9 +2891,7 @@ output$plot.appearance.panel = renderUI({
         #                                                          label=NULL,
         #                                                          choices=c(" ",get.numeric.column.names(vis.data())),
         #                                                          selected = "input$resize.by.select")))
-        ret = list(general.appearance.title,
-                   select.plot.type.object,
-                   select.bg.object,
+        ret = list(select.bg.object,
                    adjust.size.scale.object,
                    point.size.title,
                    adjust.size.points.scatter.object,
@@ -2954,17 +2904,13 @@ output$plot.appearance.panel = renderUI({
         if(!is.null(input$select.plot.type)&&
            (input$select.plot.type%in%"grid-density plot"||
             (large.sample&&input$select.plot.type%in%"default"))){
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      adjust.grid.size.title,
                      adjust.grid.size.object)
         }else if(!is.null(input$select.plot.type)&&
                  input$select.plot.type%in%"hexbin plot-size"){
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      adjust.hex.bins.title,
                      adjust.hex.bins.object,
@@ -2973,9 +2919,7 @@ output$plot.appearance.panel = renderUI({
         }
         else if(!is.null(input$select.plot.type)&&
                 input$select.plot.type%in%"hexbin plot-alpha") {
-          ret = list(general.appearance.title,
-                     select.plot.type.object,
-                     select.bg.object,
+          ret = list(select.bg.object,
                      adjust.size.scale.object,
                      adjust.hex.bins.title,
                      adjust.hex.bins.object,
