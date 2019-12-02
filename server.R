@@ -32,6 +32,7 @@ library(plotly)
 library(shinyWidgets)
 library(DT)
 # read in possible command line arguments such as 'vars.path'
+library(shinycssloaders)
 
 args=(commandArgs(TRUE))
 

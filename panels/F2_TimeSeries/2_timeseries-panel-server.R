@@ -273,7 +273,7 @@ output$ts.main.ui <- renderUI({
           ),
           tabPanel(
             title = "Interactive Plot (via plotly)",
-            uiOutput("plotly_tsmainnw"),
+            uiOutput("plotly_tsmainnw") %>% withSpinner(),
             plotlyOutput("plotly_tsmain")
           ))
       )
