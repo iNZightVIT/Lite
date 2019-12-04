@@ -6,6 +6,11 @@ observe({
     if(!is.null(input$restore_data_button)&&input$restore_data_button>0){
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = get.data.restore()
+      values$data.name = get.name.restore()
+      ## code history
+      code = paste0(values$data.name, "_", input$restore_data_button, " <- ", gsub("_ex", "", values$data.name))
+      code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+      code.save$name = paste0(values$data.name, "_", input$restore_data_button)
     }
   })
 })
