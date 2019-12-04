@@ -2,7 +2,7 @@ iNZight *Lite*
 ==============================
 
 
-*Last Updated: 16/11/19*
+*Last Updated: 04/12/19*
 
 This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz)
 
@@ -62,9 +62,9 @@ Send bug reports/errors to inzightlite_support@stat.auckland.ac.nz.
 
 
 Recent Updates (Most to least recent):
-----------------------------------------
+---------------------------------------- 
 - [visualize] Add various new plot types
-- [R code history] now, we have code history for ggplot, Import dataset, Example dataset, and some panels under manipulate variables
+- [R code history] now, we have code history for ggplot, Import dataset, Example dataset, and all the panels under manipulate variables
 
 Package dependencies
 --------------------
@@ -82,6 +82,7 @@ Please install all dependencies.
 - survey
 - shinyWidgets
 - iNZightTools
+- shinycssloaders
 
 Directories:
 ------------
