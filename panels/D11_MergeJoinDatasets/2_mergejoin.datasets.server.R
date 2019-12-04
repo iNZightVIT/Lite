@@ -190,8 +190,35 @@ observe({
         output$previewjoin.table = renderDataTable({
           NULL
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
+        ## save code 
+        code.save$dataname = paste(code.save$name, "joined", sep = ".")
+        code = tidy_assign_pipe(gsub(
+          "get.data.set\\()",
+          code.save$name,
+          iNZightTools::code(temp)
+        ))
+        code = do.call(paste, c(as.list(code), sep = ""))
+        code = do.call(c, lapply(code, function(x) {
+          y <- try({
+            formatR::tidy_source(
+              text = x,
+              width.cutoff = 80,
+              output = F,
+              indent = 4
+            )$text.tidy
+          }, silent = TRUE)
+          if (inherits(y, "try-error"))
+            x
+          else
+            c(y, "\n")
+        }))
+        code = c(paste0(code.save$dataname, " <- \n"), code)
+        code.save$variable = c(code.save$variable, list(c("\n", code)))
+        ## save data
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp.join
+        code.save$name = code.save$dataname
+        values$data.name = code.save$dataname
         output$join_true_false = renderPrint({
         })
       }
@@ -302,8 +329,35 @@ observe({
       output$previewappend.table = renderDataTable({
         NULL
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
+      ## save code 
+      code.save$dataname = paste(code.save$name, "joined", sep = ".")
+      code = tidy_assign_pipe(gsub(
+        "get.data.set\\()",
+        code.save$name,
+        iNZightTools::code(temp)
+      ))
+      code = do.call(paste, c(as.list(code), sep = ""))
+      code = do.call(c, lapply(code, function(x) {
+        y <- try({
+          formatR::tidy_source(
+            text = x,
+            width.cutoff = 80,
+            output = F,
+            indent = 4
+          )$text.tidy
+        }, silent = TRUE)
+        if (inherits(y, "try-error"))
+          x
+        else
+          c(y, "\n")
+      }))
+      code = c(paste0(code.save$dataname, " <- \n"), code)
+      code.save$variable = c(code.save$variable, list(c("\n", code)))
+      ## save data
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = temp.append
+      code.save$name = code.save$dataname
+      values$data.name = code.save$dataname
     }
   })
 })
