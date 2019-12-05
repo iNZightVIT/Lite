@@ -27,7 +27,8 @@ observeEvent(input$files, {
         values$data.set = temp
         updatePanel$doit = updatePanel$doit+1
         values$data.restore <<- get.data.set()
-        temp.name = strsplit(input$files[1, "name"],".",fixed=T)[[1]]
+        temp.name = make.names(tools::file_path_sans_ext(input$files[1, "name"]))
+        
         if(length(temp.name)>1){
           temp.name = temp.name[1:(length(temp.name)-1)]
         }
