@@ -24,6 +24,11 @@ getTime = function(data, index = TRUE) {
   return(names(data)[ind])
 }
 
+
+
+
+
+
 ## create sliderInput
 output$time.range.var <- renderUI({
   if(date_check(get.data.set(),input$select_timevars) && !is.null(ts.para$tsObj$tsObj)){
@@ -183,6 +188,31 @@ output$provide_xlab_ts <- renderUI({
             label = "Label for the x-axis:",
             value = getTime(get.data.set(), index = FALSE))
 })
+
+season_select_ts <- reactiveValues()
+season_select_ts$re = as.logical()
+
+
+
+observe({
+  get.data.set()
+  variable.names()
+  input$select_variables
+  input$choose_season
+  isolate({
+    can_multiply <- all(sapply(variable.names(), function(i) all(get.data.set()[[i]] > 0)))
+    if (can_multiply == T) {
+      shinyjs::enable("choose_season")
+      season_select_ts$re = input$choose_season
+    } else {
+      season_select_ts$re = F
+      shinyjs::reset("choose_season")
+      shinyjs::disable("choose_season")
+    }
+  })
+})
+
+
 
 ## create xlim and modlim
 ts.para = reactiveValues()
@@ -608,7 +638,7 @@ output$timeseries_plot = renderPlot({
         ## start = start),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         t = 100*input$slidersmoothing,
         smoother = input$timeseries_smoother,
         model.lim = ts.para$mod.lim,
@@ -663,7 +693,7 @@ output$saveTimeplot = downloadHandler(
             ## start = start),
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
-            multiplicative = as.logical(input$choose_season),
+            multiplicative = season_select_ts$re,
             t = 100*input$slidersmoothing,
             smoother = input$timeseries_smoother,
             model.lim = ts.para$mod.lim,
@@ -696,7 +726,7 @@ output$plotly_tsmain = renderPlotly({
   input$time_info
   input$provide_actionButton
   input$timeseries_smoother
-  input$choose_season
+  season_select_ts$re
   input$slidersmoothing
   input$provide_xlab
   input$provide_ylab
@@ -714,7 +744,7 @@ output$plotly_tsmain = renderPlotly({
           ## start = start),
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
-          multiplicative = as.logical(input$choose_season),
+          multiplicative = season_select_ts$re,
           t = 100*input$slidersmoothing,
           smoother = input$timeseries_smoother,
           model.lim = ts.para$mod.lim,
@@ -750,7 +780,7 @@ output$plotly_tsmainnw = renderUI({
         ## start = start),
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         t = 100*input$slidersmoothing,
         smoother = input$timeseries_smoother,
         model.lim = ts.para$mod.lim,
@@ -788,7 +818,7 @@ output$seasonal_plot = renderPlot({
         ts.para$tsObj,
         ylab = input$provide_ylab,
         xlab = input$provide_xlab,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         t = 100*input$slidersmoothing,
         model.lim = ts.para$mod.lim
       )
@@ -840,7 +870,7 @@ output$saveSeasonalplot = downloadHandler(
             ts.para$tsObj,
             ylab = input$provide_ylab,
             xlab = input$provide_xlab,
-            multiplicative = as.logical(input$choose_season),
+            multiplicative = season_select_ts$re,
             t = 100*input$slidersmoothing,
             model.lim = ts.para$mod.lim
           )
@@ -876,7 +906,7 @@ output$decomposed_plot = renderPlot({
       plot(
         iNZightTS::decompose(
           ts.para$tsObj,
-          multiplicative = as.logical(input$choose_season),
+          multiplicative = season_select_ts$re,
           t = 100*input$slidersmoothing,
           model.lim = ts.para$mod.lim),
           xlab = input$provide_xlab,
@@ -931,7 +961,7 @@ output$saveDecomposedplot = downloadHandler(
           plot(
             iNZightTS::decompose(
               ts.para$tsObj,
-              multiplicative = as.logical(input$choose_season),
+              multiplicative = season_select_ts$re,
               t = 100*input$slidersmoothing,
               model.lim = ts.para$mod.lim),
             xlab = input$provide_xlab,
@@ -965,7 +995,7 @@ output$trSeasonal_plot = renderPlot({
       plot(
         iNZightTS::decompose(
           ts.para$tsObj,
-          multiplicative = as.logical(input$choose_season),
+          multiplicative = season_select_ts$re,
           t = 100*input$slidersmoothing,
           model.lim = ts.para$mod.lim),
         xlab = input$provide_xlab,
@@ -1020,7 +1050,7 @@ output$saveRecomposedplot = downloadHandler(
           plot(
             iNZightTS::decompose(
               ts.para$tsObj,
-              multiplicative = as.logical(input$choose_season),
+              multiplicative = season_select_ts$re,
               t = 100*input$slidersmoothing,
               model.lim = ts.para$mod.lim),
             xlab = input$provide_xlab,
@@ -1051,7 +1081,6 @@ output$saveRecomposedplot = downloadHandler(
 
 
 
-
 ###  Forecast Plot
 output$forecast_plot = renderPlot({
   #     input$selector
@@ -1059,7 +1088,7 @@ output$forecast_plot = renderPlot({
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
         forecast = ts.para$tsObj$freq * 2,
@@ -1089,7 +1118,7 @@ output$plotly_tsforecast = renderPlotly({
   input$time_info
   input$provide_actionButton
   input$timeseries_smoother
-  input$choose_season
+  season_select_ts$re
   input$slidersmoothing
   input$provide_xlab
   input$provide_ylab
@@ -1104,7 +1133,7 @@ output$plotly_tsforecast = renderPlotly({
       suppressWarnings(tryCatch({
         plot(
           ts.para$tsObj,
-          multiplicative = as.logical(input$choose_season),
+          multiplicative = season_select_ts$re,
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
           forecast = ts.para$tsObj$freq * 2,
@@ -1138,7 +1167,7 @@ output$plotly_tsforecastnw = renderUI({
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
         forecast = ts.para$tsObj$freq * 2,
@@ -1201,7 +1230,7 @@ output$saveForecastplot = downloadHandler(
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
-            multiplicative = as.logical(input$choose_season),
+            multiplicative = season_select_ts$re,
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
             forecast = ts.para$tsObj$freq * 2,
@@ -1235,7 +1264,7 @@ output$forecast_summary = renderPrint({
     suppressWarnings(tryCatch({
       pl <- try(plot(
         ts.para$tsObj,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
         forecast = ts.para$tsObj$freq * 2,
@@ -1271,7 +1300,7 @@ output$multiple_single_plot = renderPlot({
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         t = 100*input$slidersmoothing,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
@@ -1323,7 +1352,7 @@ output$saveSingleplot = downloadHandler(
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
-            multiplicative = as.logical(input$choose_season),
+            multiplicative = season_select_ts$re,
             t = 100*input$slidersmoothing,
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
@@ -1368,7 +1397,7 @@ output$multiple_multi_plot = renderPlot({
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
-        multiplicative = as.logical(input$choose_season),
+        multiplicative = season_select_ts$re,
         t = 100*input$slidersmoothing,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
@@ -1422,7 +1451,7 @@ output$saveMultiplot = downloadHandler(
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
-            multiplicative = as.logical(input$choose_season),
+            multiplicative = season_select_ts$re,
             t = 100*input$slidersmoothing,
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
