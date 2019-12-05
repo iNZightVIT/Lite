@@ -96,12 +96,13 @@ output$load.data.panel = renderUI({
       temp = list()
       temp$url = substr(URL, url.index1+4, url.index2-1)
       temp$land = substr(URL, url.index2+6, nchar(URL))
-      load.data.panel(temp)
+      load.data.panel(temp[1])
     }
     else
-      load.data.panel(parseQueryString(session$clientData$url_search))
+      load.data.panel(parseQueryString(session$clientData$url_search)[1])
   })
 })
+
 
 output$filetable <- renderDataTable({
 
