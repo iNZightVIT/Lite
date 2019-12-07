@@ -9,34 +9,14 @@ observe({
       if (!is.null(temp)) {
         ## save code
         code.save$dataname = paste(code.save$name, "stacked", sep = ".")
-        code = tidy_assign_pipe(gsub(
-          "get.data.set\\()",
-          code.save$name,
-          iNZightTools::code(temp)
-        ))
-        code = do.call(paste, c(as.list(code), sep = ""))
-        code = do.call(c, lapply(code, function(x) {
-          y <- try({
-            formatR::tidy_source(
-              text = x,
-              width.cutoff = 80,
-              output = F,
-              indent = 4
-            )$text.tidy
-          }, silent = TRUE)
-          if (inherits(y, "try-error"))
-            x
-          else
-            c(y, "\n")
-        }))
-        code = c(paste0(code.save$dataname, " <- \n"), code)
+        code = code.data.modify(code.save$dataname, temp)
         code.save$variable = c(code.save$variable, list(c("\n", code)))
         ## save data
         updatePanel$datachanged = updatePanel$datachanged + 1
         values$data.set = temp
         code.save$name = code.save$dataname
         values$data.name = code.save$dataname
-        #       updateSelectInput(session,"stack_vars_which",selected=0)
+        ## update
         updateSelectInput(
           session,
           "stack_vars_column",
