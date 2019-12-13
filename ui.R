@@ -174,7 +174,9 @@ shinyUI(
                  tabPanel("Model Fitting",value="regression",
                           uiOutput("modelfitting.panel")),
                  tabPanel("Maps",
-                          uiOutput("newmaps.panel"))
+                          uiOutput("newmaps.panel")),
+                 tabPanel("Design of Experiments",
+                          uiOutput("mixedmodel.panel"))
       ),
       
       tabPanel("R code history", value = "rhistory",
