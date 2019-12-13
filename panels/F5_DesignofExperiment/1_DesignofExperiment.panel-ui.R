@@ -24,16 +24,15 @@
 mixedModel.sidebarPanel <- function(){
   sidebarPanelUI = list(
     ## select fitted models 
-    conditionalPanel(condition = "input.model_select.length > 0 ",
-                     
-                     fluidRow(column(6, selectInput("model_select",
-                                                    label = "Select Fitted Model",
-                                                    choices = c())),
-                              tags$div(style = "margin-top: 24px", column(2, offset = 1, actionButton(inputId = "remove.model",
-                                                                                                      label = "Remove",
-                                                                                                      style="color: #fff; background-color: #337ab7; border-color: #2e6da4")))),
-                     
-                     fluidRow(column(12, hr()))),
+    
+    fluidRow(column(6, selectInput("model_select",
+                                   label = "Select Fitted Model",
+                                   choices = c())),
+             tags$div(style = "margin-top: 24px", column(2, offset = 1, actionButton(inputId = "remove.model",
+                                                                                     label = "Remove",
+                                                                                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4")))),
+    
+    column(12, hr()),
     
     
     tags$div(column(12, radioButtons(inputId = "fit_design", label = "Select design", 
