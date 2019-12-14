@@ -22,14 +22,6 @@ mix.data <- reactive({
   get.data.set()
 })
 
-## reactive value for ggbox plot
-
-mix.par = reactiveValues(
-  x = NULL,
-  y = NULL,
-  facets = NULL,
-  data = NULL
-)
 
 values$create.fix.expression.text = ""
 
@@ -96,531 +88,144 @@ lbc <- reactiveValues(lastBtn = character())
 ###              Model Fitting part                 ###
 ###-------------------------------------------------###
 
-
-###-------------------------------------------------###
-###          one way anova no blocking              ###
-###                   tabset panel                  ###
-###-------------------------------------------------###
-
-## select response variable
-output$oneway_nb_var1_panel <- renderUI({
+## UI of selecting variables
+output$ep_anova <- renderUI({
   get.data.set()
-  isolate({    
-    sel = input$mm_oneway_nb_vari1    
-    selectInput(inputId = "mm_oneway_nb_vari1",
-                label = "Response variable",
-                choices = c(" ", var_name_numeric()),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select Treatment factor
-output$oneway_nb_var2_panel <- renderUI({
-  get.data.set()
+  ret = NULL
+  input$model_design
   isolate({
-    sel = input$mm_oneway_nb_vari2
-    ch = c(" ", var_name_factor())
-    selectInput(inputId = "mm_oneway_nb_vari2",
-                label = "Treatment factor",
-                choices = ch,
-                selected = sel,
-                selectize = F)
+    var_name_numeric = c(" ", get.numeric.column.names(get.data.set()))
+    var_name_factor = c(" ", get.categorical.column.names(get.data.set()))
+    
+    
+    base.design = fluidRow(## select response variable(numeric)
+      column(12, selectInput(inputId = "mm_vari1",
+                             label = "Response variable",
+                             choices = var_name_numeric,
+                             selected = var_name_numeric[1],
+                             selectize = F)),
+      
+      ## select treatment varibale(factor)
+      column(12, selectInput(inputId = "mm_vari2",
+                             label = "Treatment factor",
+                             choices = var_name_factor,
+                             selected = var_name_factor[1],
+                             selectize = F)))
+    
+    ## select second treatment factor
+    sec.fac = fluidRow(column(12, selectInput(inputId = "mm_vari3",
+                                              label = "Second Treatment factor",
+                                              choices = var_name_factor,
+                                              selected = var_name_factor[1],
+                                              selectize = F)))
+    
+    ## select third treatment factor
+    third.fac = fluidRow(column(12, selectInput(inputId = "mm_vari4",
+                                                label = "Third Treatment factor",
+                                                choices = var_name_factor,
+                                                selected = var_name_factor[1],
+                                                selectize = F)))
+    
+    ## select block factor
+    block.fac = fluidRow(column(12, selectInput(inputId = "mm_vari5",
+                                                label = "Block factor",
+                                                choices = var_name_factor,
+                                                selected = var_name_factor[1],
+                                                selectize = F)))
+    if(req(input$model_design) == 1){
+      ret = base.design
+    } else if (req(input$model_design) == 2) {
+      ret = list(
+        base.design,
+        block.fac
+      )} else if (req(input$model_design) == 3) {
+        ret = list(
+          base.design,
+          sec.fac
+        )} else if (req(input$model_design) == 4) {
+          ret = list(
+            base.design,
+            sec.fac,
+            block.fac
+          )} else if (req(input$model_design) == 5) {
+            ret = list(
+              base.design,
+              sec.fac,
+              third.fac
+            )} else if (req(input$model_design) == 6) {
+              ret = list(
+                base.design,
+                sec.fac,
+                third.fac,
+                block.fac
+              )}
   })
+  ret
 })
 
-###-------------------------------------------------###
-###            one way anova with blocking          ###
-###                   tabset panel                  ###
-###-------------------------------------------------###
 
-## select response variable
-output$oneway_rb_var1_panel <- renderUI({
-  get.data.set()
-  isolate({    
-    sel = input$mm_oneway_rb_vari1    
-    selectInput(inputId = "mm_oneway_rb_vari1",
-                label = "Response variable",
-                choices = c(" ", var_name_numeric()),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select Treatment factor
-output$oneway_rb_var2_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_oneway_rb_vari2
-    ch = c(" ", var_name_factor())
-    selectInput(inputId = "mm_oneway_rb_vari2",
-                label = "Treatment factor",
-                choices = ch,
-                selected = sel,
-                selectize = F)
-  })
-})
+###----------------------------###
+###     update selectInput     ###
+###----------------------------###
 
 
-## select Block factor 
-output$oneway_rb_var3_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_oneway_rb_vari3
-    ch = c(" ", var_name_factor())
-    selectInput(inputId = "mm_oneway_rb_vari3",
-                label = "Block factor",
-                choices = ch,
-                selected = sel,
-                selectize = F)
-  })
-})
 
-## update variable that has been selected
 observe({
-  if(!is.null(input$mm_oneway_rb_vari2) && input$mm_oneway_rb_vari2 != " "){
+  if(req(input$mm_vari2) != " "){
     isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_oneway_rb_vari2)&&input$mm_oneway_rb_vari2%in%ch){
-          ch  = c(" ", ch[-which(var_name_factor()%in%input$mm_oneway_rb_vari2)])
-        }
-        sel = input$mm_oneway_rb_vari3
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_oneway_rb_vari3", choices=ch, selected=sel)
+      ch  = get.categorical.column.names(get.data.set())
+      ch  = c(" ", ch[-which(ch %in% input$mm_vari2)])
+      sel = input$mm_vari3
+      if(!is.null(sel)&&!sel%in%ch){
+        sel = ch[1]
       }
+      updateSelectInput(session, "mm_vari3", choices=ch, selected=sel)
     })
   }
 })
 
 
-###-------------------------------------------------###
-###          two way anova no blocking              ###
-###                   tabset panel                  ###
-###-------------------------------------------------###
-
-## select response variable
-output$twoway_nb_var1_panel <- renderUI({
-  get.data.set()
-  isolate({    
-    sel = input$mm_twoway_nb_vari1    
-    selectInput(inputId = "mm_twoway_nb_vari1",
-                label = "Response variable",
-                choices = c(" ", var_name_numeric()),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select first Treatment factor
-output$twoway_nb_var2_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_twoway_nb_vari2
-    ch = var_name_factor()
-    selectInput(inputId = "mm_twoway_nb_vari2",
-                label = "First Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select second Treatment factor
-output$twoway_nb_var3_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_twoway_nb_vari3
-    ch = var_name_factor()
-    selectInput(inputId = "mm_twoway_nb_vari3",
-                label = "Second Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## update variable that has been selected
 observe({
-  if(!is.null(input$mm_twoway_nb_vari2) && input$mm_twoway_nb_vari2 != " "){
+  if(req(input$mm_vari2) != " " | req(input$mm_vari3) != " "){
     isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_twoway_nb_vari2)&&input$mm_twoway_nb_vari2%in%ch){
-          ch  = c(" ", ch[-which(var_name_factor()%in%input$mm_twoway_nb_vari2)])
-        }
-        sel = input$mm_twoway_nb_vari3
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session,"mm_twoway_nb_vari3", choices=ch, selected=sel)
+      ch  = get.categorical.column.names(get.data.set())
+      if(req(input$mm_vari2) != " "){
+        ch  = ch[-which(ch %in% input$mm_vari2)]
       }
+      if(req(input$mm_vari3) != " "){
+        ch  = ch[-which(ch %in% input$mm_vari3)]
+      }
+      ch = c(" ", ch)
+      sel = input$mm_vari4
+      if(!is.null(sel)&&!sel%in%ch){
+        sel = ch[1]
+      }
+      updateSelectInput(session, "mm_vari4", choices=ch, selected=sel)
     })
   }
-})
-
-###-------------------------------------------------###
-###            two way anova with blocking          ###
-###                   tabset panel                  ###
-###-------------------------------------------------###
-
-## select response variable
-output$twoway_rb_var1_panel <- renderUI({
-  get.data.set()
-  isolate({    
-    sel = input$mm_twoway_rb_vari1    
-    selectInput(inputId = "mm_twoway_rb_vari1",
-                label = "Response variable",
-                choices = c(" ", var_name_numeric()),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select first Treatment factor
-output$twoway_rb_var2_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_twoway_rb_vari2
-    ch = var_name_factor()
-    selectInput(inputId = "mm_twoway_rb_vari2",
-                label = "First Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-
-## select second Treatment factor 
-output$twoway_rb_var3_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_twoway_rb_vari3
-    ch = var_name_factor()
-    selectInput(inputId = "mm_twoway_rb_vari3",
-                label = "Second Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## update variable that has been selected
-observe({
-  if(!is.null(input$mm_twoway_rb_vari2) && input$mm_twoway_rb_vari2 != " "){
-    isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_twoway_rb_vari2)&&input$mm_twoway_rb_vari2%in%ch){
-          ch  = c(" ", ch[-which(var_name_factor()%in%input$mm_twoway_rb_vari2)])
-        }
-        sel = input$mm_twoway_rb_vari3
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session,"mm_twoway_rb_vari3", choices=ch, selected=sel)
-      }
-    })
-  }
-})
-
-## select Block factor 
-output$twoway_rb_var4_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_twoway_rb_vari4
-    ch = var_name_factor()
-    selectInput(inputId = "mm_twoway_rb_vari4",
-                label = "Block factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-##  Update Block factors
-observe({
-  if((!is.null(input$mm_twoway_rb_vari2) && input$mm_twoway_rb_vari2 != " ") | 
-     (!is.null(input$mm_twoway_rb_vari3) && input$mm_twoway_rb_vari3 != " ")){
-    isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_twoway_rb_vari2)&&input$mm_twoway_rb_vari2%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_twoway_rb_vari2)])
-        }
-        if(!is.null(input$mm_twoway_rb_vari3)&&input$mm_twoway_rb_vari3%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_twoway_rb_vari3)])
-        }
-        if(ch[1] == " " && ch[2] == " "){
-          ch = ch[-1]
-        }
-        sel = input$mm_twoway_rb_vari4
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_twoway_rb_vari4", choices=ch, selected=sel)
-      }
-    })
-  }
-})
-
-
-
-###---------------------------------------------------###
-###           Three way anova no blocking             ###
-###                   tabset panel                    ###
-###---------------------------------------------------###
-
-## select response variable
-output$threeway_nb_var1_panel <- renderUI({
-  get.data.set()
-  isolate({    
-    sel = input$mm_threeway_nb_vari1    
-    selectInput(inputId = "mm_threeway_nb_vari1",
-                label = "Response variable",
-                choices = c(" ", var_name_numeric()),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select first Treatment factor
-output$threeway_nb_var2_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_threeway_nb_vari2
-    ch = c(" ", var_name_factor())
-    selectInput(inputId = "mm_threeway_nb_vari2",
-                label = "First Treatment factor",
-                choices = ch,
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select second Treatment factor
-output$threeway_nb_var3_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_threeway_nb_vari3
-    ch = var_name_factor()
-    selectInput(inputId = "mm_threeway_nb_vari3",
-                label = "Second Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## update variable that has been selected
-observe({
-  if(!is.null(input$mm_threeway_nb_vari2) && input$mm_threeway_nb_vari2 != " "){
-    isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_threeway_nb_vari2)&&input$mm_threeway_nb_vari2%in%ch){
-          ch  = c(" ", ch[-which(var_name_factor()%in%input$mm_threeway_nb_vari2)])
-        }
-        sel = input$mm_threeway_nb_vari3
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_threeway_nb_vari3", choices=ch, selected=sel)
-      }
-    })
-  }
-})
-
-## select third Treatment factor
-output$threeway_nb_var4_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_threeway_nb_vari4
-    ch = var_name_factor()
-    selectInput(inputId = "mm_threeway_nb_vari4",
-                label = "Third Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## update the third Treatment factor
-observe({
-  if((!is.null(input$mm_threeway_nb_vari2) && input$mm_threeway_nb_vari2 != " ") | 
-     (!is.null(input$mm_threeway_nb_vari3) && input$mm_threeway_nb_vari3 != " ")){
-    isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_threeway_nb_vari2)&&input$mm_threeway_nb_vari2%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_threeway_nb_vari2)])
-        }
-        if(!is.null(input$mm_threeway_nb_vari3)&&input$mm_threeway_nb_vari3%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_threeway_nb_vari3)])
-        }
-        if(ch[1] == " " && ch[2] == " "){
-          ch = ch[-1]
-        }
-        sel = input$mm_threeway_nb_vari4
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_threeway_nb_vari4", choices=ch, selected=sel)
-      }
-    })
-  }
-})
-
-###-----------------------------------------------------###
-###           Three way anova with blocking             ###
-###                   tabset panel                      ###
-###-----------------------------------------------------###
-
-## select response variable
-output$threeway_rb_var1_panel <- renderUI({
-  get.data.set()
-  isolate({    
-    sel = input$mm_threeway_rb_vari1    
-    selectInput(inputId = "mm_threeway_rb_vari1",
-                label = "Response variable",
-                choices = c(" ", var_name_numeric()),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## select first Treatment factor
-output$threeway_rb_var2_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_threeway_rb_vari2
-    ch = var_name_factor()
-    selectInput(inputId = "mm_threeway_rb_vari2",
-                label = "First Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-
-## select second Treatment factor 
-output$threeway_rb_var3_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_threeway_rb_vari3
-    ch = var_name_factor()
-    selectInput(inputId = "mm_threeway_rb_vari3",
-                label = "Second Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-## update variable that has been selected
-observe({
-  if(!is.null(input$mm_threeway_rb_vari2) && input$mm_threeway_rb_vari2 != " "){
-    isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_threeway_rb_vari2)&&input$mm_threeway_rb_vari2%in%ch){
-          ch  = c(" ", ch[-which(var_name_factor()%in%input$mm_threeway_rb_vari2)])
-        }
-        sel = input$mm_threeway_rb_vari3
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_threeway_rb_vari3", choices=ch, selected=sel)
-      }
-    })
-  }
-})
-
-## select third variable 
-output$threeway_rb_var4_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_threeway_rb_vari4
-    ch = var_name_factor()
-    selectInput(inputId = "mm_threeway_rb_vari4",
-                label = "Third Treatment factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
-})
-
-##  Update Block factors
-observe({
-  if((!is.null(input$mm_threeway_rb_vari2) && input$mm_threeway_rb_vari2 != " ") | 
-     (!is.null(input$mm_threeway_rb_vari3) && input$mm_threeway_rb_vari3 != " ")){
-    isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_threeway_rb_vari2)&&input$mm_threeway_rb_vari2%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_threeway_rb_vari2)])
-        }
-        if(!is.null(input$mm_threeway_rb_vari3)&&input$mm_threeway_rb_vari3%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_threeway_rb_vari3)])
-        }
-        if(ch[1] == " " && ch[2] == " "){
-          ch = ch[-1]
-        }
-        sel = input$mm_threeway_rb_vari4
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_threeway_rb_vari4", choices=ch, selected=sel)
-      }
-    })
-  }
-})
-
-
-## select Block factor 
-output$threeway_rb_var5_panel <- renderUI({
-  get.data.set()
-  isolate({
-    sel = input$mm_threeway_rb_vari5
-    ch = var_name_factor()
-    selectInput(inputId = "mm_threeway_rb_vari5",
-                label = "Block factor",
-                choices = c(" ", ch),
-                selected = sel,
-                selectize = F)
-  })
 })
 
 ## update the Block factor
 observe({
-  if((!is.null(input$mm_threeway_rb_vari2) && input$mm_threeway_rb_vari2 != " ") | 
-     (!is.null(input$mm_threeway_rb_vari3) && input$mm_threeway_rb_vari3 != " ") | 
-     (!is.null(input$mm_threeway_rb_vari4) && input$mm_threeway_rb_vari4 != " ")){
+  if(req(input$mm_vari2) != " " | req(input$mm_vari3) != " " |
+     req(input$mm_vari4) != " "){
     isolate({
-      if(!is.null(mix.data())){
-        ch  = var_name_factor()
-        if(!is.null(input$mm_threeway_rb_vari2)&&input$mm_threeway_rb_vari2%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_threeway_rb_vari2)])
-        }
-        if(!is.null(input$mm_threeway_rb_vari3)&&input$mm_threeway_rb_vari3%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_threeway_rb_vari3)])
-        }
-        if(!is.null(input$mm_threeway_rb_vari4)&&input$mm_threeway_rb_vari4%in%ch){
-          ch  = c(" ", ch[-which(ch%in%input$mm_threeway_rb_vari4)])
-        }
-        if(ch[1] == " " && ch[2] == " " && ch[3] == " "){
-          ch = ch[-c(1,2)]
-        }
-        sel = input$mm_threeway_rb_vari5
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_threeway_rb_vari5", choices=ch, selected=sel)
+      ch  = get.categorical.column.names(get.data.set())
+      if(req(input$mm_vari2) != " "){
+        ch  = ch[-which(ch %in% input$mm_vari2)]
       }
+      if(req(input$mm_vari3) != " "){
+        ch  = ch[-which(ch %in% input$mm_vari3)]
+      }
+      if(req(input$mm_vari4) != " "){
+        ch  = ch[-which(ch %in% input$mm_vari4)]
+      }
+      ch = c(" ", ch)
+      sel = input$mm_vari5
+      if(!is.null(sel)&&!sel%in%ch){
+        sel = ch[1]
+      }
+      updateSelectInput(session, "mm_vari5", choices=ch, selected=sel)
     })
   }
 })
