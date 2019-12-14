@@ -145,18 +145,7 @@ mixedModel.mainPanel = function(){
                       verbatimTextOutput("aov.summary"),
                       uiOutput("comment.save.aov"),
                       uiOutput("success_msg_aov_doe1")
-                    ),
-                    tabPanel(
-                      "Residual Plot",
-                      br(),
-                      plotOutput("resi.ep", height = "500px"),
-                      uiOutput("comment.save.resip"),
-                      uiOutput("success_msg_resip_doe1")),
-                    tabPanel(
-                      "Group means and comparisons",
-                      br(),
-                      uiOutput("select.mi"),
-                      uiOutput("select.table.mi"))
+                    )
         )
     )
   )## end of mainPanelUI
