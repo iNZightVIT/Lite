@@ -23,19 +23,6 @@ mix.data <- reactive({
 })
 
 
-values$create.fix.expression.text = ""
-
-get.create.fix.expression.text = reactive({
-  values$create.fix.expression.text
-})
-
-values$create.random.expression.text = ""
-
-get.create.random.expression.text = reactive({
-  values$create.random.expression.text
-})
-
-
 ## reactive value for fit mixed model
 
 mix.list.par = reactive({
@@ -237,13 +224,14 @@ observe({
 ## select response variable
 output$own_model_var1_panel <- renderUI({
   get.data.set()
-  isolate({    
+  isolate({
+    var_name_numeric = c(" ", get.numeric.column.names(get.data.set()))
     sel = input$mm_own_model_vari1
     div(
       hr(),
       selectInput(inputId = "mm_own_model_vari1",
                   label = "Response variable",
-                  choices = c(" ", var_name_numeric()),
+                  choices = var_name_numeric,
                   selected = sel,
                   selectize = F))
   })
@@ -264,66 +252,25 @@ output$own_model_fixed_panel <- renderUI({
 })
 
 ##  Update fixed effect.
-
 observe({
-  if(!is.null(input$mm_own_model_vari1)){
+  if(req(input$mm_own_model_vari1) != " "){
     isolate({
-      if(!is.null(mix.data())){
-        ch  = colnames(mix.data())
-        if(!is.null(input$mm_own_model_vari1)&&input$mm_own_model_vari1%in%ch){
-          ch  = ch[-which(colnames(mix.data())%in%input$mm_own_model_vari1)]
-        }
-        sel = input$mm_own_model_fixed
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
-        }
-        updateSelectInput(session, "mm_own_model_fixed", choices=ch, selected=sel)
+      ch  = colnames(mix.data())
+      ch  = c(" ", ch[-which(ch %in% input$mm_own_model_vari1)])
+      sel = input$mm_own_model_fixed
+      if(!is.null(sel)&&!sel%in%ch){
+        sel = ch[1]
       }
+      updateSelectInput(session, "mm_own_model_fixed", choices=ch, selected=sel)
     })
   }
 })
 
-## add the operation to string of fixed effect when select a new operation
-observe({
-  input$select_operation
-  isolate({
-    if(!" "%in%input$select_operation){
-      values$create.fix.expression.text  = paste(
-        get.create.fix.expression.text(),
-        input$select_operation,sep="")
-    }
-  })
-})
-
-## add variable name to string of fixed effect when select a new variable
 observe({
   input$mm_own_model_fixed
   isolate({
-    if(!" "%in%input$mm_own_model_fixed){
-      values$create.fix.expression.text  = paste(
-        get.create.fix.expression.text(),
-        input$mm_own_model_fixed,sep="")
-    }
-  })
-})
-
-## fixed effect string
-output$fixed_expr = renderPrint({
-  cat(get.create.fix.expression.text())
-})
-
-
-## delete button for fixed effect
-observe({
-  input$delete_mm_fix
-  isolate({
-    if(!is.null(input$delete_mm_fix)&&input$delete_mm_fix>0){
-      if(nchar(values$create.fix.expression.text)>0){
-        values$create.fix.expression.text = substr(
-          values$create.fix.expression.text,1,
-          nchar(values$create.fix.expression.text)-1)
-      }
-    }
+    updateTextInput(session, inputId = "fixed_effect", label = "Fixed effect:",
+                    value = paste0(input$fixed_effect, input$mm_own_model_fixed))
   })
 })
 
@@ -331,61 +278,24 @@ observe({
 ## select random effect(factor)
 output$own_model_random_panel <- renderUI({
   get.data.set()
-  isolate({    
+  isolate({
+    var_name_factor = c(" ", get.categorical.column.names(get.data.set()))
     sel = input$mm_own_model_random    
     selectInput(inputId = "mm_own_model_random",
                 label = "Random effect",
-                choices =c(" ", var_name_factor()),
+                choices = var_name_factor,
                 selected = NULL,
-                size = length(var_name_factor()) + 1,
+                size = length(var_name_factor),
                 selectize = F)
   })
 })
 
 
-
-## update character string for random effect
-observe({
-  input$select_operation_random
-  isolate({
-    if(!" "%in%input$select_operation_random){
-      values$create.random.expression.text  = paste(
-        get.create.random.expression.text(),
-        input$select_operation_random,sep="")
-    }
-  })
-})
-
-## update character string for random effect
 observe({
   input$mm_own_model_random
   isolate({
-    if(!" "%in%input$mm_own_model_random){
-      values$create.random.expression.text  = paste(
-        get.create.random.expression.text(),
-        input$mm_own_model_random,sep="")
-    }
-  })
-})
-
-## random effect string
-output$random_expr = renderPrint({
-  cat(get.create.random.expression.text())
-})
-
-
-
-## delete button
-observe({
-  input$delete_mm_random
-  isolate({
-    if(!is.null(input$delete_mm_random)&&input$delete_mm_random>0){
-      if(nchar(values$create.random.expression.text)>0){
-        values$create.random.expression.text = substr(
-          values$create.random.expression.text,1,
-          nchar(values$create.random.expression.text)-1)
-      }
-    }
+    updateTextInput(session, inputId = "random_effect", label = "Random effect:",
+                    value = paste0(input$random_effect, input$mm_own_model_random))
   })
 })
 

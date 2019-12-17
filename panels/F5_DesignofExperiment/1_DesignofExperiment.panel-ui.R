@@ -51,7 +51,18 @@ mixedModel.sidebarPanel <- function(){
                                                                  "Three-way anova (no Blocking)" = 5,
                                                                  "Three-way anova (in randomized Blocks)" = 6)))),
                      fluidRow(column(12, hr())),
-                     uiOutput("ep_anova")
+                     uiOutput("ep_anova"),
+                     
+                     fluidRow(column(12, hr())),
+                     
+                     actionButton(inputId = "fit_model_aov",
+                                  label = "Fit Model",
+                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                     
+                     uiOutput("error_msg_aov"),
+                     
+                     fluidRow(column(12, hr()))
+                     
     ),
     ## fit own model
     conditionalPanel(condition = "input.fit_design == 2",
@@ -69,65 +80,36 @@ mixedModel.sidebarPanel <- function(){
                      conditionalPanel(condition = "input.select_fix_effect == 1",
                                       
                                       ## select variables and operations
-                                      fluidRow(column(6, uiOutput("own_model_fixed_panel")),
-                                               
-                                               column(6, selectInput(inputId="select_operation",
-                                                                     label="Select an operation",
-                                                                     choices=c(" ", "+", "*", 
-                                                                               "(", ")", ":", "."),
-                                                                     selected=" ",
-                                                                     size=7,
-                                                                     selectize=F))
-                                      ),
-                                      
-                                      tags$div(style = "margin-left: -1.1em;", column(12, p("Fixed effect:"))),
+                                      fluidRow(column(12, uiOutput("own_model_fixed_panel"))),
                                       
                                       ## display results
-                                      fluidRow(column(10, verbatimTextOutput("fixed_expr", placeholder = T)),
-                                               column(2, actionButton(inputId = "delete_mm_fix",
-                                                                      label = "Del",
-                                                                      style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                                      fluidRow(column(12,textInput("fixed_effect", label = "Fixed effect:", value = "")),
+                                               
+                                               hr())
                                       
                                       ## fluidRow(column(10, verbatimTextOutput("fixed.expression.message")))
-                                      hr()
                      ),
                      ## select random effect
                      checkboxInput(inputId = "select_random_effect", 
                                    label = "Structural component (random effect)", value = FALSE),
                      
-                     ## select Explanatory component
                      conditionalPanel(condition = "input.select_random_effect == 1",
                                       
                                       ## select variables and operations
-                                      fluidRow(column(6, uiOutput("own_model_random_panel")),
-                                               
-                                               column(6, selectInput(inputId="select_operation_random",
-                                                                     label="Select an operation",
-                                                                     choices=c(" ", "+", "*", 
-                                                                               "(", ")", ":", ".", "~", "|", "1", "/"),
-                                                                     selected=" ",
-                                                                     size=11,
-                                                                     selectize=F))
-                                      ),
+                                      fluidRow(column(6, uiOutput("own_model_random_panel"))),
                                       
-                                      tags$div(style = "margin-left: -1.1em;", column(12, p("Random effect:"))),
+                                      fluidRow(column(12,textInput("random_effect", label = "Random effect:", value = "")))),
                                       
-                                      ## display results
-                                      fluidRow(column(10, verbatimTextOutput("random_expr", placeholder = T)),
-                                               column(2, actionButton(inputId = "delete_mm_random",
-                                                                      label = "Del",
-                                                                      style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))))
-    ),## end of fiting own model
-    
-    fluidRow(column(12, hr())),
-    
-    actionButton(inputId = "fit_model7",
-                 label = "Fit Model",
-                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-    
-    uiOutput("error_msg_d7"),
-    
-    fluidRow(column(12, hr()))
+                     fluidRow(column(12, hr())),
+                     
+                     actionButton(inputId = "fit_model_own",
+                                  label = "Fit Model",
+                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                     
+                     uiOutput("error_msg_own"),
+                     
+                     fluidRow(column(12, hr()))
+    )## end of fiting own model
   )## end of list
 }
 
