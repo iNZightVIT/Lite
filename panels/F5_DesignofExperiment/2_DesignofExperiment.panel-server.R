@@ -362,7 +362,6 @@ observeEvent(input$fit_model_own, {
       temp$blocking = input$random_effect
       temp$data.name = values$data.name
       temp.model <- do.call(fit.own, temp)
-
     }
   }, error = function(e){print(e)}, finally = {})
   if(!is.null(temp.model)){

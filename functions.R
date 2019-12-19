@@ -1779,9 +1779,16 @@ anova.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
 
 fit.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
   fit.str = NULL
-  fit.str = sprintf("%s ~ %s", y, x)
-  fit = nlme::lme(fixed = as.formula(fit.str), random = as.formula(blocking), data = data)
-  attr(fit, "code") = paste0(name, " = nlme::lme(", fit.str, ", ", "random = ", blocking, ", data = ", data.name, ")")
+  if(!is.null(blocking)){
+    fit.str = sprintf("%s ~ %s", y, x)
+    fit = nlme::lme(as.formula(fit.str), random = as.formula(blocking), data = data)
+    attr(fit, "code") = sprintf("%s = nlme::lme(%s ~ %s, random = %s, data = %s)", name, y, x, blocking, data.name)
+  } else {
+    fit.str = sprintf("%s ~ %s", y, x)
+    fit = lm(as.formula(fit.str), data = data)
+    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y, 
+                                x, data.name)
+  }
   fit
 }
 
