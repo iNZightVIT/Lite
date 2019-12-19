@@ -371,6 +371,14 @@ shinyServer(function(input, output, session) {
   source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
   source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
   
+  #   Advanced --> Design of Experiment
+  
+  ##------------------------------##
+  ##  Experimental Design Module  ##
+  ##------------------------------##
+  source("panels/F5_DesignofExperiment//1_DesignofExperiment.panel-ui.R", local = TRUE)
+  source("panels/F5_DesignofExperiment//2_DesignofExperiment.panel-server.R", local = TRUE)
+  
   
   #   Show code history
   
