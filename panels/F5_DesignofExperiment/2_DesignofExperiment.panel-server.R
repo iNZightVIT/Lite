@@ -18,16 +18,11 @@ output$mixedmodel.panel <- renderUI({
 
 ## get data set
 mix.data <- reactive({
-  #   values$data.set
   get.data.set()
 })
 
 
 ## reactive value for fit mixed model
-
-mix.list.par = reactive({
-  mix.list.par = reactiveValuesToList(mix.par)
-})
 
 model_Vals = reactiveValues(
   num = 0,
@@ -40,7 +35,8 @@ mix.model.par = reactiveValues(
   x = NULL,
   data = NULL,
   blocking = NULL,
-  name = NULL
+  name = NULL,
+  data.name = NULL
 )
 
 mix.model.list.par = reactive({
@@ -49,26 +45,8 @@ mix.model.list.par = reactive({
 
 fit_message <- reactiveValues(
   msg1 = as.logical(),
-  msg2 = as.logical(),
-  msg3 = as.logical(),
-  msg4 = as.logical(),
-  msg5 = as.logical(),
-  msg6 = as.logical(),
-  msg7 = as.logical()
+  msg2 = as.logical()
 )
-
-
-save_success_msg <- reactiveValues(
-  aov = F,
-  resip = F,
-  tabmi = F,
-  pht = F,
-  meanLSD = F
-)
-
-
-## find out the last clicked button
-lbc <- reactiveValues(lastBtn = character())
 
 
 ###-------------------------------------------------###
@@ -266,6 +244,7 @@ observe({
   }
 })
 
+
 observe({
   input$mm_own_model_fixed
   isolate({
@@ -305,8 +284,8 @@ observe({
 ###--------------------------------------------###
 
 ## we fit model separately
-## fit oneway anova
-observeEvent(input$fit_model1, {
+
+observeEvent(input$fit_model_aov, {
   isolate({mix.model.name = ""
   temp.model = NULL
   ## fit model
@@ -316,240 +295,55 @@ observeEvent(input$fit_model1, {
     temp$data = mix.data()
     ## generate model name
     model_Vals$num = model_Vals$num + 1
-    if(input$fit_design == 1 && input$model_design == 1 && !is.null(input$mm_oneway_nb_vari1) && !is.null(input$mm_oneway_nb_vari2)){
-      mix.model.name = paste0("Model_", model_Vals$num)
-      ## fit model
-      temp$name = mix.model.name
-      temp$y = input$mm_oneway_nb_vari1
-      temp$x = input$mm_oneway_nb_vari2
-      temp.model <- do.call(anova.fit, temp)
-      temp.aov <- do.call(aov.fit, temp)
+    if (req(input$fit_design) == 1 && req(input$model_design) == 1 && req(input$mm_vari1) != " " && 
+        req(input$mm_vari2) != " ") {
+      temp$y = input$mm_vari1
+      temp$x = input$mm_vari2
+    } else if (req(input$fit_design) == 1 && req(input$model_design) == 2 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+               req(input$mm_vari5) != " ") {
+      temp$y = input$mm_vari1
+      temp$x = input$mm_vari2
+      temp$blocking = input$mm_vari5
+    } else if (req(input$fit_design) == 1 && req(input$model_design) == 3 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+               req(input$mm_vari3) != " ") {
+      temp$y = input$mm_vari1
+      temp$x = c(input$mm_vari2, input$mm_vari3)
+    } else if (req(input$fit_design) == 1 && req(input$model_design) == 4 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+               req(input$mm_vari3) != " " && req(input$mm_vari5) != " ") {
+      temp$y = input$mm_vari1
+      temp$x = c(input$mm_vari2, input$mm_vari3)
+      temp$blocking = input$mm_vari5
+    } else if (req(input$fit_design) == 1 && req(input$model_design) == 5 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+               req(input$mm_vari3) != " " && req(input$mm_vari4) != " ") {
+      temp$y = input$mm_vari1
+      temp$x = c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
+    } else if (req(input$fit_design) == 1 && req(input$model_design) == 6 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+               req(input$mm_vari3) != " " && req(input$mm_vari4) != " " && req(input$mm_vari5) != " ") {
+      temp$y = input$mm_vari1
+      temp$x = c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
+      temp$blocking = input$mm_vari5
     }
-  }, error = function(e){}, finally = {})
+    mix.model.name = paste0("Model_", model_Vals$num)
+    temp$name = mix.model.name
+    temp$data.name = values$data.name
+    temp.model <- do.call(anova.fit, temp)
+    temp.aov <- do.call(aov.fit, temp)
+  }, error = function(e){print(e)}, finally = {})
   if(!is.null(temp.model)){
     model_Vals$model[[mix.model.name]] = temp.model
     model_Vals$aov[[mix.model.name]] = temp.aov
     updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
                       selected = mix.model.name)
     fit_message$msg1 = T
-    save_success_msg$aov = F
-    save_success_msg$resip = F
-    save_success_msg$tabmi = F
-    save_success_msg$pht = F
-    save_success_msg$meanLSD = F
-  } else if(is.null(temp.model) && input$fit_model1 > 0){
+  } else if(is.null(temp.model) && input$fit_model_aov > 0){
     model_Vals$num = model_Vals$num - 1
     fit_message$msg1 = F
   }
   })
 })
 
-## fit one-way anova with blocking
-observeEvent(input$fit_model2, {
-  isolate({mix.model.name = ""
-  temp.model = NULL
-  ## fit model
-  ## set parameters
-  tryCatch({
-    temp = mix.model.list.par()
-    temp$data = mix.data()
-    ## generate model name
-    model_Vals$num = model_Vals$num + 1
-    if(input$fit_design == 1 && input$model_design == 2 && !is.null(input$mm_oneway_rb_vari1) && !is.null(input$mm_oneway_rb_vari2) &&
-       !is.null(input$mm_oneway_rb_vari3) && !is.null(input$fit_model2) && input$fit_model2 > 0){
-      mix.model.name = paste0("Model_", model_Vals$num)
-      ## fit model
-      temp$name = mix.model.name
-      temp$y = input$mm_oneway_rb_vari1
-      temp$x = input$mm_oneway_rb_vari2
-      temp$blocking = input$mm_oneway_rb_vari3
-      temp.model <- do.call(anova.fit, temp)
-      temp.aov <- do.call(aov.fit, temp)
-    }
-  }, error = function(e){}, finally = {})
-  if(!is.null(temp.model)){
-    model_Vals$model[[mix.model.name]] = temp.model
-    model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
-                      selected = mix.model.name)
-    fit_message$msg2 = T
-    save_success_msg$aov = F
-    save_success_msg$resip = F
-    save_success_msg$tabmi = F
-    save_success_msg$pht = F
-    save_success_msg$meanLSD = F
-  } else if(is.null(temp.model) && input$fit_model2 > 0){
-    fit_message$msg2 = F
-    model_Vals$num = model_Vals$num - 1
-  }
-  })
-})
-
-## fit two-way anova
-observeEvent(input$fit_model3, {
-  isolate({mix.model.name = ""
-  temp.model = NULL
-  ## fit model
-  ## set parameters
-  tryCatch({
-    temp = mix.model.list.par()
-    temp$data = mix.data()
-    ## generate model name
-    model_Vals$num = model_Vals$num + 1
-    if(input$fit_design == 1 && input$model_design == 3 && !is.null(input$mm_twoway_nb_vari1) && !is.null(input$mm_twoway_nb_vari2) &&
-       !is.null(input$mm_twoway_nb_vari3) && !is.null(input$fit_model3) && input$fit_model3 > 0){
-      mix.model.name = paste0("Model_", model_Vals$num)
-      ## fit model
-      temp$name = mix.model.name
-      temp$y = input$mm_twoway_nb_vari1
-      temp$x = c(input$mm_twoway_nb_vari2, input$mm_twoway_nb_vari3)
-      temp.model <- do.call(anova.fit, temp)
-      temp.aov <- do.call(aov.fit, temp)
-    }
-  }, error = function(e){}, finally = {})
-  if(!is.null(temp.model)){
-    model_Vals$model[[mix.model.name]] = temp.model
-    model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
-                      selected = mix.model.name)
-    fit_message$msg3 = T
-    save_success_msg$aov = F
-    save_success_msg$resip = F
-    save_success_msg$tabmi = F
-    save_success_msg$pht = F
-    save_success_msg$meanLSD = F
-  } else if(is.null(temp.model) && input$fit_model3 > 0){
-    fit_message$msg3 = F
-    model_Vals$num = model_Vals$num - 1
-  }
-  })
-})
-
-## fit two-way anova with blocking
-observeEvent(input$fit_model4, {
-  isolate({mix.model.name = ""
-  temp.model = NULL
-  ## fit model
-  ## set parameters
-  tryCatch({
-    temp = mix.model.list.par()
-    temp$data = mix.data()
-    ## generate model name
-    model_Vals$num = model_Vals$num + 1
-    if(input$fit_design == 1 && input$model_design == 4 && !is.null(input$mm_twoway_rb_vari1) && !is.null(input$mm_twoway_rb_vari2) &&
-       !is.null(input$mm_twoway_rb_vari3) && !is.null(input$mm_twoway_rb_vari4) && !is.null(input$fit_model4) && input$fit_model4 > 0){
-      mix.model.name = paste0("Model_", model_Vals$num)
-      ## fit model
-      temp$name = mix.model.name
-      temp$y = input$mm_twoway_rb_vari1
-      temp$x = c(input$mm_twoway_rb_vari2, input$mm_twoway_rb_vari3)
-      temp$blocking = input$mm_twoway_rb_vari4
-      temp.model <- do.call(anova.fit, temp)
-      temp.aov <- do.call(aov.fit, temp)
-    }
-  }, error = function(e){}, finally = {})
-  if(!is.null(temp.model)){
-    model_Vals$model[[mix.model.name]] = temp.model
-    model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
-                      selected = mix.model.name)
-    fit_message$msg4 = T
-    save_success_msg$aov = F
-    save_success_msg$resip = F
-    save_success_msg$tabmi = F
-    save_success_msg$pht = F
-    save_success_msg$meanLSD = F
-  } else if(is.null(temp.model) && input$fit_model4 > 0){
-    fit_message$msg4 = F
-    model_Vals$num = model_Vals$num - 1
-  }
-  })
-})
-
-## fit three way anova
-observeEvent(input$fit_model5, {
-  isolate({mix.model.name = ""
-  temp.model = NULL
-  ## fit model
-  ## set parameters
-  tryCatch({
-    temp = mix.model.list.par()
-    temp$data = mix.data()
-    ## generate model name
-    model_Vals$num = model_Vals$num + 1
-    if(input$fit_design == 1 && input$model_design == 5 && !is.null(input$mm_threeway_nb_vari1) && !is.null(input$mm_threeway_nb_vari2) &&
-       !is.null(input$mm_threeway_nb_vari3) && !is.null(input$mm_threeway_nb_vari4) && !is.null(input$fit_model5) && input$fit_model5 > 0){
-      mix.model.name = paste0("Model_", model_Vals$num)
-      ## fit model
-      temp$name = mix.model.name
-      temp$y = input$mm_threeway_nb_vari1
-      temp$x = c(input$mm_threeway_nb_vari2, input$mm_threeway_nb_vari3, input$mm_threeway_nb_vari4)
-      temp.model <- do.call(anova.fit, temp)
-      temp.aov <- do.call(aov.fit, temp)
-    } 
-  }, error = function(e){}, finally = {})
-  if(!is.null(temp.model)){
-    model_Vals$model[[mix.model.name]] = temp.model
-    model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
-                      selected = mix.model.name)
-    fit_message$msg5 = T
-    save_success_msg$aov = F
-    save_success_msg$resip = F
-    save_success_msg$tabmi = F
-    save_success_msg$pht = F
-    save_success_msg$meanLSD = F
-  } else if(is.null(temp.model) && input$fit_model5 > 0){
-    fit_message$msg5 = F
-    model_Vals$num = model_Vals$num - 1
-  }
-  })
-})
-
-## fit three way anova with blocking
-observeEvent(input$fit_model6, {
-  isolate({mix.model.name = ""
-  temp.model = NULL
-  ## fit model
-  ## set parameters
-  tryCatch({
-    temp = mix.model.list.par()
-    temp$data = mix.data()
-    ## generate model name
-    model_Vals$num = model_Vals$num + 1
-    if(input$fit_design == 1 && input$model_design == 6 && !is.null(input$mm_threeway_rb_vari1) && !is.null(input$mm_threeway_rb_vari2) &&
-       !is.null(input$mm_threeway_rb_vari3) && !is.null(input$mm_threeway_rb_vari4) && !is.null(input$mm_threeway_rb_vari5) &&
-       !is.null(input$fit_model6) && input$fit_model6 > 0){
-      mix.model.name = paste0("Model_", model_Vals$num)
-      ## fit model
-      temp$name = mix.model.name
-      temp$y = input$mm_threeway_rb_vari1
-      temp$x = c(input$mm_threeway_rb_vari2, input$mm_threeway_rb_vari3, input$mm_threeway_rb_vari4)
-      temp$blocking = input$mm_threeway_rb_vari5
-      temp.model <- do.call(anova.fit, temp)
-      temp.aov <- do.call(aov.fit, temp)
-    }
-  }, error = function(e){}, finally = {})
-  if(!is.null(temp.model)){
-    model_Vals$model[[mix.model.name]] = temp.model
-    model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
-                      selected = mix.model.name)
-    fit_message$msg6 = T
-    save_success_msg$aov = F
-    save_success_msg$resip = F
-    save_success_msg$tabmi = F
-    save_success_msg$pht = F
-    save_success_msg$meanLSD = F
-  } else if(is.null(temp.model) && input$fit_model6 > 0){
-    fit_message$msg6 = F
-    model_Vals$num = model_Vals$num - 1
-  }
-  })
-})
-
 ## fit customized model
-observeEvent(input$fit_model7, {
+observeEvent(input$fit_model_own, {
   isolate({mix.model.name = ""
   temp.model = NULL
   ## fit model
@@ -560,31 +354,25 @@ observeEvent(input$fit_model7, {
     ## generate model name
     model_Vals$num = model_Vals$num + 1
     mix.model.name = paste0("Model_", model_Vals$num)
-    if(input$fit_design == 2 && !is.null(input$fit_model7) && input$fit_model7 > 0 && 
-       !is.null(values$create.fix.expression.text) && values$create.fix.expression.text != "" &&
-       !is.null(values$create.random.expression.text) && values$create.fix.expression.text != ""){
+    if(req(input$fit_design) == 2 && req(input$fit_model_own) > 0){
       ## fit model
       temp$name = mix.model.name
       temp$y = input$mm_own_model_vari1
-      temp$x = values$create.fix.expression.text
-      temp$blocking = values$create.random.expression.text
+      temp$x = input$fixed_effect
+      temp$blocking = input$random_effect
+      temp$data.name = values$data.name
       temp.model <- do.call(fit.own, temp)
-      temp.aov <- do.call(aov.own, temp)
+
     }
-  }, error = function(e){}, finally = {})
+  }, error = function(e){print(e)}, finally = {})
   if(!is.null(temp.model)){
     model_Vals$model[[mix.model.name]] = temp.model
     model_Vals$aov[[mix.model.name]] = temp.aov
     updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
                       selected = mix.model.name)
-    fit_message$msg7 = T
-    save_success_msg$aov = F
-    save_success_msg$resip = F
-    save_success_msg$tabmi = F
-    save_success_msg$pht = F
-    save_success_msg$meanLSD = F
-  } else if(is.null(temp.model) && input$fit_model7 > 0){
-    fit_message$msg7 = F
+    fit_message$msg2 = T
+  } else if(is.null(temp.model) && input$fit_model_own > 0){
+    fit_message$msg2 = F
     model_Vals$num = model_Vals$num - 1
   }
   })
@@ -615,89 +403,10 @@ observe({
 ###-------------------------------###
 ###          Model Summary        ###
 ###-------------------------------###
-#output$model.code = renderPrint({
-#  input$model_select
-#  isolate({
-#    if(!is.null(input$model_select) && !input$model_select %in% "") {
-#      cat(attr(model_Vals$model[[input$model_select]], 'code'))
-#    } else {
-#      cat("No model code to show!")
-#    }
-#  })
-#})
 
-#output$model.summary = renderPrint({
-#  input$model_select
-#  isolate({
-#    if (length(model_Vals$model)>0&&
-#       (!is.null(model_Vals$model[[input$model_select]])&&
-#          !is.null(input$model_select))){
-#      summary(model_Vals$model[[input$model_select]])
-#    } else {
-#      cat("No model to show!")
-#    }
-#  })
-#})
-
-
-
-lapply(
-  X = 1:7,
-  FUN = function(i){
-    observeEvent(input[[paste0("fit_model", i)]], {
-      if (!is.null(fit_message[[paste0("msg", i)]]) && length(fit_message[[paste0("msg", i)]] > 0) && 
-          fit_message[[paste0("msg", i)]] == T) {
-        #        output$comment.save.summary <- renderUI({
-        #          div(id = 'summary_doe_cca',
-        #              checkboxInput(inputId = "comment_summary", label = "Add comments", value = FALSE),
-        #              conditionalPanel(condition = "input.comment_summary == 1", 
-        #                               column(12, textAreaInput(inputId = "comment_summary_text", label = "", value = "", resize = "both", width ="500px", height = "100px",
-        #                                                        placeholder = "Box can be resized by dragging the arrow at bottom right"),
-        #                                      style = "margin-top: -25px")),
-        #              actionButton("refresh_summary", label = "Save", style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-        #        })
-        output$comment.save.aov <- renderUI({
-          div(id = 'aov_doe_cca',
-              checkboxInput(inputId = "comment_aov", label = "Add comments", value = FALSE),
-              conditionalPanel(condition = "input.comment_aov == 1", 
-                               column(12, textAreaInput(inputId = "comment_aov_text", label = "", value = "", resize = "both", width ="500px", height = "100px",
-                                                        placeholder = "Box can be resized by dragging the arrow at bottom right"),
-                                      style = "margin-top: -25px")),
-              actionButton("refresh_aov", label = "Save", style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-        })
-        output$comment.save.resip <- renderUI({
-          div(id = 'resip_doe_cca',
-              checkboxInput(inputId = "comment_resip", label = "Add comments", value = FALSE),
-              conditionalPanel(condition = "input.comment_resip == 1", 
-                               column(12, textAreaInput(inputId = "comment_resip_text", label = "", value = "", resize = "both", width ="500px", height = "100px",
-                                                        placeholder = "Box can be resized by dragging the arrow at bottom right"),
-                                      style = "margin-top: -25px")),
-              actionButton("refresh_resip", label = "Save", style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-        })
-      }
-    })
-  }
-)
-
-## find out which button is last clicked
-lapply(
-  X = 1:7,
-  FUN = function(i){
-    observeEvent(input[[paste0("fit_model", i)]], {
-      if (input[[paste0("fit_model", i)]] > 0) {
-        lbc$lastBtn = paste0(i)    
-      }
-    })
-  }
-)
-
-## hide mainPanel if the model cannot be fitted
-observe({
-  toggle(id = "doe_show", condition = fit_message[[paste0("msg", lbc$lastBtn)]])
-})
 
 ## give error message if the model is invalid
-lapply(1:7, function(x) {
+lapply(1:2, function(x) {
   output[[paste0("error_msg_d", x)]] <- renderUI({
     if (!is.null(fit_message[[paste0("msg", x)]]) && length(fit_message[[paste0("msg", x)]]) > 0 && fit_message[[paste0("msg", x)]] == FALSE) {
       shiny::tags$div(shiny::code("The model can't be processed."), style = "margin-top: 10px")    
@@ -705,43 +414,6 @@ lapply(1:7, function(x) {
   })
 })
 
-## if the save button is clicked, save the code.
-## then widgets are refreshed and a successful message is shown
-#observe({
-#  input$refresh_summary
-#  isolate({
-#    if(!is.null(input$refresh_summary) && input$refresh_summary > 0){
-#      reset("summary_doe_cca")
-#      save_success_msg$summary = T
-#      if (input$comment_summary == 1 && input$comment_summary_text != "" && 
-#          length(input$comment_summary_text) > 0) {
-#        ## provide succuss message
-#        output$success_msg_summry_doe1 <- renderUI({
-#          div(
-#            br(),
-#            strong("The model and comments are successfully saved"),
-#            br(),
-#            hr())
-#        })
-#        ## save code
-#        code.save$model[[input$model_select]][["summary"]] = c("```{r}", attr(model_Vals$model[[input$model_select]], "code"),
-#                                                               sprintf("summary(%s)", input$model_select), "```\n", paste0(input$comment_summary_text, "\n"))
-#      } else if (input$comment_summary == 0 && input$comment_summary_text == ""){
-#        ## provide success message
-#        output$success_msg_summry_doe1 <- renderUI({
-#          div(
-#            br(),
-#            strong("The model is successfully saved"),
-#            br(),
-#            hr())
-#        })
-#        ## save code
-#        code.save$model[[input$model_select]][["summary"]] = c("```{r}", attr(model_Vals$model[[input$model_select]], "code"),
-#                                                               sprintf("summary(%s)", input$model_select), "```\n")
-#      }
-#    }
-#  })
-#})
 
 
 ###--------------------###
@@ -753,7 +425,7 @@ output$aov.code = renderPrint({
   input$model_select
   isolate({
     if(!is.null(input$model_select) && !input$model_select %in% "") {
-      cat(attr(model_Vals$aov[[input$model_select]], 'code'))
+      cat(attr(model_Vals$aov[[input$model_select]], 'code')[1])
     } else {
       cat("No ANOVA code to show!")
     }
@@ -773,163 +445,4 @@ output$aov.summary = renderPrint({
     }
   })
 })
-
-## if the save button is clicked, code for anova and mixed model is saved
-## the widgets are refreshed and a successful message is shown
-observe({
-  input$refresh_aov
-  isolate({
-    if(!is.null(input$refresh_aov) && input$refresh_aov > 0){
-      reset("aov_doe_cca")
-      save_success_msg$aov = T
-      if (input$comment_aov == 1 && input$comment_aov_text != "" && 
-          length(input$comment_aov_text) > 0) {
-        ## provide succuss message
-        output$success_msg_aov_doe1 <- renderUI({
-          div(
-            br(),
-            strong("The ANOVA summary and comments are successfully saved"),
-            br(),
-            hr())
-        })
-        ## save code
-        code.save$model[[input$model_select]][["aov"]] = c("```{r}", attr(model_Vals$aov[[input$model_select]], "code.save"), "```\n",
-                                                           paste0(input$comment_aov_text, "\n"))
-        code.save$model[[input$model_select]][["summary"]] = c("```{r}", attr(model_Vals$model[[input$model_select]], "code"),
-                                                               "```\n")
-      } else if (input$comment_aov == 0 && input$comment_aov_text == ""){
-        ## provide success message
-        output$success_msg_aov_doe1 <- renderUI({
-          div(
-            br(),
-            strong("The ANOVA summary is successfully saved"),
-            br(),
-            hr())
-        })
-        ## save code
-        code.save$model[[input$model_select]][["aov"]] = c("```{r}", attr(model_Vals$aov[[input$model_select]], "code.save"), "```\n")
-        code.save$model[[input$model_select]][["summary"]] = c("```{r}", attr(model_Vals$model[[input$model_select]], "code"),
-                                                               "```\n")
-      }
-    }
-  })
-})
-
-
-###--------------------------###
-###       Residual Plot      ###
-###--------------------------###
-
-output$resi.ep = renderPlot({
-  input$model_select
-  isolate({
-    if(!is.null(input$model_select) && !input$model_select %in% "") {
-      predictmeans::residplot(model_Vals$model[[input$model_select]])
-    } else {
-      plot.new()
-      text(0.5,0.5,"Please fit model first.",cex=2)
-    }
-  })
-})
-
-## if the save button is clicked, code for residual plot is saved
-## the widgets are refreshed and a successful message is shown
-observe({
-  input$refresh_resip
-  isolate({
-    if(!is.null(input$refresh_resip) && input$refresh_resip > 0){
-      reset("resip_doe_cca")
-      save_success_msg$resip = T
-      if (input$comment_resip == 1 && input$comment_resip_text != "" && 
-          length(input$comment_resip_text) > 0) {
-        ## provide succuss message
-        output$success_msg_resip_doe1 <- renderUI({
-          div(
-            br(),
-            strong("The residual plots and comments are successfully saved"),
-            br(),
-            hr())
-        })
-        ## save code
-        code.save$model[[input$model_select]][["resip"]] = c("```{r}", sprintf("predictmeans::residplot(%s)", input$model_select), "```\n",
-                                                             paste0(input$comment_resip_text, "\n"))
-      } else if (input$comment_resip == 0 && input$comment_resip_text == ""){
-        ## provide success message
-        output$success_msg_resip_doe1 <- renderUI({
-          div(
-            br(),
-            strong("The residual plots are successfully saved"),
-            br(),
-            hr())
-        })
-        ## save code
-        code.save$model[[input$model_select]][["resip"]] = c("```{r}", sprintf("predictmeans::residplot(%s)", input$model_select), "```\n")
-      }
-    }
-  })
-})
-
-
-###------------------###
-###    mean table    ###
-###------------------###
-
-
-## select input for model terms in anova
-output$select.mi <- renderUI({
-  input$model_select
-  isolate({    
-    if(!is.null(input$model_select) && !input$model_select %in% ""){
-      #sel = eval(parse(text = gsub('"', "",  sprintf("attributes(terms(~%s))$term.labels", char))))
-      sel = c(" ", attr(model_Vals$model[[input$model_select]]$terms, "term.labels"))
-      selectInput(inputId = "select.mi.var",
-                  label = "Select fixed effect model term",
-                  choices = sel,
-                  selected = sel[length(sel)],
-                  selectize = F)
-    }else{
-      plotOutput("mm_table.mi_nomodel")
-    }
-  })
-})
-
-
-output$mm_table.mi_nomodel <- renderPlot({
-  plot.new()
-  text(0.5,0.5,"Please fit model first.",cex=2)
-})
-
-
-
-
-
-###-----------------------------------###
-###       Hide success message        ###
-###-----------------------------------###
-
-
-## if fit button is clicked or we change the model, then we are going to hide the success message
-
-observe({
-  input$model_select
-  input$mm.tabs
-  isolate({
-    if(!is.null(input$model_select) && !input$model_select %in% "") {
-      save_success_msg$aov = F
-      save_success_msg$resip = F
-      save_success_msg$tabmi = F
-      save_success_msg$pht = F
-      save_success_msg$meanLSD = F
-    }
-  })
-})
-
-observe({
-  toggle(id = "success_msg_aov_doe1", condition = save_success_msg$aov)
-  toggle(id = "success_msg_resip_doe1", condition = save_success_msg$resip)
-  toggle(id = "success_msg_tabmi_doe1", condition = save_success_msg$tabmi)
-  toggle(id = "success_msg_pht_doe1", condition = save_success_msg$pht)
-  toggle(id = "success_msg_meanLSD_doe1", condition = save_success_msg$meanLSD)
-})
-
 

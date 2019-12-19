@@ -1737,3 +1737,94 @@ search.name = function(list.search,search.name=NULL){
 
 
 
+
+#' fit the regression model using n-way anova (n = 1,2,3)
+#' 
+#' @param y response variable.
+#' @param x covariates.
+#' @param data Dataset
+#' @param blocking blocking variable
+#' @param name name of fitted model
+#' @param data.name name of data
+#' 
+#' @return A fitted model with 'code' attribute 
+
+anova.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
+  #code.list = list()
+  fit.str = NULL
+  if(!is.null(blocking)){
+    fit.str = sprintf("%s ~ %s", y, paste(x, collapse = " * "))
+    fit = nlme::lme(as.formula(fit.str), random = as.formula(sprintf("~1|%s", blocking)), data = data)
+    attr(fit, "code") = sprintf("%s = nlme::lme(%s ~ %s, random = ~1|%s, data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name)
+  } else {
+    fit.str = sprintf("%s ~ %s", y, paste(x, collapse = " * "))
+    fit = lm(as.formula(fit.str), data = data)
+    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y, 
+                                paste(x, collapse = " * "), data.name)
+  }
+  fit
+}
+
+
+#' fit user's own mixed effect model which include a code attribute
+#' 
+#' @param y response variable.
+#' @param x fixed effect
+#' @param data Dataset
+#' @param blocking random effect
+#' @param name name of fitted model
+#' @param data.name name of data
+#' 
+#' @return A fitted model with 'code' attribute 
+
+fit.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
+  fit.str = NULL
+  fit.str = sprintf("%s ~ %s", y, x)
+  fit = nlme::lme(fixed = as.formula(fit.str), random = as.formula(blocking), data = data)
+  attr(fit, "code") = paste0(name, " = nlme::lme(", fit.str, ", ", "random = ", blocking, ", data = ", data.name, ")")
+  fit
+}
+
+#' fit ANOVA (n = 1,2,3)
+#' 
+#' @param y response variable.
+#' @param x covariates.
+#' @param data Dataset
+#' @param blocking blocking variable
+#' @param name name of fitted model
+#' @param data.name name of data
+#' 
+#' @return ANOVA with 'code' attribute 
+
+aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
+  if(!is.null(blocking)){
+    fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, paste(x, collapse = " * "), blocking)), data = data)
+    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name),
+                          sprintf("summary(%s)", paste0("aov_", name)))
+  } else {
+    fit = aov(as.formula(sprintf("%s ~ %s", y, paste(x, collapse = " * "))), data = data)
+    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y, 
+                          paste(x, collapse = " * "), data.name), sprintf("summary(%s)", paste0("aov_", name)))
+  }
+  fit
+}
+
+
+#' ANOVA for customized which include a code attribute
+#' 
+#' @param y response variable.
+#' @param x fixed effect
+#' @param data Dataset
+#' @param blocking random effect
+#' @param name name of fitted model
+#' @param data.name name of data
+#' 
+#' @return ANOVA with 'code' attribute 
+
+aov.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
+  fit.str = sprintf("%s ~ %s", y, x)
+  fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
+  attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),
+                        sprintf("summary(%s)", paste0("aov_", name)))
+  fit
+}
