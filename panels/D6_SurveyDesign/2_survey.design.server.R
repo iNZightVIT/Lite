@@ -199,21 +199,21 @@ repRscales <- reactiveValues(
 )
 
 observe({
-  if(req(design_param()$dataDesign$type) == "replicate"){
-    isolate({
-      repRscales$rep.weight = design_param()$dataDesign$repweights
-      repRscales$rscales = design_param()$dataDesign$rscales
-    })
-  }
-})
-
-observe({
   if(req(input$repRscalesClear) > 0){
     isolate({
       repRscales$rep.weight = character()
       repRscales$rscales = numeric()
       repRscales$df = NULL
-  })
+    })
+  }
+})
+
+observe({
+  if(req(design_param()$dataDesign$type) == "replicate"){
+    isolate({
+      repRscales$rep.weight = design_param()$dataDesign$repweights
+      repRscales$rscales = design_param()$dataDesign$rscales
+    })
   }
 })
 
@@ -236,6 +236,7 @@ observeEvent(input$repRscalesBtn, {
   }
 })
 
+## table
 output$rscalesTbl = renderTable({
   if(!is.null(repRscales$df)){
     cbind(data.frame(rep.weight = repRscales$rep.weight, rscales = repRscales$rscales), repRscales$df)
@@ -245,6 +246,28 @@ output$rscalesTbl = renderTable({
 })
 
 
+
+
+
+#######################
+##                   ##
+##   Post stratify   ##
+##                   ## 
+#######################
+
+observe({
+  if (is.null(plot.par$design) && req(input$svytype) == "post") {
+     shinyalert("Please specify a survey design first", type = "warning")
+  }
+})
+  
+
+
+
+
+
+
+## create design
 observe({
   input$create.design
   input$create.design1

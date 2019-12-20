@@ -77,7 +77,7 @@ shinyUI(
               nativeAlert(message);
           }
         })();")),
-    useShinyalert(),
+    
     tags$head(tags$script(src="js/testNumeric.js")),
     tags$head(tags$script(src="js/google-analytics.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).

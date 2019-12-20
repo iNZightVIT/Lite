@@ -1,10 +1,10 @@
 survey.design.sidebar =  function(){
   list(
-    
+    useShinyalert(),
     selectInput("svytype", label = "Select survey design",
                 c = list("Specify design" = "survey",
                          "Specify replicate design" = "replicate",
-                         "Post stratify" = "frequency")),
+                         "Post stratify" = "post")),
     conditionalPanel("input.svytype == 'survey'",
                      helpText("The design generated is always used with the current data set. 
              Please make sure the right data set is selected first. In case 
@@ -90,6 +90,9 @@ survey.design.sidebar =  function(){
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
                               column(6,actionButton("remove.design2","Remove design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()),
+    conditionalPanel("input.svytype == 'post'",
+                     uiOutput("svypost_ui")
+    ),
     help.display('Create design','create_design_help',
                  "panels/D6_SurveyDesign/3_survey.design.help.md"),
     br()
