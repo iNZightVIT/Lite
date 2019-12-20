@@ -1,41 +1,56 @@
 survey.design.sidebar =  function(){
   list(
-    helpText("The design generated is always used with the current data set. 
+    selectInput("svytype", label = "Select survey design",
+                c = list("Specify design" = "survey",
+                         "Specify replicate design" = "replicate",
+                         "Post stratify" = "frequency")),
+    conditionalPanel("input.svytype == 'survey'",
+                     helpText("The design generated is always used with the current data set. 
              Please make sure the right data set is selected first. In case 
              the data is changed, the current design object is lost."),
-    fixedRow(column(12,selectInput("strata.select",
-                                   label="Strata variable",
-                                   choices=c("none",
-                                             colnames(get.data.set()))))),
-    helpText("Select the clustering variables. In case of multiple stage 
-             clustering, select more than one."),
-    fixedRow(column(12,selectInput("clustering.select",
-                                   label="Clustering variables",
-                                   choices=c("none","1",colnames(get.data.set())),
-                                   multiple=T,
-                                   selectize=T,
-                                   selected="none"))),
-    fixedRow(column(12,selectInput("weights.select",
-                                   label="Weighting variable",
-                                   choices=c("none",
-                                             colnames(get.data.set()))))),
-    fixedRow(column(12,checkboxInput("nest.check",
-                                     label="Use nested sampling",
-                                     value=F))),
-    helpText("Select finite population correction variables. In case of 
-             multiple stage clustering, select more than one."),
-    fixedRow(column(12,selectInput("fpc.select",
-                                   label="Finite population correction",
-                                   choices=colnames(get.data.set()),
-                                   multiple=T,
-                                   selectize=T,
-                                   selected="none"))),
-    fixedRow(column(6,actionButton("create.design","Create design")),
-             column(6,actionButton("remove.design","Remove design"))),br(),
-    verbatimTextOutput("design.success.text"),br(),
-    help.display('Create design','create_design_help',
-                 "panels/D6_SurveyDesign/3_survey.design.help.md"),
-    br())
+                     fluidRow(column(12,selectInput("stratVar",
+                                                    label="Strata variable",
+                                                    choices=c(" ",
+                                                              colnames(get.data.set())),
+                                                    selected = " ",
+                                                    selectize = F))),
+                    
+                     fluidRow(column(12,selectInput("clus1Var",
+                                                    label="1st stage clustering variable",
+                                                    choices=c(" ",colnames(get.data.set())),
+                                                    selected = " ",
+                                                    selectize = F)),
+                              column(12, selectInput("clus2Var",
+                                                     label="2nd stage clustering variable",
+                                                     choices=c(" ",colnames(get.data.set())),
+                                                     selected = " ",
+                                                     selectize = F)),
+                              column(12,checkboxInput("nestChk",
+                                                      label="Use nested sampling",
+                                                      value=F)),
+                              column(12,selectInput("wtVar",
+                                                    label="Weighting variable",
+                                                    choices=c(" ",
+                                                              colnames(get.data.set())),
+                                                    selected = " ",
+                                                    selectize = F)),
+                              
+                              column(12,selectInput("fpcVar",
+                                                    label="Finite population correction",
+                                                    choices= c(" ", colnames(get.data.set())),
+                                                    selected = " ",
+                                                    selectize = F))
+                              ),
+                     fluidRow(column(6,actionButton("create.design","Create design",
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
+                              column(6,actionButton("remove.design","Remove design",
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br(),
+                     verbatimTextOutput("design.success.text"),br(),
+                     help.display('Create design','create_design_help',
+                                  "panels/D6_SurveyDesign/3_survey.design.help.md"),
+                     br())
+  )
+  
 }
 
 create.design.panel = function(data.set){
