@@ -45,7 +45,6 @@ survey.design.sidebar =  function(){
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
                               column(6,actionButton("remove.design","Remove design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br(),
-                     verbatimTextOutput("design.success.text"),br(),
                      help.display('Create design','create_design_help',
                                   "panels/D6_SurveyDesign/3_survey.design.help.md"),
                      br())

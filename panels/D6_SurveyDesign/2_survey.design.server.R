@@ -50,7 +50,7 @@ setDesign = function(strata = NULL, clus1 = NULL, clus2 = NULL,
 
 createSurveyObject = function(design) {
   des <- design$dataDesign
-  
+  dataSet <- get.data.set()
   weights <- if (is.null(des$wt)) "NULL" else paste("~", des$wt)
   if (des$type == "survey") {
     id <- if (is.null(des$clus1) & is.null(des$clus2)) {
@@ -75,7 +75,7 @@ createSurveyObject = function(design) {
                   sprintf("weights = %s, ", weights),
                 if (!is.null(des$fpc)) sprintf("fpc = %s, ", fpcs),
                 if (!is.null(des$nest) && des$nest) "nest = TRUE, ",
-                "data = get.data.set())"
+                "data = dataSet)"
               )
       )
   } else {
@@ -167,8 +167,33 @@ design_param = reactive({
 })
 
 
-create.Survey.Object = reactive({
-  req(design_param())
-  createSurveyObject(design_param())
-})
 
+
+observe({
+  input$create.design
+  isolate({
+    req(design_param())
+    setOk <- try(createSurveyObject(design_param()))
+    if (!inherits(setOk, "try-error")) {
+      call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
+
+      call <- sprintf("%s <- %s",
+                      design_param()$dataDesignName,
+                      gsub("dataSet", values$data.name, call))
+      code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
+      code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
+      
+      plot.par$design = createSurveyObject(design_param())
+      ## print result
+      output$create.design.summary <- renderPrint({
+        summary(createSurveyObject(design_param()))
+      })
+    } else if(inherits(setOk, "try-error")){
+      output$create.design.summary <- renderText({
+        paste0(
+          "There is a problem with the specification of the survey design:\n\n",
+          setOk)
+      })
+    }
+  })
+})
