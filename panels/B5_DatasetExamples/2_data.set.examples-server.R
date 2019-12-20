@@ -163,7 +163,8 @@ observe({
                       [length(strsplit(input[[input$data_select]],"==>",fixed=T)[[1]])])
         }
         plot.par$design=NULL
-        values$data.name = new.data[[1]]
+        values$data.name = make.names(new.data[[1]])
+        values$data.name = gsub("\\.+", ".", values$data.name)
         values$data.set = new.data[[2]]
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
