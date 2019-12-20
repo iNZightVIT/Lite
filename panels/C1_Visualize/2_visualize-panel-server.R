@@ -2658,8 +2658,7 @@ output$plot.appearance.panel = renderUI({
                      show.boxplot.title,
                      show.mean.title)
           }else{
-            ret=list(general.appearance.title,
-                     select.bg.object,
+            ret=list(select.bg.object,
                      adjust.size.scale.object,
                      bar.colour.title,
                      select.barcolor.object,
