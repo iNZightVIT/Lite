@@ -1,9 +1,10 @@
 
+
 output$survey.design = renderUI({
   create.design.panel(get.data.set())
 })
 
-
+## specify design
 setDesign = function(strata = NULL, clus1 = NULL, clus2 = NULL,
                      wt = NULL, nest = NULL, fpc = NULL,
                      repweights = NULL, reptype = NULL,
@@ -48,6 +49,7 @@ setDesign = function(strata = NULL, clus1 = NULL, clus2 = NULL,
   }
 }
 
+## create survey object
 createSurveyObject = function(design) {
   des <- design$dataDesign
   dataSet <- get.data.set()
@@ -138,9 +140,10 @@ svalue_or_null <- function(x) {
   x
 }
 
-
+## reactive design object
 design_param = reactive({
   input$create.design
+  input$create.design1
   isolate({
     if(req(input$svytype) == "survey" && req(input$create.design) > 0) {
       strat <- svalue_or_null(input$stratVar)
@@ -162,15 +165,89 @@ design_param = reactive({
         type = "survey",
         name = name
       )
+    } else if (req(input$svytype) == "replicate" && req(input$create.design1) > 0) {
+      wts <- svalue_or_null(input$sample.weight.Var)
+      repWts <- input$repVars
+      reptype <- input$repType
+      scale <- as.numeric(input$repScale)
+      rscales <- as.numeric(repRscales$rscales)
+      name <- values$data.name
+      if (length(rscales) == 0)
+        rscales <- rep(scale, length(repWts))
+      else if(any(is.na(rscales)))
+        rscales <- NULL
+      clear <- is.null(wts) && length(repWts) == 0
+      setDesign(
+        wt = wts,
+        repweights = repWts,
+        reptype = reptype,
+        scale = scale,
+        rscales = rscales,
+        type = "replicate",
+        name = name
+      )
     }
   })
 })
 
 
 
+## create data frame
+repRscales <- reactiveValues(
+  rep.weight = character(),
+  rscales = numeric()
+)
+
+observe({
+  if(req(design_param()$dataDesign$type) == "replicate"){
+    isolate({
+      repRscales$rep.weight = design_param()$dataDesign$repweights
+      repRscales$rscales = design_param()$dataDesign$rscales
+    })
+  }
+})
+
+observe({
+  if(req(input$repRscalesClear) > 0){
+    isolate({
+      repRscales$rep.weight = character()
+      repRscales$rscales = numeric()
+      repRscales$df = NULL
+  })
+  }
+})
+
+
+
+observeEvent(input$repRscalesBtn, { 
+  if(file.exists(input$repRscalesBtn[1, "datapath"])) {
+    isolate({
+      x1 <- readLines(input$repRscalesBtn[1, "datapath"], n = 1)
+      file_has_header <- suppressWarnings(is.na(as.numeric(x1)))
+      df <- read.csv(input$repRscalesBtn[1, "datapath"], header = file_has_header)
+      if (nrow(df) != length(input$repVars)) {
+        shinyalert("You need to specify one scale per replicate.", type = "error")
+      } else {
+        repRscales$rscales <- df[,1]
+        repRscales$rep.weight = input$repVars
+        repRscales$df = df[,-1]
+      }
+    })
+  }
+})
+
+output$rscalesTbl = renderTable({
+  if(!is.null(repRscales$df)){
+    cbind(data.frame(rep.weight = repRscales$rep.weight, rscales = repRscales$rscales), repRscales$df)
+  } else {
+    data.frame(rep.weight = repRscales$rep.weight, rscales = repRscales$rscales)
+  }
+})
+
 
 observe({
   input$create.design
+  input$create.design1
   isolate({
     req(design_param())
     setOk <- try(createSurveyObject(design_param()))

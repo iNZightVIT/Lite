@@ -1,5 +1,6 @@
 survey.design.sidebar =  function(){
   list(
+    
     selectInput("svytype", label = "Select survey design",
                 c = list("Specify design" = "survey",
                          "Specify replicate design" = "replicate",
@@ -14,7 +15,7 @@ survey.design.sidebar =  function(){
                                                               colnames(get.data.set())),
                                                     selected = " ",
                                                     selectize = F))),
-                    
+                     
                      fluidRow(column(12,selectInput("clus1Var",
                                                     label="1st stage clustering variable",
                                                     choices=c(" ",colnames(get.data.set())),
@@ -40,14 +41,58 @@ survey.design.sidebar =  function(){
                                                     choices= c(" ", colnames(get.data.set())),
                                                     selected = " ",
                                                     selectize = F))
-                              ),
+                     ),
+                     hr(),
                      fluidRow(column(6,actionButton("create.design","Create design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
                               column(6,actionButton("remove.design","Remove design",
-                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br(),
-                     help.display('Create design','create_design_help',
-                                  "panels/D6_SurveyDesign/3_survey.design.help.md"),
-                     br())
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()
+    ),
+    conditionalPanel("input.svytype == 'replicate'",
+                     fluidRow(column(6, selectInput("sample.weight.Var",
+                                                    label="Sampling weights: ",
+                                                    choices=c(" ",
+                                                              colnames(get.data.set())),
+                                                    selected = " ",
+                                                    selectize = F)),
+                              column(6, selectInput("repType",
+                                                    label="Type of replication weights: ",
+                                                    choices=c("BRR", "Fay", "JK1", "JKn", "bootstrap", "other"),
+                                                    selected = "other",
+                                                    selectize = F)),
+                              column(6, 
+                                     checkboxInput("combWts",
+                                                   label="Replication weights incorporate sampling weights",
+                                                   value=T),
+                                     selectInput("repVars",
+                                                 label="Select replicate weights: ",
+                                                 choices=c(colnames(get.data.set())),
+                                                 multiple = T,
+                                                 selectize = F,
+                                                 size = 18),
+                                     helpText("To select a range, click the first, then hold SHIFT while clicking the last.\n\nHold CTRL while clicking to add and remove invidividual variables.")),
+                              conditionalPanel(
+                                condition = "input.repType == 'bootstrap' | input.repType == 'other'",
+                                column(6, h5(strong("Specify at least one of overall scale and individual replicate scales")),
+                                       textInput("repScale", "Overall scale: "),
+                                       h5("Replicate scales: "),
+                                       fluidRow(column(8, div(style="display: inline-block;;", fileInput("repRscalesBtn", label="Read from file ...", multiple=F))),
+                                                column(2, div(style="display: inline-block; margin-top: 25px;", actionButton("repRscalesClear","Clear", 
+                                                                                                                             style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
+                                       ),
+                                       tags$head(tags$style("#rscalesTbl table {background-color: #FFFFFF; }", media="screen", type="text/css")),
+                                       tableOutput("rscalesTbl")
+                                )
+                              )
+                     ),
+                     hr(),
+                     fluidRow(column(6,actionButton("create.design1","Create design",
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
+                              column(6,actionButton("remove.design2","Remove design",
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()),
+    help.display('Create design','create_design_help',
+                 "panels/D6_SurveyDesign/3_survey.design.help.md"),
+    br()
   )
   
 }
