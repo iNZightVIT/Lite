@@ -54,7 +54,7 @@ createSurveyObject = function(design) {
   des <- design$dataDesign
   dataSet <- get.data.set()
   weights <- if (is.null(des$wt)) "NULL" else paste("~", des$wt)
-  if (des$type == "survey") {
+  if (!is.null(des$type) && length(des$type) > 0 && des$type == "survey") {
     id <- if (is.null(des$clus1) & is.null(des$clus2)) {
       "~ 1"
     } else if (is.null(des$clus1)) {
@@ -260,11 +260,87 @@ observe({
      shinyalert("Please specify a survey design first", type = "warning")
   }
 })
+
+
+## initial value
+
+lvldf = reactiveValues(df = NULL)
+
+observe({
+  req(input$PSvar)
+  factorvars <- names(get.data.set())[sapply(
+    get.data.set(),
+    function(v)
+      length(levels(v)) > 0 && sum(is.na(v)) == 0
+  )]
+   for (v in factorvars) {
+    if (is.null(lvldf$df[[v]])) {
+      d <- data.frame(
+        a = levels(get.data.set()[[v]]),
+        b = NA
+      )
+      names(d) <- c(v, "Freq")
+      lvldf$df[[v]] <<- d
+    }
+  }
+})
+
   
 
+output$svypost_ui <- renderUI({
+  ret = NULL
+  if (!is.null(plot.par$design) && req(input$svytype) == "post") {
+    isolate({
+      h5(strong("Specify post stratification"))
+      
+      factorvars <- names(get.data.set())[sapply(
+        get.data.set(),
+        function(v)
+          length(levels(v)) > 0 && sum(is.na(v)) == 0
+      )]
+      
+      title = fluidRow(column(12, h5(strong("Specify post stratification"))))
+      main =  fluidRow(column(4, selectInput("PSvar",
+                                             label="Choose variables: ",
+                                             choices=factorvars,
+                                             multiple = T,
+                                             selectize = F,
+                                             size = 18),
+                              helpText("Hold CTRL or SHIFT to select multiple")),
+                       column(8, tags$div(style = "margin-top: -1px;
+                                                   border: null;
+                                                   height: 436px;
+                                                   overflow-y: auto;",
+                                          tags$head(
+                                            tags$style(type="text/css", ".inline label{ display: table-cell; text-align: left; vertical-align: middle; } 
+                                                       .inline .form-group{display: table-row;}")
+                                          ),
+                                          uiOutput("PSlevel"))))
+    })
+    ret = list(
+      title,
+      main 
+      )
+  }
+})
 
+output$PSlevel <- renderUI({
+  req(input$PSvar)
+  ret = tagList()
+  isolate({
+    for (v in input$PSvar) {
+      ret[[v]] = tagList()
+      ret[[v]][[1]] = fluidRow(column(12, h5(strong(paste(v, 'Frequency')))))
+      for (i in seq_along(1:nrow(lvldf$df[[v]]))){
+        ret[[v]][[i+1]] = fluidRow(column(8, tags$div(class = "inline", textInput(paste0("PS", v, i), label = as.character(lvldf$df[[v]][, 1][i])))
+                                          ))
+      }
+    }
+  })
+  ret
+})
 
-
+observe(print(lvldf$df[[input$PSvar]]))
 
 
 ## create design

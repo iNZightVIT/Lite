@@ -80,8 +80,15 @@ survey.design.sidebar =  function(){
                                                 column(2, div(style="display: inline-block; margin-top: 25px;", actionButton("repRscalesClear","Clear", 
                                                                                                                              style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),
                                        ),
-                                       tags$head(tags$style("#rscalesTbl table {background-color: #FFFFFF; }", media="screen", type="text/css")),
-                                       tableOutput("rscalesTbl")
+                                       tags$div(style = "margin-top: -1px;
+                                                   border: 1px solid #BBB;
+                                                   width: 200px;
+                                                   height: 300px;
+                                                   overflow-y: auto;
+                                                   overflow-x: auto;",
+                                                   
+                                                tags$head(tags$style("#rscalesTbl table {background-color: #FFFFFF; }", media="screen", type="text/css")),
+                                                tableOutput("rscalesTbl"))
                                 )
                               )
                      ),
