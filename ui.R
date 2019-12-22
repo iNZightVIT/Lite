@@ -77,6 +77,7 @@ shinyUI(
               nativeAlert(message);
           }
         })();")),
+    
     tags$head(tags$script(src="js/testNumeric.js")),
     tags$head(tags$script(src="js/google-analytics.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).
@@ -138,7 +139,7 @@ shinyUI(
                           uiOutput('alphabetise.variables')),
                  tabPanel("Restore data",
                           uiOutput('restore.data')),
-                 tabPanel("Survey design (beta)",
+                 tabPanel("Survey design",
                           uiOutput('survey.design'))
       ),
       ##  "Manipulate variables" tab.

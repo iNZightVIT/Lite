@@ -33,6 +33,7 @@ library(shinyWidgets)
 library(DT)
 # read in possible command line arguments such as 'vars.path'
 library(shinycssloaders)
+library(shinyalert)
 
 args=(commandArgs(TRUE))
 

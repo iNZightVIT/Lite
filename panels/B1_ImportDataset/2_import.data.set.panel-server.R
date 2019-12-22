@@ -36,8 +36,8 @@ observeEvent(input$files, {
         import_reactives$success = T
         if(!(fext %in% c("RData", "rda"))){
           code.save$name = temp.name
-          code.save$variable = c(code.save$variable, list(c("\n", sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
-                                                                                      "\n"))))
+          code.save$variable = c(code.save$variable, list(c(sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
+                                                                                "\n"))))
           code = c(paste0(code.save$name, " <- "), gsub(paste0("\".*(?=.", fext, ")"), paste0("\"", values$data.name), iNZightTools::code(temp), perl = T))
           code = do.call(c, lapply(code, function(x) {
             y <- try({
@@ -63,10 +63,10 @@ observeEvent(input$import_set, {
       if(!is.null(input$files)&&file.exists(input$files[1, "datapath"]))
         unlink(input$files[1, "datapath"])
       
-#      if(grepl("docs.google.com", input$URLtext))
-#        data.vals = get.data.from.googledocs(input$URLtext, get.data.dir.imported())
-#      else
-        data.vals = get.data.from.URL(input$URLtext, get.data.dir.imported())
+      #      if(grepl("docs.google.com", input$URLtext))
+      #        data.vals = get.data.from.googledocs(input$URLtext, get.data.dir.imported())
+      #      else
+      data.vals = get.data.from.URL(input$URLtext, get.data.dir.imported())
       
       get.data.dir.imported()
       
@@ -106,7 +106,7 @@ output$load.data.panel = renderUI({
 
 
 output$filetable <- renderDataTable({
-
+  
   get.data.set()
   
 }, options =
@@ -123,7 +123,7 @@ observe({
                          pattern = input$Importedremove,
                          full.names = TRUE)
       if(!is.null(input$files)&&file.exists(input$files[1, "datapath"])&&
-           grepl(get.data.name(),input$files[1, "name"])){
+         grepl(get.data.name(),input$files[1, "name"])){
         unlink(input$files[1, "datapath"])
       }
       for(f in files){

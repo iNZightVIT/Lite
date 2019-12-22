@@ -137,13 +137,12 @@ pkgname = reactive({
     "iNZightMR" = "Multiple-Response",
     "iNZightTS" = "Time-Series",
     "iNZightMaps" = "Maps",
-    "survey" = "Survey",
+    "survey" = "Surveys",
     "FutureLearnData" = "Future-Learn"
   )
   named.pkg <- unlist(pkgsL)
   names(named.pkg[named.pkg %in% input$data_select])
 })
-
 
 
 observe({
@@ -168,10 +167,17 @@ observe({
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
         ## code history
+        ## survey package
+        if (req(pkgname()) == "survey") {
+          if (grepl('\\(.+\\)', values$data.name)) {
+            values$data.name <- gsub(" \\(.+", "", values$data.name)
+          }
+        }
+        
         code.save$name = sprintf("%s_ex", values$data.name)
         code.save$datacode = sprintf(".dataset <- %s", values$data.name)
-        code.save$variable = c(code.save$variable, list(c("\n", sprintf("## Load example data set\ndata(%s, package = '%s')",
-                                                                        values$data.name, pkgname()), "\n")))
+        code.save$variable = c(code.save$variable, list(c(sprintf("## Load example data set\ndata(%s, package = '%s')",
+                                                                  values$data.name, pkgname()), "\n")))
         code.save$variable = c(code.save$variable, list(c("\n", sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
                                                                                     "\n"))))
         code.save$variable = c(code.save$variable, list(c("\n", sprintf("%s <- %s", code.save$name, values$data.name), "\n")))
