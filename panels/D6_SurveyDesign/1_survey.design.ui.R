@@ -1,6 +1,7 @@
 survey.design.sidebar =  function(){
   list(
     useShinyalert(),
+    useShinyjs(),
     selectInput("svytype", label = "Select survey design",
                 c = list("Specify design" = "survey",
                          "Specify replicate design" = "replicate",
@@ -95,11 +96,16 @@ survey.design.sidebar =  function(){
                      hr(),
                      fluidRow(column(6,actionButton("create.design1","Create design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
-                              column(6,actionButton("remove.design2","Remove design",
+                              column(6,actionButton("remove.design1","Remove design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()),
     conditionalPanel("input.svytype == 'post'",
-                     uiOutput("svypost_ui")
+                     uiOutput("svypost_ui"),
+                     fluidRow(column(6,actionButton("create.design2","Create design",
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
+                              column(6,actionButton("remove.design3","Remove design",
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()
     ),
+    br(),
     help.display('Create design','create_design_help',
                  "panels/D6_SurveyDesign/3_survey.design.help.md"),
     br()

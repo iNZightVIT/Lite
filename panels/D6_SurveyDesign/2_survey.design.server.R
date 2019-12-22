@@ -264,7 +264,8 @@ observe({
 
 ## initial value
 
-lvldf = reactiveValues(df = NULL)
+lvldf = reactiveValues(df = NULL,
+                       upload = logical())
 
 observe({
   req(input$PSvar)
@@ -311,10 +312,6 @@ output$svypost_ui <- renderUI({
                                                    border: null;
                                                    height: 436px;
                                                    overflow-y: auto;",
-                                          tags$head(
-                                            tags$style(type="text/css", ".inline label{ display: table-cell; text-align: left; vertical-align: middle; } 
-                                                       .inline .form-group{display: table-row;}")
-                                          ),
                                           uiOutput("PSlevel"))))
     })
     ret = list(
@@ -332,15 +329,54 @@ output$PSlevel <- renderUI({
       ret[[v]] = tagList()
       ret[[v]][[1]] = fluidRow(column(12, h5(strong(paste(v, 'Frequency')))))
       for (i in seq_along(1:nrow(lvldf$df[[v]]))){
-        ret[[v]][[i+1]] = fluidRow(column(8, tags$div(class = "inline", textInput(paste0("PS", v, i), label = as.character(lvldf$df[[v]][, 1][i])))
-                                          ))
+        ret[[v]][[i+1]] = fluidRow(column(10, textInput(paste0("PS", v, i), label = as.character(lvldf$df[[v]][, 1][i]))
+                                          ) )
       }
+      ret[[v]][[nrow(lvldf$df[[v]]) + 2]] = fluidRow(column(10, fileInput(paste0("PS", v, "data"),
+                                                                         label="Read from file ...", multiple=F),
+                                                            hr()))
     }
   })
   ret
 })
 
-observe(print(lvldf$df[[input$PSvar]]))
+observe({
+  req(input$PSvar)
+  lvldf$df
+  for (v in input$PSvar) {
+    for (i in seq_along(1:nrow(lvldf$df[[v]]))){
+      if(is.null(input[[paste0("PS", v, "data")]])){
+        if(!is.null(input[[paste0("PS", v, i)]]) && input[[paste0("PS", v, i)]] != ""){
+          lvldf$df[[v]]$Freq[lvldf$df[[v]][,1] == as.character(lvldf$df[[v]][, 1][i])] = as.numeric(input[[paste0("PS", v, i)]])
+          updateTextInput(session, inputId = paste0("PS", v, i), label = as.character(lvldf$df[[v]][, 1][i]), 
+                          value = lvldf$df[[v]]$Freq[lvldf$df[[v]][,1] == as.character(lvldf$df[[v]][, 1][i])])
+        } else  {
+          lvldf$df[[v]]$Freq[lvldf$df[[v]][,1] == as.character(lvldf$df[[v]][, 1][i])] = NA
+          updateTextInput(session, inputId = paste0("PS", v, i), label = as.character(lvldf$df[[v]][, 1][i]), 
+                          value = "")
+        }
+      } else {
+        ## import data
+        x1 <- readLines(input[[paste0("PS", v, "data")]][1, "datapath"], n = 1)
+        file_has_header <- suppressWarnings(is.na(as.numeric(x1)))
+        df <- read.csv(input[[paste0("PS", v, "data")]][1, "datapath"], header = file_has_header)
+        if (nrow(df) != 2) {
+          shinyalert("File needs to have 2 columns: one for variable names, and one for frequencies.", type = "error")
+          shinyjs::reset(paste0("PS", v, "data"))
+        } else if (nrow(df) != nrow(lvldf$df[[v]])){
+          shinyalert("File needs to have one row for each level.", type = "error")
+          shinyjs::reset(paste0("PS", v, "data"))
+        } else {
+          names(df) <- c(v, "Freq")
+          lvldf$df[[v]] <- df
+          updateTextInput(session, inputId = paste0("PS", v, i), label = as.character(df[, 1][i]), 
+                          value = df[, 2][i])
+          shinyjs::disable(paste0("PS", v, i))
+      }
+      }  
+    }
+  }
+})
 
 
 ## create design
@@ -369,6 +405,47 @@ observe({
         paste0(
           "There is a problem with the specification of the survey design:\n\n",
           setOk)
+      })
+    }
+  })
+})
+
+
+
+## create design
+observe({
+  input$create.design2
+  isolate({
+    req(design_param())
+    PSDesign <- setDesign(
+      strata = design_param()$dataDesign$strat,
+      clus1 = design_param()$dataDesign$clus1, clus2 = design_param()$dataDesign$clus2,
+      wt = design_param()$dataDesign$wt, nest = design_param()$dataDesign$nest,
+      fpc = design_param()$dataDesign$fpc, repweights = design_param()$dataDesign$repWts, 
+      type = design_param()$dataDesign$type,
+      name = design_param()$dataDesign$name,
+      poststrat = if (length(input$PSvar) != 0) lvldf$df[input$PSvar] else NULL
+    )
+    setOk <- try(createSurveyObject(PSDesign))
+    if (!inherits(setOk, "try-error")) {
+      call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
+      print(PSDesign$dataDesignName)
+      call <- sprintf("%s <- %s",
+                      paste0(design_param()$dataDesignName, ".ps"),
+                      gsub("design_obj", design_param()$dataDesignName, call))
+      code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
+      code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
+      
+      plot.par$design = createSurveyObject(PSDesign)
+      ## print result
+      output$create.design.summary <- renderPrint({
+        summary(createSurveyObject(PSDesign))
+      })
+    } else if(inherits(setOk, "try-error")){
+      output$create.design.summary <- renderText({
+        paste0(
+          "Something went wrong during post stratification ...",
+          PSDesign)
       })
     }
   })
