@@ -177,7 +177,9 @@ shinyUI(
                  tabPanel("Maps",
                           uiOutput("newmaps.panel")),
                  tabPanel("Design of Experiments",
-                          uiOutput("mixedmodel.panel"))
+                          uiOutput("mixedmodel.panel")),
+                 tabPanel("Multiple Response",
+                          uiOutput("multiple.response"))
       ),
       
       tabPanel("R code history", value = "rhistory",

@@ -380,6 +380,13 @@ shinyServer(function(input, output, session) {
   source("panels/F5_DesignofExperiment//1_DesignofExperiment.panel-ui.R", local = TRUE)
   source("panels/F5_DesignofExperiment//2_DesignofExperiment.panel-server.R", local = TRUE)
   
+  #   Advanced --> Multiple Response
+  
+  ##----------------------------##
+  ##  Multiple Response Module  ##
+  ##----------------------------##
+  source("panels/F6_MultipleResponse//1_MultipleResponse.panel-ui.R", local = TRUE)
+  source("panels/F6_MultipleResponse//2_MultipleResponse.panel-server.R", local = TRUE)
   
   #   Show code history
   
