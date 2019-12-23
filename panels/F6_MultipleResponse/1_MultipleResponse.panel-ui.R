@@ -19,25 +19,21 @@
 
 MultipleResponse.sidebarPanel <- function(){
   sidebarPanelUI = list(
-    
+    useShinyalert(),
+    fluidRow(
+      column(12, h5(strong("Multiple Response")),
+             uiOutput("mr.var"),
+             uiOutput("mr.sub1"),
+             uiOutput("mr.sub2"),
+             uiOutput("mr.box"))
+    )
   )## end of list
 }
 
 ### now, we set up the main panel
 MultipleResponse.mainPanel = function(){
   mainPanelUI = list(
-    div(id = "doe_show",
-        tabsetPanel(type = "pills",
-                    id = "mm.tabs",
-                    tabPanel(
-                      "ANOVA",
-                      br(),
-                      verbatimTextOutput("aov.code"),
-                      br(),
-                      verbatimTextOutput("aov.summary")
-                    )
-        )
-    )
+    uiOutput("mr.ui.main")
   )## end of mainPanelUI
 }
 
@@ -57,8 +53,8 @@ MultipleResponse.panel.ui = function(data.set) {
       )
     } else {
       fluidRow(
-        column(4, MultipleResponse.sidebarPanel()),
-        column(8, MultipleResponse.mainPanel())
+        column(3, MultipleResponse.sidebarPanel()),
+        column(9, MultipleResponse.mainPanel())
       )
     }
   )
