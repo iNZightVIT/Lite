@@ -257,7 +257,7 @@ output$rscalesTbl = renderTable({
 
 observe({
   if (is.null(plot.par$design) && req(input$svytype) == "post") {
-     shinyalert("Please specify a survey design first", type = "warning")
+     shinyalert(text = "Please specify a survey design first", title = "No design specified", type = "warning")
   }
 })
 
