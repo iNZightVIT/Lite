@@ -18,7 +18,8 @@ output$multiple.response <- renderUI({
 mr.par = reactiveValues(plotSet = list(),
                         objName = "response",
                         guessName = TRUE,
-                        mrObject = NULL)
+                        mrObject = NULL,
+                        combp = NULL)
 
 
 isBinary = function(x) {
@@ -313,7 +314,7 @@ output$mr.plot.out <- renderPlot({
     if(req(input$mr.result) == "Summary"){
       setMRobj()
     } else {
-      iNZightMR::plotcombn(mr.par$mrObject)
+      mr.par$combp <- iNZightMR::plotcombn(mr.par$mrObject)
     }
   })
 })
@@ -341,7 +342,7 @@ output$mr.comb.summary.out <- renderPrint({
   input$mr.result
   input$mr.select.var
   isolate({
-    iNZightMR::plotcombn(mr.par$mrObject)
+    mr.par$combp
   })
 })
 
