@@ -20,9 +20,11 @@
 MultipleResponse.sidebarPanel <- function(){
   sidebarPanelUI = list(
     useShinyalert(),
+    useShinyjs(),
     fluidRow(
-      column(12, h5(strong("Multiple Response")),
+      column(12,
              uiOutput("mr.var"),
+             uiOutput("mr.type"),
              uiOutput("mr.sub1"),
              uiOutput("mr.sub2"),
              uiOutput("mr.box"))
