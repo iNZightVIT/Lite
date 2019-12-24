@@ -248,6 +248,7 @@ observe({
 observe({
   input$mm_own_model_fixed
   isolate({
+    req(input$mm_own_model_fixed != " ")
     updateTextInput(session, inputId = "fixed_effect", label = "Fixed effect:",
                     value = paste0(input$fixed_effect, input$mm_own_model_fixed))
   })
@@ -273,6 +274,7 @@ output$own_model_random_panel <- renderUI({
 observe({
   input$mm_own_model_random
   isolate({
+    req(input$mm_own_model_random != " ")
     updateTextInput(session, inputId = "random_effect", label = "Random effect:",
                     value = paste0(input$random_effect, input$mm_own_model_random))
   })
@@ -326,13 +328,16 @@ observeEvent(input$fit_model_aov, {
     mix.model.name = paste0("Model_", model_Vals$num)
     temp$name = mix.model.name
     temp$data.name = values$data.name
-    temp.model <- do.call(anova.fit, temp)
+
     temp.aov <- do.call(aov.fit, temp)
+   #temp.model <- do.call(anova.fit, temp)
+
+    
   }, error = function(e){print(e)}, finally = {})
-  if(!is.null(temp.model)){
-    model_Vals$model[[mix.model.name]] = temp.model
+  if(!is.null(temp.aov)){
+    #model_Vals$model[[mix.model.name]] = temp.model
     model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
+    updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
                       selected = mix.model.name)
     fit_message$msg1 = T
   } else if(is.null(temp.model) && input$fit_model_aov > 0){
@@ -361,13 +366,14 @@ observeEvent(input$fit_model_own, {
       temp$x = input$fixed_effect
       temp$blocking = input$random_effect
       temp$data.name = values$data.name
-      temp.model <- do.call(fit.own, temp)
+      #temp.model <- do.call(fit.own, temp)
+      temp.aov <- do.call(aov.own, temp)
     }
   }, error = function(e){print(e)}, finally = {})
-  if(!is.null(temp.model)){
-    model_Vals$model[[mix.model.name]] = temp.model
+  if(!is.null(temp.aov)){
+    #model_Vals$model[[mix.model.name]] = temp.model
     model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$model),                          
+    updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
                       selected = mix.model.name)
     fit_message$msg2 = T
   } else if(is.null(temp.model) && input$fit_model_own > 0){
@@ -385,11 +391,11 @@ observe({
   isolate({
     if(!is.null(input$remove.model)&&
        input$remove.model>0){
-      model_Vals$model[[input$model_select]] = NULL
-      ch = names(model_Vals$model)
+      model_Vals$aov[[input$model_select]] = NULL
+      ch = names(model_Vals$aov)
       updateSelectInput(session,"model_select",
                         choices=ch,
-                        selected=names(model_Vals$model)[length(ch)])
+                        selected=names(model_Vals$aov)[length(ch)])
     }
   })
 })

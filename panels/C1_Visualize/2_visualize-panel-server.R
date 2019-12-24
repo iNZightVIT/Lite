@@ -2040,7 +2040,7 @@ output$plot.appearance.panel.title = renderUI({
   input$vari2
   plot.par$design
   isolate({
-    if(req(plot.ret.para$parameters)) {
+    if(!is.null(plot.ret.para$parameters)) {
       varnames = unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE = attr(plot.ret.para$parameters, "plottype")
       PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
@@ -2097,7 +2097,7 @@ output$plot.appearance.panel = renderUI({
   plot.par$design
   
   isolate({
-    if(req(plot.ret.para$parameters)) {
+    if(!is.null(plot.ret.para$parameters)) {
       varnames = unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE = attr(plot.ret.para$parameters, "plottype")
       PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
