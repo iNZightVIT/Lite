@@ -324,23 +324,23 @@ observeEvent(input$fit_model_aov, {
       temp$y = input$mm_vari1
       temp$x = c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
       temp$blocking = input$mm_vari5
+    } else {
+      temp.aov = NULL
     }
-    mix.model.name = paste0("Model_", model_Vals$num)
-    temp$name = mix.model.name
-    temp$data.name = values$data.name
-
-    temp.aov <- do.call(aov.fit, temp)
-   #temp.model <- do.call(anova.fit, temp)
-
+      mix.model.name = paste0("Model_", model_Vals$num)
+      temp$name = mix.model.name
+      temp$data.name = values$data.name
+      temp.aov <- do.call(aov.fit, temp)
+      #temp.model <- do.call(anova.fit, temp)
     
-  }, error = function(e){print(e)}, finally = {})
+  }, error = function(e){print(e)})
   if(!is.null(temp.aov)){
     #model_Vals$model[[mix.model.name]] = temp.model
     model_Vals$aov[[mix.model.name]] = temp.aov
     updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
                       selected = mix.model.name)
     fit_message$msg1 = T
-  } else if(is.null(temp.model) && input$fit_model_aov > 0){
+  } else if(is.null(temp.aov) && input$fit_model_aov > 0){
     model_Vals$num = model_Vals$num - 1
     fit_message$msg1 = F
   }
@@ -376,7 +376,7 @@ observeEvent(input$fit_model_own, {
     updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
                       selected = mix.model.name)
     fit_message$msg2 = T
-  } else if(is.null(temp.model) && input$fit_model_own > 0){
+  } else if(is.null(temp.aov) && input$fit_model_own > 0){
     fit_message$msg2 = F
     model_Vals$num = model_Vals$num - 1
   }

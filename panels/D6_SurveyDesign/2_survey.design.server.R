@@ -398,7 +398,7 @@ observe({
       plot.par$design = createSurveyObject(design_param())
       ## print result
       output$create.design.summary <- renderPrint({
-        summary(createSurveyObject(design_param()))
+        summary(plot.par$design)
       })
     } else if(inherits(setOk, "try-error")){
       output$create.design.summary <- renderText({
@@ -439,7 +439,7 @@ observe({
       plot.par$design = createSurveyObject(PSDesign)
       ## print result
       output$create.design.summary <- renderPrint({
-        summary(createSurveyObject(PSDesign))
+        summary(plot.par$design)
       })
     } else if(inherits(setOk, "try-error")){
       output$create.design.summary <- renderText({
@@ -448,5 +448,17 @@ observe({
           PSDesign)
       })
     }
+  })
+})
+
+
+## remove design
+
+observe({
+  input$remove.design
+  input$remove.design1
+  input$remove.design2
+  isolate({
+      plot.par$design=NULL
   })
 })

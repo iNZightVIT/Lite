@@ -102,7 +102,7 @@ survey.design.sidebar =  function(){
                      uiOutput("svypost_ui"),
                      fluidRow(column(6,actionButton("create.design2","Create design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
-                              column(6,actionButton("remove.design3","Remove design",
+                              column(6,actionButton("remove.design2","Remove design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()
     ),
     br(),
