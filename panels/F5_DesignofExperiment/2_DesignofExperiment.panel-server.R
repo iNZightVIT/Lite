@@ -229,6 +229,7 @@ output$own_model_fixed_panel <- renderUI({
   })
 })
 
+
 ##  Update fixed effect.
 observe({
   if(req(input$mm_own_model_vari1) != " "){
@@ -269,7 +270,6 @@ output$own_model_random_panel <- renderUI({
                 selectize = F)
   })
 })
-
 
 observe({
   input$mm_own_model_random
@@ -333,7 +333,7 @@ observeEvent(input$fit_model_aov, {
       temp.aov <- do.call(aov.fit, temp)
       #temp.model <- do.call(anova.fit, temp)
     
-  }, error = function(e){print(e)})
+  }, error = function(e){print(e); temp.aov <- NULL})
   if(!is.null(temp.aov)){
     #model_Vals$model[[mix.model.name]] = temp.model
     model_Vals$aov[[mix.model.name]] = temp.aov
@@ -347,6 +347,8 @@ observeEvent(input$fit_model_aov, {
   })
 })
 
+
+
 ## fit customized model
 observeEvent(input$fit_model_own, {
   isolate({mix.model.name = ""
@@ -359,17 +361,18 @@ observeEvent(input$fit_model_own, {
     ## generate model name
     model_Vals$num = model_Vals$num + 1
     mix.model.name = paste0("Model_", model_Vals$num)
-    if(req(input$fit_design) == 2 && req(input$fit_model_own) > 0){
+    if(req(input$fit_design) == 2 && req(input$fit_model_own) > 0 && 
+       req(input$mm_own_model_vari1) != " " && req(input$fixed_effect) != "" &&
+       req(input$random_effect) != ""){
       ## fit model
       temp$name = mix.model.name
       temp$y = input$mm_own_model_vari1
       temp$x = input$fixed_effect
       temp$blocking = input$random_effect
       temp$data.name = values$data.name
-      #temp.model <- do.call(fit.own, temp)
-      temp.aov <- do.call(aov.own, temp)
     }
-  }, error = function(e){print(e)}, finally = {})
+    temp.aov <- do.call(aov.own, temp)
+  }, error = function(e){print(e); temp.aov <- NULL})
   if(!is.null(temp.aov)){
     #model_Vals$model[[mix.model.name]] = temp.model
     model_Vals$aov[[mix.model.name]] = temp.aov
