@@ -155,7 +155,7 @@ output$mr.ui.main <- renderUI({
       plot.panel = tabPanel(
         title = "Plot",
         
-        plotOutput("mr.plot.out"),
+        plotOutput("mr.plot.out", height = "600px"),
         
         br(),
         

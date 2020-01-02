@@ -7,8 +7,7 @@ get.quick.explore =  function(data.set){
                                   "Data Summary",
                                   "All 1-variable plots",
                                   "Explore 2-variable plots",
-                                  "Compare pairs"),
-                        selectize=F),
+                                  "Compare pairs")),
             conditionalPanel("input.quick_explore_select=='Missing values'",
                              uiOutput("quick.missing.summary.side")),
             conditionalPanel("input.quick_explore_select=='Data Summary'",
@@ -50,56 +49,53 @@ quick.explore.panel = function(data.set){
 # Missing values
 
 get.quick.missing.summary.side = function(data.set,data.name){
-  list(get.table.button(data.set,
-                        "missing_values_table",
-                        paste("Missing values combination of \"",
-                              data.name,"\"")),
-       br(),br(),
-       help.display('Missing Values','missing_values',
-                    "panels/F1_QuickExplore/4_missing.values.help.md"))
+  list(#get.table.button(data.set,
+    #                  "missing_values_table",
+    #                  paste("Missing values combination of \"",
+    #                        data.name,"\"")),
+    br(),br(),
+    help.display('Missing Values','missing_values',
+                 "panels/F1_QuickExplore/4_missing.values.help.md"))
 }
 
-get.table.button = function(data.set,id,title){
-  tex = " "
-  tab = get.combinations(data.set,T)
-  if(!is.null(tab)){
-    if(!is.null(tab)&&nrow(tab)>0&&ncol(tab)>0){
-      tex = "<table style='width: 500px; overflow-y: scroll;'><th><td>"
-      tex = paste(tex,paste(paste(colnames(tab),collapse="</td><td>"),sep=""),sep="")
-      tex = paste(tex,"</td></th>",sep="")
-      for(row in 1:nrow(tab)){
-        tex = paste(tex,"<tr><td></td><td>",paste(as.character(tab[row,]),collapse="</td><td>"),"</td></tr>",sep="")
-      }
-      tex = paste(tex,"</table>",sep="")
-    }
-    if(length(tex)==0){
-      tex=" "
-    }
-  }else{
-    tex = "No NA values in data."
-  }
-  HTML(paste("<div class='modal fade' id='", id, "' tabindex='-1' role='dialog' aria-labelledby='basicModal' aria-hidden='true'>
-             <div class='modal-dialog'>
-             <div class='modal-content'>
-             <div class='modal-header'>
-             <h4 class='modal-title' id='myModalLabel'>",title,"</h4>
-             </div>
-             <div class='modal-body'>
-             <div style='overflow: auto'>",
-             tex,
-             "</div>
-             </div>
-             <div class='modal-footer'>
-             </div>
-             </div>
-             </div>
-             </div>
-             <a href='#' class='btn btn-xs btn btn-primary' data-toggle='modal' data-target='#", id, "'>Get table of row combinations</a>", sep = ""))
-}
+#get.table.button = function(data.set,id,title){
+#  tex = " "
+#  tab = get.combinations(data.set,T)
+#  if(!is.null(tab)){
+#    if(!is.null(tab)&&nrow(tab)>0&&ncol(tab)>0){
+#      tex = "<table style='width: 500px; overflow-y: scroll;'><th><td>"
+#      tex = paste(tex,paste(paste(colnames(tab),collapse="</td><td>"),sep=""),sep="")
+#      tex = paste(tex,"</td></th>",sep="")
+#      for(row in 1:nrow(tab)){
+#        tex = paste(tex,"<tr><td></td><td>",paste(as.character(tab[row,]),collapse="</td><td>"),"</td></tr>",sep="")
+#      }
+#      tex = paste(tex,"</table>",sep="")
+#    }
+#    if(length(tex)==0){
+#      tex=" "
+#    }
+#  }else{
+#    tex = "No NA values in data."
+#  }
+#  HTML(paste("<div class='modal fade' id='", id, "' tabindex='-1' role='dialog' aria-labelledby='basicModal' aria-hidden='true'>
+#             <div class='modal-dialog'>
+#             <div class='modal-content'>
+#             <div class='modal-header'>
+#             <h4 class='modal-title' id='myModalLabel'>",title,"</h4>
+#             </div>
+#             <div class='modal-body'>
+#             <div style='overflow: auto'>",
+#             tex,
+#             "</div>
+#             </div>
+#             <div class='modal-footer'>
+#             </div>
+#             </div>
+#             </div>
+#             </div>
+#             <a href='#' class='btn btn-xs btn btn-primary' data-toggle='modal' data-target='#", id, "'>Get table of row combinations</a>", sep = ""))
+#}
 
-get.quick.missing.summary.main = function(data.set){
-  plotOutput("quick.missing.summary.plot")
-}
 
 # quick summary
 

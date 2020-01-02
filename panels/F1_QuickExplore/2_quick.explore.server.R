@@ -14,17 +14,39 @@ output$quick.missing.summary.side = renderUI({
 })
 
 output$quick.missing.summary.main = renderUI({
-  get.quick.missing.summary.main(get.data.set())
+  tabsetPanel(type = "pills", 
+              tabPanel(
+                title = "Plot",
+                
+                plotOutput("quick.missing.summary.plot", height = "600px"),
+                
+                br(),
+              ),
+              tabPanel(
+                title = "Table of row combinations",
+                br(),
+                br(),
+                verbatimTextOutput("quick.missing.summary.out")
+              )
+  )
 })
+
+quick.par <- reactiveValues(combp = NULL)
 
 output$quick.missing.summary.plot = renderPlot({
   if(is.null(get.combinations(get.data.set(),T))){
     plot.new()
     text(0.5,0.5,"Data is clean of NA values",cex=2)
   }else{
-    plotcombn(get.data.set())
+    quick.par$combp <- iNZightMR::plotcombn(get.data.set())
   }
 })
+
+
+output$quick.missing.summary.out <- renderPrint({
+  quick.par$combp
+})
+
 
 #   Advanced --> Quick explore --> Data summary
 
