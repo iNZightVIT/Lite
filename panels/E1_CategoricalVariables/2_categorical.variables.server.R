@@ -210,6 +210,8 @@ observe({
 })
 
 
+## Manipulate variables --> Categorical variables --> Rename levels
+
 rename.levels.main.panel = function(){
   verbatimTextOutput("text_rename")
 }
@@ -292,7 +294,7 @@ observe({
 
 
 
-## Manipulate variables --> Categorical variables --> Combine levels
+## Manipulate variables --> Categorical variables --> Combine variables
 
 output$text_combine = renderPrint({
   if(length(input$select.combine.columns)>0){
