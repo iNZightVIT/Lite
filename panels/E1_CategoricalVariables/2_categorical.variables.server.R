@@ -296,7 +296,7 @@ observe({
 
 output$text_combine = renderPrint({
   if(length(input$select.combine.columns)>0){
-    temp = combine.levels(get.data.set(),input$select.combine.columns)
+    temp = iNZightTools::combineCatVars(get.data.set(),input$select.combine.columns)
     print(table(temp[,ncol(temp)]))  
   }else{
     cat("Please select a set of columns")
