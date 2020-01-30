@@ -19,7 +19,12 @@ observeEvent(input$files, {
       if(fext %in% c("RData", "rda")){
         temp = as.data.frame(iNZightTools::load_rda(input$files[1, "datapath"])[[1]])
       } else {
-        temp = as.data.frame(iNZightTools::smart_read(input$files[1, "datapath"]))
+        if (fext == "txt") {
+          temp = as.data.frame(iNZightTools::smart_read(input$files[1, "datapath"],
+                                                        delimiter = "\t"))
+        } else {
+          temp = as.data.frame(iNZightTools::smart_read(input$files[1, "datapath"]))
+        }
       }
       
       if(!is.null(temp)){  
