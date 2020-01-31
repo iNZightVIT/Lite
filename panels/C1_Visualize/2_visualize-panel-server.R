@@ -1072,7 +1072,6 @@ observe({
 
 ##########################################################
 
-
 output$visualize.plot = renderPlot({
   isolate({
     # some of the graphical parameters need 
@@ -1580,12 +1579,12 @@ observe({
       plot.par$locate.extreme=NULL
       plot.par$zoombar=NULL
       plot.par$design=NULL
-      design.parameters$id = formula("~1")
-      design.parameters$strata = NULL
-      design.parameters$fpc = NULL
-      design.parameters$nest = F
-      design.parameters$weights = NULL
-      design.parameters$data.name = NULL   
+      #design.parameters$id = formula("~1")
+      #design.parameters$strata = NULL
+      #design.parameters$fpc = NULL
+      #design.parameters$nest = F
+      #design.parameters$weights = NULL
+      #design.parameters$data.name = NULL 
     })
   }
 })
@@ -3519,7 +3518,11 @@ observe({
 observe({
   input$adjust.hex.bins
   isolate({
-    graphical.par$hex.bins = input$adjust.hex.bins
+    if(!is.null(input$adjust.hex.bins)){
+      graphical.par$hex.bins = input$adjust.hex.bins
+    } else {
+      graphical.par$hex.bins = 20
+    }
   })
 })
 
