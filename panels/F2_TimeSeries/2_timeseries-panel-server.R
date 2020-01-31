@@ -818,7 +818,7 @@ output$seasonal_plot = renderPlot({
         ts.para$tsObj,
         ylab = input$provide_ylab,
         xlab = input$provide_xlab,
-        multiplicative = season_select_ts$re,
+        multiplicative = as.logical(season_select_ts$re),
         t = 100*input$slidersmoothing,
         model.lim = ts.para$mod.lim
       )
@@ -870,7 +870,7 @@ output$saveSeasonalplot = downloadHandler(
             ts.para$tsObj,
             ylab = input$provide_ylab,
             xlab = input$provide_xlab,
-            multiplicative = season_select_ts$re,
+            multiplicative = as.logical(season_select_ts$re),
             t = 100*input$slidersmoothing,
             model.lim = ts.para$mod.lim
           )
@@ -1300,7 +1300,7 @@ output$multiple_single_plot = renderPlot({
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
-        multiplicative = season_select_ts$re,
+        multiplicative = as.logical(season_select_ts$re),
         t = 100*input$slidersmoothing,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
@@ -1352,7 +1352,7 @@ output$saveSingleplot = downloadHandler(
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
-            multiplicative = season_select_ts$re,
+            multiplicative = as.logical(season_select_ts$re),
             t = 100*input$slidersmoothing,
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
@@ -1397,7 +1397,7 @@ output$multiple_multi_plot = renderPlot({
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
-        multiplicative = season_select_ts$re,
+        multiplicative = as.logical(season_select_ts$re),
         t = 100*input$slidersmoothing,
         xlab = input$provide_xlab,
         ylab = input$provide_ylab,
@@ -1451,7 +1451,7 @@ output$saveMultiplot = downloadHandler(
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
-            multiplicative = season_select_ts$re,
+            multiplicative = as.logical(season_select_ts$re),
             t = 100*input$slidersmoothing,
             xlab = input$provide_xlab,
             ylab = input$provide_ylab,
