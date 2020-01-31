@@ -2372,14 +2372,14 @@ output$plot.appearance.panel = renderUI({
     
     
     adjust.grid.size.title = h5(strong("Size"))
-    adjust.grid.size.object = fixedRow(column(3, h5("Grid size (n x n):")),
+    adjust.grid.size.object = fixedRow(column(3, h5("Bin size:")),
                                        column(6, sliderInput("adjust.grid.size", 
                                                              label = NULL, 
                                                              min = 10, max = 250, 
                                                              value=graphical.par$scatter.grid.bins,
                                                              step=1, 
                                                              ticks = FALSE))) 
-    
+
     adjust.min.count.grid.object = fixedRow(column(3, h5("Min-count colour (% grey):")),
                                             column(6, sliderInput("adjust.min.count.grid", 
                                                                   label = NULL, 
@@ -2419,12 +2419,20 @@ output$plot.appearance.panel = renderUI({
       graphical.par$hex.bins = 20
     }
     adjust.hex.bins.title = h5(strong("Size"))
-    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size (number of bins to use):")),
+    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size:")),
                                       column(6, sliderInput("adjust.hex.bins", 
                                                             label = NULL, min = 2, 
                                                             max = 70, 
                                                             value=graphical.par$hex.bins,
                                                             step=1, ticks = FALSE)))
+    
+    hex.bins.object.style = fixedRow(column(3, h5("Style:")),
+                                     column(6, selectInput(inputId="select.hex.style",label=NULL,
+                                                           choices= c("size", "alpha"),
+                                                           selected= "size",
+                                                           selectize = F)))
+    
+    
     
     
     adjust.num.bins.object = NULL
@@ -2907,22 +2915,20 @@ output$plot.appearance.panel = renderUI({
                      adjust.grid.size.title,
                      adjust.grid.size.object)
         }else if(!is.null(input$select.plot.type)&&
-                 input$select.plot.type%in%"hexbin plot-size"){
+                 input$select.plot.type%in%"hexagonal binning"){
           ret = list(select.bg.object,
                      adjust.size.scale.object,
                      adjust.hex.bins.title,
                      adjust.hex.bins.object,
+                     hex.bins.object.style,
                      point.colour.title,
                      select.dotcolor.object)
-        }
-        else if(!is.null(input$select.plot.type)&&
-                input$select.plot.type%in%"hexbin plot-alpha") {
+        }else if(!is.null(input$select.plot.type)&&
+                 input$select.plot.type%in%"grid-density"){
           ret = list(select.bg.object,
                      adjust.size.scale.object,
-                     adjust.hex.bins.title,
-                     adjust.hex.bins.object,
-                     point.colour.title,
-                     select.dotcolor.object)
+                     adjust.grid.size.title,
+                     adjust.grid.size.object)
         }
       }
     }
@@ -3029,9 +3035,8 @@ observe({
                    'Customize labels',
                    'Adjust axis limits')
             if(!is.null(input$select.plot.type)&&
-               ((input$select.plot.type%in%"grid-density plot"|
-                 input$select.plot.type%in%"hexbin plot-size"|
-                 input$select.plot.type%in%"hexbin plot-alpha")||
+               ((input$select.plot.type%in%"grid-density"|
+                 input$select.plot.type%in%"hexagonal binning")||
                 large.sample&&
                 input$select.plot.type%in%"default")){
               ch = c('Add trend curves',
@@ -3186,6 +3191,15 @@ observe({
       graphical.par$gg_method = input$gg.swarmMethod
   })
 })
+
+observe({
+  input$select.hex.style
+  isolate({
+    if(!is.null(input$select.hex.style))
+      graphical.par$hex.style = input$select.hex.style
+  })
+})
+
 
 observe({
   input$rotationx
@@ -3783,9 +3797,7 @@ output$code.variables.panel = renderUI({
         #        }
         if(length(input$select.plot.type) != 0 && 
            (input$select.plot.type %in% "histogram" ||
-            input$select.plot.type %in% "grid-density plot" ||
-            input$select.plot.type %in% "hexbin plot-size" ||
-            input$select.plot.type %in% "hexbin plot-alpha"))
+            input$select.plot.type %in% "hexagonal binning"))
           ret = list(color.by.object)
         else if (length(input$select.plot.type) != 0 && 
                  (input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin", 
@@ -3801,14 +3813,16 @@ output$code.variables.panel = renderUI({
                      br(),
                      br())  
           
-        } else
+        } else if (length(input$select.plot.type) != 0 && input$select.plot.type == "grid-density") {
+          ret = NULL
+        } else {
           ret = list(color.by.object,
                      color.use.ranks.object,
                      point.symbol.title,
                      symbol.object,
                      symbol.by.object,
                      symbol.linewidth.object)
-        
+        }
         
         
       }
@@ -6423,19 +6437,6 @@ output$interactive.plot = renderUI({
 
 
 
-
-
-
-observe({
-  input$select.plot.type
-  isolate({
-    if(!is.null(input$select.plot.type) && input$select.plot.type == "hexbin plot-size")
-      graphical.par$hex.style = "size"
-    if(!is.null(input$select.plot.type) && input$select.plot.type == "hexbin plot-alpha")
-      graphical.par$hex.style = "alpha"
-    
-  })
-})
 
 
 # add fitted values and residuals
