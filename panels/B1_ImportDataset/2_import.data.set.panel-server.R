@@ -75,7 +75,7 @@ observeEvent(input$import_set, {
       
       get.data.dir.imported()
       
-      design.parameters$data.name = NULL
+      #design.parameters$data.name = NULL
       values$data.set = data.vals$data.set
       updatePanel$doit = updatePanel$doit+1
       values$data.restore = get.data.set()
