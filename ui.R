@@ -107,6 +107,8 @@ shinyUI(
       navbarMenu("File",
                  tabPanel("Import Dataset",
                           uiOutput('load.data.panel')),
+                 tabPanel("Paste Dataset",
+                          uiOutput('paste.data.panel')),
                  tabPanel("Export Dataset",
                           uiOutput('save.data.panel')),
                  tabPanel("Display Dataset",

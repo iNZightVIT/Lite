@@ -210,6 +210,13 @@ shinyServer(function(input, output, session) {
   source("panels/B5_DatasetExamples/1_data.set.examples-ui.R", local = TRUE)
   source("panels/B5_DatasetExamples/2_data.set.examples-server.R", local = TRUE)
   
+  
+  ##-----------------------------------------##
+  ##  B6. "File -> Paste Dataset" Module  ##
+  ##-----------------------------------------##
+  source("panels/B6_PasteDataset/1_paste.data.set-ui.R", local = TRUE)
+  source("panels/B6_PasteDataset/2_paste.data.set-server.R", local = TRUE)
+  
   ##------------------------##
   ##  C1. Visualize Module  ##
   ##------------------------##
