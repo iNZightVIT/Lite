@@ -200,17 +200,22 @@ observe({
   input$select_variables
   input$choose_season
   isolate({
-    can_multiply <- all(sapply(variable.names(), function(i) all(get.data.set()[[i]] > 0)))
-    if(!is.na(can_multiply)){
-      if (can_multiply == T) {
-        shinyjs::enable("choose_season")
-        season_select_ts$re = input$choose_season
-      } else {
-        season_select_ts$re = F
-        shinyjs::reset("choose_season")
-        shinyjs::disable("choose_season")
+    tryCatch({
+      can_multiply <- all(sapply(variable.names(), function(i) all(get.data.set()[[i]] > 0)))
+      if(!is.na(can_multiply)){
+        if (can_multiply == T) {
+          shinyjs::enable("choose_season")
+          season_select_ts$re = input$choose_season
+        } else {
+          season_select_ts$re = F
+          shinyjs::reset("choose_season")
+          shinyjs::disable("choose_season")
+        }
       }
-    }
+    },error = function(e) {
+      print(e)
+    }, finally = {})
+
   })
 })
 
