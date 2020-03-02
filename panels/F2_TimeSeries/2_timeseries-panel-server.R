@@ -160,7 +160,7 @@ observe({
   get.data.set()
   input$mod_limit_until
   isolate({
-    if(!is.null(ts.para$tsObj$tsObj)){
+    if(!is.null(ts.para$tsObj$tsObj) && length(ts.para$tsObj$tsObj)!=0){
       xr <- range(time(ts.para$tsObj$tsObj))
       xby <- 1 / ts.para$tsObj$freq
       xx <- seq(xr[1], xr[2], by = xby)
@@ -201,13 +201,15 @@ observe({
   input$choose_season
   isolate({
     can_multiply <- all(sapply(variable.names(), function(i) all(get.data.set()[[i]] > 0)))
-    if (can_multiply == T) {
-      shinyjs::enable("choose_season")
-      season_select_ts$re = input$choose_season
-    } else {
-      season_select_ts$re = F
-      shinyjs::reset("choose_season")
-      shinyjs::disable("choose_season")
+    if(!is.na(can_multiply)){
+      if (can_multiply == T) {
+        shinyjs::enable("choose_season")
+        season_select_ts$re = input$choose_season
+      } else {
+        season_select_ts$re = F
+        shinyjs::reset("choose_season")
+        shinyjs::disable("choose_season")
+      }
     }
   })
 })
