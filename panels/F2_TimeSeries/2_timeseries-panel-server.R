@@ -1527,7 +1527,7 @@ output$time.select = renderUI({
 })
 
 output$time.plot.select = renderUI({
-  sel = rev(get.numeric.column.names(get.data.set()))[1]
+  sel = get.numeric.column.names(get.data.set())[1]
   
   get.vars = parseQueryString(session$clientData$url_search)
   if(!is.null(get.vars$url)) {
@@ -1546,7 +1546,7 @@ output$time.plot.select = renderUI({
     div(style = "padding: 0px 0px; margin-top:-1.5em", 
         selectInput(inputId = "select_variables",
                     label = "",
-                    choices =  rev(get.numeric.column.names(get.data.set())),
+                    choices =  get.numeric.column.names(get.data.set()),
                     selected = sel,
                     multiple = TRUE,
                     selectize = FALSE,
