@@ -395,6 +395,15 @@ shinyServer(function(input, output, session) {
   source("panels/F6_MultipleResponse//1_MultipleResponse.panel-ui.R", local = TRUE)
   source("panels/F6_MultipleResponse//2_MultipleResponse.panel-server.R", local = TRUE)
   
+  #   Advanced --> Multivariate
+  
+  ##----------------##
+  ##  Multivariate  ##
+  ##----------------##
+  source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
+  source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
+  
+  
   #   Show code history
   
   ##---------------##
