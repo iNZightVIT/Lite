@@ -348,7 +348,7 @@ output$mv.plot <- renderPlot({
 })
 
 
-plotly_pairs_corrmain <- renderPlotly({
+output$plotly_pairs_corrmain <- renderPlotly({
   get.data.set()
   input$multivarate.method
   mrOptions$vars
