@@ -543,17 +543,17 @@ aggregate.data= function(aggregate.over,
 }
 
 ## unlist list columns in a dataset
-unlist.data.frame = function(data) {
-  col_names = colnames(data)
-  temp1 = sapply(data, is.list)
-  temp2 = do.call(
-    cbind, lapply(data[temp1], function(x) 
-      data.frame(do.call(rbind, x), check.names=FALSE)))
-  result = cbind(data[!temp1], temp2)
-  colnames(result) = col_names
-  
-  result
-}
+#unlist.data.frame = function(data) {
+#  col_names = colnames(data)
+#  temp1 = sapply(data, is.list)
+#  temp2 = do.call(
+#    cbind, lapply(data[temp1], function(x) 
+#      data.frame(do.call(rbind, x), check.names=FALSE)))
+#  result = cbind(data[!temp1], temp2)
+#  colnames(result) = col_names
+#  
+#  result
+#}
 
 ##########################################################
 #To be removed when the iNZight tools package is working##

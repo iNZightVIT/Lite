@@ -311,7 +311,7 @@ output$ts.main.ui <- renderUI({
           tabPanel(
             title = "Interactive Plot (via plotly)",
             uiOutput("plotly_tsmainnw"),
-            plotlyOutput("plotly_tsmain") %>% withSpinner()
+            plotlyOutput("plotly_tsmain", height = "500px") %>% withSpinner()
           ))
       )
     } else if (!is.null(input$select_variables) && length(input$select_variables) == 1 &&
@@ -437,7 +437,7 @@ output$ts.main.ui <- renderUI({
           tabPanel(
             title = "Interactive Plot (via plotly)",
             uiOutput("plotly_tsforecastnw"),
-            plotlyOutput("plotly_tsforecast") %>% withSpinner()
+            plotlyOutput("plotly_tsforecast", height = "500px") %>% withSpinner()
           ))
       )
     } else if (!is.null(input$select_variables) && length(input$select_variables) == 1 &&
