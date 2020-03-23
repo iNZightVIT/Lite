@@ -235,25 +235,42 @@ output$multivarate.ui.main <- renderUI({
     if (mrOptions$type %in% c("pairs", "pairs_corr")) {
       ret = list(
         tabsetPanel(
-          type = "pills", # Try type = "tabs" is you wish...
-          ##  Tab 1: Time Series Plot
+          type = "pills",
           tabPanel(
             title = "Plot",
               br(),
-            plotOutput("mv.plot", height = "500px")
+            plotOutput("mv.plot", height = "500px"),
+            br(),
+            fixedRow(column(width = 3, 
+                            NULL),
+                     column(width = 3, 
+                            downloadButton(outputId = "saveMvplot", label = "Download Plot")),
+                     column(width = 3,
+                            radioButtons(inputId = "saveMvplottype", 
+                                         label = strong("Select the file type"), 
+                                         choices = list("jpg", "png", "pdf"), inline = TRUE)))
           ))
       )
     } else if (mrOptions$type == "pcp"){
       ret = list(
         tabsetPanel(
-          type = "pills", # Try type = "tabs" is you wish...
-          ##  Tab 1: Time Series Plot
+          type = "pills", 
           tabPanel(
             title = "Plot",
             br(),
-            plotOutput("mv.plot", height = "500px")),
+            plotOutput("mv.plot", height = "500px"),
+            br(),
+            fixedRow(column(width = 3, 
+                            NULL),
+                     column(width = 3, 
+                            downloadButton(outputId = "saveMvplot", label = "Download Plot")),
+                     column(width = 3,
+                            radioButtons(inputId = "saveMvplottype", 
+                                         label = strong("Select the file type"), 
+                                         choices = list("jpg", "png", "pdf"), inline = TRUE)))),
           tabPanel(
             title = "Interactive Plot (via plotly)",
+            uiOutput("plotly_pairs_corrmainnw"),
             plotlyOutput("plotly_pairs_corrmain", height = "500px") %>% withSpinner()
           ))
       )
@@ -265,7 +282,16 @@ output$multivarate.ui.main <- renderUI({
           tabPanel(
             title = "Plot",
             br(),
-            plotOutput("mv.pca", height = "500px")),
+            plotOutput("mv.pca", height = "500px"),
+            br(),
+            fixedRow(column(width = 3, 
+                            NULL),
+                     column(width = 3, 
+                            downloadButton(outputId = "saveMvPcaplot", label = "Download Plot")),
+                     column(width = 3,
+                            radioButtons(inputId = "saveMvPcaplottype", 
+                                         label = strong("Select the file type"), 
+                                         choices = list("jpg", "png", "pdf"), inline = TRUE)))),
           tabPanel(
             title = "Summary",
             br(),
@@ -288,10 +314,20 @@ output$multivarate.ui.main <- renderUI({
           tabPanel(
             title = "Plot",
             br(),
-            plotOutput("mv.pca", height = "500px")
+            plotOutput("mv.pca", height = "500px"),
+            br(),
+            fixedRow(column(width = 3, 
+                            NULL),
+                     column(width = 3, 
+                            downloadButton(outputId = "saveMvPcaplot", label = "Download Plot")),
+                     column(width = 3,
+                            radioButtons(inputId = "saveMvPcaplottype", 
+                                         label = strong("Select the file type"), 
+                                         choices = list("jpg", "png", "pdf"), inline = TRUE)))
           ),
           tabPanel(
             title = "Interactive Plot (via plotly)",
+            uiOutput("plotly_pcamainnw"),
             plotlyOutput("plotly_pcamain", height = "500px") %>% withSpinner()
           ))
       )
@@ -348,6 +384,64 @@ output$mv.plot <- renderPlot({
 })
 
 
+###  download mv Plot
+output$saveMvplot = downloadHandler(
+  filename = function() {
+    paste("MultivariatePlot", 
+          switch(input$saveMvplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveMvplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveMvplottype == "jpg")
+        jpeg(file)
+      else if(input$saveMvplottype == "png")
+        png(file)
+      else if(input$saveMvplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      plot_fun <- list(
+        pcp = iNZightMultivariate::inz.parcoord,
+        pairs = iNZightMultivariate::inzight.ggpairs,
+        pairs_corr = iNZightMultivariate::inzight.corr
+      )[[mrOptions$type]]
+      
+      plot_arg_names <- list(
+        pcp = c("vars", "group", "alpha"),
+        pairs = c("vars"),
+        pairs_corr = c("vars")
+      )[[mrOptions$type]]
+      
+      mrOptions.list = reactiveValuesToList(mrOptions)
+      plot_args <- mrOptions.list[plot_arg_names]
+      plot_args <- plot_args[!is.na(names(plot_args))]
+      
+      if (mrOptions$type == "pairs") {
+        plot(c(0, 1), c(0, 1), ann = FALSE, bty = "n", type = "n", xaxt = "n", yaxt = "n")
+        text(0.5, 0.5, "Generating pairs plot - please wait... ")
+      }
+      plot_exprs <- do.call(plot_fun, c(list(values$data.name), plot_args))
+      
+      eval_env <- rlang::env(!!rlang::sym(values$data.name) := get.data.set())
+      eval_results <- lapply(plot_exprs, eval, envir = eval_env)
+      plot_object <- eval_results[[length(eval_results)]]
+      dev.hold()
+      tryCatch(
+        print(plot_object),
+        finally = dev.flush()
+      )
+      dev.off()
+    }
+  })  
+
+
+
+
 output$plotly_pairs_corrmain <- renderPlotly({
   get.data.set()
   input$multivarate.method
@@ -361,6 +455,28 @@ output$plotly_pairs_corrmain <- renderPlotly({
   })
 })
 
+output$plotly_pairs_corrmainnw <- renderUI({
+  curdir <- getwd()
+  on.exit(setwd(curdir))
+  #set to temp directory
+  tdir <- tempdir()
+  setwd(tdir)
+  cdev <- dev.cur()
+  on.exit(dev.off(cdev), add = TRUE)
+  pdf(NULL)
+  mul.plot.parm()
+  print(plotly::ggplotly())
+  htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
+  addResourcePath("path", normalizePath(tdir))
+  list(
+    br(),
+    br(),
+    tags$a(href = "path/index.html", 
+           "Open in a new window", 
+           target="_blank"), 
+    br(),
+    br())
+})
 
   
 mul.plot.pca <- reactive({
@@ -460,6 +576,34 @@ output$mv.pca <- renderPlot({
 })
 
 
+###  download pca Plot
+output$saveMvPcaplot = downloadHandler(
+  filename = function() {
+    paste("MultivariatePlot", 
+          switch(input$saveMvPcaplottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveMvPcaplottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveMvPcaplottype == "jpg")
+        jpeg(file)
+      else if(input$saveMvPcaplottype == "png")
+        png(file)
+      else if(input$saveMvPcaplottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      mul.plot.pca()
+      dev.off()
+    }
+  }) 
+
+
+
 output$mv.summary <- renderText({
   mrOptions$text
 })
@@ -486,5 +630,36 @@ output$plotly_pcamain <- renderPlotly({
   })
 })
 
-
+output$plotly_pcamainnw <- renderUI({
+  curdir <- getwd()
+  on.exit(setwd(curdir))
+  #set to temp directory
+  tdir <- tempdir()
+  setwd(tdir)
+  cdev <- dev.cur()
+  on.exit(dev.off(cdev), add = TRUE)
+  get.data.set()
+  input$multivarate.method
+  mrOptions$vars
+  mrOptions$group
+  mrOptions$alpha
+  mrOptions$shape
+  mrOptions$dim1
+  mrOptions$dim2
+  mrOptions$k
+  isolate({
+    pdf(NULL)
+    mul.plot.pca()
+  })
+  htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
+  addResourcePath("path", normalizePath(tdir))
+  list(
+    br(),
+    br(),
+    tags$a(href = "path/index.html", 
+           "Open in a new window", 
+           target="_blank"), 
+    br(),
+    br())
+})
 
