@@ -13,12 +13,6 @@
 ###-----------------###
 
 ##  set up the "help" functionality for this module
-maps.help = function() {
-  help.display(
-    title = "Maps Module",
-    id = "Maps_Module",
-    file = "panels/F4_Maps/3_maps.panel-help.md")
-}
 
 
 ## set up the sidebar panel with "maps.sidebarPanel()"
@@ -159,7 +153,10 @@ maps.sidebarPanel = function(data.set) {
         
         hr(),
         
-        maps.help()
+        tags$a(href = "https://www.stat.auckland.ac.nz/~wild/iNZight/user_guides/add_ons/?topic=maps&ver=lite", 
+                      "Help", class = 'btn btn-xs btn-success',
+                      target="_blank")
+        
         
       ),
       
