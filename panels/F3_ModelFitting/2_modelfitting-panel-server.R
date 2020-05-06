@@ -183,7 +183,8 @@ output$model_fit = renderUI({
                                                         choices=colnames(get.data.set())[-which(colnames(get.data.set())%in%sel)],
                                                         selected=confound.sel,
                                                         selectize=T,
-                                                        multiple=T)))),
+                                                        multiple=T))),
+                          checkboxInput("modelfit_inc_int", label = "Include intercept", value = T)),
          fixedRow(column(11,h4("Add Interactions")),
                   column(1,checkboxInput("toggle_check1",
                                          label="",
@@ -440,7 +441,7 @@ observe({
   isolate({
     model.name = ""
     if(!is.null(input$fit_model_button)&&
-         input$fit_model_button>0){
+       input$fit_model_button>0){
       temp.model = NULL
       temp.code = NULL
       tryCatch({
@@ -450,8 +451,8 @@ observe({
           max = 1
           for(m.name in numbers){
             if(length(m.name)==2&&
-                 !is.na(suppressWarnings(as.numeric(m.name[2])))&&
-                 suppressWarnings(as.numeric(m.name[2]))>max){
+               !is.na(suppressWarnings(as.numeric(m.name[2])))&&
+               suppressWarnings(as.numeric(m.name[2]))>max){
               max = suppressWarnings(as.numeric(m.name[2]))
             }
           }
@@ -466,14 +467,14 @@ observe({
         int.specific = F
         # interaction is used
         if(!is.null(input$intersaction_select)&&
-             input$intersaction_select%in%"all"){
+           input$intersaction_select%in%"all"){
           col  = " * "
         }else if(!is.null(input$intersaction_select)&&
-                   input$intersaction_select%in%"by degree"){
+                 input$intersaction_select%in%"by degree"){
           int.deg = T
         }else if(!is.null(input$intersaction_select)&&
-                   input$intersaction_select%in%"by variables"&&
-                   length(modelValues$interaction.log)>0){
+                 input$intersaction_select%in%"by variables"&&
+                 length(modelValues$interaction.log)>0){
           int.specific = T
         }
         if(input$transform_Y%in%"log"){
@@ -499,7 +500,7 @@ observe({
                                 collapse=col),sep="")
           }
         }else if(input$transform_Y%in%"^argument"&&
-                   !input$arg1%in%""){
+                 !input$arg1%in%""){
           formu = paste(input$select_Y,"^",input$arg1," ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -566,6 +567,9 @@ observe({
             formu = paste(formu,paste(names(modelValues$interaction.log),collapse=" + "),sep=" + ")
           }
         }
+        if(input$modelfit_inc_int != T){
+          formu = paste0(formu, " - 1")
+        }
         design0=NULL
         dafr = get.data.set()
         if(input$data_structure%in%"Complex Survey"){
@@ -574,11 +578,11 @@ observe({
             id0 = id0[-which(id0%in%"none")]
           }
           if("1"%in%id0&&
-               length(id0)>1){
+             length(id0)>1){
             id0 = id0[-which(id0%in%"1")]
           }
           if(!is.null(id0)&&
-               length(id0)>0){
+             length(id0)>0){
             id0 = formula(paste0("~",paste(id0,collapse="+")))
           }else{
             id0=NULL
@@ -598,11 +602,11 @@ observe({
             fpc0 = fpc0[-which(fpc0%in%"none")]
           }
           if("1"%in%fpc0&&
-               length(fpc0)>1){
+             length(fpc0)>1){
             fpc0 = fpc0[-which(fpc0%in%"1")]
           }
           if(!is.null(fpc0)&&
-               length(fpc0)>0){
+             length(fpc0)>0){
             fpc0 = formula(paste0("~",paste(fpc0,collapse="+")))
           }else{
             fpc0=NULL
@@ -614,13 +618,13 @@ observe({
                       data=dafr)
           print(temp)
           design0 = do.call(svydesign,temp)
-#           design0 = svydesign(id=id0,
-#                               strata=strata0,
-#                               weights=weights0,
-#                               fpc=fpc0,
-#                               nest=nest0,
-#                               data=dafr,
-#                               variables=dafr)
+          #           design0 = svydesign(id=id0,
+          #                               strata=strata0,
+          #                               weights=weights0,
+          #                               fpc=fpc0,
+          #                               nest=nest0,
+          #                               data=dafr,
+          #                               variables=dafr)
           design.text = paste0("mydesign = svydesign(id=~",input$cluster)
           if(!is.null(strata0)){
             design.text = paste0(design.text,",strata=~",input$strata)
@@ -636,7 +640,7 @@ observe({
           family0="gaussian"
           offset0=NULL
           if(!is.null(input$offset)&&
-               !input$offset%in%""){
+             !input$offset%in%""){
             offset0=input$offset
           }
           if(input$model_framework%in%"Poisson Regression (Y counts)"){
@@ -725,8 +729,8 @@ observe({
           confounds = confounds[-which(confounds%in%" ")]
         }
         if(!is.null(confounds)&&
-             length(confounds)>0&&
-             all(confounds%in%colnames(get.data.set()))){
+           length(confounds)>0&&
+           all(confounds%in%colnames(get.data.set()))){
           modelValues$code.history = paste0(modelValues$code.history,
                                             temp.code,
                                             "\niNZightSummary(",
