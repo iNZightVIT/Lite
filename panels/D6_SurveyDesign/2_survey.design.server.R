@@ -169,13 +169,18 @@ design_param = reactive({
       wts <- svalue_or_null(input$sample.weight.Var)
       repWts <- input$repVars
       reptype <- input$repType
-      scale <- as.numeric(input$repScale)
-      rscales <- as.numeric(repRscales$rscales)
-      name <- values$data.name
-      if (length(rscales) == 0)
-        rscales <- rep(scale, length(repWts))
-      else if(any(is.na(rscales)))
+      if (reptype %in% c("bootstrap", "other")) {
+        scale <- as.numeric(input$repScale)
+        rscales <- as.numeric(repRscales$rscales)
+        if (length(rscales) == 0)
+          rscales <- rep(scale, length(repWts))
+        else if(any(is.na(rscales)))
+          rscales <- NULL
+      } else {
+        scale <- NULL
         rscales <- NULL
+      }
+      name <- values$data.name
       clear <- is.null(wts) && length(repWts) == 0
       setDesign(
         wt = wts,
