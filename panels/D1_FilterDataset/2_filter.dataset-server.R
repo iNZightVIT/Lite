@@ -244,5 +244,8 @@ observe({
     updateSelectInput(session, "subs1", selected = "none")
     updateSelectInput(session, "vari2", selected = "none")
     updateSelectInput(session, "vari1", selected = "none")
+    if(!is.null(values$data.set) && !is.null(plot.par$locate)){
+      plot.par$locate = NULL
+    }
   })
 })
