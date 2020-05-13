@@ -1232,14 +1232,14 @@ output$visualize.summary = renderPrint({
   if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
      tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
     tryCatch({
-      cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
+      print(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
     }, warning = function(w) {
       print(w)
     }, error = function(e) {
       print(e)
     }, finally = {})
   }else{
-    suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
+    suppressWarnings(try(print(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
   }
 })
 
