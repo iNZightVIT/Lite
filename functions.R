@@ -1,3 +1,9 @@
+## add for now, will delete after updating R
+isFALSE = function(x){
+  is.logical(x) && length(x) == 1L && !is.na(x) && !x
+}
+
+
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
