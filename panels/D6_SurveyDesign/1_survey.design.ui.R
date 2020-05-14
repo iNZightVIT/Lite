@@ -41,6 +41,11 @@ survey.design.sidebar =  function(){
                                                     label="Finite population correction",
                                                     choices= c(" ", colnames(get.data.set())),
                                                     selected = " ",
+                                                    selectize = F)),
+                              column(12,selectInput("fpcVar2",
+                                                    label="2nd finite population correction variable",
+                                                    choices= c(" ", colnames(get.data.set())),
+                                                    selected = " ",
                                                     selectize = F))
                      ),
                      hr(),

@@ -140,6 +140,24 @@ svalue_or_null <- function(x) {
   x
 }
 
+fpc.f <-reactive({
+  if(req(input$fpcVar) == ' ') {
+    shinyjs::reset("fpcVar2")
+    shinyjs::disable("fpcVar2")
+    return(NULL)
+    } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) == ' ') {
+      shinyjs::enable("fpcVar2")
+      return(input$fpcVar)
+    } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) != ' '){
+      shinyjs::enable("fpcVar2")
+      return(paste0(input$fpcVar, ' + ', input$fpcVar2))
+    } else {
+      shinyjs::disable("fpcVar2")
+      NULL
+      }
+})
+
+
 ## reactive design object
 design_param = reactive({
   input$create.design
@@ -150,7 +168,7 @@ design_param = reactive({
       clus1 <- svalue_or_null(input$clus1Var)
       clus2 <- svalue_or_null(input$clus2Var)
       wts <- svalue_or_null(input$wtVar)
-      fpc <- svalue_or_null(input$fpcVar)
+      fpc <- fpc.f()
       nest <- as.logical(input$nestChk)
       name <- values$data.name
       clear <- is.null(input$strat) && is.null(input$clus1) &&
