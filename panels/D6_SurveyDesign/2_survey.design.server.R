@@ -142,19 +142,27 @@ svalue_or_null <- function(x) {
 
 fpc.f <-reactive({
   if(req(input$fpcVar) == ' ') {
-    shinyjs::reset("fpcVar2")
-    shinyjs::disable("fpcVar2")
     return(NULL)
     } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) == ' ') {
-      shinyjs::enable("fpcVar2")
       return(input$fpcVar)
     } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) != ' '){
-      shinyjs::enable("fpcVar2")
       return(paste0(input$fpcVar, ' + ', input$fpcVar2))
     } else {
-      shinyjs::disable("fpcVar2")
       NULL
       }
+})
+
+observe({
+  if(req(input$fpcVar) == ' ') {
+    shinyjs::reset("fpcVar2")
+    shinyjs::disable("fpcVar2")
+  } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) == ' ') {
+    shinyjs::enable("fpcVar2")
+  } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) != ' '){
+    shinyjs::enable("fpcVar2")
+  } else {
+    shinyjs::disable("fpcVar2")
+  }
 })
 
 
