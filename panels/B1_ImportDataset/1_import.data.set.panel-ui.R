@@ -3,6 +3,8 @@ get.sidebar.load = function(url_load){
     url_load=""
   }
   list(
+    HTML("Please let us know if you have difficulty importing data, if you can include information about the operating system, browser and a copy of the data that would be extremely helpful. <br/> Email: inzightlite_support@stat.auckland.ac.nz<br/>"),
+    hr(),
     helpText("Select a file (Size Limit: 5MB),"),
     fileInput("files",label="", multiple=F),
     helpText("or provide a URL pointing to a file on a web location"),
