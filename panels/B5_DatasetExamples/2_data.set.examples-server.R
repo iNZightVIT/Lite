@@ -183,6 +183,11 @@ observe({
         code.save$variable = c(code.save$variable, list(c("\n", sprintf("%s <- %s", code.save$name, values$data.name), "\n")))
         values$data.name = code.save$name
         values$name.restore = code.save$name
+        updateSelectInput(session, "subs2", selected = "none")
+        updateSelectInput(session, "subs1", selected = "none")
+        updateSelectInput(session, "vari2", selected = "none")
+        updateSelectInput(session, "vari1", selected = "none")
+        plot.par$design = NULL
       }
     })
   }

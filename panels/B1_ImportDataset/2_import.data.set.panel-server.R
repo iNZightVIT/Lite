@@ -5,7 +5,12 @@ import_reactives = reactiveValues(
   success = F
 )
 
-
+observe({
+  input$filter_data_perform
+  isolate({
+    
+  })
+})
 
 observeEvent(input$files, { 
   
@@ -39,7 +44,7 @@ observeEvent(input$files, {
         }
         values$data.name = temp.name
         import_reactives$success = T
-        if(!(fext %in% c("RData", "rda"))){
+        if(!(fext %in% c("RData", "rda", "Rda"))){
           code.save$name = temp.name
           code.save$variable = c(code.save$variable, list(c(sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
                                                                                 "\n"))))
@@ -54,6 +59,11 @@ observeEvent(input$files, {
           code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
         }
         values$name.restore = temp.name
+        updateSelectInput(session, "subs2", selected = "none")
+        updateSelectInput(session, "subs1", selected = "none")
+        updateSelectInput(session, "vari2", selected = "none")
+        updateSelectInput(session, "vari1", selected = "none")
+        plot.par$design = NULL
       }      
     })
   }
@@ -81,6 +91,7 @@ observeEvent(input$import_set, {
       values$data.restore = get.data.set()
       values$data.name = data.vals$data.name
       import_reactives$success = T
+      plot.par$design = NULL
     })
   }
   
