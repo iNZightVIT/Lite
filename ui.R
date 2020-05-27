@@ -142,7 +142,10 @@ shinyUI(
                  tabPanel("Restore data",
                           uiOutput('restore.data')),
                  tabPanel("Survey design",
-                          uiOutput('survey.design'))
+                          uiOutput('survey.design')),
+                 tabPanel("Frequency tables",
+                          uiOutput('frequency.tables'))
+                 
       ),
       ##  "Manipulate variables" tab.
       navbarMenu("Manipulate variables",

@@ -289,6 +289,12 @@ shinyServer(function(input, output, session) {
   source("panels/D7_AlphabetiseVariables/1_alphabetise.variables-ui.R", local = TRUE)
   source("panels/D7_AlphabetiseVariables/2_alphabetise.variables-server.R", local = TRUE)
   
+  ##---------------------------------##
+  ##  D12. Frequency tables (beta)   ##
+  ##---------------------------------##
+  source("panels/D12_FrequencyTables/1_frequency.tables.ui.R", local = TRUE)
+  source("panels/D12_FrequencyTables/2_frequency.tables.server.R", local = TRUE)
+  
   ##-----------------------------##
   ##  E0. Convert to Categorical ##
   ##-----------------------------##
