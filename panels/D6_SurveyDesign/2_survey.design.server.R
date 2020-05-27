@@ -165,6 +165,62 @@ observe({
   }
 })
 
+design_params = reactiveValues()
+
+
+observe({
+  input$create.design
+  input$create.design1
+  isolate({
+    if(req(input$svytype) == "survey" && req(input$create.design) > 0) {
+      strat <- svalue_or_null(input$stratVar)
+      clus1 <- svalue_or_null(input$clus1Var)
+      clus2 <- svalue_or_null(input$clus2Var)
+      wts <- svalue_or_null(input$wtVar)
+      fpc <- fpc.f()
+      nest <- as.logical(input$nestChk)
+      name <- values$data.name
+      clear <- is.null(input$strat) && is.null(input$clus1) &&
+        is.null(input$clus2) && is.null(input$wts) && is.null(input$fpc)
+      design_params$design = setDesign(
+        strata = strat,
+        clus1 = clus1,
+        clus2 = clus2,
+        wt = wts,
+        nest = nest,
+        fpc = fpc,
+        type = "survey",
+        name = name
+      )
+    } else if (req(input$svytype) == "replicate" && req(input$create.design1) > 0) {
+      wts <- svalue_or_null(input$sample.weight.Var)
+      repWts <- input$repVars
+      reptype <- input$repType
+      if (reptype %in% c("bootstrap", "other")) {
+        scale <- as.numeric(input$repScale)
+        rscales <- as.numeric(repRscales$rscales)
+        if (length(rscales) == 0)
+          rscales <- rep(scale, length(repWts))
+        else if(any(is.na(rscales)))
+          rscales <- NULL
+      } else {
+        scale <- NULL
+        rscales <- NULL
+      }
+      name <- values$data.name
+      clear <- is.null(wts) && length(repWts) == 0
+      design_params$design = setDesign(
+        wt = wts,
+        repweights = repWts,
+        reptype = reptype,
+        scale = scale,
+        rscales = rscales,
+        type = "replicate",
+        name = name
+      )
+    }
+  })
+})
 
 ## reactive design object
 design_param = reactive({
@@ -240,10 +296,10 @@ observe({
 })
 
 observe({
-  if(req(design_param()$dataDesign$type) == "replicate"){
+  if(req(design_params$design$dataDesign$type) == "replicate"){
     isolate({
-      repRscales$rep.weight = design_param()$dataDesign$repweights
-      repRscales$rscales = design_param()$dataDesign$rscales
+      repRscales$rep.weight = design_params$design$dataDesign$repweights
+      repRscales$rscales = design_params$design$dataDesign$rscales
     })
   }
 })
@@ -415,18 +471,18 @@ observe({
   input$create.design
   input$create.design1
   isolate({
-    req(design_param())
-    setOk <- try(createSurveyObject(design_param()))
+    req(design_params$design)
+    setOk <- try(createSurveyObject(design_params$design))
     if (!inherits(setOk, "try-error")) {
       call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
 
       call <- sprintf("%s <- %s",
-                      design_param()$dataDesignName,
+                      design_params$design$dataDesignName,
                       gsub("dataSet", values$data.name, call))
       code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
       code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
       
-      plot.par$design = createSurveyObject(design_param())
+      plot.par$design = createSurveyObject(design_params$design)
       ## print result
       output$create.design.summary <- renderPrint({
         summary(plot.par$design)
@@ -447,14 +503,14 @@ observe({
 observe({
   input$create.design2
   isolate({
-    req(design_param())
+    req(design_params$design)
     PSDesign <- setDesign(
-      strata = design_param()$dataDesign$strat,
-      clus1 = design_param()$dataDesign$clus1, clus2 = design_param()$dataDesign$clus2,
-      wt = design_param()$dataDesign$wt, nest = design_param()$dataDesign$nest,
-      fpc = design_param()$dataDesign$fpc, repweights = design_param()$dataDesign$repWts, 
-      type = design_param()$dataDesign$type,
-      name = design_param()$dataDesign$name,
+      strata = design_params$design$dataDesign$strat,
+      clus1 = design_params$design$dataDesign$clus1, clus2 = design_params$design$dataDesign$clus2,
+      wt = design_params$design$dataDesign$wt, nest = design_params$design$dataDesign$nest,
+      fpc = design_params$design$dataDesign$fpc, repweights = design_params$design$dataDesign$repWts, 
+      type = design_params$design$dataDesign$type,
+      name = design_params$design$dataDesign$name,
       poststrat = if (length(input$PSvar) != 0) lvldf$df[input$PSvar] else NULL
     )
     setOk <- try(createSurveyObject(PSDesign))
@@ -462,8 +518,8 @@ observe({
       call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
       print(PSDesign$dataDesignName)
       call <- sprintf("%s <- %s",
-                      paste0(design_param()$dataDesignName, ".ps"),
-                      gsub("design_obj", design_param()$dataDesignName, call))
+                      paste0(design_params$design$dataDesignName, ".ps"),
+                      gsub("design_obj", design_params$design$dataDesignName, call))
       code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
       code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
       
