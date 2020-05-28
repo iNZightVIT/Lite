@@ -368,11 +368,11 @@ vis.mainPanel = function() {
         
         #br(),
         
-        fixedRow(column(4, selectInput("type.inference.select",
-                                       choices = c("normal",
-                                                   "bootstrap"),
-                                       label = "Select type of inference")),
-                 column(6, uiOutput("interence_test"))),
+        fixedRow(column(3, radioButtons("type.inference.select",
+                                         choices = c("normal" = 1,
+                                                   "bootstrap" = 2),
+                                         label = h5(strong("Select type of inference")))),
+                 column(9, uiOutput("interence_test"))),
       
         br(),
         helpText("Statistical Inference for the data."),

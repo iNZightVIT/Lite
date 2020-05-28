@@ -3,7 +3,7 @@
 ###-----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
-###  Last Modified  :   Feb 15, 2019.
+###  Last Modified  :   May 31, 2020.
 ###
 ###  Please consult the comments before editing any code.
 ###
@@ -18,6 +18,16 @@ vis.data <- reactive({
 })
 
 
+###########################
+##                       ##
+## summary and inference ##
+##                       ##
+###########################
+
+source("panels/C1_Visualize//infoWindow.R", local = TRUE)
+
+
+## gg plot methods
 plot_list <- function(plot_type, x, y) {
   if (plot_type %in% c(
     "scatter", 
@@ -200,6 +210,13 @@ get.default.num.bins = reactive({
 
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par = reactiveValues(
+  hypothesis.value = 0,
+  hypothesis.alt = c("two.sided", "less", "greater"),
+  hypothesis.var.equal = FALSE,
+  hypothesis.use.exact = FALSE,
+  hypothesis.test = c("default", 
+                      "t.test", "anova", "chi2", "proportion"),
+  hypothesis.simulated.p.value = FALSE,
   boxplot = TRUE,
   mean_indicator = FALSE,
   fill_colour = "",
@@ -1205,217 +1222,6 @@ output$mini.plot = renderPlot({
 
 
 
-output$visualize.summary = renderPrint({
-  if (is.null(plot.par$x)) {
-    return(cat("Please select a variable"))
-  }
-  values.list = modifyList(reactiveValuesToList(plot.par),
-                           reactiveValuesToList(graphical.par), keep.null = TRUE)
-  if(is.numeric(plot.par$x)&
-     is.numeric(plot.par$y)){
-    values.list.x = values.list$x
-    values.list$x=values.list$y
-    values.list$y=values.list.x
-    values.list.varnames.x = values.list$varnames$x
-    values.list$varnames$x = values.list$varnames$y
-    values.list$varnames$y = values.list.varnames.x
-  }
-  if(!is.null(values.list$design)){
-    values.list$data = NULL
-  }
-  
-  
-  tmp.list <- values.list
-  tmp.list$plottype = "hist"
-  
-  
-  if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-     tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-    tryCatch({
-      cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
-    }, warning = function(w) {
-      print(w)
-    }, error = function(e) {
-      print(e)
-    }, finally = {})
-  }else{
-    suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
-  }
-})
-
-
-
-output$interence_test = renderUI({
-  get.data.set()
-  ret = NULL
-  input$vari1
-  input$vari2
-  input$type.inference.select
-  
-  isolate({
-    if (!is.null(vis.par()) & (length(input$type.inference.select) > 0 && input$type.inference.select == "normal")) {
-      if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y) & length(unique(plot.par$y)) == 2) |
-         (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x) & length(unique(plot.par$x)) == 2)) {
-        
-        main_test_panel = checkboxInput("inference_twosampletest",
-                                        label = "Two Sample t-test",
-                                        value = input$inference_twosampletest)
-        
-        menu_test_panel = conditionalPanel("input.inference_twosampletest",
-                                           fixedRow(column(4, h5("Null Value:")),
-                                                    column(6, textInput(inputId = "null_twosample", value = 0, label = NULL))),
-                                           fixedRow(column(4, h5("Alternative Hypothesis:")),
-                                                    column(6, selectInput(inputId = "hypothesis_twosample",
-                                                                          label = NULL,
-                                                                          choices = c("two sided", "greater than", "less than"),
-                                                                          #selected = input$hypothesis_twosample,
-                                                                          selectize = F))),
-                                           fixedRow(column(4, NULL),
-                                                    column(6, checkboxInput("use_equalvar",
-                                                                            label = "Use equal-variance"))),
-                                           
-                                           fixedRow(column(4, NULL),
-                                                    column(6, actionButton(inputId = "confirm_twosample",
-                                                                           label = "Confirm",
-                                                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))))
-        
-        ret = list(main_test_panel,
-                   menu_test_panel)
-      }
-      
-      else if(is.numeric(plot.par$x) & is.null(plot.par$y)) {
-        
-        main_test_panel = checkboxInput("inference_onesampletest",
-                                        label = "Change Hypothesis",
-                                        value = input$inference_onesampletest)
-        
-        menu_test_panel = conditionalPanel("input.inference_onesampletest",
-                                           fixedRow(column(4, h5("Null Value:")),
-                                                    column(6, textInput(inputId = "null_onesample", value = 0, label = NULL))),
-                                           fixedRow(column(4, h5("Alternative Hypothesis:")),
-                                                    column(6, selectInput(inputId = "hypothesis_onesample",
-                                                                          label = NULL,
-                                                                          choices = c("two sided", "greater than", "less than"),
-                                                                          #selected = input$hypothesis_onesample,
-                                                                          selectize = F))),
-                                           fixedRow(column(4, NULL),
-                                                    column(6, actionButton(inputId = "confirm_onesample",
-                                                                           label = "Confirm",
-                                                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))))
-        
-        ret = list(main_test_panel,
-                   menu_test_panel)
-        
-      }
-    }
-  })
-  
-  ret
-})
-
-
-
-output$visualize.inference = renderPrint({
-  if(input$plot_selector%in%"Inference"){
-    input$type.inference.select
-    input$vari1
-    input$vari2
-    input$subs1
-    input$confirm_twosample
-    input$confirm_onesample
-    
-    isolate({
-      if (is.null(plot.par$x)) {
-        return(cat("Please select a variable"))
-      }
-      values.list = modifyList(reactiveValuesToList(plot.par),
-                               reactiveValuesToList(graphical.par), keep.null = TRUE)
-      ## need to reset the plottype to default
-      values.list$plottype = "default"
-      bs.inf= T
-      if(input$type.inference.select%in%"normal"){
-        bs.inf = F
-      }
-      values.list <- modifyList(
-        values.list,
-        list(bs.inference = bs.inf,
-             summary.type = "inference",
-             inference.type = "conf",
-             inference.par = NULL),
-        
-        keep.null = TRUE
-      )
-      if(is.numeric(plot.par$x)&
-         is.numeric(plot.par$y)){
-        values.list.x = values.list$x
-        values.list$x=values.list$y
-        values.list$y=values.list.x
-        values.list.varnames.x = values.list$varnames$x
-        values.list$varnames$x = values.list$varnames$y
-        values.list$varnames$y = values.list.varnames.x
-      }
-      dafr = get.data.set()
-      
-      
-      ## add information for one sample t-test and two sample t-test
-      if (!is.null(vis.par()) & (length(input$type.inference.select) > 0 && input$type.inference.select == "normal")) {
-        
-        if((is.numeric(plot.par$x) & !is.null(plot.par$y) & !is.numeric(plot.par$y) & length(unique(plot.par$y)) == 2) |
-           (is.numeric(plot.par$y) & !is.null(plot.par$x) & !is.numeric(plot.par$x) & length(unique(plot.par$x)) == 2)) {
-          
-          if(length(input$inference_twosampletest) > 0 && input$inference_twosampletest)
-            values.list = modifyList(
-              values.list,
-              list(hypothesis.value = as.numeric(input$null_twosample),
-                   hypothesis.alt = switch(input$hypothesis_twosample, 
-                                           "two sided" = "two.sided", 
-                                           "greater than" = "greater", 
-                                           "less than" = "less"),
-                   hypothesis.var.equal = input$use_equalvar,
-                   hypothesis.test = "t.test")
-            )
-        }
-        
-        else if(is.numeric(plot.par$x) & is.null(plot.par$y)) {
-          if(length(input$inference_onesampletest) > 0 && input$inference_onesampletest)
-            values.list = modifyList(
-              values.list,
-              list(hypothesis.value = as.numeric(input$null_onesample),
-                   hypothesis.alt = switch(input$hypothesis_onesample, 
-                                           "two sided" = "two.sided", 
-                                           "greater than" = "greater", 
-                                           "less than" = "less"),
-                   hypothesis.test = "t.test")
-            )
-        }
-      }
-      
-      pdf(NULL)
-      
-      tryCatch({
-        do.call(iNZightPlots:::getPlotSummary, values.list)
-        #saveRDS(values.list, file = "/Users/tongchen/Documents/work/Lite/b.rds")
-      }, warning = function(w) {
-        print(w)
-      }, error = function(e) {
-        print(e)
-      }, finally = {})
-      
-      #      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-      #           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-      #        tryCatch({
-      #          cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")
-      #        }, warning = function(w) {
-      #          print(w)
-      #        }, error = function(e) {
-      #          print(e)
-      #        }, finally = {})
-      #      }else{
-      #        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
-      #      }
-    })
-  }
-})
 
 
 
@@ -6315,7 +6121,7 @@ output$interactive.plot = renderUI({
   
   if(nrow(vis.data()) <= 200  ||
      !any(!is.null(input$vari1) && is.numeric(plot.par$x), 
-          !is.null(input$vari2) && input$vari2 != "none" && is.numeric(plot.par$y))) {
+          !is.null(input$vari2) && input$vari2 != "none" && is.numeric(plot.par$y)) || !is.null(plot.par$design)) {
     dafr = get.data.set()
     vis.par()
     input$vari1
