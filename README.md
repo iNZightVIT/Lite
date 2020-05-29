@@ -2,8 +2,6 @@ iNZight *Lite*
 ==============================
 
 
-*Last Updated: 04/12/19*
-
 This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz)
 
 
