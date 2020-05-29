@@ -515,8 +515,10 @@ observe({
     )
     setOk <- try(createSurveyObject(PSDesign))
     if (!inherits(setOk, "try-error")) {
+      design_params$design$dataDesign <-  PSDesign$dataDesign
+      design_params$design$dataDesignName <-  PSDesign$dataDesignName
+      
       call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
-      print(PSDesign$dataDesignName)
       call <- sprintf("%s <- %s",
                       paste0(design_params$design$dataDesignName, ".ps"),
                       gsub("design_obj", design_params$design$dataDesignName, call))
