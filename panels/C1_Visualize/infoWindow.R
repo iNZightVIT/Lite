@@ -178,13 +178,6 @@ output$interence_test = renderUI({
   ret
 })
 
-observe({
-  input$inf.trend.chk
-  isolate({
-    plot.par$trend = input$inf.trend.chk
-  })
-})
-
 
 output$visualize.inference = renderPrint({
   if(input$plot_selector%in%"Inference"){
