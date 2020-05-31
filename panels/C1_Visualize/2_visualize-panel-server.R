@@ -5660,7 +5660,7 @@ output$saveplot = downloadHandler(
     }
     
     else if(input$saveplottype == "svg") {
-      local.dir = iNZightPlots:::exportSVG.function(create.html)
+      local.dir = exportSVG.function(create.html)
       src = normalizePath(local.dir)
       owd = setwd(tempdir())
       on.exit(setwd(owd))
@@ -5668,6 +5668,73 @@ output$saveplot = downloadHandler(
       file.copy("inzightplot.svg", file)
     }
   })  
+
+
+
+
+exportSVG <- function(x, file, ...)
+  UseMethod('exportSVG')
+
+#' @describeIn exportSVG method for functions
+#' @param width the width of the plot device
+#' @param height the height of the plot device
+exportSVG.function <- function(x, file = 'inzightplot.svg',
+                               width = dev.size()[1],
+                               height = dev.size()[2], ...) {
+  
+  #get current directory
+  curdir <- getwd()
+  
+  #set directory to temp directory
+  tdir <- tempdir()
+  setwd(tdir)
+  
+  #create pdf graphics device into here:
+  pdf('tempfile.pdf', width = width, height = height, onefile = TRUE)
+  
+  #do exporting:
+  obj <- x()
+  exportSVG(obj, file)
+  
+  #turn off device:
+  dev.off()
+  
+  #remove pdf:
+  file.remove('tempfile.pdf')
+  
+  #reset back to original directory:
+  setwd(curdir)
+  
+}
+
+
+exportSVG.inzplotoutput <- function(x, file = 'inzightplot.svg', ...) {
+  
+  #suggest gridSVG:
+  if(!requireNamespace("gridSVG", quietly = TRUE)) {
+    stop(
+      paste("Required packages aren't installed",
+            "Use 'install.packages('iNZightPlots', depends = TRUE)' to install them.",
+            sep = "\n"
+      )
+    )
+  }
+  
+  curdir <- getwd()
+  #work in a temp directory
+  setwd(tempdir())
+  
+  gridSVG::grid.export(file)
+  
+  #open in browser?
+  browseURL(file.path(file))
+  
+  #return:
+  setwd(curdir)
+}
+
+
+
 
 
 
