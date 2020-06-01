@@ -4,6 +4,9 @@ output$survey.design = renderUI({
   create.design.panel(get.data.set())
 })
 
+design.model.fit <- reactiveValues()
+
+
 ## specify design
 setDesign = function(strata = NULL, clus1 = NULL, clus2 = NULL,
                      wt = NULL, nest = NULL, fpc = NULL,
@@ -143,13 +146,13 @@ svalue_or_null <- function(x) {
 fpc.f <-reactive({
   if(req(input$fpcVar) == ' ') {
     return(NULL)
-    } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) == ' ') {
-      return(input$fpcVar)
-    } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) != ' '){
-      return(paste0(input$fpcVar, ' + ', input$fpcVar2))
-    } else {
-      NULL
-      }
+  } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) == ' ') {
+    return(input$fpcVar)
+  } else if(req(input$fpcVar) != ' ' && req(input$fpcVar2) != ' '){
+    return(paste0(input$fpcVar, ' + ', input$fpcVar2))
+  } else {
+    NULL
+  }
 })
 
 observe({
@@ -344,7 +347,7 @@ output$rscalesTbl = renderTable({
 
 observe({
   if (is.null(plot.par$design) && req(input$svytype) == "post") {
-     shinyalert(text = "Please specify a survey design first", title = "No design specified", type = "warning")
+    shinyalert(text = "Please specify a survey design first", title = "No design specified", type = "warning")
   }
 })
 
@@ -361,7 +364,7 @@ observe({
     function(v)
       length(levels(v)) > 0 && sum(is.na(v)) == 0
   )]
-   for (v in factorvars) {
+  for (v in factorvars) {
     if (is.null(lvldf$df[[v]])) {
       d <- data.frame(
         a = levels(get.data.set()[[v]]),
@@ -373,7 +376,7 @@ observe({
   }
 })
 
-  
+
 
 output$svypost_ui <- renderUI({
   ret = NULL
@@ -404,7 +407,7 @@ output$svypost_ui <- renderUI({
     ret = list(
       title,
       main 
-      )
+    )
   }
 })
 
@@ -417,10 +420,10 @@ output$PSlevel <- renderUI({
       ret[[v]][[1]] = fluidRow(column(12, h5(strong(paste(v, 'Frequency')))))
       for (i in seq_along(1:nrow(lvldf$df[[v]]))){
         ret[[v]][[i+1]] = fluidRow(column(10, textInput(paste0("PS", v, i), label = as.character(lvldf$df[[v]][, 1][i]))
-                                          ) )
+        ) )
       }
       ret[[v]][[nrow(lvldf$df[[v]]) + 2]] = fluidRow(column(10, fileInput(paste0("PS", v, "data"),
-                                                                         label="Read from file ...", multiple=F),
+                                                                          label="Read from file ...", multiple=F),
                                                             hr()))
     }
   })
@@ -459,7 +462,7 @@ observe({
           updateTextInput(session, inputId = paste0("PS", v, i), label = as.character(df[, 1][i]), 
                           value = df[, 2][i])
           shinyjs::disable(paste0("PS", v, i))
-      }
+        }
       }  
     }
   }
@@ -475,10 +478,11 @@ observe({
     setOk <- try(createSurveyObject(design_params$design))
     if (!inherits(setOk, "try-error")) {
       call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
-
+      
       call <- sprintf("%s <- %s",
                       design_params$design$dataDesignName,
                       gsub("dataSet", values$data.name, call))
+      design.model.fit$code <- call
       code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
       code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
       
@@ -522,6 +526,7 @@ observe({
       call <- sprintf("%s <- %s",
                       paste0(design_params$design$dataDesignName, ".ps"),
                       gsub("design_obj", design_params$design$dataDesignName, call))
+      design.model.fit$code <- call
       code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
       code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
       
@@ -548,6 +553,8 @@ observe({
   input$remove.design1
   input$remove.design2
   isolate({
-      plot.par$design=NULL
+    plot.par$design=NULL
   })
 })
+
+
