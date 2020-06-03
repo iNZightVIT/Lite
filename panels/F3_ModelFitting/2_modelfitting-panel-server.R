@@ -510,17 +510,7 @@ observe({
                                 collapse=col),sep="")
           }
         }
-        if(length(input$confounding_variables)>0){
-          formu = paste(input$select_Y," ~ ",
-                        paste(input$independent_variables
-                              ,collapse=col),col,
-                        paste(input$confounding_variables,
-                              collapse=col),sep="")
-        }else{
-          formu = paste(input$select_Y," ~ ",
-                        paste(input$independent_variables
-                              ,collapse=col),sep="")
-        }
+
         if(int.deg){
           formu = strsplit(formu," ~ ")[[1]]
           formu[2] = paste0("(",formu[2],")^",input$arg2)
