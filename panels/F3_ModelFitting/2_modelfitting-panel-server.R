@@ -10,7 +10,7 @@
 # reactive values to store the fitted models
 modelValues = reactiveValues(models=list(),
                              code=list(),
-                             code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n",
+                             code.history="# To make this code work outside of iNZight, read in your data first\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n",
                              transformation.log=c(),
                              interaction.log=list(),
                              independent.vars=list())
@@ -27,15 +27,15 @@ output$fit.summary = renderPrint({
   input$model.select
   isolate({
     if(length(modelValues$models)>0&&
-         (!is.null(modelValues$models[[input$model.select]])&&
-         !is.null(input$model.select))){
+       (!is.null(modelValues$models[[input$model.select]])&&
+        !is.null(input$model.select))){
       confounds = input$confounding_variables
       if(" "%in%confounds){
         confounds = confounds[-which(confounds%in%" ")]
       }
       if(!is.null(confounds)&&
-           length(confounds)>0&&
-           all(confounds%in%colnames(get.data.set()))){
+         length(confounds)>0&&
+         all(confounds%in%colnames(get.data.set()))){
         iNZightSummary(modelValues$models[[input$model.select]],
                        exclude=confounds)
       }else{
@@ -252,6 +252,9 @@ output$mf.trans.y <- renderUI({
   ret
 })
 
+
+
+
 # update the numericInput for the degree of selected variables
 observe({
   input$interaction.vars.select
@@ -270,22 +273,22 @@ observe({
   input$submit.interaction
   isolate({
     if(!is.null(input$submit.interaction)&&
-         input$submit.interaction>0){
+       input$submit.interaction>0){
       if(!is.null(input$interaction.vars.select)&&
-           !is.null(input$intersaction_select)&&
-           !input$intersaction_select%in%"none"&&
-           all(unlist(lapply(input$interaction.vars.select,
-                             function(x,y,z){
-                               x%in%z||(x%in%names(y)&&
-                                          y[x]%in%z)
-                             },modelValues$transformation.log,
-                             colnames(get.data.set()))))&&
-           length(input$interaction.vars.select)>1){
+         !is.null(input$intersaction_select)&&
+         !input$intersaction_select%in%"none"&&
+         all(unlist(lapply(input$interaction.vars.select,
+                           function(x,y,z){
+                             x%in%z||(x%in%names(y)&&
+                                      y[x]%in%z)
+                           },modelValues$transformation.log,
+                           colnames(get.data.set()))))&&
+         length(input$interaction.vars.select)>1){
         dup = F
         if(length(modelValues$interaction.log)>0){
           dup = any(unlist(lapply(modelValues$interaction.log,function(x,y){
             length(which(y%in%x))==length(x)
-            },input$interaction.vars.select)))
+          },input$interaction.vars.select)))
         }
         if(!dup){
           interaction.string = paste(input$interaction.vars.select,collapse=":")
@@ -302,7 +305,7 @@ observe({
   input$interaction_remove
   isolate({
     if(!is.null(input$interaction_remove)&&
-         input$interaction_remove%in%names(modelValues$interaction.log)){
+       input$interaction_remove%in%names(modelValues$interaction.log)){
       modelValues$interaction.log[[input$interaction_remove]] = NULL
       updateSelectInput(session,"interaction_remove",
                         choices=c("none",names(modelValues$interaction.log)))
@@ -315,16 +318,16 @@ observe({
   input$transformation_submit
   isolate({
     if(!is.null(input$transformation_submit)&&
-         input$transformation_submit>0){ 
+       input$transformation_submit>0){ 
       if(!is.null(input$transform_select)&&
-           !input$transform_select%in%"none"&&
-           !is.null(input$transform_variable_select)&&
-           input$transform_variable_select%in%colnames(get.data.set())){
+         !input$transform_select%in%"none"&&
+         !is.null(input$transform_variable_select)&&
+         input$transform_variable_select%in%colnames(get.data.set())){
         transformation.string = get.transformation.string(input$transform_select,
                                                           input$transform_variable_select,
                                                           input$arg3)
         if(!transformation.string%in%""&&
-             !transformation.string%in%names(modelValues$transformation.log)){
+           !transformation.string%in%names(modelValues$transformation.log)){
           modelValues$transformation.log[transformation.string] = input$transform_variable_select
           updateSelectInput(session,"transformation_remove",
                             choices=c("none",names(modelValues$transformation.log)),
@@ -353,10 +356,10 @@ observe({
                                 input$confounding_variables,
                                 selected=input$interaction.vars.select))
     if((!is.null(input$independent_variables)||
-          !is.null(input$confounding_variables))&&
-         !is.null(modelValues$transformation.log)){
+        !is.null(input$confounding_variables))&&
+       !is.null(modelValues$transformation.log)){
       if(length(which(!modelValues$transformation.log%in%input$independent_variables||
-                        !modelValues$transformation.log%in%input$confounding_variables))>0){
+                      !modelValues$transformation.log%in%input$confounding_variables))>0){
         modelValues$transformation.log = modelValues$transformation.log[-which(!modelValues$transformation.log%in%input$independent_variables||
                                                                                  !modelValues$transformation.log%in%input$confounding_variables)]
         updateSelectInput(session,"transformation_remove",
@@ -377,8 +380,8 @@ observe({
   input$transformation_remove
   isolate({
     if(!is.null(input$transformation_remove)&&
-         !is.null(names(modelValues$transformation.log))&&
-         input$transformation_remove%in%names(modelValues$transformation.log)){
+       !is.null(names(modelValues$transformation.log))&&
+       input$transformation_remove%in%names(modelValues$transformation.log)){
       temp = modelValues$transformation.log
       temp = temp[-which(names(modelValues$transformation.log)%in%input$transformation_remove)]
       modelValues$transformation.log = temp
@@ -426,6 +429,11 @@ observe({
 observe({
   input$fit_model_button
   isolate({
+    is_survey <- FALSE
+    if (!is.null(design_params$design$dataDesign)) {
+      design.obj <- createSurveyObject(design_params$design)
+      is_survey <- TRUE
+    }
     model.name = ""
     if(!is.null(input$fit_model_button)&&
        input$fit_model_button>0){
@@ -475,7 +483,7 @@ observe({
                           paste(input$confounding_variables,
                                 collapse=col),sep="")
           }
-        }else if(input$transform_Y%in%"sqrt"){
+        } else if(input$transform_Y%in%"sqrt"){
           formu = paste("sqrt(",input$select_Y,") ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -486,8 +494,8 @@ observe({
                           paste(input$confounding_variables,
                                 collapse=col),sep="")
           }
-        }else if(input$transform_Y%in%"^argument"&&
-                 !input$arg1%in%""){
+        } else if(input$transform_Y%in%"^argument"&&
+                  !input$arg1%in%""){
           formu = paste(input$select_Y,"^",input$arg1," ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -498,7 +506,7 @@ observe({
                           paste(input$confounding_variables,
                                 collapse=col),sep="")
           }
-        }else{
+        } else if (is.null(input$transform_Y)){
           formu = paste(input$select_Y," ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -510,7 +518,18 @@ observe({
                                 collapse=col),sep="")
           }
         }
-
+        
+        #if(length(input$confounding_variables)>0){
+        #  formu = paste(input$select_Y," ~ ",
+        #                paste(input$independent_variables
+        #                      ,collapse=col),col,
+        #                paste(input$confounding_variables,
+        #                      collapse=col),sep="")
+        #}else{
+        #  formu = paste(input$select_Y," ~ ",
+        #                paste(input$independent_variables
+        #                      ,collapse=col),sep="")
+        #}
         if(int.deg){
           formu = strsplit(formu," ~ ")[[1]]
           formu[2] = paste0("(",formu[2],")^",input$arg2)
@@ -547,73 +566,11 @@ observe({
         if(input$modelfit_inc_int != T){
           formu = paste0(formu, " - 1")
         }
-        design0=NULL
+        #  print(formu)
         dafr = get.data.set()
-        if(input$data_structure%in%"Complex Survey"){
-          id0 = input$cluster
-          if("none"%in%id0){
-            id0 = id0[-which(id0%in%"none")]
-          }
-          if("1"%in%id0&&
-             length(id0)>1){
-            id0 = id0[-which(id0%in%"1")]
-          }
-          if(!is.null(id0)&&
-             length(id0)>0){
-            id0 = formula(paste0("~",paste(id0,collapse="+")))
-          }else{
-            id0=NULL
-          }
-          if(!input$strata%in%" "){
-            strata0 = formula(paste0("~",input$strata,sep=""))
-          }else{
-            strata0 = NULL
-          }
-          if(!input$weights%in%" "){
-            weights0=eval(bquote(formula(paste0("~",input$weights))))
-          }else{
-            weights0=NULL
-          }
-          fpc0 = input$fpc
-          if("none"%in%fpc0){
-            fpc0 = fpc0[-which(fpc0%in%"none")]
-          }
-          if("1"%in%fpc0&&
-             length(fpc0)>1){
-            fpc0 = fpc0[-which(fpc0%in%"1")]
-          }
-          if(!is.null(fpc0)&&
-             length(fpc0)>0){
-            fpc0 = formula(paste0("~",paste(fpc0,collapse="+")))
-          }else{
-            fpc0=NULL
-          }
-          nest0 = input$nest
-          temp = list(id=id0,strata=strata0,
-                      fpc=fpc0,nest=nest0,
-                      weights=weights0,
-                      data=dafr)
-          print(temp)
-          design0 = do.call(svydesign,temp)
-          #           design0 = svydesign(id=id0,
-          #                               strata=strata0,
-          #                               weights=weights0,
-          #                               fpc=fpc0,
-          #                               nest=nest0,
-          #                               data=dafr,
-          #                               variables=dafr)
-          design.text = paste0("mydesign = svydesign(id=~",input$cluster)
-          if(!is.null(strata0)){
-            design.text = paste0(design.text,",strata=~",input$strata)
-          }
-          if(!is.null(weights0)){
-            design.text = paste0(design.text,",weights=~",input$weights)
-          }
-          if(!is.null(fpc0)){
-            design.text = paste0(design.text,",fpc=~",input$fpc)
-          }
-          design.text = paste0(design.text,",nest=",input$nest)
-          design.text = paste0(design.text,")")
+        if(is_survey){
+          design0 = design.obj
+          design.text = design.model.fit$code
           family0="gaussian"
           offset0=NULL
           if(!is.null(input$offset)&&
@@ -636,7 +593,7 @@ observe({
           if(family0%in%"gaussian"){
             temp.model = svyglm(formula(formu),design=design0)
             temp.code = paste0(design.text,"\n",model.name,
-                               " = svyglm(",formu,",design=mydesign)")
+                               " = svyglm(",formu,",design = ", design_params$design$dataDesignName,")")
           }else{
             temp.model = svyglm(formula(formu),design=design0,family=family0,offset=offset0)
             temp.code = paste0(design.text,"\nsvyglm(",formu)
@@ -644,52 +601,52 @@ observe({
               temp.code = paste0(temp.code,",offset=",offset0)
             }
             temp.code = paste0(temp.code,"family=",family0)
-            temp.code = paste0(temp.code,",design=mydesign)")
+            temp.code = paste0(temp.code,",design = ", design_params$design$dataDesignName,")")
           }
         }else{
           if(input$model_framework%in%"Least Squares"){
             temp.model = lm(formula(formu),data=dafr)
-            temp.code = paste0(model.name," = lm(",formu,",data=mydata)")
+            temp.code = paste0(model.name," = lm(",formu,",data=", values$data.name, ")")
           }else if(input$model_framework%in%"Poisson Regression (Y counts)"){
             if(input$quasi){
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='quasipoisson')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasipoisson')")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasipoisson')")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='quasipoisson',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasipoisson',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasipoisson',offset=",input$offset,")")
               }
             }else{
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='poisson')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='poisson'")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='poisson'")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='poisson',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='poisson',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='poisson',offset=",input$offset,")")
               }
             }
           }else if(input$model_framework%in%"Logistic Regression (Y binary)"){
             if(input$quasi){
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='quasibinomial')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasibinomial')")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasibinomial')")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='quasibinomial',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasibinomial',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasibinomial',offset=",input$offset,")")
               }
             }else{
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='binomial')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='binomial')")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='binomial')")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='binomial',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='binomial',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='binomial',offset=",input$offset,")")
               }
             }
           }
         }
       }, error = function(e) {
-        print(e)
+        print()
       }, finally = {})
       modelValues$interaction.log = list()
       modelValues$transformation.log = c()
