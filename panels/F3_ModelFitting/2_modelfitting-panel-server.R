@@ -54,23 +54,23 @@ output$model_fit = renderUI({
     is.numeric.column = NULL
     sel = NULL
     if(!is.null(input$select_Y)&&
-         input$select_Y%in%colnames(get.data.set())){
+       input$select_Y%in%colnames(get.data.set())){
       sel = input$select_Y
     }
     predict.sel = input$independent_variables
     confound.sel = input$confounding_variables
     if(updatePanel$first){
-#       updatePanel$first = F
+      #       updatePanel$first = F
       get.vars = parseQueryString(session$clientData$url_search)
       if(!is.null(get.vars$url)) {
         temp = session$clientData$url_search
         get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
       }
       if(length(get.vars)>0&&
-           (any(names(get.vars)%in%"url")||
-              any(names(get.vars)%in%"example"))&&
-           (any(names(get.vars)%in%"Y")&&
-              !get.vars$Y%in%"")){
+         (any(names(get.vars)%in%"url")||
+          any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"Y")&&
+          !get.vars$Y%in%"")){
         sel = get.vars$Y
       }
     }
@@ -80,30 +80,30 @@ output$model_fit = renderUI({
                            selected=sel)
     if(updatePanel$first){
       if(length(get.vars)>0&&
-           (any(names(get.vars)%in%"url")||
-              any(names(get.vars)%in%"example"))&&
-           (any(names(get.vars)%in%"predict")&&
-              !get.vars$predict%in%"")){
+         (any(names(get.vars)%in%"url")||
+          any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"predict")&&
+          !get.vars$predict%in%"")){
         predict.sel = strsplit(get.vars$predict,",")[[1]]
       }
     }
     if(updatePanel$first){
       if(length(get.vars)>0&&
-           (any(names(get.vars)%in%"url")||
-              any(names(get.vars)%in%"example"))&&
-           (any(names(get.vars)%in%"confound")&&
-              !get.vars$confound%in%"")){
+         (any(names(get.vars)%in%"url")||
+          any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"confound")&&
+          !get.vars$confound%in%"")){
         confound.sel = strsplit(get.vars$confound,",")[[1]]
       }
     }
     if(!is.null(input$select_Y)){
       updatePanel$first = F
     }
-    if(!is.null(sel)&&
-         !sel%in%""&&
-         sel%in%colnames(get.data.set())){
-      is.numeric.column = toJSON(get.data.set()[,sel])
-    }
+    #if(!is.null(sel)&&
+    #   !sel%in%""&&
+    #   sel%in%colnames(get.data.set())){
+    #  is.numeric.column = toJSON(get.data.set()[,sel])
+    #}
     list(br(),
          fixedRow(column(11,h4("Choose Model Settings")),
                   column(1,checkboxInput("toggle_check4",
@@ -111,32 +111,12 @@ output$model_fit = renderUI({
                                          value=T))),
          conditionalPanel("input.toggle_check4",
                           fixedRow(column(6,select_Y),
-                          column(6, 
-                                 conditionalPanel(paste0("testNumeric(",
-                                                         is.numeric.column,
-                                                         ")"),
-                                                  fixedRow(column(6,
-                                                                  selectInput("transform_Y",
-                                                                              label="Transform Y",
-                                                                              choices=c(" ",
-                                                                                        "log",
-                                                                                        "sqrt",
-                                                                                        "^argument"),
-                                                                              selected=input$transform_Y)),
-                                                           column(6,conditionalPanel("input.transform_Y=='^argument'",
-                                                                                     textInput("arg1",
-                                                                                               label="argument",
-                                                                                               value=input$arg1)))
-                                                  )))),
+                                   column(6, uiOutput("mf.trans.y"))),
                           fixedRow(column(6,selectInput("model_framework",label="Model Framework",
                                                         choices=c("Least Squares",
                                                                   "Logistic Regression (Y binary)",
                                                                   "Poisson Regression (Y counts)"),
-                                                        selected=input$model_framework)),
-                                   column(6,selectInput("data_structure",label="Data Structure",
-                                                        choices=c("Standard",
-                                                                  "Complex Survey"),
-                                                        selected=input$data_structure))
+                                                        selected=input$model_framework))
                           ),
                           conditionalPanel("input.model_framework=='Logistic Regression (Y binary)'||
                                            input.model_framework=='Poisson Regression (Y counts)'",
@@ -146,27 +126,9 @@ output$model_fit = renderUI({
                                                                          choices=c(no=F,
                                                                                    yes=T),
                                                                          selected=input$quasi)),
-                                                    column(6,textInput("offset",label="offset")))),
-                          conditionalPanel("input.data_structure=='Complex Survey'",
-                                           h4("Survey Design"),
-                                           fixedRow(column(4,selectInput("cluster",label="Cluster",
-                                                                         choices=c("none","1",colnames(get.data.set())),
-                                                                         selected=input$cluster,
-                                                                         multiple=T)),
-                                                    column(4,selectInput("strata",label="Strata",
-                                                                         choices=c(" ",colnames(get.data.set())),
-                                                                         selected=input$strata)),
-                                                    column(4,selectInput("weights",label="Weights",
-                                                                         choices=c(" ",colnames(get.data.set())),
-                                                                         selected=input$weights))
-                                           ),
-                                           fixedRow(column(4,selectInput("fpc",label="fpc",
-                                                                         choices=c("none",colnames(get.data.set())),
-                                                                         selected=input$fpc,
-                                                                         multiple=T)),
-                                                    column(4,checkboxInput("nest",label="Nest",
-                                                                           value=input$nest)))
-                          )),
+                                                    column(6,textInput("offset",label="offset")))
+                          )
+         ),
          fixedRow(column(11,h4("Choose predictor Variables")),
                   column(1,checkboxInput("toggle_check3",
                                          label="",
@@ -261,8 +223,33 @@ output$model_fit = renderUI({
                           verbatimTextOutput("current.code")),
          br(),
          actionButton("fit_model_button","Fit Model")
-         )
+    )
   })
+})
+
+output$mf.trans.y <- renderUI({
+  ret = NULL
+  input$select_Y
+  isolate({
+    if(!is.null(input$select_Y)){
+      num.y = is.numeric(get.data.set()[[input$select_Y]])
+      if(num.y) {
+        ret = list(fixedRow(column(6,
+                                   selectInput("transform_Y",
+                                               label="Transform Y",
+                                               choices=c(" ",
+                                                         "log",
+                                                         "sqrt",
+                                                         "^argument"),
+                                               selected=ifelse(is.null(input$transform_Y), 'log', input$transform_Y))),
+                            column(6,conditionalPanel("input.transform_Y=='^argument'",
+                                                      textInput("arg1",
+                                                                label="argument",
+                                                                value=input$arg1)))))
+      }
+    }
+  })
+  ret
 })
 
 # update the numericInput for the degree of selected variables
