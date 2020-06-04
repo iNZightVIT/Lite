@@ -10,7 +10,7 @@
 # reactive values to store the fitted models
 modelValues = reactiveValues(models=list(),
                              code=list(),
-                             code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n",
+                             code.history="# To make this code work outside of iNZight, read in your data first\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n",
                              transformation.log=c(),
                              interaction.log=list(),
                              independent.vars=list())
@@ -27,15 +27,15 @@ output$fit.summary = renderPrint({
   input$model.select
   isolate({
     if(length(modelValues$models)>0&&
-         (!is.null(modelValues$models[[input$model.select]])&&
-         !is.null(input$model.select))){
+       (!is.null(modelValues$models[[input$model.select]])&&
+        !is.null(input$model.select))){
       confounds = input$confounding_variables
       if(" "%in%confounds){
         confounds = confounds[-which(confounds%in%" ")]
       }
       if(!is.null(confounds)&&
-           length(confounds)>0&&
-           all(confounds%in%colnames(get.data.set()))){
+         length(confounds)>0&&
+         all(confounds%in%colnames(get.data.set()))){
         iNZightSummary(modelValues$models[[input$model.select]],
                        exclude=confounds)
       }else{
@@ -54,23 +54,23 @@ output$model_fit = renderUI({
     is.numeric.column = NULL
     sel = NULL
     if(!is.null(input$select_Y)&&
-         input$select_Y%in%colnames(get.data.set())){
+       input$select_Y%in%colnames(get.data.set())){
       sel = input$select_Y
     }
     predict.sel = input$independent_variables
     confound.sel = input$confounding_variables
     if(updatePanel$first){
-#       updatePanel$first = F
+      #       updatePanel$first = F
       get.vars = parseQueryString(session$clientData$url_search)
       if(!is.null(get.vars$url)) {
         temp = session$clientData$url_search
         get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
       }
       if(length(get.vars)>0&&
-           (any(names(get.vars)%in%"url")||
-              any(names(get.vars)%in%"example"))&&
-           (any(names(get.vars)%in%"Y")&&
-              !get.vars$Y%in%"")){
+         (any(names(get.vars)%in%"url")||
+          any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"Y")&&
+          !get.vars$Y%in%"")){
         sel = get.vars$Y
       }
     }
@@ -80,30 +80,30 @@ output$model_fit = renderUI({
                            selected=sel)
     if(updatePanel$first){
       if(length(get.vars)>0&&
-           (any(names(get.vars)%in%"url")||
-              any(names(get.vars)%in%"example"))&&
-           (any(names(get.vars)%in%"predict")&&
-              !get.vars$predict%in%"")){
+         (any(names(get.vars)%in%"url")||
+          any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"predict")&&
+          !get.vars$predict%in%"")){
         predict.sel = strsplit(get.vars$predict,",")[[1]]
       }
     }
     if(updatePanel$first){
       if(length(get.vars)>0&&
-           (any(names(get.vars)%in%"url")||
-              any(names(get.vars)%in%"example"))&&
-           (any(names(get.vars)%in%"confound")&&
-              !get.vars$confound%in%"")){
+         (any(names(get.vars)%in%"url")||
+          any(names(get.vars)%in%"example"))&&
+         (any(names(get.vars)%in%"confound")&&
+          !get.vars$confound%in%"")){
         confound.sel = strsplit(get.vars$confound,",")[[1]]
       }
     }
     if(!is.null(input$select_Y)){
       updatePanel$first = F
     }
-    if(!is.null(sel)&&
-         !sel%in%""&&
-         sel%in%colnames(get.data.set())){
-      is.numeric.column = toJSON(get.data.set()[,sel])
-    }
+    #if(!is.null(sel)&&
+    #   !sel%in%""&&
+    #   sel%in%colnames(get.data.set())){
+    #  is.numeric.column = toJSON(get.data.set()[,sel])
+    #}
     list(br(),
          fixedRow(column(11,h4("Choose Model Settings")),
                   column(1,checkboxInput("toggle_check4",
@@ -111,32 +111,12 @@ output$model_fit = renderUI({
                                          value=T))),
          conditionalPanel("input.toggle_check4",
                           fixedRow(column(6,select_Y),
-                          column(6, 
-                                 conditionalPanel(paste0("testNumeric(",
-                                                         is.numeric.column,
-                                                         ")"),
-                                                  fixedRow(column(6,
-                                                                  selectInput("transform_Y",
-                                                                              label="Transform Y",
-                                                                              choices=c(" ",
-                                                                                        "log",
-                                                                                        "sqrt",
-                                                                                        "^argument"),
-                                                                              selected=input$transform_Y)),
-                                                           column(6,conditionalPanel("input.transform_Y=='^argument'",
-                                                                                     textInput("arg1",
-                                                                                               label="argument",
-                                                                                               value=input$arg1)))
-                                                  )))),
+                                   column(6, uiOutput("mf.trans.y"))),
                           fixedRow(column(6,selectInput("model_framework",label="Model Framework",
                                                         choices=c("Least Squares",
                                                                   "Logistic Regression (Y binary)",
                                                                   "Poisson Regression (Y counts)"),
-                                                        selected=input$model_framework)),
-                                   column(6,selectInput("data_structure",label="Data Structure",
-                                                        choices=c("Standard",
-                                                                  "Complex Survey"),
-                                                        selected=input$data_structure))
+                                                        selected=input$model_framework))
                           ),
                           conditionalPanel("input.model_framework=='Logistic Regression (Y binary)'||
                                            input.model_framework=='Poisson Regression (Y counts)'",
@@ -146,27 +126,9 @@ output$model_fit = renderUI({
                                                                          choices=c(no=F,
                                                                                    yes=T),
                                                                          selected=input$quasi)),
-                                                    column(6,textInput("offset",label="offset")))),
-                          conditionalPanel("input.data_structure=='Complex Survey'",
-                                           h4("Survey Design"),
-                                           fixedRow(column(4,selectInput("cluster",label="Cluster",
-                                                                         choices=c("none","1",colnames(get.data.set())),
-                                                                         selected=input$cluster,
-                                                                         multiple=T)),
-                                                    column(4,selectInput("strata",label="Strata",
-                                                                         choices=c(" ",colnames(get.data.set())),
-                                                                         selected=input$strata)),
-                                                    column(4,selectInput("weights",label="Weights",
-                                                                         choices=c(" ",colnames(get.data.set())),
-                                                                         selected=input$weights))
-                                           ),
-                                           fixedRow(column(4,selectInput("fpc",label="fpc",
-                                                                         choices=c("none",colnames(get.data.set())),
-                                                                         selected=input$fpc,
-                                                                         multiple=T)),
-                                                    column(4,checkboxInput("nest",label="Nest",
-                                                                           value=input$nest)))
-                          )),
+                                                    column(6,textInput("offset",label="offset")))
+                          )
+         ),
          fixedRow(column(11,h4("Choose predictor Variables")),
                   column(1,checkboxInput("toggle_check3",
                                          label="",
@@ -261,9 +223,37 @@ output$model_fit = renderUI({
                           verbatimTextOutput("current.code")),
          br(),
          actionButton("fit_model_button","Fit Model")
-         )
+    )
   })
 })
+
+output$mf.trans.y <- renderUI({
+  ret = NULL
+  input$select_Y
+  isolate({
+    if(!is.null(input$select_Y)){
+      num.y = is.numeric(get.data.set()[[input$select_Y]])
+      if(num.y) {
+        ret = list(fixedRow(column(6,
+                                   selectInput("transform_Y",
+                                               label="Transform Y",
+                                               choices=c('None',
+                                                         "log",
+                                                         "sqrt",
+                                                         "^argument"),
+                                               selected=ifelse(is.null(input$transform_Y), 'None', input$transform_Y))),
+                            column(6,conditionalPanel("input.transform_Y=='^argument'",
+                                                      textInput("arg1",
+                                                                label="argument",
+                                                                value=input$arg1)))))
+      }
+    }
+  })
+  ret
+})
+
+
+
 
 # update the numericInput for the degree of selected variables
 observe({
@@ -283,22 +273,22 @@ observe({
   input$submit.interaction
   isolate({
     if(!is.null(input$submit.interaction)&&
-         input$submit.interaction>0){
+       input$submit.interaction>0){
       if(!is.null(input$interaction.vars.select)&&
-           !is.null(input$intersaction_select)&&
-           !input$intersaction_select%in%"none"&&
-           all(unlist(lapply(input$interaction.vars.select,
-                             function(x,y,z){
-                               x%in%z||(x%in%names(y)&&
-                                          y[x]%in%z)
-                             },modelValues$transformation.log,
-                             colnames(get.data.set()))))&&
-           length(input$interaction.vars.select)>1){
+         !is.null(input$intersaction_select)&&
+         !input$intersaction_select%in%"none"&&
+         all(unlist(lapply(input$interaction.vars.select,
+                           function(x,y,z){
+                             x%in%z||(x%in%names(y)&&
+                                      y[x]%in%z)
+                           },modelValues$transformation.log,
+                           colnames(get.data.set()))))&&
+         length(input$interaction.vars.select)>1){
         dup = F
         if(length(modelValues$interaction.log)>0){
           dup = any(unlist(lapply(modelValues$interaction.log,function(x,y){
             length(which(y%in%x))==length(x)
-            },input$interaction.vars.select)))
+          },input$interaction.vars.select)))
         }
         if(!dup){
           interaction.string = paste(input$interaction.vars.select,collapse=":")
@@ -315,7 +305,7 @@ observe({
   input$interaction_remove
   isolate({
     if(!is.null(input$interaction_remove)&&
-         input$interaction_remove%in%names(modelValues$interaction.log)){
+       input$interaction_remove%in%names(modelValues$interaction.log)){
       modelValues$interaction.log[[input$interaction_remove]] = NULL
       updateSelectInput(session,"interaction_remove",
                         choices=c("none",names(modelValues$interaction.log)))
@@ -328,16 +318,16 @@ observe({
   input$transformation_submit
   isolate({
     if(!is.null(input$transformation_submit)&&
-         input$transformation_submit>0){ 
+       input$transformation_submit>0){ 
       if(!is.null(input$transform_select)&&
-           !input$transform_select%in%"none"&&
-           !is.null(input$transform_variable_select)&&
-           input$transform_variable_select%in%colnames(get.data.set())){
+         !input$transform_select%in%"none"&&
+         !is.null(input$transform_variable_select)&&
+         input$transform_variable_select%in%colnames(get.data.set())){
         transformation.string = get.transformation.string(input$transform_select,
                                                           input$transform_variable_select,
                                                           input$arg3)
         if(!transformation.string%in%""&&
-             !transformation.string%in%names(modelValues$transformation.log)){
+           !transformation.string%in%names(modelValues$transformation.log)){
           modelValues$transformation.log[transformation.string] = input$transform_variable_select
           updateSelectInput(session,"transformation_remove",
                             choices=c("none",names(modelValues$transformation.log)),
@@ -366,10 +356,10 @@ observe({
                                 input$confounding_variables,
                                 selected=input$interaction.vars.select))
     if((!is.null(input$independent_variables)||
-          !is.null(input$confounding_variables))&&
-         !is.null(modelValues$transformation.log)){
+        !is.null(input$confounding_variables))&&
+       !is.null(modelValues$transformation.log)){
       if(length(which(!modelValues$transformation.log%in%input$independent_variables||
-                        !modelValues$transformation.log%in%input$confounding_variables))>0){
+                      !modelValues$transformation.log%in%input$confounding_variables))>0){
         modelValues$transformation.log = modelValues$transformation.log[-which(!modelValues$transformation.log%in%input$independent_variables||
                                                                                  !modelValues$transformation.log%in%input$confounding_variables)]
         updateSelectInput(session,"transformation_remove",
@@ -390,8 +380,8 @@ observe({
   input$transformation_remove
   isolate({
     if(!is.null(input$transformation_remove)&&
-         !is.null(names(modelValues$transformation.log))&&
-         input$transformation_remove%in%names(modelValues$transformation.log)){
+       !is.null(names(modelValues$transformation.log))&&
+       input$transformation_remove%in%names(modelValues$transformation.log)){
       temp = modelValues$transformation.log
       temp = temp[-which(names(modelValues$transformation.log)%in%input$transformation_remove)]
       modelValues$transformation.log = temp
@@ -439,6 +429,11 @@ observe({
 observe({
   input$fit_model_button
   isolate({
+    is_survey <- FALSE
+    if (!is.null(design_params$design$dataDesign)) {
+      design.obj <- createSurveyObject(design_params$design)
+      is_survey <- TRUE
+    }
     model.name = ""
     if(!is.null(input$fit_model_button)&&
        input$fit_model_button>0){
@@ -488,7 +483,7 @@ observe({
                           paste(input$confounding_variables,
                                 collapse=col),sep="")
           }
-        }else if(input$transform_Y%in%"sqrt"){
+        } else if(input$transform_Y%in%"sqrt"){
           formu = paste("sqrt(",input$select_Y,") ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -499,8 +494,8 @@ observe({
                           paste(input$confounding_variables,
                                 collapse=col),sep="")
           }
-        }else if(input$transform_Y%in%"^argument"&&
-                 !input$arg1%in%""){
+        } else if(input$transform_Y%in%"^argument"&&
+                  !input$arg1%in%""){
           formu = paste(input$select_Y,"^",input$arg1," ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -511,7 +506,7 @@ observe({
                           paste(input$confounding_variables,
                                 collapse=col),sep="")
           }
-        }else{
+        } else if (input$transform_Y == 'None'){
           formu = paste(input$select_Y," ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -523,17 +518,18 @@ observe({
                                 collapse=col),sep="")
           }
         }
-        if(length(input$confounding_variables)>0){
-          formu = paste(input$select_Y," ~ ",
-                        paste(input$independent_variables
-                              ,collapse=col),col,
-                        paste(input$confounding_variables,
-                              collapse=col),sep="")
-        }else{
-          formu = paste(input$select_Y," ~ ",
-                        paste(input$independent_variables
-                              ,collapse=col),sep="")
-        }
+        
+        #if(length(input$confounding_variables)>0){
+        #  formu = paste(input$select_Y," ~ ",
+        #                paste(input$independent_variables
+        #                      ,collapse=col),col,
+        #                paste(input$confounding_variables,
+        #                      collapse=col),sep="")
+        #}else{
+        #  formu = paste(input$select_Y," ~ ",
+        #                paste(input$independent_variables
+        #                      ,collapse=col),sep="")
+        #}
         if(int.deg){
           formu = strsplit(formu," ~ ")[[1]]
           formu[2] = paste0("(",formu[2],")^",input$arg2)
@@ -570,73 +566,11 @@ observe({
         if(input$modelfit_inc_int != T){
           formu = paste0(formu, " - 1")
         }
-        design0=NULL
+        #  print(formu)
         dafr = get.data.set()
-        if(input$data_structure%in%"Complex Survey"){
-          id0 = input$cluster
-          if("none"%in%id0){
-            id0 = id0[-which(id0%in%"none")]
-          }
-          if("1"%in%id0&&
-             length(id0)>1){
-            id0 = id0[-which(id0%in%"1")]
-          }
-          if(!is.null(id0)&&
-             length(id0)>0){
-            id0 = formula(paste0("~",paste(id0,collapse="+")))
-          }else{
-            id0=NULL
-          }
-          if(!input$strata%in%" "){
-            strata0 = formula(paste0("~",input$strata,sep=""))
-          }else{
-            strata0 = NULL
-          }
-          if(!input$weights%in%" "){
-            weights0=eval(bquote(formula(paste0("~",input$weights))))
-          }else{
-            weights0=NULL
-          }
-          fpc0 = input$fpc
-          if("none"%in%fpc0){
-            fpc0 = fpc0[-which(fpc0%in%"none")]
-          }
-          if("1"%in%fpc0&&
-             length(fpc0)>1){
-            fpc0 = fpc0[-which(fpc0%in%"1")]
-          }
-          if(!is.null(fpc0)&&
-             length(fpc0)>0){
-            fpc0 = formula(paste0("~",paste(fpc0,collapse="+")))
-          }else{
-            fpc0=NULL
-          }
-          nest0 = input$nest
-          temp = list(id=id0,strata=strata0,
-                      fpc=fpc0,nest=nest0,
-                      weights=weights0,
-                      data=dafr)
-          print(temp)
-          design0 = do.call(svydesign,temp)
-          #           design0 = svydesign(id=id0,
-          #                               strata=strata0,
-          #                               weights=weights0,
-          #                               fpc=fpc0,
-          #                               nest=nest0,
-          #                               data=dafr,
-          #                               variables=dafr)
-          design.text = paste0("mydesign = svydesign(id=~",input$cluster)
-          if(!is.null(strata0)){
-            design.text = paste0(design.text,",strata=~",input$strata)
-          }
-          if(!is.null(weights0)){
-            design.text = paste0(design.text,",weights=~",input$weights)
-          }
-          if(!is.null(fpc0)){
-            design.text = paste0(design.text,",fpc=~",input$fpc)
-          }
-          design.text = paste0(design.text,",nest=",input$nest)
-          design.text = paste0(design.text,")")
+        if(is_survey){
+          design0 = design.obj
+          design.text = design.model.fit$code
           family0="gaussian"
           offset0=NULL
           if(!is.null(input$offset)&&
@@ -659,60 +593,61 @@ observe({
           if(family0%in%"gaussian"){
             temp.model = svyglm(formula(formu),design=design0)
             temp.code = paste0(design.text,"\n",model.name,
-                               " = svyglm(",formu,",design=mydesign)")
+                               " = svyglm(",formu,", design = ", design_params$design$dataDesignName,")")
           }else{
             temp.model = svyglm(formula(formu),design=design0,family=family0,offset=offset0)
-            temp.code = paste0(design.text,"\nsvyglm(",formu)
+            temp.code = paste0(design.text,"\n", model.name,
+                               " = svyglm(",formu)
             if(!is.null(offset0)){
-              temp.code = paste0(temp.code,",offset=",offset0)
+              temp.code = paste0(temp.code,", offset=", offset0)
             }
-            temp.code = paste0(temp.code,"family=",family0)
-            temp.code = paste0(temp.code,",design=mydesign)")
+            temp.code = paste0(temp.code,", family = ", family0)
+            temp.code = paste0(temp.code,", design = ", design_params$design$dataDesignName,")")
           }
         }else{
           if(input$model_framework%in%"Least Squares"){
             temp.model = lm(formula(formu),data=dafr)
-            temp.code = paste0(model.name," = lm(",formu,",data=mydata)")
+            temp.code = paste0(model.name," = lm(",formu,",data=", values$data.name, ")")
           }else if(input$model_framework%in%"Poisson Regression (Y counts)"){
             if(input$quasi){
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='quasipoisson')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasipoisson')")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasipoisson')")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='quasipoisson',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasipoisson',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasipoisson',offset=",input$offset,")")
               }
             }else{
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='poisson')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='poisson'")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='poisson'")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='poisson',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='poisson',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='poisson',offset=",input$offset,")")
               }
             }
           }else if(input$model_framework%in%"Logistic Regression (Y binary)"){
             if(input$quasi){
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='quasibinomial')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasibinomial')")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasibinomial')")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='quasibinomial',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='quasibinomial',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='quasibinomial',offset=",input$offset,")")
               }
             }else{
               if(input$offset%in%""){
                 temp.model = glm(formula(formu),data=dafr,family='binomial')
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='binomial')")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='binomial')")
               }else{
                 temp.model = glm(formula(formu),data=dafr,family='binomial',offset=input$offset)
-                temp.code = paste0(model.name," = glm(",formu,",data=mydata,family='binomial',offset=",input$offset,")")
+                temp.code = paste0(model.name," = glm(",formu,",data=", values$data.name, ",family='binomial',offset=",input$offset,")")
               }
             }
           }
         }
       }, error = function(e) {
-        print(e)
+        print()
       }, finally = {})
       modelValues$interaction.log = list()
       modelValues$transformation.log = c()
@@ -790,10 +725,10 @@ observe({
   input$select_Y
   isolate({
     if(!is.null(input$select_Y)&&
-         input$select_Y%in%colnames(get.data.set())&&
-         !input$select_Y%in%""){
+       input$select_Y%in%colnames(get.data.set())&&
+       !input$select_Y%in%""){
       if(is.numeric(get.data.set()[,input$select_Y])||
-           length(levels(as.factor(na.omit(get.data.set()[,input$select_Y]))))!=2){
+         length(levels(as.factor(na.omit(get.data.set()[,input$select_Y]))))!=2){
         updateSelectInput(session,"model_framework",
                           selected="Least Squares")
       }else{
@@ -812,21 +747,12 @@ observe({
   input$arg1
   isolate({
     if(!is.null(input$arg1)&&
-         !is.convertable.numeric(input$arg1)){
+       !is.convertable.numeric(input$arg1)){
       updateTextInput(session,"arg1",value='')
     }
   })
 })
 
-# update input when complex survey is selected (not implemented yet)
-observe({
-  input$data_structure
-  isolate({
-    #     if(){
-    #       updateSelectInput(session,"quasi",selected="yes")
-    #     }
-  })
-})
 
 # print the current code used for the next model
 output$current.code = renderPrint({
@@ -834,14 +760,9 @@ output$current.code = renderPrint({
   input$model_framework
   input$quasi
   input$offset
+  design_params$design$dataDesign
   input$independent_variables
   input$confounding_variables
-  input$data_structure
-  input$cluster
-  input$strata
-  input$weights
-  input$fpc
-  input$nest
   input$transform_Y
   input$arg1
   input$intersaction_select
@@ -852,27 +773,32 @@ output$current.code = renderPrint({
   input$interaction.vars.select
   input$degree.interaction.numeric
   isolate({
+    is_survey <- FALSE
+    if (!is.null(design_params$design$dataDesign)) {
+      design.obj <- createSurveyObject(design_params$design)
+      is_survey <- TRUE
+    }
     # test whether y is not NULL or not "" and
     # a framework is selected
     if(!is.null(input$select_Y)&&
-         !input$select_Y%in%""&&
-         !is.null(input$model_framework)&&
-         !input$model_framework%in%""){
+       !input$select_Y%in%""&&
+       !is.null(input$model_framework)&&
+       !input$model_framework%in%""){
       col = " + "
       int.all = F
       int.deg = F
       int.specific = F
       # interaction is used
       if(!is.null(input$intersaction_select)&&
-           input$intersaction_select%in%"all"){
+         input$intersaction_select%in%"all"){
         int.all = T
         col  = " * "
       }else if(!is.null(input$intersaction_select)&&
-                 input$intersaction_select%in%"by degree"){
+               input$intersaction_select%in%"by degree"){
         int.deg = T
       }else if(!is.null(input$intersaction_select)&&
-                 input$intersaction_select%in%"by variables"&&
-                 length(modelValues$interaction.log)>0){
+               input$intersaction_select%in%"by variables"&&
+               length(modelValues$interaction.log)>0){
         int.specific = T
       }
       if(input$transform_Y%in%"log"){
@@ -898,7 +824,7 @@ output$current.code = renderPrint({
                              collapse=col),sep="")
         }
       }else if(input$transform_Y%in%"^argument"&&
-                 !input$arg1%in%""){
+               !input$arg1%in%""){
         func = paste(input$select_Y,"^",input$arg1," ~ ",
                      paste(input$independent_variables
                            ,collapse=col),sep="")
@@ -940,7 +866,7 @@ output$current.code = renderPrint({
         if(any(unlist(lapply(modelValues$interaction.log,
                              function(x,y){
                                any(x%in%y)
-                               },
+                             },
                              modelValues$transformation.log)))){
           new.interaction.log = lapply(modelValues$interaction.log,
                                        function(x,y){
@@ -954,23 +880,8 @@ output$current.code = renderPrint({
           func = paste(func,paste(names(modelValues$interaction.log),collapse=" + "),sep=" + ")
         }
       }
-      if(input$data_structure%in%"Complex Survey"){
-        design=paste0("svyDesign = svydesign(id=~",input$cluster)
-        if(!input$strata%in%" "){
-          design = paste0(design,",strata=~",input$strata)
-        }
-        if(!input$weights%in%" "){
-          design = paste0(design,",weights=~",input$weights)
-        }
-        if(!input$fpc%in%" "){
-          design = paste0(design,",fpc=~",input$fpc)
-        }
-        if(input$nest){
-          design = paste0(design,",nest=T,")
-        }else{
-          design = paste0(design,",nest=F,")
-        }
-        design = paste0(design,"data=mydata)\n")
+      if(is_survey){
+        design = paste0(design.model.fit$code, "\n")
         glmcode = paste0("svyglm(",func)
         if(input$model_framework%in%"Poisson Regression (Y counts)"){
           if(input$quasi){
@@ -1001,37 +912,37 @@ output$current.code = renderPrint({
             }
           }
         }
-        glmcode = paste0(glmcode,",design=svyDesign)")
+        glmcode = paste0(glmcode,", design = ", design_params$design$dataDesignName,")")
         cat(design,glmcode,sep="")
       }else{
         if(input$model_framework%in%"Least Squares"){
-          cat("lm(",func,",data=mydata)")
+          cat("lm(",func,",data=", values$data.name, ")")
         }else if(input$model_framework%in%"Poisson Regression (Y counts)"){
           if(input$quasi){
             if(input$offset%in%""){
-              cat("glm(",func,",data=mydata,family='quasipoisson')")
+              cat("glm(",func,",data=", values$data.name, ",family='quasipoisson')")
             }else{
-              cat("glm(",func,",data=mydata,family='quasipoisson',offset=",input$offset,")")
+              cat("glm(",func,",data=", values$data.name, ",family='quasipoisson',offset=",input$offset,")")
             }
           }else{
             if(input$offset%in%""){
-              cat("glm(",func,",data=mydata,family='poisson')")
+              cat("glm(",func,",data=", values$data.name, ",family='poisson')")
             }else{
-              cat("glm(",func,",data=mydata,family='poisson',offset=",input$offset,")")
+              cat("glm(",func,",data=", values$data.name, ",family='poisson',offset=",input$offset,")")
             }
           }
         }else if(input$model_framework%in%"Logistic Regression (Y binary)"){
           if(input$quasi){
             if(input$offset%in%""){
-              cat("glm(",func,",data=mydata,family='quasibinomial')")
+              cat("glm(",func,",data=", values$data.name, ",family='quasibinomial')")
             }else{
-              cat("glm(",func,",data=mydata,family='quasibinomial',offset=",input$offset,")")
+              cat("glm(",func,",data=", values$data.name, ",family='quasibinomial',offset=",input$offset,")")
             }
           }else{
             if(input$offset%in%""){
-              cat("glm(",func,",data=mydata,family='binomial')")
+              cat("glm(",func,",data=", values$data.name, ",family='binomial')")
             }else{
-              cat("glm(",func,",data=mydata,family='binomial',offset=",input$offset,")")
+              cat("glm(",func,",data=", values$data.name, ",family='binomial',offset=",input$offset,")")
             }
           }
         }else{
@@ -1047,11 +958,11 @@ observe({
   input$rename_model
   isolate({
     if(!is.null(input$rename_model)&&
-         input$rename_model>0){
+       input$rename_model>0){
       if(!is.null(input$new_model_name)&&
-           !trim(input$new_model_name)%in%""&&
-           !is.null(input$model.select)&&
-           !input$new_model_name%in% names(modelValues$models)){
+         !trim(input$new_model_name)%in%""&&
+         !is.null(input$model.select)&&
+         !input$new_model_name%in% names(modelValues$models)){
         names(modelValues$models)[which(names(modelValues$models)%in%input$model.select)] = input$new_model_name
         names(modelValues$code)[which(names(modelValues$code)%in%input$model.select)] = input$new_model_name
         names(modelValues$independent.vars)[which(names(modelValues$independent.vars)%in%input$model.select)] = input$new_model_name
@@ -1067,16 +978,18 @@ observe({
 observe({
   input$remove.model
   isolate({
-    if(!is.null(input$remove.model)&&
+    tryCatch({
+      if(!is.null(input$remove.model)&&
          input$remove.model>0){
-      modelValues$models[[input$model.select]] = NULL
-      modelValues$code[[input$model.select]] = NULL
-      modelValues$independent.vars[[input$model.select]] = NULL
-      ch = names(modelValues$models)
-      updateSelectInput(session,"model.select",
-                        choices=names(modelValues$models),
-                        selected=names(modelValues$models)[1])
-    }
+        modelValues$models[[input$model.select]] = NULL
+        modelValues$code[[input$model.select]] = NULL
+        modelValues$independent.vars[[input$model.select]] = NULL
+        ch = names(modelValues$models)
+        updateSelectInput(session,"model.select",
+                          choices=names(modelValues$models),
+                          selected=names(modelValues$models)[1])
+      }
+    }, error = function(e) {})
   })
 })
 
@@ -1119,10 +1032,10 @@ output$downloadScript <- downloadHandler(
 # display the code for the selected model.
 output$r.code.fit = renderPrint({
   input$model.select
-#   modelValues$models
+  #   modelValues$models
   isolate({
     if(!is.null(input$model.select)&&
-         !input$model.select%in%""){
+       !input$model.select%in%""){
       cat(modelValues$code[[input$model.select]])
     }else{
       cat("No model code to show!")
@@ -1151,7 +1064,7 @@ observe({
   isolate({
     modelValues$models=list()
     modelValues$code=list()
-    modelValues$code.history="# To make this code work outside of iNZight, read in your data like so:\n# mydata = read.table(file.choose(), header = TRUE)\n# or \n# mydata = read.csv(file.choose())\n# if it is a comma seperated file.\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n"
+    modelValues$code.history="# To make this code work outside of iNZight, read in your data first\n# In iNZight Lite, this has been done\ for you, just run the\n# following code in your R console:\nlibrary(iNZightRegression)\nlibrary(GGally)\nlibrary(survey) # only needed if a complex survey model was fitted\n"
     updateSelectInput(session,"select_Y",
                       choices=colnames(get.data.set()),
                       selected=colnames(get.data.set())[1])
@@ -1163,11 +1076,11 @@ observe({
 # side bar for model plots
 output$model_plots = renderUI({
   navlistPanel(id="plot_selector",
-    "Select Plot Type",
-    tabPanel("Factor level comparison"),
-    tabPanel("Graphical Diagnostics"),
-    tabPanel("Normality Checks"),
-    widths=c(8,4)
+               "Select Plot Type",
+               tabPanel("Factor level comparison"),
+               tabPanel("Graphical Diagnostics"),
+               tabPanel("Normality Checks"),
+               widths=c(8,4)
   )
 })
 
@@ -1177,16 +1090,16 @@ output$plots.main = renderUI({
   input$plot_selector
   isolate({
     if(is.null(input$model.select)||
-         input$model.select%in%""){
+       input$model.select%in%""){
       h2("Please fit a model first")
     }else{
       if(!any(modelValues$independent.vars[[input$model.select]]%in%
-               get.categorical.column.names(get.data.set()))&&
-           input$plot_selector%in%'Factor level comparison'){
+              get.categorical.column.names(get.data.set()))&&
+         input$plot_selector%in%'Factor level comparison'){
         h2("No factor variables are fit in this model.")
       }else{
         ch1 = modelValues$independent.vars[[input$model.select]][which(modelValues$independent.vars[[input$model.select]]%in%
-                                                                        get.categorical.column.names(get.data.set()))]
+                                                                         get.categorical.column.names(get.data.set()))]
         ch2 = get.numeric.column.names(modelValues$models[[input$model.select]]$model)
         ch2 = ch2[which(ch2%in%modelValues$independent.vars[[input$model.select]])]
         list(conditionalPanel("input.plot_selector=='Factor level comparison'",
@@ -1309,8 +1222,8 @@ output$factor.comparison.plot = renderPlot({
   input$factor.comp.select
   isolate({
     if(!is.null(modelValues$models)&&
-         !is.null(input$model.select)&&
-         !is.null(input$factor.comp.select)){
+       !is.null(input$model.select)&&
+       !is.null(input$factor.comp.select)){
       suppressWarnings(plot(moecalc(modelValues$models[[input$model.select]],input$factor.comp.select)))
       modelValues$code.history = paste0(modelValues$code.history,
                                         paste0("plot(moecalc(",
