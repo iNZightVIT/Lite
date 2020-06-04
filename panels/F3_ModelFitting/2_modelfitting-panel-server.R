@@ -472,41 +472,43 @@ observe({
                  length(modelValues$interaction.log)>0){
           int.specific = T
         }
-        if(input$transform_Y%in%"log"){
-          formu = paste("log(",input$select_Y,") ~ ",
-                        paste(input$independent_variables
-                              ,collapse=col),sep="")
-          if(length(input$confounding_variables)>0){
+        if(!is.null(input$transform_Y) && input$transform_Y != "None") {
+          if(input$transform_Y%in%"log"){
             formu = paste("log(",input$select_Y,") ~ ",
                           paste(input$independent_variables
-                                ,collapse=col),col,
-                          paste(input$confounding_variables,
-                                collapse=col),sep="")
-          }
-        } else if(input$transform_Y%in%"sqrt"){
-          formu = paste("sqrt(",input$select_Y,") ~ ",
-                        paste(input$independent_variables
-                              ,collapse=col),sep="")
-          if(length(input$confounding_variables)>0){
+                                ,collapse=col),sep="")
+            if(length(input$confounding_variables)>0){
+              formu = paste("log(",input$select_Y,") ~ ",
+                            paste(input$independent_variables
+                                  ,collapse=col),col,
+                            paste(input$confounding_variables,
+                                  collapse=col),sep="")
+            }
+          } else if(input$transform_Y%in%"sqrt"){
             formu = paste("sqrt(",input$select_Y,") ~ ",
                           paste(input$independent_variables
-                                ,collapse=col),col,
-                          paste(input$confounding_variables,
-                                collapse=col),sep="")
-          }
-        } else if(input$transform_Y%in%"^argument"&&
-                  !input$arg1%in%""){
-          formu = paste(input$select_Y,"^",input$arg1," ~ ",
-                        paste(input$independent_variables
-                              ,collapse=col),sep="")
-          if(length(input$confounding_variables)>0){
+                                ,collapse=col),sep="")
+            if(length(input$confounding_variables)>0){
+              formu = paste("sqrt(",input$select_Y,") ~ ",
+                            paste(input$independent_variables
+                                  ,collapse=col),col,
+                            paste(input$confounding_variables,
+                                  collapse=col),sep="")
+            }
+          } else if(input$transform_Y%in%"^argument"&&
+                    !input$arg1%in%""){
             formu = paste(input$select_Y,"^",input$arg1," ~ ",
                           paste(input$independent_variables
-                                ,collapse=col),col,
-                          paste(input$confounding_variables,
-                                collapse=col),sep="")
-          }
-        } else if (input$transform_Y == 'None'){
+                                ,collapse=col),sep="")
+            if(length(input$confounding_variables)>0){
+              formu = paste(input$select_Y,"^",input$arg1," ~ ",
+                            paste(input$independent_variables
+                                  ,collapse=col),col,
+                            paste(input$confounding_variables,
+                                  collapse=col),sep="")
+            }
+          } 
+        } else {
           formu = paste(input$select_Y," ~ ",
                         paste(input$independent_variables
                               ,collapse=col),sep="")
@@ -601,7 +603,7 @@ observe({
             if(!is.null(offset0)){
               temp.code = paste0(temp.code,", offset=", offset0)
             }
-            temp.code = paste0(temp.code,", family = ", family0)
+            temp.code = paste0(temp.code,", family = '", family0, "'")
             temp.code = paste0(temp.code,", design = ", design_params$design$dataDesignName,")")
           }
         }else{
@@ -647,7 +649,7 @@ observe({
           }
         }
       }, error = function(e) {
-        print()
+        print(e)
       }, finally = {})
       modelValues$interaction.log = list()
       modelValues$transformation.log = c()
@@ -801,41 +803,43 @@ output$current.code = renderPrint({
                length(modelValues$interaction.log)>0){
         int.specific = T
       }
-      if(input$transform_Y%in%"log"){
-        func = paste("log(",input$select_Y,") ~ ",
-                     paste(input$independent_variables
-                           ,collapse=col),sep="")
-        if(length(input$confounding_variables)>0){
+      if(!is.null(input$transform_Y) && input$transform_Y != 'None') {
+        if(input$transform_Y%in%"log"){
           func = paste("log(",input$select_Y,") ~ ",
                        paste(input$independent_variables
-                             ,collapse=col),col,
-                       paste(input$confounding_variables,
-                             collapse=col),sep="")
-        }
-      }else if(input$transform_Y%in%"sqrt"){
-        func = paste("sqrt(",input$select_Y,") ~ ",
-                     paste(input$independent_variables
-                           ,collapse=col),sep="")
-        if(length(input$confounding_variables)>0){
+                             ,collapse=col),sep="")
+          if(length(input$confounding_variables)>0){
+            func = paste("log(",input$select_Y,") ~ ",
+                         paste(input$independent_variables
+                               ,collapse=col),col,
+                         paste(input$confounding_variables,
+                               collapse=col),sep="")
+          }
+        }else if(input$transform_Y%in%"sqrt"){
           func = paste("sqrt(",input$select_Y,") ~ ",
                        paste(input$independent_variables
-                             ,collapse=col),col,
-                       paste(input$confounding_variables,
-                             collapse=col),sep="")
-        }
-      }else if(input$transform_Y%in%"^argument"&&
-               !input$arg1%in%""){
-        func = paste(input$select_Y,"^",input$arg1," ~ ",
-                     paste(input$independent_variables
-                           ,collapse=col),sep="")
-        if(length(input$confounding_variables)>0){
+                             ,collapse=col),sep="")
+          if(length(input$confounding_variables)>0){
+            func = paste("sqrt(",input$select_Y,") ~ ",
+                         paste(input$independent_variables
+                               ,collapse=col),col,
+                         paste(input$confounding_variables,
+                               collapse=col),sep="")
+          }
+        }else if(input$transform_Y%in%"^argument"&&
+                 !input$arg1%in%""){
           func = paste(input$select_Y,"^",input$arg1," ~ ",
                        paste(input$independent_variables
-                             ,collapse=col),col,
-                       paste(input$confounding_variables,
-                             collapse=col),sep="")
+                             ,collapse=col),sep="")
+          if(length(input$confounding_variables)>0){
+            func = paste(input$select_Y,"^",input$arg1," ~ ",
+                         paste(input$independent_variables
+                               ,collapse=col),col,
+                         paste(input$confounding_variables,
+                               collapse=col),sep="")
+          }
         }
-      }else{
+      } else {
         func = paste(input$select_Y," ~ ",
                      paste(input$independent_variables
                            ,collapse=col),sep="")
@@ -847,6 +851,7 @@ output$current.code = renderPrint({
                              collapse=col),sep="")
         }
       }
+      
       if(int.deg){
         func = strsplit(func," ~ ")[[1]]
         func[2] = paste0("(",func[2],")^",input$arg2)
