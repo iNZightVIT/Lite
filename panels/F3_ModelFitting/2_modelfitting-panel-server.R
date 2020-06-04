@@ -593,15 +593,16 @@ observe({
           if(family0%in%"gaussian"){
             temp.model = svyglm(formula(formu),design=design0)
             temp.code = paste0(design.text,"\n",model.name,
-                               " = svyglm(",formu,",design = ", design_params$design$dataDesignName,")")
+                               " = svyglm(",formu,", design = ", design_params$design$dataDesignName,")")
           }else{
             temp.model = svyglm(formula(formu),design=design0,family=family0,offset=offset0)
-            temp.code = paste0(design.text,"\nsvyglm(",formu)
+            temp.code = paste0(design.text,"\n", model.name,
+                               " = svyglm(",formu)
             if(!is.null(offset0)){
-              temp.code = paste0(temp.code,",offset=",offset0)
+              temp.code = paste0(temp.code,", offset=", offset0)
             }
-            temp.code = paste0(temp.code,"family=",family0)
-            temp.code = paste0(temp.code,",design = ", design_params$design$dataDesignName,")")
+            temp.code = paste0(temp.code,", family = ", family0)
+            temp.code = paste0(temp.code,", design = ", design_params$design$dataDesignName,")")
           }
         }else{
           if(input$model_framework%in%"Least Squares"){
