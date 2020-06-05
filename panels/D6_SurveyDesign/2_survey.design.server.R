@@ -302,11 +302,12 @@ observe({
 })
 
 observe({
-  input$selector == "Survey design"
-  updateSelectInput(session, inputId = "svytype", label = "Select survey design", choices = list("Specify design" = "survey",
-                                                                                                 "Specify replicate design" = "replicate",
-                                                                                                 "Post stratify" = "post"),
-                    selected = "survey")
+  if(input$selector == "Survey design"){
+    updateSelectInput(session, inputId = "svytype", label = "Select survey design", choices = list("Specify design" = "survey",
+                                                                                                   "Specify replicate design" = "replicate",
+                                                                                                   "Post stratify" = "post"),
+                      selected = "survey")
+  }
 })
 
 
