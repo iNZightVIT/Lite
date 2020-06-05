@@ -225,60 +225,6 @@ observe({
   })
 })
 
-## reactive design object
-design_param = reactive({
-  input$create.design
-  input$create.design1
-  isolate({
-    if(req(input$svytype) == "survey" && req(input$create.design) > 0) {
-      strat <- svalue_or_null(input$stratVar)
-      clus1 <- svalue_or_null(input$clus1Var)
-      clus2 <- svalue_or_null(input$clus2Var)
-      wts <- svalue_or_null(input$wtVar)
-      fpc <- fpc.f()
-      nest <- as.logical(input$nestChk)
-      name <- values$data.name
-      clear <- is.null(input$strat) && is.null(input$clus1) &&
-        is.null(input$clus2) && is.null(input$wts) && is.null(input$fpc)
-      setDesign(
-        strata = strat,
-        clus1 = clus1,
-        clus2 = clus2,
-        wt = wts,
-        nest = nest,
-        fpc = fpc,
-        type = "survey",
-        name = name
-      )
-    } else if (req(input$svytype) == "replicate" && req(input$create.design1) > 0) {
-      wts <- svalue_or_null(input$sample.weight.Var)
-      repWts <- input$repVars
-      reptype <- input$repType
-      if (reptype %in% c("bootstrap", "other")) {
-        scale <- as.numeric(input$repScale)
-        rscales <- as.numeric(repRscales$rscales)
-        if (length(rscales) == 0)
-          rscales <- rep(scale, length(repWts))
-        else if(any(is.na(rscales)))
-          rscales <- NULL
-      } else {
-        scale <- NULL
-        rscales <- NULL
-      }
-      name <- values$data.name
-      clear <- is.null(wts) && length(repWts) == 0
-      setDesign(
-        wt = wts,
-        repweights = repWts,
-        reptype = reptype,
-        scale = scale,
-        rscales = rscales,
-        type = "replicate",
-        name = name
-      )
-    }
-  })
-})
 
 
 
