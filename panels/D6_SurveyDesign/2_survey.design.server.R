@@ -292,9 +292,21 @@ output$rscalesTbl = renderTable({
 #######################
 
 observe({
-  if (is.null(plot.par$design) && req(input$svytype) == "post") {
-    shinyalert(text = "Please specify a survey design first", title = "No design specified", type = "warning")
-  }
+  input$svytype
+  isolate({
+    if (is.null(plot.par$design) && !is.null(input$svytype) && input$svytype == "post") {
+      shinyalert(text = "Please specify a survey design first", title = "No design specified", type = "warning")
+    }
+  })
+  
+})
+
+observe({
+  input$selector == "Survey design"
+  updateSelectInput(session, inputId = "svytype", label = "Select survey design", choices = list("Specify design" = "survey",
+                                                                                                 "Specify replicate design" = "replicate",
+                                                                                                 "Post stratify" = "post"),
+                    selected = "survey")
 })
 
 
