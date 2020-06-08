@@ -514,6 +514,7 @@ observe({
   input$remove.design2
   isolate({
     plot.par$design=NULL
+    design_params$design = NULL
   })
 })
 
