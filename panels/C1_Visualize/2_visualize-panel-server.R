@@ -6308,72 +6308,81 @@ output$interactive.plot = renderUI({
 
 
 
-
-
-
-
 # add fitted values and residuals
 # add trends and curves 
 output$add.fitted.residuals.panel = renderUI({
   get.data.set()
-  isolate({
-    add.fitted.values.button = conditionalPanel("input.check_linear ||  
-                                                input.check_quadratic || 
-                                                input.check_cubic || 
-                                                input.check_smoother",
-                                                actionButton("store_fitted_values", 
-                                                             "Store fitted values",
-                                                             style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-    
-    add.residuals.button = conditionalPanel("input.check_linear ||  
-                                            input.check_quadratic || 
-                                            input.check_cubic || 
-                                            input.check_smoother",
-                                            actionButton("store_residuals", 
-                                                         "Store residuals",
-                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-    
-    
-    #    list(fixedRow(column(width = 6, add.fitted.values.button),
-    #                  column(width = 6, add.residuals.button))
-    #         )
-    
-    list(add.fitted.values.button,
-         br(),
-         add.residuals.button)
-  })
+  ret = NULL
+    if (!is.null(plot.par$x)) {
+      xvar = plot.par$x
+      yvar = if(!is.null(plot.par$y)) plot.par$y else NULL
+      if (is.null(plot.par$g1) &&
+          is.null(plot.par$g2) &&
+          !is.null(plot.par$y) &&
+          (iNZightTools::is_num(xvar) | iNZightTools::is_num(yvar)) &&
+          (!is.null(graphical.par$trend) | (graphical.par$smooth > 0 && !is.null(graphical.par$smooth)) |
+           !iNZightTools::is_num(xvar) | !iNZightTools::is_num(yvar))){
+        
+        
+        
+        
+        ret = list(add.fitted.values.button = actionButton("store_fitted_values", 
+                                                           "Store fitted values",
+                                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                   br(),
+                   br(),
+                   add.residuals.button = actionButton("store_residuals", 
+                                                       "Store residuals",
+                                                       style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+      }
+    }
+  ret
 })
 
 
 observeEvent(input$store_fitted_values, {
-  showModal(modalDialog(
-    h5(strong("Specify names for the new variables")),
-    
-    conditionalPanel("input.check_linear",
-                     fixedRow(column(2, h5("Linear:")),
-                              column(6, textInput(inputId = "add_linear_fitted_values",
-                                                  value = paste(input$vari1, ".predict.linear", sep = ""), 
-                                                  label=NULL)))),
-    conditionalPanel("input.check_quadratic",
-                     fixedRow(column(2, h5("Quadratic:")),
-                              column(6, textInput(inputId="add_quadratic_fitted_values",
-                                                  value = paste(input$vari1, ".predict.quadratic", sep = ""), 
-                                                  label=NULL)))),
-    conditionalPanel("input.check_cubic",
-                     fixedRow(column(2, h5("Cubic:")),
-                              column(6, textInput(inputId="add_cubic_fitted_values",
-                                                  value = paste(input$vari1, ".predict.cubic", sep = ""), 
-                                                  label=NULL)))),
-    conditionalPanel("input.check_smoother",
-                     fixedRow(column(2, h5("Smoother:")),
-                              column(6, textInput(inputId="add_smoother_fitted_values",
-                                                  value = paste(input$vari1, ".predict.smoother", sep = ""), 
-                                                  label=NULL)))),
-    actionButton("store_fitted_values_ok", "OK"),
-    textOutput("add_fitted_values_status"),
-    title = "Store fitted values"
-    
-  ))
+  if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
+     iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+    showModal(modalDialog(
+      h5(strong("Specify names for the new variables")),
+      
+      conditionalPanel("input.check_linear",
+                       fixedRow(column(2, h5("Linear:")),
+                                column(6, textInput(inputId = "add_linear_fitted_values",
+                                                    value = paste(input$vari1, ".predict.linear", sep = ""), 
+                                                    label=NULL)))),
+      conditionalPanel("input.check_quadratic",
+                       fixedRow(column(2, h5("Quadratic:")),
+                                column(6, textInput(inputId="add_quadratic_fitted_values",
+                                                    value = paste(input$vari1, ".predict.quadratic", sep = ""), 
+                                                    label=NULL)))),
+      conditionalPanel("input.check_cubic",
+                       fixedRow(column(2, h5("Cubic:")),
+                                column(6, textInput(inputId="add_cubic_fitted_values",
+                                                    value = paste(input$vari1, ".predict.cubic", sep = ""), 
+                                                    label=NULL)))),
+      conditionalPanel("input.check_smoother",
+                       fixedRow(column(2, h5("Smoother:")),
+                                column(6, textInput(inputId="add_smoother_fitted_values",
+                                                    value = paste(input$vari1, ".predict.smoother", sep = ""), 
+                                                    label=NULL)))),
+      
+      actionButton("store_fitted_values_ok", "OK"),
+      textOutput("add_fitted_values_status"),
+      title = "Store fitted values"
+      
+    ))
+  } else {
+    showModal(modalDialog(
+      h5(strong("Specify names for the new variables")),
+      
+      
+      actionButton("store_fitted_values_ok", "OK"),
+      textOutput("add_fitted_values_status"),
+      title = "Store fitted values"
+      
+    ))
+  }
 })
 
 
