@@ -98,6 +98,7 @@ observe({
         silent = TRUE
       )
       if (!inherits(data, "try-error")) {
+        data = dplyr::mutate_if(data, is.character, as.factor)
         plot.par$design=NULL
         values$data.name = "data"
         values$data.set = data
