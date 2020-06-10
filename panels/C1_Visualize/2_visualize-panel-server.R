@@ -1935,7 +1935,7 @@ output$plot.appearance.panel = renderUI({
     sorting.title = h5(strong("Sorting"))
     
     pyramid.title = h5(strong("Pyramid Options"))
-
+    
     point.size.title = checkboxInput(inputId = "point_size_title",
                                      label = strong("Point Size"),
                                      value = input$point_size_title)
@@ -2019,13 +2019,13 @@ output$plot.appearance.panel = renderUI({
                                                    ticks = FALSE)))
     
     pyramid.slider.object = fixedRow(column(3, h5("Number of bins:")),
-                               column(6, sliderInput("pyramid.bins", 
-                                                     label = NULL, 
-                                                     value = graphical.par$gg_bins,
-                                                     min = 5,
-                                                     max = 50,
-                                                     step = 5)))
-                              
+                                     column(6, sliderInput("pyramid.bins", 
+                                                           label = NULL, 
+                                                           value = graphical.par$gg_bins,
+                                                           min = 5,
+                                                           max = 50,
+                                                           step = 5)))
+    
     gridplot.object = fixedRow(column(3, h5("Observations / square:")),
                                column(6, numericInput("grid.square", 
                                                       label = NULL, 
@@ -2185,7 +2185,7 @@ output$plot.appearance.panel = renderUI({
                                                              value=graphical.par$scatter.grid.bins,
                                                              step=1, 
                                                              ticks = FALSE))) 
-
+    
     adjust.min.count.grid.object = fixedRow(column(3, h5("Min-count colour (% grey):")),
                                             column(6, sliderInput("adjust.min.count.grid", 
                                                                   label = NULL, 
@@ -2268,7 +2268,7 @@ output$plot.appearance.panel = renderUI({
       if(input$vari2%in%"none"&&
          (class(get.data.set()[,input$vari1])%in%"factor"|
           class(get.data.set()[,input$vari1])%in%"character")){
-
+        
         ret = list(select.bg.object,
                    adjust.size.scale.object,
                    bar.colour.title,
@@ -2416,7 +2416,7 @@ output$plot.appearance.panel = renderUI({
                   class(get.data.set()[,input$vari1])%in%"numeric")&
                  (class(get.data.set()[,input$vari2])%in%"character"|
                   class(get.data.set()[,input$vari2])%in%"factor")))){
-
+        
         ret = list(select.bg.object,
                    adjust.size.scale.object,
                    show.boxplot.title,
@@ -2690,7 +2690,7 @@ output$plot.appearance.panel = renderUI({
                  class(get.data.set()[,input$vari1])%in%"integer")&&
                 (class(get.data.set()[,input$vari1])%in%"numeric"|
                  class(get.data.set()[,input$vari1])%in%"integer"))){
-
+        
         resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
                                             fixedRow(column(3, h5("Resize points by:")),
                                                      column(6, selectInput("resize.by.select",
@@ -2918,10 +2918,10 @@ output$plotly_nw = renderUI({
         br(),
         br(),
         tags$a(href = "path/index.html", 
-                  "Open in a new window", 
-                   target="_blank"), 
-           br(),
-           br())
+               "Open in a new window", 
+               target="_blank"), 
+        br(),
+        br())
     }
   })
 })
@@ -6254,54 +6254,54 @@ output$interactive.plot = renderUI({
     dafr = get.data.set()
     input$extra_vars_confirm_button
     isolate({
-     # if((!is.null(input$subs1) &&
-    #      input$subs1 %in% colnames(vis.data())) ||
-    #     (!is.null(input$subs2) &&
-    #      input$subs2 %in% colnames(vis.data()))) {
-    #    h4("iNZight doesn't handle interactive panel plots ... yet! 
-    #       Please remove the subset variable(s)")
-    #  } 
-    #  else {
-    #    if(!is.null(input$select.plot.type) &&
-    #       input$select.plot.type == "grid-density plot") {
-    #      h4("iNZight doesn't handle interactive grid-density plots ... yet! 
-    #         Please select other plot types")
-    #    }
-    #    else if(!is.null(input$select.plot.type) &&
-    #            (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-    #            !is.null(input$color_by_select) &&
-    #            input$color_by_select != " ") {
-    #      h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
-    #     Please select other plot types")
-    #    }
-    #    else {
-    #      if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-    #          (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-    #         !is.null(input$export.extra.vars.html) && 
-    #         all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-    #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-    #      }
-    #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
-            local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                           data = data_html(),
-                                                           extra.vars = extra.vars_html(),
-                                                           width = 10, height = 6)
-            
-            local.dir = unclass(local.dir)
-            temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
-            addResourcePath("path", temp.dir)
-            
-            tags$div(tags$a(href = "path/index.html", 
-                            "Open in a new window", 
-                            target="_blank"),
-                     tags$iframe(
-                       seamless = "seamless",
-                       src = "path/index.html",
-                       height = 600, width = 1200
-                     ))
-    #       }
-    #   }
-    #  }
+      # if((!is.null(input$subs1) &&
+      #      input$subs1 %in% colnames(vis.data())) ||
+      #     (!is.null(input$subs2) &&
+      #      input$subs2 %in% colnames(vis.data()))) {
+      #    h4("iNZight doesn't handle interactive panel plots ... yet! 
+      #       Please remove the subset variable(s)")
+      #  } 
+      #  else {
+      #    if(!is.null(input$select.plot.type) &&
+      #       input$select.plot.type == "grid-density plot") {
+      #      h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+      #         Please select other plot types")
+      #    }
+      #    else if(!is.null(input$select.plot.type) &&
+      #            (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+      #            !is.null(input$color_by_select) &&
+      #            input$color_by_select != " ") {
+      #      h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+      #     Please select other plot types")
+      #    }
+      #    else {
+      #      if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
+      #          (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
+      #         !is.null(input$export.extra.vars.html) && 
+      #         all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+      #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+      #      }
+      #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
+      local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                     data = data_html(),
+                                                     extra.vars = extra.vars_html(),
+                                                     width = 10, height = 6)
+      
+      local.dir = unclass(local.dir)
+      temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+      addResourcePath("path", temp.dir)
+      
+      tags$div(tags$a(href = "path/index.html", 
+                      "Open in a new window", 
+                      target="_blank"),
+               tags$iframe(
+                 seamless = "seamless",
+                 src = "path/index.html",
+                 height = 600, width = 1200
+               ))
+      #       }
+      #   }
+      #  }
     })
   }
 })
@@ -6313,75 +6313,78 @@ output$interactive.plot = renderUI({
 output$add.fitted.residuals.panel = renderUI({
   get.data.set()
   ret = NULL
-    if (!is.null(plot.par$x)) {
-      xvar = plot.par$x
-      yvar = if(!is.null(plot.par$y)) plot.par$y else NULL
-      if (is.null(plot.par$g1) &&
-          is.null(plot.par$g2) &&
-          !is.null(plot.par$y) &&
-          (iNZightTools::is_num(xvar) | iNZightTools::is_num(yvar)) &&
-          (!is.null(graphical.par$trend) | (graphical.par$smooth > 0 && !is.null(graphical.par$smooth)) |
-           !iNZightTools::is_num(xvar) | !iNZightTools::is_num(yvar))){
-        
-        
-        
-        
-        ret = list(add.fitted.values.button = actionButton("store_fitted_values", 
-                                                           "Store fitted values",
-                                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-                   br(),
-                   br(),
-                   add.residuals.button = actionButton("store_residuals", 
-                                                       "Store residuals",
-                                                       style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
-      }
+  if (!is.null(plot.par$x)) {
+    xvar = plot.par$x
+    yvar = if(!is.null(plot.par$y)) plot.par$y else NULL
+    if (is.null(plot.par$g1) &&
+        is.null(plot.par$g2) &&
+        !is.null(plot.par$y) &&
+        (iNZightTools::is_num(xvar) | iNZightTools::is_num(yvar)) &&
+        (!is.null(graphical.par$trend) | (graphical.par$smooth > 0 && !is.null(graphical.par$smooth)) |
+         !iNZightTools::is_num(xvar) | !iNZightTools::is_num(yvar))){
+      
+      
+      
+      
+      ret = list(add.fitted.values.button = actionButton("store_fitted_values", 
+                                                         "Store fitted values",
+                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                 br(),
+                 br(),
+                 add.residuals.button = actionButton("store_residuals", 
+                                                     "Store residuals",
+                                                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
     }
+  }
   ret
 })
 
 
 observeEvent(input$store_fitted_values, {
-  if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
-     iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
-    showModal(modalDialog(
-      h5(strong("Specify names for the new variables")),
-      
-      conditionalPanel("input.check_linear",
-                       fixedRow(column(2, h5("Linear:")),
-                                column(6, textInput(inputId = "add_linear_fitted_values",
-                                                    value = paste(input$vari1, ".predict.linear", sep = ""), 
-                                                    label=NULL)))),
-      conditionalPanel("input.check_quadratic",
-                       fixedRow(column(2, h5("Quadratic:")),
-                                column(6, textInput(inputId="add_quadratic_fitted_values",
-                                                    value = paste(input$vari1, ".predict.quadratic", sep = ""), 
-                                                    label=NULL)))),
-      conditionalPanel("input.check_cubic",
-                       fixedRow(column(2, h5("Cubic:")),
-                                column(6, textInput(inputId="add_cubic_fitted_values",
-                                                    value = paste(input$vari1, ".predict.cubic", sep = ""), 
-                                                    label=NULL)))),
-      conditionalPanel("input.check_smoother",
-                       fixedRow(column(2, h5("Smoother:")),
-                                column(6, textInput(inputId="add_smoother_fitted_values",
-                                                    value = paste(input$vari1, ".predict.smoother", sep = ""), 
-                                                    label=NULL)))),
-      
-      actionButton("store_fitted_values_ok", "OK"),
-      textOutput("add_fitted_values_status"),
-      title = "Store fitted values"
-      
-    ))
-  } else {
-    showModal(modalDialog(
-      h5(strong("Specify names for the new variables")),
-      
-      
-      actionButton("store_fitted_values_ok", "OK"),
-      textOutput("add_fitted_values_status"),
-      title = "Store fitted values"
-      
-    ))
+  if (!is.null(plot.par$x)) {
+    if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
+       iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+      showModal(modalDialog(
+        h5(strong("Specify names for the new variables")),
+        
+        conditionalPanel("input.check_linear",
+                         fixedRow(column(2, h5("Linear:")),
+                                  column(6, textInput(inputId = "add_linear_fitted_values",
+                                                      value = paste(input$vari1, ".predict.linear", sep = ""), 
+                                                      label=NULL)))),
+        conditionalPanel("input.check_quadratic",
+                         fixedRow(column(2, h5("Quadratic:")),
+                                  column(6, textInput(inputId="add_quadratic_fitted_values",
+                                                      value = paste(input$vari1, ".predict.quadratic", sep = ""), 
+                                                      label=NULL)))),
+        conditionalPanel("input.check_cubic",
+                         fixedRow(column(2, h5("Cubic:")),
+                                  column(6, textInput(inputId="add_cubic_fitted_values",
+                                                      value = paste(input$vari1, ".predict.cubic", sep = ""), 
+                                                      label=NULL)))),
+        conditionalPanel("input.check_smoother",
+                         fixedRow(column(2, h5("Smoother:")),
+                                  column(6, textInput(inputId="add_smoother_fitted_values",
+                                                      value = paste(input$vari1, ".predict.smoother", sep = ""), 
+                                                      label=NULL)))),
+        
+        actionButton("store_fitted_values_ok", "OK"),
+        textOutput("add_fitted_values_status"),
+        title = "Store fitted values"
+        
+      ))
+    } else {
+      showModal(modalDialog(
+        h5(strong("Specify names for the new variables")),
+        fixedRow(column(6, textInput(inputId = "add_numcat_fitted_values",
+                                     value = paste(ifelse(iNZightTools::is_num(plot.par$x), input$vari1, input$vari2), ".predict", sep = ""), 
+                                     label=NULL))),                 
+        actionButton("store_fitted_values_ok", "OK"),
+        textOutput("add_fitted_values_status"),
+        title = "Store fitted values"
+        
+      ))
+    }
   }
 })
 
@@ -6396,34 +6399,48 @@ output$add_fitted_values_status = renderText({
 
 
 observeEvent(input$store_residuals, {
-  showModal(modalDialog(
-    h5(strong("Specify names for the new variables")),
-    
-    conditionalPanel("input.check_linear",
-                     fixedRow(column(2, h5("Linear:")),
-                              column(6, textInput(inputId="add_linear_residuals",
-                                                  value = paste(input$vari1, ".residuals.linear", sep = ""), 
-                                                  label=NULL)))),
-    conditionalPanel("input.check_quadratic",
-                     fixedRow(column(2, h5("Quadratic:")),
-                              column(6, textInput(inputId="add_quadratic_residuals",
-                                                  value = paste(input$vari1, ".residuals.quadratic", sep = ""), 
-                                                  label=NULL)))),
-    conditionalPanel("input.check_cubic",
-                     fixedRow(column(2, h5("Cubic:")),
-                              column(6, textInput(inputId="add_cubic_residuals",
-                                                  value = paste(input$vari1, ".residuals.cubic", sep = ""), 
-                                                  label=NULL)))),
-    conditionalPanel("input.check_smoother",
-                     fixedRow(column(2, h5("Smoother:")),
-                              column(6, textInput(inputId="add_smoother_residuals",
-                                                  value = paste(input$vari1, ".residuals.smoother", sep = ""), 
-                                                  label=NULL)))),
-    actionButton("store_resisuals_ok", "OK"),
-    textOutput("add_residuals_status"),
-    title = "Store residuals"
-    
-  ))
+    if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
+       iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+      showModal(modalDialog(
+        h5(strong("Specify names for the new variables")),
+        
+        conditionalPanel("input.check_linear",
+                         fixedRow(column(2, h5("Linear:")),
+                                  column(6, textInput(inputId="add_linear_residuals",
+                                                      value = paste(input$vari1, ".residuals.linear", sep = ""), 
+                                                      label=NULL)))),
+        conditionalPanel("input.check_quadratic",
+                         fixedRow(column(2, h5("Quadratic:")),
+                                  column(6, textInput(inputId="add_quadratic_residuals",
+                                                      value = paste(input$vari1, ".residuals.quadratic", sep = ""), 
+                                                      label=NULL)))),
+        conditionalPanel("input.check_cubic",
+                         fixedRow(column(2, h5("Cubic:")),
+                                  column(6, textInput(inputId="add_cubic_residuals",
+                                                      value = paste(input$vari1, ".residuals.cubic", sep = ""), 
+                                                      label=NULL)))),
+        conditionalPanel("input.check_smoother",
+                         fixedRow(column(2, h5("Smoother:")),
+                                  column(6, textInput(inputId="add_smoother_residuals",
+                                                      value = paste(input$vari1, ".residuals.smoother", sep = ""), 
+                                                      label=NULL)))),
+        actionButton("store_resisuals_ok", "OK"),
+        textOutput("add_residuals_status"),
+        title = "Store residuals"
+        
+      ))
+    } else {
+      showModal(modalDialog(
+        h5(strong("Specify names for the new variables")),
+        fixedRow(column(6, textInput(inputId = "add_numcat_residuals",
+                                     value = paste(ifelse(iNZightTools::is_num(plot.par$x), input$vari1, input$vari2), ".residuals", sep = ""), 
+                                     label=NULL))),
+        actionButton("store_resisuals_ok", "OK"),
+        textOutput("add_residuals_status"),
+        title = "Store residuals"
+        
+      ))
+    }
 })
 
 
@@ -6440,59 +6457,71 @@ observe({
   isolate({
     if(!is.null(input$store_resisuals_ok) &&
        input$store_resisuals_ok > 0) {
-      linear_trend = FALSE
-      quadratic_trend = FALSE
-      cubic_trend = FALSE
-      smoother_trend = FALSE
       temp1 = input$vari1
       temp2 = input$vari2
       temp = get.data.set()
-      if("linear" %in% graphical.par$trend) {
-        linear_trend = TRUE
-        fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
-        resi.linear = data.frame(residuals(fit.linear))
-        colnames(resi.linear) = input$add_linear_residuals
-        temp = cbind(temp, resi.linear)
-      }
-      if("quadratic" %in% graphical.par$trend) {
-        quadratic_trend = TRUE
-        fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
-        resi.quadratic = data.frame(residuals(fit.quadratic))
-        colnames(resi.quadratic) = input$add_quadratic_residuals
-        temp = cbind(temp, resi.quadratic)
-      }
-      if("cubic" %in% graphical.par$trend) {
-        cubic_trend = TRUE
-        fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
-        resi.cubic = data.frame(residuals(fit.cubic))
-        colnames(resi.cubic) = input$add_cubic_residuals
-        temp = cbind(temp, resi.cubic)
-      }
-      if(graphical.par$smooth > 0) {
-        temp3 = graphical.par$smooth
-        smoother_trend = TRUE
-        fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
-                                           family = "gaussian", degree = 1, na.action = "na.exclude"))
-        resi.smooth = data.frame(residuals(fit.smooth))
-        colnames(resi.smooth) = input$add_smoother_residuals
-        temp = cbind(temp, resi.smooth)
-        
+      if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
+         iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+        linear_trend = FALSE
+        quadratic_trend = FALSE
+        cubic_trend = FALSE
+        smoother_trend = FALSE
+        if("linear" %in% graphical.par$trend) {
+          linear_trend = TRUE
+          fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
+          resi.linear = data.frame(residuals(fit.linear))
+          colnames(resi.linear) = input$add_linear_residuals
+          temp = cbind(temp, resi.linear)
+        }
+        if("quadratic" %in% graphical.par$trend) {
+          quadratic_trend = TRUE
+          fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
+          resi.quadratic = data.frame(residuals(fit.quadratic))
+          colnames(resi.quadratic) = input$add_quadratic_residuals
+          temp = cbind(temp, resi.quadratic)
+        }
+        if("cubic" %in% graphical.par$trend) {
+          cubic_trend = TRUE
+          fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
+          resi.cubic = data.frame(residuals(fit.cubic))
+          colnames(resi.cubic) = input$add_cubic_residuals
+          temp = cbind(temp, resi.cubic)
+        }
+        if(graphical.par$smooth > 0) {
+          temp3 = graphical.par$smooth
+          smoother_trend = TRUE
+          fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+                                             family = "gaussian", degree = 1, na.action = "na.exclude"))
+          resi.smooth = data.frame(residuals(fit.smooth))
+          colnames(resi.smooth) = input$add_smoother_residuals
+          temp = cbind(temp, resi.smooth)
+          
+        }
+        if(linear_trend)
+          updateCheckboxInput(session, "check_linear", value = T)
+        if(quadratic_trend)
+          updateCheckboxInput(session, "check_quadratic", value = T)
+        if(cubic_trend)
+          updateCheckboxInput(session, "check_cubic", value = T)
+        if(smoother_trend) {
+          updateCheckboxInput(session, "check_smoother",value = T)
+          updateSliderInput(session, "smoother.smooth", value = temp3)
+          
+        }
+      } else {
+        if (iNZightTools::is_num(plot.par$y)){
+          fit = lm(formula = plot.par$y ~ plot.par$x, na.action = na.exclude)
+        } else {
+          fit <- lm(formula = plot.par$x ~ plot.par$y, na.action = na.exclude)
+        }
+        resi.numcat = data.frame(residuals(fit))
+        colnames(resi.numcat) = input$add_numcat_residuals
+        temp = cbind(temp, resi.numcat)
       }
       updatePanel$datachanged = updatePanel$datachanged + 1
       values$data.set = temp
       updateCheckboxInput(session, "vari1", value = temp1)
       updateCheckboxInput(session, "vari2", value = temp2)
-      if(linear_trend)
-        updateCheckboxInput(session, "check_linear", value = T)
-      if(quadratic_trend)
-        updateCheckboxInput(session, "check_quadratic", value = T)
-      if(cubic_trend)
-        updateCheckboxInput(session, "check_cubic", value = T)
-      if(smoother_trend) {
-        updateCheckboxInput(session, "check_smoother",value = T)
-        updateSliderInput(session, "smoother.smooth", value = temp3)
-        
-      }
     }
   })
 })
@@ -6502,62 +6531,75 @@ observe({
   isolate({
     if(!is.null(input$store_fitted_values_ok) &&
        input$store_fitted_values_ok > 0) {
-      linear_trend = FALSE
-      quadratic_trend = FALSE
-      cubic_trend = FALSE
-      smoother_trend = FALSE
       temp1 = input$vari1
       temp2 = input$vari2
       temp = get.data.set()
-      if("linear" %in% graphical.par$trend) {
-        linear_trend = TRUE
-        fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
-        pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = graphical.par$y)))
-        colnames(pred.linear) = input$add_linear_fitted_values
-        temp = cbind(temp, pred.linear)
-      }
-      if("quadratic" %in% graphical.par$trend) {
-        quadratic_trend = TRUE
-        fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
-        pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = graphical.par$y)))
-        colnames(pred.quadratic) = input$add_quadratic_fitted_values
-        temp = cbind(temp, pred.quadratic)
-      }
-      if("cubic" %in% graphical.par$trend) {
-        cubic_trend = TRUE
-        fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
-        pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = graphical.par$y)))
-        colnames(pred.cubic) = input$add_cubic_fitted_values
-        temp = cbind(temp, pred.cubic)
-      }
-      if(graphical.par$smooth > 0) {
-        temp3 = graphical.par$smooth
-        smoother_trend = TRUE
-        fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
-                                           family = "gaussian", degree = 1, na.action = "na.exclude"))
-        pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = graphical.par$y)))
-        colnames(pred.smooth) = input$add_smoother_fitted_values
-        temp = cbind(temp, pred.smooth)
-        
+      if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
+         iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+        linear_trend = FALSE
+        quadratic_trend = FALSE
+        cubic_trend = FALSE
+        smoother_trend = FALSE
+        if("linear" %in% graphical.par$trend) {
+          linear_trend = TRUE
+          fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
+          pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = graphical.par$y)))
+          colnames(pred.linear) = input$add_linear_fitted_values
+          temp = cbind(temp, pred.linear)
+        }
+        if("quadratic" %in% graphical.par$trend) {
+          quadratic_trend = TRUE
+          fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
+          pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = graphical.par$y)))
+          colnames(pred.quadratic) = input$add_quadratic_fitted_values
+          temp = cbind(temp, pred.quadratic)
+        }
+        if("cubic" %in% graphical.par$trend) {
+          cubic_trend = TRUE
+          fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
+          pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = graphical.par$y)))
+          colnames(pred.cubic) = input$add_cubic_fitted_values
+          temp = cbind(temp, pred.cubic)
+        }
+        if(graphical.par$smooth > 0) {
+          temp3 = graphical.par$smooth
+          smoother_trend = TRUE
+          fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+                                             family = "gaussian", degree = 1, na.action = "na.exclude"))
+          pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = graphical.par$y)))
+          colnames(pred.smooth) = input$add_smoother_fitted_values
+          temp = cbind(temp, pred.smooth)
+          
+        }
+        if(linear_trend)
+          updateCheckboxInput(session, "check_linear", value = T)
+        if(quadratic_trend)
+          updateCheckboxInput(session, "check_quadratic", value = T)
+        if(cubic_trend)
+          updateCheckboxInput(session, "check_cubic", value = T)
+        if(smoother_trend) {
+          updateCheckboxInput(session, "check_smoother",value = T)
+          updateSliderInput(session, "smoother.smooth", value = temp3)
+        }
+      } else {
+        if (iNZightTools::is_num(plot.par$y)){
+          fit = lm(formula = plot.par$y ~ plot.par$x, na.action = na.exclude)
+        } else {
+          fit <- lm(formula = plot.par$x ~ plot.par$y, na.action = na.exclude)
+        }
+        pred.numcat = data.frame(predict(fit, newdata = data.frame(x = ifelse(iNZightTools::is_num(plot.par$x), plot.par$y, plot.par$x),
+                                                                   stringsAsFactors = T)))
+        colnames(pred.numcat) = input$add_numcat_fitted_values
+        temp = cbind(temp, pred.numcat)
       }
       updatePanel$datachanged = updatePanel$datachanged + 1
       values$data.set = temp
       updateCheckboxInput(session, "vari1", value = temp1)
       updateCheckboxInput(session, "vari2", value = temp2)
-      if(linear_trend)
-        updateCheckboxInput(session, "check_linear", value = T)
-      if(quadratic_trend)
-        updateCheckboxInput(session, "check_quadratic", value = T)
-      if(cubic_trend)
-        updateCheckboxInput(session, "check_cubic", value = T)
-      if(smoother_trend) {
-        updateCheckboxInput(session, "check_smoother",value = T)
-        updateSliderInput(session, "smoother.smooth", value = temp3)
-        
-      }
     }
   })
 })
+
 
 
 
@@ -7068,8 +7110,8 @@ observe({
         }, error = function(e) {
           print(e)
         }, finally = {})
-       code = gsub("data_name", code.save$name, code)
-       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+        code = gsub("data_name", code.save$name, code)
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
       }
     }
   })
