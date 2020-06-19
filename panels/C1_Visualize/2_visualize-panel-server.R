@@ -210,13 +210,8 @@ get.default.num.bins = reactive({
 
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par = reactiveValues(
-  hypothesis.value = 0,
-  hypothesis.alt = c("two.sided", "less", "greater"),
-  hypothesis.var.equal = FALSE,
-  hypothesis.use.exact = FALSE,
-  hypothesis.test = c("default", 
-                      "t.test", "anova", "chi2", "proportion"),
-  hypothesis.simulated.p.value = FALSE,
+  
+  
   boxplot = TRUE,
   mean_indicator = FALSE,
   fill_colour = "",
@@ -1935,7 +1930,7 @@ output$plot.appearance.panel = renderUI({
     sorting.title = h5(strong("Sorting"))
     
     pyramid.title = h5(strong("Pyramid Options"))
-
+    
     point.size.title = checkboxInput(inputId = "point_size_title",
                                      label = strong("Point Size"),
                                      value = input$point_size_title)
@@ -2019,13 +2014,13 @@ output$plot.appearance.panel = renderUI({
                                                    ticks = FALSE)))
     
     pyramid.slider.object = fixedRow(column(3, h5("Number of bins:")),
-                               column(6, sliderInput("pyramid.bins", 
-                                                     label = NULL, 
-                                                     value = graphical.par$gg_bins,
-                                                     min = 5,
-                                                     max = 50,
-                                                     step = 5)))
-                              
+                                     column(6, sliderInput("pyramid.bins", 
+                                                           label = NULL, 
+                                                           value = graphical.par$gg_bins,
+                                                           min = 5,
+                                                           max = 50,
+                                                           step = 5)))
+    
     gridplot.object = fixedRow(column(3, h5("Observations / square:")),
                                column(6, numericInput("grid.square", 
                                                       label = NULL, 
@@ -2185,7 +2180,7 @@ output$plot.appearance.panel = renderUI({
                                                              value=graphical.par$scatter.grid.bins,
                                                              step=1, 
                                                              ticks = FALSE))) 
-
+    
     adjust.min.count.grid.object = fixedRow(column(3, h5("Min-count colour (% grey):")),
                                             column(6, sliderInput("adjust.min.count.grid", 
                                                                   label = NULL, 
@@ -2268,7 +2263,7 @@ output$plot.appearance.panel = renderUI({
       if(input$vari2%in%"none"&&
          (class(get.data.set()[,input$vari1])%in%"factor"|
           class(get.data.set()[,input$vari1])%in%"character")){
-
+        
         ret = list(select.bg.object,
                    adjust.size.scale.object,
                    bar.colour.title,
@@ -2416,7 +2411,7 @@ output$plot.appearance.panel = renderUI({
                   class(get.data.set()[,input$vari1])%in%"numeric")&
                  (class(get.data.set()[,input$vari2])%in%"character"|
                   class(get.data.set()[,input$vari2])%in%"factor")))){
-
+        
         ret = list(select.bg.object,
                    adjust.size.scale.object,
                    show.boxplot.title,
@@ -2690,7 +2685,7 @@ output$plot.appearance.panel = renderUI({
                  class(get.data.set()[,input$vari1])%in%"integer")&&
                 (class(get.data.set()[,input$vari1])%in%"numeric"|
                  class(get.data.set()[,input$vari1])%in%"integer"))){
-
+        
         resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
                                             fixedRow(column(3, h5("Resize points by:")),
                                                      column(6, selectInput("resize.by.select",
@@ -2918,10 +2913,10 @@ output$plotly_nw = renderUI({
         br(),
         br(),
         tags$a(href = "path/index.html", 
-                  "Open in a new window", 
-                   target="_blank"), 
-           br(),
-           br())
+               "Open in a new window", 
+               target="_blank"), 
+        br(),
+        br())
     }
   })
 })
@@ -3784,9 +3779,12 @@ output$trend.curve.panel = renderUI({
     #    title.add.trend.curve = h5("Add trend curves")
     trend.curves.title = h5(strong("Trend Curves"))
     smoother.title = h5(strong("Smoother"))
-    check.linear.object = checkboxInput("check_linear",label="linear",value = input$check_linear)
-    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = input$check_quadratic)
-    check.cubic.object = checkboxInput("check_cubic",label="cubic",value = input$check_cubic)
+    check.linear.object = checkboxInput("check_linear",label="linear",
+                                        value = ifelse((!is.null(input$inf.trend.linear)&&length(input$inf.trend.linear)>0),input$inf.trend.linear, FALSE))
+    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",
+                                           value = ifelse((!is.null(input$inf.trend.quadratic)&&length(input$inf.trend.quadratic)>0),input$inf.trend.quadratic, FALSE))
+    check.cubic.object = checkboxInput("check_cubic",label="cubic",
+                                       value = ifelse((!is.null(input$inf.trend.cubic)&&length(input$inf.trend.cubic)>0),input$inf.trend.cubic, FALSE))
     check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = input$check_smoother)
     check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = input$check_quantiles)
     color.linear.select = selectInput("color.linear",label="",
@@ -6187,54 +6185,54 @@ output$interactive.plot = renderUI({
     dafr = get.data.set()
     input$extra_vars_confirm_button
     isolate({
-     # if((!is.null(input$subs1) &&
-    #      input$subs1 %in% colnames(vis.data())) ||
-    #     (!is.null(input$subs2) &&
-    #      input$subs2 %in% colnames(vis.data()))) {
-    #    h4("iNZight doesn't handle interactive panel plots ... yet! 
-    #       Please remove the subset variable(s)")
-    #  } 
-    #  else {
-    #    if(!is.null(input$select.plot.type) &&
-    #       input$select.plot.type == "grid-density plot") {
-    #      h4("iNZight doesn't handle interactive grid-density plots ... yet! 
-    #         Please select other plot types")
-    #    }
-    #    else if(!is.null(input$select.plot.type) &&
-    #            (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-    #            !is.null(input$color_by_select) &&
-    #            input$color_by_select != " ") {
-    #      h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
-    #     Please select other plot types")
-    #    }
-    #    else {
-    #      if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-    #          (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-    #         !is.null(input$export.extra.vars.html) && 
-    #         all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-    #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-    #      }
-    #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
-            local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                           data = data_html(),
-                                                           extra.vars = extra.vars_html(),
-                                                           width = 10, height = 6)
-            
-            local.dir = unclass(local.dir)
-            temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
-            addResourcePath("path", temp.dir)
-            
-            tags$div(tags$a(href = "path/index.html", 
-                            "Open in a new window", 
-                            target="_blank"),
-                     tags$iframe(
-                       seamless = "seamless",
-                       src = "path/index.html",
-                       height = 600, width = 1200
-                     ))
-    #       }
-    #   }
-    #  }
+      # if((!is.null(input$subs1) &&
+      #      input$subs1 %in% colnames(vis.data())) ||
+      #     (!is.null(input$subs2) &&
+      #      input$subs2 %in% colnames(vis.data()))) {
+      #    h4("iNZight doesn't handle interactive panel plots ... yet! 
+      #       Please remove the subset variable(s)")
+      #  } 
+      #  else {
+      #    if(!is.null(input$select.plot.type) &&
+      #       input$select.plot.type == "grid-density plot") {
+      #      h4("iNZight doesn't handle interactive grid-density plots ... yet! 
+      #         Please select other plot types")
+      #    }
+      #    else if(!is.null(input$select.plot.type) &&
+      #            (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
+      #            !is.null(input$color_by_select) &&
+      #            input$color_by_select != " ") {
+      #      h4("iNZight doesn't handle interactive coloured hex bins plots ... yet! 
+      #     Please select other plot types")
+      #    }
+      #    else {
+      #      if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
+      #          (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
+      #         !is.null(input$export.extra.vars.html) && 
+      #         all(input$export.extra.vars.html %in% colnames(vis.data()))) {
+      #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
+      #      }
+      #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
+      local.dir = iNZightPlots:::exportHTML.function(create.html, 
+                                                     data = data_html(),
+                                                     extra.vars = extra.vars_html(),
+                                                     width = 10, height = 6)
+      
+      local.dir = unclass(local.dir)
+      temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+      addResourcePath("path", temp.dir)
+      
+      tags$div(tags$a(href = "path/index.html", 
+                      "Open in a new window", 
+                      target="_blank"),
+               tags$iframe(
+                 seamless = "seamless",
+                 src = "path/index.html",
+                 height = 600, width = 1200
+               ))
+      #       }
+      #   }
+      #  }
     })
   }
 })
@@ -6992,8 +6990,8 @@ observe({
         }, error = function(e) {
           print(e)
         }, finally = {})
-       code = gsub("data_name", code.save$name, code)
-       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+        code = gsub("data_name", code.save$name, code)
+        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
       }
     }
   })

@@ -117,6 +117,101 @@ output$inference_test = renderUI({
 })
 
 
+observe({
+  updateCheckboxInput(session, inputId = "check_linear", label = "linear", value = input$inf.trend.linear)
+})
+observe({
+  updateCheckboxInput(session, inputId = "inf.trend.linear", label = "linear", value = input$check_linear)
+})
+
+observe({
+  updateCheckboxInput(session, inputId = "check_quadratic", label = "quadratic", value = input$inf.trend.quadratic)
+})
+observe({
+  updateCheckboxInput(session, inputId = "inf.trend.quadratic", label = "quadratic", value = input$check_quadratic)
+})
+
+observe({
+  updateCheckboxInput(session, inputId = "check_cubic", label = "cubic", value = input$inf.trend.cubic)
+})
+observe({
+  updateCheckboxInput(session, inputId = "inf.trend.cubic", label = "cubic", value = input$check_cubic)
+})
+
+observe({
+  input$inf.trend.linear
+  isolate({
+    #    graphical.par$bs.inference = F
+    #    graphical.par$inference.type = NULL
+    if(is.null(input$check_linear)&&!is.null(input$inf.trend.linear)){
+      if(input$inf.trend.linear){
+        if(length(which(graphical.par$trend%in%"linear"))==0){
+          graphical.par$trend=c(graphical.par$trend,"linear")
+        }
+        graphical.par$col.trend[["linear"]] = "blue"
+        graphical.par$lty.trend[["linear"]] = 1
+      }else{
+        if(length(which(graphical.par$trend%in%"linear"))>0){
+          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"linear")]
+          if(length(graphical.par$trend)==0){
+            graphical.par$trend=NULL
+          }
+        }
+      }
+    }
+  })
+})
+
+
+observe({
+  input$inf.trend.quadratic
+  isolate({
+    #    graphical.par$bs.inference = F
+    if(is.null(input$check_quadratic)&&!is.null(input$inf.trend.quadratic)){
+      if(input$inf.trend.quadratic){
+        if(length(which(graphical.par$trend%in%"quadratic"))==0){
+          graphical.par$trend=c(graphical.par$trend,"quadratic")
+        }
+        graphical.par$col.trend[["quadratic"]] = "red"
+        graphical.par$lty.trend[["quadratic"]] = 1
+      }else{
+        if(length(which(graphical.par$trend%in%"quadratic"))>0){
+          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"quadratic")]
+          if(length(graphical.par$trend)==0){
+            graphical.par$trend=NULL
+          }
+        }
+      }
+    }
+  })
+})
+
+
+# observe cubic trend
+observe({
+  input$inf.trend.cubic
+  isolate({
+    #    graphical.par$bs.inference = F
+    if(is.null(input$check_cubic)&&!is.null(input$inf.trend.cubic)){
+      if(input$inf.trend.cubic){
+        if(length(which(graphical.par$trend%in%"cubic"))==0){
+          graphical.par$trend=c(graphical.par$trend,"cubic")
+        }
+        graphical.par$col.trend[["cubic"]] = "green4"
+        graphical.par$lty.trend[["cubic"]] = 1
+      }else{
+        if(length(which(graphical.par$trend%in%"cubic"))>0){
+          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"cubic")]
+          if(length(graphical.par$trend)==0){
+            graphical.par$trend=NULL
+          }
+        }
+      }
+    }
+  })
+})
+
+
 
 output$inference_out = renderUI({
   get.data.set()
@@ -371,7 +466,7 @@ output$visualize.inference = renderPrint({
             )
           }
         }
-      }, error = function(e) {print(e)})
+      }, error = function(e) {})
       if(iNZightTools::is_num(plot.par$x) && iNZightTools::is_num(plot.par$y)){
         chosen <- c(input$inf.trend.linear, input$inf.trend.quadratic, input$inf.trend.cubic)
         curSet$trend <- if (any(chosen)) c("linear", "quadratic", "cubic")[chosen] else NULL
@@ -392,7 +487,6 @@ output$visualize.inference = renderPrint({
         print(w)
       }, error = function(e) {
         print(e)
-        print(curSet)
       }, finally = {})
       
       #      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
@@ -453,6 +547,4 @@ output$visualize.summary = renderPrint({
     suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
   }
 })
-
-
 
