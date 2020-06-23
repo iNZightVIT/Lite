@@ -210,13 +210,8 @@ get.default.num.bins = reactive({
 
 ##  These are the list of parameters in inzPlotDefaults()
 graphical.par = reactiveValues(
-  hypothesis.value = 0,
-  hypothesis.alt = c("two.sided", "less", "greater"),
-  hypothesis.var.equal = FALSE,
-  hypothesis.use.exact = FALSE,
-  hypothesis.test = c("default", 
-                      "t.test", "anova", "chi2", "proportion"),
-  hypothesis.simulated.p.value = FALSE,
+  
+  
   boxplot = TRUE,
   mean_indicator = FALSE,
   fill_colour = "",
@@ -3784,9 +3779,12 @@ output$trend.curve.panel = renderUI({
     #    title.add.trend.curve = h5("Add trend curves")
     trend.curves.title = h5(strong("Trend Curves"))
     smoother.title = h5(strong("Smoother"))
-    check.linear.object = checkboxInput("check_linear",label="linear",value = input$check_linear)
-    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",value = input$check_quadratic)
-    check.cubic.object = checkboxInput("check_cubic",label="cubic",value = input$check_cubic)
+    check.linear.object = checkboxInput("check_linear",label="linear",
+                                        value = ifelse((!is.null(input$inf.trend.linear)&&length(input$inf.trend.linear)>0),input$inf.trend.linear, FALSE))
+    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",
+                                           value = ifelse((!is.null(input$inf.trend.quadratic)&&length(input$inf.trend.quadratic)>0),input$inf.trend.quadratic, FALSE))
+    check.cubic.object = checkboxInput("check_cubic",label="cubic",
+                                       value = ifelse((!is.null(input$inf.trend.cubic)&&length(input$inf.trend.cubic)>0),input$inf.trend.cubic, FALSE))
     check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = input$check_smoother)
     check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = input$check_quantiles)
     color.linear.select = selectInput("color.linear",label="",
