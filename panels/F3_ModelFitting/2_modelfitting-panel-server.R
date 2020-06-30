@@ -1082,9 +1082,9 @@ observe({
 output$model_plots = renderUI({
   navlistPanel(id="plot_selector",
                "Select Plot Type",
-               tabPanel("Factor level comparison"),
                tabPanel("Graphical Diagnostics"),
                tabPanel("Normality Checks"),
+               tabPanel("Factor level comparison"),
                widths=c(8,4)
   )
 })
@@ -1119,13 +1119,13 @@ output$plots.main = renderUI({
                                           tabPanel("Basic Plots",
                                                    selectInput("plotlm6.selected",
                                                                label="Select Plot type",
-                                                               choices=c("All Plots",
-                                                                         "Residuals vs Fitted",
+                                                               choices=c("Residuals vs Fitted",
                                                                          "Scale-location",
                                                                          "Residuals vs Leverage",
                                                                          "Cooks Distance",
                                                                          "QQ-Plot",
-                                                                         "Histogram"),
+                                                                         "Histogram",
+                                                                         "All Plots"),
                                                                selected = input$plotlm6.select),
                                                    plotOutput("plotlm6")),
                                           tabPanel("Partial Residual Plot",
