@@ -4,7 +4,7 @@ convert.to.categorical.sidebar =  function(){
        
        selectInput(inputId = "select.to.convert",
                    label = "Select variable",
-                   choices = c("", get.numeric.column.names(get.data.set())),
+                   choices = c(" ", get.numeric.column.names(get.data.set())),
                    multiple = F,
                    selectize = FALSE),
        
