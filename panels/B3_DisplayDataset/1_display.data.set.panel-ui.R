@@ -1,7 +1,7 @@
 current.data = function(){
   ret = list()
   ret[[1]] = h4(textOutput("current.text"))
-  ret[[2]] = dataTableOutput(outputId="current")
+  ret[[2]] = DTOutput(outputId="current")
   ret[[3]] = br()
   ret[[4]] = br()
   ret[[5]] = help.display('Current data','current_data',

@@ -27,7 +27,7 @@ observe({
       name = ifelse(input$name_unite_columns == "", "newcol", input$name_unite_columns)
       sep = input$sep_unite_columns
       temp = iNZightTools::unite(get.data.set(), name, col, sep)
-      output$previewunitecolumns.table = renderDataTable({
+      output$previewunitecolumns.table = renderDT({
         temp
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
     }
@@ -45,7 +45,7 @@ observe({
       name = ifelse(input$name_unite_columns == "", "newcol", input$name_unite_columns)
       sep = input$sep_unite_columns
       temp = iNZightTools::unite(get.data.set(), name, col, sep)
-      output$previewunitecolumns.table = renderDataTable({
+      output$previewunitecolumns.table = renderDT({
         NULL
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
       ## save code 
@@ -61,7 +61,7 @@ observe({
   })
 })
 
-output$unitecolumns.table = renderDataTable({
+output$unitecolumns.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 

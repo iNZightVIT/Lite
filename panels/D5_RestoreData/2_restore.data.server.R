@@ -14,7 +14,7 @@ observe({
   }
 })
 
-output$data.restore.table = renderDataTable({
+output$data.restore.table = renderDT({
   if(input$selector == "Restore data"){
   get.data.set()
   }

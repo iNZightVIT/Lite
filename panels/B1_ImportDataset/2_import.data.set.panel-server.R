@@ -124,7 +124,7 @@ output$load.data.panel = renderUI({
 })
 
 
-output$filetable <- renderDataTable({
+output$filetable <- renderDT({
   
   get.data.set()
   

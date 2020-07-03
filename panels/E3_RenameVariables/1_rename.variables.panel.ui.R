@@ -12,7 +12,7 @@ rename.variables.panel = function(){
       sidebarPanel(uiOutput("rename_variables_two_columns"),
                    actionButton("rename_variables_two_columns_but","Rename",
                                 style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
-      mainPanel(dataTableOutput("rename.variables.table"))
+      mainPanel(DTOutput("rename.variables.table"))
     )
   }
 }

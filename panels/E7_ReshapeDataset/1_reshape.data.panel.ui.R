@@ -16,7 +16,7 @@ reshape.data.panel = function(data.set){
                          reshape button is pressed on the right, the 
                          selected dataset is reshaped and the reshaped version 
                          of the reshaped dataset is displyed."),
-                dataTableOutput("reshape.data.table"))
+                DTOutput("reshape.data.table"))
     )
   }
 }

@@ -48,7 +48,7 @@ get.switch.data.main = function(data.set){
          p(textOutput("col_names_show")),br(),
          div(class="page-divider"),
          h3(textOutput("set_to_change")),br(),
-         dataTableOutput("temp_table"),
+         DTOutput("temp_table"),
          div(class="page-divider"))
   }else{
     list(div(class="page-divider"),
@@ -58,7 +58,7 @@ get.switch.data.main = function(data.set){
          p(textOutput("col_names_show")),br(),
          div(class="page-divider"),
          h3(textOutput("set_to_change")),
-         dataTableOutput("temp_table"),
+         DTOutput("temp_table"),
          div(class="page-divider"))
   }
 }

@@ -10,18 +10,20 @@ output$switch.data.panel = renderUI({
   })
 })
 
-output$temp_table = renderDataTable({
+output$temp_table = renderDT({
   if (!is.null(input[[input$data_select]])){
     if("Imported"%in%input$data_select){
-      load.data(get.data.dir.imported(),
-                strsplit(input[[input$data_select]],
-                         "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
-                                                             "==>",fixed=T)[[1]])])[[2]]
+      as.data.frame(load.data(get.data.dir.imported(),
+                              strsplit(input[[input$data_select]],
+                                       "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
+                                                                           "==>",fixed=T)[[1]])])[[2]],
+                    stringsAsFactors = TRUE)
     }else{
-      load.data(get.data.dir.global(),
-                strsplit(input[[input$data_select]],
-                         "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
-                                                             "==>",fixed=T)[[1]])])[[2]]
+      as.data.frame(load.data(get.data.dir.global(),
+                              strsplit(input[[input$data_select]],
+                                       "==>",fixed=T)[[1]][length(strsplit(input[[input$data_select]],
+                                                                           "==>",fixed=T)[[1]])])[[2]],
+                    stringsAsFactors = TRUE)
     }
   } else {
     NULL

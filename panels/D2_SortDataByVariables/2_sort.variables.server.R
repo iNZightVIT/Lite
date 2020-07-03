@@ -138,7 +138,7 @@ observe({
   })
 })
 
-output$sort.table = renderDataTable({
+output$sort.table = renderDT({
   input$sort_vars
   get.data.set()
 }, options = list(

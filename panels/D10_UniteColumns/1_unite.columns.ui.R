@@ -38,9 +38,9 @@ unite.columns.panel =function(){
     sidebarLayout(
       sidebarPanel(unite.columns.sidebar()),
       mainPanel(h5(strong("Original dataset")),
-                dataTableOutput("unitecolumns.table"),
+                DTOutput("unitecolumns.table"),
                 h5(strong("New dataset")),
-                dataTableOutput("previewunitecolumns.table"))
+                DTOutput("previewunitecolumns.table"))
     )
   }
 }

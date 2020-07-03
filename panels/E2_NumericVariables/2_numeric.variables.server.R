@@ -29,7 +29,7 @@ observe({
   })
 })
 
-output$table_part <- renderDataTable({
+output$table_part <- renderDT({
   if(!is.null(input$select.transform) && !is.null(input$select.columns.transform)){
     transform.tempTable(get.data.set(),input$select.transform,input$select.columns.transform)
   }
@@ -71,7 +71,7 @@ output$standardise.variables.side = renderUI({
 })
 
 
-output$standardise.variables.table = renderDataTable({
+output$standardise.variables.table = renderDT({
   get.data.set()
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
@@ -119,7 +119,7 @@ output$convert.to.cate.side = renderUI({
 
 
 
-output$convert.to.cate.table = renderDataTable({
+output$convert.to.cate.table = renderDT({
   get.data.set()
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
@@ -173,7 +173,7 @@ observe({
   })
 })
 
-output$form.class.interval.table = renderDataTable({
+output$form.class.interval.table = renderDT({
   ret = get.data.set()
   if(all(is.convertable.integer(input$form_class_interval_number))){
     intervals = NULL
@@ -295,7 +295,7 @@ output$labels.provide = renderUI({
 })
 ## Manipulate variables -> Numeric variables -> Rank numeric
 
-output$rank.numeric.table = renderDataTable({
+output$rank.numeric.table = renderDT({
   get.data.set()
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 

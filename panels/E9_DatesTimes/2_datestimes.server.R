@@ -28,8 +28,8 @@ output$convert_datestimes_panel = renderUI({
                            selectize = FALSE,
                            multiple = FALSE),
                
-               fixedRow(column(6, dataTableOutput("convert_datestimes_original_table")),
-                        column(6, dataTableOutput("convert_datestimes_converted_table"))),
+               fixedRow(column(6, DTOutput("convert_datestimes_original_table")),
+                        column(6, DTOutput("convert_datestimes_converted_table"))),
                
                fixedRow(column(3, actionButton("preview_convert_datestimes", "Preview",
                                                style = "color: #fff; background-color: #337ab7; border-color: #2e6da4")),
@@ -58,7 +58,7 @@ observe({
       updateTextInput(session, "convert_datestimes_newname", 
                       value = paste0(new_name, ".dt", sep = ""))
       
-      output$convert_datestimes_original_table = renderDataTable({
+      output$convert_datestimes_original_table = renderDT({
         data.frame(Original = varx, stringsAsFactors = TRUE)
       },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
     }
@@ -87,7 +87,7 @@ observe({
               }
             })
           
-          output$convert_datestimes_converted_table = renderDataTable({
+          output$convert_datestimes_converted_table = renderDT({
             data
           },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
         }
@@ -111,11 +111,11 @@ observe({
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
           
-          output$convert_datestimes_original_table = renderDataTable({
+          output$convert_datestimes_original_table = renderDT({
             NULL
           },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
           
-          output$convert_datestimes_converted_table = renderDataTable({
+          output$convert_datestimes_converted_table = renderDT({
             NULL
           },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
           
@@ -166,7 +166,7 @@ output$aggregate_datestimes_panel = renderUI({
 
 
 
-output$convert.datestimes.table = renderDataTable({
+output$convert.datestimes.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
@@ -175,7 +175,7 @@ output$dates.times = renderUI({
   dates.times.panel()
 })
 
-output$aggregate_datestimes.table = renderDataTable({
+output$aggregate_datestimes.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 

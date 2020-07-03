@@ -32,15 +32,15 @@ mergejoin.datasets.panel =function(){
       mainPanel(conditionalPanel("input.select_mergejoin_columns == 'Join by column values'",
                                  fixedRow(column(6, h5(strong("Preview of the original dataset"))),
                                           column(6, h5(strong("Preview of the imported dataset")))),
-                                 fixedRow(column(6, dataTableOutput("join.table")),
-                                          column(6, dataTableOutput("previewimport.table"))),
+                                 fixedRow(column(6, DTOutput("join.table")),
+                                          column(6, DTOutput("previewimport.table"))),
                                  h5(strong("Preview")),
-                                 dataTableOutput("previewjoin.table")),
+                                 DTOutput("previewjoin.table")),
                 conditionalPanel("input.select_mergejoin_columns == 'Append new rows'",
                                  h5(strong("Original dataset")),
-                                 dataTableOutput("append.table"),
+                                 DTOutput("append.table"),
                                  h5(strong("New dataset")),
-                                 dataTableOutput("previewappend.table")))
+                                 DTOutput("previewappend.table")))
     )
   }
 }

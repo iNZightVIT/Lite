@@ -12,7 +12,7 @@ output$current.data <- renderUI({
   current.data()
 })
 
-output$current <- renderDataTable({
+output$current <- renderDT({
   input$selector
   get.data.set()
 }, options =

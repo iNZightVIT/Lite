@@ -30,13 +30,13 @@ dates.times.panel =function(){
     sidebarLayout(
       sidebarPanel(dates.times.sidebar()),
       mainPanel(conditionalPanel("input.select_datestimes == 'Convert to a Date-Time variable'",
-                                 dataTableOutput("convert.datestimes.table")),
+                                 DTOutput("convert.datestimes.table")),
                                 
                 conditionalPanel("input.select_datestimes == 'Aggregate datetimes to monthly or quarterly'",
                                  h5(strong("Original dataset")),
-                                 dataTableOutput("aggregate_datestimes.table"),
+                                 DTOutput("aggregate_datestimes.table"),
                                  h5(strong("New dataset")),
-                                 dataTableOutput("previewaggregate_datestimes.table")))
+                                 DTOutput("previewaggregate_datestimes.table")))
     )
   }
 }

@@ -37,7 +37,7 @@ observe({
   })
 })
 
-output$ft.expand.data.table = renderDataTable({
+output$ft.expand.data.table = renderDT({
   input$expand_table_button
   get.data.set()
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))

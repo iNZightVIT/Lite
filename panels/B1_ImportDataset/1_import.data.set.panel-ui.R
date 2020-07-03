@@ -19,7 +19,7 @@ get.sidebar.load = function(url_load){
 load.data.panel = function(url_load){
   sidebarLayout(
     sidebarPanel(get.sidebar.load(url_load)),
-    mainPanel(dataTableOutput("filetable")
+    mainPanel(DTOutput("filetable")
     )
   )
 }

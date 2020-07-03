@@ -120,7 +120,7 @@ output$aggregate.variable = renderUI({
   aggregate.variable.panel()
 })
 
-output$aggregate.table = renderDataTable({
+output$aggregate.table = renderDT({
   get.data.set()
 }, options = list(
   lengthMenu = c(5, 30, 50),

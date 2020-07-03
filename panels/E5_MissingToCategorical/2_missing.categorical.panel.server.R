@@ -11,7 +11,7 @@ output$missing.categorical = renderUI({
   missing.categorical.panel(get.data.set())
 })
 
-output$missing.categorical.table = renderDataTable({
+output$missing.categorical.table = renderDT({
   input$missing.categorical.column.select
   dafr = get.data.set()
   isolate({

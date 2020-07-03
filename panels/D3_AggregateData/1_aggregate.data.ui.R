@@ -44,7 +44,7 @@ aggregate.variable.panel =function(){
   }else{
     sidebarLayout(
       sidebarPanel(aggregate.data.sidebar()),
-      mainPanel(dataTableOutput("aggregate.table"))
+      mainPanel(DTOutput("aggregate.table"))
     )
   }
 }

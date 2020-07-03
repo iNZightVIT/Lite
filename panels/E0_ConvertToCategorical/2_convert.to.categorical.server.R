@@ -34,7 +34,7 @@ observe({
 
 
 
-output$convert.to.categorical.table = renderDataTable({
+output$convert.to.categorical.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
