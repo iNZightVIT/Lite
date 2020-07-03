@@ -1,9 +1,3 @@
-## add for now, will delete after updating R
-isFALSE = function(x){
-  is.logical(x) && length(x) == 1L && !is.na(x) && !x
-}
-
-
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
@@ -19,7 +13,7 @@ isFALSE = function(x){
 get.reshape.data = function(dafr){
   temp = do.call(rbind,lapply(1:ncol(dafr),function(index,d){
     name = colnames(d)[index]
-    data.frame(groups=name,d[,index])
+    data.frame(groups=name,d[,index], stringsAsFactors = TRUE)
   },dafr))
   colnames(temp)[2] = "variables"
   temp
@@ -37,9 +31,10 @@ get.reshape.data = function(dafr){
 #' 
 #' @author Christoph Knapp  
 get.missing.categorical = function(dafr,columns){
-  temp = as.data.frame(dafr[,columns])
+  temp = as.data.frame(dafr[,columns], stringsAsFactors = TRUE)
   colnames(temp) = columns
-  new.dafr = data.frame(do.call(cbind,lapply(1:length(columns),
+  new.dafr = data.frame(stringsAsFactors = TRUE, 
+                        do.call(cbind,lapply(1:length(columns),
                                   function(index, d, c){
                                     te = rep("observed",nrow(d))
                                     te[is.na(d[,index])] = "missing"
@@ -78,9 +73,9 @@ display.missing.categorical = function(dafr, columns) {
       temp[index] = "missing"
       temp = factor(temp, levels = c("observed", "missing"))
     }
-    temp = as.data.frame(temp)
+    temp = as.data.frame(temp, stringsAsFactors = TRUE)
     colnames(temp) = paste(i, "missing", sep = "_")
-    dafr = data.frame(dafr, temp)
+    dafr = data.frame(dafr, temp, stringsAsFactors = TRUE)
   }
   dafr
 }
@@ -150,7 +145,7 @@ convert.dafr = function(dafr){
 #' 
 #' @author Christoph Knapp
 get.combinations = function(dafr,simplify=F){
-  dafr = data.frame(dafr)
+  dafr = data.frame(dafr, stringsAsFactors = TRUE)
   index.column = rep(T,ncol(dafr))
   rm.na <- function(variable) {
     sum(is.na(variable)) > 0
@@ -158,7 +153,7 @@ get.combinations = function(dafr,simplify=F){
   if(simplify){
     index.column <- sapply(dafr, rm.na)
   }
-  x <- data.frame(dafr[,index.column])
+  x <- data.frame(dafr[,index.column], stringsAsFactors = TRUE)
   if(ncol(x)>0){
     x1 <- as.numeric(apply(x, 2, function(x) length(which(is.na(x)))))
     row4col.order <- order(x1) 
@@ -166,7 +161,7 @@ get.combinations = function(dafr,simplify=F){
     z1 <- ifelse(is.na(x), "missing", "observed")
     tab <- table(apply(z1, 1, paste, collapse = ","))
     tab <- tab[order(names(tab), decreasing = TRUE)]
-    tab <- data.frame(combination = names(tab), count = as.numeric(tab))
+    tab <- data.frame(combination = names(tab), count = as.numeric(tab), stringsAsFactors = TRUE)
     tabp <- t(apply(tab, 1, function(x) {
       unlist(strsplit(x, ",", fixed = TRUE))
     }))
@@ -259,7 +254,8 @@ get.create.variables = function(dafr,new.formula,new.name=NULL){
 #' 
 #' @author Christoph Knapp
 get.rank.numeric = function(dafr,columns){
-  temp = data.frame(sapply(dafr[,columns], 
+  temp = data.frame(stringsAsFactors = TRUE,
+                    sapply(dafr[,columns], 
                            rank, 
                            ties.method = "min", 
                            na.last = "keep"))
@@ -694,7 +690,7 @@ sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
 #' @author Christoph Knapp
 get.numeric.column.names = function(dafr){
   colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
-    is.numeric(as.data.frame(d)[,index])
+    is.numeric(as.data.frame(d, stringsAsFactors = TRUE)[,index])
   },dafr)))]
 }
 
@@ -706,7 +702,7 @@ get.numeric.column.names = function(dafr){
 #' @author Christoph Knapp
 get.categorical.column.names = function(dafr){
   colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
-    class(as.data.frame(d)[,index])%in%"factor"||class(as.data.frame(d)[,index])%in%"character"
+    class(as.data.frame(d, stringsAsFactors = TRUE)[,index])%in%"factor"||class(as.data.frame(d, stringsAsFactors = TRUE)[,index])%in%"character"
   },dafr)))]
 }
 
@@ -803,7 +799,7 @@ get.player = function(ID.forward,ID.player,ID.backward,maxi){
 #' 
 #' @author Christoph Knapp
 change.factor.transform = function(temp,columns){
-  temp = as.data.frame(temp)
+  temp = as.data.frame(temp, stringsAsFactors = TRUE)
   nums = unlist(lapply(1:ncol(temp),function(index,temp.data,columns){
     if(is.numeric(temp.data[,index])){
       columns[index]
@@ -811,7 +807,8 @@ change.factor.transform = function(temp,columns){
       NULL
     }
   },temp,columns))
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(temp),function(index,temp.data){
+  temp = as.data.frame(stringsAsFactors = TRUE, 
+                       do.call(cbind,lapply(1:ncol(temp),function(index,temp.data){
     if(is.numeric(temp.data[,index])){
       as.character(temp.data[,index])
     }else{
@@ -833,8 +830,8 @@ change.factor.transform = function(temp,columns){
 #' 
 #' @author Christoph Knapp
 change.sign.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
+  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
     if(is.numeric(dafr[,index])){
       as.matrix(dafr[,index]*(-1))
     }else{
@@ -870,14 +867,14 @@ test.for.dates = function(dafr){
 }
 
 copy.transform = function(dafr,columns){
-  data = as.data.frame(dafr)
+  data = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = paste("copy",columns,sep=".")
   data
 }
 
 reverse.coding.transform = function(dafr,columns){
-  data = as.data.frame(dafr)
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+  data = as.data.frame(dafr, stringsAsFactors = TRUE)
+  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       min(d[,index],na.rm=T)+max(d[,index],na.rm=T)-d[,index]
     }else{
@@ -895,9 +892,9 @@ reverse.coding.transform = function(dafr,columns){
 }
 
 median.split.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   nums = unlist(lapply(1:ncol(dafr),function(index,dafr){is.numeric(dafr[,index])},dafr))
-  dafr = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+  dafr = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       med = median(d[,index],na.rm=T)
       ret = rep("high",length(d[,index]))
@@ -912,8 +909,9 @@ median.split.transform = function(dafr,columns){
 }
 
 standardize.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
-  dafr = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
+  dafr = as.data.frame(stringsAsFactors = TRUE,
+                       do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       (d[,index]-mean(d[,index],na.rm=T))/sd(d[,index],na.rm=T)
     }else{
@@ -927,8 +925,9 @@ standardize.transform = function(dafr,columns){
 }
 
 center.transform = function(dafr,columns){
-  data = as.data.frame(dafr)
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+  data = as.data.frame(dafr, stringsAsFactors = TRUE)
+  temp = as.data.frame(stringsAsFactors = TRUE, 
+                       do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       d[,index]-mean(d[,index])
     }else{
@@ -940,24 +939,28 @@ center.transform = function(dafr,columns){
 }
 
 divide.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
   if(is.null(dafr)){
     return(NULL)
   }else{
-    if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+    if(ncol(as.data.frame(stringsAsFactors = TRUE,
+                          dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
       is.numeric(d[,index])
     },dafr))]))==1){
-      temp = as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      temp = as.data.frame(stringsAsFactors = TRUE,
+                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))])
       colnames(temp) = colnames(data)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },data))]
-    }else if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+    }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
+                                dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
       is.numeric(d[,index])
     },data))]))>1){
-      temp = as.data.frame(divide(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      temp = as.data.frame(stringsAsFactors = TRUE,
+                           divide(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])},dafr))]))
       colnames(temp) = paste0("divide.",
                               paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
@@ -974,7 +977,7 @@ divide = function(dafr){
   dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
     is.numeric(d[,index])
   },dafr))]
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   if(ncol(dafr)==1){
     dafr[,1]
   }else{
@@ -987,24 +990,28 @@ divide = function(dafr){
 }
 
 multiply.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
   if(is.null(dafr)){
     return(NULL)
   }else{
-    if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+    if(ncol(as.data.frame(stringsAsFactors = TRUE,
+                          dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
       is.numeric(d[,index])
     },dafr))]))==1){
-      temp = as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      temp = as.data.frame(stringsAsFactors = TRUE,
+                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))])
       colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))]
-    }else if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+    }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
+                                dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
       is.numeric(d[,index])
     },dafr))]))>1){
-      temp = as.data.frame(multiply(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      temp = as.data.frame(stringsAsFactors = TRUE,
+                           multiply(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))]))
       colnames(temp) = paste0("multiply.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
@@ -1021,7 +1028,7 @@ multiply = function(dafr){
   dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
     is.numeric(d[,index])
   },dafr))]
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   if(ncol(dafr)==1){
     dafr[,1]
   }else{
@@ -1034,24 +1041,28 @@ multiply = function(dafr){
 }
 
 subtract.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
   if(is.null(dafr)){
     return(NULL)
   }else{
-    if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+    if(ncol(as.data.frame(stringsAsFactors = TRUE,
+                          dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
       is.numeric(d[,index])
     },dafr))]))==1){
-      temp = as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      temp = as.data.frame(stringsAsFactors = TRUE,
+                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))])
       colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))]
-    }else if(ncol(as.data.frame(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+    }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
+                                dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
       is.numeric(d[,index])
     },dafr))]))>1){
-      temp = as.data.frame(subtract(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
+      temp = as.data.frame(stringsAsFactors = TRUE,
+                           subtract(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))]))
       colnames(temp) = paste0("subtract.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
@@ -1068,7 +1079,8 @@ subtract = function(dafr){
   dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
     is.numeric(d[,index])
   },dafr))]
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(stringsAsFactors = TRUE,
+                       dafr)
   if(ncol(dafr)==1){
     dafr[,1]
   }else{
@@ -1081,16 +1093,18 @@ subtract = function(dafr){
 }
 
 add.transform  = function(temp,columns){
-  temp = as.data.frame(temp)
+  temp = as.data.frame(temp, stringsAsFactors = TRUE)
   colnames(temp) = columns
   if(is.null(temp)){
     return(NULL)
   }else{
-    ret = as.data.frame(temp[,unlist(lapply(1:ncol(temp),function(index,d){
+    ret = as.data.frame(stringsAsFactors = TRUE,
+                        temp[,unlist(lapply(1:ncol(temp),function(index,d){
       is.numeric(d[,index])
     },temp))])
     if(ncol(ret)>1){
-      ret = as.data.frame(apply(ret,1,function(row){sum(row)}))
+      ret = as.data.frame(stringsAsFactors = TRUE,
+                          apply(ret,1,function(row){sum(row)}))
       colnames(ret) = paste0("add_",paste(colnames(temp),collapse="_"))
     }else{
       return(NULL)
@@ -1112,11 +1126,12 @@ transform.perform = function(dafr,type,columns){
 # returns the transformed columns and the original columns as 
 # dataframe (cbind(<original columns>,<transformed columns>)).
 transform.tempTable = function(dafr,type,columns){
-  temp1 = as.data.frame(dafr[,which(colnames(dafr)%in%columns)])
+  temp1 = as.data.frame(stringsAsFactors = TRUE,
+                        dafr[,which(colnames(dafr)%in%columns)])
   colnames(temp1) = columns
   temp2 = transform.get.temp(dafr,type,columns)
   if(!is.null(temp2)){
-    temp1 = data.frame(temp1,temp2)
+    temp1 = data.frame(stringsAsFactors = TRUE,temp1,temp2)
   }
   temp1
 }
@@ -1162,9 +1177,9 @@ transform.get.temp = function(dafr,type,columns){
 }
 
 log.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
+  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
     if(is.numeric(dafr[,index])){
       log(dafr[,index])
     }else{
@@ -1186,9 +1201,9 @@ log.transform = function(dafr,columns){
 }
 
 root.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       sqrt(d[,index])
     }else{
@@ -1211,9 +1226,9 @@ root.transform = function(dafr,columns){
 }
 
 square.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       d[,index]^2
     }else{
@@ -1236,9 +1251,10 @@ square.transform = function(dafr,columns){
 }
 
 abs.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr)
+  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
-  temp = as.data.frame(do.call(cbind,lapply(1:ncol(dafr),function(index,d){
+  temp = as.data.frame(stringsAsFactors = TRUE, 
+                       do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       abs(d[,index])
     }else{
@@ -1326,13 +1342,13 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
         }else if(tolower(ext)%in%"csv"){
           temp = read.csv(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"), stringsAsFactors=TRUE)
         }else if(tolower(ext)%in%"txt"){
-          temp = read.delim(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"))
+          temp = read.delim(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"), stringsAsFactors = TRUE)
         }else if(tolower(ext)%in%"xls"){
 #          temp = read.xlsx(full.name[indexes[1]], 1)
-          temp = as.data.frame(read_excel(full.name[indexes[1]]))
+          temp = as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
         }else if(tolower(ext)%in%"xlsx"){
 #          temp = read.xlsx(full.name[indexes[1]], 1)
-          temp = as.data.frame(read_excel(full.name[indexes[1]]))
+          temp = as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
         }else if(tolower(ext)%in%"sas7bdat"){
           temp = read.sas7bdat(full.name[indexes[1]])
         }else if(tolower(ext)%in%"dta"){
