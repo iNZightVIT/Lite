@@ -1332,7 +1332,7 @@ observe({
       filepath = paste(dirpath, filename, sep = "")
       mapData = iNZightMaps::retrieveMap(filepath)
       args2$mapData = mapData
-      map.vars = as.data.frame(mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
+      map.vars = as.data.frame(stringsAsFactors = TRUE, mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
       ## get the choices for mapvairable_panel
       mapvars.update = colnames(map.vars[, !(apply(map.vars, 2, anyDuplicated, incomparables = c(NA, ""))), drop = FALSE])
       
@@ -1368,7 +1368,7 @@ observeEvent(input$loadshapefiles, {
     filepath = input$loadshapefiles$datapath
     mapData = iNZightMaps::retrieveMap(filepath)
     args2$mapData = mapData
-    map.vars = as.data.frame(mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
+    map.vars = as.data.frame(stringsAsFactors = TRUE, mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
     ## get the choices for mapvairable_panel
     mapvars.update = colnames(map.vars[, !(apply(map.vars, 2, anyDuplicated, incomparables = c(NA, ""))), drop = FALSE])
     
@@ -2038,7 +2038,8 @@ output$printseqvar = renderText({
   input$seqvar_slider
   isolate({
     temp = plot.args2()
-    unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
+    unique.singlevals = unique(as.data.frame(stringsAsFactors = TRUE,
+                                             temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
     unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
     if(!is.null(input$sequencevariable) && length(input$sequencevariable) > 0)
       paste("Value of", input$sequencevariable, ":", unique.singlevals[input$seqvar_slider])
@@ -2055,7 +2056,8 @@ output$seqvar_slider_panel = renderUI({
     temp = plot.args2()
     
     if(!is.null(temp$match.list) && temp$match.list$multiple.obs) {
-      unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
+      unique.singlevals = unique(as.data.frame(stringsAsFactors = TRUE,
+                                               temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
       unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
       n.unique.singlevals = length(unique.singlevals)
       if(!is.null(input$sequencevariable) && length(input$sequencevariable) > 0) 
@@ -2106,7 +2108,8 @@ observe({
     if(!is.null(temp$match.list) && temp$match.list$multiple.obs)
       if(length(input$multipleobsoption) > 0 && input$multipleobsoption == 1) {
         
-        unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
+        unique.singlevals = unique(as.data.frame(stringsAsFactors = TRUE,
+                                                 temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
         unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
         
         args2$multipleObsOption = "singleval"
@@ -2151,7 +2154,8 @@ observe({
       args2$plotSparklinesType = input$linecharttypeoption
       
       if(!is.null(input$vartodisplay) && length(input$vartodisplay) > 0) {
-        vars.to.keep = sapply(as.data.frame(plot.args2()$combinedData$region.data)[, input$vartodisplay, drop = FALSE], is.numeric)
+        vars.to.keep = sapply(as.data.frame(stringsAsFactors = TRUE,
+                                            plot.args2()$combinedData$region.data)[, input$vartodisplay, drop = FALSE], is.numeric)
         if(sum(vars.to.keep) > 0)
           updateSelectInput(session, "vartodisplay", selected = input$vartodisplay[vars.to.keep])
         else
@@ -2621,7 +2625,8 @@ output$maps_plot = renderPlot({
         
         ## update "match.list" information after loading data        
         match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
-                                                 as.data.frame(mapData)[, input$mapvariable])
+                                                 as.data.frame(stringsAsFactors = TRUE,
+                                                               mapData)[, input$mapvariable])
         
         args2$match.list = match.list
           
@@ -2773,7 +2778,8 @@ output$interactive.maps = renderUI({
         
         ## update "match.list" information after loading data        
         match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
-                                                 as.data.frame(mapData)[, input$mapvariable])
+                                                 as.data.frame(stringsAsFactors = TRUE,
+                                                               mapData)[, input$mapvariable])
         
         args2$match.list = match.list
         
@@ -3079,7 +3085,7 @@ output$save_interactive_mapplot2 = downloadHandler(
         
         ## update "match.list" information after loading data        
         match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
-                                                 as.data.frame(mapData)[, input$mapvariable])
+                                                 as.data.frame(stringsAsFactors = TRUE, mapData)[, input$mapvariable])
         
         args2$match.list = match.list
         
@@ -3278,7 +3284,8 @@ observe({
             
             ## update "match.list" information after loading data        
             match.list = iNZightMaps::matchVariables(temp.data[, input$datavariable],
-                                                     as.data.frame(mapData)[, input$mapvariable])
+                                                     as.data.frame(stringsAsFactors = TRUE, 
+                                                                   mapData)[, input$mapvariable])
             
             args2$match.list = match.list
             

@@ -59,7 +59,7 @@ observe({
                       value = paste0(new_name, ".dt", sep = ""))
       
       output$convert_datestimes_original_table = renderDataTable({
-        data.frame(Original = varx)
+        data.frame(Original = varx, stringsAsFactors = TRUE)
       },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
     }
   })
@@ -77,12 +77,13 @@ observe({
           name = input$convert_datestimes_newname
           
           data = tryCatch(
-            data.frame(Converted = iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)[[name]]),
+            data.frame(Converted = iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)[[name]],
+                       stringsAsFactors = TRUE),
             warning = function(w) {
               if (w$message == "Failed to parse") {
-                data.frame(Converted = "Invalid format")
+                data.frame(Converted = "Invalid format",  stringsAsFactors = TRUE)
               } else {
-                data.frame(Converted = w$message)
+                data.frame(Converted = w$message,  stringsAsFactors = TRUE)
               }
             })
           

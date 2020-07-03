@@ -1350,11 +1350,11 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
 #          temp = read.xlsx(full.name[indexes[1]], 1)
           temp = as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
         }else if(tolower(ext)%in%"sas7bdat"){
-          temp = read.sas7bdat(full.name[indexes[1]])
+          temp = as.data.frame(stringsAsFactors = TRUE, read.sas7bdat(full.name[indexes[1]]))
         }else if(tolower(ext)%in%"dta"){
-          temp = read.dta(full.name[indexes[1]])
+          temp = as.data.frame(stringsAsFactors = TRUE, read.dta(full.name[indexes[1]]))
         }else if(tolower(ext)%in%"sav"){
-          temp = read.spss(full.name[indexes[1]], use.value.labels=FALSE,to.data.frame=TRUE)
+          temp = as.data.frame(stringsAsFactors = TRUE, read.spss(full.name[indexes[1]], use.value.labels=FALSE,to.data.frame=TRUE))
         }
       }, error = function(e) {
         print(e)

@@ -260,7 +260,7 @@ observeEvent(input$repRscalesBtn, {
     isolate({
       x1 <- readLines(input$repRscalesBtn[1, "datapath"], n = 1)
       file_has_header <- suppressWarnings(is.na(as.numeric(x1)))
-      df <- read.csv(input$repRscalesBtn[1, "datapath"], header = file_has_header)
+      df <- read.csv(input$repRscalesBtn[1, "datapath"], header = file_has_header, stringsAsFactors = TRUE)
       if (nrow(df) != length(input$repVars)) {
         shinyalert("You need to specify one scale per replicate.", type = "error")
       } else {
@@ -275,9 +275,9 @@ observeEvent(input$repRscalesBtn, {
 ## table
 output$rscalesTbl = renderTable({
   if(!is.null(repRscales$df)){
-    cbind(data.frame(rep.weight = repRscales$rep.weight, rscales = repRscales$rscales), repRscales$df)
+    cbind(data.frame(stringsAsFactors = TRUE, rep.weight = repRscales$rep.weight, rscales = repRscales$rscales), repRscales$df)
   } else {
-    data.frame(rep.weight = repRscales$rep.weight, rscales = repRscales$rscales)
+    data.frame(stringsAsFactors = TRUE, rep.weight = repRscales$rep.weight, rscales = repRscales$rscales)
   }
 })
 
@@ -326,6 +326,7 @@ observe({
   for (v in factorvars) {
     if (is.null(lvldf$df[[v]])) {
       d <- data.frame(
+        stringsAsFactors = TRUE,
         a = levels(get.data.set()[[v]]),
         b = NA
       )
@@ -408,7 +409,7 @@ observe({
         ## import data
         x1 <- readLines(input[[paste0("PS", v, "data")]][1, "datapath"], n = 1)
         file_has_header <- suppressWarnings(is.na(as.numeric(x1)))
-        df <- read.csv(input[[paste0("PS", v, "data")]][1, "datapath"], header = file_has_header)
+        df <- read.csv(input[[paste0("PS", v, "data")]][1, "datapath"], header = file_has_header, stringsAsFactors = TRUE)
         if (nrow(df) != 2) {
           shinyalert("File needs to have 2 columns: one for variable names, and one for frequencies.", type = "error")
           shinyjs::reset(paste0("PS", v, "data"))

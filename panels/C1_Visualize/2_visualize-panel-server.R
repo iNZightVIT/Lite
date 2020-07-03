@@ -6467,21 +6467,21 @@ observe({
         if("linear" %in% graphical.par$trend) {
           linear_trend = TRUE
           fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
-          resi.linear = data.frame(residuals(fit.linear))
+          resi.linear = data.frame(residuals(fit.linear), stringsAsFactors = TRUE)
           colnames(resi.linear) = input$add_linear_residuals
           temp = cbind(temp, resi.linear)
         }
         if("quadratic" %in% graphical.par$trend) {
           quadratic_trend = TRUE
           fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
-          resi.quadratic = data.frame(residuals(fit.quadratic))
+          resi.quadratic = data.frame(residuals(fit.quadratic), stringsAsFactors = TRUE)
           colnames(resi.quadratic) = input$add_quadratic_residuals
           temp = cbind(temp, resi.quadratic)
         }
         if("cubic" %in% graphical.par$trend) {
           cubic_trend = TRUE
           fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
-          resi.cubic = data.frame(residuals(fit.cubic))
+          resi.cubic = data.frame(residuals(fit.cubic), stringsAsFactors = TRUE)
           colnames(resi.cubic) = input$add_cubic_residuals
           temp = cbind(temp, resi.cubic)
         }
@@ -6490,7 +6490,7 @@ observe({
           smoother_trend = TRUE
           fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
                                              family = "gaussian", degree = 1, na.action = "na.exclude"))
-          resi.smooth = data.frame(residuals(fit.smooth))
+          resi.smooth = data.frame(residuals(fit.smooth), stringsAsFactors = TRUE)
           colnames(resi.smooth) = input$add_smoother_residuals
           temp = cbind(temp, resi.smooth)
           
@@ -6512,7 +6512,7 @@ observe({
         } else {
           fit <- lm(formula = plot.par$x ~ plot.par$y, na.action = na.exclude)
         }
-        resi.numcat = data.frame(residuals(fit))
+        resi.numcat = data.frame(residuals(fit), stringsAsFactors = TRUE)
         colnames(resi.numcat) = input$add_numcat_residuals
         temp = cbind(temp, resi.numcat)
       }
@@ -6541,21 +6541,24 @@ observe({
         if("linear" %in% graphical.par$trend) {
           linear_trend = TRUE
           fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
-          pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = graphical.par$y)))
+          pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = graphical.par$y, stringsAsFactors = TRUE)),
+                                   stringsAsFactors = TRUE)
           colnames(pred.linear) = input$add_linear_fitted_values
           temp = cbind(temp, pred.linear)
         }
         if("quadratic" %in% graphical.par$trend) {
           quadratic_trend = TRUE
           fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
-          pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = graphical.par$y)))
+          pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = graphical.par$y, stringsAsFactors = TRUE)),
+                                      stringsAsFactors = TRUE)
           colnames(pred.quadratic) = input$add_quadratic_fitted_values
           temp = cbind(temp, pred.quadratic)
         }
         if("cubic" %in% graphical.par$trend) {
           cubic_trend = TRUE
           fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
-          pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = graphical.par$y)))
+          pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = graphical.par$y, stringsAsFactors = TRUE)),
+                                  stringsAsFactors = TRUE)
           colnames(pred.cubic) = input$add_cubic_fitted_values
           temp = cbind(temp, pred.cubic)
         }
@@ -6564,7 +6567,8 @@ observe({
           smoother_trend = TRUE
           fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
                                              family = "gaussian", degree = 1, na.action = "na.exclude"))
-          pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = graphical.par$y)))
+          pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = graphical.par$y, stringsAsFactors = TRUE)),
+                                   stringsAsFactors = TRUE)
           colnames(pred.smooth) = input$add_smoother_fitted_values
           temp = cbind(temp, pred.smooth)
           
@@ -6586,7 +6590,8 @@ observe({
           fit <- lm(formula = plot.par$x ~ plot.par$y, na.action = na.exclude)
         }
         pred.numcat = data.frame(predict(fit, newdata = data.frame(x = ifelse(iNZightTools::is_num(plot.par$x), plot.par$y, plot.par$x),
-                                                                   stringsAsFactors = T)))
+                                                                   stringsAsFactors = TRUE)),
+                                 stringsAsFactors = TRUE)
         colnames(pred.numcat) = input$add_numcat_fitted_values
         temp = cbind(temp, pred.numcat)
       }
