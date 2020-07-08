@@ -302,16 +302,7 @@ output$visualize.inference = renderPrint({
       }
       if (!is.null(curSet$freq))
         curSet$freq <- get.data.set()[[curSet$freq]]
-      #if (!is.null(curSet$x) && !is.null(curSet$y)) {
-      #  if (is.numeric(vis.data()[[curSet$x]]) && is.numeric(vis.data()[[curSet$y]])) {
-      #    tmp.x <- curSet$y
-      #    curSet$y <- curSet$x
-      #    curSet$x <- tmp.x
-      #    v <- curSet$varnames
-      #    curSet$varnames$x <- v$y
-      #    curSet$varnames$y <- v$x
-      #  }
-      #}
+    
       if (is.null(curSet$g1) && !is.null(curSet$g2)) {
         if (curSet$g2.level != "_ALL") {
           curSet$g1 <- curSet$g2
@@ -478,18 +469,14 @@ output$visualize.inference = renderPrint({
       if (!is.null(curSet$y))
         vartypes$y <- iNZightTools::vartype(vis.data()[[curSet$y]])
       
-      #if(is.numeric(plot.par$x) && is.numeric(plot.par$x)){
-      #  curSet <- modifyList(
-      #    curSet,
-      #    list(trend = plot.par$trend),
-      #    keep.null = TRUE)
-      #}
+
       
       tryCatch({
-        eval(construct_call(curSet, vartypes,
-                            data = vis.data(),
-                            what = "inference"
+        inf.print <- eval(construct_call(curSet, vartypes,
+                                         data = vis.data(),
+                                         what = "inference"
         ))
+        
         #saveRDS(values.list, file = "/Users/tongchen/Documents/work/Lite/b.rds")
       }, warning = function(w) {
         print(w)
@@ -497,6 +484,19 @@ output$visualize.inference = renderPrint({
         print(e)
       }, finally = {})
       
+      
+      if (!is.null(input$hypSimPval)) {
+        exp_match <- any(grepl("since some expected counts <", inf.print, fixed = TRUE))
+        if (exp_match) {
+          updateCheckboxInput(session, "hypSimPval", label = "Simulate p-value", value = TRUE)
+          shinyjs::disable("hypSimPval")
+        }
+        if (!exp_match) {
+          shinyjs::enable("hypSimPval")
+        }
+      }
+      
+      inf.print
       #      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
       #           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       #        tryCatch({
@@ -523,15 +523,7 @@ output$visualize.summary = renderPrint({
   } else {
     values.list = modifyList(reactiveValuesToList(plot.par),
                              reactiveValuesToList(graphical.par), keep.null = TRUE)
-    #if(!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
-    #   !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])){
-      #values.list.x = values.list$x
-      #values.list$x=values.list$y
-      #values.list$y=values.list.x
-      #values.list.varnames.x = values.list$varnames$x
-      #values.list$varnames$x = values.list$varnames$y
-      #values.list$varnames$y = values.list.varnames.x
-    #}
+    
     if(!is.null(values.list$design)){
       values.list$data = NULL
     }
