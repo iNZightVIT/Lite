@@ -2898,7 +2898,9 @@ output$plotly_inter = renderPlotly({
       temp$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
       pdf(NULL)
       do.call(iNZightPlots:::iNZightPlot, temp)
-      plotly::ggplotly()
+      g<-plotly::ggplotly()
+      dev.off()
+      g
     }
   })
 })
@@ -2926,6 +2928,7 @@ output$plotly_nw = renderUI({
       on.exit(dev.off(cdev), add = TRUE)
       do.call(iNZightPlots:::iNZightPlot, temp)
       htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
+      dev.off()
       addResourcePath("path", normalizePath(tdir))
       list(
         br(),
