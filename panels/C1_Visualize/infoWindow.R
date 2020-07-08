@@ -21,14 +21,14 @@ output$inference_test = renderUI({
   design_params$design
   isolate({
     if (!is.null(plot.par$x)) {
-      xvar <- plot.par$x
-      yvar <- if (!is.null(plot.par$y)) plot.par$y else NULL
+      xvar <- vis.data()[[plot.par$x]]
+      yvar <- if (!is.null(vis.data()[[plot.par$y]])) vis.data()[[plot.par$y]] else NULL
       ## Figure out what type of inference will be happening:
-      xnum <- iNZightTools::is_num(plot.par$x)
+      xnum <- iNZightTools::is_num(vis.data()[[plot.par$x]])
       if (is.null(yvar)) {
         INFTYPE <- ifelse(xnum, "onesample-ttest", "oneway-table")
       } else {
-        ynum <- iNZightTools::is_num(plot.par$y)
+        ynum <- iNZightTools::is_num(vis.data()[[plot.par$y]])
         if (xnum && ynum) {
           INFTYPE <- "regression"
         } else if (xnum | ynum) {
@@ -341,7 +341,7 @@ output$visualize.inference = renderPrint({
       
       tryCatch({
         ## one sample t-test
-        if(iNZightTools::is_num(plot.par$x) && is.null(plot.par$y)){
+        if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && is.null(plot.par$y)){
           if(input$hypTest == "One sample t-test"){
             curSet <- modifyList(
               curSet,
@@ -360,7 +360,7 @@ output$visualize.inference = renderPrint({
               keep.null = TRUE
             )
           }
-        } else if(length(levels(plot.par$x)) == 2 && is.null(plot.par$y)){
+        } else if(length(levels(vis.data()[[plot.par$x]])) == 2 && is.null(plot.par$y)){
           ## test for binary x
           ## for survey obj
           if(is_survey){
@@ -407,8 +407,8 @@ output$visualize.inference = renderPrint({
               )
             } 
           }
-        } else if ((length(levels(plot.par$x)) > 2 && is.null(plot.par$y)) || 
-                   (is.factor(plot.par$x) && is.factor(plot.par$y))){
+        } else if ((length(levels(vis.data()[[plot.par$x]])) > 2 && is.null(plot.par$y)) || 
+                   (is.factor(vis.data()[[plot.par$x]]) && is.factor(vis.data()[[plot.par$y]]))){
           ## chi-square test
           if(input$hypTest == "Chi-square test"){
             curSet <- modifyList(curSet,
@@ -423,8 +423,8 @@ output$visualize.inference = renderPrint({
               keep.null = TRUE
             )
           }
-        } else if ((length(levels(plot.par$x)) == 2 && is.numeric(plot.par$y)) || 
-                   (is.numeric(plot.par$x) && length(levels(plot.par$y)) == 2)){
+        } else if ((length(levels(vis.data()[[plot.par$x]])) == 2 && is.numeric(vis.data()[[plot.par$y]])) || 
+                   (is.numeric(vis.data()[[plot.par$x]]) && length(levels(vis.data()[[plot.par$y]])) == 2)){
           ## two sample t-test
           if(input$hypTest == "Two sample t-test") {
             curSet <- modifyList(
@@ -451,8 +451,8 @@ output$visualize.inference = renderPrint({
               keep.null = TRUE
             )
           }
-        } else if ((length(levels(plot.par$x)) > 2 && is.numeric(plot.par$y)) || 
-                   (is.numeric(plot.par$x) && length(levels(plot.par$y)) > 2)){
+        } else if ((length(levels(vis.data()[[plot.par$x]])) > 2 && is.numeric(vis.data()[[plot.par$y]])) || 
+                   (is.numeric(vis.data()[[plot.par$x]]) && length(levels(vis.data()[[plot.par$y]])) > 2)){
           if(input$hypTest == "ANOVA"){
             curSet <- modifyList(
               curSet,
@@ -467,7 +467,7 @@ output$visualize.inference = renderPrint({
           }
         }
       }, error = function(e) {})
-      if(iNZightTools::is_num(plot.par$x) && iNZightTools::is_num(plot.par$y)){
+      if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && iNZightTools::is_num(vis.data()[[plot.par$y]])){
         chosen <- c(input$inf.trend.linear, input$inf.trend.quadratic, input$inf.trend.cubic)
         curSet$trend <- if (any(chosen)) c("linear", "quadratic", "cubic")[chosen] else NULL
       }
@@ -513,38 +513,39 @@ output$visualize.inference = renderPrint({
 output$visualize.summary = renderPrint({
   if (is.null(plot.par$x)) {
     return(cat("Please select a variable"))
-  }
-  values.list = modifyList(reactiveValuesToList(plot.par),
-                           reactiveValuesToList(graphical.par), keep.null = TRUE)
-  if(is.numeric(plot.par$x)&
-     is.numeric(plot.par$y)){
-    values.list.x = values.list$x
-    values.list$x=values.list$y
-    values.list$y=values.list.x
-    values.list.varnames.x = values.list$varnames$x
-    values.list$varnames$x = values.list$varnames$y
-    values.list$varnames$y = values.list.varnames.x
-  }
-  if(!is.null(values.list$design)){
-    values.list$data = NULL
-  }
-  
-  
-  tmp.list <- values.list
-  tmp.list$plottype = "hist"
-  
-  
-  if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-     tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-    tryCatch({
-      cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
-    }, warning = function(w) {
-      print(w)
-    }, error = function(e) {
-      print(e)
-    }, finally = {})
-  }else{
-    suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
+  } else {
+    values.list = modifyList(reactiveValuesToList(plot.par),
+                             reactiveValuesToList(graphical.par), keep.null = TRUE)
+    if(!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
+       !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])){
+      values.list.x = values.list$x
+      values.list$x=values.list$y
+      values.list$y=values.list.x
+      values.list.varnames.x = values.list$varnames$x
+      values.list$varnames$x = values.list$varnames$y
+      values.list$varnames$y = values.list.varnames.x
+    }
+    if(!is.null(values.list$design)){
+      values.list$data = NULL
+    }
+    
+    
+    tmp.list <- values.list
+    tmp.list$plottype = "hist"
+    
+    if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
+       tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
+      tryCatch({
+        cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
+      }, warning = function(w) {
+        print(w)
+      }, error = function(e) {
+        print(e)
+      }, finally = {})
+    }else{
+      suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
+    }
   }
 })
+
 
