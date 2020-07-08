@@ -223,7 +223,7 @@ output$inference_out = renderUI({
   input$hypTest
   isolate({
     # null value/alternative [t.test, t.test2, proportion]
-    if(!is.null(input$hypTest) && input$hypTest != "None"){
+    if(!is.null(input$hypTest) && input$hypTest != "None" && input$type.inference.select == 1){
       if(input$hypTest %in% c("One sample t-test", "Two sample t-test", "Test proportion")) {
         ret = list(ret, 
                    column(3, h5("Null Value:")),
