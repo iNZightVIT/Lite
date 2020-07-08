@@ -22,7 +22,7 @@ output$inference_test = renderUI({
   isolate({
     if (!is.null(plot.par$x)) {
       xvar <- vis.data()[[plot.par$x]]
-      yvar <- if (!is.null(vis.data()[[plot.par$y]])) vis.data()[[plot.par$y]] else NULL
+      yvar <- if (!is.null(plot.par$y)) vis.data()[[plot.par$y]] else NULL
       ## Figure out what type of inference will be happening:
       xnum <- iNZightTools::is_num(vis.data()[[plot.par$x]])
       if (is.null(yvar)) {
@@ -333,7 +333,6 @@ output$visualize.inference = renderPrint({
       curSet <- modifyList(
         curSet,
         list(bs.inference = bs.inf,
-             summary.type = "inference",
              inference.type = "conf",
              inference.par = NULL),
         keep.null = TRUE
@@ -341,7 +340,7 @@ output$visualize.inference = renderPrint({
       
       tryCatch({
         ## one sample t-test
-        if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && is.null(plot.par$y)){
+        if(!is.null(plot.par$x) && iNZightTools::is_num(vis.data()[[plot.par$x]]) && is.null(plot.par$y)){
           if(input$hypTest == "One sample t-test"){
             curSet <- modifyList(
               curSet,
@@ -356,7 +355,7 @@ output$visualize.inference = renderPrint({
           } else {
             curSet <- modifyList(
               curSet,
-              list(hypothesis = NULL),
+              list(hypothesis = 'NULL'),
               keep.null = TRUE
             )
           }
@@ -374,7 +373,7 @@ output$visualize.inference = renderPrint({
             } else {
               curSet <- modifyList(
                 curSet,
-                list(hypothesis = NULL),
+                list(hypothesis = 'NULL'),
                 keep.null = TRUE
               )
             }
@@ -402,7 +401,7 @@ output$visualize.inference = renderPrint({
             } else {
               curSet <- modifyList(
                 curSet,
-                list(hypothesis = NULL),
+                list(hypothesis = 'NULL'),
                 keep.null = TRUE
               )
             } 
@@ -419,7 +418,7 @@ output$visualize.inference = renderPrint({
           } else {
             curSet <- modifyList(
               curSet,
-              list(hypothesis = NULL),
+              list(hypothesis = 'NULL'),
               keep.null = TRUE
             )
           }
@@ -447,7 +446,7 @@ output$visualize.inference = renderPrint({
           } else {
             curSet <- modifyList(
               curSet,
-              list(hypothesis = NULL),
+              list(hypothesis = 'NULL'),
               keep.null = TRUE
             )
           }
@@ -461,16 +460,25 @@ output$visualize.inference = renderPrint({
           } else {
             curSet <- modifyList(
               curSet,
-              list(hypothesis = NULL),
+              list(hypothesis = 'NULL'),
               keep.null = TRUE
             )
           }
         }
       }, error = function(e) {})
+      
       if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && iNZightTools::is_num(vis.data()[[plot.par$y]])){
         chosen <- c(input$inf.trend.linear, input$inf.trend.quadratic, input$inf.trend.cubic)
         curSet$trend <- if (any(chosen)) c("linear", "quadratic", "cubic")[chosen] else NULL
       }
+      
+      vartypes <- list(
+        x = iNZightTools::vartype(vis.data()[[curSet$x]]),
+        y = NULL
+      )
+      if (!is.null(curSet$y))
+        vartypes$y <- iNZightTools::vartype(vis.data()[[curSet$y]])
+      
       
       #if(is.numeric(plot.par$x) && is.numeric(plot.par$x)){
       #  curSet <- modifyList(
@@ -481,7 +489,10 @@ output$visualize.inference = renderPrint({
       pdf(NULL)
       
       tryCatch({
-        do.call(iNZightPlots:::getPlotSummary, curSet)
+        eval(construct_call(curSet, vartypes,
+                            data = vis.data(),
+                            what = "inference"
+        ))
         #saveRDS(values.list, file = "/Users/tongchen/Documents/work/Lite/b.rds")
       }, warning = function(w) {
         print(w)
@@ -530,20 +541,37 @@ output$visualize.summary = renderPrint({
     }
     
     
-    tmp.list <- values.list
-    tmp.list$plottype = "hist"
+    curSet <- values.list
+    curSet$plottype = "hist"
+    
+    vartypes <- list(
+      x = NULL,
+      y = NULL
+    )
+    if (!is.null(curSet$x))  {
+      vartypes$x <- iNZightTools::vartype(vis.data()[[curSet$x]])
+      if (!is.null(curSet$y))
+        vartypes$y <- iNZightTools::vartype(vis.data()[[curSet$y]])
+    }
+    
     
     if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
        tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       tryCatch({
-        cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")
+        eval(construct_call(curSet, vartypes,
+                       data = get.data.set(),
+                       what = "summary"
+        ))
       }, warning = function(w) {
         print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
     }else{
-      suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, tmp.list), sep = "\n")))
+      suppressWarnings(try(eval(construct_call(curSet, vartypes,
+                                          data = get.data.set(),
+                                          what = "summary")
+                           )))
     }
   }
 })
