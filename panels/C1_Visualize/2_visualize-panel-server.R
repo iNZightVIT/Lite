@@ -5566,8 +5566,8 @@ output$select_additions_panel = renderUI({
 create.html = function() {
   if (!is.null(vis.par())) {
     dafr = get.data.set()
-    if(is.numeric(vis.data()[[plot.par$x]])&
-       is.numeric(vis.data()[[plot.par$y]])){
+    if(!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
+       !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])){
       temp = vis.par()
       temp$trend.parallel = graphical.par$trend.parallel
       temp.x = temp$x
