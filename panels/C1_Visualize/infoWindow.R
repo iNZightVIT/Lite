@@ -291,7 +291,6 @@ output$visualize.inference = renderPrint({
     isolate({
       ## Design or data?
       is_survey <- !is.null(design_params$design$dataDesign)
-      
       curSet <- modifyList(reactiveValuesToList(plot.par),
                            reactiveValuesToList(graphical.par), keep.null = TRUE)
       curSet <- modifyList(reactiveValuesToList(plot.par),
@@ -303,16 +302,16 @@ output$visualize.inference = renderPrint({
       }
       if (!is.null(curSet$freq))
         curSet$freq <- get.data.set()[[curSet$freq]]
-      if (!is.null(curSet$x)) {
-        if (is.numeric(curSet$x) && is.numeric(curSet$y)) {
-          tmp.x <- curSet$y
-          curSet$y <- curSet$x
-          curSet$x <- tmp.x
-          v <- curSet$varnames
-          curSet$varnames$x <- v$y
-          curSet$varnames$y <- v$x
-        }
-      }
+      #if (!is.null(curSet$x) && !is.null(curSet$y)) {
+      #  if (is.numeric(vis.data()[[curSet$x]]) && is.numeric(vis.data()[[curSet$y]])) {
+      #    tmp.x <- curSet$y
+      #    curSet$y <- curSet$x
+      #    curSet$x <- tmp.x
+      #    v <- curSet$varnames
+      #    curSet$varnames$x <- v$y
+      #    curSet$varnames$y <- v$x
+      #  }
+      #}
       if (is.null(curSet$g1) && !is.null(curSet$g2)) {
         if (curSet$g2.level != "_ALL") {
           curSet$g1 <- curSet$g2
@@ -340,7 +339,7 @@ output$visualize.inference = renderPrint({
       
       tryCatch({
         ## one sample t-test
-        if(!is.null(plot.par$x) && iNZightTools::is_num(vis.data()[[plot.par$x]]) && is.null(plot.par$y)){
+        if(iNZightTools::is_num(vis.data()[[curSet$x]]) && is.null(plot.par$y)){
           if(input$hypTest == "One sample t-test"){
             curSet <- modifyList(
               curSet,
@@ -467,18 +466,17 @@ output$visualize.inference = renderPrint({
         }
       }, error = function(e) {})
       
-      if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && iNZightTools::is_num(vis.data()[[plot.par$y]])){
+      if(!is.null(plot.par$x) && iNZightTools::is_num(vis.data()[[plot.par$x]]) && 
+         !is.null(plot.par$y) && iNZightTools::is_num(vis.data()[[plot.par$y]])){
         chosen <- c(input$inf.trend.linear, input$inf.trend.quadratic, input$inf.trend.cubic)
         curSet$trend <- if (any(chosen)) c("linear", "quadratic", "cubic")[chosen] else NULL
       }
       
       vartypes <- list(
         x = iNZightTools::vartype(vis.data()[[curSet$x]]),
-        y = NULL
-      )
+        y = NULL)
       if (!is.null(curSet$y))
         vartypes$y <- iNZightTools::vartype(vis.data()[[curSet$y]])
-      
       
       #if(is.numeric(plot.par$x) && is.numeric(plot.par$x)){
       #  curSet <- modifyList(
@@ -486,7 +484,6 @@ output$visualize.inference = renderPrint({
       #    list(trend = plot.par$trend),
       #    keep.null = TRUE)
       #}
-      pdf(NULL)
       
       tryCatch({
         eval(construct_call(curSet, vartypes,
@@ -513,7 +510,6 @@ output$visualize.inference = renderPrint({
       #        suppressWarnings(try(cat(do.call(iNZightPlots:::getPlotSummary, values.list), sep = "\n")))
       #      }
       
-      
     })
   }
 })
@@ -527,15 +523,15 @@ output$visualize.summary = renderPrint({
   } else {
     values.list = modifyList(reactiveValuesToList(plot.par),
                              reactiveValuesToList(graphical.par), keep.null = TRUE)
-    if(!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
-       !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])){
-      values.list.x = values.list$x
-      values.list$x=values.list$y
-      values.list$y=values.list.x
-      values.list.varnames.x = values.list$varnames$x
-      values.list$varnames$x = values.list$varnames$y
-      values.list$varnames$y = values.list.varnames.x
-    }
+    #if(!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
+    #   !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])){
+      #values.list.x = values.list$x
+      #values.list$x=values.list$y
+      #values.list$y=values.list.x
+      #values.list.varnames.x = values.list$varnames$x
+      #values.list$varnames$x = values.list$varnames$y
+      #values.list$varnames$y = values.list.varnames.x
+    #}
     if(!is.null(values.list$design)){
       values.list$data = NULL
     }
