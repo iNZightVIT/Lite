@@ -296,10 +296,6 @@ output$visualize.inference = renderPrint({
       curSet <- modifyList(reactiveValuesToList(plot.par),
                            reactiveValuesToList(inf.def.par), keep.null = TRUE)
       curSet$plottype = NULL
-      if (!is.null(design_params$design$dataDesign)) {
-        curSet$data <- NULL
-        curSet$design <- createSurveyObject(design_params$design)
-      }
       if (!is.null(curSet$freq))
         curSet$freq <- get.data.set()[[curSet$freq]]
     
@@ -469,14 +465,35 @@ output$visualize.inference = renderPrint({
       if (!is.null(curSet$y))
         vartypes$y <- iNZightTools::vartype(vis.data()[[curSet$y]])
       
-
+      
+      if (!is.null(design_params$design$dataDesign)) {
+        curSet$data <- NULL
+        curSet$design <- as.name(".design")
+        .design = createSurveyObject(design_params$design)
+        # designname <<- curMod$dataDesignName
+        # curSet$design <<- as.name(designname)
+        # assign(designname, curMod$createSurveyObject(), envir = env)
+      }
       
       tryCatch({
-        inf.print <- eval(construct_call(curSet, vartypes,
-                                         data = vis.data(),
-                                         what = "inference"
+        inf.print <- eval(construct_call(curSet, design_params$design,
+                                                        vartypes,
+                                                        data = vis.data(),
+                                                        what = "inference"
         ))
         
+        if (input$hypTest == "Chi-square test" && !is.null(input$hypTest)) {
+          exp_match <- any(grepl("since some expected counts <", inf.print, fixed = TRUE))
+          if (exp_match) {
+            updateCheckboxInput(session, "hypSimPval", label = "Simulate p-value", value = TRUE)
+            shinyjs::disable("hypSimPval")
+          }
+          if (!exp_match) {
+            shinyjs::enable("hypSimPval")
+          }
+        }
+        
+        inf.print
         #saveRDS(values.list, file = "/Users/tongchen/Documents/work/Lite/b.rds")
       }, warning = function(w) {
         print(w)
@@ -484,19 +501,7 @@ output$visualize.inference = renderPrint({
         print(e)
       }, finally = {})
       
-      
-      if (!is.null(input$hypSimPval)) {
-        exp_match <- any(grepl("since some expected counts <", inf.print, fixed = TRUE))
-        if (exp_match) {
-          updateCheckboxInput(session, "hypSimPval", label = "Simulate p-value", value = TRUE)
-          shinyjs::disable("hypSimPval")
-        }
-        if (!exp_match) {
-          shinyjs::enable("hypSimPval")
-        }
-      }
-      
-      inf.print
+
       #      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
       #           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       #        tryCatch({
@@ -542,24 +547,31 @@ output$visualize.summary = renderPrint({
         vartypes$y <- iNZightTools::vartype(vis.data()[[curSet$y]])
     }
     
-    
+    if (!is.null(design_params$design$dataDesign)) {
+      curSet$data <- NULL
+      curSet$design <- as.name(".design")
+      .design = createSurveyObject(design_params$design)
+      # designname <<- curMod$dataDesignName
+      # curSet$design <<- as.name(designname)
+      # assign(designname, curMod$createSurveyObject(), envir = env)
+    }
     if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
        tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       tryCatch({
-        eval(construct_call(curSet, vartypes,
-                       data = get.data.set(),
-                       what = "summary"
-        ))
+        eval(construct_call(curSet, design_params$design,
+                            vartypes,
+                            data = get.data.set(),
+                            what = "summary"))
       }, warning = function(w) {
         print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
     }else{
-      suppressWarnings(try(eval(construct_call(curSet, vartypes,
-                                          data = get.data.set(),
-                                          what = "summary")
-                           )))
+      suppressWarnings(try(eval(construct_call(curSet, design_params$design,
+                                               vartypes,
+                                               data = get.data.set(),
+                                               what = "summary"))))
     }
   }
 })
