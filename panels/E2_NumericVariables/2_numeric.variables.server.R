@@ -185,7 +185,6 @@ output$rank.numeric.side = renderUI({
 })
 
 output$rank.numeric.main = renderUI({
-  get.data.set()
   rank.numeric.main()
 })
 
