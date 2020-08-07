@@ -5636,7 +5636,7 @@ output$saveplot = downloadHandler(
       else if(input$saveplottype == "png")
         png(file)
       else if(input$saveplottype == "pdf")
-        pdf(file, useDingbats = FALSE)
+        pdf(file, useDingbats = FALSE, onefile = F)
       
       if (!is.null(vis.par())) {
         dafr = get.data.set()
