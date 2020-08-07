@@ -65,36 +65,26 @@ get.transform.main = function(){
 }
 
 get.form.class.interval.side = function(data.set){
-  list(helpText("Please select a column and specify the number of intervals and the 
-                method of forming class intervals. The output can be poduced in two 
-                different formats. See help for more information."),
-       selectInput(inputId="form.class.interval.column.select",
+  list(selectInput(inputId="form.class.interval.column.select",
                    label="Choose variable",
                    choices=get.numeric.column.names(data.set),
                    selected=1),
-       textInput(inputId="form_class_interval_number",
-                 label="Number of intervals",
-                 value = 2),
-       checkboxInput("form.class.interval.format",
-                     label="Uncheck to change the format from (open left, closed right]
-                     to [closed left, open right)",
-                     value =T),
-       selectInput(inputId="form_class_interval_method_select",
-                   label="Select method to form Class intervals",
-                   choices=c(c("equal.width",
-                               "equal.count",
-                               "specified")),
-                   selected=1),
-       conditionalPanel("input.form_class_interval_method_select=='specified'",
-                        uiOutput("specified.range")),
-       checkboxInput("form_class_interval_labels_provide",label="Provide custom labels for the intervals."),
-       conditionalPanel("input.form_class_interval_labels_provide==true",
-                        uiOutput("labels.provide")),
+       uiOutput("form.class.interval.name"),
+       sliderInput(inputId="form_class_interval_number",
+                   label="Number of intervals",
+                   min = 2, max = 20, value = 2, step = 1),
+       fixedRow(column(6, radioButtons(inputId = "form_class_interval_new_level_name",
+                                       label = "New level names:",
+                                       choices = c("(open left, closed right]", "[closed left, open right)"),
+                                       selected = "(open left, closed right]")),
+                column(6, radioButtons(inputId = "form_class_interval_method",
+                                       label = "Method:",
+                                       choices = c("Equal width intervals",
+                                                   "Equal count intervals", "Specified intervals"),
+                                       selected = "Equal width intervals"))),
        actionButton(inputId="form.class.interval.submit",
                     label="Proceed",
-                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br(),
-       help.display('Form Class interval','form_class_interval',
-                    "panels/E2_NumericVariables/5_form.class.interval.help.md")
+                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br()
   )
 }
 

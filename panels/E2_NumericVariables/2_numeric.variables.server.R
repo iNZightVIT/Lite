@@ -159,140 +159,15 @@ output$form.class.interval.main = renderUI({
   get.form.class.interval.main()
 })
 
-observe({
-  input$form_class_interval_number
-  isolate({
-    if((!is.null(input$form_class_interval_number)&&
-        !all(is.convertable.integer(input$form_class_interval_number)))||(
-          !is.null(input$form_class_interval_number)&&
-          all(is.convertable.integer(input$form_class_interval_number))&&
-          as.numeric(input$form_class_interval_number)<=1)){
-      updateTextInput(session,inputId="form_class_interval_number",
-                      value="")
-    }
-  })
+output$form.class.interval.name = renderUI({
+  textInput(inputId="form.class.interval.column.name",
+            label="New variable",
+            value = paste(input$form.class.interval.column.select, "f", sep = "."))
 })
 
-output$form.class.interval.table = renderDataTable({
-  ret = get.data.set()
-  if(all(is.convertable.integer(input$form_class_interval_number))){
-    intervals = NULL
-    labels=NULL
-    if(input$form_class_interval_method_select%in%"specified"){
-      ids = names(input)[grep("^specified_text[0-9]+$",names(input))]
-      if(length(ids)>0){
-        intervals = unlist(lapply(1:length(ids),function(i){
-          input[[ids[i]]]
-        }))
-      }
-    }
-    if(input$form_class_interval_labels_provide){
-      labels = names(input)[grep("^lable_class[0-9]+$",names(input))]
-      for(i in 1:length(labels)){
-        labels[i] = input[[labels[i]]]
-      }
-      if(any(is.null(labels))||
-         any(labels%in%"")){
-        labels=NULL
-      }
-    }
-    if(all(is.convertable.numeric(intervals))){
-      ret = get.form.class.interval(dafr=get.data.set(),
-                                    intervals=sort(as.numeric(intervals)),
-                                    method=input$form_class_interval_method_select,
-                                    column=input$form.class.interval.column.select,
-                                    num.intervals=as.numeric(input$form_class_interval_number),
-                                    open.left.closed.right=input$form.class.interval.format,
-                                    labels=labels)
-    }
-  }
-  ret
-},options=list(lengthMenu = c(5, 30, 50), 
-               pageLength = 5, 
-               columns.defaultContent="NA",
-               scrollX=T))
 
-observe({
-  input$form.class.interval.submit
-  isolate({
-    if(!is.null(input$form.class.interval.submit)&&
-       input$form.class.interval.submit>0&&
-       all(is.convertable.integer(input$form_class_interval_number))){
-      intervals = NULL
-      labels=NULL
-      if(input$form_class_interval_method_select%in%"specified"){
-        ids = names(input)[grep("^specified_text[0-9]+$",names(input))]
-        if(length(ids)>0){
-          intervals = unlist(lapply(1:length(ids),function(i){
-            input[[ids[i]]]
-          }))
-        }
-      }
-      if(input$form_class_interval_labels_provide){
-        labels = names(input)[grep("^lable_class[0-9]+$",names(input))]
-        for(i in 1:length(labels)){
-          labels[i] = input[[labels[i]]]
-        }
-        if(any(is.null(labels))||
-           any(labels%in%"")){
-          labels=NULL
-        }
-      }
-      if(all(is.convertable.numeric(intervals))){
-        updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = get.form.class.interval(dafr=get.data.set(),
-                                                  intervals=sort(as.numeric(intervals)),
-                                                  method=input$form_class_interval_method_select,
-                                                  column=input$form.class.interval.column.select,
-                                                  num.intervals=as.numeric(input$form_class_interval_number),
-                                                  open.left.closed.right=input$form.class.interval.format,
-                                                  labels=labels)
-      }
-    }
-  })
-})
 
-output$specified.range = renderUI({
-  get.data.set()
-  input$form_class_interval_number
-  input$form.class.interval.column.select
-  isolate({
-    ret = NULL
-    if(all(is.convertable.integer(input$form_class_interval_number))&&
-       !is.null(input$form.class.interval.column.select)){
-      ret = list(helpText(paste("Fill in the text fields below with numeric 
-                                range cuttoffs. The minimum in the selected 
-                                column is ",
-                                min(get.data.set()[,input$form.class.interval.column.select],na.rm=T),
-                                ". The maximum is ",
-                                max(get.data.set()[,input$form.class.interval.column.select],na.rm=T),
-                                ". All values must be in this range."
-                                ,sep="")))
-      for(i in 2:(input$form_class_interval_number)){
-        ret[[i]] = textInput(inputId=paste0("specified_text",i),
-                             label=paste("Range cutoff",(i-1),sep=" "),
-                             value = "")
-      }
-    }
-    ret
-  })
-})
 
-output$labels.provide = renderUI({
-  get.data.set()
-  input$form_class_interval_number
-  isolate({
-    if(all(is.convertable.integer(input$form_class_interval_number))){
-      ret = list(helpText("Fill in all the text fields to label the 
-                          factors in the newly generated class interval 
-                          variable."))
-      for(i in 1:input$form_class_interval_number){
-        ret[[i+1]] = textInput(paste0("lable_class",i),label=paste("Specify factor",i,sep=" "))
-      }
-    }
-    ret
-  })
-})
 ## Manipulate variables -> Numeric variables -> Rank numeric
 
 output$rank.numeric.table = renderDataTable({
