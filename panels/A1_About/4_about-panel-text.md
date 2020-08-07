@@ -18,7 +18,7 @@ We have made a <a href="https://www.stat.auckland.ac.nz/~wild/iNZightLite/IntroM
 
 <br>
 
-This project is led by <a href = "http://www.stat.auckland.ac.nz/~wild" target="_blank"> Professor Chris Wild </a> and has been primarily supported by the Department of Statistics at the University of Auckland, with additional support from Statistics New Zealand and the NZ Ministry of Education via Census at School. test R4
+This project is led by <a href = "http://www.stat.auckland.ac.nz/~wild" target="_blank"> Professor Chris Wild </a> and has been primarily supported by the Department of Statistics at the University of Auckland, with additional support from Statistics New Zealand and the NZ Ministry of Education via Census at School.
 
 <br>
 
