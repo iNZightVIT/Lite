@@ -18,7 +18,7 @@ save.data.panel = function(data.set){
     m.panel = h1("Please Import or select a data set.")
   }else{
     s.panel = get.sidebar.save()
-    m.panel = dataTableOutput("save_table")
+    m.panel = DTOutput("save_table")
   }
   sidebarLayout(
     sidebarPanel(s.panel),

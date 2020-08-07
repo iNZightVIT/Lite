@@ -435,11 +435,15 @@ output$visualize.panel <- renderUI({
 
 
 x.class = reactive({
-  determine.class(plot.par$x)
+  determine.class(vis.data()[[plot.par$x]])
 })
 
 y.class = reactive({
-  determine.class(plot.par$y)
+  if(!is.null(plot.par$y)){
+    determine.class(vis.data()[[plot.par$y]])
+  } else {
+    NULL
+  }
 })
 
 determine.g = reactive({
@@ -581,8 +585,8 @@ observe({
 observe({
   if(!is.null(input$vari1)){
     isolate({
-      vari1.par = handle.input(input$vari1)$input.out
-      plot.par$x = vari1.par
+      #vari1.par = handle.input(input$vari1)$input.out
+      plot.par$x = as.name(input$vari1)
       plot.par$varnames$x = input$vari1
       if(!is.null(vis.data())){
         ch  = colnames(vis.data())
@@ -654,25 +658,28 @@ output$subs1_panel = renderUI({
 observe({
   input$subs1
   isolate({
-    subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
-    plot.par$g1 = subs1.par
-    varnames.g1 = input$subs1
-    if(!is.null(varnames.g1)&&
-       varnames.g1%in%"none"){
-      varnames.g1 = NULL
-    }
-    plot.par$varnames$g1 = varnames.g1
-    #choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-    choices1 = c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
-    if(is.null(choices1)){
-      choices1 = 1
-    }
-    if(!is.null(input$subs1)&&
-       !input$subs1%in%""&&
-       !input$subs1%in%"none"){
-      updateSliderTextInput(session,"sub1_level",
-                            label = paste0("Subset '", input$subs1, "':"),
-                            choices = choices1, selected = choices1[1])
+    if(!is.null(input$subs1)){
+      #subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
+      plot.par$g1 = as.name(input$subs1)
+      varnames.g1 = input$subs1
+      if(!is.null(varnames.g1)&&
+         varnames.g1%in%"none"){
+        varnames.g1 = NULL
+        plot.par$g1 = NULL
+      }
+      plot.par$varnames$g1 = varnames.g1
+      #choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+      choices1 = c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
+      if(is.null(choices1)){
+        choices1 = 1
+      }
+      if(!is.null(input$subs1)&&
+         !input$subs1%in%""&&
+         !input$subs1%in%"none"){
+        updateSliderTextInput(session,"sub1_level",
+                              label = paste0("Subset '", input$subs1, "':"),
+                              choices = choices1, selected = choices1[1])
+      } 
     }
   })
 })
@@ -681,21 +688,24 @@ observe({
 observe({
   input$subs1
   isolate({
-    subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
-    plot.par$g1 = subs1.par
-    varnames.g1 = input$subs1
-    if(!is.null(varnames.g1)&&
-       varnames.g1%in%"none"){
-      varnames.g1 = NULL
+    if(!is.null(input$subs1)){
+      #subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
+      plot.par$g1 = as.name(input$subs1)
+      varnames.g1 = input$subs1
+      if(!is.null(varnames.g1)&&
+         varnames.g1%in%"none"){
+        varnames.g1 = NULL
+        plot.par$g1 = NULL
+      }
+      plot.par$varnames$g1 = varnames.g1
+      choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
+      if(is.null(choices1)){
+        choices1 = 1
+      }
+      updateSliderInput(session,"sub1_level_mini",
+                        label = paste0("Subset '", input$subs1, "':"),
+                        min = 0, max = choices1, value = 0,step=1)
     }
-    plot.par$varnames$g1 = varnames.g1
-    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-    if(is.null(choices1)){
-      choices1 = 1
-    }
-    updateSliderInput(session,"sub1_level_mini",
-                      label = paste0("Subset '", input$subs1, "':"),
-                      min = 0, max = choices1, value = 0,step=1)
   })
 })
 
@@ -858,14 +868,15 @@ output$vari2_panel = renderUI({
 
 ##  Update plot.par$y
 observe({
-  vari2.par = handle.input(input$vari2)$input.out
+  input$vari2
   isolate({
-    if(!is.null(vis.data())){
-      plot.par$y = vari2.par
+    if(!is.null(vis.data()) && !is.null(input$vari2)){
+      plot.par$y = as.name(input$vari2)
       varnames.y = input$vari2
       if(!is.null(varnames.y)&&
          varnames.y%in%"none"){
         varnames.y = NULL
+        plot.par$y = NULL
       }
       plot.par$varnames$y = varnames.y
       ch  = colnames(vis.data())
@@ -927,23 +938,26 @@ output$subs2_panel = renderUI({
 
 ##  Update plot.par$g2.
 observe({
-  subs2.par = handle.input(input$subs2, subs = TRUE)$input.out
+  input$subs2
   isolate({
-    plot.par$g2 = subs2.par
-    varnames.g2 = input$subs2
-    if(!is.null(varnames.g2)&&
-       varnames.g2%in%"none"){
-      varnames.g2 = NULL
+    if(!is.null(input$subs2)){
+      plot.par$g2 = as.name(input$subs2)
+      varnames.g2 = input$subs2
+      if(!is.null(varnames.g2)&&
+         varnames.g2%in%"none"){
+        varnames.g2 = NULL
+        plot.par$g2 = NULL
+      }
+      plot.par$varnames$g2 = varnames.g2
+      ch = colnames(vis.data())
+      if(!is.null(input$vari1)&&input$vari1%in%ch){
+        ch  = ch[-which(ch%in%input$vari1)]
+      }
+      if(!is.null(input$vari2)&&input$vari2%in%ch){
+        ch  = ch[-which(ch%in%input$vari2)]
+      }
+      updateSelectInput(session,"subs1",choices=c("none",ch),selected=input$subs1) 
     }
-    plot.par$varnames$g2 = varnames.g2
-    ch = colnames(vis.data())
-    if(!is.null(input$vari1)&&input$vari1%in%ch){
-      ch  = ch[-which(ch%in%input$vari1)]
-    }
-    if(!is.null(input$vari2)&&input$vari2%in%ch){
-      ch  = ch[-which(ch%in%input$vari2)]
-    }
-    updateSelectInput(session,"subs1",choices=c("none",ch),selected=input$subs1)
   })
 })
 
@@ -1013,26 +1027,28 @@ output$subs2_conditional_mini = renderUI({
 # ##  Update plot.par$g2.level
 observe({
   g2_level = input$sub2_level
-  g2 = handle.input(input$subs2, subs = TRUE)$input.out
-  
-  if ((is.null(g2_level) || g2_level == 0) && !is.null(input$subs2) && input$subs2 != "none") {
-    g2_level = "_ALL"
-  } 
-  
-  if (is.null(g2_level) || g2_level == 0 || input$subs2 == "none") {
-    g2_level = NULL
-    g2 = NULL
+  if(!is.null(input$subs2)){
+    g2 = as.name(input$subs2)
+    
+    if ((is.null(g2_level) || g2_level == 0) && !is.null(input$subs2) && input$subs2 != "none") {
+      g2_level = "_ALL"
+    } 
+    
+    if (is.null(g2_level) || g2_level == 0 || input$subs2 == "none") {
+      g2_level = NULL
+      g2 = NULL
+    }
+    
+    
+    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    if (!is.null(g2_level) && 
+        length(g2.level.check) == 1 && 
+        g2_level == g2.level.check) {
+      g2_level = "_MULTI"
+    }
+    plot.par$g2.level = g2_level
+    plot.par$g2 = g2
   }
-  
-  
-  g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
-  if (!is.null(g2_level) && 
-      length(g2.level.check) == 1 && 
-      g2_level == g2.level.check) {
-    g2_level = "_MULTI"
-  }
-  plot.par$g2.level = g2_level
-  plot.par$g2 = g2
 })
 
 
@@ -1056,19 +1072,21 @@ observe({
 
 observe({
   g2_level = input$sub2_level_mini
-  g2 = handle.input(input$subs2, subs = TRUE)$input.out
-  if (is.null(g2_level) || g2_level == 0) {
-    g2_level = NULL
-    g2 = NULL
+  if(!is.null(input$subs2)){
+    g2 = as.name(input$subs2)
+    if (is.null(g2_level) || g2_level == 0) {
+      g2_level = NULL
+      g2 = NULL
+    }
+    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    if (!is.null(g2_level) && 
+        length(g2.level.check) == 1 && 
+        g2_level == g2.level.check) {
+      g2_level = "_MULTI"
+    }
+    plot.par$g2.level = g2_level
+    plot.par$g2 = g2 
   }
-  g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
-  if (!is.null(g2_level) && 
-      length(g2.level.check) == 1 && 
-      g2_level == g2.level.check) {
-    g2_level = "_MULTI"
-  }
-  plot.par$g2.level = g2_level
-  plot.par$g2 = g2
 })
 
 ################## modified by Wilson ###################
@@ -1102,8 +1120,8 @@ output$visualize.plot = renderPlot({
   # plot it
   if (!is.null(vis.par())) {
     dafr = get.data.set()
-    if(is.numeric(plot.par$x)&
-       is.numeric(plot.par$y)){
+    if(is.numeric(vis.data()[[plot.par$x]])&
+       is.numeric(vis.data()[[plot.par$y]])){
       temp = vis.par()
       temp$trend.parallel = graphical.par$trend.parallel
       temp.x = temp$x
@@ -1177,8 +1195,8 @@ output$mini.plot = renderPlot({
   # plot it
   if (!is.null(vis.par())) {
     dafr = get.data.set()
-    if(is.numeric(plot.par$x)&
-       is.numeric(plot.par$y)){
+    if(is.numeric(vis.data()[[plot.par$x]])&
+       is.numeric(vis.data()[[plot.par$y]])){
       temp = vis.par()
       temp$trend.parallel = graphical.par$trend.parallel
       temp.x = temp$x
@@ -2880,7 +2898,9 @@ output$plotly_inter = renderPlotly({
       temp$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
       pdf(NULL)
       do.call(iNZightPlots:::iNZightPlot, temp)
-      plotly::ggplotly()
+      g<-plotly::ggplotly()
+      dev.off()
+      g
     }
   })
 })
@@ -2908,6 +2928,7 @@ output$plotly_nw = renderUI({
       on.exit(dev.off(cdev), add = TRUE)
       do.call(iNZightPlots:::iNZightPlot, temp)
       htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
+      dev.off()
       addResourcePath("path", normalizePath(tdir))
       list(
         br(),
@@ -3690,7 +3711,7 @@ observe({
       plot.par$varnames$colby = NULL
     }else{
       if(input$color_by_select%in%colnames(vis.data())){
-        plot.par$colby = vis.data()[,input$color_by_select]
+        plot.par$colby = as.name(input$color_by_select)
         plot.par$varnames$colby = input$color_by_select
       }
     }
@@ -3707,7 +3728,7 @@ observe({
       plot.par$sizeby = NULL
       plot.par$varnames$sizeby = NULL
     }else{
-      plot.par$sizeby = vis.data()[ ,input$resize.by.select]
+      plot.par$sizeby = as.name(input$resize.by.select)
       plot.par$varnames$sizeby = input$resize.by.select
     }
   })
@@ -3741,7 +3762,7 @@ observe({
       plot.par$symbolby = NULL
       plot.par$varnames$symbolby = NULL
     }else{
-      plot.par$symbolby = vis.data()[ ,input$point_symbol_by]
+      plot.par$symbolby = as.name(input$point_symbol_by)
       plot.par$varnames$symbolby = input$point_symbol_by
     }
   })
@@ -4325,13 +4346,13 @@ output$adjust.axis.panel = renderUI({
         ret = list(h5(strong('Axis Limits')))
         temp = list()
         #        temp$x = get.data.set()[,input$vari1]
-        temp$x = plot.par$x
+        temp$x = vis.data()[[plot.par$x]]
         
         if(input$vari2%in%'none'){
           temp$y = NULL
         }else{
           #          temp$y = get.data.set()[,input$vari2]
-          temp$y = plot.par$y
+          temp$y = vis.data()[[plot.par$y]]
         }
         temp$plot = F
         tester = try(do.call(iNZightPlots:::iNZightPlot, temp))
@@ -5545,8 +5566,8 @@ output$select_additions_panel = renderUI({
 create.html = function() {
   if (!is.null(vis.par())) {
     dafr = get.data.set()
-    if(is.numeric(plot.par$x)&
-       is.numeric(plot.par$y)){
+    if(!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
+       !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])){
       temp = vis.par()
       temp$trend.parallel = graphical.par$trend.parallel
       temp.x = temp$x
@@ -5619,8 +5640,8 @@ output$saveplot = downloadHandler(
       
       if (!is.null(vis.par())) {
         dafr = get.data.set()
-        if(is.numeric(plot.par$x)&
-           is.numeric(plot.par$y)){
+        if(is.numeric(vis.data()[[plot.par$x]])&
+           is.numeric(vis.data()[[plot.par$y]])){
           temp = vis.par()
           temp$trend.parallel = graphical.par$trend.parallel
           temp.x = temp$x
@@ -5847,10 +5868,10 @@ output$extra_vars_check_panel = renderUI({
   input$vari1
   input$vari2
   isolate({
-    if((!is.null(input$vari1) && !is.numeric(plot.par$x) &&
+    if((!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
         !is.null(input$vari2) && input$vari2 == "none") | 
-       (!is.null(input$vari1) && !is.numeric(plot.par$x) &&
-        !is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y)))
+       (!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
+        !is.null(input$vari2) && input$vari2 != "none" && !is.numeric(vis.data()[[plot.par$y]])))
       ret = NULL
     else
       ret = checkboxInput("extra_vars_check", 
@@ -6012,8 +6033,8 @@ output$extra_vars_confirm = renderUI({
   input$vari2
   isolate({
     if(nrow(vis.data()) > 200  &&
-       any(!is.null(input$vari1) && is.numeric(plot.par$x), 
-           !is.null(input$vari2) && input$vari2 != "none" && is.numeric(plot.par$y)))
+       any(!is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]), 
+           !is.null(input$vari2) && input$vari2 != "none" && is.numeric(vis.data()[[plot.par$y]])))
       ret = list(actionButton("extra_vars_confirm_button",
                               "Produce Plot",
                               style="color: #424242; background-color: #E9E9E9; border-color: #E9E9E9"),
@@ -6185,8 +6206,8 @@ observe({
 output$interactive.plot = renderUI({
   
   if(nrow(vis.data()) <= 200  ||
-     !any(!is.null(input$vari1) && is.numeric(plot.par$x), 
-          !is.null(input$vari2) && input$vari2 != "none" && is.numeric(plot.par$y)) || !is.null(plot.par$design)) {
+     !any(!is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]), 
+          !is.null(input$vari2) && input$vari2 != "none" && is.numeric(vis.data()[[plot.par$y]])) || !is.null(plot.par$design)) {
     dafr = get.data.set()
     vis.par()
     input$vari1
@@ -6312,8 +6333,8 @@ output$add.fitted.residuals.panel = renderUI({
   get.data.set()
   ret = NULL
   if (!is.null(plot.par$x)) {
-    xvar = plot.par$x
-    yvar = if(!is.null(plot.par$y)) plot.par$y else NULL
+    xvar = vis.data()[[plot.par$x]]
+    yvar = if(!is.null(plot.par$y)) vis.data()[[plot.par$y]] else NULL
     if (is.null(plot.par$g1) &&
         is.null(plot.par$g2) &&
         !is.null(plot.par$y) &&
@@ -6340,8 +6361,8 @@ output$add.fitted.residuals.panel = renderUI({
 
 observeEvent(input$store_fitted_values, {
   if (!is.null(plot.par$x)) {
-    if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
-       iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+    if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) && 
+       iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
         
@@ -6375,7 +6396,7 @@ observeEvent(input$store_fitted_values, {
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
         fixedRow(column(6, textInput(inputId = "add_numcat_fitted_values",
-                                     value = paste(ifelse(iNZightTools::is_num(plot.par$x), input$vari1, input$vari2), ".predict", sep = ""), 
+                                     value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".predict", sep = ""), 
                                      label=NULL))),                 
         actionButton("store_fitted_values_ok", "OK"),
         textOutput("add_fitted_values_status"),
@@ -6397,8 +6418,8 @@ output$add_fitted_values_status = renderText({
 
 
 observeEvent(input$store_residuals, {
-    if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
-       iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+    if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) && 
+       iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
         
@@ -6431,7 +6452,7 @@ observeEvent(input$store_residuals, {
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
         fixedRow(column(6, textInput(inputId = "add_numcat_residuals",
-                                     value = paste(ifelse(iNZightTools::is_num(plot.par$x), input$vari1, input$vari2), ".residuals", sep = ""), 
+                                     value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".residuals", sep = ""), 
                                      label=NULL))),
         actionButton("store_resisuals_ok", "OK"),
         textOutput("add_residuals_status"),
@@ -6458,39 +6479,39 @@ observe({
       temp1 = input$vari1
       temp2 = input$vari2
       temp = get.data.set()
-      if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
-         iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+      if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) && 
+         iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
         linear_trend = FALSE
         quadratic_trend = FALSE
         cubic_trend = FALSE
         smoother_trend = FALSE
         if("linear" %in% graphical.par$trend) {
           linear_trend = TRUE
-          fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
-          resi.linear = data.frame(residuals(fit.linear))
+          fit.linear = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude))
+          resi.linear = data.frame(residuals(fit.linear), stringsAsFactors = TRUE)
           colnames(resi.linear) = input$add_linear_residuals
           temp = cbind(temp, resi.linear)
         }
         if("quadratic" %in% graphical.par$trend) {
           quadratic_trend = TRUE
-          fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
-          resi.quadratic = data.frame(residuals(fit.quadratic))
+          fit.quadratic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2), na.action = na.exclude))
+          resi.quadratic = data.frame(residuals(fit.quadratic), stringsAsFactors = TRUE)
           colnames(resi.quadratic) = input$add_quadratic_residuals
           temp = cbind(temp, resi.quadratic)
         }
         if("cubic" %in% graphical.par$trend) {
           cubic_trend = TRUE
-          fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
-          resi.cubic = data.frame(residuals(fit.cubic))
+          fit.cubic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3), na.action = na.exclude))
+          resi.cubic = data.frame(residuals(fit.cubic), stringsAsFactors = TRUE)
           colnames(resi.cubic) = input$add_cubic_residuals
           temp = cbind(temp, resi.cubic)
         }
         if(graphical.par$smooth > 0) {
           temp3 = graphical.par$smooth
           smoother_trend = TRUE
-          fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+          fit.smooth = with(vis.par(), loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], span = graphical.par$smooth, 
                                              family = "gaussian", degree = 1, na.action = "na.exclude"))
-          resi.smooth = data.frame(residuals(fit.smooth))
+          resi.smooth = data.frame(residuals(fit.smooth), stringsAsFactors = TRUE)
           colnames(resi.smooth) = input$add_smoother_residuals
           temp = cbind(temp, resi.smooth)
           
@@ -6507,12 +6528,12 @@ observe({
           
         }
       } else {
-        if (iNZightTools::is_num(plot.par$y)){
-          fit = lm(formula = plot.par$y ~ plot.par$x, na.action = na.exclude)
+        if (iNZightTools::is_num(vis.data()[[plot.par$y]])){
+          fit = lm(formula = vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]], na.action = na.exclude)
         } else {
-          fit <- lm(formula = plot.par$x ~ plot.par$y, na.action = na.exclude)
+          fit <- lm(formula = vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude)
         }
-        resi.numcat = data.frame(residuals(fit))
+        resi.numcat = data.frame(residuals(fit), stringsAsFactors = TRUE)
         colnames(resi.numcat) = input$add_numcat_residuals
         temp = cbind(temp, resi.numcat)
       }
@@ -6532,39 +6553,43 @@ observe({
       temp1 = input$vari1
       temp2 = input$vari2
       temp = get.data.set()
-      if(iNZightTools::is_num(plot.par$x) && !is.null(plot.par$x) && 
-         iNZightTools::is_num(plot.par$y) && !is.null(plot.par$y)) {
+      if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) && 
+         iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
         linear_trend = FALSE
         quadratic_trend = FALSE
         cubic_trend = FALSE
         smoother_trend = FALSE
         if("linear" %in% graphical.par$trend) {
           linear_trend = TRUE
-          fit.linear = with(vis.par(), lm(x ~ y, na.action = na.exclude))
-          pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = graphical.par$y)))
+          fit.linear = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude))
+          pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+                                   stringsAsFactors = TRUE)
           colnames(pred.linear) = input$add_linear_fitted_values
           temp = cbind(temp, pred.linear)
         }
         if("quadratic" %in% graphical.par$trend) {
           quadratic_trend = TRUE
-          fit.quadratic = with(vis.par(), lm(x ~ y + I(y^2), na.action = na.exclude))
-          pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = graphical.par$y)))
+          fit.quadratic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2), na.action = na.exclude))
+          pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+                                      stringsAsFactors = TRUE)
           colnames(pred.quadratic) = input$add_quadratic_fitted_values
           temp = cbind(temp, pred.quadratic)
         }
         if("cubic" %in% graphical.par$trend) {
           cubic_trend = TRUE
-          fit.cubic = with(vis.par(), lm(x ~ y + I(y^2) + I(y^3), na.action = na.exclude))
-          pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = graphical.par$y)))
+          fit.cubic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3), na.action = na.exclude))
+          pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+                                  stringsAsFactors = TRUE)
           colnames(pred.cubic) = input$add_cubic_fitted_values
           temp = cbind(temp, pred.cubic)
         }
         if(graphical.par$smooth > 0) {
           temp3 = graphical.par$smooth
           smoother_trend = TRUE
-          fit.smooth = with(vis.par(), loess(x ~ y, span = graphical.par$smooth, 
+          fit.smooth = with(vis.par(), loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], span = graphical.par$smooth, 
                                              family = "gaussian", degree = 1, na.action = "na.exclude"))
-          pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = graphical.par$y)))
+          pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+                                   stringsAsFactors = TRUE)
           colnames(pred.smooth) = input$add_smoother_fitted_values
           temp = cbind(temp, pred.smooth)
           
@@ -6580,13 +6605,14 @@ observe({
           updateSliderInput(session, "smoother.smooth", value = temp3)
         }
       } else {
-        if (iNZightTools::is_num(plot.par$y)){
-          fit = lm(formula = plot.par$y ~ plot.par$x, na.action = na.exclude)
+        if (iNZightTools::is_num(vis.data()[[plot.par$y]])){
+          fit = lm(formula = vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]], na.action = na.exclude)
         } else {
-          fit <- lm(formula = plot.par$x ~ plot.par$y, na.action = na.exclude)
+          fit = lm(formula = vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude)
         }
-        pred.numcat = data.frame(predict(fit, newdata = data.frame(x = ifelse(iNZightTools::is_num(plot.par$x), plot.par$y, plot.par$x),
-                                                                   stringsAsFactors = T)))
+        pred.numcat = data.frame(predict(fit, newdata = data.frame(x = ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), vis.data()[[plot.par$y]], vis.data()[[plot.par$x]]),
+                                                                   stringsAsFactors = TRUE)),
+                                 stringsAsFactors = TRUE)
         colnames(pred.numcat) = input$add_numcat_fitted_values
         temp = cbind(temp, pred.numcat)
       }
@@ -7048,8 +7074,10 @@ observe({
       # plot it
       if (!is.null(vis.par())) {
         dafr = get.data.set()
-        if(is.numeric(plot.par$x)&
-           is.numeric(plot.par$y)){
+        if(is.numeric(vis.data()[[plot.par$x]]) &&
+           !is.null(plot.par$y) &&
+           is.numeric(vis.data()[[plot.par$y]]) && 
+           !is.null(plot.par$x)){
           temp = vis.par()
           temp$trend.parallel = graphical.par$trend.parallel
           temp.x = temp$x

@@ -41,9 +41,9 @@ separate.columns.panel =function(){
     sidebarLayout(
       sidebarPanel(separate.columns.sidebar()),
       mainPanel(h5(strong("Original dataset")),
-                dataTableOutput("separatecolumns.table"),
+                DTOutput("separatecolumns.table"),
                 h5(strong("New dataset")),
-                dataTableOutput("previewseparatecolumns.table"))
+                DTOutput("previewseparatecolumns.table"))
     )
   }
 }

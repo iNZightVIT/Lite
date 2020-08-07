@@ -37,7 +37,7 @@ observe({
   })
 })
 
-output$add.table = renderDataTable({
+output$add.table = renderDT({
   temp=get.data.set()
   input$new.column
   input$add_column

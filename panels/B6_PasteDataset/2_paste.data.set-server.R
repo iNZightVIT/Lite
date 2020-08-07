@@ -50,7 +50,7 @@ output$paste.view.title = renderUI({
   
   
 
-output$paste.table.preview = renderDataTable({
+output$paste.table.preview = renderDT({
   if(req(!is.null(input$paste.data.area))){
     txt = input$paste.data.area
     if (length(txt) == 1) {
@@ -58,16 +58,17 @@ output$paste.table.preview = renderDataTable({
     }
     
     data <- try(
-      iNZightTools::read_text(
-        txt,
-        delim = paste.delimiter.val()
-      ),
+      as.data.frame(stringsAsFactors = TRUE,
+                    iNZightTools::read_text(
+                      txt,
+                      delim = paste.delimiter.val()
+                    )),
       silent = TRUE
     )
     if (!inherits(data, "try-error")) {
       data
     } else {
-        data.frame(
+        data.frame(stringsAsFactors = TRUE,
           Error = "Cannot parse data. Try specifying a different delimiter."
         )
     }
@@ -91,10 +92,11 @@ observe({
       }
       
       data <- try(
-        as.data.frame(iNZightTools::read_text(
-          txt,
-          delim = paste.delimiter.val()
-        )),
+        as.data.frame(stringsAsFactors = TRUE,
+                      iNZightTools::read_text(
+                        txt,
+                        delim = paste.delimiter.val()
+                        )),
         silent = TRUE
       )
       if (!inherits(data, "try-error")) {

@@ -25,7 +25,7 @@ observe({
   }
 })
 
-output$rem.col.table = renderDataTable({
+output$rem.col.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 

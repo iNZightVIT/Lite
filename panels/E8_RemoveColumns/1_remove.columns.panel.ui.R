@@ -34,7 +34,7 @@ remove.columns.panel = function(data.set){
   }else{
     sidebarLayout(
       sidebarPanel(get.sidebar.remove(data.set)),
-      mainPanel(dataTableOutput("rem.col.table"))
+      mainPanel(DTOutput("rem.col.table"))
     )
   }
 }

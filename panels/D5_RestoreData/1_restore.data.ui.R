@@ -15,7 +15,7 @@ restore.data.panel = function(data.set){
   }else{
     sidebarLayout(
       sidebarPanel(restore.data.sidebar()),
-      mainPanel(dataTableOutput("data.restore.table"))
+      mainPanel(DTOutput("data.restore.table"))
     )
   }
 }

@@ -4,7 +4,7 @@ output$save.data.panel = renderUI({
   save.data.panel(get.data.set())
 })
 
-output$save_table = renderDataTable({
+output$save_table = renderDT({
   get.data.set()
 }, options =
   list(lengthMenu = c(5, 30, 50), pageLength = 5,

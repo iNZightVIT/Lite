@@ -4,7 +4,7 @@ convert.to.categorical.sidebar =  function(){
        
        selectInput(inputId = "select.to.convert",
                    label = "Select variable",
-                   choices = c("", get.numeric.column.names(get.data.set())),
+                   choices = c(" ", get.numeric.column.names(get.data.set())),
                    multiple = F,
                    selectize = FALSE),
        
@@ -28,7 +28,7 @@ convert.to.categorical.panel = function(){
   }else{
     sidebarLayout(
       sidebarPanel(convert.to.categorical.sidebar()),
-      mainPanel(dataTableOutput("convert.to.categorical.table"))
+      mainPanel(DTOutput("convert.to.categorical.table"))
     )
   }
 }

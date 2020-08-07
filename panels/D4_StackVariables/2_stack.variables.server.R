@@ -45,7 +45,7 @@ observe({
 #  })
 #})
 
-output$stack.table = renderDataTable({
+output$stack.table = renderDT({
   get.data.set()
 }, options = list(
   lengthMenu = c(5, 30, 50),

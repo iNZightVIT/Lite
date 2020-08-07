@@ -31,9 +31,9 @@ reshape.dataset.panel =function(){
     sidebarLayout(
       sidebarPanel(reshape.dataset.sidebar()),
       mainPanel(h5(strong("Original dataset")),
-                dataTableOutput("reshape.table"),
+                DTOutput("reshape.table"),
                 h5(strong("New dataset")),
-                dataTableOutput("preview.reshape.table"))
+                DTOutput("preview.reshape.table"))
     )
   }
 }

@@ -82,7 +82,7 @@ sort.variables.panel = function(){
   }else{
     sidebarLayout(
       sidebarPanel(sort.variables.sidebar()),
-      mainPanel(dataTableOutput("sort.table"))
+      mainPanel(DTOutput("sort.table"))
     )
   }
 }

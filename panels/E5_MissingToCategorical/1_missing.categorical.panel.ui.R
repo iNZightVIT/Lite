@@ -29,6 +29,6 @@ missing.categorical.panel = function(data.set){
                          not NA (observed) are shown. The row count of how often 
                          the row combination is seen in the data is in the last 
                          column of the table" ),
-                dataTableOutput("missing.categorical.table")))
+                DTOutput("missing.categorical.table")))
   }
 }

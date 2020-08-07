@@ -25,7 +25,7 @@ observe({
             num = num + 1
           }
           temp = data
-          output$previewseparatecolumns.table = renderDataTable({
+          output$previewseparatecolumns.table = renderDT({
             temp
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
           numcol = sum(grepl("^col[1-9]+$", names(temp)))
@@ -58,7 +58,7 @@ observe({
           sep = input$separator
           data = get.data.set() %>% dplyr::select(col, dplyr::everything())
           temp = iNZightTools::separate(data, col, left, right, sep, check)
-          output$previewseparatecolumns.table = renderDataTable({
+          output$previewseparatecolumns.table = renderDT({
             temp
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         }
@@ -106,7 +106,7 @@ observe({
               colnames(temp)[vec.index] = vec.colnames
           }
           
-          output$previewseparatecolumns.table = renderDataTable({
+          output$previewseparatecolumns.table = renderDT({
             NULL
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
           
@@ -130,7 +130,7 @@ observe({
           sep = input$separator
           data = get.data.set() %>% dplyr::select(col, dplyr::everything())
           temp = iNZightTools::separate(data, col, left, right, sep, check)
-          output$previewseparatecolumns.table = renderDataTable({
+          output$previewseparatecolumns.table = renderDT({
             NULL
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
           updatePanel$datachanged = updatePanel$datachanged+1
@@ -141,7 +141,7 @@ observe({
   })
 })
 
-output$separatecolumns.table = renderDataTable({
+output$separatecolumns.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 

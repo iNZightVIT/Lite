@@ -7,7 +7,7 @@ paste.data.main = function(data.set){
          uiOutput("paste.data.info"),
          br(),
          uiOutput("paste.view.title"),
-         dataTableOutput("paste.table.preview"),
+         DTOutput("paste.table.preview"),
          div(class="page-divider"))
   }
 }

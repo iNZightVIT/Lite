@@ -28,7 +28,7 @@ remove.data.panel = function(data.path){
                                           "panels/B4_RemoveDataset/3_remove.data.set.panel-help.md")
                    ,br(),HTML("&nbsp;")),
       mainPanel(
-        dataTableOutput("removetable")
+        DTOutput("removetable")
         )
     )
   }

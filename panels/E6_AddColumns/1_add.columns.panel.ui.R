@@ -26,7 +26,7 @@ add.columns.panel = function(data.set){
   }else{
     sidebarLayout(
       sidebarPanel(get.sidebar.add()),
-      mainPanel( dataTableOutput("add.table"))
+      mainPanel(DTOutput("add.table"))
     )  
   }
 }

@@ -43,7 +43,7 @@ observe({
         key = ifelse(length(input$new_colname) == 0, "key", input$new_colname)
         value = ifelse(length(input$new_value) == 0, "value", input$new_value)
         temp = iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "wide")
-        output$preview.reshape.table = renderDataTable({
+        output$preview.reshape.table = renderDT({
           temp
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
       }
@@ -54,7 +54,7 @@ observe({
         col1 = input$select_col1
         col2 = input$select_col2
         temp = iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "long")
-        output$preview.reshape.table = renderDataTable({
+        output$preview.reshape.table = renderDT({
           temp
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
       }
@@ -73,7 +73,7 @@ observe({
         key = ifelse(length(input$new_colname) == 0, "key", input$new_colname)
         value = ifelse(length(input$new_value) == 0, "value", input$new_value)
         temp = iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "wide")
-        output$preview.reshape.table = renderDataTable({
+        output$preview.reshape.table = renderDT({
           NULL
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         ## save code 
@@ -93,7 +93,7 @@ observe({
         col1 = input$select_col1
         col2 = input$select_col2
         temp = iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "long")
-        output$preview.reshape.table = renderDataTable({
+        output$preview.reshape.table = renderDT({
           NULL
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         ## save code 
@@ -110,7 +110,7 @@ observe({
   })
 })
 
-output$reshape.table = renderDataTable({
+output$reshape.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 

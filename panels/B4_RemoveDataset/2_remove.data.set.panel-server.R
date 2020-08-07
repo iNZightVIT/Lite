@@ -8,7 +8,7 @@ output$remove.data.panel <- renderUI({
   })
 })
 
-output$removetable <- renderDataTable({
+output$removetable <- renderDT({
   if(!is.null(input$Importedremove)){
     load.data(get.data.dir.imported(),input$Importedremove)[[2]]
   } else {

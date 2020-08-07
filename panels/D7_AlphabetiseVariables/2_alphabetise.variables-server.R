@@ -33,7 +33,7 @@ output$alphabetise.variables = renderUI({
 })
 
 
-output$alphabetise.variables.table = renderDataTable({
+output$alphabetise.variables.table = renderDT({
   get.data.set()
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, 
                columns.defaultContent="NA",scrollX=T))

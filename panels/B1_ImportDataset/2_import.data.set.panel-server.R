@@ -22,13 +22,16 @@ observeEvent(input$files, {
       fpath = input$files[1, "datapath"]
       fext = tools::file_ext(fpath)
       if(fext %in% c("RData", "rda")){
-        temp = as.data.frame(iNZightTools::load_rda(input$files[1, "datapath"])[[1]])
+        temp = as.data.frame(stringsAsFactors = TRUE,
+                             iNZightTools::load_rda(input$files[1, "datapath"])[[1]])
       } else {
         if (fext == "txt") {
-          temp = as.data.frame(iNZightTools::smart_read(input$files[1, "datapath"],
+          temp = as.data.frame(stringsAsFactors = TRUE,
+                               iNZightTools::smart_read(input$files[1, "datapath"],
                                                         delimiter = "\t"))
         } else {
-          temp = as.data.frame(iNZightTools::smart_read(input$files[1, "datapath"]))
+          temp = as.data.frame(stringsAsFactors = TRUE,
+                               iNZightTools::smart_read(input$files[1, "datapath"]))
         }
       }
       
@@ -121,7 +124,7 @@ output$load.data.panel = renderUI({
 })
 
 
-output$filetable <- renderDataTable({
+output$filetable <- renderDT({
   
   get.data.set()
   

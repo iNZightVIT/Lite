@@ -28,7 +28,7 @@ alphabetise.variables = function(data.set){
   }else{
     sidebarLayout(
       sidebarPanel(alphabetise.variables.sidebar(data.set)),
-      mainPanel(dataTableOutput("alphabetise.variables.table"))
+      mainPanel(DTOutput("alphabetise.variables.table"))
     )
   }
 }

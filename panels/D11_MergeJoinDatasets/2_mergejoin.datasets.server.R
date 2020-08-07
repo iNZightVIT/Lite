@@ -68,7 +68,7 @@ observeEvent(input$import_to_join, {
         mergejoin$data.to.join = temp.join.data
       }
       
-      output$previewimport.table = renderDataTable({
+      output$previewimport.table = renderDT({
         temp.join.data
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
     })
@@ -121,7 +121,7 @@ observe({
       
       if(orig_type == new_type|orig_type == "character" & new_type == "factor"|orig_type == "factor" & new_type == "character") {
         temp.join = iNZightTools::joindata(data, newdata, left_col, right_col, join_method, left_name, right_name)
-        output$previewjoin.table = renderDataTable({
+        output$previewjoin.table = renderDT({
           temp.join
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         output$join_true_false = renderPrint({
@@ -183,11 +183,11 @@ observe({
       
       if(orig_type == new_type|orig_type == "character" & new_type == "factor"|orig_type == "factor" & new_type == "character") {
         temp.join = iNZightTools::joindata(data, newdata, left_col, right_col, join_method, left_name, right_name)
-        output$previewimport.table = renderDataTable({
+        output$previewimport.table = renderDT({
           NULL
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         mergejoin$data.to.join = NULL
-        output$previewjoin.table = renderDataTable({
+        output$previewjoin.table = renderDT({
           NULL
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         ## save code 
@@ -275,7 +275,7 @@ observe({
         }
       }
       temp.append = iNZightTools::appendrows(data, newdata, date)
-      output$previewappend.table = renderDataTable({
+      output$previewappend.table = renderDT({
         temp.append
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
     }
@@ -306,7 +306,7 @@ observe({
       }
       temp.append = iNZightTools::appendrows(data, newdata, date)
       mergejoin$data.to.append = NULL
-      output$previewappend.table = renderDataTable({
+      output$previewappend.table = renderDT({
         NULL
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
       ## save code 
@@ -328,11 +328,11 @@ observe({
 
 
 
-output$append.table = renderDataTable({
+output$append.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
-output$join.table = renderDataTable({
+output$join.table = renderDT({
   get.data.set()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 

@@ -5,7 +5,7 @@ output$reshape.data = renderUI({
   reshape.data.panel(get.data.set())
 })
 
-output$reshape.data.table = renderDataTable({
+output$reshape.data.table = renderDT({
   get.reshape.data(get.data.set())
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
