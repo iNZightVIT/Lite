@@ -190,6 +190,7 @@ observe({
         updateSelectInput(session, "vari2", selected = "none")
         updateSelectInput(session, "vari1", selected = "none")
         plot.par$design = NULL
+        design_params$design = NULL
       }
     })
   }

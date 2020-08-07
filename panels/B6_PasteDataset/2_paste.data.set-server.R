@@ -107,6 +107,7 @@ observe({
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
         values$name.restore = values$data.name
+        design_params$design = NULL
       }
     }
   })

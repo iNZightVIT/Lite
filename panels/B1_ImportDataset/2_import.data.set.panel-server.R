@@ -67,6 +67,7 @@ observeEvent(input$files, {
         updateSelectInput(session, "vari2", selected = "none")
         updateSelectInput(session, "vari1", selected = "none")
         plot.par$design = NULL
+        design_params$design = NULL
       }      
     })
   }
@@ -95,6 +96,7 @@ observeEvent(input$import_set, {
       values$data.name = data.vals$data.name
       import_reactives$success = T
       plot.par$design = NULL
+      design_params$design = NULL
     })
   }
   
