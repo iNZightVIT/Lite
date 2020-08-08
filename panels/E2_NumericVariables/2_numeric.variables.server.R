@@ -205,6 +205,7 @@ observe({
       
       dataSet <- get.data.set()
       VarValues <- dataSet[, input$form.class.interval.column.select]
+      newVarValues = NULL
       if (input$form_class_interval_method == "Equal width intervals")
         newVarValues <- try(cut(VarValues, bins,
                                 right = levelLabels, include.lowest = TRUE))
@@ -221,13 +222,35 @@ observe({
         cutOffPoints = c(min(VarValues, na.rm = TRUE),
                          gsub(pattern = '\\s+', replacement = "", x = cutOffPoints, perl = TRUE),
                          max(VarValues, na.rm = TRUE))
-        newVarValues = try(cut(VarValues, cutOffPoints, include.lowest = TRUE, right = levelLabels))
+        
+        if (any(cutOffPoints %in% c("", " ", "", "   ", "\n", "\n\n"))){
+          shinyalert(title = "ERROR", text = "Fill in all text boxes", type = "error")
+        } else if (length(unique(cutOffPoints[c(-1,-length(cutOffPoints))])) != length(cutOffPoints)-2){
+          shinyalert(title = "ERROR", text = "Breaks must be unique values.", type = "error")
+        } else {
+          newVarValues = try(cut(VarValues, cutOffPoints, include.lowest = TRUE, right = levelLabels))
+        }
       }
-      data = data.frame(stringsAsFactors = T,
-                        get.data.set(), newVarValues)
-      colnames(data)[length(data)] = input$form.class.interval.column.name
-      updatePanel$datachanged = updatePanel$datachanged+1
-      values$data.set = data
+      
+      if(!is.null(newVarValues)){
+        if (class(newVarValues)[1] == "try-error"){
+          shinyalert(title = "ERROR",
+                     text = "Error in cutting intervals!",
+                     type = "error")
+        } else {
+          data = data.frame(stringsAsFactors = T,
+                            get.data.set(), newVarValues)
+          colnames(data)[length(data)] = input$form.class.interval.column.name
+          updatePanel$datachanged = updatePanel$datachanged+1
+          values$data.set = data
+          
+          shinyalert(title = "Success",
+                     text = paste("The new variable",
+                                  input$form.class.interval.column.name,
+                                  "will be inserted as the last column of the dataset"),
+                     type = "success")
+        }
+      }
       
       ## reset radiobuttons
       updateRadioButtons(
