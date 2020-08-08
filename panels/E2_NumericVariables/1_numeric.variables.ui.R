@@ -65,7 +65,8 @@ get.transform.main = function(){
 }
 
 get.form.class.interval.side = function(data.set){
-  list(selectInput(inputId="form.class.interval.column.select",
+  list(useShinyalert(),
+       selectInput(inputId="form.class.interval.column.select",
                    label="Choose variable",
                    choices=get.numeric.column.names(data.set),
                    selected=1),
@@ -82,6 +83,8 @@ get.form.class.interval.side = function(data.set){
                                        choices = c("Equal width intervals",
                                                    "Equal count intervals", "Specified intervals"),
                                        selected = "Equal width intervals"))),
+       uiOutput("form_class_interval_specified_interval"),
+       br(),
        actionButton(inputId="form.class.interval.submit",
                     label="Proceed",
                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"),br(),br()

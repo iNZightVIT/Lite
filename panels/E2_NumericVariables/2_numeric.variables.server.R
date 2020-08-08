@@ -150,6 +150,9 @@ observe({
 
 
 
+
+
+
 ## Manipulate variables -> Numeric variables -> Form Class interval
 
 output$form.class.interval.side = renderUI({
@@ -168,7 +171,83 @@ output$form.class.interval.name = renderUI({
             value = paste(input$form.class.interval.column.select, "f", sep = "."))
 })
 
+output$form_class_interval_specified_interval <- renderUI({
+  ret = NULL
+  input$form_class_interval_method
+  input$form.class.interval.column.select
+  input$form_class_interval_number
+  isolate({
+    if(input$form_class_interval_method == "Specified intervals") {
+      VarValues <- get.data.set()[, input$form.class.interval.column.select]
+      breaksNeeded = input$form_class_interval_number - 1
+      title = list(fixedRow(column(12, paste("Specified", input$form_class_interval_number, "intervals.\n Need", breaksNeeded, "break points"))))
+      valmin = list(fixedRow(column(12, paste0("The minimum value of variable ", input$form.class.interval.column.select, " is ", 
+                                      as.character(min(VarValues, na.rm = TRUE))))))
+      textbox = lapply(1:breaksNeeded, function(i) {
+        textInput(paste0('form_class_interval_si', i), label = "", width = "300px")
+      })
+      valmax = list(fixedRow(column(12, paste0("The maximum value of variable ", input$form.class.interval.column.select, " is ", 
+                                               as.character(max(VarValues, na.rm = TRUE))))))
+      ret = c(title, valmin, textbox, valmax)
+    }
+  })
+  ret
+})
 
+
+observe({
+  if(input$form.class.interval.submit > 0 && !is.null(input$form.class.interval.submit)){
+    isolate({
+      bins = input$form_class_interval_number
+      levelLabels <- TRUE
+      if (req(input$form_class_interval_new_level_name) == "[closed left, open right)")
+        levelLabels <- FALSE
+      
+      dataSet <- get.data.set()
+      VarValues <- dataSet[, input$form.class.interval.column.select]
+      if (input$form_class_interval_method == "Equal width intervals")
+        newVarValues <- try(cut(VarValues, bins,
+                                right = levelLabels, include.lowest = TRUE))
+      else if (req(input$form_class_interval_method) == "Equal count intervals")
+        newVarValues <- try(cut(VarValues,
+                                quantile(VarValues, probs=seq(0,1,1/bins),na.rm=TRUE),
+                                include.lowest = TRUE,
+                                right = levelLabels))
+      else if(req(input$form_class_interval_method) == "Specified intervals"){
+        breaksNeeded = bins - 1
+        cutOffPoints = numeric(0)
+        for(i in 1:breaksNeeded)
+          cutOffPoints= c(cutOffPoints, gsub(pattern = '\\n+', replacement = "", x = input[[paste0('form_class_interval_si', i)]], perl = TRUE))
+        cutOffPoints = c(min(VarValues, na.rm = TRUE),
+                         gsub(pattern = '\\s+', replacement = "", x = cutOffPoints, perl = TRUE),
+                         max(VarValues, na.rm = TRUE))
+        newVarValues = try(cut(VarValues, cutOffPoints, include.lowest = TRUE, right = levelLabels))
+      }
+      data = data.frame(stringsAsFactors = T,
+                        get.data.set(), newVarValues)
+      colnames(data)[length(data)] = input$form.class.interval.column.name
+      updatePanel$datachanged = updatePanel$datachanged+1
+      values$data.set = data
+      
+      ## reset radiobuttons
+      updateRadioButtons(
+        session,
+        inputId = "form_class_interval_method",
+        label = "Method:",
+        choices = c("Equal width intervals",
+                    "Equal count intervals", "Specified intervals"),
+        selected = "Equal width intervals"
+      )
+    })
+  }
+})
+
+output$form.class.interval.table <- renderDT({
+  get.data.set()
+},options=list(lengthMenu = c(5, 30, 50), 
+               pageLength = 5, 
+               columns.defaultContent="NA",
+               scrollX=T))
 
 
 ## Manipulate variables -> Numeric variables -> Rank numeric
