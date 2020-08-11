@@ -23,6 +23,7 @@
 ###  Next, we set up the sidebar panel with "exploratory.analysis.panel.ui".
 mixedModel.sidebarPanel <- function(){
   sidebarPanelUI = list(
+    useShinyalert(),
     ## select fitted models 
     
     fluidRow(column(6, selectInput("model_select",

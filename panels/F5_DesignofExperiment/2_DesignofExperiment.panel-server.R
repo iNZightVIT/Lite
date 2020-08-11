@@ -43,10 +43,6 @@ mix.model.list.par = reactive({
   mix.model.list.par = reactiveValuesToList(mix.model.par)
 })
 
-fit_message <- reactiveValues(
-  msg1 = as.logical(),
-  msg2 = as.logical()
-)
 
 
 ###-------------------------------------------------###
@@ -292,57 +288,57 @@ observeEvent(input$fit_model_aov, {
   temp.model = NULL
   ## fit model
   ## set parameters
-  tryCatch({
-    temp = mix.model.list.par()
-    temp$data = mix.data()
-    ## generate model name
-    model_Vals$num = model_Vals$num + 1
-    if (req(input$fit_design) == 1 && req(input$model_design) == 1 && req(input$mm_vari1) != " " && 
-        req(input$mm_vari2) != " ") {
-      temp$y = input$mm_vari1
-      temp$x = input$mm_vari2
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 2 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
-               req(input$mm_vari5) != " ") {
-      temp$y = input$mm_vari1
-      temp$x = input$mm_vari2
-      temp$blocking = input$mm_vari5
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 3 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
-               req(input$mm_vari3) != " ") {
-      temp$y = input$mm_vari1
-      temp$x = c(input$mm_vari2, input$mm_vari3)
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 4 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
-               req(input$mm_vari3) != " " && req(input$mm_vari5) != " ") {
-      temp$y = input$mm_vari1
-      temp$x = c(input$mm_vari2, input$mm_vari3)
-      temp$blocking = input$mm_vari5
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 5 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
-               req(input$mm_vari3) != " " && req(input$mm_vari4) != " ") {
-      temp$y = input$mm_vari1
-      temp$x = c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 6 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
-               req(input$mm_vari3) != " " && req(input$mm_vari4) != " " && req(input$mm_vari5) != " ") {
-      temp$y = input$mm_vari1
-      temp$x = c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
-      temp$blocking = input$mm_vari5
-    } else {
-      temp.aov = NULL
-    }
-      mix.model.name = paste0("Model_", model_Vals$num)
-      temp$name = mix.model.name
-      temp$data.name = values$data.name
-      temp.aov <- do.call(aov.fit, temp)
-      #temp.model <- do.call(anova.fit, temp)
+  temp = mix.model.list.par()
+  temp$data = mix.data()
+  ## generate model name
+  model_Vals$num = model_Vals$num + 1
+  if (req(input$fit_design) == 1 && req(input$model_design) == 1 && req(input$mm_vari1) != " " && 
+      req(input$mm_vari2) != " ") {
+    temp$y = input$mm_vari1
+    temp$x = input$mm_vari2
+  } else if (req(input$fit_design) == 1 && req(input$model_design) == 2 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+             req(input$mm_vari5) != " ") {
+    temp$y = input$mm_vari1
+    temp$x = input$mm_vari2
+    temp$blocking = input$mm_vari5
+  } else if (req(input$fit_design) == 1 && req(input$model_design) == 3 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+             req(input$mm_vari3) != " ") {
+    temp$y = input$mm_vari1
+    temp$x = c(input$mm_vari2, input$mm_vari3)
+  } else if (req(input$fit_design) == 1 && req(input$model_design) == 4 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+             req(input$mm_vari3) != " " && req(input$mm_vari5) != " ") {
+    temp$y = input$mm_vari1
+    temp$x = c(input$mm_vari2, input$mm_vari3)
+    temp$blocking = input$mm_vari5
+  } else if (req(input$fit_design) == 1 && req(input$model_design) == 5 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+             req(input$mm_vari3) != " " && req(input$mm_vari4) != " ") {
+    temp$y = input$mm_vari1
+    temp$x = c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
+  } else if (req(input$fit_design) == 1 && req(input$model_design) == 6 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+             req(input$mm_vari3) != " " && req(input$mm_vari4) != " " && req(input$mm_vari5) != " ") {
+    temp$y = input$mm_vari1
+    temp$x = c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
+    temp$blocking = input$mm_vari5
+  } else {
+    temp.aov = NULL
+  }
+  mix.model.name = paste0("Model_", model_Vals$num)
+  temp$name = mix.model.name
+  temp$data.name = values$data.name
+  temp.aov <- try(do.call(aov.fit, temp))
+  #temp.model <- do.call(anova.fit, temp)
     
-  }, error = function(e){print(e); temp.aov <- NULL})
   if(!is.null(temp.aov)){
-    #model_Vals$model[[mix.model.name]] = temp.model
-    model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
-                      selected = mix.model.name)
-    fit_message$msg1 = T
-  } else if(is.null(temp.aov) && input$fit_model_aov > 0){
-    model_Vals$num = model_Vals$num - 1
-    fit_message$msg1 = F
+    if (class(temp.aov)[1] == "try-error"){
+      model_Vals$num = model_Vals$num - 1
+      shinyalert(title = "ERROR",
+                 text = "The model can't be processed",
+                 type = "error")
+    } else {
+      model_Vals$aov[[mix.model.name]] = temp.aov
+      updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
+                        selected = mix.model.name)
+    }
   }
   })
 })
@@ -355,33 +351,34 @@ observeEvent(input$fit_model_own, {
   temp.model = NULL
   ## fit model
   ## set parameters
-  tryCatch({
-    temp = mix.model.list.par()
-    temp$data = mix.data()
-    ## generate model name
-    model_Vals$num = model_Vals$num + 1
-    mix.model.name = paste0("Model_", model_Vals$num)
-    if(req(input$fit_design) == 2 && req(input$fit_model_own) > 0 && 
-       req(input$mm_own_model_vari1) != " " && req(input$fixed_effect) != "" &&
-       req(input$random_effect) != ""){
-      ## fit model
-      temp$name = mix.model.name
-      temp$y = input$mm_own_model_vari1
-      temp$x = input$fixed_effect
-      temp$blocking = input$random_effect
-      temp$data.name = values$data.name
-    }
-    temp.aov <- do.call(aov.own, temp)
-  }, error = function(e){print(e); temp.aov <- NULL})
+  temp = mix.model.list.par()
+  temp$data = mix.data()
+  ## generate model name
+  model_Vals$num = model_Vals$num + 1
+  mix.model.name = paste0("Model_", model_Vals$num)
+  if(req(input$fit_design) == 2 && req(input$fit_model_own) > 0 && 
+     req(input$mm_own_model_vari1) != " " && req(input$fixed_effect) != "" &&
+     req(input$random_effect) != ""){
+    ## fit model
+    temp$name = mix.model.name
+    temp$y = input$mm_own_model_vari1
+    temp$x = input$fixed_effect
+    temp$blocking = input$random_effect
+    temp$data.name = values$data.name
+  }
+  temp.aov <- try(do.call(aov.own, temp))
   if(!is.null(temp.aov)){
-    #model_Vals$model[[mix.model.name]] = temp.model
-    model_Vals$aov[[mix.model.name]] = temp.aov
-    updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
-                      selected = mix.model.name)
-    fit_message$msg2 = T
-  } else if(is.null(temp.aov) && input$fit_model_own > 0){
-    fit_message$msg2 = F
-    model_Vals$num = model_Vals$num - 1
+    if (class(temp.aov)[1] == "try-error"){
+      shinyalert(title = "ERROR",
+                 text = "The model can't be processed",
+                 type = "error")
+      model_Vals$num = model_Vals$num - 1
+    } else {
+      #model_Vals$model[[mix.model.name]] = temp.model
+      model_Vals$aov[[mix.model.name]] = temp.aov
+      updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
+                        selected = mix.model.name)
+    }
   }
   })
 })
@@ -411,17 +408,6 @@ observe({
 ###-------------------------------###
 ###          Model Summary        ###
 ###-------------------------------###
-
-
-## give error message if the model is invalid
-lapply(1:2, function(x) {
-  output[[paste0("error_msg_d", x)]] <- renderUI({
-    if (!is.null(fit_message[[paste0("msg", x)]]) && length(fit_message[[paste0("msg", x)]]) > 0 && fit_message[[paste0("msg", x)]] == FALSE) {
-      shiny::tags$div(shiny::code("The model can't be processed."), style = "margin-top: 10px")    
-    }
-  })
-})
-
 
 
 ###--------------------###
