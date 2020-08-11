@@ -5640,8 +5640,8 @@ output$saveplot = downloadHandler(
       
       if (!is.null(vis.par())) {
         dafr = get.data.set()
-        if(is.numeric(vis.data()[[plot.par$x]])&
-           is.numeric(vis.data()[[plot.par$y]])){
+        if(!is.null(plot.par$x) && !is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]) &&
+           !is.null(plot.par$y) && !is.null(input$vari2) && is.numeric(vis.data()[[plot.par$y]])){
           temp = vis.par()
           temp$trend.parallel = graphical.par$trend.parallel
           temp.x = temp$x
