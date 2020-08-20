@@ -429,14 +429,106 @@ output$aov.code = renderPrint({
 ## print summary
 output$aov.summary = renderPrint({
   input$model_select
+  input$fit_model_own
+  input$fit_model_aov
   isolate({
     if (length(model_Vals$aov)>0&&
         (!is.null(model_Vals$aov[[input$model_select]])&&
          !is.null(input$model_select))){
-      summary(model_Vals$aov[[input$model_select]])
+      op = list(summary(model_Vals$aov[[input$model_select]]),
+                model.tables(model_Vals$aov[[input$model_select]], type = "means"))
+      names(op) <- c("AOV summary", "tables of the mean response for each combinations of levels of the factors")
+      op
     } else {
       cat("No model to show!")
     }
   })
 })
 
+
+###------- ----------###
+###       LSD        ###
+###------------------###
+
+output$Doe.smy <- renderUI({
+  if (length(model_Vals$aov)>0&&
+      (!is.null(model_Vals$aov[[input$model_select]])&&
+       !is.null(input$model_select))){
+    list(helpText("Computing LSD"),
+         fixedRow(column(3, textInput("Doe.lsd.df", label = "Residual degree of freedom")),
+                  column(3, textInput("Doe.lsd.rms", label = "Residual mean square error")),
+                  column(3, textInput("Doe.lsd.rp", label = "No. of replicates"))
+                  ),
+         fixedRow(column(3, actionButton(inputId = "Doe.comp.lsd",
+                                         label = "Comfirm",
+                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
+         uiOutput("Doe.lsd.res"),
+         helpText("Computing TSR"),
+         fixedRow(column(3, textInput("Doe.tsr.df", label = "Residual degree of freedom")),
+                  column(3, textInput("Doe.tsr.rms", label = "Residual mean square error")),
+                  column(3, textInput("Doe.tsr.rp", label = "No. of replicates")),
+                  column(3, textInput("Doe.tsr.lev", label = "No. of levels for treatment factor")),
+                  column(3, actionButton(inputId = "Doe.comp.tsr",
+                                         label = "Comfirm",
+                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
+         uiOutput("Doe.tsr.res")
+         )
+  }
+})
+
+
+observeEvent(input$Doe.comp.lsd, {
+  isolate({
+    if(!stringr::str_detect(input$Doe.lsd.df, "[^\\d]") && !is.null(input$Doe.lsd.df) && input$Doe.lsd.df != "" &&
+       !stringr::str_detect(input$Doe.lsd.rms, "[^\\d]") && !is.null(input$Doe.lsd.rms) && input$Doe.lsd.rms != "" &&
+       !stringr::str_detect(input$Doe.lsd.rp, "[^\\d]") && !is.null(input$Doe.lsd.rp) && input$Doe.lsd.rp != ""){
+      output$Doe.lsd.res <- renderUI({
+        verbatimTextOutput("Doe.lsd.result")
+      })
+    } else {
+      output$Doe.lsd.res <- renderUI({
+        list(NULL)
+      })
+      shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+    }
+  })
+})
+
+
+output$Doe.lsd.result = renderPrint({
+  input$Doe.comp.lsd
+  isolate({
+    qt(0.975, as.numeric(input$Doe.lsd.df)) * sqrt(2 * as.numeric(input$Doe.lsd.rms) / as.numeric(input$Doe.lsd.rp))
+  })
+})
+
+
+###------- ---------###
+###      TSR        ###
+###-----------------###
+
+observeEvent(input$Doe.comp.tsr, {
+  isolate({
+    if(!stringr::str_detect(input$Doe.tsr.df, "[^\\d]") && !is.null(input$Doe.tsr.df) && input$Doe.tsr.df != "" &&
+       !stringr::str_detect(input$Doe.tsr.rms, "[^\\d]") && !is.null(input$Doe.tsr.rms) && input$Doe.tsr.rms != "" &&
+       !stringr::str_detect(input$Doe.tsr.rp, "[^\\d]") && !is.null(input$Doe.tsr.rp) && input$Doe.tsr.rp != "" &&
+       !stringr::str_detect(input$Doe.tsr.lev, "[^\\d]") && !is.null(input$Doe.tsr.lev) && input$Doe.tsr.lev != ""){
+      output$Doe.tsr.res <- renderUI({
+        verbatimTextOutput("Doe.tsr.result")
+      })
+    } else {
+      output$Doe.tsr.res <- renderUI({
+        list(NULL)
+      })
+      shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+    }
+  })
+})
+
+
+output$Doe.tsr.result = renderPrint({
+  input$Doe.comp.tsr
+  isolate({
+    qtukey(0.95, as.numeric(input$Doe.tsr.lev), as.numeric(input$Doe.tsr.df)) * sqrt(as.numeric(input$Doe.tsr.rms)/as.numeric(input$Doe.tsr.rp))
+  })
+})

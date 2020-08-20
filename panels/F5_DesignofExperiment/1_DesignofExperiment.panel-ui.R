@@ -125,7 +125,8 @@ mixedModel.mainPanel = function(){
                       br(),
                       verbatimTextOutput("aov.code"),
                       br(),
-                      verbatimTextOutput("aov.summary")
+                      verbatimTextOutput("aov.summary"),
+                      uiOutput("Doe.smy")
                     )
         )
     )
