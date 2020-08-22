@@ -75,14 +75,14 @@ output$ep_anova <- renderUI({
     
     ## select second treatment factor
     sec.fac = fluidRow(column(12, selectInput(inputId = "mm_vari3",
-                                              label = "Second Treatment factor",
+                                              label = "Second treatment factor",
                                               choices = var_name_factor,
                                               selected = var_name_factor[1],
                                               selectize = F)))
     
     ## select third treatment factor
     third.fac = fluidRow(column(12, selectInput(inputId = "mm_vari4",
-                                                label = "Third Treatment factor",
+                                                label = "Third treatment factor",
                                                 choices = var_name_factor,
                                                 selected = var_name_factor[1],
                                                 selectize = F)))
@@ -93,32 +93,51 @@ output$ep_anova <- renderUI({
                                                 choices = var_name_factor,
                                                 selected = var_name_factor[1],
                                                 selectize = F)))
+    
+    ## treatment means 
+    trt.mean.block = fluidRow(column(12, radioButtons(inputId = "mm_trt.mean",
+                                                      label = "Treatment means",
+                                                      choices = c("No blocking or complete blocks", "balanced incomplete blocks"),
+                                                      selected = "No blocking or complete blocks")))
+    
+    trt.mean.noblock = fluidRow(column(12, radioButtons(inputId = "mm_trt.mean",
+                                                      label = "Treatment means",
+                                                      choices = c("No blocking or complete blocks"),
+                                                      selected = "No blocking or complete blocks")))
+    
     if(req(input$model_design) == 1){
-      ret = base.design
-    } else if (req(input$model_design) == 2) {
       ret = list(
         base.design,
-        block.fac
+        trt.mean.noblock
+      )} else if (req(input$model_design) == 2) {
+      ret = list(
+        base.design,
+        block.fac,
+        trt.mean.block
       )} else if (req(input$model_design) == 3) {
         ret = list(
           base.design,
-          sec.fac
+          sec.fac,
+          trt.mean.noblock
         )} else if (req(input$model_design) == 4) {
           ret = list(
             base.design,
             sec.fac,
-            block.fac
+            block.fac,
+            trt.mean.block
           )} else if (req(input$model_design) == 5) {
             ret = list(
               base.design,
               sec.fac,
-              third.fac
+              third.fac,
+              trt.mean.noblock
             )} else if (req(input$model_design) == 6) {
               ret = list(
                 base.design,
                 sec.fac,
                 third.fac,
-                block.fac
+                block.fac,
+                trt.mean.block
               )}
   })
   ret
@@ -332,10 +351,11 @@ observeEvent(input$fit_model_aov, {
     if (class(temp.aov)[1] == "try-error"){
       model_Vals$num = model_Vals$num - 1
       shinyalert(title = "ERROR",
-                 text = "The model can't be processed",
+                 text = temp.aov[1],
                  type = "error")
     } else {
       model_Vals$aov[[mix.model.name]] = temp.aov
+      model_Vals$trt[[mix.model.name]] = input$mm_trt.mean
       updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
                         selected = mix.model.name)
     }
@@ -370,12 +390,13 @@ observeEvent(input$fit_model_own, {
   if(!is.null(temp.aov)){
     if (class(temp.aov)[1] == "try-error"){
       shinyalert(title = "ERROR",
-                 text = "The model can't be processed",
+                 text = temp.aov[1],
                  type = "error")
       model_Vals$num = model_Vals$num - 1
     } else {
       #model_Vals$model[[mix.model.name]] = temp.model
       model_Vals$aov[[mix.model.name]] = temp.aov
+      model_Vals$trt[[mix.model.name]] = input$mm_trt.mean1
       updateSelectInput(session, "model_select", choices = names(model_Vals$aov),                          
                         selected = mix.model.name)
     }
@@ -426,8 +447,12 @@ output$aov.code = renderPrint({
   })
 })
 
-## print summary
-output$aov.summary = renderPrint({
+
+
+## print summary and table of treatment means
+
+
+observe({
   input$model_select
   input$fit_model_own
   input$fit_model_aov
@@ -435,15 +460,46 @@ output$aov.summary = renderPrint({
     if (length(model_Vals$aov)>0&&
         (!is.null(model_Vals$aov[[input$model_select]])&&
          !is.null(input$model_select))){
-      op = list(summary(model_Vals$aov[[input$model_select]]),
-                model.tables(model_Vals$aov[[input$model_select]], type = "means"))
-      names(op) <- c("AOV summary", "tables of the mean response for each combinations of levels of the factors")
-      op
-    } else {
-      cat("No model to show!")
+      
+      
+      ## summary
+      smry.tab = try(summary(model_Vals$aov[[input$model_select]]))
+      if(!is.null(smry.tab)){
+        if (class(smry.tab)[1] == "try-error"){
+          output$aov.summary = renderPrint(smry.tab[1])
+        } else {
+          output$aov.summary = renderPrint(smry.tab)
+        }
+      }
+      
+      
+      ## treatment means
+      if(model_Vals$trt[[input$model_select]] == "No blocking or complete blocks"){
+        trt.table = try(model.tables(model_Vals$aov[[input$model_select]], "means"))
+        if(!is.null(trt.table)){
+          if (class(trt.table)[1] == "try-error"){
+            output$aov.trtmean = renderPrint(cat(trt.table[1]))
+          } else {
+            output$aov.trtmean = renderPrint(trt.table)
+          }
+        }
+      } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks"){
+        trt.table = try(dummy.coef(model_Vals$aov[[input$model_select]])$"(Intercept)"[[1]]+dummy.coef(model_Vals$aov[[input$model_select]])$Within[[1]])
+        if(!is.null(trt.table)){
+          if (class(trt.table)[1] == "try-error"){
+            output$aov.trtmean = renderPrint(cat(trt.table[1]))
+          } else {
+            output$aov.trtmean = renderPrint(trt.table)
+          }
+        }
+      }
+      
+      
     }
   })
 })
+
+
 
 
 ###------- ----------###
@@ -454,37 +510,77 @@ output$Doe.smy <- renderUI({
   if (length(model_Vals$aov)>0&&
       (!is.null(model_Vals$aov[[input$model_select]])&&
        !is.null(input$model_select))){
-    list(helpText("Computing LSD"),
-         fixedRow(column(3, textInput("Doe.lsd.df", label = "Residual degree of freedom")),
-                  column(3, textInput("Doe.lsd.rms", label = "Residual mean square error")),
-                  column(3, textInput("Doe.lsd.rp", label = "No. of replicates"))
-                  ),
-         fixedRow(column(3, actionButton(inputId = "Doe.comp.lsd",
-                                         label = "Comfirm",
-                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
-         uiOutput("Doe.lsd.res"),
-         helpText("Computing TSR"),
-         fixedRow(column(3, textInput("Doe.tsr.df", label = "Residual degree of freedom")),
-                  column(3, textInput("Doe.tsr.rms", label = "Residual mean square error")),
-                  column(3, textInput("Doe.tsr.rp", label = "No. of replicates")),
-                  column(3, textInput("Doe.tsr.lev", label = "No. of levels for treatment factor")),
-                  column(3, actionButton(inputId = "Doe.comp.tsr",
-                                         label = "Comfirm",
-                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
-         uiOutput("Doe.tsr.res")
-         )
+    if(model_Vals$trt[[input$model_select]] == "No blocking or complete blocks"){
+      list(helpText("Computing LSD"),
+           fixedRow(column(2, textInput("Doe.lsd.df", label = "Degree of freedom")),
+                    column(2, textInput("Doe.lsd.rms", label = "Residual mean square")),
+                    column(2, textInput("Doe.lsd.rp", label = "Replication")),
+                    column(2, textInput("Doe.lsd.sig", label = "Significance level"))),
+           fixedRow(column(3, actionButton(inputId = "Doe.comp.lsd",
+                                           label = "Comfirm",
+                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
+           uiOutput("Doe.lsd.res"),
+           helpText("Computing TSR"),
+           fixedRow(column(2, textInput("Doe.tsr.df", label = "Degree of freedom")),
+                    column(2, textInput("Doe.tsr.rms", label = "Residual mean square")),
+                    column(2, textInput("Doe.tsr.rp", label = "Replication")),
+                    column(2, textInput("Doe.tsr.lev", label = "Number of means")),
+                    column(2, textInput("Doe.tsr.sig", label = "Significance level")),
+                    column(3, actionButton(inputId = "Doe.comp.tsr",
+                                           label = "Comfirm",
+                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
+           uiOutput("Doe.tsr.res")
+      )
+    } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks"){
+      list(helpText("Computing LSD"),
+           fixedRow(column(2, textInput("Doe.lsd.df", label = "Degree of freedom")),
+                    column(2, textInput("Doe.lsd.rms", label = "Residual mean square")),
+                    column(2, textInput("Doe.lsd.rp", label = "Replication")),
+                    column(2, textInput("Doe.lsd.sig", label = "Significance level")),
+                    column(2, textInput("Doe.lsd.eff", label = "Efficiency"))),
+           fixedRow(column(3, actionButton(inputId = "Doe.comp.lsd",
+                                           label = "Comfirm",
+                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
+           uiOutput("Doe.lsd.res"),
+           helpText("Computing TSR"),
+           fixedRow(column(2, textInput("Doe.tsr.df", label = "Degree of freedom")),
+                    column(2, textInput("Doe.tsr.rms", label = "Residual mean square")),
+                    column(2, textInput("Doe.tsr.rp", label = "Replication")),
+                    column(2, textInput("Doe.tsr.lev", label = "Number of means")),
+                    column(2, textInput("Doe.tsr.sig", label = "Significance level")),
+                    column(2, textInput("Doe.tsr.eff", label = "Efficiency")),
+                    column(3, actionButton(inputId = "Doe.comp.tsr",
+                                           label = "Comfirm",
+                                           style="color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"))),
+           uiOutput("Doe.tsr.res")
+      )
+      
+    }
   }
 })
 
 
 observeEvent(input$Doe.comp.lsd, {
   isolate({
-    if(!stringr::str_detect(input$Doe.lsd.df, "[^\\d]") && !is.null(input$Doe.lsd.df) && input$Doe.lsd.df != "" &&
-       !stringr::str_detect(input$Doe.lsd.rms, "[^\\d]") && !is.null(input$Doe.lsd.rms) && input$Doe.lsd.rms != "" &&
-       !stringr::str_detect(input$Doe.lsd.rp, "[^\\d]") && !is.null(input$Doe.lsd.rp) && input$Doe.lsd.rp != ""){
-      output$Doe.lsd.res <- renderUI({
-        verbatimTextOutput("Doe.lsd.result")
-      })
+    if(!stringr::str_detect(input$Doe.lsd.df, "[^.\\d]") && !is.null(input$Doe.lsd.df) && input$Doe.lsd.df != "" &&
+       !stringr::str_detect(input$Doe.lsd.rms, "[^.\\d]") && !is.null(input$Doe.lsd.rms) && input$Doe.lsd.rms != "" &&
+       !stringr::str_detect(input$Doe.lsd.rp, "[^.\\d]") && !is.null(input$Doe.lsd.rp) && input$Doe.lsd.rp != "" &&
+       !stringr::str_detect(input$Doe.lsd.sig, "[^.\\d]") && !is.null(input$Doe.lsd.sig) && input$Doe.lsd.sig != ""){
+      if(model_Vals$trt[[input$model_select]] == "No blocking or complete blocks"){
+        output$Doe.lsd.res <- renderUI({
+          verbatimTextOutput("Doe.lsd.result")
+        })
+      } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks" && 
+                 !stringr::str_detect(input$Doe.lsd.eff, "[^.\\d]") && !is.null(input$Doe.lsd.eff) && input$Doe.lsd.eff != "") {
+        output$Doe.lsd.res <- renderUI({
+          verbatimTextOutput("Doe.lsd.result")
+        })
+      } else {
+        output$Doe.lsd.res <- renderUI({
+          list(NULL)
+        })
+        shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+      }
     } else {
       output$Doe.lsd.res <- renderUI({
         list(NULL)
@@ -498,7 +594,11 @@ observeEvent(input$Doe.comp.lsd, {
 output$Doe.lsd.result = renderPrint({
   input$Doe.comp.lsd
   isolate({
-    qt(0.975, as.numeric(input$Doe.lsd.df)) * sqrt(2 * as.numeric(input$Doe.lsd.rms) / as.numeric(input$Doe.lsd.rp))
+    if(model_Vals$trt[[input$model_select]] == "No blocking or complete blocks"){
+      qt(1-as.numeric(input$Doe.lsd.sig)/2, as.numeric(input$Doe.lsd.df))*sqrt(2*as.numeric(input$Doe.lsd.rms)/(as.numeric(input$Doe.lsd.rp)))
+    } else {
+      qt(1-as.numeric(input$Doe.lsd.sig)/2, as.numeric(input$Doe.lsd.df))*sqrt(2*as.numeric(input$Doe.lsd.rms)/(as.numeric(input$Doe.lsd.rp) * as.numeric(input$Doe.lsd.eff)))
+    }
   })
 })
 
@@ -509,13 +609,27 @@ output$Doe.lsd.result = renderPrint({
 
 observeEvent(input$Doe.comp.tsr, {
   isolate({
-    if(!stringr::str_detect(input$Doe.tsr.df, "[^\\d]") && !is.null(input$Doe.tsr.df) && input$Doe.tsr.df != "" &&
-       !stringr::str_detect(input$Doe.tsr.rms, "[^\\d]") && !is.null(input$Doe.tsr.rms) && input$Doe.tsr.rms != "" &&
-       !stringr::str_detect(input$Doe.tsr.rp, "[^\\d]") && !is.null(input$Doe.tsr.rp) && input$Doe.tsr.rp != "" &&
-       !stringr::str_detect(input$Doe.tsr.lev, "[^\\d]") && !is.null(input$Doe.tsr.lev) && input$Doe.tsr.lev != ""){
-      output$Doe.tsr.res <- renderUI({
-        verbatimTextOutput("Doe.tsr.result")
-      })
+    if(!stringr::str_detect(input$Doe.tsr.df, "[^.\\d]") && !is.null(input$Doe.tsr.df) && input$Doe.tsr.df != "" &&
+       !stringr::str_detect(input$Doe.tsr.rms, "[^.\\d]") && !is.null(input$Doe.tsr.rms) && input$Doe.tsr.rms != "" &&
+       !stringr::str_detect(input$Doe.tsr.rp, "[^.\\d]") && !is.null(input$Doe.tsr.rp) && input$Doe.tsr.rp != "" &&
+       !stringr::str_detect(input$Doe.tsr.lev, "[^.\\d]") && !is.null(input$Doe.tsr.lev) && input$Doe.tsr.lev != "" &&
+       !stringr::str_detect(input$Doe.tsr.sig, "[^.\\d]") && !is.null(input$Doe.tsr.sig) && input$Doe.tsr.sig != ""){
+      
+      if(model_Vals$trt[[input$model_select]] == "No blocking or complete blocks"){
+        output$Doe.tsr.res <- renderUI({
+          verbatimTextOutput("Doe.tsr.result")
+        })
+      } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks" && 
+                 !stringr::str_detect(input$Doe.tsr.eff, "[^.\\d]") && !is.null(input$Doe.tsr.eff) && input$Doe.tsr.eff != "") {
+        output$Doe.tsr.res <- renderUI({
+          verbatimTextOutput("Doe.tsr.result")
+        })
+      } else {
+        output$Doe.tsr.res <- renderUI({
+          list(NULL)
+        })
+        shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+      }
     } else {
       output$Doe.tsr.res <- renderUI({
         list(NULL)
@@ -529,6 +643,69 @@ observeEvent(input$Doe.comp.tsr, {
 output$Doe.tsr.result = renderPrint({
   input$Doe.comp.tsr
   isolate({
-    qtukey(0.95, as.numeric(input$Doe.tsr.lev), as.numeric(input$Doe.tsr.df)) * sqrt(as.numeric(input$Doe.tsr.rms)/as.numeric(input$Doe.tsr.rp))
+    if(model_Vals$trt[[input$model_select]] == "No blocking or complete blocks"){
+      qtukey(1-as.numeric(input$Doe.tsr.sig), as.numeric(input$Doe.tsr.lev), as.numeric(input$Doe.tsr.df))*sqrt(as.numeric(input$Doe.tsr.rms)/(as.numeric(input$Doe.tsr.rp)))
+    } else {
+      qtukey(1-as.numeric(input$Doe.tsr.sig), as.numeric(input$Doe.tsr.lev), as.numeric(input$Doe.tsr.df))*sqrt(as.numeric(input$Doe.tsr.rms)/(as.numeric(input$Doe.tsr.rp) * as.numeric(input$Doe.tsr.eff)))
+    }
+    
   })
 })
+
+
+
+
+
+
+###------- ----------------------###
+###      Interaction plot        ###
+###------------------------------###
+output$Doe.int.var <- renderUI({
+  get.data.set()
+  ret = NULL
+  isolate({
+    var_name_numeric = c(" ", get.numeric.column.names(get.data.set()))
+    var_name_factor = c(" ", get.categorical.column.names(get.data.set()))
+    
+    
+    base.design = fluidRow(## select response variable(numeric)
+      column(12, selectInput(inputId = "Doe.int_vari1",
+                             label = "Response variable",
+                             choices = var_name_numeric,
+                             selected = var_name_numeric[1],
+                             selectize = F)),
+      
+      ## select treatment varibale(factor)
+      column(12, selectInput(inputId = "Doe.int_vari2",
+                             label = "X-axis variable",
+                             choices = var_name_factor,
+                             selected = var_name_factor[1],
+                             selectize = F)))
+    
+    ## select second treatment factor
+    sec.fac = fluidRow(column(12, selectInput(inputId = "Doe.int_vari3",
+                                              label = "trace variable",
+                                              choices = var_name_factor,
+                                              selected = var_name_factor[1],
+                                              selectize = F)))
+    ret = list(base.design,
+               sec.fac)
+  })
+  ret
+})
+
+
+output$Doe.interaction.plot <- renderPlot({
+  get.data.set()
+  input$Doe.int_vari1
+  input$Doe.int_vari2
+  input$Doe.int_vari3
+  isolate({
+    if(req(input$Doe.int_vari1 != " ") && req(input$Doe.int_vari2 != " ") && req(input$Doe.int_vari3 != " ")){
+      data = get.data.set()
+      interaction.plot(data[[input$Doe.int_vari2]], data[[input$Doe.int_vari3]], data[[input$Doe.int_vari1]], xlab = input$Doe.int_vari2,
+                       ylab = paste0("mean of ", input$Doe.int_vari1), trace.label = input$Doe.int_vari3)
+    }
+  })
+})
+
