@@ -148,7 +148,9 @@ mixedModel.mainPanel = function(){
         conditionalPanel("input.Doe_type == 'Interaction Plot'",
                          tabsetPanel(type = "pills",
                                      tabPanel("Interaction Plot",
-                                              plotOutput("Doe.interaction.plot"))))
+                                              plotOutput("Doe.interaction.plot"),
+                                              uiOutput("Doe.interaction.plot.save")
+                                              )))
         
     )
   )## end of mainPanelUI

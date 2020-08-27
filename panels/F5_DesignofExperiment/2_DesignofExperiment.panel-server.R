@@ -709,3 +709,60 @@ output$Doe.interaction.plot <- renderPlot({
   })
 })
 
+output$Doe.interaction.plot.save <- renderUI({
+  get.data.set()
+  input$Doe.int_vari1
+  input$Doe.int_vari2
+  input$Doe.int_vari3
+  isolate({
+    if(req(input$Doe.int_vari1 != " ") && req(input$Doe.int_vari2 != " ") && req(input$Doe.int_vari3 != " ")){
+      fixedRow(column(width = 3, 
+                      NULL),
+               column(width = 3, 
+                      downloadButton(outputId = "saveDoe.int.plot", label = "Download Plot")),
+               column(width = 3,
+                      radioButtons(inputId = "saveDoe.int.plottype", 
+                                   label = strong("Select the file type"), 
+                                   choices = list("jpg", "png", "pdf"), inline = TRUE)))
+    }
+  })
+})
+
+
+
+output$saveDoe.int.plot = downloadHandler(
+  filename = function() {
+    paste("InteractionPlot", 
+          switch(input$saveDoe.int.plottype,
+                 "jpg" = "jpg", 
+                 "png" = "png", 
+                 "pdf" = "pdf"),
+          sep = ".")
+  },
+  
+  content = function(file) {
+    
+    if(input$saveDoe.int.plottype %in% c("jpg", "png", "pdf")) {
+      
+      if(input$saveDoe.int.plottype == "jpg")
+        jpeg(file)
+      else if(input$saveDoe.int.plottype == "png")
+        png(file)
+      else if(input$saveDoe.int.plottype == "pdf")
+        pdf(file, useDingbats = FALSE)
+      suppressWarnings(tryCatch({
+        data = get.data.set()
+        interaction.plot(data[[input$Doe.int_vari2]], data[[input$Doe.int_vari3]], data[[input$Doe.int_vari1]], xlab = input$Doe.int_vari2,
+                         ylab = paste0("mean of ", input$Doe.int_vari1), trace.label = input$Doe.int_vari3)
+      }, 
+      #        warning = function(w) {
+      #          cat("Warning produced in timseries plot\n")
+      #          print(w)
+      #        }, 
+      error = function(e) {
+        print(e)
+      }, finally = {}))
+      
+      dev.off()
+    }
+  })  
