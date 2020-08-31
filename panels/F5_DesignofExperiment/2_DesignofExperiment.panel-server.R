@@ -377,8 +377,8 @@ observeEvent(input$fit_model_own, {
   model_Vals$num = model_Vals$num + 1
   mix.model.name = paste0("Model_", model_Vals$num)
   if(req(input$fit_design) == 2 && req(input$fit_model_own) > 0 && 
-     req(input$mm_own_model_vari1) != " " && req(input$fixed_effect) != "" &&
-     req(input$random_effect) != ""){
+     req(input$mm_own_model_vari1) != " " && !is.null(input$fixed_effect) &&
+     !is.null(input$random_effect)){
     ## fit model
     temp$name = mix.model.name
     temp$y = input$mm_own_model_vari1

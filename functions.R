@@ -1874,9 +1874,16 @@ aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
 
 aov.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
   fit.str = sprintf("%s ~ %s", y, x)
-  fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
-  attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),
-                        sprintf("summary(%s)", paste0("aov_", name)))
+  
+  if(!is.null(blocking) && blocking != ""){
+    fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
+    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),
+                          sprintf("summary(%s)", paste0("aov_", name)))
+  } else {
+    fit = aov(as.formula(sprintf("%s ~ %s", y, x)), data = data)
+    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y, 
+                                  x, data.name), sprintf("summary(%s)", paste0("aov_", name)))
+  }
   fit
 }
 
