@@ -24,9 +24,80 @@ getTime = function(data, index = TRUE) {
   return(names(data)[ind])
 }
 
+freqOpts <- list(
+  "Year" = c(
+    "Yearly (1)" = 1,
+    "Quarterly (4)" = 4,
+    "Monthly (12)" = 12,
+    "Weekly (52)" = 52,
+    "Daily (365/366)" = 365
+  ),
+  "Week" = c(
+    "Daily (7)" = 7,
+    "Daily - work week (5)" = 5
+  ),
+  "Day"  = c(
+    "Hourly (24)" = 24
+  )
+)
+
+## specify time manually
+output$TS.manual <- renderUI({
+  input$TS.period
+  isolate({
+    if(input$TS.period == ""){
+      choice = ""
+    } else {
+      choice = c("", names(freqOpts[[input$TS.period]]), "Custom")
+    }
+    selectInput(inputId = "TS.timeFreqList",
+                label = "Frequency* :",
+                choices = choice,
+                selected = NULL)
+  })
+})
 
 
 
+output$TS.startlbl1 <- renderText({
+  if(input$TS.period == ""){
+    "Period"
+  } else {
+    input$TS.period
+  }
+})
+
+
+output$TS.startlbl2 <- renderText({
+  if(!is.null(input$TS.timeFreqList)){
+    if (input$TS.timeFreqList == "Custom" || input$TS.timeFreqList == "") {
+      "Season"
+    } else {
+      season.name = gsub("ly$", "",
+                         strsplit(input$TS.timeFreqList, " ")[[1]][1])
+      if (season.name == "Dai") season.name <- "Day"
+      if (season.name == "Year") season.name <- " "
+      season.name
+    }
+  }
+  
+})
+
+
+observe({
+  input$input$TS.period
+  input$TS.timeFreqList
+  isolate({
+    if(!is.null(input$TS.timeFreqList) && !is.null(input$TS.period)){
+      if (input$TS.timeFreqList == "Custom" || input$TS.timeFreqList == "") {
+        shinyjs::enable("TS.timeFreqNum")
+      } else {
+        updateNumericInput(session, inputId = "TS.timeFreqNum", label = "", value = freqOpts[[input$TS.period]][[input$TS.timeFreqList]])
+        shinyjs::disable("TS.timeFreqNum")
+      }
+    }
+  })
+})
 
 
 ## create sliderInput
@@ -244,18 +315,29 @@ ts.para$xlim = vector()
 observe({
   get.data.set()
   ## create tsObj
-  if(date_check(get.data.set(),input$select_timevars)){
+  if ((!is.null(input$time_info) && input$time_info == 1 && !is.null(input$select_timevars)) ||
+      (!is.null(input$time_info) && input$time_info == 2 && !is.null(input$TS.period) && !is.null(input$TS.timeFreqNum) && !is.na(input$TS.timeFreqNum))) {
     temp = get.data.set()
-    if(!input$select_timevars%in%"time"){
-      colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+    if(input$time_info == 1){
+      if(date_check(get.data.set(),input$select_timevars)){
+        if(!input$select_timevars%in%"time"){
+          colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
+        }
+        tryCatch({ts.para$tsObj = iNZightTS(temp,
+                                            var = variable.names(),
+                                            time.col =
+                                              which(colnames(temp) == "time"))}, 
+                 warning = function(w) {print(w)},
+                 error = function(e) {print(e)})
+      }
+    } else {
+      tryCatch({ts.para$tsObj = iNZightTS(temp,
+                                          var = variable.names(),
+                                          start = c(input$TS.timeStartPeriod, input$TS.timeStartSeason),
+                                          freq = input$TS.timeFreqNum)}, 
+               warning = function(w) {print(w)},
+               error = function(e) {print(e)})
     }
-    tryCatch({ts.para$tsObj = iNZightTS(temp,
-                                       var = variable.names(),
-                                       time.col =
-                                         which(colnames(temp) == "time"))}, 
-             warning = function(w) {print(w)},
-             error = function(e) {print(e)})
-    
     
     ## modlim and xlim
     if(!is.null(input$adjust_limit_from) && !is.null(input$adjust_limit_until) &&
@@ -270,8 +352,8 @@ observe({
       tryCatch({
         ts.para$xlim[1] = xx[xd == input$adjust_limit_from]
         ts.para$xlim[2] = xx[xd == input$adjust_limit_until]}, 
-      warning = function(w) {print(w)},
-      error = function(e) {print(e)})
+        warning = function(w) {print(w)},
+        error = function(e) {print(e)})
       
       if(input$check_lim_fit == TRUE){
         ts.para$mod.lim = ts.para$xlim
@@ -596,48 +678,48 @@ output$time_info = renderUI({
 # start = 1-4 for Quarters or 1-12 for Month
 # example 2004Q2 (quarter 2 of the year 2004)
 #         2002M7 (July 2002)
-observe({
-  get.data.set()
-  input$provide_actionButton
-  isolate({
-    if(!is.null(input$provide_actionButton)&&
-       input$provide_actionButton>0){
-      time = NULL
-      if(!is.null(input$provide_frequency)&&
-         input$provide_frequency%in%"Day"){
-        time = seq(as.Date(input$provide_startdate), 
-                   by='day', 
-                   length=nrow(get.data.set()))
-        time = unlist(lapply(strsplit(as.character(time),"-"),
-                             function(x){
-                               paste0(x[1],"D",
-                                      strftime(as.Date(paste(x,collapse="-")),
-                                               format="%j"))
-                             }))
-      }else if (!is.null(input$provide_frequency)&&
-                input$provide_frequency%in%"Month") {
-        time = seq(as.Date(input$provide_startdate), 
-                   by='month', 
-                   length=nrow(get.data.set()))
-        time = unlist(lapply(strsplit(as.character(time),"-"),
-                             function(x){
-                               paste0(x[1],"M",x[2])
-                             }))
-      }else if(!is.null(input$provide_frequency)&&
-               input$provide_frequency%in%"Quarter"){
-        time = seq(as.Date(input$provide_startdate), 
-                   by='month', 
-                   length=nrow(get.data.set())*3)[seq(from=1,by=3,
-                                                      length.out=nrow(get.data.set()))]
-        time = unlist(lapply(strsplit(as.character(time),"-"),
-                             function(x){
-                               paste0(x[1],"Q",ceiling(as.numeric(x[2])/3))
-                             }))
-      }
-      values$data.set = cbind(time,get.data.set())
-    }
-  })
-})
+#observe({
+#  get.data.set()
+#  input$provide_actionButton
+#  isolate({
+#    if(!is.null(input$provide_actionButton)&&
+#       input$provide_actionButton>0){
+#      time = NULL
+#      if(!is.null(input$provide_frequency)&&
+#         input$provide_frequency%in%"Day"){
+#        time = seq(as.Date(input$provide_startdate), 
+#                   by='day', 
+#                   length=nrow(get.data.set()))
+#        time = unlist(lapply(strsplit(as.character(time),"-"),
+#                             function(x){
+#                               paste0(x[1],"D",
+#                                      strftime(as.Date(paste(x,collapse="-")),
+#                                               format="%j"))
+#                             }))
+#      }else if (!is.null(input$provide_frequency)&&
+#                input$provide_frequency%in%"Month") {
+#        time = seq(as.Date(input$provide_startdate), 
+#                   by='month', 
+#                   length=nrow(get.data.set()))
+#        time = unlist(lapply(strsplit(as.character(time),"-"),
+#                             function(x){
+#                               paste0(x[1],"M",x[2])
+#                             }))
+#     }else if(!is.null(input$provide_frequency)&&
+#               input$provide_frequency%in%"Quarter"){
+#        time = seq(as.Date(input$provide_startdate), 
+#                   by='month', 
+#                   length=nrow(get.data.set())*3)[seq(from=1,by=3,
+#                                                      length.out=nrow(get.data.set()))]
+#        time = unlist(lapply(strsplit(as.character(time),"-"),
+#                             function(x){
+#                               paste0(x[1],"Q",ceiling(as.numeric(x[2])/3))
+#                             }))
+#      }
+#      values$data.set = cbind(time,get.data.set())
+#    }
+#  })
+#})
 
 
 ###  Variable Names

@@ -71,17 +71,17 @@ ts.sidebarPanel = function(data.set) {
       ##  then load a panel that allows the user to do so.
       conditionalPanel(
           condition = "input.time_info == 2",
-          helpText("Choose a start date and frequency. Choose any 
-                   day of the starting month. This will add an 
-                   additional column to the data called \"time\"."),
-          dateInput("provide_startdate",label="",format="yyyy-mm-dd"),
-          selectInput(inputId = "provide_frequency",
-                    label = "Frequency: ",
-#                       choices=c("","Day","Month","Quarter"),# to be added back when dayly data can be used
-                    choices=c("","Month","Quarter"),
-                    selected=""),
-          actionButton(inputId = "provide_actionButton",
-                       label = "Provide time information")
+          fixedRow(column(6, selectInput(inputId = "TS.period",
+                                         label = "Period :",
+                                         choices = c("", "Year", "Week", "Day"),
+                                         selected = NULL))),
+          fixedRow(column(6, uiOutput("TS.manual")),
+                   column(6, numericInput("TS.timeFreqNum", label = "", value = 1))),
+          p("*How many observations per period?"),
+          fixedRow(column(6, numericInput("TS.timeStartPeriod", label = "Start date : ", value = 1)),
+                   column(6, div(style = "margin-top: 4px;", numericInput("TS.timeStartSeason", label = " ", value = 1)))),
+          fixedRow(column(6, div(style = "margin-top: -8px;", textOutput("TS.startlbl1"))),
+                   column(6, div(style = "margin-top: -8px;", textOutput("TS.startlbl2"))))
       ),
       hr(),
       h5(strong("Model Settings:")),
