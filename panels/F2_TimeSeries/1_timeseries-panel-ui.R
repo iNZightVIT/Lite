@@ -76,7 +76,7 @@ ts.sidebarPanel = function(data.set) {
                                          choices = c("", "Year", "Week", "Day"),
                                          selected = NULL))),
           fixedRow(column(6, uiOutput("TS.manual")),
-                   column(6, numericInput("TS.timeFreqNum", label = "", value = 1))),
+                   column(6, numericInput("TS.timeFreqNum", label = "", value = NULL))),
           p("*How many observations per period?"),
           fixedRow(column(6, numericInput("TS.timeStartPeriod", label = "Start date : ", value = 1)),
                    column(6, div(style = "margin-top: 4px;", numericInput("TS.timeStartSeason", label = " ", value = 1)))),

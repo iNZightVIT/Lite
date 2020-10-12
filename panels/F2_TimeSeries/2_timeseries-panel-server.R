@@ -102,7 +102,7 @@ observe({
 
 ## create sliderInput
 output$time.range.var <- renderUI({
-  if(date_check(get.data.set(),input$select_timevars) && !is.null(ts.para$tsObj$tsObj)){
+  if((date_check(get.data.set(),input$select_timevars)|| input$time_info == 2) && !is.null(ts.para$tsObj$tsObj)){
     xr <- range(time(ts.para$tsObj$tsObj))
     xby <- 1 / ts.para$tsObj$freq
     xx <- seq(xr[1], xr[2], by = xby)
@@ -319,7 +319,7 @@ observe({
       (!is.null(input$time_info) && input$time_info == 2 && !is.null(input$TS.period) && !is.null(input$TS.timeFreqNum) && !is.na(input$TS.timeFreqNum))) {
     temp = get.data.set()
     if(input$time_info == 1){
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
         }
@@ -734,7 +734,7 @@ variable.names = reactive({
 ###
 ###  Time Series Plot
 output$timeseries_plot = renderPlot({
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
@@ -789,7 +789,7 @@ output$saveTimeplot = downloadHandler(
       else if(input$saveTimeplottype == "pdf")
         pdf(file, useDingbats = FALSE)
       
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
@@ -839,7 +839,7 @@ output$plotly_tsmain = renderPlotly({
   input$mod_limit_from
   input$mod_limit_until
   isolate({
-    if(date_check(get.data.set(),input$select_timevars)){
+    if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
       pdf(NULL)
       suppressWarnings(tryCatch({
         plot(
@@ -869,7 +869,7 @@ output$plotly_tsmain = renderPlotly({
 
 # open in new window
 output$plotly_tsmainnw = renderUI({
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     curdir <- getwd()
     on.exit(setwd(curdir))
     #set to temp directory
@@ -915,7 +915,7 @@ output$plotly_tsmainnw = renderUI({
 ###  Seasonal Plot
 output$seasonal_plot = renderPlot({
   #     input$selector
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
       seasonplot(
         ts.para$tsObj,
@@ -967,7 +967,7 @@ output$saveSeasonalplot = downloadHandler(
       else if(input$saveSeasonalplottype == "pdf")
         pdf(file, useDingbats = FALSE)
       
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         suppressWarnings(tryCatch({
           seasonplot(
             ts.para$tsObj,
@@ -1004,7 +1004,7 @@ output$saveSeasonalplot = downloadHandler(
 ###  Decomposed Plot
 output$decomposed_plot = renderPlot({
   #     input$selector
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
       plot(
         iNZightTS::decompose(
@@ -1059,7 +1059,7 @@ output$saveDecomposedplot = downloadHandler(
       else if(input$saveDecomposedplottype == "pdf")
         pdf(file, useDingbats = FALSE)
       
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         suppressWarnings(tryCatch({
           plot(
             iNZightTS::decompose(
@@ -1093,7 +1093,7 @@ output$saveDecomposedplot = downloadHandler(
 ###  Trend + Seasonal Plot
 output$trSeasonal_plot = renderPlot({
   #     input$selector
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
       plot(
         iNZightTS::decompose(
@@ -1148,7 +1148,7 @@ output$saveRecomposedplot = downloadHandler(
       else if(input$saveRecomposedplottype == "pdf")
         pdf(file, useDingbats = FALSE)
       
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         suppressWarnings(tryCatch({
           plot(
             iNZightTS::decompose(
@@ -1187,7 +1187,7 @@ output$saveRecomposedplot = downloadHandler(
 ###  Forecast Plot
 output$forecast_plot = renderPlot({
   #     input$selector
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
@@ -1231,7 +1231,7 @@ output$plotly_tsforecast = renderPlotly({
   input$mod_limit_from
   input$mod_limit_until
   isolate({
-    if(date_check(get.data.set(),input$select_timevars)){
+    if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
       pdf(NULL)
       suppressWarnings(tryCatch({
         plot(
@@ -1259,7 +1259,7 @@ output$plotly_tsforecast = renderPlotly({
 
 ## open in new window
 output$plotly_tsforecastnw = renderUI({
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     curdir <- getwd()
     on.exit(setwd(curdir))
     #set to temp directory
@@ -1325,7 +1325,7 @@ output$saveForecastplot = downloadHandler(
       else if(input$saveForecastplottype == "pdf")
         pdf(file, useDingbats = FALSE)
       
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         temp = get.data.set()
         if(!input$select_timevars%in%"time"){
           colnames(temp)[which(colnames(temp)%in%input$select_timevars)] = "time"
@@ -1362,7 +1362,7 @@ output$saveForecastplot = downloadHandler(
 
 
 output$forecast_summary = renderPrint({
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     pdf(NULL)
     suppressWarnings(tryCatch({
       pl <- try(plot(
@@ -1399,7 +1399,7 @@ output$forecast_summary = renderPrint({
 ###
 output$multiple_single_plot = renderPlot({
   #     input$selctor
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
@@ -1451,7 +1451,7 @@ output$saveSingleplot = downloadHandler(
       else if(input$saveSingleplottype == "pdf")
         pdf(file, useDingbats = FALSE)
       
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
@@ -1483,7 +1483,7 @@ output$saveSingleplot = downloadHandler(
 
 output$multipleSeries_single_layout = renderUI({
   #     input$selctor
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     columns = length(input$multi_series_vars)
     if (columns <= 6) {
       plotOutput("multiple_single_plot", height = "500px")
@@ -1496,7 +1496,7 @@ output$multipleSeries_single_layout = renderUI({
 
 output$multiple_multi_plot = renderPlot({
   #     input$selector
-  if(date_check(get.data.set(),input$select_timevars)){
+  if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
       plot(
         ts.para$tsObj,
@@ -1550,7 +1550,7 @@ output$saveMultiplot = downloadHandler(
       else if(input$saveMultiplottype == "pdf")
         pdf(file, useDingbats = FALSE)
       
-      if(date_check(get.data.set(),input$select_timevars)){
+      if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
         suppressWarnings(tryCatch({
           plot(
             ts.para$tsObj,
