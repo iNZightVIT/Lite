@@ -784,18 +784,20 @@ observe({
     #if (is.null(g1_level) || g1_level == 0) {
     #  g1_level = NULL
     #}
-    if ((is.null(g1_level) || g1_level == 0) && !is.null(input$subs1) && input$subs1 != "none") {
-      g1_level = "_MULTI"
-    } 
-    if ((is.null(g1_level) || g1_level == 0 || input$subs1 == "none")){
-      g1_level = NULL
-    }
-    plot.par$g1.level = g1_level
-    if(is.null(g1_level)){
-      g1_level = 0
-    }
-    updateSliderInput(session,"sub1_level_mini",
-                      value=g1_level)
+    tryCatch({ 
+      if ((is.null(g1_level) || g1_level == 0) && !is.null(input$subs1) && input$subs1 != "none") {
+        g1_level = "_MULTI"
+      } 
+      if ((is.null(g1_level) || g1_level == 0 || input$subs1 == "none")){
+        g1_level = NULL
+      }
+      plot.par$g1.level = g1_level
+      if(is.null(g1_level)){
+        g1_level = 0
+      }
+      updateSliderInput(session,"sub1_level_mini",
+                        value=g1_level)
+      }, error = function(e) {print(e)})
   })
 })
 
@@ -2958,26 +2960,29 @@ observe({
   input$sub2_level
   input$subs2
   isolate({
-    if(!is.null(input$select.plot.type) && 
-       input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot",
-                                     "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
-                                     "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
-                                     "(gg) diverging stacked bar (likert)",
-                                     "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons", "(gg) spine/pyramid",
-                                     "(gg) pyramid",
-                                     "")) {
-      hideTab(inputId = "plot_selector", target = "1")
-      showTab(inputId = "plot_selector", target = "2")
-    } else if ((!is.null(input$select.plot.type) &&  input$select.plot.type %in% c("(gg) pie", "(gg) gridplot",
-                                                                                   "(gg) donut", "(gg) density (ridgeline)")) ||
-               (!is.null(input$sub1_level) && input$sub1_level == "_MULTI" && input$subs1 != "none") ||
-               !is.null(input$sub2_level) && input$subs2 != "none") {
-      hideTab(inputId = "plot_selector", target = "2")
-      hideTab(inputId = "plot_selector", target = "1")
-    } else {
-      hideTab(inputId = "plot_selector", target = "2")
-      showTab(inputId = "plot_selector", target = "1")
-    }
+    tryCatch({
+      if(!is.null(input$select.plot.type) && 
+         input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot",
+                                       "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
+                                       "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
+                                       "(gg) diverging stacked bar (likert)",
+                                       "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons", "(gg) spine/pyramid",
+                                       "(gg) pyramid",
+                                       "")) {
+        hideTab(inputId = "plot_selector", target = "1")
+        showTab(inputId = "plot_selector", target = "2")
+      } else if ((!is.null(input$select.plot.type) &&  input$select.plot.type %in% c("(gg) pie", "(gg) gridplot",
+                                                                                     "(gg) donut", "(gg) density (ridgeline)")) ||
+                 (!is.null(input$sub1_level) && input$sub1_level == "_MULTI" && input$subs1 != "none") ||
+                 !is.null(input$sub2_level) && input$subs2 != "none") {
+        hideTab(inputId = "plot_selector", target = "2")
+        hideTab(inputId = "plot_selector", target = "1")
+      } else {
+        hideTab(inputId = "plot_selector", target = "2")
+        showTab(inputId = "plot_selector", target = "1")
+      }
+    }, error = function(e){print(e)})
+    
   })
 })
 
