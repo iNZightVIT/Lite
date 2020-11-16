@@ -1245,13 +1245,13 @@ output$factor_comparison_matrix = renderPrint({
   input$model.select
   input$factor.comp.select
   isolate({
-    print(suppressWarnings(multicomp(moecalc(modelValues$models[[input$model.select]],input$factor.comp.select))))
+    print(suppressWarnings(iNZightRegression::factorComp(modelValues$models[[input$model.select]],input$factor.comp.select)))
     modelValues$code.history = paste0(modelValues$code.history,
-                                      paste0("multicomp(moecalc(",
+                                      paste0("iNZightRegression::factorComp(",
                                              input$model.select,
                                              ",'",
                                              input$factor.comp.select,
-                                             "'))\n"))
+                                             "')\n"))
   })
 })
 
