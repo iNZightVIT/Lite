@@ -51,7 +51,7 @@ output$paste.view.title = renderUI({
   
 
 output$paste.table.preview = renderDT({
-  if(req(!is.null(input$paste.data.area))){
+  if(req(!is.null(input$paste.data.area) && input$paste.data.area != "")){
     txt = input$paste.data.area
     if (length(txt) == 1) {
       txt <- sprintf("%s\n", txt)
