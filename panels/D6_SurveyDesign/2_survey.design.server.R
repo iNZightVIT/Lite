@@ -141,13 +141,13 @@ design.model.fit <- reactiveValues()
 
 setDesign = function(x) {
   if (missing(x)) {
-    dataDesign <<- NULL
-    dataDesignName <<- name
+    design_params$design$dataDesign <- NULL
+    design_params$design$dataDesignName <- values$data.name
     return()
   }
   if (inherits(x, "inzsvyspec")) {
     if (is.null(x$design))
-      x <- iNZightTools::make_survey(dataSet, x)
+      x <- iNZightTools::make_survey(values$data.set, x)
   } else {
     spec <- structure(
       list(
@@ -168,32 +168,31 @@ setDesign = function(x) {
       ),
       class = "inzsvyspec"
     )
-    x <- iNZightTools::make_survey(dataSet, spec)
+    x <- iNZightTools::make_survey(values$data.set, spec)
   }
-  dataDesign <<- unclass(x)
-  dataDesignName <<- sprintf("%s.%s",
-                             name,
-                             switch(x$spec$type,
-                                    "survey" = "svy",
-                                    "replicate" = "repsvy"
-                             )
+  design_params$design$dataDesign <- unclass(x)
+  design_params$design$dataDesignName <- sprintf("%s.%s",
+                                                 values$data.name,
+                                                 switch(x$spec$type,
+                                                        "survey" = "svy",
+                                                        "replicate" = "repsvy"
+                                                 )
   )
   # when design changed, update the object
   invisible(createSurveyObject(reload = TRUE))
 }
 
-currentDesign = list()
+currentDesign = reactiveValues()
+currentDesign$info = NULL
 
 createSurveyObject = function(reload = FALSE) {
-  if (!is.null(plot.par$design) && !reload)
-    return(plot.par$design)
-  currentDesign <<- getDesign()
-  currentDesign$design
+  if (!is.null(currentDesign$info$design) && !reload)
+    return(currentDesign$info$design)
+  currentDesign$info = design_params$design$dataDesign
+  currentDesign$info$design
 }
 
-getDesign = function() {
-  dataDesign
-}
+
 
 
 svalue_or_null <- function(x) {
@@ -237,21 +236,30 @@ observe({
       strat <- svalue_or_null(input$stratVar)
       clus1 <- svalue_or_null(input$clus1Var)
       clus2 <- svalue_or_null(input$clus2Var)
+      if (!is.null(clus1) && !is.null(clus2)) {
+        clus <- paste(clus1, clus2, sep = " + ")
+      } else {
+        clus <- ifelse(is.null(clus1), clus2, clus1)
+      }
       wts <- svalue_or_null(input$wtVar)
       fpc <- fpc.f()
       nest <- as.logical(input$nestChk)
-      name <- values$data.name
       clear <- is.null(input$strat) && is.null(input$clus1) &&
-        is.null(input$clus2) && is.null(input$wts) && is.null(input$fpc)
+        is.null(input$clus2) && is.null(input$wts) && is.null(fpc.f())
+      a = list(strata = strat,
+               ids = clus,
+               weights = wts,
+               nest = nest,
+               fpc = fpc,
+               type = "survey")
+      saveRDS(a, file = "a.rds")
       design_params$design = setDesign(
-        strata = strat,
-        clus1 = clus1,
-        clus2 = clus2,
-        wt = wts,
-        nest = nest,
-        fpc = fpc,
-        type = "survey",
-        name = name
+        list(strata = strat,
+             ids = clus,
+             weights = wts,
+             nest = nest,
+             fpc = fpc,
+             type = "survey")
       )
     } else if (req(input$svytype) == "replicate" && req(input$create.design1) > 0) {
       wts <- svalue_or_null(input$sample.weight.Var)
@@ -504,7 +512,7 @@ observe({
       code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
       code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
       
-      plot.par$design = createSurveyObject(design_params$design)
+      plot.par$design = createSurveyObject()
       ## print result
       output$create.design.summary <- renderPrint({
         summary(plot.par$design)
@@ -535,7 +543,7 @@ observe({
       name = design_params$design$dataDesign$name,
       poststrat = if (length(input$PSvar) != 0) lvldf$df[input$PSvar] else NULL
     )
-    setOk <- try(createSurveyObject(PSDesign))
+    setOk <- try(createSurveyObject())
     if (!inherits(setOk, "try-error")) {
       design_params$design$dataDesign <-  PSDesign$dataDesign
       
@@ -549,7 +557,7 @@ observe({
       code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
       code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
       
-      plot.par$design = createSurveyObject(PSDesign)
+      plot.par$design = createSurveyObject()
       ## print result
       output$create.design.summary <- renderPrint({
         summary(plot.par$design)
