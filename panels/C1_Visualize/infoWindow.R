@@ -469,7 +469,7 @@ output$visualize.inference = renderPrint({
       if (!is.null(design_params$design$dataDesign)) {
         curSet$data <- NULL
         curSet$design <- as.name(".design")
-        .design = createSurveyObject(design_params$design)
+        .design = createSurveyObject()
         # designname <<- curMod$dataDesignName
         # curSet$design <<- as.name(designname)
         # assign(designname, curMod$createSurveyObject(), envir = env)
@@ -550,7 +550,7 @@ output$visualize.summary = renderPrint({
     if (!is.null(design_params$design$dataDesign)) {
       curSet$data <- NULL
       curSet$design <- as.name(".design")
-      .design = createSurveyObject(design_params$design)
+      .design = createSurveyObject()
       # designname <<- curMod$dataDesignName
       # curSet$design <<- as.name(designname)
       # assign(designname, curMod$createSurveyObject(), envir = env)

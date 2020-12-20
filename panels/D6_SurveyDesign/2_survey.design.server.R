@@ -1,5 +1,4 @@
 
-
 output$survey.design = renderUI({
   create.design.panel(get.data.set())
 })
@@ -145,10 +144,10 @@ setDesign = function(x) {
     design_params$design$dataDesignName <- values$data.name
     return()
   }
-  dataSet = values$data.set 
+  
   if (inherits(x, "inzsvyspec")) {
     if (is.null(x$design))
-      x <- iNZightTools::make_survey(dataSet, x)
+      x <- iNZightTools::make_survey(values$data.set, x)
   } else {
     spec <- structure(
       list(
@@ -169,7 +168,7 @@ setDesign = function(x) {
       ),
       class = "inzsvyspec"
     )
-    x <- iNZightTools::make_survey(dataSet, spec)
+    x <- iNZightTools::make_survey(values$data.set, spec)
   }
   design_params$design$dataDesign <- unclass(x)
   design_params$design$dataDesignName <- sprintf("%s.%s",
@@ -249,7 +248,7 @@ observe({
       nest <- as.logical(input$nestChk)
       clear <- is.null(input$strat) && is.null(input$clus1) &&
         is.null(input$clus2) && is.null(input$wts) && is.null(fpc.f())
-      design_params$design = setDesign(
+      setDesign(
         list(strata = strat,
              ids = clus,
              weights = wts,
@@ -272,16 +271,16 @@ observe({
         scale <- NULL
         rscales <- NULL
       }
-      name <- values$data.name
       clear <- is.null(wts) && length(repWts) == 0
-      design_params$design = setDesign(
-        wt = wts,
-        repweights = repWts,
-        reptype = reptype,
-        scale = scale,
-        rscales = rscales,
-        type = "replicate",
-        name = name
+      setDesign(
+        list(
+          weights = wts,
+          repweights = repWts,
+          reptype = reptype,
+          scale = scale,
+          rscales = rscales,
+          type = "replicate"
+        )
       )
     }
   })
