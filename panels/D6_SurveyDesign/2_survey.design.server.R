@@ -490,6 +490,8 @@ observe({
 })
 
 
+
+
 ## create design
 observe({
   input$create.design
@@ -523,26 +525,38 @@ observe({
 })
 
 
-
 ## create design
 observe({
   input$create.design2
   isolate({
     req(design_params$design)
-    PSDesign <- setDesign(
-      strata = design_params$design$dataDesign$strat,
-      clus1 = design_params$design$dataDesign$clus1, clus2 = design_params$design$dataDesign$clus2,
-      wt = design_params$design$dataDesign$wt, nest = design_params$design$dataDesign$nest,
-      fpc = design_params$design$dataDesign$fpc, repweights = design_params$design$dataDesign$repWts, 
-      type = design_params$design$dataDesign$type,
-      name = design_params$design$dataDesign$name,
-      poststrat = if (length(input$PSvar) != 0) lvldf$df[input$PSvar] else NULL
+    #PSDesign <- setDesign(
+    #  strata = design_params$design$dataDesign$strat,
+    #  clus1 = design_params$design$dataDesign$clus1, clus2 = design_params$design$dataDesign$clus2,
+    #  wt = design_params$design$dataDesign$wt, nest = design_params$design$dataDesign$nest,
+    #  fpc = design_params$design$dataDesign$fpc, repweights = design_params$design$dataDesign$repWts, 
+    #  type = design_params$design$dataDesign$type,
+    #  name = design_params$design$dataDesign$name,
+    #  poststrat = if (length(input$PSvar) != 0) lvldf$df[input$PSvar] else NULL
+    #)
+    curDes <- design_params$design$dataDesign$spec
+    
+    cal_list <- lapply(names(lvldf$df),
+                       function(var) {
+                         x <- lvldf$df[[var]]$Freq
+                         names(x) <- lvldf$df[[var]][[var]]
+                         x
+                       }
     )
+    names(cal_list) <- names(lvldf$df)
+    setDesign(
+      modifyList(curDes,
+                 list(calibrate = if (length(input$PSvar)) cal_list[input$PSvar] else NULL)
+      )
+    )
+    
     setOk <- try(createSurveyObject())
     if (!inherits(setOk, "try-error")) {
-      design_params$design$dataDesign <-  PSDesign$dataDesign
-      
-      
       call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
       call <- sprintf("%s <- %s",
                       paste0(design_params$design$dataDesignName, ".ps"),
@@ -559,9 +573,7 @@ observe({
       })
     } else if(inherits(setOk, "try-error")){
       output$create.design.summary <- renderText({
-        paste0(
-          "Something went wrong during post stratification ...",
-          PSDesign)
+        "Something went wrong during post stratification ..."
       })
     }
   })
