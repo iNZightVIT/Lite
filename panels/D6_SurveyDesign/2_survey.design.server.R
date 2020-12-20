@@ -248,14 +248,15 @@ observe({
       nest <- as.logical(input$nestChk)
       clear <- is.null(input$strat) && is.null(input$clus1) &&
         is.null(input$clus2) && is.null(input$wts) && is.null(fpc.f())
-      setDesign(
+      set = try(setDesign(
         list(strata = strat,
              ids = clus,
              weights = wts,
              nest = nest,
              fpc = fpc,
              type = "survey")
-      )
+      ), silent = TRUE)
+      
     } else if (req(input$svytype) == "replicate" && req(input$create.design1) > 0) {
       wts <- svalue_or_null(input$sample.weight.Var)
       repWts <- input$repVars
@@ -272,7 +273,7 @@ observe({
         rscales <- NULL
       }
       clear <- is.null(wts) && length(repWts) == 0
-      setDesign(
+      set = try(setDesign(
         list(
           weights = wts,
           repweights = repWts,
@@ -281,11 +282,35 @@ observe({
           rscales = rscales,
           type = "replicate"
         )
-      )
+      ), silent = TRUE)
+    }
+    
+    
+    setOk <- try(createSurveyObject())
+    if (!inherits(set, "try-error")) {
+      call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
+      
+      call <- sprintf("%s <- %s",
+                      design_params$design$dataDesignName,
+                      gsub("dataSet", values$data.name, call))
+      design.model.fit$code <- call
+      code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
+      code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
+      
+      plot.par$design = createSurveyObject()
+      ## print result
+      output$create.design.summary <- renderPrint({
+        summary(plot.par$design)
+      })
+    } else if(inherits(set, "try-error")){
+      output$create.design.summary <- renderText({
+        paste0(
+          "There is a problem with the specification of the survey design:\n\n",
+          set)
+      })
     }
   })
 })
-
 
 
 
@@ -366,7 +391,8 @@ observe({
   if(input$selector == "Survey design"){
     updateSelectInput(session, inputId = "svytype", label = "Select survey design", choices = list("Specify design" = "survey",
                                                                                                    "Specify replicate design" = "replicate",
-                                                                                                   "Post stratify" = "post"),
+                                                                                                   "Post stratify" = "post",
+                                                                                                   "Read from file" = "read"),
                       selected = "survey")
   }
 })
@@ -492,37 +518,7 @@ observe({
 
 
 
-## create design
-observe({
-  input$create.design
-  input$create.design1
-  isolate({
-    req(design_params$design)
-    setOk <- try(createSurveyObject())
-    if (!inherits(setOk, "try-error")) {
-      call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
-      
-      call <- sprintf("%s <- %s",
-                      design_params$design$dataDesignName,
-                      gsub("dataSet", values$data.name, call))
-      design.model.fit$code <- call
-      code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
-      code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
-      
-      plot.par$design = createSurveyObject()
-      ## print result
-      output$create.design.summary <- renderPrint({
-        summary(plot.par$design)
-      })
-    } else if(inherits(setOk, "try-error")){
-      output$create.design.summary <- renderText({
-        paste0(
-          "There is a problem with the specification of the survey design:\n\n",
-          setOk)
-      })
-    }
-  })
-})
+
 
 
 ## create design
@@ -549,14 +545,14 @@ observe({
                        }
     )
     names(cal_list) <- names(lvldf$df)
-    setDesign(
+    set = try(setDesign(
       modifyList(curDes,
                  list(calibrate = if (length(input$PSvar)) cal_list[input$PSvar] else NULL)
       )
-    )
+    ), silent = TRUE)
     
     setOk <- try(createSurveyObject())
-    if (!inherits(setOk, "try-error")) {
+    if (!inherits(set, "try-error")) {
       call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
       call <- sprintf("%s <- %s",
                       paste0(design_params$design$dataDesignName, ".ps"),
@@ -571,7 +567,7 @@ observe({
       output$create.design.summary <- renderPrint({
         summary(plot.par$design)
       })
-    } else if(inherits(setOk, "try-error")){
+    } else if(inherits(set, "try-error")){
       output$create.design.summary <- renderText({
         "Something went wrong during post stratification ..."
       })
@@ -586,6 +582,7 @@ observe({
   input$remove.design
   input$remove.design1
   input$remove.design2
+  input$remove.design3
   isolate({
     plot.par$design=NULL
     design_params$design = NULL
@@ -593,3 +590,35 @@ observe({
 })
 
 
+## read the design from file
+
+
+observeEvent(input$svy.design.spec, { 
+  if(file.exists(input$svy.design.spec[1, "datapath"])) {
+    isolate({
+      svyspec <- iNZightTools::import_survey(input$svy.design.spec[1, "datapath"])
+      set = try(setDesign(svyspec), silent = TRUE)
+      setOK <- try(
+        createSurveyObject(),
+        silent = TRUE
+      )
+      
+      if (!inherits(set, "try-error")) {
+
+        ## write design call
+        call <- paste(deparse(setOK$call), collapse = "\n")
+        plot.par$design = createSurveyObject()
+        ## print result
+        output$create.design.summary <- renderPrint({
+          summary(plot.par$design)
+        })
+      } else {
+        output$create.design.summary <- renderText({
+          paste0(
+            "There is a problem with the survey specification file:\n\n",
+            set)
+        })
+      }
+    })
+  }
+})
