@@ -145,9 +145,10 @@ setDesign = function(x) {
     design_params$design$dataDesignName <- values$data.name
     return()
   }
+  dataSet = values$data.set 
   if (inherits(x, "inzsvyspec")) {
     if (is.null(x$design))
-      x <- iNZightTools::make_survey(values$data.set, x)
+      x <- iNZightTools::make_survey(dataSet, x)
   } else {
     spec <- structure(
       list(
@@ -168,7 +169,7 @@ setDesign = function(x) {
       ),
       class = "inzsvyspec"
     )
-    x <- iNZightTools::make_survey(values$data.set, spec)
+    x <- iNZightTools::make_survey(dataSet, spec)
   }
   design_params$design$dataDesign <- unclass(x)
   design_params$design$dataDesignName <- sprintf("%s.%s",
@@ -236,7 +237,9 @@ observe({
       strat <- svalue_or_null(input$stratVar)
       clus1 <- svalue_or_null(input$clus1Var)
       clus2 <- svalue_or_null(input$clus2Var)
-      if (!is.null(clus1) && !is.null(clus2)) {
+      if (is.null(clus1) && is.null(clus2)){
+        clus = NULL
+      } else if (!is.null(clus1) && !is.null(clus2)) {
         clus <- paste(clus1, clus2, sep = " + ")
       } else {
         clus <- ifelse(is.null(clus1), clus2, clus1)
@@ -246,13 +249,6 @@ observe({
       nest <- as.logical(input$nestChk)
       clear <- is.null(input$strat) && is.null(input$clus1) &&
         is.null(input$clus2) && is.null(input$wts) && is.null(fpc.f())
-      a = list(strata = strat,
-               ids = clus,
-               weights = wts,
-               nest = nest,
-               fpc = fpc,
-               type = "survey")
-      saveRDS(a, file = "a.rds")
       design_params$design = setDesign(
         list(strata = strat,
              ids = clus,
