@@ -658,7 +658,7 @@ old.vis.mainPanel = function() {
       tabPanel(
         title = "Summary",
         br(),
-        helpText("Statistical Sumary for the data."),
+        helpText("Statistical Summary for the data."),
         verbatimTextOutput("visualize.summary")
       ),
       ##  Inference Panel
