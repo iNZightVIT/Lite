@@ -1581,7 +1581,7 @@ get.data.from.URL = function(URL, data.dir.import){
     if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
     else
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="curl")
+      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
     
     temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
     if(!is.null(temp[[2]])){
