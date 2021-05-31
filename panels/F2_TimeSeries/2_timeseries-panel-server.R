@@ -528,21 +528,8 @@ output$ts.main.ui <- renderUI({
                      column(width = 3,
                             radioButtons(inputId = "saveForecastplottype", 
                                          label = strong("Select the file type"), 
-                                         choices = list("jpg", "png", "pdf"), inline = TRUE)))
-          ),
-          tabPanel(
-            title = "Interactive Plot (via plotly)",
-            uiOutput("plotly_tsforecastnw"),
-            plotlyOutput("plotly_tsforecast", height = "500px") %>% withSpinner()
-          ))
-      )
-    } else if (!is.null(input$select_variables) && length(input$select_variables) == 1 &&
-               input$time_plot_info1 == 6) {
-      ret = list(
-        tabsetPanel(
-          type = "pills",
-          tabPanel(
-            title = "Summary",
+                                         choices = list("jpg", "png", "pdf"), inline = TRUE))),
+            
             helpText(
               br(),
               "A",
@@ -554,6 +541,11 @@ output$ts.main.ui <- renderUI({
               br()
             ),
             verbatimTextOutput(outputId = "forecast_summary")
+          ),
+          tabPanel(
+            title = "Interactive Plot (via plotly)",
+            uiOutput("plotly_tsforecastnw"),
+            plotlyOutput("plotly_tsforecast", height = "500px") %>% withSpinner()
           ))
       )
     } else if (!is.null(input$select_variables) && length(input$select_variables) > 1 &&
@@ -1189,7 +1181,7 @@ output$forecast_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
+      pl <- try(plot(
         ts.para$tsObj,
         multiplicative = as.logical(season_select_ts$re),
         xlab = input$provide_xlab,
@@ -1197,8 +1189,14 @@ output$forecast_plot = renderPlot({
         forecast = ts.para$tsObj$freq * 2,
         model.lim = ts.para$mod.lim,
         xlim = ts.para$xlim
-      )
-    }, 
+      ), silent = TRUE)
+      if (inherits(pl, "try-error")) {
+        return()
+      }
+      
+      ts.para$forecasts <- iNZightTS::pred(pl)
+      pl
+      }, 
     #        warning = function(w) {
     #          cat("Warning produced in forecastplot \n")
     #          print(w)
@@ -1363,23 +1361,8 @@ output$saveForecastplot = downloadHandler(
 
 output$forecast_summary = renderPrint({
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
-    pdf(NULL)
     suppressWarnings(tryCatch({
-      pl <- try(plot(
-        ts.para$tsObj,
-        multiplicative = as.logical(season_select_ts$re),
-        xlab = input$provide_xlab,
-        ylab = input$provide_ylab,
-        forecast = ts.para$tsObj$freq * 2,
-        model.lim = ts.para$mod.lim,
-        xlim = ts.para$xlim
-      ), silent = TRUE)
-      if (inherits(pl, "try-error")) {
-        visible(forecastError) <<- TRUE
-        return()
-      }
-
-      iNZightTS::pred(pl)
+      ts.para$forecasts
     }, warning = function(w) {
       print(w) 
     }, error = function(e) {
@@ -1648,4 +1631,27 @@ output$time.plot.select = renderUI({
                     selectize = FALSE,
                     size = 7)))
 })
+
+
+output$ts_plot_type <- renderUI({
+  input$select_variables
+  list(conditionalPanel(condition = "input.select_variables.length == 1",
+                         radioButtons(inputId = "time_plot_info1", label = "", 
+                                      choices = c("Standard" = 1,
+                                                  "Decomposed" = 2,
+                                                  "Recomposed" = 3,
+                                                  "Seasonal" = 4,
+                                                  "Forecast" = 5),
+                                      selected  = 1)),
+      conditionalPanel(condition = "input.select_variables.length > 1",
+                       radioButtons(inputId = "time_plot_info", label = "", 
+                                    choices = c("Single graph" = 1,
+                                                "Separate graphs" = 2),
+                                    selected  = 1))
+  )
+})
+
+
+
+
 
