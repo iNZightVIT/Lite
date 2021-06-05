@@ -728,18 +728,18 @@ variable.names = reactive({
 output$timeseries_plot = renderPlot({
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
-        ts.para$tsObj,
-        ## start = start),
-        xlab = input$provide_xlab,
-        ylab = input$provide_ylab,
-        multiplicative = as.logical(season_select_ts$re),
-        t = 100*input$slidersmoothing,
-        smoother = input$timeseries_smoother,
-        model.lim = ts.para$mod.lim,
-        xlim = ts.para$xlim
-      )
-    }, 
+      g<-plot(ts.para$tsObj,
+              ## start = start),
+              xlab = input$provide_xlab,
+              ylab = input$provide_ylab,
+              multiplicative = as.logical(season_select_ts$re),
+              t = 100*input$slidersmoothing,
+              smoother = input$timeseries_smoother,
+              model.lim = ts.para$mod.lim,
+              xlim = ts.para$xlim)
+      dev.off()
+      g
+    },
     #        warning = function(w) {
     #          cat("Warning produced in timseries plot\n")
     #          print(w)
@@ -845,6 +845,8 @@ output$plotly_tsmain = renderPlotly({
           model.lim = ts.para$mod.lim,
           xlim = ts.para$xlim
         )
+        g <- plotly::ggplotly()
+        g
       }, 
       #        warning = function(w) {
       #          cat("Warning produced in timseries plot\n")
@@ -852,9 +854,8 @@ output$plotly_tsmain = renderPlotly({
       #        }, 
       error = function(e) {
         cat("Handled error in timseries plot\n")
-        print(e)
       }, finally = {}))
-      plotly::ggplotly()
+      
     }
   })
 })
@@ -909,7 +910,7 @@ output$seasonal_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      seasonplot(
+      g<-seasonplot(
         ts.para$tsObj,
         ylab = input$provide_ylab,
         xlab = input$provide_xlab,
@@ -917,6 +918,8 @@ output$seasonal_plot = renderPlot({
         t = 100*input$slidersmoothing,
         model.lim = ts.para$mod.lim
       )
+      dev.off()
+      g
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in seasonplot\n")
@@ -998,16 +1001,18 @@ output$decomposed_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
+      g<-plot(
         iNZightTS::decompose(
           ts.para$tsObj,
           multiplicative = as.logical(season_select_ts$re),
           t = 100*input$slidersmoothing,
           model.lim = ts.para$mod.lim),
-          xlab = input$provide_xlab,
-          ylab = input$provide_ylab,
-          xlim = ts.para$xlim
+        xlab = input$provide_xlab,
+        ylab = input$provide_ylab,
+        xlim = ts.para$xlim
       )
+      dev.off()
+      g
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in decompositionplot \n")
@@ -1087,7 +1092,7 @@ output$trSeasonal_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
+      g<-plot(
         iNZightTS::decompose(
           ts.para$tsObj,
           multiplicative = as.logical(season_select_ts$re),
@@ -1098,6 +1103,8 @@ output$trSeasonal_plot = renderPlot({
         xlim = ts.para$xlim,
         recompose.progress = c(1, nrow(get.data.set()))
       )
+      dev.off()
+      g
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in recompose plot \n")
@@ -1193,7 +1200,7 @@ output$forecast_plot = renderPlot({
       if (inherits(pl, "try-error")) {
         return()
       }
-      
+      dev.off()
       ts.para$forecasts <- iNZightTS::pred(pl)
       pl
       }, 
