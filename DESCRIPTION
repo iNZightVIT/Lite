@@ -14,5 +14,5 @@ Authors@R: c(person("Shengwei", "Hu", role = c("aut", "cre"),
 Description: A web implementation of iNZight, a simple data analysis tool designed for high school students in New Zealand.
 License: GPL-3
 Depends: R (>= 3.1.0), shiny, markdown
-Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps
+Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps, plotly, shinyWidgets, shinyalert, shinycssloaders, DT
 RoxygenNote: 6.0.1
