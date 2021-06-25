@@ -5766,10 +5766,10 @@ exportSVG.inzplotoutput <- function(x, file = 'inzightplot.svg', ...) {
 output$save_interactive_plot_beta2 = downloadHandler(
   filename = "Plot.html",
   content = function(file) {
-    local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                   data = data_html_beta2(),
-                                                   extra.vars = extra.vars_html_beta2(),
-                                                   width = 10, height = 6)
+	  local.dir = iNZightPlots::exportHTML(create.html,
+					       data = data_html_beta2(),
+					       extra.vars = extra.vars_html_beta2(),
+					       width = 10, height = 6)
     
     src = normalizePath(local.dir)
     owd = setwd(tempdir())
@@ -5781,10 +5781,10 @@ output$save_interactive_plot_beta2 = downloadHandler(
 output$save_interactive_plot = downloadHandler(
   filename = "Plot.html",
   content = function(file) {
-    local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                   data = data_html(),
-                                                   extra.vars = extra.vars_html(),
-                                                   width = 10, height = 6)
+	  local.dir = iNZightPlots::exportHTML(create.html,
+					       data = data_html(),
+					       extra.vars = extra.vars_html(),
+					       width = 10, height = 6)
     
     src = normalizePath(local.dir)
     owd = setwd(tempdir())
@@ -6185,10 +6185,10 @@ observe({
           #                h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
           #              }
           #              else {
-          local.dir = iNZightPlots:::exportHTML.function(create.html,
-                                                         data = data_html_beta2(),
-                                                         extra.vars = extra.vars_html_beta2(),
-                                                         width = 10, height = 6)
+		local.dir = iNZightPlots::exportHTML(create.html,
+						     data = data_html_beta2(),
+						     extra.vars = extra.vars_html_beta2(),
+						     width = 10, height = 6)
           
           local.dir = unclass(local.dir)
           temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
@@ -6251,10 +6251,10 @@ output$interactive.plot = renderUI({
       #            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
       #          }
       #          else {
-      local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                     data = data_html(),
-                                                     extra.vars = extra.vars_html(),
-                                                     width = 10, height = 6)
+	    local.dir = iNZightPlots::exportHTML(create.html,
+						 data = data_html(),
+						 extra.vars = extra.vars_html(),
+						 width = 10, height = 6)
       
       local.dir = unclass(local.dir)
       temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
@@ -6306,10 +6306,10 @@ output$interactive.plot = renderUI({
       #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
       #      }
       #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
-      local.dir = iNZightPlots:::exportHTML.function(create.html, 
-                                                     data = data_html(),
-                                                     extra.vars = extra.vars_html(),
-                                                     width = 10, height = 6)
+	    local.dir = iNZightPlots::exportHTML(create.html,
+						 data = data_html(),
+						 extra.vars = extra.vars_html(),
+						 width = 10, height = 6)
       
       local.dir = unclass(local.dir)
       temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
