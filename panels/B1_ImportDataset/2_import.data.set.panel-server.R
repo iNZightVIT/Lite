@@ -16,23 +16,19 @@ observeEvent(input$files, {
   
   if(file.exists(input$files[1, "datapath"])) {
     isolate({
-      #temp = load.data(get.data.dir.imported(),
-      #                 fileID = input$files[1, "name"],
-      #                 path = input$files[1, "datapath"])[[2]]
-      fpath = input$files[1, "datapath"]
+      fpath = input$files$datapath
       fext = tools::file_ext(fpath)
-      if(fext %in% c("RData", "rda")){
-        temp = as.data.frame(stringsAsFactors = TRUE,
-                             iNZightTools::load_rda(input$files[1, "datapath"])[[1]])
+      temp <- if (length(fpath) == 2L && "svydesign" %in% fext) {
+	      sf <- fext == "svydesign"
+	      iNZightTools::import_survey(fpath[sf], fpath[!sf])
       } else {
-        if (fext == "txt") {
-          temp = as.data.frame(stringsAsFactors = TRUE,
-                               iNZightTools::smart_read(input$files[1, "datapath"],
-                                                        delimiter = "\t"))
-        } else {
-          temp = as.data.frame(stringsAsFactors = TRUE,
-                               iNZightTools::smart_read(input$files[1, "datapath"]))
-        }
+	      fpath <- fpath[1]
+	      fext <- fext[1]
+	      as.data.frame(switch(fext,
+				   "Rdata" =,
+				   "rda" = iNZightTools::load_rda(fpath)[[1]],
+				   "txt" = iNZightTools::smart_read(fpath, delimiter = "\t"),
+				   iNZightTools::smart_read(fpath)))
       }
       
       if(!is.null(temp)){  

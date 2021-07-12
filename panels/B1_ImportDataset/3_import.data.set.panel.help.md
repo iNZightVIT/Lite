@@ -1,10 +1,11 @@
 <h5>Import Dataset</h5>
-To import your own data, press the "Choose File" button. A new window will appear 
-which lets you select a file. After that is done the data will be presented to 
-you as a table in the middle of the screen. If the file to import is located as 
-a web resource at a URL, paste the URL in the blue text field. <br><br>
+To import your own data, press the "Choose File" button.
+A new window will appear which lets you select a file.
+If a survey file is present along with the data, select them both.
+After that is done the data will be presented to you as a table in the middle of the screen.
+If the file to import is located as a web resource at a URL, paste the URL in the blue text field.
 
-In any case, press the "IMPORT FILE" button to finalize your choice.
+Press the "IMPORT FILE" button to finalize your choice.
 
 All imported text files are assumed to have a header line and no row names as a 
 first unnamed column. The type of the file is estimated from the file extension.<br>
@@ -12,6 +13,9 @@ first unnamed column. The type of the file is estimated from the file extension.
  <ul>
   <li>.csv<br>
       A comma seperated file.
+  </li>
+  <li>.svydesign<br>
+      A survey design file as described in <a href="https://inzight.nz/docs/survey-specification.html">the iNZight survey design specification document</a>
   </li>
   <li>.txt<br>
       A tab seperated file.
@@ -24,5 +28,3 @@ first unnamed column. The type of the file is estimated from the file extension.
       behaviour than the RDA file above. 
   </li>
 </ul> 
-
-In any case, press the "IMPORT FILE" button to finalize your choice. 
