@@ -116,6 +116,16 @@ output$inference_test = renderUI({
   ret
 })
 
+output$inference_epi = renderUI({
+  get.data.set()
+  ret = NULL
+  input$vari1
+  input$vari2
+  ret = list(checkboxInput("inf.epi.out", 
+                          label = h5(strong("Show Epi Output")), 
+                          value = FALSE))
+  ret
+})
 
 observe({
   updateCheckboxInput(session, inputId = "check_linear", label = "linear", value = input$inf.trend.linear)
@@ -287,6 +297,7 @@ output$visualize.inference = renderPrint({
     #input$confirm_inf_button
     input$type.inference.select
     design_params$design
+    input$inf.epi.out
     
     isolate({
       ## Design or data?
@@ -473,6 +484,20 @@ output$visualize.inference = renderPrint({
         # designname <<- curMod$dataDesignName
         # curSet$design <<- as.name(designname)
         # assign(designname, curMod$createSurveyObject(), envir = env)
+      }
+      
+      if (input$inf.epi.out == TRUE) {
+        curSet <- modifyList(
+          curSet,
+          list(epi.out = TRUE),
+          keep.null = TRUE
+        )
+      } else {
+        curSet <- modifyList(
+          curSet,
+          list(epi.out = NULL),
+          keep.null = TRUE
+        )
       }
       
       tryCatch({
