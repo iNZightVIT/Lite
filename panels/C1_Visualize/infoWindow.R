@@ -121,9 +121,18 @@ output$inference_epi = renderUI({
   ret = NULL
   input$vari1
   input$vari2
-  ret = list(checkboxInput("inf.epi.out", 
-                          label = h5(strong("Show Epi Output")), 
-                          value = FALSE))
+  ret = list(
+    h5(strong("Epidemiology options")),
+    checkboxInput("inf_epi_out", 
+                  label = "Show Output", 
+                  value = FALSE),
+    conditionalPanel(
+      "input.inf_epi_out === true",
+      checkboxInput("inf_epi_casecontrol",
+                    label = "Case-control study",
+                    value = FALSE)
+    )
+  )
   ret
 })
 
@@ -297,7 +306,7 @@ output$visualize.inference = renderPrint({
     #input$confirm_inf_button
     input$type.inference.select
     design_params$design
-    input$inf.epi.out
+    input$inf_epi_out
     
     isolate({
       ## Design or data?
@@ -486,7 +495,7 @@ output$visualize.inference = renderPrint({
         # assign(designname, curMod$createSurveyObject(), envir = env)
       }
       
-      if (input$inf.epi.out == TRUE) {
+      if (input$inf_epi_out == TRUE) {
         curSet <- modifyList(
           curSet,
           list(epi.out = TRUE),
