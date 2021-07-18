@@ -125,13 +125,13 @@ output$inference_epi = renderUI({
     h5(strong("Epidemiology options")),
     checkboxInput("inf_epi_out", 
                   label = "Show Output", 
-                  value = FALSE),
-    conditionalPanel(
-      "input.inf_epi_out === true",
-      checkboxInput("inf_epi_casecontrol",
-                    label = "Case-control study",
-                    value = FALSE)
-    )
+                  value = FALSE)#,
+    # conditionalPanel(
+    #   "input.inf_epi_out === true",
+    #   checkboxInput("inf_epi_casecontrol",
+    #                 label = "Case-control study",
+    #                 value = FALSE)
+    # )
   )
   ret
 })
