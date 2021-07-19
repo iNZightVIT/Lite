@@ -116,6 +116,25 @@ output$inference_test = renderUI({
   ret
 })
 
+output$inference_epi = renderUI({
+  get.data.set()
+  ret = NULL
+  input$vari1
+  input$vari2
+  ret = list(
+    h5(strong("Epidemiology options")),
+    checkboxInput("inf_epi_out", 
+                  label = "Show Output", 
+                  value = FALSE)#,
+    # conditionalPanel(
+    #   "input.inf_epi_out === true",
+    #   checkboxInput("inf_epi_casecontrol",
+    #                 label = "Case-control study",
+    #                 value = FALSE)
+    # )
+  )
+  ret
+})
 
 observe({
   updateCheckboxInput(session, inputId = "check_linear", label = "linear", value = input$inf.trend.linear)
@@ -287,6 +306,7 @@ output$visualize.inference = renderPrint({
     #input$confirm_inf_button
     input$type.inference.select
     design_params$design
+    input$inf_epi_out
     
     isolate({
       ## Design or data?
@@ -473,6 +493,20 @@ output$visualize.inference = renderPrint({
         # designname <<- curMod$dataDesignName
         # curSet$design <<- as.name(designname)
         # assign(designname, curMod$createSurveyObject(), envir = env)
+      }
+      
+      if (input$inf_epi_out == TRUE) {
+        curSet <- modifyList(
+          curSet,
+          list(epi.out = TRUE),
+          keep.null = TRUE
+        )
+      } else {
+        curSet <- modifyList(
+          curSet,
+          list(epi.out = NULL),
+          keep.null = TRUE
+        )
       }
       
       tryCatch({

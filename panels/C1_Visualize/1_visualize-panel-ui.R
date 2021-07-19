@@ -370,7 +370,8 @@ vis.mainPanel = function() {
         
         fixedRow(column(3, uiOutput("inference_type")),
                  column(3, uiOutput("inference_test")),
-                 column(6, uiOutput("inference_out"))),
+                 column(3, uiOutput("inference_out")),
+                 column(3, uiOutput("inference_epi"))),
         #fixedRow(column(3, actionButton("confirm_inf_button","Confirm",
         #                                style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"), offset = 3)),
         br(),
