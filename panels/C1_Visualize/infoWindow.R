@@ -121,19 +121,22 @@ output$inference_epi = renderUI({
   ret = NULL
   input$vari1
   input$vari2
-  ret = list(
-    h5(strong("Epidemiology options")),
-    checkboxInput("inf_epi_out", 
-                  label = "Show Output", 
-                  value = FALSE)#,
-    # conditionalPanel(
-    #   "input.inf_epi_out === true",
-    #   checkboxInput("inf_epi_casecontrol",
-    #                 label = "Case-control study",
-    #                 value = FALSE)
-    # )
-  )
-  ret
+  
+  if (!is.null(plot.par$x) && iNZightTools::is_cat(vis.data()[[plot.par$x]]) && 
+      !is.null(plot.par$y) && iNZightTools::is_cat(vis.data()[[plot.par$y]]) &&
+      length(levels(vis.data()[[plot.par$x]])) >= 2 && length(levels(vis.data()[[plot.par$y]])) == 2
+      ) {
+    ret = list(
+        h5(strong("Epidemiology options")),
+        checkboxInput("inf_epi_out", 
+                      label = "Show Output", 
+                      value = FALSE)
+      )
+      
+      ret
+    } else {
+      NULL
+    }
 })
 
 observe({
@@ -495,12 +498,17 @@ output$visualize.inference = renderPrint({
         # assign(designname, curMod$createSurveyObject(), envir = env)
       }
       
-      if (input$inf_epi_out == TRUE) {
-        curSet <- modifyList(
-          curSet,
-          list(epi.out = TRUE),
-          keep.null = TRUE
-        )
+      if (!is.null(plot.par$x) && iNZightTools::is_cat(vis.data()[[plot.par$x]]) && 
+          !is.null(plot.par$y) && iNZightTools::is_cat(vis.data()[[plot.par$y]]) &&
+          length(levels(vis.data()[[plot.par$x]])) >= 2 && length(levels(vis.data()[[plot.par$y]])) == 2 &&
+          input$inf_epi_out == TRUE) {
+        if (input$inf_epi_out == TRUE) {
+          curSet <- modifyList(
+            curSet,
+            list(epi.out = TRUE),
+            keep.null = TRUE
+          )
+        }
       } else {
         curSet <- modifyList(
           curSet,
@@ -508,6 +516,7 @@ output$visualize.inference = renderPrint({
           keep.null = TRUE
         )
       }
+        
       
       tryCatch({
         inf.print <- eval(construct_call(curSet, design_params$design,
