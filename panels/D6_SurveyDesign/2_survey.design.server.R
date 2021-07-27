@@ -1,5 +1,4 @@
 
-
 output$survey.design = renderUI({
   create.design.panel(get.data.set())
 })
@@ -8,134 +7,192 @@ design.model.fit <- reactiveValues()
 
 
 ## specify design
-setDesign = function(strata = NULL, clus1 = NULL, clus2 = NULL,
-                     wt = NULL, nest = NULL, fpc = NULL,
-                     repweights = NULL, reptype = NULL,
-                     scale = NULL, rscales = NULL,
-                     poststrat = NULL, name,
-                     type = c("survey", "replicate")) {
-  if (is.null(strata) & is.null(clus1) & is.null(clus2) &
-      is.null(wt) & is.null(nest) & is.null(fpc) &
-      is.null(repweights) & is.null(poststrat)) {
-    list(dataDesign = NULL,
-         dataDesignName = name)
-  } else {
-    dataDesign = 
-      switch(type,
-             "survey" = list(
-               strata = strata,
-               clus1  = clus1,
-               clus2  = clus2,
-               wt     = wt,
-               fpc    = fpc,
-               nest   = nest,
-               poststrat = poststrat,
-               type = type
-             ),
-             "replicate" = list(
-               wt = wt,
-               repweights = repweights,
-               reptype = reptype,
-               scale = scale,
-               rscales = rscales,
-               poststrat = poststrat,
-               type = type
-             )
-      )
-    dataDesignName =
-      sprintf("%s.%s",
-              name,
-              switch(type, "survey" = "svy", "replicate" = "repsvy")
-      )
-    list(dataDesign = dataDesign,
-         dataDesignName = dataDesignName)
-  }
-}
+#setDesign = function(strata = NULL, clus1 = NULL, clus2 = NULL,
+#                     wt = NULL, nest = NULL, fpc = NULL,
+#                     repweights = NULL, reptype = NULL,
+#                     scale = NULL, rscales = NULL,
+#                     poststrat = NULL, name,
+#                     type = c("survey", "replicate")) {
+#  if (is.null(strata) & is.null(clus1) & is.null(clus2) &
+#      is.null(wt) & is.null(nest) & is.null(fpc) &
+#      is.null(repweights) & is.null(poststrat)) {
+#    list(dataDesign = NULL,
+#         dataDesignName = name)
+#  } else {
+#    dataDesign = 
+#    switch(type,
+#             "survey" = list(
+#               strata = strata,
+#               clus1  = clus1,
+#               clus2  = clus2,
+#               wt     = wt,
+#               fpc    = fpc,
+#               nest   = nest,
+#               poststrat = poststrat,
+#               type = type
+#             ),
+#             "replicate" = list(
+#               wt = wt,
+#               repweights = repweights,
+#               reptype = reptype,
+#               scale = scale,
+#               rscales = rscales,
+#               poststrat = poststrat,
+#               type = type
+#             )
+#      )
+#    dataDesignName =
+#      sprintf("%s.%s",
+#              name,
+#              switch(type, "survey" = "svy", "replicate" = "repsvy")
+#      )
+#    list(dataDesign = dataDesign,
+#         dataDesignName = dataDesignName)
+#  }
+#}
 
 ## create survey object
-createSurveyObject = function(design) {
-  des <- design$dataDesign
-  dataSet <- get.data.set()
-  weights <- if (is.null(des$wt)) "NULL" else paste("~", des$wt)
-  if (!is.null(des$type) && length(des$type) > 0 && des$type == "survey") {
-    id <- if (is.null(des$clus1) & is.null(des$clus2)) {
-      "~ 1"
-    } else if (is.null(des$clus1)) {
-      paste("~", des$clus2)
-    } else if (is.null(des$clus2)) {
-      paste("~", des$clus1)
-    } else {
-      paste("~", des$clus1, "+", des$clus2)
-    }
-    
-    strata <- if (is.null(des$strata)) "NULL" else paste("~", des$strata)
-    fpcs <- if (is.null(des$fpc)) "NULL" else paste("~", des$fpc)
-    obj <-
-      parse(text =
-              paste0(
-                "survey::svydesign(",
-                "id = ", id, ", ",
-                if (!is.null(des$strata)) sprintf("strata = %s, ", strata),
-                if (!is.null(des$wt) || !is.null(des$freq))
-                  sprintf("weights = %s, ", weights),
-                if (!is.null(des$fpc)) sprintf("fpc = %s, ", fpcs),
-                if (!is.null(des$nest) && des$nest) "nest = TRUE, ",
-                "data = dataSet)"
-              )
-      )
+#createSurveyObject = function(design) {
+#  des <- design$dataDesign
+#  dataSet <- get.data.set()
+#  weights <- if (is.null(des$wt)) "NULL" else paste("~", des$wt)
+#  if (!is.null(des$type) && length(des$type) > 0 && des$type == "survey") {
+#    id <- if (is.null(des$clus1) & is.null(des$clus2)) {
+#      "~ 1"
+#    } else if (is.null(des$clus1)) {
+#      paste("~", des$clus2)
+#    } else if (is.null(des$clus2)) {
+#      paste("~", des$clus1)
+#    } else {
+#      paste("~", des$clus1, "+", des$clus2)
+#    }
+#    
+#    strata <- if (is.null(des$strata)) "NULL" else paste("~", des$strata)
+#    fpcs <- if (is.null(des$fpc)) "NULL" else paste("~", des$fpc)
+#    obj <-
+#      parse(text =
+#              paste0(
+#                "survey::svydesign(",
+#                "id = ", id, ", ",
+#                if (!is.null(des$strata)) sprintf("strata = %s, ", strata),
+#                if (!is.null(des$wt) || !is.null(des$freq))
+#                  sprintf("weights = %s, ", weights),
+#                if (!is.null(des$fpc)) sprintf("fpc = %s, ", fpcs),
+#                if (!is.null(des$nest) && des$nest) "nest = TRUE, ",
+#                "data = dataSet)"
+#              )
+#      )
+#  } else {
+#    ## replicate weights specified
+#    repweights <- if(is.null(des$repweights)) "NULL"
+#    else paste("~", paste(des$repweights, collapse = " + "))
+#    type <- des$reptype
+#    rscales <- if (is.null(des$rscales)) "NULL"
+#    else sprintf("c(%s)", paste(des$rscales, collapse = ", "))
+#    obj <-
+#      parse(text =
+#              paste0("survey::svrepdesign(",
+#                     if (!is.null(des$wt))
+#                       sprintf("weights = %s, ", weights),
+#                     sprintf("repweights = %s, ", repweights),
+#                     sprintf("type = '%s', ", type),
+#                     if (!is.null(des$scale))
+#                       sprintf("scale = %s, ", des$scale),
+#                     if (!is.null(des$rscales))
+#                       sprintf("rscales = %s, ", rscales),
+#                     "data = dataSet)"
+#              )
+#      )
+#  }
+#  
+#  if (!is.null(des$poststrat)) {
+#    design_obj <- eval(obj)
+#    ## Note: if allowing continuous variables in future,
+#    ##       this needs a better name:
+#    pop.totals <- structure(
+#      do.call(c,
+#              c(
+#                list(sum(des$poststrat[[1]]$Freq)),
+#                lapply(des$poststrat, function(df) df$Freq[-1])
+#              )
+#      ),
+#      .Names = do.call(c,
+#                       c(
+#                         list("(Intercept)"),
+#                         lapply(des$poststrat, function(df)
+#                           paste0(names(df)[1], as.character(df[-1,1]))
+#                         )
+#                       )
+#      )
+#    )
+#    obj <- parse(
+#      text = sprintf(
+#        "survey::calibrate(design_obj, ~%s, pop.totals)",
+#        paste(names(des$poststrat), collapse = " + ")
+#      )
+#    )
+#  }
+#  
+#  eval(obj)
+#}
+
+
+
+setDesign = function(x) {
+  if (missing(x)) {
+    design_params$design$dataDesign <- NULL
+    design_params$design$dataDesignName <- values$data.name
+    return()
+  }
+  
+  if (inherits(x, "inzsvyspec")) {
+    if (is.null(x$design))
+      x <- iNZightTools::make_survey(values$data.set, x)
   } else {
-    ## replicate weights specified
-    repweights <- if(is.null(des$repweights)) "NULL"
-    else paste("~", paste(des$repweights, collapse = " + "))
-    type <- des$reptype
-    rscales <- if (is.null(des$rscales)) "NULL"
-    else sprintf("c(%s)", paste(des$rscales, collapse = ", "))
-    obj <-
-      parse(text =
-              paste0("survey::svrepdesign(",
-                     if (!is.null(des$wt))
-                       sprintf("weights = %s, ", weights),
-                     sprintf("repweights = %s, ", repweights),
-                     sprintf("type = '%s', ", type),
-                     if (!is.null(des$scale))
-                       sprintf("scale = %s, ", des$scale),
-                     if (!is.null(des$rscales))
-                       sprintf("rscales = %s, ", rscales),
-                     "data = dataSet)"
-              )
-      )
-  }
-  
-  if (!is.null(des$poststrat)) {
-    design_obj <- eval(obj)
-    ## Note: if allowing continuous variables in future,
-    ##       this needs a better name:
-    pop.totals <- structure(
-      do.call(c,
-              c(
-                list(sum(des$poststrat[[1]]$Freq)),
-                lapply(des$poststrat, function(df) df$Freq[-1])
-              )
+    spec <- structure(
+      list(
+        spec = list(
+          ids = if (is.null(x$ids)) 1 else x$ids,
+          probs = x$probs,
+          strata = x$strata,
+          fpc = x$fpc,
+          nest = as.logical(x$nest),
+          weights = x$weights,
+          type = x$type,
+          repweights = x$repweights,
+          scale = x$scale,
+          rscales = x$rscales,
+          reptype = x$reptype,
+          calibrate = x$calibrate
+        )
       ),
-      .Names = do.call(c,
-                       c(
-                         list("(Intercept)"),
-                         lapply(des$poststrat, function(df)
-                           paste0(names(df)[1], as.character(df[-1,1]))
-                         )
-                       )
-      )
+      class = "inzsvyspec"
     )
-    obj <- parse(
-      text = sprintf(
-        "survey::calibrate(design_obj, ~%s, pop.totals)",
-        paste(names(des$poststrat), collapse = " + ")
-      )
-    )
+    x <- iNZightTools::make_survey(values$data.set, spec)
   }
-  
-  eval(obj)
+  design_params$design$dataDesign <- unclass(x)
+  design_params$design$dataDesignName <- sprintf("%s.%s",
+                                                 values$data.name,
+                                                 switch(x$spec$type,
+                                                        "survey" = "svy",
+                                                        "replicate" = "repsvy"
+                                                 )
+  )
+  # when design changed, update the object
+  invisible(createSurveyObject(reload = TRUE))
 }
+
+currentDesign = reactiveValues()
+currentDesign$info = NULL
+
+createSurveyObject = function(reload = FALSE) {
+  if (!is.null(currentDesign$info$design) && !reload)
+    return(currentDesign$info$design)
+  currentDesign$info = design_params$design$dataDesign
+  currentDesign$info$design
+}
+
+
 
 
 svalue_or_null <- function(x) {
@@ -179,22 +236,27 @@ observe({
       strat <- svalue_or_null(input$stratVar)
       clus1 <- svalue_or_null(input$clus1Var)
       clus2 <- svalue_or_null(input$clus2Var)
+      if (is.null(clus1) && is.null(clus2)){
+        clus = NULL
+      } else if (!is.null(clus1) && !is.null(clus2)) {
+        clus <- paste(clus1, clus2, sep = " + ")
+      } else {
+        clus <- ifelse(is.null(clus1), clus2, clus1)
+      }
       wts <- svalue_or_null(input$wtVar)
       fpc <- fpc.f()
       nest <- as.logical(input$nestChk)
-      name <- values$data.name
       clear <- is.null(input$strat) && is.null(input$clus1) &&
-        is.null(input$clus2) && is.null(input$wts) && is.null(input$fpc)
-      design_params$design = setDesign(
-        strata = strat,
-        clus1 = clus1,
-        clus2 = clus2,
-        wt = wts,
-        nest = nest,
-        fpc = fpc,
-        type = "survey",
-        name = name
-      )
+        is.null(input$clus2) && is.null(input$wts) && is.null(fpc.f())
+      set = try(setDesign(
+        list(strata = strat,
+             ids = clus,
+             weights = wts,
+             nest = nest,
+             fpc = fpc,
+             type = "survey")
+      ), silent = TRUE)
+      
     } else if (req(input$svytype) == "replicate" && req(input$create.design1) > 0) {
       wts <- svalue_or_null(input$sample.weight.Var)
       repWts <- input$repVars
@@ -210,21 +272,45 @@ observe({
         scale <- NULL
         rscales <- NULL
       }
-      name <- values$data.name
       clear <- is.null(wts) && length(repWts) == 0
-      design_params$design = setDesign(
-        wt = wts,
-        repweights = repWts,
-        reptype = reptype,
-        scale = scale,
-        rscales = rscales,
-        type = "replicate",
-        name = name
-      )
+      set = try(setDesign(
+        list(
+          weights = wts,
+          repweights = repWts,
+          reptype = reptype,
+          scale = scale,
+          rscales = rscales,
+          type = "replicate"
+        )
+      ), silent = TRUE)
+    }
+    
+    
+    setOk <- try(createSurveyObject())
+    if (!inherits(set, "try-error")) {
+      call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
+      
+      call <- sprintf("%s <- %s",
+                      design_params$design$dataDesignName,
+                      gsub("dataSet", values$data.name, call))
+      design.model.fit$code <- call
+      code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
+      code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
+      
+      plot.par$design = createSurveyObject()
+      ## print result
+      output$create.design.summary <- renderPrint({
+        summary(plot.par$design)
+      })
+    } else if(inherits(set, "try-error")){
+      output$create.design.summary <- renderText({
+        paste0(
+          "There is a problem with the specification of the survey design:\n\n",
+          set)
+      })
     }
   })
 })
-
 
 
 
@@ -305,7 +391,8 @@ observe({
   if(input$selector == "Survey design"){
     updateSelectInput(session, inputId = "svytype", label = "Select survey design", choices = list("Specify design" = "survey",
                                                                                                    "Specify replicate design" = "replicate",
-                                                                                                   "Post stratify" = "post"),
+                                                                                                   "Post stratify" = "post",
+                                                                                                   "Read from file" = "read"),
                       selected = "survey")
   }
 })
@@ -429,37 +516,8 @@ observe({
 })
 
 
-## create design
-observe({
-  input$create.design
-  input$create.design1
-  isolate({
-    req(design_params$design)
-    setOk <- try(createSurveyObject(design_params$design))
-    if (!inherits(setOk, "try-error")) {
-      call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
-      
-      call <- sprintf("%s <- %s",
-                      design_params$design$dataDesignName,
-                      gsub("dataSet", values$data.name, call))
-      design.model.fit$code <- call
-      code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
-      code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
-      
-      plot.par$design = createSurveyObject(design_params$design)
-      ## print result
-      output$create.design.summary <- renderPrint({
-        summary(plot.par$design)
-      })
-    } else if(inherits(setOk, "try-error")){
-      output$create.design.summary <- renderText({
-        paste0(
-          "There is a problem with the specification of the survey design:\n\n",
-          setOk)
-      })
-    }
-  })
-})
+
+
 
 
 
@@ -468,20 +526,33 @@ observe({
   input$create.design2
   isolate({
     req(design_params$design)
-    PSDesign <- setDesign(
-      strata = design_params$design$dataDesign$strat,
-      clus1 = design_params$design$dataDesign$clus1, clus2 = design_params$design$dataDesign$clus2,
-      wt = design_params$design$dataDesign$wt, nest = design_params$design$dataDesign$nest,
-      fpc = design_params$design$dataDesign$fpc, repweights = design_params$design$dataDesign$repWts, 
-      type = design_params$design$dataDesign$type,
-      name = design_params$design$dataDesign$name,
-      poststrat = if (length(input$PSvar) != 0) lvldf$df[input$PSvar] else NULL
+    #PSDesign <- setDesign(
+    #  strata = design_params$design$dataDesign$strat,
+    #  clus1 = design_params$design$dataDesign$clus1, clus2 = design_params$design$dataDesign$clus2,
+    #  wt = design_params$design$dataDesign$wt, nest = design_params$design$dataDesign$nest,
+    #  fpc = design_params$design$dataDesign$fpc, repweights = design_params$design$dataDesign$repWts, 
+    #  type = design_params$design$dataDesign$type,
+    #  name = design_params$design$dataDesign$name,
+    #  poststrat = if (length(input$PSvar) != 0) lvldf$df[input$PSvar] else NULL
+    #)
+    curDes <- design_params$design$dataDesign$spec
+    
+    cal_list <- lapply(names(lvldf$df),
+                       function(var) {
+                         x <- lvldf$df[[var]]$Freq
+                         names(x) <- lvldf$df[[var]][[var]]
+                         x
+                       }
     )
-    setOk <- try(createSurveyObject(PSDesign))
-    if (!inherits(setOk, "try-error")) {
-      design_params$design$dataDesign <-  PSDesign$dataDesign
-      
-      
+    names(cal_list) <- names(lvldf$df)
+    set = try(setDesign(
+      modifyList(curDes,
+                 list(calibrate = if (length(input$PSvar)) cal_list[input$PSvar] else NULL)
+      )
+    ), silent = TRUE)
+    
+    setOk <- try(createSurveyObject())
+    if (!inherits(set, "try-error")) {
       call <- do.call(paste, c(as.list(deparse(setOk$call)), sep = "\n"))
       call <- sprintf("%s <- %s",
                       paste0(design_params$design$dataDesignName, ".ps"),
@@ -491,16 +562,14 @@ observe({
       code.save$variable = c(code.save$variable, list(c("\n", "## create survey design object")))
       code.save$variable = c(code.save$variable, list(c("\n", call, "\n")))
       
-      plot.par$design = createSurveyObject(PSDesign)
+      plot.par$design = createSurveyObject()
       ## print result
       output$create.design.summary <- renderPrint({
         summary(plot.par$design)
       })
-    } else if(inherits(setOk, "try-error")){
+    } else if(inherits(set, "try-error")){
       output$create.design.summary <- renderText({
-        paste0(
-          "Something went wrong during post stratification ...",
-          PSDesign)
+        "Something went wrong during post stratification ..."
       })
     }
   })
@@ -513,6 +582,7 @@ observe({
   input$remove.design
   input$remove.design1
   input$remove.design2
+  input$remove.design3
   isolate({
     plot.par$design=NULL
     design_params$design = NULL
@@ -520,3 +590,35 @@ observe({
 })
 
 
+## read the design from file
+
+
+observeEvent(input$svy.design.spec, { 
+  if(file.exists(input$svy.design.spec[1, "datapath"])) {
+    isolate({
+      svyspec <- iNZightTools::import_survey(input$svy.design.spec[1, "datapath"])
+      set = try(setDesign(svyspec), silent = TRUE)
+      setOK <- try(
+        createSurveyObject(),
+        silent = TRUE
+      )
+      
+      if (!inherits(set, "try-error")) {
+
+        ## write design call
+        call <- paste(deparse(setOK$call), collapse = "\n")
+        plot.par$design = createSurveyObject()
+        ## print result
+        output$create.design.summary <- renderPrint({
+          summary(plot.par$design)
+        })
+      } else {
+        output$create.design.summary <- renderText({
+          paste0(
+            "There is a problem with the survey specification file:\n\n",
+            set)
+        })
+      }
+    })
+  }
+})
