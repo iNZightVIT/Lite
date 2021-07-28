@@ -37,6 +37,7 @@ survey.design.sidebar =  function(){
                                                               colnames(get.data.set())),
                                                     selected = " ",
                                                     selectize = F)),
+                              column(12, uiOutput("estimate.pop.size")),
                               
                               column(12,selectInput("fpcVar",
                                                     label="Finite population correction",

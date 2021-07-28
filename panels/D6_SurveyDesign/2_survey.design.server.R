@@ -6,6 +6,8 @@ output$survey.design = renderUI({
 design.model.fit <- reactiveValues()
 
 
+
+
 ## specify design
 #setDesign = function(strata = NULL, clus1 = NULL, clus2 = NULL,
 #                     wt = NULL, nest = NULL, fpc = NULL,
@@ -621,4 +623,16 @@ observeEvent(input$svy.design.spec, {
       }
     })
   }
+})
+
+
+
+output$estimate.pop.size <- renderUI({
+  input$wtVar
+  isolate({
+    if(!is.null(input$wtVar) && length(input$wtVar) > 0 && input$wtVar != " "){
+      size = round(sum(get.data.set()[[input$wtVar]]))
+      h5(paste0("Estimated population size: ", size))
+    }
+  })
 })
