@@ -516,12 +516,12 @@ output$visualize.inference = renderPrint({
           keep.null = TRUE
         )
       }
-        
+      .dataset <- get.data.set()
       
       tryCatch({
         inf.print <- eval(construct_call(curSet, design_params$design,
                                                         vartypes,
-                                                        data = vis.data(),
+                                                        data = quote(.dataset),
                                                         what = "inference"
         ))
         
@@ -598,12 +598,13 @@ output$visualize.summary = renderPrint({
       # curSet$design <<- as.name(designname)
       # assign(designname, curMod$createSurveyObject(), envir = env)
     }
+    .dataset <- get.data.set()
     if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
        tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       tryCatch({
         eval(construct_call(curSet, design_params$design,
                             vartypes,
-                            data = get.data.set(),
+                            data = quote(.dataset),
                             what = "summary"))
       }, warning = function(w) {
         print(w)
@@ -613,7 +614,7 @@ output$visualize.summary = renderPrint({
     }else{
       suppressWarnings(try(eval(construct_call(curSet, design_params$design,
                                                vartypes,
-                                               data = get.data.set(),
+                                               data = quote(.dataset),
                                                what = "summary"))))
     }
   }
