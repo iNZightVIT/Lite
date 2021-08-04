@@ -18,12 +18,17 @@ observeEvent(input$files, {
     isolate({
       fpath = input$files[1, "datapath"]
       fext = tools::file_ext(fpath)
-      temp <- as.data.frame(switch(tolower(fext),
+      temp <- tryCatch(as.data.frame(switch(tolower(fext),
 				   "rdata"=,
 				   "rda"=iNZightTools::load_rda(fpath)[[1]],
 				   "tsv"=iNZightTools::smart_read(fpath, delimiter="\t"),
+				   "numbers"=warning("Not a valid file extension: ", fext),
 				   iNZightTools::smart_read(fpath)),
 			    stringsAsFactors=TRUE),
+		       warning=function(w) showNotification(w$message,
+							    duration=10,
+							    type="warning"))
+
       if(!is.null(temp)){
         plot.par$design=NULL
         values$data.set = temp
