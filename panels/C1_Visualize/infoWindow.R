@@ -124,19 +124,19 @@ output$inference_epi = renderUI({
   
   if (!is.null(plot.par$x) && iNZightTools::is_cat(vis.data()[[plot.par$x]]) && 
       !is.null(plot.par$y) && iNZightTools::is_cat(vis.data()[[plot.par$y]]) &&
-      length(levels(vis.data()[[plot.par$x]])) >= 2 && length(levels(vis.data()[[plot.par$y]])) == 2
-      ) {
+      length(levels(vis.data()[[plot.par$y]])) >= 2 && length(levels(vis.data()[[plot.par$x]])) == 2
+  ) {
     ret = list(
-        h5(strong("Epidemiology options")),
-        checkboxInput("inf_epi_out", 
-                      label = "Show Output", 
-                      value = FALSE)
-      )
-      
-      ret
-    } else {
-      NULL
-    }
+      h5(strong("Epidemiology options")),
+      checkboxInput("inf_epi_out", 
+                    label = "Show Output", 
+                    value = FALSE)
+    )
+    
+    ret
+  } else {
+    NULL
+  }
 })
 
 observe({
@@ -500,7 +500,7 @@ output$visualize.inference = renderPrint({
       
       if (!is.null(plot.par$x) && iNZightTools::is_cat(vis.data()[[plot.par$x]]) && 
           !is.null(plot.par$y) && iNZightTools::is_cat(vis.data()[[plot.par$y]]) &&
-          length(levels(vis.data()[[plot.par$x]])) >= 2 && length(levels(vis.data()[[plot.par$y]])) == 2 &&
+          length(levels(vis.data()[[plot.par$y]])) >= 2 && length(levels(vis.data()[[plot.par$x]])) == 2 &&
           input$inf_epi_out == TRUE) {
         if (input$inf_epi_out == TRUE) {
           curSet <- modifyList(
