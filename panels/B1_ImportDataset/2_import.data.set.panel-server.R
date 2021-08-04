@@ -16,26 +16,15 @@ observeEvent(input$files, {
   
   if(file.exists(input$files[1, "datapath"])) {
     isolate({
-      #temp = load.data(get.data.dir.imported(),
-      #                 fileID = input$files[1, "name"],
-      #                 path = input$files[1, "datapath"])[[2]]
       fpath = input$files[1, "datapath"]
       fext = tools::file_ext(fpath)
-      if(fext %in% c("RData", "rda")){
-        temp = as.data.frame(stringsAsFactors = TRUE,
-                             iNZightTools::load_rda(input$files[1, "datapath"])[[1]])
-      } else {
-        if (fext == "txt") {
-          temp = as.data.frame(stringsAsFactors = TRUE,
-                               iNZightTools::smart_read(input$files[1, "datapath"],
-                                                        delimiter = "\t"))
-        } else {
-          temp = as.data.frame(stringsAsFactors = TRUE,
-                               iNZightTools::smart_read(input$files[1, "datapath"]))
-        }
-      }
-      
-      if(!is.null(temp)){  
+      temp <- as.data.frame(switch(tolower(fext),
+				   "rdata"=,
+				   "rda"=iNZightTools::load_rda(fpath)[[1]],
+				   "tsv"=iNZightTools::smart_read(fpath, delimiter="\t"),
+				   iNZightTools::smart_read(fpath)),
+			    stringsAsFactors=TRUE),
+      if(!is.null(temp)){
         plot.par$design=NULL
         values$data.set = temp
         updatePanel$doit = updatePanel$doit+1
