@@ -2,16 +2,19 @@ Package: iNZightLite
 Type: Shiny Application
 Title: iNZight Lite
 Version: 0.9.6
-Date: 2017-12-08
-Authors@R: c(person("Shengwei", "Hu", role = c("aut", "cre"),
-                    email = "shengwei.hu@auckland.ac.nz"),
-             person("Chris", "Park", role = c("aut"),
-             email = "cpar137@aucklanduni.ac.nz"),
-             person("Christoph", "Knapp", role = c("aut"),
-             email = "c.knapp@auckland.ac.nz"),
-             person("Junjie", "Zeng", role = c("aut"),
-             email = "jzen188@aucklanduni.ac.nz"))
-Description: A web implementation of iNZight, a simple data analysis tool designed for high school students in New Zealand.
+Date: 2021-08-04
+Authors@R: c(person("Tong", "Chen", role=c("aut", "cre")),
+		person("Jason", "Cairns", role=c("aut", "cre"),
+			email="jason.cairns@auckland.ac.nz"),
+		person("Shengwei", "Hu", role="aut",
+			email="shengwei.hu@auckland.ac.nz"),
+		person("Chris", "Park", role="aut",
+			email= cpar137@aucklanduni.ac.nz"),
+		person("Christoph", "Knapp", role="aut",
+			email="c.knapp@auckland.ac.nz"),
+		person("Junjie", "Zeng", role="aut",
+			email="jzen188@aucklanduni.ac.nz"))
+Description: A web implementation of iNZight, a swiss-army-knife data analysis tool designed for ease of use.
 License: GPL-3
 Depends: R (>= 3.1.0), shiny, markdown
 Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps, plotly, shinyWidgets, shinyalert, shinycssloaders, DT
