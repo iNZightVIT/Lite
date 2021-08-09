@@ -519,11 +519,11 @@ output$visualize.inference = renderPrint({
       .dataset <- get.data.set()
       
       tryCatch({
-        inf.print <- eval(construct_call(curSet, design_params$design,
+        suppressWarnings(inf.print <- eval(construct_call(curSet, design_params$design,
                                                         vartypes,
                                                         data = quote(.dataset),
                                                         what = "inference"
-        ))
+        )))
         
         if (input$hypTest == "Chi-square test" && !is.null(input$hypTest)) {
           exp_match <- any(grepl("since some expected counts <", inf.print, fixed = TRUE))
@@ -538,8 +538,6 @@ output$visualize.inference = renderPrint({
         
         inf.print
         #saveRDS(values.list, file = "/Users/tongchen/Documents/work/Lite/b.rds")
-      }, warning = function(w) {
-        print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
@@ -606,8 +604,6 @@ output$visualize.summary = renderPrint({
                             vartypes,
                             data = quote(.dataset),
                             what = "summary"))
-      }, warning = function(w) {
-        print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
