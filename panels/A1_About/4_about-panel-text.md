@@ -22,7 +22,7 @@ This project is led by <a href = "http://www.stat.auckland.ac.nz/~wild" target="
 
 <br>
 
-If you want to provide feedback please email <a href="mailto:inzightlite_support@stat.auckland.ac.nz">inzightlite_support@stat.auckland.ac.nz</a>.
+If you want to provide feedback please fill in the <a href="http://inzight.nz/support/contact?v=lite">contact form</a>.
 
 <br>
 If you are an expert programmer or statistician, you can contribute to the project by sending us feedback about our <a href = "https://github.com/iNZightVIT" target="_blank">R source code</a>.
