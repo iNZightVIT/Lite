@@ -17,11 +17,11 @@ data.dir.imported=/tmp/iNZight
 # as the version in the about
 # page.
 ##############################
-lite.version=NULL
+lite.version=
 
 ##############################
 # This variable is displayed
 # as the version in the about
 # page.
 ##############################
-lite.update=NULL
+lite.update=
