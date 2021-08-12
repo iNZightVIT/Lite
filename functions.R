@@ -1,14 +1,14 @@
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
-#' Reahapes the data that all columns are merged into two 
-#' column with the variable names in the first column and 
+#' Reahapes the data that all columns are merged into two
+#' column with the variable names in the first column and
 #' the values in the second column.
-#' 
+#'
 #' @param dafr The data.frame to convert
-#' 
+#'
 #' @return The converted data.frame.
-#' 
+#'
 #' @author Christoph Knapp
 get.reshape.data = function(dafr){
   temp = do.call(rbind,lapply(1:ncol(dafr),function(index,d){
@@ -21,19 +21,19 @@ get.reshape.data = function(dafr){
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
-#' Converts specified columns into binary factor variables 
+#' Converts specified columns into binary factor variables
 #' which get added to the input data.frame.
-#' 
+#'
 #' @param dafr The input data.frame.
 #' @param The column names or indexes to be converted.
-#' 
+#'
 #' @return A data.frame with the binary columns added.
-#' 
-#' @author Christoph Knapp  
+#'
+#' @author Christoph Knapp
 get.missing.categorical = function(dafr,columns){
   temp = as.data.frame(dafr[,columns], stringsAsFactors = TRUE)
   colnames(temp) = columns
-  new.dafr = data.frame(stringsAsFactors = TRUE, 
+  new.dafr = data.frame(stringsAsFactors = TRUE,
                         do.call(cbind,lapply(1:length(columns),
                                   function(index, d, c){
                                     te = rep("observed",nrow(d))
@@ -48,15 +48,15 @@ get.missing.categorical = function(dafr,columns){
 
 
 #' add new columns to the original dataframe which replace "NA"
-#' with "missing" so that the missing values could be displayed 
+#' with "missing" so that the missing values could be displayed
 #' in the plot..
-#' 
+#'
 #' @param dafr The input data.frame.
 #' @param The column names or indexes to be converted.
-#' 
+#'
 #' @return A data.frame with the new columns added.
-#' 
-#' @author Wilson Hu 
+#'
+#' @author Wilson Hu
 display.missing.categorical = function(dafr, columns) {
   for(i in columns) {
     temp = dafr[, i]
@@ -80,15 +80,15 @@ display.missing.categorical = function(dafr, columns) {
   dafr
 }
 
-#' Simplifies the input data.frame by keeping only 
-#' columns where NA values are present. Function 
+#' Simplifies the input data.frame by keeping only
+#' columns where NA values are present. Function
 #' used in get.combinations
-#' 
-#' @param dafr A data.frame to be 
-#' simplified such that all columns 
-#' which do not contain NA values are 
+#'
+#' @param dafr A data.frame to be
+#' simplified such that all columns
+#' which do not contain NA values are
 #' removed.
-#' 
+#'
 #' @author Christoph Knapp
 simplify.dafr = function(dafr){
   ies = c()
@@ -104,14 +104,14 @@ simplify.dafr = function(dafr){
   dafr
 }
 
-#' Converts a data.frame to a format where all 
-#' non NA are replaced by "observed" and all NA 
+#' Converts a data.frame to a format where all
+#' non NA are replaced by "observed" and all NA
 #' values are repalced by "missing".
-#' 
+#'
 #' @param dafr the data.frame to convert.
-#' 
+#'
 #' @return The converted data.frame.
-#' 
+#'
 #' @author Christoph Knapp
 convert.dafr = function(dafr){
   if(!is.null(dafr)){
@@ -127,22 +127,22 @@ convert.dafr = function(dafr){
   }
 }
 
-#' Takes a data.frame as generated from the 
-#' \texttt(get.missing.categorical) function and converts it 
-#' into a data.frame of all unique rows and there counts in 
-#' the original data. It is a modified version of the 
+#' Takes a data.frame as generated from the
+#' \texttt(get.missing.categorical) function and converts it
+#' into a data.frame of all unique rows and there counts in
+#' the original data. It is a modified version of the
 #' calmissing.data.frame method from the iNZightMR package.
-#' 
+#'
 #' @param dafr A data.frmae to convert
-#' @param simplify Returns the smallest number of possible 
-#' rows, ignoring columns which do not contain NA values if 
+#' @param simplify Returns the smallest number of possible
+#' rows, ignoring columns which do not contain NA values if
 #' TRUE, otherwise it processes the whole input.
-#' @param convert TRUE if the input data.frame should be 
-#' converted into "missing" or observed format.   
-#' 
-#' @return A data.frame with all unique rows from dafr and 
+#' @param convert TRUE if the input data.frame should be
+#' converted into "missing" or observed format.
+#'
+#' @return A data.frame with all unique rows from dafr and
 #' their counts in the last column.
-#' 
+#'
 #' @author Christoph Knapp
 get.combinations = function(dafr,simplify=F){
   dafr = data.frame(dafr, stringsAsFactors = TRUE)
@@ -156,7 +156,7 @@ get.combinations = function(dafr,simplify=F){
   x <- data.frame(dafr[,index.column], stringsAsFactors = TRUE)
   if(ncol(x)>0){
     x1 <- as.numeric(apply(x, 2, function(x) length(which(is.na(x)))))
-    row4col.order <- order(x1) 
+    row4col.order <- order(x1)
     x1 <- c(x1, nrow(x))
     z1 <- ifelse(is.na(x), "missing", "observed")
     tab <- table(apply(z1, 1, paste, collapse = ","))
@@ -170,20 +170,20 @@ get.combinations = function(dafr,simplify=F){
     tabp <- rbind(tabp, x1[c(row4col.order, max(row4col.order)+1)])  #  x1[row4col.order] == numMiss
     names(tabp) <- c(names(x)[row4col.order], "Total")
     row.names(tabp) <- c(seq_len(nrow(tab)), "Total")
-    
+
     tabfinal <- tabp[-nrow(tabp), ]
     tabfinal <- tabfinal[order(tabfinal$Total, decreasing = TRUE), ]
     tabfinal <- rbind(tabfinal, tabp[nrow(tabp), ])
-    
+
     finaltable <- tabfinal
-    
+
     Name <- names(finaltable)
     i <- nrow(finaltable)
     j <- ncol(finaltable)
     index <- order(x1[-j], decreasing = FALSE)
     numMiss <- x1[c(index, j)]
     percMiss <- round(numMiss / numMiss[j], 3)
-    
+
     finaltable = rbind(finaltable,paste0(round(percMiss * 100, 2), "%"))
     colnames(finaltable)[j] <- "Freq"
     finaltable
@@ -195,21 +195,21 @@ get.combinations = function(dafr,simplify=F){
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
-#' Takes an input string of a formula involving colummn 
-#' names in the input data set and tries to evaluate it. 
-#' If this is not possible, NULL is returned and the error 
+#' Takes an input string of a formula involving colummn
+#' names in the input data set and tries to evaluate it.
+#' If this is not possible, NULL is returned and the error
 #' is printed to standard out.
-#' 
-#' @param dafr The data.frame containing the data needed 
+#'
+#' @param dafr The data.frame containing the data needed
 #' to evaluate the expression.
-#' @param new.formula The character string holding the 
+#' @param new.formula The character string holding the
 #' expression to be evaluated.
-#' 
-#' @return Null if the expression could not be evaluated, 
-#' otherwise the input data.frame with one additional 
-#' column. This column contains the results of the 
+#'
+#' @return Null if the expression could not be evaluated,
+#' otherwise the input data.frame with one additional
+#' column. This column contains the results of the
 #' expression.
-#' 
+#'
 #' @author Christoph Knapp
 get.create.variables = function(dafr,new.formula,new.name=NULL){
   tryCatch({
@@ -236,7 +236,7 @@ get.create.variables = function(dafr,new.formula,new.name=NULL){
     #print(cond)
   },
   finally={
-    
+
   })
 }
 
@@ -244,20 +244,20 @@ get.create.variables = function(dafr,new.formula,new.name=NULL){
 #To be removed when the iNZight tools package is working##
 ##########################################################
 #' This function is a wrapper function for the rank method.
-#' 
+#'
 #' @param dafr A dataframe with variables to be ranked.
-#' @param columns Character of column names or column 
+#' @param columns Character of column names or column
 #' indices of the columns to be ranked.
-#' 
-#' @return A data.frame containig the original data plus 
+#'
+#' @return A data.frame containig the original data plus
 #' the ranked variables.
-#' 
+#'
 #' @author Christoph Knapp
 get.rank.numeric = function(dafr,columns){
   temp = data.frame(stringsAsFactors = TRUE,
-                    sapply(dafr[,columns], 
-                           rank, 
-                           ties.method = "min", 
+                    sapply(dafr[,columns],
+                           rank,
+                           ties.method = "min",
                            na.last = "keep"))
   nams = paste(columns,"rank",sep=".")
   count = 0
@@ -272,35 +272,35 @@ get.rank.numeric = function(dafr,columns){
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
-#' Form class intervals from a column specified by column 
+#' Form class intervals from a column specified by column
 #' name or column index from the a data.frame.
-#' 
+#'
 #' @param dafr The data frame the column can be retrieved from.
-#' @param column The column name or index to produce class 
+#' @param column The column name or index to produce class
 #' intervals from.
-#' @param num.intervals The number of intervals the column 
+#' @param num.intervals The number of intervals the column
 #' should be separated in.
-#' @param open.left.closed.right Logical variable specifying 
-#' whether the output should be in the format 
-#' [open left, closed right) or (closed left, open right] 
-#' @param method The method used to generate the class 
+#' @param open.left.closed.right Logical variable specifying
+#' whether the output should be in the format
+#' [open left, closed right) or (closed left, open right]
+#' @param method The method used to generate the class
 #' intervals.
-#' @param intervals If method="specified" this needs to be 
-#' provided as a vector of numeric values. The length of the 
-#' vector needs to be num.intervals-1 and the minimum and 
-#' maximum needs to be within range of the minimum and maximum 
+#' @param intervals If method="specified" this needs to be
+#' provided as a vector of numeric values. The length of the
+#' vector needs to be num.intervals-1 and the minimum and
+#' maximum needs to be within range of the minimum and maximum
 #' of the selected column.
-#' @param labels Optional labels for the intervals. By default 
+#' @param labels Optional labels for the intervals. By default
 #' the range of the labels will be used.
-#' 
-#' @return The same data.frame as dafr except that the class 
-#' intervals are added as additional column or the the unchanged 
-#' dafr data.frame is returned if the input is wrong. Warnings 
+#'
+#' @return The same data.frame as dafr except that the class
+#' intervals are added as additional column or the the unchanged
+#' dafr data.frame is returned if the input is wrong. Warnings
 #' are provided in this case.
-#'  
-#' @note This is a wrapper for the cut function. See \code{?cut}. 
-#' 
-#' @author Christoph Knapp 
+#'
+#' @note This is a wrapper for the cut function. See \code{?cut}.
+#'
+#' @author Christoph Knapp
 get.form.class.interval = function(dafr,column,num.intervals,
                                    open.left.closed.right=T,
                                    method=c("equal.width",
@@ -336,14 +336,14 @@ get.form.class.interval = function(dafr,column,num.intervals,
                          include.lowest=T,
                          right=open.left.closed.right))
   }else if(method%in%"equal.width"){
-    ret = cbind(dafr,cut(x=column.temp, 
-                         breaks=num.intervals, 
+    ret = cbind(dafr,cut(x=column.temp,
+                         breaks=num.intervals,
                          right=open.left.closed.right,
                          labels=labels,
                          include.lowest=TRUE))
   }else if(method%in%"equal.count"){
     ret = cbind(dafr,cut(x=column.temp,
-                         breaks=quantile(column.temp, 
+                         breaks=quantile(column.temp,
                                          probs=seq(0,1,1/num.intervals,),
                                          na.rm=TRUE),
                          include.lowest = TRUE,
@@ -366,14 +366,14 @@ get.form.class.interval = function(dafr,column,num.intervals,
 ##########################################################
 #'Combine the levels of factor variables.
 #'
-#' @param dafr The dataframe containing factor columns 
+#' @param dafr The dataframe containing factor columns
 #' specified in columns.
-#' @param columns The column names of the columns in dafr 
+#' @param columns The column names of the columns in dafr
 #' to combine.
-#' 
+#'
 #' @return A data.frame with one additional column as dafr,
 #' which contains the combined levels.
-#' 
+#'
 #' @author Christoph Knapp
 combine.levels = function(dafr,columns){
   new.column = do.call(paste,lapply(columns,function(name,d){
@@ -391,13 +391,13 @@ combine.levels = function(dafr,columns){
 #'
 #' @param dafr A data.frame of the data to change.
 #' @param column The column name of the column to change.
-#' @param new.levels A character variabel of the length of 
-#' the number of factors of the column to change. This 
+#' @param new.levels A character variabel of the length of
+#' the number of factors of the column to change. This
 #' vector contains the new levels.
 #'
-#' @return A data.frame where the levels of the specified 
+#' @return A data.frame where the levels of the specified
 #' columns are changed.
-#' 
+#'
 #' @author Christoph Knapp
 rename.levels = function(dafr,column,new.levels){
   temp = as.character(dafr[,column])
@@ -412,17 +412,17 @@ rename.levels = function(dafr,column,new.levels){
 #To be removed when the iNZight tools package is working##
 ##########################################################
 #' This function changes the order of levels in the data.
-#' 
+#'
 #' @param dafr The data to be changed
-#' @param column the factor column where the order of 
+#' @param column the factor column where the order of
 #' levels should be changed.
-#' @param levels.new A vector of all levels in the column 
-#' specified by column in the order they should be 
+#' @param levels.new A vector of all levels in the column
+#' specified by column in the order they should be
 #' ordered.
-#' 
-#' @return A data.frame with the levels of one column 
+#'
+#' @return A data.frame with the levels of one column
 #' reordered
-#' 
+#'
 #' @author Christoph Knapp
 reorder.levels = function(dafr,column,levels.new){
   dafr[,column] = factor(dafr[,column],levels=levels.new)
@@ -433,14 +433,14 @@ reorder.levels = function(dafr,column,levels.new){
 #To be removed when the iNZight tools package is working##
 ##########################################################
 #' Collapses selected levels in factor vector
-#' 
-#' @param column the vector where levels should be 
+#'
+#' @param column the vector where levels should be
 #' collapsed into one.
 #' @param to.collapse Vector of levels to collapse.
-#' 
-#' @note Levels in to.collapse which are not in column 
+#'
+#' @note Levels in to.collapse which are not in column
 #' will be ignored.
-#' 
+#'
 #' @author Christoph Knapp
 get.collapsed.column = function(column,to.collapse){
   column = as.character(column)
@@ -457,13 +457,13 @@ get.collapsed.column = function(column,to.collapse){
 ##########################################################
 #' Stacks the selected columns onto the data.
 #'
-#' Multiplies the data.set by adding rows to the data for 
+#' Multiplies the data.set by adding rows to the data for
 #' every selected column. The selected columns are stacked
-#' onto each other and added as an additional column 
-#' 
+#' onto each other and added as an additional column
+#'
 #' @param columns The columns to stack.
 #' @param dafr a dataframe the stacking is performed on.
-#' 
+#'
 #' @author Christoph Knapp
 stack.variables.perform = function(columns,dafr){
   stack = unlist(lapply(1:length(columns),function(index,d,c){
@@ -479,23 +479,23 @@ stack.variables.perform = function(columns,dafr){
 #To be removed when the iNZight tools package is working##
 ##########################################################
 #' aggregates the data over selected factor columns
-#' 
-#' The dimensions of the df data frame will change so that 
-#' all possible combinations of factors selected will be 
-#' the number of rows and the number of all selected factor 
-#' columns + a column for all methods selected will be the 
-#' number of columns in the return data.frame. 
-#' 
-#' @param aggregate.over column names of factor variables 
+#'
+#' The dimensions of the df data frame will change so that
+#' all possible combinations of factors selected will be
+#' the number of rows and the number of all selected factor
+#' columns + a column for all methods selected will be the
+#' number of columns in the return data.frame.
+#'
+#' @param aggregate.over column names of factor variables
 #' in data to aggregate over
-#' @param methods A set of methods which can be used to 
+#' @param methods A set of methods which can be used to
 #' aggregate.
-#' @param df A data.frame containing at least on factor 
+#' @param df A data.frame containing at least on factor
 #' column and one numeric column.
-#' 
+#'
 #' @return A data.frame with the results of the aggregation.
-#' 
-#' @author Christoph Knapp  
+#'
+#' @author Christoph Knapp
 aggregate.data= function(aggregate.over,
                          methods=c("mean","median","sum","sd","IQR","count"),
                          dafr){
@@ -504,7 +504,7 @@ aggregate.data= function(aggregate.over,
     stop("aggregate.data : Wrong input")
   }
   if(any(!as.character(aggregate.over)%in%colnames(dafr))){
-    warning("aggregate.data : Some columns in aggregate.over are 
+    warning("aggregate.data : Some columns in aggregate.over are
             not in the column names for df. They will be ignored.")
   }
   if(is.character(aggregate.over)){
@@ -521,13 +521,13 @@ aggregate.data= function(aggregate.over,
       temp = aggregate(d[,unlist(lapply(1:ncol(d),
                                         function(j,da){
                                           is.numeric(da[,j])
-                                        },d))], 
+                                        },d))],
                        by=b, FUN=m[i],simplify = FALSE)
     }else{
       temp = aggregate(d[,unlist(lapply(1:ncol(d),
                                         function(j,da){
                                           is.numeric(da[,j])
-                                        },d))], 
+                                        },d))],
                        by=b, FUN=m[i],na.rm=T,simplify = FALSE)
     }
 
@@ -549,11 +549,11 @@ aggregate.data= function(aggregate.over,
 #  col_names = colnames(data)
 #  temp1 = sapply(data, is.list)
 #  temp2 = do.call(
-#    cbind, lapply(data[temp1], function(x) 
+#    cbind, lapply(data[temp1], function(x)
 #      data.frame(do.call(rbind, x), check.names=FALSE)))
 #  result = cbind(data[!temp1], temp2)
 #  colnames(result) = col_names
-#  
+#
 #  result
 #}
 
@@ -561,24 +561,24 @@ aggregate.data= function(aggregate.over,
 #To be removed when the iNZight tools package is working##
 ##########################################################
 #' Sorts the df data frame after the input variables
-#' 
-#' Warnings will be given if the colnames in vars will not 
-#' match the column in df. This is a wrapper function for 
+#'
+#' Warnings will be given if the colnames in vars will not
+#' match the column in df. This is a wrapper function for
 #' sort. See \code{?sort} for more information.
-#' 
+#'
 #' @param vars The column names in the order the df data.frame
 #' should be sorted.
-#' @param sort.type A logical vector of the same length as 
-#' vars. If the element in the vector is TRUE the corresponding 
+#' @param sort.type A logical vector of the same length as
+#' vars. If the element in the vector is TRUE the corresponding
 #' element in vars will be sorted in increasing order.
 #' @ param The data.fram or matrix to sort.
-#' 
+#'
 #' @return An ordered data.frame
-#' 
-#' @author Christoph Knapp  
+#'
+#' @author Christoph Knapp
 sort.data = function(vars,sort.type,df){
   if(any(!vars%in%colnames(df))){
-    warning("sort.data : Not all variables in vars could be 
+    warning("sort.data : Not all variables in vars could be
             matched to column names in df.")
   }
   if(length(vars)!=length(sort.type)){
@@ -597,31 +597,31 @@ sort.data = function(vars,sort.type,df){
   df[order.overwrite(z),]
 }
 
-#' The iNZight version of the order function which lets you pass 
-#' in a list of vectors to order instead of the ... argument. It 
-#' is shortened and might be therefore not as stable as the 
+#' The iNZight version of the order function which lets you pass
+#' in a list of vectors to order instead of the ... argument. It
+#' is shortened and might be therefore not as stable as the
 #' original order function.
-#' 
-#' @param z a sequence of numeric, complex, character or logical 
+#'
+#' @param z a sequence of numeric, complex, character or logical
 #' vectors, all of the same length, or a classed R object.
-#' @param na.last for controlling the treatment of NAs. If TRUE, 
-#' missing values in the data are put last; if FALSE, they are 
+#' @param na.last for controlling the treatment of NAs. If TRUE,
+#' missing values in the data are put last; if FALSE, they are
 #' put first; if NA, they are removed (see ‘Note’.)
-#' @param decreasing logical. Should the sort order be increasing 
+#' @param decreasing logical. Should the sort order be increasing
 #' or decreasing?
-#' 
-#' @note This function is only called in sort.data but needs to be 
+#'
+#' @note This function is only called in sort.data but needs to be
 #' available to sort.data
-#' 
+#'
 #' @author Christoph Knapp
 order.overwrite = function (z, na.last = TRUE, decreasing = FALSE) {
-  if (any(diff(l.z <- vapply(z, length, 1L)) != 0L)) 
+  if (any(diff(l.z <- vapply(z, length, 1L)) != 0L))
     stop("argument lengths differ")
   ans <- vapply(z, is.na, rep.int(NA, l.z[1L]))
-  ok <- if (is.matrix(ans)) 
+  ok <- if (is.matrix(ans))
     !apply(ans, 1, any)
   else !any(ans)
-  if (all(!ok)) 
+  if (all(!ok))
     return(integer())
   z[[1L]][!ok] <- NA
   ans <- do.call("order", c(z, decreasing = decreasing))
@@ -634,22 +634,22 @@ order.overwrite = function (z, na.last = TRUE, decreasing = FALSE) {
 #To be removed when the iNZight tools package is working##
 ##########################################################
 #' Takes a sample of rows from a data.frame
-#' 
-#' This function samples rows from a data.frame with or 
-#' without replacment. 
-#' 
+#'
+#' This function samples rows from a data.frame with or
+#' without replacment.
+#'
 #' @param df A data.frame the sample is taken from.
 #' @param sampleSize The size of the samples to be taken.
 #' @param numSample The number of samples to be taken.
-#' @param bootstrap TRUE if samples with replacement is 
+#' @param bootstrap TRUE if samples with replacement is
 #' desired, FALSE if no replacement.
-#' 
-#' @return A data.frame with the samples merged together. 
-#' An additional column is added where the sampling 
-#' iteration is stored. 
-#' 
+#'
+#' @return A data.frame with the samples merged together.
+#' An additional column is added where the sampling
+#' iteration is stored.
+#'
 #' @author Christoph Knapp
-#' 
+#'
 #' @export
 sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
   if(sampleSize>nrow(df)){
@@ -683,10 +683,10 @@ sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
   ret
 }
 
-#' Returns the names of all numeric columns in data 
-#' 
+#' Returns the names of all numeric columns in data
+#'
 #' @param dafr The input dataframe to be searched.
-#' 
+#'
 #' @author Christoph Knapp
 get.numeric.column.names = function(dafr){
   colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
@@ -696,9 +696,9 @@ get.numeric.column.names = function(dafr){
 
 #' Returns the column names of the currently selected data which
 #' can be converted into factors.
-#' 
+#'
 #' @param dafr The input dataframe to be searched.
-#' 
+#'
 #' @author Christoph Knapp
 get.categorical.column.names = function(dafr){
   colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
@@ -707,21 +707,21 @@ get.categorical.column.names = function(dafr){
 }
 
 
-#' Returns TRUE if x can be converted to a numeric 
-#' value, FALSE if not. 
-#' 
+#' Returns TRUE if x can be converted to a numeric
+#' value, FALSE if not.
+#'
 #' @param x any oblect to be tested
-#' 
+#'
 #' @author Christoph Knapp
 is.convertable.numeric = function(x){
   !suppressWarnings(is.na(as.numeric(x)))
 }
 
-#' Tests whether a character variable is convertable to an 
+#' Tests whether a character variable is convertable to an
 #' integer value.
-#' 
+#'
 #' @param x a character or numeric value to test for.
-#' 
+#'
 #' @author Christoph Knapp
 is.convertable.integer = function(x){
   temp = is.convertable.numeric(x)
@@ -730,9 +730,9 @@ is.convertable.integer = function(x){
 }
 
 #' Prints a summary of the currently selected data set.
-#' 
+#'
 #' @author Christoph Knapp
-data.summary = function(dafr){  
+data.summary = function(dafr){
   if(!is.null(dafr)){
     cat("Number of rows in data: ",nrow(dafr),"\n")
     cat("Number of columns in data: ",ncol(dafr),"\n")
@@ -745,11 +745,11 @@ data.summary = function(dafr){
 }
 
 # #' Creates a widget for moving through plots quickly.
-# #' 
+# #'
 # #' @param ID.forward inputID for the forward button in the player widget
 # #' @param ID.player inputID for the slider in the player widget
 # #' @param ID.backward inputID for the backward button in the player widget
-# #' 
+# #'
 # #' @author Christoph Knapp
 # get.player = function(ID.forward,ID.player,ID.backward,maxi){
 #   fixedRow(column(width=8,offset=2,
@@ -790,13 +790,13 @@ get.player = function(ID.forward,ID.player,ID.backward,maxi){
 }
 
 #' changes numeric columns to factor columns
-#' 
+#'
 #' @param temp a matrix or data.frame with columns to change
 #' @param columns a vector of column names for temp
-#' 
-#' @return a data.frame where all numeric columns are 
+#'
+#' @return a data.frame where all numeric columns are
 #' converted into character column
-#' 
+#'
 #' @author Christoph Knapp
 change.factor.transform = function(temp,columns){
   temp = as.data.frame(temp, stringsAsFactors = TRUE)
@@ -807,7 +807,7 @@ change.factor.transform = function(temp,columns){
       NULL
     }
   },temp,columns))
-  temp = as.data.frame(stringsAsFactors = TRUE, 
+  temp = as.data.frame(stringsAsFactors = TRUE,
                        do.call(cbind,lapply(1:ncol(temp),function(index,temp.data){
     if(is.numeric(temp.data[,index])){
       as.character(temp.data[,index])
@@ -824,10 +824,10 @@ change.factor.transform = function(temp,columns){
 }
 
 #' change the sign of numeric columns
-#' 
+#'
 #' @param dafr a data frame with columns to transform
 #' @param columns the column names of the columns in dafr
-#' 
+#'
 #' @author Christoph Knapp
 change.sign.transform = function(dafr,columns){
   dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
@@ -926,7 +926,7 @@ standardize.transform = function(dafr,columns){
 
 center.transform = function(dafr,columns){
   data = as.data.frame(dafr, stringsAsFactors = TRUE)
-  temp = as.data.frame(stringsAsFactors = TRUE, 
+  temp = as.data.frame(stringsAsFactors = TRUE,
                        do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       d[,index]-mean(d[,index])
@@ -1113,7 +1113,7 @@ add.transform  = function(temp,columns){
   ret
 }
 
-# returns the transformed columns and the original data as 
+# returns the transformed columns and the original data as
 # dataframe (cbind(data,<transformed columns>)).
 transform.perform = function(dafr,type,columns){
   temp = transform.get.temp(dafr,type,columns)
@@ -1123,7 +1123,7 @@ transform.perform = function(dafr,type,columns){
   temp
 }
 
-# returns the transformed columns and the original columns as 
+# returns the transformed columns and the original columns as
 # dataframe (cbind(<original columns>,<transformed columns>)).
 transform.tempTable = function(dafr,type,columns){
   temp1 = as.data.frame(stringsAsFactors = TRUE,
@@ -1136,7 +1136,7 @@ transform.tempTable = function(dafr,type,columns){
   temp1
 }
 
-# transorms the columns named columns in data with the selected 
+# transorms the columns named columns in data with the selected
 # type (type) of transformation.
 transform.get.temp = function(dafr,type,columns){
   temp = NULL
@@ -1253,7 +1253,7 @@ square.transform = function(dafr,columns){
 abs.transform = function(dafr,columns){
   dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) = columns
-  temp = as.data.frame(stringsAsFactors = TRUE, 
+  temp = as.data.frame(stringsAsFactors = TRUE,
                        do.call(cbind,lapply(1:ncol(dafr),function(index,d){
     if(is.numeric(d[,index])){
       abs(d[,index])
@@ -1279,7 +1279,7 @@ abs.transform = function(dafr,columns){
 delete.old.files = function(data_dir,days){
   if(length(list.files(paste0(data_dir,"/Imported")))>0){
     unlink(list.files(paste0(data_dir,"/Imported"))
-           [difftime(Sys.time(), 
+           [difftime(Sys.time(),
                      file.info(list.files(
                        paste0(data_dir,"/Imported"),full.name=T))
                      [,"mtime"], units = "days")>days])
@@ -1417,6 +1417,7 @@ get.vars = function(vars.path){
   if(is.null(vars.path)){
     vars.path = "VARS"
   }
+  if (!file.exists(vars.path)) vars.path <- "VARS.default"
   if(file.exists(vars.path)){
     lines = scan(vars.path,what="character",sep="\n",quiet=T)
   }else{
@@ -1442,16 +1443,16 @@ get.vars = function(vars.path){
 }
 
 #' Tests whether a directory has read write execute permissions.
-#' 
+#'
 #' @param file The directory path to test
-#' 
+#'
 #' @return TRUE if writable and the file exists, otherwise FALSE
-#' 
-#' @note This is a Unix only function. On Windows and all other 
-#' OS where \code{.Platform$OS.type} is not unix the function 
-#' returns always TRUE. Extend this function if necessary. Only 
-#' relevant permission types have been added. 
-#' 
+#'
+#' @note This is a Unix only function. On Windows and all other
+#' OS where \code{.Platform$OS.type} is not unix the function
+#' returns always TRUE. Extend this function if necessary. Only
+#' relevant permission types have been added.
+#'
 #' @author Christoph Knapp
 file.writable = function(file,debug){
   tryCatch({
@@ -1469,26 +1470,26 @@ file.writable = function(file,debug){
   },finally = {})
 }
 
-#' Wrapper function for \code{dir.create} which returns 
+#' Wrapper function for \code{dir.create} which returns
 #' whether information whether the directory was created.
-#' 
-#' @param path a character vector containing a single 
+#'
+#' @param path a character vector containing a single
 #' path name. Tilde expansion (see ?path.expand) is done.
-#' @param showWarnings logical; should the warnings on 
+#' @param showWarnings logical; should the warnings on
 #' failure be shown?
-#' @param recursive logical. Should elements of the path 
-#' other than the last be created? If true, like the Unix 
+#' @param recursive logical. Should elements of the path
+#' other than the last be created? If true, like the Unix
 #' command \code{mkdir -p}.
-#' @param mode the mode to be used on Unix-alikes: it 
-#' will be coerced by \code{?as.octmode}. For 
+#' @param mode the mode to be used on Unix-alikes: it
+#' will be coerced by \code{?as.octmode}. For
 #' \code{Sys.chmod} it is recycled along paths.
-#' 
-#' @note This function does most likely not work on a 
+#'
+#' @note This function does most likely not work on a
 #' windows System.
-#' 
-#' @return TRUE if the directory was created, FALSE if 
+#'
+#' @return TRUE if the directory was created, FALSE if
 #' not.
-#' 
+#'
 #' @author Christoph Knapp
 dir.create.logical = function(path,
                               showWarnings=TRUE,
@@ -1523,18 +1524,18 @@ get.quantiles = function(subx){
 
 
 #' Loads data from a specified URL
-#' 
+#'
 #' @param URL A valid URL pointing to a data set
-#' @param data.dir.import The directory the data set 
+#' @param data.dir.import The directory the data set
 #' should be downloaded to
-#' 
-#' @return A list of two elements. 
+#'
+#' @return A list of two elements.
 #'         data.set = A data.frame object containing the loaded data.set
 #'         data.name = The name of the data set as retrieved from the URL
-#'         
-#' @note This method is using the function download.file and the wget method. 
+#'
+#' @note This method is using the function download.file and the wget method.
 #' This might not work in all possible cases.
-#' 
+#'
 #' @author Christoph Knapp
 
 parseQueryString = function(str) {
@@ -1554,7 +1555,7 @@ get.data.from.URL = function(URL, data.dir.import){
     #if(!grepl("output=csv", URL)) {
     #  URL = paste(URL, "=0&single=true&output=csv", sep = "")
     #}
-      
+
     url.index = gregexpr("output=", URL)
     url.index = unlist(url.index)
     file.type = substr(URL, url.index+7, nchar(URL))
@@ -1568,21 +1569,21 @@ get.data.from.URL = function(URL, data.dir.import){
     name = strsplit(URL,"/")[[1]]
     name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
   }
-  
+
   if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
         file.writable(data.dir.import)) {
     dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
   }
-  
+
 #  print(URL)
 #  print(name)
-  
+
   tryCatch({
     if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
     else
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    
+
     temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
     if(!is.null(temp[[2]])){
       ret$data.set = temp[[2]]
@@ -1626,7 +1627,7 @@ get.data.from.googledocs = function(URL, data.dir.import){
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
     else
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="curl")
-    
+
     temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
     if(!is.null(temp[[2]])){
       ret$data.set = temp[[2]]
@@ -1645,17 +1646,17 @@ get.data.from.googledocs = function(URL, data.dir.import){
   },finally = {})
 }
 
-#' Connerts transparency or alpha value to a 
+#' Connerts transparency or alpha value to a
 #' percentage integer.
-#' 
-#' @param value Value to convert. Either a 
-#' value between 0 and 1 in steps of 0.01 
+#'
+#' @param value Value to convert. Either a
+#' value between 0 and 1 in steps of 0.01
 #' (back = T) or a value between 0 and 100
 #' (back = F).
-#' @param back Wether to convert from 
+#' @param back Wether to convert from
 #' percentage into fraction (back = T) or
-#' from fraction to percentage (back = F). 
-#' 
+#' from fraction to percentage (back = F).
+#'
 convert.to.percent = function(value,back=F){
   #percentage to numeric
   if(is.null(value)){
@@ -1703,17 +1704,17 @@ get.transformation.string = function(transform_select,
 }
 #' Searches a list recursivly for a name and
 #' returns the value associated with the name
-#' 
+#'
 #' @param list.seach A list to search
-#' @param search.name A name to be found in a list. 
+#' @param search.name A name to be found in a list.
 #' If null, the whole simplified list is returned.
-#' 
+#'
 #' @return The value found in the list associated with
 #' search.name, NULL if not there.
-#' 
-#' @note This function is used to change the 
+#'
+#' @note This function is used to change the
 #' everchanging plot output from iNZightPlot.
-#' 
+#'
 #' @author Christoph Knapp
 search.name = function(list.search,search.name=NULL){
   list.out=list()
@@ -1783,15 +1784,15 @@ modifyList <- function (x, val, keep.null = FALSE)
 
 
 #' fit the regression model using n-way anova (n = 1,2,3)
-#' 
+#'
 #' @param y response variable.
 #' @param x covariates.
 #' @param data Dataset
 #' @param blocking blocking variable
 #' @param name name of fitted model
 #' @param data.name name of data
-#' 
-#' @return A fitted model with 'code' attribute 
+#'
+#' @return A fitted model with 'code' attribute
 
 anova.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
   #code.list = list()
@@ -1803,7 +1804,7 @@ anova.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
   } else {
     fit.str = sprintf("%s ~ %s", y, paste(x, collapse = " * "))
     fit = lm(as.formula(fit.str), data = data)
-    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y, 
+    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y,
                                 paste(x, collapse = " * "), data.name)
   }
   fit
@@ -1811,15 +1812,15 @@ anova.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
 
 
 #' fit user's own mixed effect model which include a code attribute
-#' 
+#'
 #' @param y response variable.
 #' @param x fixed effect
 #' @param data Dataset
 #' @param blocking random effect
 #' @param name name of fitted model
 #' @param data.name name of data
-#' 
-#' @return A fitted model with 'code' attribute 
+#'
+#' @return A fitted model with 'code' attribute
 
 fit.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
   fit.str = NULL
@@ -1830,22 +1831,22 @@ fit.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
   } else {
     fit.str = sprintf("%s ~ %s", y, x)
     fit = lm(as.formula(fit.str), data = data)
-    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y, 
+    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y,
                                 x, data.name)
   }
   fit
 }
 
 #' fit ANOVA (n = 1,2,3)
-#' 
+#'
 #' @param y response variable.
 #' @param x covariates.
 #' @param data Dataset
 #' @param blocking blocking variable
 #' @param name name of fitted model
 #' @param data.name name of data
-#' 
-#' @return ANOVA with 'code' attribute 
+#'
+#' @return ANOVA with 'code' attribute
 
 aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
   if(!is.null(blocking)){
@@ -1854,7 +1855,7 @@ aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
                           sprintf("summary(%s)", paste0("aov_", name)))
   } else {
     fit = aov(as.formula(sprintf("%s ~ %s", y, paste(x, collapse = " * "))), data = data)
-    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y, 
+    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y,
                           paste(x, collapse = " * "), data.name), sprintf("summary(%s)", paste0("aov_", name)))
   }
   fit
@@ -1862,26 +1863,26 @@ aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
 
 
 #' ANOVA for customized which include a code attribute
-#' 
+#'
 #' @param y response variable.
 #' @param x fixed effect
 #' @param data Dataset
 #' @param blocking random effect
 #' @param name name of fitted model
 #' @param data.name name of data
-#' 
-#' @return ANOVA with 'code' attribute 
+#'
+#' @return ANOVA with 'code' attribute
 
 aov.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
   fit.str = sprintf("%s ~ %s", y, x)
-  
+
   if(!is.null(blocking) && blocking != ""){
     fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
     attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),
                           sprintf("summary(%s)", paste0("aov_", name)))
   } else {
     fit = aov(as.formula(sprintf("%s ~ %s", y, x)), data = data)
-    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y, 
+    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y,
                                   x, data.name), sprintf("summary(%s)", paste0("aov_", name)))
   }
   fit
@@ -1895,6 +1896,3 @@ construct_call <- function(settings, model, vartypes,
   if (is.null(model$dataDesign)) design <- NULL
   iNZightPlots:::construct_call(settings, vartypes, data, design, what)
 }
-
-
-

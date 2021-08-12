@@ -17,23 +17,17 @@ about.panel.ui = function(lite.version,lite.update) {
 #        width = 10, offset = 1,
 #        HTML(
 #          '<div class="NoticeBox">
-#         Our website is being hosted on a new server. If you have any problems, please feel free to contact us. 
+#         Our website is being hosted on a new server. If you have any problems, please feel free to contact us.
 #          </div>'
 #          )
 #        ),
-#      
+#
 #        br(),
 #      br(),
         column(
             width = 10, offset = 1,
-            ##  We include the markdown document that contains the
-            ##  text for the "About" module. 
-            includeMarkdown("panels/A1_About/4_about-panel-text.md"),
-            ##  We include some line breaks to space things out.
-            br(),
-            br(),
-            br(),
-            br(),
+            img(src = "/iNZight_lite_logo.png", height = 80),
+            br(), br(),
             ##  We add version details at the bottom right hand corner
             ##  of the page. "lite.version" is defined in the file
             ##  "global.R" - this is because the version number is also
@@ -41,13 +35,21 @@ about.panel.ui = function(lite.version,lite.update) {
             ##  much effort to update the version number more than once.
             ##  Fortune favours the lazy. The same logic applies to
             ##  "lite.update".
-            p(em(lite.version),
-              br(),
-              em(lite.update),
-              style = 'color:gray',
-              align = 'right')
+            if (lite.version != "" || lite.update != "") {
+              p_args <- list()
+              if (lite.version != "")
+                p_args <- c(p_args, list("iNZight Lite Version: ", em(lite.version), br()))
+              if (lite.update != "")
+                p_args <- c(p_args, list("Last updated: ", em(lite.update)))
+
+              p_args <- c(p_args, list(style = "color: gray"))
+              do.call(p, p_args)
+            },
+            ##  We include the markdown document that contains the
+            ##  text for the "About" module.
+            includeMarkdown("panels/A1_About/4_about-panel-text.md")
         ),
-       
+
         ##  Next, we add a helpful footer.
         column(
             width = 12,
@@ -77,14 +79,14 @@ about.panel.ui = function(lite.version,lite.update) {
                     <!-- Links to sponsors -->
           <a href = "http://stat.auckland.ac.nz">
                       <img src = "uoa_logo.png", height = 65>
-                    </a> &nbsp; &nbsp;       
+                    </a> &nbsp; &nbsp;
                     <a href = "http://www.stats.govt.nz/">
 		      <img src = "stats_nz.png"/, height = 75>
 		    </a> &nbsp; &nbsp;
                     <a href = "http://www.minedu.govt.nz/">
 		      <img src = "minedu_logo.png"/, height = 60, width = 170>
-		    </a> &nbsp; 
-		    
+		    </a> &nbsp;
+
 		  </span>
 		</div>
 	      </div>'
@@ -92,4 +94,3 @@ about.panel.ui = function(lite.version,lite.update) {
         )
     )
 }
-
