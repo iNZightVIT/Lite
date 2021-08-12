@@ -26,14 +26,8 @@ about.panel.ui = function(lite.version,lite.update) {
 #      br(),
         column(
             width = 10, offset = 1,
-            ##  We include the markdown document that contains the
-            ##  text for the "About" module.
-            includeMarkdown("panels/A1_About/4_about-panel-text.md"),
-            ##  We include some line breaks to space things out.
-            br(),
-            br(),
-            br(),
-            br(),
+            img(src = "/iNZight_lite_logo.png", height = 80),
+            br(), br(),
             ##  We add version details at the bottom right hand corner
             ##  of the page. "lite.version" is defined in the file
             ##  "global.R" - this is because the version number is also
@@ -48,9 +42,12 @@ about.panel.ui = function(lite.version,lite.update) {
               if (lite.update != "")
                 p_args <- c(p_args, list("Last updated: ", em(lite.update)))
 
-              p_args <- c(p_args, list(style = "color: gray", align = "right"))
+              p_args <- c(p_args, list(style = "color: gray"))
               do.call(p, p_args)
-            }
+            },
+            ##  We include the markdown document that contains the
+            ##  text for the "About" module.
+            includeMarkdown("panels/A1_About/4_about-panel-text.md")
         ),
 
         ##  Next, we add a helpful footer.
