@@ -1417,6 +1417,7 @@ get.vars = function(vars.path){
   if(is.null(vars.path)){
     vars.path = "VARS"
   }
+  message(vars.path)
   if (!file.exists(vars.path)) vars.path <- "VARS.default"
   if(file.exists(vars.path)){
     lines = scan(vars.path,what="character",sep="\n",quiet=T)
