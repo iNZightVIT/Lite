@@ -77,12 +77,12 @@ shinyUI(
               nativeAlert(message);
           }
         })();")),
-    
+
     tags$head(tags$script(src="js/testNumeric.js")),
     tags$head(tags$script(src="js/google-analytics.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).
-    
-    
+
+
     theme = "bootstrap.css",
     navbarPage(
       ##  Set Window Title
@@ -99,7 +99,7 @@ shinyUI(
       id = "selector",
       ##  Set custom colour and collapse options.
       inverse = TRUE, collapsible = TRUE,
-      
+
       ##  "About" tab.
       tabPanel("About",
                uiOutput('about.panel')),
@@ -145,7 +145,7 @@ shinyUI(
                           uiOutput('survey.design')),
                  tabPanel("Frequency tables",
                           uiOutput('frequency.tables'))
-                 
+
       ),
       ##  "Manipulate variables" tab.
       navbarMenu("Manipulate variables",
@@ -170,7 +170,7 @@ shinyUI(
                  tabPanel("Delete variables",
                           uiOutput("remove.columns"))
       ),
-      
+
       ##  "Quick Explore" tab.
       navbarMenu("Advanced",
                  tabPanel("Quick explore",
@@ -188,10 +188,10 @@ shinyUI(
                  tabPanel("Multivariate",
                           uiOutput("multivariate.panel"))
       ),
-      
+
       tabPanel("R code history", value = "rhistory",
                uiOutput("code.panel"))
-      
+
       ## Backup Link
       #            navbarMenu("Backup Link",
       #                       tabPanel(HTML("</a><a href=\"http://litebackup1.test-pods.auckland.ac.nz\">Backup Link 1")),
