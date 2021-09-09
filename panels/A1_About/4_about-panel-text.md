@@ -1,5 +1,9 @@
 <font size = "3">
 
+Due to server issues, some users are experiencing errors with Lite. You might like to install Lite locally to avoid these issues. Instructions can be found <a href="https://inzight.nz/install/">here</a> (Click on 'Mac' and then 'Install Lite locally').
+
+<br>
+
 The desktop application <a href="https://www.stat.auckland.ac.nz/~wild/iNZight/"><font size = "4" color = "18afe3"><b>i<font color = "094b85">nz</font>ight</b></font></a> is a simple data analysis system which was initially designed for high school students to help them explore data quickly and easily. It still serves this function but other demands have seen extensive additions to its capabilities. For example, it now provides very flexible multivariate visualisation capabilities and supports 3D graphics, maps, time series, and multivariable regression analysis. <font size = "4" color = "18afe3"><b>i<font color = "094b85">nz</font>ight</b><font color = "094b85"> lite</font></b></font> is an online version of the software, which requires only access to the internet and a modern web browser, thus making it accessible to a wider range of users.
 
 <br>
