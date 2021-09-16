@@ -409,6 +409,14 @@ shinyServer(function(input, output, session) {
   source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
   source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
 
+  #   Advanced --> Text Analytics
+
+  ##------------------##
+  ##  Text Analytics  ##
+  ##------------------##
+  source("panels/F8_TextAnalytics/1_textanalytics.panel-ui.R", local = TRUE)
+  source("panels/F8_TextAnalytics/2_textanalytics.panel-server.R", local = TRUE)
+
 
   #   Show code history
 
