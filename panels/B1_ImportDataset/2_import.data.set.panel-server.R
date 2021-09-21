@@ -13,21 +13,25 @@ observe({
 })
 
 observeEvent(input$files, { 
-  
-  if(file.exists(input$files[1, "datapath"])) {
-    isolate({
-      fpath = input$files[1, "datapath"]
-      fext = tools::file_ext(fpath)
-      temp <- tryCatch(as.data.frame(switch(tolower(fext),
-				   "rdata"=,
-				   "rda"=iNZightTools::load_rda(fpath)[[1]],
-				   "tsv"=iNZightTools::smart_read(fpath, delimiter="\t"),
-				   "numbers"=warning("Not a valid file extension: ", fext),
-				   iNZightTools::smart_read(fpath)),
-			    stringsAsFactors=TRUE),
-		       warning=function(w) showNotification(w$message,
-							    duration=10,
-							    type="warning"))
+      if(file.exists(input$files[1, "datapath"])) {
+        isolate({
+            fpaths <- input$files$datapath
+            fexts <- tools::file_ext(fpaths)
+            fext <- fexts[1]
+            temp <- tryCatch(if (any(grepl("txt|pdf|docx?|odt|rtf", fexts))) {
+                                 readtext::readtext(fpaths)
+                             } else {
+                                 switch(tolower(tools::file_ext(fpaths[1]),
+                                                "rdata"=,
+                                                "rda"=as.data.frame(iNZightTools::load_rda(fpath)[[1]]),
+                                                "tsv"=as.data.frame(iNZightTools::smart_read(fpath, delimiter="\t")),
+                                                "numbers"=warning("Not a valid file extension: ", fext),
+                                                as.data.frame(iNZightTools::smart_read(fpath)),
+                                                stringsAsFactors=TRUE))
+                             },
+                             warning=function(w) showNotification(w$message,
+                                                                  duration=10,
+                                                                  type="warning"))
 
       if(!is.null(temp)){
         plot.par$design=NULL
@@ -119,14 +123,31 @@ output$load.data.panel = renderUI({
   })
 })
 
+output$filedisplay <- renderUI({
+    if (is.data.frame(get.data.set())) {
+        DTOutput('filetable')
+    } else if (!is.null(get.data.set())) {
+        verbatimTextOutput('fileprint')
+    }
+})
 
-output$filetable <- renderDT({
-  
-  get.data.set()
-  
-}, options =
-  list(lengthMenu = c(5, 30, 50), pageLength = 5,
-       columns.defaultContent="NA", scrollX = TRUE))
+output$fileprint <- renderPrint(get.data.set())
+
+output$filetable <- renderDT(get.data.set(),
+                             options = list(lengthMenu = c(5, 30, 50),
+                                            pageLength = 5,
+                                            columns.defaultContent="NA",
+                                            scrollX = TRUE,
+                                            columnDefs = list(list(
+                                                targets = "_all",
+                                                render = JS(
+                                                    "function(data, type, row, meta) {",
+                                                    "return type === 'display' && data != null && data.length > 30 ?",
+                                                    "'<span>' + data.substr(0, 300) + '...</span>' : data;",
+                                                    "}")))
+
+
+                                            ))
 
 
 
