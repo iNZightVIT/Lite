@@ -15,23 +15,20 @@ observe({
 observeEvent(input$files, { 
       if(file.exists(input$files[1, "datapath"])) {
         isolate({
-            fpaths <- input$files$datapath
-            fexts <- tools::file_ext(fpaths)
+            fpath <- input$files$datapath
+            fexts <- tools::file_ext(fpath)
             fext <- fexts[1]
             temp <- tryCatch(if (any(grepl("txt|pdf|docx?|odt|rtf", fexts))) {
-                                 readtext::readtext(fpaths)
+                                 readtext::readtext(fpath)
                              } else {
-                                 switch(tolower(tools::file_ext(fpaths[1]),
+                                 switch(tolower(tools::file_ext(fpath[1])),
                                                 "rdata"=,
                                                 "rda"=as.data.frame(iNZightTools::load_rda(fpath)[[1]]),
                                                 "tsv"=as.data.frame(iNZightTools::smart_read(fpath, delimiter="\t")),
-                                                "numbers"=warning("Not a valid file extension: ", fext),
-                                                as.data.frame(iNZightTools::smart_read(fpath)),
-                                                stringsAsFactors=TRUE))
+                                                "numbers"=stop("Not a valid file extension: ", fext),
+                                                as.data.frame(iNZightTools::smart_read(fpath)))
                              },
-                             warning=function(w) showNotification(w$message,
-                                                                  duration=10,
-                                                                  type="warning"))
+                             error=identity)
 
       if(!is.null(temp)){
         plot.par$design=NULL
@@ -44,7 +41,7 @@ observeEvent(input$files, {
           temp.name = temp.name[1:(length(temp.name)-1)]
         }
         values$data.name = temp.name
-        import_reactives$success = T
+        import_reactives$success = !inherits(temp, "condition")
         if(!(fext %in% c("RData", "rda", "Rda"))){
           code.save$name = temp.name
           code.save$variable = c(code.save$variable, list(c(sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
@@ -126,10 +123,14 @@ output$load.data.panel = renderUI({
 output$filedisplay <- renderUI({
     if (is.data.frame(get.data.set())) {
         DTOutput('filetable')
+    } else if (inherits(get.data.set(), "condition")) {
+        textOutput('fileError')
     } else if (!is.null(get.data.set())) {
         verbatimTextOutput('fileprint')
-    }
+    } else NULL
 })
+
+output$fileError <- renderText(safeError(message(get.data.set())))
 
 output$fileprint <- renderPrint(get.data.set())
 
