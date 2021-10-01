@@ -1,0 +1,53 @@
+digraph G {
+	subgraph cluster_import {
+		label="import";
+		rt[label="readtext(): df"];
+		subgraph cluster_imv {
+			label="visual";
+			imrdt[label="renderDT()"];
+		}
+	}
+
+	subgraph cluster_process {
+		label="process";
+		corp[label="corpus()+alterations: corpus"];
+		toks[label="tokens()+alterations: tokens"];
+		dfm[label="dfm()+alterations: dfm"];
+		subgraph cluster_pv {
+			label="visual";
+			prdt[label="renderDT()"];
+			prv[label="renderVerbatim()"];
+		}
+	}
+
+	subgraph cluster_insight {
+		label="insight";
+		kwic[label="kwic(): kwic"];
+		tf[label="textstat_frequency(): df"];
+		ld[label="textstat_lexdiv(): df"];
+		td[label="hclust(as.dist(textstat_dist())): dist"];
+		kn[label="textstat_keyness(): df"];
+		lda[label="as.data.frame(terms(textmodel_lda())): df"];
+		subgraph cluster_inv {
+			label="visual";
+			inrdt[label="renderDT()"];
+			inrv[label="renderVerbatim()"];
+			inbprp[label="barplot - renderPlot()"];
+			inwcrp[label="textplot_wordcloud - renderPlot()"];
+			intsrp[label="time series - renderPlot()"];
+			inhcrp[label="hier clust - renderPlot()"];
+			inknrp[label="textplot_keyness - renderPlot()"];
+		}
+	}
+
+	rt -> {imrdt prdt};
+	rt -> corp -> toks -> dfm;
+	{corp toks dfm} -> prv;
+	toks -> kwic -> inrv;
+	dfm -> {tf ld td kn lda};
+	tf -> {inrdt inbprp inwcrp};
+	ld -> {inrdt inbprp intsrp};
+	td -> {inrv inhcrp};
+	kn -> inknrp;
+	lda -> inrdt;
+}
