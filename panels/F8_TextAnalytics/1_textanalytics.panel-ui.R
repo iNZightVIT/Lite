@@ -1,4 +1,4 @@
-# panel: textanalytics.panel 
+# panel: textanalytics.panel
 textanalytics.sidebarPanel <- function(){
 	sidebarPanel(uiOutput("textanalytics.ui.sidebar"))
 }
