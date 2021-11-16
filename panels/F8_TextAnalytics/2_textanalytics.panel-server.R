@@ -14,8 +14,6 @@ output$textanalytics.ui.main <- renderUI({
 		    tabPanel("Visualisation", mainvisualisation(), value="visualisation"))
 })
 
-
-
 observeEvent(input$mainstate,
 	     updateTabsetPanel(inputId="sidebarstate",
 			       selected = input$mainstate)
@@ -41,21 +39,35 @@ sidebarprocess <- reactive({
 sidebarvisualisation <- reactive({
 	tagList(
 		selectInput("insight", "Select what you want to Visualise",
-			    list(`Term Insight` = list("Term Frequency",
-						       "n-gram Frequency",
-						       "Key Words",
-						       "Term Sentiment",
-						       "Moving Average Term Sentiment"),
-				 `Aggregate Insight` = list("Term Count",
-							    "Key Sections",
-							    "Aggregate Sentiment",
-							    "Word Correlation"))),
-		selectInput("visualisation", "Select how to visualise it",
-			    list("Bar Chart", "etc", "etc...")),
-                renderText(input$insight),
-		checkboxInput("scale", "Scale Fixed")
+			    list("Keywords in Context",
+			         "Hierarchical Cluster",
+			         "Lexical Diversity",
+			         "Term Frequency",
+			         "Text LDA",
+			         "Keyness")),
+		uiOutput("insight_options"),
+		selectInput("visualisation", "Select how to visualise it", choices = NULL),
+		uiOutput("visualisation_options")
 	)
 })
+
+output$insight_options <- renderUI({
+    if (identical(input$insight, "Keywords in Context")) {
+        updateSelectInput(inputId = "visualisation", choices = list("verbatim"))
+        tagList(
+            textInput("kwic_text", "Enter key words you wish to see in context")
+            )
+    } else if (identical(input$insight, "Hierarchical Cluster")){
+        updateSelectInput(inputId = "visualisation", choices = list("verbatim", "hclust"))
+        tagList(
+            textInput("cluster_op", "Enter Cluster")
+            )
+    } else tagList()
+})
+
+output$visualisation_options <- renderText({
+	"placeholder for vis options"
+    })
 
 ## Object creation
 
@@ -65,10 +77,17 @@ processed_corpus <- bindEvent(reactive({
                             input$processEvent)
 processed_tokens <- reactive({
     quanteda::tokens(processed_corpus())
-    })
+})
 processed_dfm <- reactive({
     quanteda::dfm(processed_tokens())
-    })
+})
+insight <- reactive({
+    if (identical(input$insight, "Keywords in Context")) {
+        quanteda::kwic(processed_tokens(), input$kwic_text)
+    } else if (identical(input$insight, "Hierarchical Cluster")) {
+        hclust(as.dist(quanteda.textstats::textstat_dist(processed_dfm())))
+    }
+})
 
 ## Main panel
 
@@ -99,4 +118,15 @@ observeEvent(input$processEvent,
                                      inline = TRUE,
                                      selected = input$text_process_type))
 
-mainvisualisation <- reactive(renderText("goodbye"))
+mainvisualisation <- reactive(
+    renderUI({
+        if (identical(input$visualisation, "verbatim")) {
+            verbatimTextOutput("verbatim_rendering")
+        } else if (identical(input$visualisation, "hclust")) {
+            plotOutput("hclust_rendering")
+            }
+        })
+    )
+
+output$verbatim_rendering <- renderPrint(insight())
+output$hclust_rendering <- renderPlot(plot(insight(), xlab = "Distance", ylab = NULL))
