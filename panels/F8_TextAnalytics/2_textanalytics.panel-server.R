@@ -33,6 +33,7 @@ sidebarprocess <- reactive({
 		sliderInput("docfreq_trim", "Keep features with proportional document frequency",
                             min=0, max=1, value=c(0,1), step = 0.05),
                 fileInput("dictionary", "Upload Lookup Dictionary"),
+                helpText("Supported dictionary file formats include WordStat, LIWC, Lexicoder v2 and v3, and Yoshikoder formats"),
 		actionButton("processEvent", "Prepare Text")
 	)
 })
