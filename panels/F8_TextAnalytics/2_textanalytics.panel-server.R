@@ -27,18 +27,12 @@ sidebarprocess <- reactive({
             		"Select the level of Aggregation for the corpus",
             		list("documents", "paragraphs", "sentences")),
             	checkboxInput("remove_punct", "Remove Punctuation"),
-
-
-
-		checkboxInput("lemmatize", "Lemmatize"),
-		selectInput("stopwords", "Select the Stopword Lexicon",
-			    list(`Good` = list("a", "b", "c"),
-				 `Bad` = list("d", "e", "f"))),
-                renderText({
-                	paste("You chose", input$stopwords)
-                }),
-		selectInput("section", "Select what to Section by",
-			    list("Sentence", "Paragraph", "Chapter")),
+		checkboxInput("stopwords_remove", "Remove Stopwords"),
+		sliderInput("termfreq_trim", "Keep features with quantile term frequency",
+                            min=0, max=1, value=c(0,1), step = 0.05),
+		sliderInput("docfreq_trim", "Keep features with proportional document frequency",
+                            min=0, max=1, value=c(0,1), step = 0.05),
+                fileInput("dictionary", "Upload Lookup Dictionary"),
 		actionButton("processEvent", "Prepare Text")
 	)
 })
@@ -84,7 +78,7 @@ output$insight_options <- renderUI({
         tagList(
             selectInput("visualisation", "Select how to visualise it", choices = list("keyness"))
             )
-        }else tagList()
+    }  else tagList()
 })
 
 output$visualisation_options <- renderText({
@@ -98,10 +92,24 @@ processed_corpus <- bindEvent(reactive({
                                 }),
                             input$processEvent)
 processed_tokens <- reactive({
-    quanteda::tokens(processed_corpus(), remove_punct = input$remove_punct)
+    toks <- quanteda::tokens(processed_corpus(), remove_punct = input$remove_punct)
+    if (input$stopwords_remove) quanteda::tokens_remove(toks, pattern = quanteda::stopwords("en")) else toks
 })
 processed_dfm <- reactive({
-    quanteda::dfm(processed_tokens())
+    dfmat <- quanteda::dfm(processed_tokens())
+    if (any(sort(input$termfreq_trim) != c(0,1)))
+        dfmat <- quanteda::dfm_trim(dfmat,
+                                    min_termfreq=min(input$termfreq_trim),
+                                    max_termfreq=max(input$termfreq_trim),
+                                    termfreq_type = "quantile")
+    if (any(sort(input$docfreq_trim) != c(0,1)))
+        dfmat <- quanteda::dfm_trim(dfmat,
+                                    min_docfreq=min(input$docfreq_trim),
+                                    max_docfreq=max(input$docfreq_trim),
+                                    docfreq_type = "prop")
+    if (!is.null(input$dictionary$datapath))
+        dfmat <- quanteda::dfm_lookup(dfmat, quanteda::dictionary(file = input$dictionary$datapath))
+    dfmat
 })
 insight <- reactive({
     if (identical(input$insight, "Keywords in Context")) {
