@@ -23,6 +23,13 @@ observeEvent(input$mainstate,
 
 sidebarprocess <- reactive({
 	tagList(
+    		selectInput("corpus_aggregation",
+            		"Select the level of Aggregation for the corpus",
+            		list("documents", "paragraphs", "sentences")),
+            	checkboxInput("remove_punct", "Remove Punctuation"),
+
+
+
 		checkboxInput("lemmatize", "Lemmatize"),
 		selectInput("stopwords", "Select the Stopword Lexicon",
 			    list(`Good` = list("a", "b", "c"),
@@ -87,11 +94,11 @@ output$visualisation_options <- renderText({
 ## Object creation
 
 processed_corpus <- bindEvent(reactive({
-                                        quanteda::corpus(get.data.set())
-                                        }),
+    quanteda::corpus_reshape(quanteda::corpus(get.data.set()), to=input$corpus_aggregation)
+                                }),
                             input$processEvent)
 processed_tokens <- reactive({
-    quanteda::tokens(processed_corpus())
+    quanteda::tokens(processed_corpus(), remove_punct = input$remove_punct)
 })
 processed_dfm <- reactive({
     quanteda::dfm(processed_tokens())
