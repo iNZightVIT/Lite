@@ -18,5 +18,5 @@ Authors@R: c(person("Tong", "Chen", role=c("aut", "cre"),
 Description: A web implementation of iNZight, a swiss-army-knife data analysis tool designed for ease of use.
 License: GPL-3
 Depends: R (>= 3.1.0), shiny, markdown
-Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps, plotly, shinyWidgets, shinyalert, shinycssloaders, DT, readtext
+Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps, plotly, shinyWidgets, shinyalert, shinycssloaders, DT, readtext, quanteda, quanteda.textstats, seededlda
 RoxygenNote: 6.0.1

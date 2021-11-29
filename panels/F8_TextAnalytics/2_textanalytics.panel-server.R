@@ -42,27 +42,42 @@ sidebarvisualisation <- reactive({
 			    list("Keywords in Context",
 			         "Hierarchical Cluster",
 			         "Lexical Diversity",
-			         "Term Frequency",
-			         "Text LDA",
+			         "Feature Frequency",
+			         "Topic Models",
 			         "Keyness")),
 		uiOutput("insight_options"),
-		selectInput("visualisation", "Select how to visualise it", choices = NULL),
 		uiOutput("visualisation_options")
 	)
 })
 
 output$insight_options <- renderUI({
     if (identical(input$insight, "Keywords in Context")) {
-        updateSelectInput(inputId = "visualisation", choices = list("verbatim"))
         tagList(
+            selectInput("visualisation", "Select how to visualise it", choices = "verbatim"),
             textInput("kwic_text", "Enter key words you wish to see in context")
             )
     } else if (identical(input$insight, "Hierarchical Cluster")){
-        updateSelectInput(inputId = "visualisation", choices = list("verbatim", "hclust"))
         tagList(
+            selectInput("visualisation", "Select how to visualise it", choices = list("hclust", "verbatim")),
             textInput("cluster_op", "Enter Cluster")
             )
-    } else tagList()
+    } else if (identical(input$insight, "Lexical Diversity")) {
+        tagList(
+            selectInput("visualisation", "Select how to visualise it", choices = list("verbatim"))
+            )
+    } else if (identical(input$insight, "Feature Frequency")) {
+        tagList(
+            selectInput("visualisation", "Select how to visualise it", choices = list("verbatim"))
+            )
+    } else if (identical(input$insight, "Topic Models")) {
+        tagList(
+            selectInput("visualisation", "Select how to visualise it", choices = list("verbatim"))
+            )
+    } else if (identical(input$insight, "Keyness")) {
+        tagList(
+            selectInput("visualisation", "Select how to visualise it", choices = list("keyness"))
+            )
+        }else tagList()
 })
 
 output$visualisation_options <- renderText({
@@ -85,7 +100,17 @@ insight <- reactive({
     if (identical(input$insight, "Keywords in Context")) {
         quanteda::kwic(processed_tokens(), input$kwic_text)
     } else if (identical(input$insight, "Hierarchical Cluster")) {
+        # if (nrow(processed_dfm()) < 3)
+        #     stop("Need at least 3 documents for Hierarchical Clustering")
         hclust(as.dist(quanteda.textstats::textstat_dist(processed_dfm())))
+    } else if (identical(input$insight, "Lexical Diversity")) {
+        quanteda.textstats::textstat_lexdiv(processed_dfm())
+    } else if (identical(input$insight, "Feature Frequency")) {
+        quanteda.textstats::textstat_frequency(processed_dfm(), n = 15)
+    } else if (identical(input$insight, "Topic Models")) {
+        seededlda::terms(seededlda::textmodel_lda(processed_dfm(), k = 4))
+    } else if (identical(input$insight, "Keyness")) {
+        quanteda.textstats::textstat_keyness(processed_dfm(), target = 1L)
     }
 })
 
@@ -124,9 +149,12 @@ mainvisualisation <- reactive(
             verbatimTextOutput("verbatim_rendering")
         } else if (identical(input$visualisation, "hclust")) {
             plotOutput("hclust_rendering")
-            }
+        } else if (identical(input$visualisation, "keyness")) {
+            plotOutput("keyness_rendering")
+        }
         })
     )
 
 output$verbatim_rendering <- renderPrint(insight())
 output$hclust_rendering <- renderPlot(plot(insight(), xlab = "Distance", ylab = NULL))
+output$keyness_rendering <- renderPlot(quanteda.textplots::textplot_keyness(insight()))

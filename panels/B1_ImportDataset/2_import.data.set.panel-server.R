@@ -19,7 +19,7 @@ observeEvent(input$files, {
             fexts <- tools::file_ext(fpath)
             fext <- fexts[1]
             temp <- tryCatch(if (any(grepl("txt|pdf|docx?|odt|rtf", fexts))) {
-                                 readtext::readtext(fpath)
+                                 transform(readtext::readtext(fpath), doc_id = input$files$name)
                              } else {
                                  switch(tolower(tools::file_ext(fpath[1])),
                                                 "rdata"=,
