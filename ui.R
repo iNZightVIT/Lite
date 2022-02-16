@@ -190,7 +190,11 @@ shinyUI(
       ),
 
       tabPanel("R code history", value = "rhistory",
-               uiOutput("code.panel"))
+                uiOutput("code.panel")),
+       navbarMenu("VIT",
+                  tabPanel("VIT",
+                           uiOutput("vit.panel"))
+       )
 
       ## Backup Link
       #            navbarMenu("Backup Link",

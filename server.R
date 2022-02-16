@@ -418,6 +418,12 @@ shinyServer(function(input, output, session) {
   source("panels/G1_Code//1_code.panel-ui.R", local = TRUE)
   source("panels/G1_Code//2_code.panel-server.R", local = TRUE)
 
+   ##-------##
+   ##  VIT  ##
+   ##-------##
+   source("panels/H1_vit//1_vit-ui.R", local = TRUE)
+   source("panels/H1_vit//2_vit-server.R", local = TRUE)
+
 
   #     Help
 
