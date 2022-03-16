@@ -9,6 +9,6 @@ log:
 stop:
 	docker stop lite-${TAG}
 push:
-	docker push scienceis/uoa-inzight-lite:${TAG} .
+	docker push scienceis/uoa-inzight-lite:${TAG}
 clean:
 	docker image prune
