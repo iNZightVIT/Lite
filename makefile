@@ -1,7 +1,7 @@
 .PHONY: build run log stop push clean
-TAG=dev # latest
+TAG=latest		#latest=mainline,dev=development
 build:
-	docker build --progress plain -t scienceis/uoa-inzight-lite:${TAG} .
+	docker build --tag scienceis/uoa-inzight-lite:${TAG} .
 run:
 	docker run --name lite-${TAG} -p 3838:3838 -d scienceis/uoa-inzight-lite:${TAG}
 log:
