@@ -17,6 +17,7 @@ RUN install2.r --error --skipinstalled \
     readxl \
     RgoogleMaps \
     RJSONIO \
+    reshape2 \
     sas7bdat \
     shinyalert \
     shinycssloaders \
