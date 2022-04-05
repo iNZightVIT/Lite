@@ -9,6 +9,8 @@
 
 ###  We load the packages we require. This is done only ONCE per instance.
 
+message("Starting iNZight Lite Server...")
+
 suppressPackageStartupMessages(library(iNZightPlots))
 suppressPackageStartupMessages(library(iNZightTS))
 suppressPackageStartupMessages(library(iNZightMR))
