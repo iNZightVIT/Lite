@@ -3,50 +3,48 @@
 ###-------------------------------------###
 ###
 ### Date Created : January 10, 2015
-### Last Modified : May 14, 2017
 ###
 ### Please consult the comments before editing any code.
 ### This file sources the ui files for each panel separately.
 
 ###  We load the packages we require. This is done only ONCE per instance.
 
-library(iNZightPlots)
-library(iNZightTS)
-library(iNZightMR)
-library(markdown)
-library(GGally)
-library(iNZightRegression)
-library(RJSONIO)
-library(survey)
-library(iNZightMaps)
-library(colorspace)
-library(readxl)
-#library(xlsx)
-library(sas7bdat)
-library(foreign)
-#library(shinydashboard)
-library(shinyjs)
-#library(iNZightTools)
-library(dplyr)
-library(plotly)
-library(shinyWidgets)
-library(DT)
-# read in possible command line arguments such as 'vars.path'
-library(shinycssloaders)
-library(shinyalert)
+suppressPackageStartupMessages(library(iNZightPlots))
+suppressPackageStartupMessages(library(iNZightTS))
+suppressPackageStartupMessages(library(iNZightMR))
+suppressPackageStartupMessages(library(markdown))
+suppressPackageStartupMessages(library(GGally))
+suppressPackageStartupMessages(library(iNZightRegression))
+suppressPackageStartupMessages(library(RJSONIO))
+suppressPackageStartupMessages(library(survey))
+suppressPackageStartupMessages(library(iNZightMaps))
+suppressPackageStartupMessages(library(colorspace))
+suppressPackageStartupMessages(library(readxl))
+#suppressPackageStartupMessages(library(xlsx))
+suppressPackageStartupMessages(library(sas7bdat))
+suppressPackageStartupMessages(library(foreign))
+#suppressPackageStartupMessages(library(shinydashboard))
+suppressPackageStartupMessages(library(shinyjs))
+#suppressPackageStartupMessages(library(iNZightTools))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(shinyWidgets))
+suppressPackageStartupMessages(library(DT))
+suppressPackageStartupMessages(library(shinycssloaders))
+suppressPackageStartupMessages(library(shinyalert))
 
 args=(commandArgs(TRUE))
 
 ## args is now a list of character vectors
 ## First check to see if arguments are passed.
 ## Then cycle through each element of the list and evaluate the expressions.
-if(length(args) == 0){
-  message("No arguments supplied.")
-}else{
-  for(i in 1:length(args)){
-    eval(parse(text=args[[i]]))
-  }
-}
+#if(length(args) == 0){
+#  message("No arguments supplied.")
+#}else{
+#  for(i in 1:length(args)){
+#    eval(parse(text=args[[i]]))
+#  }
+#}
 
 ## read in all the functions used in iNZight Lite
 source("functions.R")
