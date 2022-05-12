@@ -422,8 +422,7 @@ shinyServer(function(input, output, session) {
    ##  VIT  ##
    ##-------##
    source("panels/H1_vit//1_vit-ui.R", local = TRUE)
-   source("panels/H1_vit//2_vit-server.R", local = TRUE)
-
+   
 
   #     Help
 
