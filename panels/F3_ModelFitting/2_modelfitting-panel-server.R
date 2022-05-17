@@ -431,7 +431,7 @@ observe({
   isolate({
     is_survey <- FALSE
     if (!is.null(design_params$design$dataDesign)) {
-      design.obj <- createSurveyObject(design_params$design)
+      design.obj <- createSurveyObject()
       is_survey <- TRUE
     }
     model.name = ""
@@ -777,7 +777,7 @@ output$current.code = renderPrint({
   isolate({
     is_survey <- FALSE
     if (!is.null(design_params$design$dataDesign)) {
-      design.obj <- createSurveyObject(design_params$design)
+      design.obj <- createSurveyObject()
       is_survey <- TRUE
     }
     # test whether y is not NULL or not "" and
