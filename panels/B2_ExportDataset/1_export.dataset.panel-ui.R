@@ -6,8 +6,7 @@ get.sidebar.save = function(){
     downloadButton('downloadData', 'Download'),
     br(),br(),help.display('Export data','export_data',
                            "panels/B2_ExportDataset/3_export.dataset.panel-help.md"),
-    br(),
-    uiOutput("vit_randomisation_test")
+    br()
     )
 }
 
@@ -23,7 +22,7 @@ save.data.panel = function(data.set){
     m.panel = DTOutput("save_table")
   }
   sidebarLayout(
-    sidebarPanel(s.panel),
+    sidebarPanel(s.panel, uiOutput("vit_randomisation_test")),
     mainPanel(m.panel)
   )
 }
