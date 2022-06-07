@@ -54,6 +54,8 @@ source("functions.R")
 ### We write the server function.
 shinyServer(function(input, output, session) {
 
+  session$allowReconnect(TRUE)
+
   ##Specify all the reactive values
 
   values = reactiveValues()

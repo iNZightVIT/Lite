@@ -1,24 +1,30 @@
 sv.data <- reactive(get.data.set())
 
 
-output$vit_randomisation_test <- renderUI({
+observeEvent(input$to_vit_randomisation_test, {
   df <- as.data.frame(sv.data())
-  json_output <- jsonlite::toJSON(df, na = "null") # need this for VITonline
-  
-  form_html <-  htmltools::div(
-    htmltools::tags$form(method = "post", 
-                         action = "https://vit-test123.herokuapp.com/randomisationTest/RVar.php?file=JSON",
-                         target="_blank",
-                         htmltools::tags$input(type = "hidden", 
-                                               name = "p_data", 
-                                               value = json_output),
-                         htmltools::tags$input(type = "submit", 
-                                               value= "Jump to VIT online (test) randomisation test")
-    )
-  )
-  
-  htmltools::tagList(form_html)
-})
+  json_output <- jsonlite::toJSON(df, na = "null")
+  session$sendCustomMessage("to_vit_randomisation_test", json_output)
+  }
+)
+observeEvent(input$to_vit_sampling_variation, {
+  df <- as.data.frame(sv.data())
+  json_output <- jsonlite::toJSON(df, na = "null")
+  session$sendCustomMessage("to_vit_sampling_variation", json_output)
+  }
+)
+observeEvent(input$to_vit_bootstrap, {
+  df <- as.data.frame(sv.data())
+  json_output <- jsonlite::toJSON(df, na = "null")
+  session$sendCustomMessage("to_vit_bootstrap", json_output)
+  }
+)
+observeEvent(input$to_vit_randomisation_variation, {
+  df <- as.data.frame(sv.data())
+  json_output <- jsonlite::toJSON(df, na = "null")
+  session$sendCustomMessage("to_vit_randomisation_variation", json_output)
+  }
+)
 
 ##  Data -> Export data (export the currently used data set)
 
