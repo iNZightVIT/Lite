@@ -12,6 +12,7 @@ shinyUI(
     #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet-pure-css.css")),
     ##  Set Tabpanel font to be size 16.
     tags$head(
+      tags$script(src="post-vit.js"),
       tags$style(
         type = "text/css",
         ".nav {font-size:16px}
@@ -186,11 +187,14 @@ shinyUI(
                  tabPanel("Multiple Response",
                           uiOutput("multiple.response")),
                  tabPanel("Multivariate",
-                          uiOutput("multivariate.panel"))
+                          uiOutput("multivariate.panel")),
+		 tabPanel("VIT",
+			  uiOutput("VIT.panel"))
       ),
 
       tabPanel("R code history", value = "rhistory",
-               uiOutput("code.panel"))
+                uiOutput("code.panel")
+       )
 
       ## Backup Link
       #            navbarMenu("Backup Link",

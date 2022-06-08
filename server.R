@@ -54,6 +54,8 @@ source("functions.R")
 ### We write the server function.
 shinyServer(function(input, output, session) {
 
+  session$allowReconnect(TRUE)
+
   ##Specify all the reactive values
 
   values = reactiveValues()
@@ -409,6 +411,10 @@ shinyServer(function(input, output, session) {
   source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
   source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
 
+  ##-------##
+  ##  VIT  ##
+  ##-------##
+  source("panels/F8_vit/vit.R", local = TRUE)
 
   #   Show code history
 
@@ -418,6 +424,7 @@ shinyServer(function(input, output, session) {
   source("panels/G1_Code//1_code.panel-ui.R", local = TRUE)
   source("panels/G1_Code//2_code.panel-server.R", local = TRUE)
 
+   
 
   #     Help
 
