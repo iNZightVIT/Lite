@@ -5,11 +5,6 @@ get.sidebar.save = function(){
     downloadButton('downloadData', 'Download'),
     br(),br(),help.display('Export data','export_data',
                            "panels/B2_ExportDataset/3_export.dataset.panel-help.md"),
-    br(),
-    actionButton("to_vit_randomisation_test", label = "To VIT Randomisation Test"),
-    actionButton("to_vit_sampling_variation", label = "To VIT Sampling Variation"),
-    actionButton("to_vit_bootstrap", label = "To VIT Bootstrap"),
-    actionButton("to_vit_randomisation_variation", label = "To VIT Randomisation Variation")
     )
 }
 

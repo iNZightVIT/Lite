@@ -187,7 +187,9 @@ shinyUI(
                  tabPanel("Multiple Response",
                           uiOutput("multiple.response")),
                  tabPanel("Multivariate",
-                          uiOutput("multivariate.panel"))
+                          uiOutput("multivariate.panel")),
+		 tabPanel("VIT",
+			  uiOutput("VIT.panel"))
       ),
 
       tabPanel("R code history", value = "rhistory",
