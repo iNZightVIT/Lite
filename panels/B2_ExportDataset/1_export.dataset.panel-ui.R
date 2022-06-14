@@ -4,8 +4,7 @@ get.sidebar.save = function(){
                 choices=c("txt","csv","RData","RDS"),selected=1),
     downloadButton('downloadData', 'Download'),
     br(),br(),help.display('Export data','export_data',
-                           "panels/B2_ExportDataset/3_export.dataset.panel-help.md"),
-    )
+                           "panels/B2_ExportDataset/3_export.dataset.panel-help.md"))
 }
 
 save.data.panel = function(data.set){
