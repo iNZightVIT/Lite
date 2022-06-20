@@ -1,15 +1,33 @@
-function to_vit(path) {
-	return function(message) {
-	    var url = `https://vit-test123.herokuapp.com/${path}.php?file=JSON`;
-	    var to_send = JSON.stringify(message);
-	    var form = $(`<form action="${url}" method="post" target="vit-frame"><input type="hidden" name="p_data" value='${to_send}' /></form>`);
-	    $('body').append(form);
-	    form.submit(); 
+function vit(message) {
+	var path = message.test;
+	var data = JSON.stringify(message.data);
+
+	var url = `https://vit-test123.herokuapp.com/${path}.php?file=JSON`;
+
+	var form = document.createElement("form");
+	form.action = url;
+	form.method = "post";
+	form.target = "vit-frame";
+
+	var input = document.createElement("input");
+	input.type = "hidden";
+	input.name = "p_data";
+	input.value = data;
+	form.appendChild(input);
+
+	console.log(message.vars);
+	for (const i in message.vars) {
+		var var_param = document.createElement("input");
+		var_param.type = "hidden";
+		var_param.name = "var";
+		var_param.value = message.vars[i];
+		console.log(message.vars[i]);
+	
+		form.appendChild(var_param);
 	}
+
+	document.body.appendChild(form);
+	form.submit();
 }
 
-var vit_randomisation_test = to_vit("randomisationTest/RVar");
-var vit_bootstrap = to_vit("bootstrap/bootstrap");
-
-Shiny.addCustomMessageHandler('data_for_randomisation', vit_randomisation_test);
-Shiny.addCustomMessageHandler('vit_bootstrap', vit_bootstrap);
+Shiny.addCustomMessageHandler('send_to_vit_frame', vit);
