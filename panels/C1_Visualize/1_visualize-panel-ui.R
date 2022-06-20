@@ -411,7 +411,13 @@ vis.mainPanel = function() {
                #              style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
                uiOutput("plotly_nw"), 
                plotlyOutput("plotly_inter", height = "500px") %>% withSpinner()
-      )
+      ),
+	tabPanel(title="VIT",
+		 radioButtons("vit-type", "VIT Test",
+			      c("Random"="random", "Bootstrap"="bootstrap"),
+			      selected=character(0)),
+		 uiOutput("vit-frame")
+	)
     )
   )
   panel
