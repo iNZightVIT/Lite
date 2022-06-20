@@ -414,9 +414,9 @@ vis.mainPanel = function() {
       ),
 	tabPanel(title="VIT",
 		 radioButtons("vit-type", "VIT Test",
-			      c("Randomisation Test"="random", "Bootstrap"="bootstrap"),
-			      selected=character(0)),
-		 uiOutput("vit-frame")
+			      c("Bootstrap"="bootstrap", "Randomisation Test"="random")),
+		 tags$iframe(name="vit-frame", title="VIT Frame", class="fill-frame"),
+		 value = "vit"	
 	)
     )
   )
