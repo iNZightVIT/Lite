@@ -1,2 +1,4 @@
 VARS
 data/Surveys/*.svydesign
+rsconnect
+.vscode
