@@ -3923,8 +3923,10 @@ observe({
     if(!is.null(input$check_quantiles)&&input$check_quantiles){
       updateCheckboxInput(session,"each_level",value=F)
       graphical.par$quant.smooth = c(0.25, 0.5, 0.75)
+      shinyjs::hide("smoother.smooth")
     }else{
       graphical.par$quant.smooth = NULL
+      shinyjs::show("smoother.smooth")
     }
   })
 })
