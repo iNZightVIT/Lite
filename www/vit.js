@@ -2,7 +2,7 @@ function vit(message) {
 	var path = message.test;
 	var data = JSON.stringify(message.data);
 
-	var url = `https://vit-test123.herokuapp.com/${path}.php?file=JSON`;
+	var url = `https://vit.inzight.nz/${path}.php?file=JSON`;
 
 	var form = document.createElement("form");
 	form.action = url;

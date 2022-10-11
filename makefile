@@ -1,5 +1,6 @@
+# Define TAG; e.g.:
+# make push TAG=dev	# latest=mainline,dev=development
 .PHONY: build run log stop push clean
-TAG=latest		#latest=mainline,dev=development
 build:
 	docker build --tag scienceis/uoa-inzight-lite:${TAG} .
 run:
