@@ -1,5 +1,8 @@
 name: "Publish Docker image"
-on: push
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build-and-push-image:
@@ -19,4 +22,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: scienceis/uoa-inzight-lite:github
+          tags: scienceis/uoa-inzight-lite:staging
