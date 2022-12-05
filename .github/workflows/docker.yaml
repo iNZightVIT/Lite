@@ -26,5 +26,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
+          pull: true
           push: true
           tags: scienceis/uoa-inzight-lite:${{ env.TAGNAME }}
