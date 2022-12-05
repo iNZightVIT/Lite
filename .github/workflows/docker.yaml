@@ -1,8 +1,5 @@
 name: "Publish Docker image"
-on:
-  push:
-    branches:
-      - master
+on: push
 
 jobs:
   build-and-push-image:
@@ -18,12 +15,10 @@ jobs:
           username: ${{ secrets.DOCKER_USER_2 }}
           password: ${{ secrets.DOCKER_SECRET_2 }}
 
-      # set env TAGNAME to latest if master
       - name: Set env TAGNAME
         if: github.ref == 'refs/heads/master'
         run: echo "TAGNAME=latest" >> $GITHUB_ENV
 
-      # create env name with git branch if not master
       - name: Set env TAGNAME
         if: ${{ github.ref != 'refs/heads/master' }}
         run: echo "TAGNAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
