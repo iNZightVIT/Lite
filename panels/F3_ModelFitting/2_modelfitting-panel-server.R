@@ -30,17 +30,31 @@ output$fit.summary = renderPrint({
        (!is.null(modelValues$models[[input$model.select]])&&
         !is.null(input$model.select))){
       confounds = input$confounding_variables
-      if(" "%in%confounds){
-        confounds = confounds[-which(confounds%in%" ")]
+
+      # filter counfounds to those in names of get.data.set()
+      confounds <- confounds[confounds %in% names(get.data.set())]
+
+      op <- options(width = 200)
+      on.exit(options(op))
+      smry <- try(
+        capture.output(
+          iNZightSummary(
+            modelValues$models[[input$model.select]],
+            exclude = if (length(confounds)) confounds else NULL
+          )
+        ),
+        silent = TRUE
+      )
+      if (inherits(smry, "try-error")) {
+        smry <- try(
+          capture.output(summary(modelValues$models[[input$model.select]])),
+          silent = TRUE
+        )
       }
-      if(!is.null(confounds)&&
-         length(confounds)>0&&
-         all(confounds%in%colnames(get.data.set()))){
-        iNZightSummary(modelValues$models[[input$model.select]],
-                       exclude=confounds)
-      }else{
-        iNZightSummary(modelValues$models[[input$model.select]])
-      }
+      if (inherits(smry, "try-error"))
+        smry <- "Unable to obtain summary information for model."
+
+      cat(smry, sep = "\n")
     }else{
       cat("No model to show")
     }
@@ -318,7 +332,7 @@ observe({
   input$transformation_submit
   isolate({
     if(!is.null(input$transformation_submit)&&
-       input$transformation_submit>0){ 
+       input$transformation_submit>0){
       if(!is.null(input$transform_select)&&
          !input$transform_select%in%"none"&&
          !is.null(input$transform_variable_select)&&
@@ -333,7 +347,7 @@ observe({
                             choices=c("none",names(modelValues$transformation.log)),
                             selected="none")
           ch = c(input$independent_variables,input$confounding_variables)
-          ch[which(ch%in%modelValues$transformation.log)] = 
+          ch[which(ch%in%modelValues$transformation.log)] =
             names(modelValues$transformation.log)[which(modelValues$transformation.log%in%ch)]
           updateSelectInput(session,"interaction.vars.select",
                             choices=ch)
@@ -343,8 +357,8 @@ observe({
   })
 })
 
-# delete transform variables if the 
-# independent variable is removed 
+# delete transform variables if the
+# independent variable is removed
 # from model
 observe({
   input$independent_variables
@@ -366,7 +380,7 @@ observe({
                           choices=c("none",names(modelValues$transformation.log)),
                           selected="none")
         ch = c(input$independent_variables,input$confounding_variables)
-        ch[which(ch%in%modelValues$transformation.log)] = 
+        ch[which(ch%in%modelValues$transformation.log)] =
           names(modelValues$transformation.log)[which(modelValues$transformation.log%in%ch)]
         updateSelectInput(session,"interaction.vars.select",
                           choices=ch)
@@ -389,7 +403,7 @@ observe({
                         choices=c("none",names(modelValues$transformation.log)),
                         selected="none")
       ch = c(input$independent_variables,input$confounding_variables)
-      ch[which(ch%in%modelValues$transformation.log)] = 
+      ch[which(ch%in%modelValues$transformation.log)] =
         names(modelValues$transformation.log)[which(modelValues$transformation.log%in%ch)]
       updateSelectInput(session,"interaction.vars.select",
                         choices=ch)
@@ -507,7 +521,7 @@ observe({
                             paste(input$confounding_variables,
                                   collapse=col),sep="")
             }
-          } 
+          }
         } else {
           formu = paste(input$select_Y," ~ ",
                         paste(input$independent_variables
@@ -520,7 +534,7 @@ observe({
                                 collapse=col),sep="")
           }
         }
-        
+
         #if(length(input$confounding_variables)>0){
         #  formu = paste(input$select_Y," ~ ",
         #                paste(input$independent_variables
@@ -555,7 +569,7 @@ observe({
                                modelValues$transformation.log)))){
             new.interaction.log = lapply(modelValues$interaction.log,
                                          function(x,y){
-                                           x[which(x%in%y)] = names(y)[which(y%in%x)] 
+                                           x[which(x%in%y)] = names(y)[which(y%in%x)]
                                          },modelValues$transformation.log)
             names(new.interaction.log) = unlist(lapply(new.interaction.log,function(x){
               paste(x,collapse=":")
@@ -684,8 +698,8 @@ observe({
   })
 })
 
-# Remove the posibility to select a variable in 
-# confounders and independent variables. This 
+# Remove the posibility to select a variable in
+# confounders and independent variables. This
 # checks the independent variables.
 observe({
   input$independent_variables
@@ -702,8 +716,8 @@ observe({
   })
 })
 
-# Remove the posibility to select a variable in 
-# confounders and independent variables. This 
+# Remove the posibility to select a variable in
+# confounders and independent variables. This
 # checks the confounding variables.
 observe({
   input$confounding_variables
@@ -720,8 +734,8 @@ observe({
   })
 })
 
-# Test whether the selected Y variable is 
-# numeric, binary or count data and set 
+# Test whether the selected Y variable is
+# numeric, binary or count data and set
 # the model framework accordingly
 observe({
   input$select_Y
@@ -743,7 +757,7 @@ observe({
   })
 })
 
-# Test whether input in the numeric text field for 
+# Test whether input in the numeric text field for
 # transforming Y is numeric
 observe({
   input$arg1
@@ -851,7 +865,7 @@ output$current.code = renderPrint({
                              collapse=col),sep="")
         }
       }
-      
+
       if(int.deg){
         func = strsplit(func," ~ ")[[1]]
         func[2] = paste0("(",func[2],")^",input$arg2)
@@ -875,7 +889,7 @@ output$current.code = renderPrint({
                              modelValues$transformation.log)))){
           new.interaction.log = lapply(modelValues$interaction.log,
                                        function(x,y){
-                                         x[which(x%in%y)] = names(y)[which(y%in%x)] 
+                                         x[which(x%in%y)] = names(y)[which(y%in%x)]
                                        },modelValues$transformation.log)
           names(new.interaction.log) = unlist(lapply(new.interaction.log,function(x){
             paste(x,collapse=":")
@@ -1010,25 +1024,25 @@ output$code.history.text = renderPrint({
 
 # panel for the R code download
 output$code_download = renderUI({
-  list(helpText("Press button below to download the R 
+  list(helpText("Press button below to download the R
                 code to rerun the work you have done."),
        downloadButton('downloadScript', 'Download R script'))
 })
 
 # download handler for retrieving the R code
 output$downloadScript <- downloadHandler(
-  
+
   # This function returns a string which tells the client
   # browser what name to use when saving the file.
   filename = function() {
     "codeHistory.R"
   },
-  
+
   # This function should write data to a file given to it by
   # the argument 'file'.
   content = function(file) {
     sep = "\n"
-    
+
     # Write to a file specified by the 'file' argument
     write(modelValues$code.history, file, sep = sep,)
   }
@@ -1210,7 +1224,7 @@ output$partial.residual.plot = renderPlot({
   input$model.select
   input$partial.residual.plot.select
   isolate({
-    partialResPlot(modelValues$models[[input$model.select]], 
+    partialResPlot(modelValues$models[[input$model.select]],
                    input$partial.residual.plot.select)
     modelValues$code.history = paste0(modelValues$code.history,
                                       "partialResPlot(",
@@ -1278,7 +1292,7 @@ output$plotlm6 = renderPlot({
   input$plotlm6.selected
   isolate({
     plotindex=7
-    if(!is.null(input$plotlm6.selected)){ 
+    if(!is.null(input$plotlm6.selected)){
       if(input$plotlm6.selected%in%"Residuals vs Fitted"){
         plotindex=1
       }else if(input$plotlm6.selected%in%"Scale-location"){
@@ -1292,9 +1306,9 @@ output$plotlm6 = renderPlot({
       }else if(input$plotlm6.selected%in%"Histogram"){
         plotindex=6
       }
-      # needs to have a global variable as the plotlm6 function reevaluates the 
+      # needs to have a global variable as the plotlm6 function reevaluates the
       # model formula which includes an object of name dafr (data set)
-      dafr<<-get.data.set() 
+      dafr<<-get.data.set()
       # plotting call
       modelValues$code.history = paste0(modelValues$code.history,
                                         "plotlm6(",
