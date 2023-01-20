@@ -1,7 +1,9 @@
-# Release 20221205
+# Release 1.0.0
 
-- catch errors in 'iNZightSummary()' and default to base R model summary
+This is the first formal release using a new deployment process, using a more conventional versioning scheme.
 
----
+Earlier changes are not logged.
 
-Earlier changes not logged.
+## Changes in this version:
+
+-
