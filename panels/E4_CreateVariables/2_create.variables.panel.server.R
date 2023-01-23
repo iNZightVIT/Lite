@@ -39,8 +39,14 @@ observe({
   isolate({
     if(!is.null(input$create.variables.submit)&&
        input$create.variables.submit>0){
+      # check if the new variable contains spaces " " or dashes "-"
+      # replace it with an underscore "_" if found
+      # browser()
+      new_var = trimws(input$create.variables.name)
+      new_var = gsub(" |-", "_", new_var)
+      
       temp = iNZightTools::createNewVar(get.data.set(),
-                                        new_var = input$create.variables.name,
+                                        new_var = new_var,
                                         get.create.variables.expression.text())
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
