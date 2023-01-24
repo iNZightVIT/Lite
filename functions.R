@@ -1522,6 +1522,20 @@ get.quantiles = function(subx){
   g1
 }
 
+#' Make Syntactically Valid Names
+#'
+#' @param names vector to be coerced to syntactically valid names.
+#' 
+#' @description Replace spaces with underscores and any other 
+#' invalid characters to dots
+#' 
+#' @return Character vector of valid names
+make_names = function(names) {
+  names = gsub("\\s+", "_", names)
+  names = make.names(names)
+  
+  return(names)
+}
 
 #' Loads data from a specified URL
 #'
