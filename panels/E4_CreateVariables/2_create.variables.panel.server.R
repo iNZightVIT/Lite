@@ -41,9 +41,7 @@ observe({
        input$create.variables.submit>0){
       # check if the new variable contains spaces " " or dashes "-"
       # replace it with an underscore "_" if found
-      # browser()
-      new_var = trimws(input$create.variables.name)
-      new_var = gsub(" |-", "_", new_var)
+      new_var = make_names(input$create.variables.name)
       
       temp = iNZightTools::createNewVar(get.data.set(),
                                         new_var = new_var,
