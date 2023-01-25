@@ -29,3 +29,5 @@ jobs:
           pull: true
           push: true
           tags: scienceis/uoa-inzight-lite:${{ env.TAGNAME }}
+          build-args: |
+            GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
