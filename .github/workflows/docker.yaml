@@ -23,9 +23,14 @@ jobs:
         if: ${{ github.ref != 'refs/heads/master' }}
         run: echo "TAGNAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
+      - name: Remove slashes from TAGNAME
+        run: echo "TAGNAME=${TAGNAME//\//_}" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           pull: true
           push: true
           tags: scienceis/uoa-inzight-lite:${{ env.TAGNAME }}
+          build-args: |
+            GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
