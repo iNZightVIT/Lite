@@ -10,51 +10,52 @@
 ###  * Note: This file is to be sourced locally within "server.R" *
 
 about.panel.ui = function(lite.version,lite.update) {
-    ##  We manually set the page width to be 10 columns so that it looks
-    ##  (rougly) centred.
-    fixedPage(
-#      column(
-#        width = 10, offset = 1,
-#        HTML(
-#          '<div class="NoticeBox">
-#         Our website is being hosted on a new server. If you have any problems, please feel free to contact us.
-#          </div>'
-#          )
-#        ),
-#
-#        br(),
-#      br(),
-        column(
-            width = 10, offset = 1,
-            img(src = "/iNZight_lite_logo.png", height = 80),
-            br(), br(),
-            ##  We add version details at the bottom right hand corner
-            ##  of the page. "lite.version" is defined in the file
-            ##  "global.R" - this is because the version number is also
-            ##  included in the "help" page, and it would take far too
-            ##  much effort to update the version number more than once.
-            ##  Fortune favours the lazy. The same logic applies to
-            ##  "lite.update".
-            if (lite.version != "" || lite.update != "") {
-              p_args <- list()
-              if (lite.version != "")
-                p_args <- c(p_args, list("iNZight Lite Version: ", em(lite.version), br()))
-              if (lite.update != "")
-                p_args <- c(p_args, list("Last updated: ", em(lite.update)))
-
-              p_args <- c(p_args, list(style = "color: gray"))
-              do.call(p, p_args)
-            },
-            ##  We include the markdown document that contains the
-            ##  text for the "About" module.
-            includeMarkdown("panels/A1_About/4_about-panel-text.md")
-        ),
-
-        ##  Next, we add a helpful footer.
-        column(
-            width = 12,
-            HTML(
-                '<div id = "wrapper">
+  ##  We manually set the page width to be 10 columns so that it looks
+  ##  (rougly) centred.
+  fixedPage(
+    #      column(
+    #        width = 10, offset = 1,
+    #        HTML(
+    #          '<div class="NoticeBox">
+    #         Our website is being hosted on a new server. If you have any problems, please feel free to contact us.
+    #          </div>'
+    #          )
+    #        ),
+    #
+    #        br(),
+    #      br(),
+    column(
+      width = 10, offset = 1,
+      img(src = "/iNZight_lite_logo.png", height = 80),
+      br(), br(),
+      ##  We add version details at the bottom right hand corner
+      ##  of the page. "lite.version" is defined in the file
+      ##  "global.R" - this is because the version number is also
+      ##  included in the "help" page, and it would take far too
+      ##  much effort to update the version number more than once.
+      ##  Fortune favours the lazy. The same logic applies to
+      ##  "lite.update".
+      if (lite.version != "" || lite.update != "") {
+        p_args <- list()
+        if (lite.version != "")
+          p_args <- c(p_args, list("iNZight Lite Version: ", em(lite.version), br()))
+        if (lite.update != "")
+          p_args <- c(p_args, list("Last updated: ", em(lite.update)))
+        
+        p_args <- c(p_args, list(style = "color: gray"))
+        do.call(p, p_args)
+      },
+      ##  We include the markdown document that contains the
+      ##  text for the "About" module.
+      includeMarkdown("panels/A1_About/4_about-panel-text.md")
+    ),
+    
+    ##  Next, we add a helpful footer.
+    column(
+      width = 12,
+      HTML(
+        glue::glue(
+          '<div id = "wrapper">
 		<div id = "footer">
 		  <span style = "float:left;">
                   <br> &nbsp;
@@ -73,7 +74,7 @@ about.panel.ui = function(lite.version,lite.update) {
                     <br>
                     <br>
                     <!-- Copyright Statement -->
-                      &nbsp; Copyright 2015 iNZight | All Rights Reserved
+                      &nbsp; Copyright 2015-{as.integer(format(Sys.Date(), "%Y"))} iNZight | All Rights Reserved
 		  </span>
 		  <span style = "float:right;">
                     <!-- Links to sponsors -->
@@ -90,7 +91,8 @@ about.panel.ui = function(lite.version,lite.update) {
 		  </span>
 		</div>
 	      </div>'
-            )
         )
+      )
     )
+  )
 }
