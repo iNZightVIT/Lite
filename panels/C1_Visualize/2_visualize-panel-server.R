@@ -486,7 +486,7 @@ determine.g = reactive({
 ##  Then on the third, he declared the need for parameters for the "visualize" module:
 vis.par = reactive({
   vis.par = reactiveValuesToList(plot.par)
-  # browser()
+
   if (!is.null(vis.par$x) && plot.par$varnames$x != "") {
     if(any(na.omit(vis.par$x) == "")){
       vis.par$x[which(vis.par$x == "")] = NA
@@ -7122,6 +7122,7 @@ observe({
            !is.null(plot.par$y) &&
            is.numeric(vis.data()[[plot.par$y]]) && 
            !is.null(plot.par$x)){
+          temp = vis.par()
           
           temp$trend.parallel = graphical.par$trend.parallel
           temp.x = temp$x
