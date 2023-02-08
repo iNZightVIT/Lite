@@ -486,6 +486,7 @@ determine.g = reactive({
 ##  Then on the third, he declared the need for parameters for the "visualize" module:
 vis.par = reactive({
   vis.par = reactiveValuesToList(plot.par)
+  # browser()
   if (!is.null(vis.par$x) && plot.par$varnames$x != "") {
     if(any(na.omit(vis.par$x) == "")){
       vis.par$x[which(vis.par$x == "")] = NA
@@ -497,8 +498,12 @@ vis.par = reactive({
       temp$y = vis.par$y
       temp$varnames$x = vis.par$varnames$x
       temp$varnames$y = vis.par$varnames$y
+      
       vis.par = modifyList(vis.par, temp, keep.null = TRUE)
     }
+    # set ci_width in par for plots
+    vis.par$ci.width = ci_width() / 100
+    
     vis.par = modifyList(reactiveValuesToList(graphical.par), vis.par, keep.null = TRUE)
   } else {
     NULL
@@ -797,7 +802,7 @@ observe({
       }
       updateSliderInput(session,"sub1_level_mini",
                         value=g1_level)
-      }, error = function(e) {print(e)})
+    }, error = function(e) {print(e)})
   })
 })
 
@@ -1416,6 +1421,7 @@ output$add_inference = renderUI({
   get.data.set()
   input$vari1
   input$vari2
+  ci_width()
   ret = NULL
   isolate({
     dafr = get.data.set()
@@ -1432,9 +1438,31 @@ output$add_inference = renderUI({
                                           choices=c("Normal","Bootstrap"),
                                           selected=input$inference_type1,
                                           inline=T)
-    confidence.interval.check = checkboxInput("confidence_interval1",
-                                              label="Confidence interval",
-                                              value=input$confidence_interval1)
+    
+    confidence.interval.check = fixedRow(
+      column(
+        4,
+        align = "center",
+        checkboxInput(
+          "confidence_interval1",
+          label = "Confidence interval",
+          value = input$confidence_interval1
+        )
+      ),
+      column(
+        6,
+        align = "center",
+        numericInput(
+          inputId = "ci.width.plot",
+          label = "",
+          value = ci_width(),
+          min = 10,
+          max = 99,
+        )
+      )
+    )
+    
+    
     comparison.interval.check = checkboxInput("comparison_interval1",
                                               label="Comparison interval",
                                               value=input$comparison_interval1)
@@ -1672,11 +1700,19 @@ observe({
   input$inference_parameter1
   input$vari1
   input$vari2
+  input$ci.width.plot
   input$add.inference
   isolate({
     graphical.par$inference.par = NULL
     intervals = NULL
     graphical.par$bs.inference = F
+    
+    # update `ci_width()` since input$ci.width also uses this value
+    # ci width on plot won't be used unless the checkbox is checked
+    if(!is.null(input$ci.width.plot)) {
+      ci_width(input$ci.width.plot)
+    }
+    
     # vari1 = numeric; vari2 = none
     if((!is.null(input$vari1)&&
         !is.null(input$vari2)&&
@@ -3186,8 +3222,8 @@ observe({
     if(!is.null(input$select.colour.palette))
       if(input$select.colour.palette %in% names(graphical.par$colourPalettes$cat))
         graphical.par$col.fun = graphical.par$colourPalettes$cat[[input$select.colour.palette]]
-      else if(input$select.colour.palette %in% names(graphical.par$colourPalettes$cont))
-        graphical.par$col.fun = graphical.par$colourPalettes$cont[[input$select.colour.palette]]
+    else if(input$select.colour.palette %in% names(graphical.par$colourPalettes$cont))
+      graphical.par$col.fun = graphical.par$colourPalettes$cont[[input$select.colour.palette]]
   })
 })
 
@@ -5768,10 +5804,10 @@ exportSVG.inzplotoutput <- function(x, file = 'inzightplot.svg', ...) {
 output$save_interactive_plot_beta2 = downloadHandler(
   filename = "Plot.html",
   content = function(file) {
-	  local.dir = iNZightPlots::exportHTML(create.html,
-					       data = data_html_beta2(),
-					       extra.vars = extra.vars_html_beta2(),
-					       width = 10, height = 6)
+    local.dir = iNZightPlots::exportHTML(create.html,
+                                         data = data_html_beta2(),
+                                         extra.vars = extra.vars_html_beta2(),
+                                         width = 10, height = 6)
     
     src = normalizePath(local.dir)
     owd = setwd(tempdir())
@@ -5783,10 +5819,10 @@ output$save_interactive_plot_beta2 = downloadHandler(
 output$save_interactive_plot = downloadHandler(
   filename = "Plot.html",
   content = function(file) {
-	  local.dir = iNZightPlots::exportHTML(create.html,
-					       data = data_html(),
-					       extra.vars = extra.vars_html(),
-					       width = 10, height = 6)
+    local.dir = iNZightPlots::exportHTML(create.html,
+                                         data = data_html(),
+                                         extra.vars = extra.vars_html(),
+                                         width = 10, height = 6)
     
     src = normalizePath(local.dir)
     owd = setwd(tempdir())
@@ -6187,10 +6223,10 @@ observe({
           #                h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
           #              }
           #              else {
-		local.dir = iNZightPlots::exportHTML(create.html,
-						     data = data_html_beta2(),
-						     extra.vars = extra.vars_html_beta2(),
-						     width = 10, height = 6)
+          local.dir = iNZightPlots::exportHTML(create.html,
+                                               data = data_html_beta2(),
+                                               extra.vars = extra.vars_html_beta2(),
+                                               width = 10, height = 6)
           
           local.dir = unclass(local.dir)
           temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
@@ -6253,10 +6289,10 @@ output$interactive.plot = renderUI({
       #            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
       #          }
       #          else {
-	    local.dir = iNZightPlots::exportHTML(create.html,
-						 data = data_html(),
-						 extra.vars = extra.vars_html(),
-						 width = 10, height = 6)
+      local.dir = iNZightPlots::exportHTML(create.html,
+                                           data = data_html(),
+                                           extra.vars = extra.vars_html(),
+                                           width = 10, height = 6)
       
       local.dir = unclass(local.dir)
       temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
@@ -6308,10 +6344,10 @@ output$interactive.plot = renderUI({
       #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
       #      }
       #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
-	    local.dir = iNZightPlots::exportHTML(create.html,
-						 data = data_html(),
-						 extra.vars = extra.vars_html(),
-						 width = 10, height = 6)
+      local.dir = iNZightPlots::exportHTML(create.html,
+                                           data = data_html(),
+                                           extra.vars = extra.vars_html(),
+                                           width = 10, height = 6)
       
       local.dir = unclass(local.dir)
       temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
@@ -6425,48 +6461,48 @@ output$add_fitted_values_status = renderText({
 
 
 observeEvent(input$store_residuals, {
-    if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) && 
-       iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
-      showModal(modalDialog(
-        h5(strong("Specify names for the new variables")),
-        
-        conditionalPanel("input.check_linear",
-                         fixedRow(column(2, h5("Linear:")),
-                                  column(6, textInput(inputId="add_linear_residuals",
-                                                      value = paste(input$vari1, ".residuals.linear", sep = ""), 
-                                                      label=NULL)))),
-        conditionalPanel("input.check_quadratic",
-                         fixedRow(column(2, h5("Quadratic:")),
-                                  column(6, textInput(inputId="add_quadratic_residuals",
-                                                      value = paste(input$vari1, ".residuals.quadratic", sep = ""), 
-                                                      label=NULL)))),
-        conditionalPanel("input.check_cubic",
-                         fixedRow(column(2, h5("Cubic:")),
-                                  column(6, textInput(inputId="add_cubic_residuals",
-                                                      value = paste(input$vari1, ".residuals.cubic", sep = ""), 
-                                                      label=NULL)))),
-        conditionalPanel("input.check_smoother",
-                         fixedRow(column(2, h5("Smoother:")),
-                                  column(6, textInput(inputId="add_smoother_residuals",
-                                                      value = paste(input$vari1, ".residuals.smoother", sep = ""), 
-                                                      label=NULL)))),
-        actionButton("store_resisuals_ok", "OK"),
-        textOutput("add_residuals_status"),
-        title = "Store residuals"
-        
-      ))
-    } else {
-      showModal(modalDialog(
-        h5(strong("Specify names for the new variables")),
-        fixedRow(column(6, textInput(inputId = "add_numcat_residuals",
-                                     value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".residuals", sep = ""), 
-                                     label=NULL))),
-        actionButton("store_resisuals_ok", "OK"),
-        textOutput("add_residuals_status"),
-        title = "Store residuals"
-        
-      ))
-    }
+  if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) && 
+     iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
+    showModal(modalDialog(
+      h5(strong("Specify names for the new variables")),
+      
+      conditionalPanel("input.check_linear",
+                       fixedRow(column(2, h5("Linear:")),
+                                column(6, textInput(inputId="add_linear_residuals",
+                                                    value = paste(input$vari1, ".residuals.linear", sep = ""), 
+                                                    label=NULL)))),
+      conditionalPanel("input.check_quadratic",
+                       fixedRow(column(2, h5("Quadratic:")),
+                                column(6, textInput(inputId="add_quadratic_residuals",
+                                                    value = paste(input$vari1, ".residuals.quadratic", sep = ""), 
+                                                    label=NULL)))),
+      conditionalPanel("input.check_cubic",
+                       fixedRow(column(2, h5("Cubic:")),
+                                column(6, textInput(inputId="add_cubic_residuals",
+                                                    value = paste(input$vari1, ".residuals.cubic", sep = ""), 
+                                                    label=NULL)))),
+      conditionalPanel("input.check_smoother",
+                       fixedRow(column(2, h5("Smoother:")),
+                                column(6, textInput(inputId="add_smoother_residuals",
+                                                    value = paste(input$vari1, ".residuals.smoother", sep = ""), 
+                                                    label=NULL)))),
+      actionButton("store_resisuals_ok", "OK"),
+      textOutput("add_residuals_status"),
+      title = "Store residuals"
+      
+    ))
+  } else {
+    showModal(modalDialog(
+      h5(strong("Specify names for the new variables")),
+      fixedRow(column(6, textInput(inputId = "add_numcat_residuals",
+                                   value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".residuals", sep = ""), 
+                                   label=NULL))),
+      actionButton("store_resisuals_ok", "OK"),
+      textOutput("add_residuals_status"),
+      title = "Store residuals"
+      
+    ))
+  }
 })
 
 
@@ -7078,6 +7114,7 @@ observe({
           graphical.par$scatter.grid.bins  = 50
         }
       })
+      
       # plot it
       if (!is.null(vis.par())) {
         dafr = get.data.set()
@@ -7085,7 +7122,7 @@ observe({
            !is.null(plot.par$y) &&
            is.numeric(vis.data()[[plot.par$y]]) && 
            !is.null(plot.par$x)){
-          temp = vis.par()
+          
           temp$trend.parallel = graphical.par$trend.parallel
           temp.x = temp$x
           temp$x=temp$y
@@ -7097,20 +7134,21 @@ observe({
           if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
              tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
             
-            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, temp)
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           }else{
-            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, temp))
           }
         }else{
           if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
              tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
             
-            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+            tryCatch({
+              plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
             }, warning = function(w) {
               print(w)
             }, error = function(e) {

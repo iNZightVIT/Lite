@@ -12,6 +12,7 @@ inf.def.par = reactiveValues(
   #hypothesis <- if(!is.null(input$hypTest) && input$hypTest == "None") "NULL" else NULL
 )
 
+ci_width = reactiveVal(95)
 output$inference_test = renderUI({
   get.data.set()
   ret = NULL
@@ -63,6 +64,17 @@ output$inference_test = renderUI({
                        label = h5(strong("Select type of inference")))
         })
       }
+      
+      # UI for "Additional Options: Confidence level (%):"
+      output$ci_width <- renderUI({
+        numericInput(
+          inputId = "ci.width",
+          label = div(h5(strong("Additional Options")), "Confidence level (%):"),
+          value = ci_width(),
+          min = 10,
+          max = 99,
+        )
+      })
       
       do_hyp_test <- grepl("ttest|anova|table", INFTYPE)
       
@@ -290,7 +302,6 @@ output$inference_out = renderUI({
 
 
 
-
 output$visualize.inference = renderPrint({
   if(input$plot_selector%in%"Inference"){
     input$hypTest
@@ -308,9 +319,9 @@ output$visualize.inference = renderPrint({
     input$inf.trend.cubic
     #input$confirm_inf_button
     input$type.inference.select
+    input$ci.width
     design_params$design
     input$inf_epi_out
-    
     isolate({
       ## Design or data?
       is_survey <- !is.null(design_params$design$dataDesign)
@@ -321,7 +332,7 @@ output$visualize.inference = renderPrint({
       curSet$plottype = NULL
       if (!is.null(curSet$freq))
         curSet$freq <- get.data.set()[[curSet$freq]]
-    
+      
       if (is.null(curSet$g1) && !is.null(curSet$g2)) {
         if (curSet$g2.level != "_ALL") {
           curSet$g1 <- curSet$g2
@@ -516,13 +527,24 @@ output$visualize.inference = renderPrint({
           keep.null = TRUE
         )
       }
+      
+      # Adjust CI width
+      if(!is.null(input$ci.width)) {
+        ci_width(input$ci.width)
+        curSet <- modifyList(
+          curSet,
+          list(ci.width = ci_width() / 100),
+          keep.null = TRUE
+        )
+      }
+      
       .dataset <- get.data.set()
       
       tryCatch({
         suppressWarnings(inf.print <- eval(construct_call(curSet, design_params$design,
-                                                        vartypes,
-                                                        data = quote(.dataset),
-                                                        what = "inference"
+                                                          vartypes,
+                                                          data = quote(.dataset),
+                                                          what = "inference"
         )))
         
         if (input$hypTest == "Chi-square test" && !is.null(input$hypTest)) {
@@ -542,7 +564,7 @@ output$visualize.inference = renderPrint({
         print(e)
       }, finally = {})
       
-
+      
       #      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
       #           tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       #        tryCatch({
