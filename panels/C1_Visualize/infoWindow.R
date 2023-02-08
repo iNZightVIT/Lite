@@ -67,12 +67,13 @@ output$inference_test = renderUI({
       
       # UI for "Additional Options: Confidence level (%):"
       output$ci_width <- renderUI({
-        numericInput(
+        numericInputIcon(
           inputId = "ci.width",
           label = div(h5(strong("Additional Options")), "Confidence level (%):"),
           value = ci_width(),
           min = 10,
           max = 99,
+          icon = list(NULL, "%")
         )
       })
       

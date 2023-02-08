@@ -1438,28 +1438,28 @@ output$add_inference = renderUI({
                                           choices=c("Normal","Bootstrap"),
                                           selected=input$inference_type1,
                                           inline=T)
-    
-    confidence.interval.check = fixedRow(
-      column(
-        4,
-        align = "center",
-        checkboxInput(
-          "confidence_interval1",
-          label = "Confidence interval",
-          value = input$confidence_interval1
-        )
-      ),
-      column(
-        6,
-        align = "center",
-        numericInput(
-          inputId = "ci.width.plot",
-          label = "",
-          value = ci_width(),
-          min = 10,
-          max = 99,
-        )
-      )
+
+    confidence.interval.check = checkboxInput(
+      "confidence_interval1",
+      label = p("Confidence interval (%)"),
+      value = input$confidence_interval1
+    )
+    # prevent re-rendering the ci width plot input as disabled by default
+    # when the reactive ci_with() changes
+    ci_width_plot = numericInputIcon(
+      inputId = "ci.width.plot",
+      label = "",
+      value = ci_width(),
+      min = 10,
+      max = 99,
+      icon = list(NULL, "%")
+    )
+    if(isFALSE(input$confidence_interval1) | is.null(input$confidence_interval1)) {
+      ci_width_plot = disabled(ci_width_plot)
+    }
+    confidence.interval.check = fluidRow(
+      column(6, confidence.interval.check),
+      column(6, ci_width_plot)
     )
     
     
@@ -1706,7 +1706,16 @@ observe({
     graphical.par$inference.par = NULL
     intervals = NULL
     graphical.par$bs.inference = F
-    
+
+    # only allow CI input when checkbox is checked
+    if(isTRUE(input$confidence_interval1)) {
+      shinyjs::enable("ci.width.plot")
+    } else if (is.null(input$confidence_interval1)) {
+      # prevent errors, check null
+      shinyjs::disable("ci.width.plot")
+    }else {
+      shinyjs::disable("ci.width.plot")
+    }
     # update `ci_width()` since input$ci.width also uses this value
     # ci width on plot won't be used unless the checkbox is checked
     if(!is.null(input$ci.width.plot)) {
