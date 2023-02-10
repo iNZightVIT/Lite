@@ -12,27 +12,54 @@ observe({
   })
 })
 
+# file input field (Browse) 
 observeEvent(input$files, { 
       if(file.exists(input$files[1, "datapath"])) {
         isolate({
             fpath <- input$files$datapath
             fexts <- tools::file_ext(fpath)
             fext <- fexts[1]
-            temp <- tryCatch(if (any(grepl("txt|pdf|docx?|odt|rtf", fexts))) {
-                                 readtext::readtext(fpath)
-                             } else {
-                                 switch(tolower(tools::file_ext(fpath[1])),
-                                                "rdata"=,
-                                                "rda"=as.data.frame(iNZightTools::load_rda(fpath)[[1]]),
-                                                "tsv"=as.data.frame(iNZightTools::smart_read(fpath, delimiter="\t")),
-                                                "numbers"=stop("Not a valid file extension: ", fext),
-                                                as.data.frame(iNZightTools::smart_read(fpath)))
-                             },
-                             error=identity)
+            
+            data_ext = tolower(tools::file_ext(fpath[1]))
+            temp <- tryCatch(
+              if (any(grepl("txt|pdf|docx?|odt|rtf", fexts))) {
+                readtext::readtext(fpath)
+              } else {
+                if(data_ext == "rdta" | data_ext == "rda") {
+                  # get available names
+                  rda_data = iNZightTools::load_rda(fpath)
+                  # store available names
+                  values$data.available.data.names = names(rda_data)
+                  # by default the first data is read in
+                  values$data.current.data.name = values$data.available.data.names[1]
+                  
+                  as.data.frame(iNZightTools::load_rda(fpath)[[1]])
+                } else if(data_ext == "tsv") {
+                  as.data.frame(iNZightTools::smart_read(fpath, delimiter = "\t"))
+                } else if(data_ext == "numbers") {
+                  stop("Not a valid file extension: ", fext)
+                } else {
+                  d = as.data.frame(iNZightTools::smart_read(fpath))
+                  # if its an excel file
+                  if(data_ext == "xls" | data_ext == "xlsx") {
+                    # get available sheets
+                    sheet_names = iNZightTools::sheets(d)
+                    # store available sheets
+                    values$data.available.sheets = sheet_names
+                    # by default the first sheet is read in
+                    values$data.current.sheet = sheet_names[1]
+                  }
+                  
+                  d
+                }
+              },
+              error = identity)
+            
 
       if(!is.null(temp)){
         plot.par$design=NULL
         values$data.set = temp
+        values$data.type = data_ext
         updatePanel$doit = updatePanel$doit+1
         values$data.restore <<- get.data.set()
         temp.name = make.names(tools::file_path_sans_ext(input$files[1, "name"]))
@@ -68,9 +95,8 @@ observeEvent(input$files, {
   }
 })
 
-
+# "Import file from url" button
 observeEvent(input$import_set, {
-  
   if(!is.null(input$URLtext)&&!input$URLtext%in%"") {
     
     isolate({
@@ -97,9 +123,64 @@ observeEvent(input$import_set, {
   
 })
 
+# select input for available sheets/data
+output$data.info = renderUI({
+  input$files
+  dtype = values$data.type
+  if(!is.null(dtype)) {
+      if(dtype == "xls" | dtype == "xlsx") {
+        selectInput(
+          inputId = "data.info",
+          label = "Sheet:",
+          selected = values$data.current.sheet,
+          choices = values$data.available.sheets
+        )
+      } else if(dtype == "rdta" | dtype == "rda") {
+        selectInput(
+          inputId = "data.info",
+          label = "Dataset:",
+          selected = values$data.current.data.name,
+          choices = values$data.available.data.names,
+        )
+      }
+  }
+})
+# reload data when user chooses a different sheet/data
+observeEvent(input$data.info, {
+  # browser()
+  # data type
+  dtype = values$data.type
+  # path of data
+  fpath = input$files[1, "datapath"]
+  tryCatch(
+    if(!is.null(dtype)) {
+      if(dtype == "xls" | dtype == "xlsx") {
+        # prevent loading data again, if the selected sheet name is the same
+        if(input$data.info != values$data.current.sheet) {
+          values$data.set = as.data.frame(iNZightTools::smart_read(fpath, sheet = input$data.info))
+          # update sheet name
+          values$data.current.sheet = input$data.info
+        }
+      } else if(dtype == "rdta" | dtype == "rda") {
+        # prevent loading data again, if the selected data name is the same
+        if(input$data.info != values$data.current.data.name) {
+          ind = which(values$data.available.data.names == input$data.info)
+          values$data.set = as.data.frame(iNZightTools::load_rda(fpath)[[ind]])
+          # update data name
+          values$data.current.data.name = input$data.info
+        }
+      }
+    },
+    error = function(e) {
+      shinyalert::shinyalert(
+        title = "Import failed",
+        text = glue::glue("Failed to switch to data '{input$data.info}'")
+      )
+    }
+  )
+})
 
-
-
+# whole data import panel
 output$load.data.panel = renderUI({
   input$selector
   isolate({
@@ -120,6 +201,7 @@ output$load.data.panel = renderUI({
   })
 })
 
+# output of the imported file
 output$filedisplay <- renderUI({
     if (is.data.frame(get.data.set())) {
         DTOutput('filetable')
