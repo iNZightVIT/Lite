@@ -6,10 +6,8 @@
 
 - Added data import related information to `values`:
   - `data.type`
-  - `data.current.sheet`
-  - `data.available.sheet`
-  - `data.current.data.name`
-  - `data.available.data.names`
+  - `data.available.dnames`
+  - `data.current.dname`
 
 # Release 1.0.1
 
