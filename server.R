@@ -63,6 +63,9 @@ shinyServer(function(input, output, session) {
   values$data.dir.global = "data"
   values$data.dir.imported = "data"
   values$data.set = NULL
+  values$data.type = NULL # file type (e.g., csv, xlsx, rda ... etc)
+  values$data.available.dnames = NULL # available data/sheet names
+  values$data.current.dname = NULL # current data/sheet names
   values$data.restore = NULL
   values$name.restore = NULL
   values$lite.version = ""

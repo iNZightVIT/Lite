@@ -7,6 +7,7 @@ get.sidebar.load = function(url_load){
     hr(),
     helpText("Select a file (Size Limit: 5MB)"),
     fileInput("files",label="", multiple=T),
+    uiOutput("data.info"),
     helpText("or provide a URL pointing to a file on a web location"),
     br(),textInput(inputId="URLtext",label="paste/enter URL",value=url_load),br(),
     helpText("Finalise your choice by pressing the button below."),

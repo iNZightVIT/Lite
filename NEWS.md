@@ -2,6 +2,13 @@
 
 - Allow users to specify confidence interval levels at inferences and plots.
 
+- Allow users to specify sheet/data name when importing data.
+
+- Added data import related information to `values`:
+  - `data.type`
+  - `data.available.dnames`
+  - `data.current.dname`
+
 # Release 1.0.1
 
 - Rolls back dependency versions due to minor version API changes resulting in a few unintended bugs
