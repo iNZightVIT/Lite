@@ -45,6 +45,9 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
+        values$data.sample = temp[values$sample.row,]
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        
         values$create.variables.expression.text = "";
         ## code history
         code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))

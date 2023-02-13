@@ -20,6 +20,8 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
+        values$data.sample = temp[values$sample.row,]
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
         ## code history
         code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
         code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -32,7 +34,7 @@ observe({
 
 output$table_part <- renderDT({
   if(!is.null(input$select.transform) && !is.null(input$select.columns.transform)){
-    transform.tempTable(get.data.set(),input$select.transform,input$select.columns.transform)
+    values$data.sample
   }
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
@@ -52,6 +54,14 @@ output$transform.columns.main = renderUI({
   get.transform.main()
 })
 
+
+output$table_part.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
+
+##  Manipulate variables -> Numeric variables -> Standardise variables (Perform column transformations)
 
 output$standardise.variables.side = renderUI({
   get.data.set()
@@ -74,7 +84,9 @@ output$standardise.variables.side = renderUI({
 
 
 output$standardise.variables.table = renderDT({
-  get.data.set()
+  if(!is.null(values$data.set)){
+    values$data.sample
+  }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
                columns.defaultContent="NA",
@@ -91,6 +103,10 @@ observe({
       data = iNZightTools::standardizeVars(get.data.set(), varnames, names)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
+      
+      values$data.sample = data[values$sample.row,]
+      row.names(values$data.sample) = 1:nrow(values$data.sample)
+      
       ## code history
       code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -98,7 +114,14 @@ observe({
   })
 })
 
+output$standardise.var.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
 
+
+##  Manipulate variables -> Numeric variables -> Convert to categorical variables (Perform column transformations)
 
 
 output$convert.to.cate.side = renderUI({
@@ -122,7 +145,9 @@ output$convert.to.cate.side = renderUI({
 
 
 output$convert.to.cate.table = renderDT({
-  get.data.set()
+  if(!is.null(values$data.set)){
+    values$data.sample
+  }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
                columns.defaultContent="NA",
@@ -140,6 +165,9 @@ observe({
       data = iNZightTools::convertToCat(get.data.set(), vars, varnames)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
+      
+      values$data.sample = data[values$sample.row,]
+      row.names(values$data.sample) = 1:nrow(values$data.sample)
       ## code history
       code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -148,7 +176,11 @@ observe({
 })
 
 
-
+output$convert.to.cate.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
 
 
 
@@ -244,6 +276,9 @@ observe({
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
           
+          values$data.sample = data[values$sample.row,]
+          row.names(values$data.sample) = 1:nrow(values$data.sample)
+          
           shinyalert(title = "Success",
                      text = paste("The new variable",
                                   input$form.class.interval.column.name,
@@ -266,17 +301,27 @@ observe({
 })
 
 output$form.class.interval.table <- renderDT({
-  get.data.set()
+  if(!is.null(values$data.set)){
+    values$data.sample
+  }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
                columns.defaultContent="NA",
                scrollX=T))
 
+output$form.class.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
+
 
 ## Manipulate variables -> Numeric variables -> Rank numeric
 
 output$rank.numeric.table = renderDT({
-  get.data.set()
+  if(!is.null(values$data.set)){
+    values$data.sample
+  }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
                columns.defaultContent="NA",
@@ -299,9 +344,20 @@ observe({
       data = iNZightTools::rankVars(get.data.set(), input$rank.numeric.select.column)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
+      
+      values$data.sample = data[values$sample.row,]
+      row.names(values$data.sample) = 1:nrow(values$data.sample)
+      
       ## code history
       code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
     }
   })
+})
+
+
+output$rank.numeric.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
 })

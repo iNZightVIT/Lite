@@ -19,7 +19,9 @@ get.sidebar.load = function(url_load){
 load.data.panel = function(url_load){
   sidebarLayout(
     sidebarPanel(get.sidebar.load(url_load)),
-    mainPanel(DTOutput("filetable")
+    mainPanel(
+      textOutput('import.data.sample.info'), br(), br(),
+      DTOutput("filetable")
     )
   )
 }

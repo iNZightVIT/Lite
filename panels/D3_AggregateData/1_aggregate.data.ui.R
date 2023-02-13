@@ -44,7 +44,9 @@ aggregate.variable.panel =function(){
   }else{
     sidebarLayout(
       sidebarPanel(aggregate.data.sidebar()),
-      mainPanel(DTOutput("aggregate.table"))
+      mainPanel(
+        textOutput('aggregate.table.data.sample.info'), br(), br(),
+        DTOutput("aggregate.table"))
     )
   }
 }

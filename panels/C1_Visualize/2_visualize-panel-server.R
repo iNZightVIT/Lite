@@ -3869,8 +3869,8 @@ output$trend.curve.panel = renderUI({
                                             column(width = 6, sliderInput("line.width.multiplier", 
                                                                           label = NULL, 
                                                                           min = 1, 
-                                                                          max = 2, 
-                                                                          value = input$line.width.multiplier, step = 0.5, ticks = FALSE)))
+                                                                          max = 4, 
+                                                                          value = 1, step = 0.5, ticks = FALSE)))
     list(trend.curves.title,
          fixedRow(column(width=3),
                   column(width=4,"Line colour"),

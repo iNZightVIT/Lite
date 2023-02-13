@@ -28,7 +28,9 @@ frequency.tables.panel = function(data.set){
   }else{
     sidebarLayout(
       sidebarPanel(frequency.tables.sidebar()),
-      mainPanel(DTOutput("ft.expand.data.table"))
+      mainPanel(
+        textOutput('ft.expand.dt.data.sample.info'), br(), br(),
+        DTOutput("ft.expand.data.table"))
       )
   }
 }

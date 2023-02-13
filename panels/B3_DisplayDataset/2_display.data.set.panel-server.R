@@ -8,13 +8,21 @@ output$current.text <- renderText({
   }
 })
 
+output$data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
+
 output$current.data <- renderUI({
   current.data()
 })
 
 output$current <- renderDT({
   input$selector
-  get.data.set()
+  if(!is.null(values$data.set)){
+    values$data.sample
+  }
 }, options =
   list(lengthMenu = c(10, 30, 50), pageLength = 10,
        columns.defaultContent = "NA", scrollX = TRUE))

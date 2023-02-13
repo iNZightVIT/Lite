@@ -28,7 +28,10 @@ convert.to.categorical.panel = function(){
   }else{
     sidebarLayout(
       sidebarPanel(convert.to.categorical.sidebar()),
-      mainPanel(DTOutput("convert.to.categorical.table"))
+      mainPanel(
+        textOutput('convert.cate.data.sample.info'), br(), br(),
+        DTOutput("convert.to.categorical.table")
+        )
     )
   }
 }

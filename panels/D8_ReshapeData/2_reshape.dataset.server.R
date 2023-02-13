@@ -43,8 +43,15 @@ observe({
         key = ifelse(length(input$new_colname) == 0, "key", input$new_colname)
         value = ifelse(length(input$new_value) == 0, "value", input$new_value)
         temp = iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "wide")
+        
+        data.set = as.data.frame(temp)
+        sample.num = ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set)/4))
+        sample.row = sort(sample(1:nrow(data.set), sample.num))
         output$preview.reshape.table = renderDT({
-          temp
+          temp.d = as.data.frame(data.set[sample.row,])
+          row.names(temp.d) = 1:nrow(temp.d)
+          colnames(temp.d) = colnames(data.set)
+          temp.d
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
       }
     }
@@ -54,8 +61,17 @@ observe({
         col1 = input$select_col1
         col2 = input$select_col2
         temp = iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "long")
+        
+        
+        data.set = as.data.frame(temp)
+        sample.num = ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set)/4))
+        sample.row = sort(sample(1:nrow(data.set), sample.num))
+
         output$preview.reshape.table = renderDT({
-          temp
+          temp.d = as.data.frame(data.set[sample.row,])
+          row.names(temp.d) = 1:nrow(temp.d)
+          colnames(temp.d) = colnames(data.set)
+          temp.d
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
       }
     }
@@ -82,7 +98,14 @@ observe({
         code.save$variable = c(code.save$variable, list(c("\n", code)))
         ## save data
         updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = temp
+        
+        values$data.set = as.data.frame(temp)
+        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+        values$sample.row = sort(sample(1:nrow(values$data.set), values$sample.num))
+        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        colnames(values$data.sample) = colnames(values$data.set)
+        
         code.save$name = code.save$dataname
         values$data.name = code.save$dataname
       }
@@ -102,7 +125,15 @@ observe({
         code.save$variable = c(code.save$variable, list(c("\n", code)))
         ## save data
         updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = temp
+        
+        
+        values$data.set = as.data.frame(temp)
+        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+        values$sample.row = sort(sample(1:nrow(values$data.set), values$sample.num))
+        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        colnames(values$data.sample) = colnames(values$data.set)
+        
         code.save$name = code.save$dataname
         values$data.name = code.save$dataname
       }
@@ -111,7 +142,7 @@ observe({
 })
 
 output$reshape.table = renderDT({
-  get.data.set()
+  values$data.sample
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$reshape.dataset = renderUI({

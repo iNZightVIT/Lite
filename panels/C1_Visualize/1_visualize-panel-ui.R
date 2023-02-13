@@ -347,7 +347,7 @@ vis.mainPanel = function() {
         
         
         #br(),
-        helpText("Statistical Sumary for the data."),
+        helpText("Statistical Summary for the data."),
         verbatimTextOutput("visualize.summary")
       ),
       ##  Inference Panel

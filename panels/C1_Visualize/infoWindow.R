@@ -475,12 +475,14 @@ output$visualize.inference = renderPrint({
         # assign(designname, curMod$createSurveyObject(), envir = env)
       }
       
+      .dataset <- get.data.set()
+      
       tryCatch({
-        inf.print <- eval(construct_call(curSet, design_params$design,
-                                                        vartypes,
-                                                        data = vis.data(),
-                                                        what = "inference"
-        ))
+        suppressWarnings(inf.print <- eval(construct_call(curSet, design_params$design,
+                                                          vartypes,
+                                                          data = quote(.dataset),
+                                                          what = "inference"
+        )))
         
         if (input$hypTest == "Chi-square test" && !is.null(input$hypTest)) {
           exp_match <- any(grepl("since some expected counts <", inf.print, fixed = TRUE))
@@ -495,8 +497,6 @@ output$visualize.inference = renderPrint({
         
         inf.print
         #saveRDS(values.list, file = "/Users/tongchen/Documents/work/Lite/b.rds")
-      }, warning = function(w) {
-        print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
@@ -555,22 +555,23 @@ output$visualize.summary = renderPrint({
       # curSet$design <<- as.name(designname)
       # assign(designname, curMod$createSurveyObject(), envir = env)
     }
+    
+    .dataset <- get.data.set()
+    
     if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
        tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
       tryCatch({
         eval(construct_call(curSet, design_params$design,
                             vartypes,
-                            data = get.data.set(),
+                            data = quote(.dataset),
                             what = "summary"))
-      }, warning = function(w) {
-        print(w)
       }, error = function(e) {
         print(e)
       }, finally = {})
     }else{
       suppressWarnings(try(eval(construct_call(curSet, design_params$design,
                                                vartypes,
-                                               data = get.data.set(),
+                                               data = quote(.dataset),
                                                what = "summary"))))
     }
   }

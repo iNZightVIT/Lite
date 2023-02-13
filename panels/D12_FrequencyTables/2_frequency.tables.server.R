@@ -30,7 +30,14 @@ observe({
         
         
         updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = out
+        values$data.set = as.data.frame(out)
+
+        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+        values$sample.row = sort(sample(1:nrow(values$data.set), values$sample.num))
+        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        colnames(values$data.sample) = colnames(values$data.set)
+        
         values$data.name = "data"
       }
     }, error = function(e){})
@@ -39,10 +46,16 @@ observe({
 
 output$ft.expand.data.table = renderDT({
   input$expand_table_button
-  get.data.set()
+  values$data.sample
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
 
+
+output$ft.expand.dt.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
 
 
 

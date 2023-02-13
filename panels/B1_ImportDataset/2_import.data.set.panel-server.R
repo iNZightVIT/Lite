@@ -37,7 +37,14 @@ observeEvent(input$files, {
       
       if(!is.null(temp)){  
         plot.par$design=NULL
-        values$data.set = temp
+        values$data.set = as.data.frame(temp)
+        
+        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+        values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
+        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        colnames(values$data.sample) = colnames(values$data.set)
+        
         updatePanel$doit = updatePanel$doit+1
         values$data.restore <<- get.data.set()
         temp.name = make.names(tools::file_path_sans_ext(input$files[1, "name"]))
@@ -90,8 +97,16 @@ observeEvent(input$import_set, {
       get.data.dir.imported()
       
       #design.parameters$data.name = NULL
-      values$data.set = data.vals$data.set
+      
+      values$data.set = as.data.frame(data.vals$data.set)
       updatePanel$doit = updatePanel$doit+1
+      
+      values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+      values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
+      values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+      colnames(values$data.sample) = colnames(values$data.set)
+      row.names(values$data.sample) = 1:nrow(values$data.sample)
+      
       values$data.restore = get.data.set()
       values$data.name = data.vals$data.name
       import_reactives$success = T
@@ -127,13 +142,18 @@ output$load.data.panel = renderUI({
 
 
 output$filetable <- renderDT({
-  
-  get.data.set()
-  
+  if(!is.null(values$data.set)){
+    values$data.sample
+  }
 }, options =
   list(lengthMenu = c(5, 30, 50), pageLength = 5,
        columns.defaultContent="NA", scrollX = TRUE))
 
+output$import.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
 
 
 observe({

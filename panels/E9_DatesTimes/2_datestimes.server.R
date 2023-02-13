@@ -59,7 +59,9 @@ observe({
                       value = paste0(new_name, ".dt", sep = ""))
       
       output$convert_datestimes_original_table = renderDT({
-        data.frame(Original = varx, stringsAsFactors = TRUE)
+        data = data.frame(Original = data.frame(Original = varx, stringsAsFactors = TRUE)[values$sample.row,])
+        row.names(data) = 1:length(values$sample.row)
+        data
       },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
     }
   })
@@ -88,6 +90,8 @@ observe({
             })
           
           output$convert_datestimes_converted_table = renderDT({
+            data = data.frame(Converted = data[values$sample.row,])
+            row.names(data) = 1:length(values$sample.row)
             data
           },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
         }
@@ -110,6 +114,9 @@ observe({
           data = iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
+          
+          values$data.sample = data[values$sample.row,]
+          row.names(values$data.sample) = 1:nrow(values$data.sample)
           
           output$convert_datestimes_original_table = renderDT({
             NULL
@@ -167,7 +174,7 @@ output$aggregate_datestimes_panel = renderUI({
 
 
 output$convert.datestimes.table = renderDT({
-  get.data.set()
+  values$data.sample
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 
@@ -176,12 +183,22 @@ output$dates.times = renderUI({
 })
 
 output$aggregate_datestimes.table = renderDT({
-  get.data.set()
+  values$data.sample
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 
 
+output$convert.datestimes.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
 
+output$aggregate_datestimes.data.sample.info <- renderText({
+  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+  }
+})
 
 
 

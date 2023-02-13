@@ -13,7 +13,7 @@ output$paste.data.info = renderUI({
   if(!is.null(get.data.set()) && !is.null(get.data.name())) {
     list(
       h3(paste("Selected data set:", get.data.name())),
-      p(paste("Selected data number of rows is: ", dim(get.data.set())[1])),
+      # p(paste("Selected data number of rows is: ", dim(get.data.set())[1])),
       p(paste("Selected data number of columns is: ", dim(get.data.set())[2])),
       p(paste("Column names: ", paste(colnames(get.data.set()), collapse = ", ")))
     )
@@ -48,10 +48,9 @@ output$paste.view.title = renderUI({
   }
 })
   
-  
 
 output$paste.table.preview = renderDT({
-  if(req(!is.null(input$paste.data.area))){
+  if(req(!is.null(input$paste.data.area) && input$paste.data.area != "")){
     txt = input$paste.data.area
     if (length(txt) == 1) {
       txt <- sprintf("%s\n", txt)
@@ -103,7 +102,14 @@ observe({
         data = dplyr::mutate_if(data, is.character, as.factor)
         plot.par$design=NULL
         values$data.name = "data"
-        values$data.set = data
+        values$data.set = as.data.frame(data)
+        
+        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+        values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
+        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        colnames(values$data.sample) = colnames(values$data.set)
+        
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
         values$name.restore = values$data.name
