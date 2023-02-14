@@ -232,7 +232,7 @@ vis.mainPanel = function() {
     
     #    br(),
     #    br()
-    h4(strong(textOutput("data_info"))),
+    strong(textOutput("data_info")),
     br(),
     tabsetPanel(
       id = "plot_selector",

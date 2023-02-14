@@ -418,10 +418,10 @@ handle.input = function(input, subs = FALSE) {
 output$data_info = renderText({
   info_text = NULL
   if(!is.null(values$data.name)) {
-    if(values$data.type %in% c("rda", "rdta")) {
+    if(isTRUE(values$data.type %in% c("rda", "rdta"))) {
       # if is rda or rdta, use data.current.dname
       info_text = paste("Dataset: ", values$data.current.dname)
-    } else if(values$data.type %in% c("xls", "xlsx")) {
+    } else if(isTRUE(values$data.type %in% c("xls", "xlsx"))) {
       # if xls or xlsx, use data.name + data.current.dname
       info_text = paste("Dataset: ", values$data.name, ", Sheet: ", values$data.current.dname)
     } else {
