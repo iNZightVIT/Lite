@@ -415,10 +415,22 @@ handle.input = function(input, subs = FALSE) {
   list(input.out = input.out, factor.levels = factor.levels)
 }
 
-
-
-
-
+output$data_info = renderText({
+  info_text = NULL
+  if(!is.null(values$data.name)) {
+    if(isTRUE(values$data.type %in% c("rda", "rdta"))) {
+      # if is rda or rdta, use data.current.dname
+      info_text = paste("Dataset: ", values$data.current.dname)
+    } else if(isTRUE(values$data.type %in% c("xls", "xlsx"))) {
+      # if xls or xlsx, use data.name + data.current.dname
+      info_text = paste("Dataset: ", values$data.name, "| Sheet: ", values$data.current.dname)
+    } else {
+      # else just use the filename
+      info_text = paste("Dataset: ", values$data.name)
+    }
+  }
+  info_text
+})
 
 output$visualize.panel <- renderUI({
   get.data.set()
@@ -426,13 +438,6 @@ output$visualize.panel <- renderUI({
     visualize.panel.ui(get.data.set())
   })
 })
-
-
-
-
-
-
-
 
 x.class = reactive({
   determine.class(vis.data()[[plot.par$x]])
@@ -486,7 +491,7 @@ determine.g = reactive({
 ##  Then on the third, he declared the need for parameters for the "visualize" module:
 vis.par = reactive({
   vis.par = reactiveValuesToList(plot.par)
-
+  
   if (!is.null(vis.par$x) && plot.par$varnames$x != "") {
     if(any(na.omit(vis.par$x) == "")){
       vis.par$x[which(vis.par$x == "")] = NA
@@ -1438,7 +1443,7 @@ output$add_inference = renderUI({
                                           choices=c("Normal","Bootstrap"),
                                           selected=input$inference_type1,
                                           inline=T)
-
+    
     confidence.interval.check = checkboxInput(
       "confidence_interval1",
       label = p("Confidence interval (%)"),
@@ -1706,7 +1711,7 @@ observe({
     graphical.par$inference.par = NULL
     intervals = NULL
     graphical.par$bs.inference = F
-
+    
     # only allow CI input when checkbox is checked
     if(isTRUE(input$confidence_interval1)) {
       shinyjs::enable("ci.width.plot")

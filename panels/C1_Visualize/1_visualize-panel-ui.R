@@ -232,6 +232,8 @@ vis.mainPanel = function() {
     
     #    br(),
     #    br()
+    strong(textOutput("data_info")),
+    br(),
     tabsetPanel(
       id = "plot_selector",
       type = "pills",
@@ -413,12 +415,12 @@ vis.mainPanel = function() {
                uiOutput("plotly_nw"), 
                plotlyOutput("plotly_inter", height = "500px") %>% withSpinner()
       ),
-	tabPanel(title="VIT",
-		 radioButtons("vit-type", "VIT Test",
-			      c("Bootstrap"="bootstrap", "Randomisation Test"="random")),
-		 tags$iframe(name="vit-frame", title="VIT Frame", class="fill-frame"),
-		 value = "vit"	
-	)
+      tabPanel(title="VIT",
+               radioButtons("vit-type", "VIT Test",
+                            c("Bootstrap"="bootstrap", "Randomisation Test"="random")),
+               tags$iframe(name="vit-frame", title="VIT Frame", class="fill-frame"),
+               value = "vit"	
+      )
     )
   )
   panel

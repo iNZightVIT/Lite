@@ -9,6 +9,8 @@
   - `data.available.dnames`
   - `data.current.dname`
 
+- Show data set name in Visualize tab
+
 # Release 1.0.1
 
 - Rolls back dependency versions due to minor version API changes resulting in a few unintended bugs
