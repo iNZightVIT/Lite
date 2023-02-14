@@ -423,7 +423,7 @@ output$data_info = renderText({
       info_text = paste("Dataset: ", values$data.current.dname)
     } else if(isTRUE(values$data.type %in% c("xls", "xlsx"))) {
       # if xls or xlsx, use data.name + data.current.dname
-      info_text = paste("Dataset: ", values$data.name, ", Sheet: ", values$data.current.dname)
+      info_text = paste("Dataset: ", values$data.name, "| Sheet: ", values$data.current.dname)
     } else {
       # else just use the filename
       info_text = paste("Dataset: ", values$data.name)
