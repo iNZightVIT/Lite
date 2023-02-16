@@ -1,3 +1,5 @@
+# Release 1.0.2
+
 - Replace spaces with underscores (\_) and all other special characters with periods (.) in user-provided variable name (in 'Create New Variable')
 
 - Allow users to specify confidence interval levels at inferences and plots.
