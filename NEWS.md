@@ -13,6 +13,8 @@
 
 - Show data set name in Visualize tab
 
+- Redirect to [VIT](https://vit.inzight.nz/) at `Advanced > VIT`
+
 # Release 1.0.1
 
 - Rolls back dependency versions due to minor version API changes resulting in a few unintended bugs
