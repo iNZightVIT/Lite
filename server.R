@@ -53,6 +53,8 @@ source("functions.R")
 
 ### We write the server function.
 shinyServer(function(input, output, session) {
+  desc = read.dcf("DESCRIPTION")
+  
   session$allowReconnect(TRUE)
 
   ##Specify all the reactive values
@@ -67,7 +69,7 @@ shinyServer(function(input, output, session) {
   values$data.current.dname = NULL # current data/sheet names
   values$data.restore = NULL
   values$name.restore = NULL
-  values$lite.version = ""
+  values$lite.version = desc[, "Version"][[1]]
   values$lite.update = ""
   values$button = F
   values$transform.text = ""
