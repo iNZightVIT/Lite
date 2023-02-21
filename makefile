@@ -4,7 +4,7 @@
 build:
 	docker build --tag scienceis/uoa-inzight-lite:${TAG} --build-arg GITHUB_PAT=${GITHUB_PAT} .
 run:
-	docker run --name lite-${TAG} -p 3838:3838 scienceis/uoa-inzight-lite:${TAG}
+	docker run --rm --name lite-${TAG} -p 3838:3838 scienceis/uoa-inzight-lite:${TAG}
 log:
 	docker logs -f lite-${TAG}
 stop:

@@ -232,6 +232,8 @@ vis.mainPanel = function() {
     
     #    br(),
     #    br()
+    strong(textOutput("data_info")),
+    br(),
     tabsetPanel(
       id = "plot_selector",
       type = "pills",
@@ -371,6 +373,7 @@ vis.mainPanel = function() {
         fixedRow(column(3, uiOutput("inference_type")),
                  column(3, uiOutput("inference_test")),
                  column(3, uiOutput("inference_out")),
+                 column(2, uiOutput("ci_width")),
                  column(3, uiOutput("inference_epi"))),
         #fixedRow(column(3, actionButton("confirm_inf_button","Confirm",
         #                                style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"), offset = 3)),
@@ -412,12 +415,12 @@ vis.mainPanel = function() {
                uiOutput("plotly_nw"), 
                plotlyOutput("plotly_inter", height = "500px") %>% withSpinner()
       ),
-	tabPanel(title="VIT",
-		 radioButtons("vit-type", "VIT Test",
-			      c("Bootstrap"="bootstrap", "Randomisation Test"="random")),
-		 tags$iframe(name="vit-frame", title="VIT Frame", class="fill-frame"),
-		 value = "vit"	
-	)
+      tabPanel(title="VIT",
+               radioButtons("vit-type", "VIT Test",
+                            c("Bootstrap"="bootstrap", "Randomisation Test"="random")),
+               tags$iframe(name="vit-frame", title="VIT Frame", class="fill-frame"),
+               value = "vit"	
+      )
     )
   )
   panel
@@ -701,30 +704,3 @@ old.visualize.panel.ui = function(data.set) {
     }
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
