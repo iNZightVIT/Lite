@@ -46,3 +46,15 @@ output$about.panel <- renderUI({
   }
   about.panel.ui(get.lite.version(),get.lite.update())
 })
+
+# pop up for change log
+observeEvent(input$change_log_link, {
+  change_log <- includeMarkdown("NEWS.md")
+  
+  showModal(modalDialog(
+    title = "Change Log",
+    renderUI(change_log),
+    easyClose = TRUE
+  ))
+  
+})

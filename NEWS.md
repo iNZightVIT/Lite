@@ -1,3 +1,5 @@
+# Release 1.0.2
+
 - Replace spaces with underscores (\_) and all other special characters with periods (.) in user-provided variable name (in 'Create New Variable')
 
 - Allow users to specify confidence interval levels at inferences and plots.
@@ -10,6 +12,8 @@
   - `data.current.dname`
 
 - Show data set name in Visualize tab
+
+- Redirect to [VIT](https://vit.inzight.nz/) at `Advanced > VIT`
 
 # Release 1.0.1
 

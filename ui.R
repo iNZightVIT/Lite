@@ -12,6 +12,7 @@ shinyUI(
     #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet-pure-css.css")),
     ##  Set Tabpanel font to be size 16.
     tags$head(
+      shinyjs::useShinyjs(),
       tags$script(src="vit.js"),
       tags$style(HTML("
 			.fill-frame {

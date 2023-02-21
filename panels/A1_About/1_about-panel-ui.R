@@ -42,7 +42,12 @@ about.panel.ui = function(lite.version,lite.update) {
         if (lite.update != "")
           p_args <- c(p_args, list("Last updated: ", em(lite.update)))
         
-        p_args <- c(p_args, list(style = "color: gray"))
+        change_log = list(br(), actionLink(inputId = "change_log_link", label = "CHANGELOG"))
+        p_args <- c(
+          p_args,
+          change_log,
+          list(style = "color: gray")
+        )
         do.call(p, p_args)
       },
       ##  We include the markdown document that contains the

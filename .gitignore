@@ -8,6 +8,8 @@ rsconnect
 renv.lock
 renv/
 
+NEWS.html
+
 # Created by https://www.toptal.com/developers/gitignore/api/r,macos,windows,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=r,macos,windows,linux
 
