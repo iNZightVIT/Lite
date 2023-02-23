@@ -128,7 +128,6 @@ output$data.info = renderUI({
   input$files
   dtype = values$data.type
   
-  
   if(!is.null(dtype)) {
     label_name = switch(
       dtype,
@@ -137,6 +136,10 @@ output$data.info = renderUI({
       "rdta" = ,
       "rda" = "Dataset:"
     )
+    # if(is.null(label_name)) {
+    #   return(NULL)
+    # }
+    
     selectInput(
       inputId = "data.info",
       label = label_name,
