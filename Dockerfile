@@ -1,4 +1,4 @@
-FROM rocker/shiny-verse:4.1.2
+FROM rocker/shiny-verse:4.2
 RUN rm -rf /srv/shiny-server/index.html /srv/shiny-server/sample-apps
 RUN apt-get update && apt-get install -y \
     cmake \
