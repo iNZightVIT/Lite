@@ -1,4 +1,4 @@
-FROM rocker/shiny-verse:4.1.2
+FROM rocker/shiny-verse:4.2
 RUN rm -rf /srv/shiny-server/index.html /srv/shiny-server/sample-apps
 RUN apt-get update && apt-get install -y \
     cmake \
@@ -12,7 +12,7 @@ RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
 RUN R -e "remotes::install_github(\
     c('tmelliott/surveyspec@0.1.1', \
       'iNZightVIT/iNZightTools@1.13.0', \
-      'iNZightVIT/iNZightTS@1.5.9', \
+      'iNZightVIT/iNZightTS@1.5.10', \
       'iNZightVIT/iNZightRegression@1.3.3', \
       'iNZightVIT/iNZightMR@2.2.7', \
       'iNZightVIT/iNZightPlots@2.14.4', \

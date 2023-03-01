@@ -1,3 +1,7 @@
+# Release 1.0.3
+
+- Fixes a bug in time series forecasting plot
+
 # Release 1.0.2
 
 - Replace spaces with underscores (\_) and all other special characters with periods (.) in user-provided variable name (in 'Create New Variable')
