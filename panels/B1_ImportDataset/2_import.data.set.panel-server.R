@@ -12,88 +12,224 @@ observe({
   })
 })
 
-# file input field (Browse) 
-observeEvent(input$files, { 
-      if(file.exists(input$files[1, "datapath"])) {
-        isolate({
-            fpath <- input$files$datapath
-            fexts <- tools::file_ext(fpath)
-            fext <- fexts[1]
-            
-            data_ext = tolower(tools::file_ext(fpath[1]))
-            temp <- tryCatch(
-              if (any(grepl("txt|pdf|docx?|odt|rtf", fexts))) {
-                readtext::readtext(fpath)
-              } else {
-                if(data_ext == "rdta" | data_ext == "rda") {
-                  # get available names
-                  rda_data = iNZightTools::load_rda(fpath)
-                  # store available names
-                  values$data.available.dnames = names(rda_data)
-                  # by default the first data is read in
-                  values$data.current.dname = values$data.available.dnames[1]
-                  
-                  as.data.frame(iNZightTools::load_rda(fpath)[[1]])
-                } else if(data_ext == "tsv") {
-                  as.data.frame(iNZightTools::smart_read(fpath, delimiter = "\t"))
-                } else if(data_ext == "numbers") {
-                  stop("Not a valid file extension: ", fext)
-                } else {
-                  d = as.data.frame(iNZightTools::smart_read(fpath))
-                  # if its an excel file
-                  if(data_ext == "xls" | data_ext == "xlsx") {
-                    # get available sheets
-                    sheet_names = iNZightTools::sheets(d)
-                    # store available sheets
-                    values$data.available.dnames = sheet_names
-                    # by default the first sheet is read in
-                    values$data.current.dname = sheet_names[1]
-                  }
-                  
-                  d
-                }
-              },
-              error = identity)
-            
+ext_choices = list(
+  "Comma Seperated Values (.csv)" = "csv",
+  "Tab-delimited Text Files (.txt, .tsv)" = "tsv",
+  "Tab-delimited Text Files (.txt, .tsv)" = "txt",
+  "SPSS Files (.sav)" = "sav",
+  "SAS Data Files (.sas7bdat)" = "sas7dbat",
+  "SAS XPORT Files (.xpt)" = "xpt",
+  "97-2003 Excel Files (.xls)" = "xls",
+  "2007 Excel Files (.xlsx)" = "xlsx",
+  "SATA Files (.dta)" = "dta",
+  "JSON (.json)" = "json",
+  "R Object (.rds)" = "rds",
+  "RData Files (.RData, .rda)" = "RData",
+  "RData Files (.RData, .rda)" = "rda"
+  # "Survey Design Files (.svydesign)" = "svydesign",
+  # "Linked Data (.inzlnk)" = "inzlnk"
+)
+delim_choices = list(
+  "Detected automatically" = NULL,
+  "Comma (,)" = ",",
+  "Semi-colon (;)" = ";",
+  "Tab" = "\t"
+)
 
-      if(!is.null(temp)){
-        plot.par$design=NULL
-        values$data.set = temp
-        values$data.type = data_ext
-        updatePanel$doit = updatePanel$doit+1
-        values$data.restore <<- get.data.set()
-        temp.name = make.names(tools::file_path_sans_ext(input$files[1, "name"]))
-        
-        if(length(temp.name)>1){
-          temp.name = temp.name[1:(length(temp.name)-1)]
-        }
-        values$data.name = temp.name
-        import_reactives$success = !inherits(temp, "condition")
-        if(!(fext %in% c("RData", "rda", "Rda"))){
-          code.save$name = temp.name
-          code.save$variable = c(code.save$variable, list(c(sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name), 
-                                                                                "\n"))))
-          code = c(paste0(code.save$name, " <- "), gsub(paste0("\".*(?=.", fext, ")"), paste0("\"", values$data.name), iNZightTools::code(temp), perl = T))
-          code = do.call(c, lapply(code, function(x) {
-            y <- try({
-              formatR::tidy_source(text = x, width.cutoff = 80, output = F, indent = 4)$text.tidy
-            }, silent = TRUE)
-            if (inherits(y, "try-error")) x else c(y, "\n")
-          }))
-          code = gsub("(.*)\\).*","\\1)", paste0(code, collapse = "\n"))
-          code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
-        }
-        values$name.restore = temp.name
-        updateSelectInput(session, "subs2", selected = "none")
-        updateSelectInput(session, "subs1", selected = "none")
-        updateSelectInput(session, "vari2", selected = "none")
-        updateSelectInput(session, "vari1", selected = "none")
-        plot.par$design = NULL
-        design_params$design = NULL
-      }      
+preview_data = reactiveValues(
+  fpath = NULL,
+  data = NULL,
+  preview_data = NULL,
+  delimiter = NULL,
+  ext = NULL,
+  # use count to prevent rendering multiple times
+  state = NULL
+)
+
+output$preview_data = renderDataTable({
+  datatable(
+    preview_data$preview_data, selection = "single",
+    options = list(dom = "t")
+  )
+})
+
+smart_delimiter = function(fpath) {
+  ext = tolower(tools::file_ext(fpath[1]))
+  switch(
+    ext,
+    "csv" = ",",
+    "tsv" = "\t",
+    "txt" = "\t",
+    NULL
+  )
+}
+
+lite_read = function(fpath, delimiter = NULL, ext = NULL) {
+  # if ext not given then guess by its file type
+  if (is.null(ext)) {
+    ext = tolower(tools::file_ext(fpath[1]))
+  }
+  # if delimiter not given then guess by its file type
+  if (is.null(delimiter)) {
+    delimiter = smart_delimiter(fpath)
+  }
+  
+  d = tryCatch(
+    if (any(grepl("pdf|docx?|odt|rtf", ext))) {
+      readtext::readtext(fpath)
+    } else if(ext == "txt") {
+       readtext::readtext(fpath)
+    } else if(ext == "rdta" | ext == "rda") {
+      as.data.frame(iNZightTools::load_rda(fpath)[[1]])
+    } else if(ext == "tsv" | ext == "csv") {
+      as.data.frame(iNZightTools::smart_read(fpath, delimiter = unlist(delimiter)))
+    } else if(ext == "numbers") {
+      stop("Not a valid file extension: ", ext)
+    } else {
+      as.data.frame(iNZightTools::smart_read(fpath))
+    },
+    error = identity
+  )
+  
+  preview_data$preview_data = NULL
+  if(is.data.frame(d)) {
+    nr = min(nrow(d), 5)
+    nc = min(ncol(d), 5)
+    try({
+      data_ext = tolower(tools::file_ext(fpath[1]))
+      preview_data$fpath = fpath
+      preview_data$data = d
+      # ensure its a df
+      preview_data$preview_data = as.data.frame(d[1:nr, 1:nc])
+      preview_data$ext = ext
+      preview_data$delimiter = delimiter
+      preview_data$state = 0
     })
   }
+}
+
+show_preview_modal = function() {
+  ext = preview_data$ext
+  delimiter = preview_data$delimiter
+  preview_data = preview_data$preview_data
+  h3_title = ifelse(is.null(preview_data), "Failed to load data", "Preview")
+  table_output = ifelse(is.null(preview_data), NULL, DT::dataTableOutput("preview_data"))
+  
+  select_inputs = list()
+  if(!is.null(delimiter) && !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
+    select_inputs = fluidRow(
+      column(
+        width = 6,
+        selectInput(
+          inputId = "preview.filetype",
+          label = "File type",
+          selected = names(which(unlist(ext_choices) == ext)),
+          choices = unique(names(ext_choices))
+        )
+      ),
+      column(
+        width = 6,
+        selectInput(
+          inputId = "preview.delim",
+          label = "Delimiter",
+          selected = "Detected automatically",
+          choices = names(delim_choices)
+        )
+      )
+    )
+  }
+  
+  m = modalDialog(
+    title = "Import file",
+    h3(h3_title),
+    table_output,
+    hr(),
+    select_inputs,
+    footer = tagList(
+      modalButton("Cancel"),
+      actionButton(session$ns("confirm_import"), "Confirm"),
+    )
+  )
+  showModal(m)
+}
+
+observeEvent(c(input$preview.filetype, input$preview.delim), {
+  # work around for preventing shiny rendering multiple times
+  # `ignoreInit` dont seem to work
+  if(preview_data$state == 0) {
+    preview_data$state = preview_data$state + 1
+  } else {
+    delimiter = input$preview.delim
+    if(input$preview.delim == "Detected automatically") {
+      delimiter = preview_data$delimiter
+    } else {
+      delimiter = delim_choices[names(delim_choices) == input$preview.delim][1]
+    }
+    ext = ext_choices[names(ext_choices) == input$preview.filetype][1]
+    
+    lite_read(
+      fpath = preview_data$fpath,
+      delimiter = delimiter,
+      ext = ext
+    )
+    show_preview_modal()
+  }
 })
+
+# when user uploads a file
+observeEvent(input$files, { 
+  if(file.exists(input$files[1, "datapath"])) {
+    # isolate({
+      lite_read(fpath = input$files$datapath)
+      show_preview_modal()
+    # })
+    }
+})
+
+# when user confirms the data in preview
+observeEvent(input$confirm_import, {
+  if(!is.null(preview_data$data)){
+    plot.par$design = NULL
+    values$data.set = preview_data$data
+    values$data.type = preview_data$ext
+    updatePanel$doit = updatePanel$doit+1
+    values$data.restore <<- get.data.set()
+    temp.name = make.names(tools::file_path_sans_ext(input$files[1, "name"]))
+    
+    if(length(temp.name)>1){
+      temp.name = temp.name[1:(length(temp.name)-1)]
+    }
+    # TODO: multiple sheets
+    values$data.name = temp.name
+    
+    # setting success status to show "Import sucessful" text
+    import_reactives$success = !inherits(preview_data$data, "condition")
+    
+    if(!(preview_data$ext %in% c("RData", "rda", "Rda"))){
+      code.save$name = temp.name
+      code.save$variable = c(code.save$variable, list(c(sep(), "\n", paste0(sprintf("## Exploring the '%s' dataset", code.save$name),
+                                                                            "\n"))))
+      code = c(paste0(code.save$name, " <- "), gsub(paste0("\".*(?=.", preview_data$ext, ")"), paste0("\"", values$data.name), iNZightTools::code(preview_data$data), perl = T))
+      code = do.call(c, lapply(code, function(x) {
+        y <- try({
+          formatR::tidy_source(text = x, width.cutoff = 80, output = F, indent = 4)$text.tidy
+        }, silent = TRUE)
+        if (inherits(y, "try-error")) x else c(y, "\n")
+      }))
+      code = gsub("(.*)\\).*","\\1)", paste0(code, collapse = "\n"))
+      code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+    }
+    values$name.restore = temp.name
+    updateSelectInput(session, "subs2", selected = "none")
+    updateSelectInput(session, "subs1", selected = "none")
+    updateSelectInput(session, "vari2", selected = "none")
+    updateSelectInput(session, "vari1", selected = "none")
+    plot.par$design = NULL
+    design_params$design = NULL
+  }
+  removeModal()
+})
+
 
 # "Import file from url" button
 observeEvent(input$import_set, {
