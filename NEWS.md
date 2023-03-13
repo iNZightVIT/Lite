@@ -1,3 +1,7 @@
+- Remove "Remove dataset module"
+
+- Add preview mode for importing datasets
+
 # Release 1.0.3
 
 - Fixes a bug in time series forecasting plot
