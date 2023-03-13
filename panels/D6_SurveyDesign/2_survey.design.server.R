@@ -160,11 +160,11 @@ setDesign <- function(x) {
           fpc = x$fpc,
           nest = as.logical(x$nest),
           weights = x$weights,
-          type = x$type,
+          survey_type = x$survey_type,
           repweights = x$repweights,
           scale = x$scale,
           rscales = x$rscales,
-          reptype = x$reptype,
+          type = x$type,
           calibrate = x$calibrate
         )
       ),
@@ -176,7 +176,7 @@ setDesign <- function(x) {
   design_params$design$dataDesignName <- sprintf(
     "%s.%s",
     values$data.name,
-    switch(x$spec$type,
+    switch(x$spec$survey_type,
       "survey" = "svy",
       "replicate" = "repsvy"
     )
@@ -261,7 +261,7 @@ observe({
           weights = wts,
           nest = nest,
           fpc = fpc,
-          type = "survey"
+          survey_type = "survey"
         )
       ), silent = TRUE)
     } else if (req(input$svytype) == "replicate" && req(input$create.design1) > 0) {
@@ -285,10 +285,10 @@ observe({
         list(
           weights = wts,
           repweights = repWts,
-          reptype = reptype,
+          type = reptype,
           scale = scale,
           rscales = rscales,
-          type = "replicate"
+          survey_type = "replicate"
         )
       ), silent = TRUE)
     }
