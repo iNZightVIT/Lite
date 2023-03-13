@@ -3,20 +3,23 @@ Type: Shiny Application
 Title: iNZight Lite
 Version: 1.0.4
 Authors@R: c(
-		person("Charco", "Hui", role = c("aut", "cre"),
-			email = "charco.hui@auckland.ac.nz"),
-		person("Tom", "Elliott", role = "ctb",
-			email = "tom.elliott@auckland.ac.nz"),
-	    person("Tong", "Chen", role = "aut",
-			email = "tong.chen@auckland.ac.nz"),
-		person("Jason", "Cairns", role = "aut"),
-		person("Shengwei", "Hu", role = "aut"),
-		person("Chris", "Park", role = "aut"),
-		person("Christoph", "Knapp", role = "aut"),
-		person("Junjie", "Zeng", role = "aut"))
+    person("Charco", "Hui", role = c("aut", "cre"),
+        email = "charco.hui@auckland.ac.nz"),
+    person("Tom", "Elliott", role = "ctb",
+        email = "tom.elliott@auckland.ac.nz"),
+    person("Tong", "Chen", role = "aut",
+        email = "tong.chen@auckland.ac.nz"),
+    person("Jason", "Cairns", role = "aut"),
+    person("Shengwei", "Hu", role = "aut"),
+    person("Chris", "Park", role = "aut"),
+    person("Christoph", "Knapp", role = "aut"),
+    person("Junjie", "Zeng", role = "aut"))
 Description: A web implementation of iNZight, a swiss-army-knife data analysis tool designed for ease of use.
 License: GPL-3
-Depends: R (>= 3.1.0), shiny, markdown
+Depends:
+    R (>= 3.1.0),
+    markdown,
+    shiny
 Imports:
 	colorspace,
 	DT,
