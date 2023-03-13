@@ -1,7 +1,7 @@
 Package: iNZightLite
 Type: Shiny Application
 Title: iNZight Lite
-Version: 1.0.3
+Version: 1.0.4
 Authors@R: c(person("Tong", "Chen", role=c("aut", "cre"),
 			email="tong.chen@auckland.ac.nz"),
 		person("Jason", "Cairns", role="aut",
@@ -19,5 +19,30 @@ Authors@R: c(person("Tong", "Chen", role=c("aut", "cre"),
 Description: A web implementation of iNZight, a swiss-army-knife data analysis tool designed for ease of use.
 License: GPL-3
 Depends: R (>= 3.1.0), shiny, markdown
-Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps, plotly, shinyWidgets, shinyalert, shinycssloaders, DT, readtext
+Imports:
+	colorspace,
+	DT,
+	GGally,
+	gpairs,
+	iNZightMaps,
+	iNZightMR,
+	iNZightPlots,
+	iNZightRegression,
+	iNZightTools,
+	iNZightTS,
+	plotly,
+	readtext,
+	readxl,
+	RJSONIO,
+	sas7bdat,
+	shinyalert,
+	shinycssloaders,
+	shinydashboard,
+	shinyjs,
+	shinyWidgets,
+	survey,
+	surveyspec,
+	tibble,
+	viridis
+Additional_repository: https://r.docker.stat.auckland.ac.nz
 RoxygenNote: 6.0.1
