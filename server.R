@@ -207,8 +207,8 @@ shinyServer(function(input, output, session) {
   ##---------------------------------------##
   ##  B4. "File -> Remove Dataset" Module  ##
   ##---------------------------------------##
-  source("panels/B4_RemoveDataset/1_remove.data.set.panel-ui.R", local = TRUE)
-  source("panels/B4_RemoveDataset/2_remove.data.set.panel-server.R", local = TRUE)
+  # source("panels/B4_RemoveDataset/1_remove.data.set.panel-ui.R", local = TRUE)
+  # source("panels/B4_RemoveDataset/2_remove.data.set.panel-server.R", local = TRUE)
 
   ##-----------------------------------------##
   ##  B5. "File -> Dataset Examples" Module  ##
