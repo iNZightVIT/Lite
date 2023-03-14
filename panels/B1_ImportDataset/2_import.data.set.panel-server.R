@@ -2,7 +2,7 @@ options(shiny.maxRequestSize=5*1024^2)
 
 
 import_reactives = reactiveValues(
-  success = F
+  success = NULL
 )
 
 observe({
@@ -42,6 +42,7 @@ preview_data = reactiveValues(
   preview_data = NULL,
   delimiter = NULL,
   ext = NULL,
+  comment_symbol = "#",
   # use count to prevent rendering multiple times
   state = NULL
 )
@@ -59,11 +60,13 @@ smart_delimiter = function(fpath) {
     ext,
     "csv" = ",",
     "tsv" = "\t",
+    # default txt file delim to tab
     "txt" = "\t",
     NULL
   )
 }
 
+options(inzighttools.comment = "#")
 lite_read = function(fpath, delimiter = NULL, ext = NULL) {
   # if ext not given then guess by its file type
   if (is.null(ext)) {
@@ -73,20 +76,37 @@ lite_read = function(fpath, delimiter = NULL, ext = NULL) {
   if (is.null(delimiter)) {
     delimiter = smart_delimiter(fpath)
   }
-  
+
   d = tryCatch(
     if (any(grepl("pdf|docx?|odt|rtf", ext))) {
       readtext::readtext(fpath)
     } else if(ext == "txt") {
        readtext::readtext(fpath)
     } else if(ext == "rdta" | ext == "rda") {
-      as.data.frame(iNZightTools::load_rda(fpath)[[1]])
+      # get available names
+      rda_data = iNZightTools::load_rda(fpath)
+      # store available names
+      values$data.available.dnames = names(rda_data)
+      # by default the first data is read in
+      values$data.current.dname = values$data.available.dnames[1]
+      
+      as.data.frame(rda_data)
     } else if(ext == "tsv" | ext == "csv") {
       as.data.frame(iNZightTools::smart_read(fpath, delimiter = unlist(delimiter)))
     } else if(ext == "numbers") {
       stop("Not a valid file extension: ", ext)
     } else {
-      as.data.frame(iNZightTools::smart_read(fpath))
+      d = as.data.frame(iNZightTools::smart_read(fpath))
+      # if its an excel file
+      if(ext == "xls" | ext == "xlsx") {
+        # get available sheets
+        sheet_names = iNZightTools::sheets(d)
+        # store available sheets
+        values$data.available.dnames = sheet_names
+        # by default the first sheet is read in
+        values$data.current.dname = sheet_names[1]
+      }
+      d
     },
     error = identity
   )
@@ -111,15 +131,15 @@ lite_read = function(fpath, delimiter = NULL, ext = NULL) {
 show_preview_modal = function() {
   ext = preview_data$ext
   delimiter = preview_data$delimiter
-  preview_data = preview_data$preview_data
-  h3_title = ifelse(is.null(preview_data), "Failed to load data", "Preview")
-  table_output = ifelse(is.null(preview_data), NULL, DT::dataTableOutput("preview_data"))
+  imported_preview_data = preview_data$preview_data
+  h3_title = ifelse(is.null(imported_preview_data), "Failed to load data", "Preview")
+  table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
   
   select_inputs = list()
   if(!is.null(delimiter) && !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
     select_inputs = fluidRow(
       column(
-        width = 6,
+        width = 5,
         selectInput(
           inputId = "preview.filetype",
           label = "File type",
@@ -128,12 +148,21 @@ show_preview_modal = function() {
         )
       ),
       column(
-        width = 6,
+        width = 5,
         selectInput(
           inputId = "preview.delim",
           label = "Delimiter",
           selected = "Detected automatically",
           choices = names(delim_choices)
+        )
+      ),
+      column(
+        width = 2,
+        textInput(
+          inputId = "preview.comment",
+          label = "Comment symbol",
+          value = preview_data$comment_symbol
+          # placeholder = "#"
         )
       )
     )
@@ -148,17 +177,22 @@ show_preview_modal = function() {
     footer = tagList(
       modalButton("Cancel"),
       actionButton(session$ns("confirm_import"), "Confirm"),
-    )
+    ),
+    size = "l"
   )
   showModal(m)
 }
 
-observeEvent(c(input$preview.filetype, input$preview.delim), {
+observeEvent(c(input$preview.filetype, input$preview.delim, input$preview.comment), {
   # work around for preventing shiny rendering multiple times
   # `ignoreInit` dont seem to work
   if(preview_data$state == 0) {
     preview_data$state = preview_data$state + 1
   } else {
+    if(!is.null(input$preview.comment)) {
+      preview_data$comment_symbol = input$preview.comment
+      options(inzighttools.comment = input$preview.comment)
+    }
     delimiter = input$preview.delim
     if(input$preview.delim == "Detected automatically") {
       delimiter = preview_data$delimiter
@@ -199,7 +233,6 @@ observeEvent(input$confirm_import, {
     if(length(temp.name)>1){
       temp.name = temp.name[1:(length(temp.name)-1)]
     }
-    # TODO: multiple sheets
     values$data.name = temp.name
     
     # setting success status to show "Import sucessful" text
@@ -233,35 +266,38 @@ observeEvent(input$confirm_import, {
 
 # "Import file from url" button
 observeEvent(input$import_set, {
-  if(!is.null(input$URLtext)&&!input$URLtext%in%"") {
+  if(!is.null(input$URLtext) && !input$URLtext %in% "") {
+    input_url = input$URLtext
+    input_url = trimws(input_url)
     
     isolate({
-      if(!is.null(input$files)&&file.exists(input$files[1, "datapath"]))
-        unlink(input$files[1, "datapath"])
-      
-      #      if(grepl("docs.google.com", input$URLtext))
-      #        data.vals = get.data.from.googledocs(input$URLtext, get.data.dir.imported())
-      #      else
-      data.vals = get.data.from.URL(input$URLtext, get.data.dir.imported())
-      
-      get.data.dir.imported()
-      
-      #design.parameters$data.name = NULL
-      values$data.set = data.vals$data.set
-      updatePanel$doit = updatePanel$doit+1
-      values$data.restore = get.data.set()
-      values$data.name = data.vals$data.name
-      import_reactives$success = T
-      plot.par$design = NULL
-      design_params$design = NULL
+      if(!is.null(input$files) && file.exists(input$files[1, "datapath"]))
+      unlink(input$files[1, "datapath"])
+
+      import_success = tryCatch({
+        imported_data = iNZightTools::smart_read(input_url)
+        imported_name = get.data.name.from.URL(input_url)
+        #design.parameters$data.name = NULL
+        if(is.data.frame(imported_data)) {
+          values$data.set = imported_data
+          updatePanel$doit = updatePanel$doit + 1
+          values$data.restore = get.data.set()
+          values$data.name = imported_name
+          plot.par$design = NULL
+          design_params$design = NULL
+        }
+        import_reactives$success = TRUE
+        }, error = function(e) {
+          import_reactives$success = FALSE
+      })
     })
   }
-  
 })
 
 # select input for available sheets/data
 output$data.info = renderUI({
-  input$files
+  # input$files
+  values$data.set
   dtype = values$data.type
   
   if(!is.null(dtype)) {
@@ -392,9 +428,11 @@ output$message.success = renderText({
   input$import_set
   input$files
   isolate({
-    if(import_reactives$success){
+    if(isTRUE(import_reactives$success)){
       import_reactives$success = F
       "Import was successful"
+    } else if(isFALSE(import_reactives$success)) {
+      "Import failed, check URL"
     }
   })
 })
