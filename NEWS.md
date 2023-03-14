@@ -1,6 +1,11 @@
 - Remove "Remove dataset module"
 
-- Add preview mode for importing datasets
+- Use `iNZightTools::smart_read` when importing from URL
+
+- Add preview mode for importing data sets
+
+- Allow users to specify comment symbol when importing text files
+
 
 # Release 1.0.3
 
