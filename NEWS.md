@@ -1,3 +1,5 @@
+- FIX: Provides a temporary fix for an issue caused by passing invalid(?) values of 'varnames' to gg_* plottypes - there are other instances (e.g., colby, sizeby, etc), and further testing/investigation needed.
+
 # Release 1.0.4
 
 - Fixes a bug in survey imports with functions moved from iNZightTools to surveyspec
