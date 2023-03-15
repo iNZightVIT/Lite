@@ -1,3 +1,7 @@
+# Release 1.0.4
+
+- Fixes a bug in survey imports with functions moved from iNZightTools to surveyspec
+
 # Release 1.0.3
 
 - Fixes a bug in time series forecasting plot
@@ -11,6 +15,7 @@
 - Allow users to specify sheet/data name when importing data.
 
 - Added data import related information to `values`:
+
   - `data.type`
   - `data.available.dnames`
   - `data.current.dname`
