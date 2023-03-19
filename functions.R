@@ -1561,15 +1561,64 @@ parseQueryString = function(str) {
     shiny::parseQueryString(str)
 }
 
-get.data.from.URL = function(URL, data.dir.import){
-  ret = list()
-  URL = URLencode(URL)
+# # deprecated
+# get.data.from.URL = function(URL, data.dir.import){
+#   ret = list()
+#   URL = URLencode(URL)
+# 
+#   if(grepl("docs.google.com", URL)) {
+#     #if(!grepl("output=csv", URL)) {
+#     #  URL = paste(URL, "=0&single=true&output=csv", sep = "")
+#     #}
+# 
+#     url.index = gregexpr("output=", URL)
+#     url.index = unlist(url.index)
+#     file.type = substr(URL, url.index+7, nchar(URL))
+#     temp.file.name = tempfile()
+#     temp.file.name.index = gregexpr("file", temp.file.name)
+#     temp.file.name.index = unlist(temp.file.name.index)
+#     file.name = substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+#     name = paste(file.name, file.type, sep = ".")
+#   }
+#   else {
+#     name = strsplit(URL,"/")[[1]]
+#     name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+#   }
+# 
+#   if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
+#         file.writable(data.dir.import)) {
+#     dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
+#   }
+# 
+# #  print(URL)
+# #  print(name)
+# 
+#   tryCatch({
+#     if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
+#       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
+#     else
+#       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
+# 
+#     temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
+#     if(!is.null(temp[[2]])){
+#       ret$data.set = temp[[2]]
+#       ret$data.name = name
+#     }else{
+#       return(NULL)
+#     }
+#     ret
+#   },error = function(e){
+#     if(file.exists(paste0(data.dir.import,"/Imported/",name))){
+#       unlink(paste0(data.dir.import,"Imported/",name))
+#     }
+#     print(e)
+#   },warning = function(w) {
+#     print(w)
+#   },finally = {})
+# }
 
+get.data.name.from.URL = function(URL) {
   if(grepl("docs.google.com", URL)) {
-    #if(!grepl("output=csv", URL)) {
-    #  URL = paste(URL, "=0&single=true&output=csv", sep = "")
-    #}
-
     url.index = gregexpr("output=", URL)
     url.index = unlist(url.index)
     file.type = substr(URL, url.index+7, nchar(URL))
@@ -1583,37 +1632,7 @@ get.data.from.URL = function(URL, data.dir.import){
     name = strsplit(URL,"/")[[1]]
     name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
   }
-
-  if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
-        file.writable(data.dir.import)) {
-    dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
-  }
-
-#  print(URL)
-#  print(name)
-
-  tryCatch({
-    if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    else
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-
-    temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
-    if(!is.null(temp[[2]])){
-      ret$data.set = temp[[2]]
-      ret$data.name = name
-    }else{
-      return(NULL)
-    }
-    ret
-  },error = function(e){
-    if(file.exists(paste0(data.dir.import,"/Imported/",name))){
-      unlink(paste0(data.dir.import,"Imported/",name))
-    }
-    print(e)
-  },warning = function(w) {
-    print(w)
-  },finally = {})
+  return(name)
 }
 
 # get data from google docs urls
