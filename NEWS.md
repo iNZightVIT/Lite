@@ -1,11 +1,12 @@
 - Remove "Remove dataset module"
-
 - Use `iNZightTools::smart_read` when importing from URL
-
 - Add preview mode for importing data sets
-
 - Allow users to specify comment symbol when importing text files
+- FIX: Provides a temporary fix for an issue caused by passing invalid(?) values of 'varnames' to gg_* plottypes - there are other instances (e.g., colby, sizeby, etc), and further testing/investigation needed.
 
+# Release 1.0.4
+
+- Fixes a bug in survey imports with functions moved from iNZightTools to surveyspec
 
 # Release 1.0.3
 
@@ -20,6 +21,7 @@
 - Allow users to specify sheet/data name when importing data.
 
 - Added data import related information to `values`:
+
   - `data.type`
   - `data.available.dnames`
   - `data.current.dname`
