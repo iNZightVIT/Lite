@@ -54,29 +54,42 @@ output$preview_data = renderDataTable({
   )
 })
 
-smart_delimiter = function(fpath) {
-  ext = tolower(tools::file_ext(fpath[1]))
-  switch(
-    ext,
-    "csv" = ",",
-    "tsv" = "\t",
-    # default txt file delim to tab
-    "txt" = "\t",
-    NULL
-  )
-}
+# smart_delimiter = function(fpath) {
+#   ext = tolower(tools::file_ext(fpath[1]))
+#   switch(
+#     ext,
+#     "csv" = ",",
+#     "tsv" = "\t",
+#     # default txt file delim to tab
+#     "txt" = "\t",
+#     NULL
+#   )
+# }
 
 options(inzighttools.comment = "#")
 lite_read = function(fpath, delimiter = NULL, ext = NULL) {
+  # ensure correct type
+  delimiter = unlist(delimiter)
+  ext = unlist(ext)
+  # if no fpath given, get it from preview_data
+  if(is.null(fpath)) {
+    fpath = preview_data$fpath
+  }
   # if ext not given then guess by its file type
   if (is.null(ext)) {
     ext = tolower(tools::file_ext(fpath[1]))
+    # tools::file_ext might fail if its a googledoc which uses =csv
+    # instead of .csv
+    if(ext == "") {
+      ext = tolower(tools::file_ext(gsub("=", ".", fpath[1])))
+    }
   }
   # if delimiter not given then guess by its file type
   if (is.null(delimiter)) {
-    delimiter = smart_delimiter(fpath)
+    delimiter = "auto"
+    # delimiter = smart_delimiter(fpath)
   }
-
+  
   d = tryCatch(
     if (any(grepl("pdf|docx?|odt|rtf", ext))) {
       readtext::readtext(fpath)
@@ -92,7 +105,11 @@ lite_read = function(fpath, delimiter = NULL, ext = NULL) {
       
       as.data.frame(rda_data)
     } else if(ext == "tsv" | ext == "csv") {
-      as.data.frame(iNZightTools::smart_read(fpath, delimiter = unlist(delimiter)))
+      as.data.frame(iNZightTools::smart_read(
+        fpath, 
+        delimiter = unlist(delimiter), 
+        ext = ext
+      ))
     } else if(ext == "numbers") {
       stop("Not a valid file extension: ", ext)
     } else {
@@ -123,7 +140,7 @@ lite_read = function(fpath, delimiter = NULL, ext = NULL) {
       preview_data$preview_data = as.data.frame(d[1:nr, 1:nc])
       preview_data$ext = ext
       preview_data$delimiter = delimiter
-      preview_data$state = 0
+      # preview_data$state = 0
     })
   }
 }
@@ -133,26 +150,39 @@ show_preview_modal = function() {
   delimiter = preview_data$delimiter
   imported_preview_data = preview_data$preview_data
   h3_title = ifelse(is.null(imported_preview_data), "Failed to load data", "Preview")
-  table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
-  
-  select_inputs = list()
+  if(is.null(imported_preview_data)) {
+    table_output = NULL
+  } else {
+    table_output = DT::dataTableOutput("preview_data")
+  }
+  # table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
+
+  ext_selected = ifelse(is.null(ext), "", names(which(unlist(ext_choices) == ext)))
+  select_inputs = list(
+    column(
+      width = 5,
+      selectInput(
+        inputId = "preview.filetype",
+        label = "File type",
+        selected = ext_selected,
+        choices = c("", unique(names(ext_choices)))
+      )
+    )
+  )
   if(!is.null(delimiter) && !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
-    select_inputs = fluidRow(
-      column(
-        width = 5,
-        selectInput(
-          inputId = "preview.filetype",
-          label = "File type",
-          selected = names(which(unlist(ext_choices) == ext)),
-          choices = unique(names(ext_choices))
-        )
-      ),
+    if(delimiter == "auto") {
+      delim_selected = "Detected automatically"
+    } else {
+      delim_selected = names(delimiter)
+    }
+    
+    select_inputs2 = list(
       column(
         width = 5,
         selectInput(
           inputId = "preview.delim",
           label = "Delimiter",
-          selected = "Detected automatically",
+          selected = delim_selected,
           choices = names(delim_choices)
         )
       ),
@@ -166,12 +196,15 @@ show_preview_modal = function() {
         )
       )
     )
+    select_inputs = append(select_inputs, select_inputs2)
   }
+  select_inputs = do.call("fluidRow", select_inputs)
   
   m = modalDialog(
     title = "Import file",
     h3(h3_title),
     table_output,
+
     hr(),
     select_inputs,
     footer = tagList(
@@ -184,6 +217,10 @@ show_preview_modal = function() {
 }
 
 observeEvent(c(input$preview.filetype, input$preview.delim, input$preview.comment), {
+  # if first import failed, manually set the state
+  if(is.null(preview_data$state)) {
+    preview_data$state = 1
+  }
   # work around for preventing shiny rendering multiple times
   # `ignoreInit` dont seem to work
   if(preview_data$state == 0) {
@@ -194,7 +231,7 @@ observeEvent(c(input$preview.filetype, input$preview.delim, input$preview.commen
       options(inzighttools.comment = input$preview.comment)
     }
     delimiter = input$preview.delim
-    if(input$preview.delim == "Detected automatically") {
+    if(!is.null(input$preview.delim) && input$preview.delim == "Detected automatically") {
       delimiter = preview_data$delimiter
     } else {
       delimiter = delim_choices[names(delim_choices) == input$preview.delim][1]
@@ -214,7 +251,8 @@ observeEvent(c(input$preview.filetype, input$preview.delim, input$preview.commen
 observeEvent(input$files, { 
   if(file.exists(input$files[1, "datapath"])) {
     # isolate({
-      lite_read(fpath = input$files$datapath)
+      preview_data$fpath = input$files$datapath
+      lite_read(fpath = preview_data$fpath)
       show_preview_modal()
     # })
     }
@@ -274,22 +312,16 @@ observeEvent(input$import_set, {
       if(!is.null(input$files) && file.exists(input$files[1, "datapath"]))
       unlink(input$files[1, "datapath"])
 
+      preview_data$fpath = input_url
       import_success = tryCatch({
-        imported_data = iNZightTools::smart_read(input_url)
-        imported_name = get.data.name.from.URL(input_url)
-        #design.parameters$data.name = NULL
-        if(is.data.frame(imported_data)) {
-          values$data.set = imported_data
-          updatePanel$doit = updatePanel$doit + 1
-          values$data.restore = get.data.set()
-          values$data.name = imported_name
-          plot.par$design = NULL
-          design_params$design = NULL
-        }
+        lite_read(fpath = input_url)
         import_reactives$success = TRUE
-        }, error = function(e) {
-          import_reactives$success = FALSE
+        TRUE
+      }, error = function(e) {
+        import_reactives$success = FALSE
+        FALSE
       })
+      show_preview_modal()
     })
   }
 })
