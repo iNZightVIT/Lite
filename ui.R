@@ -99,9 +99,7 @@ shinyUI(
       ##  Add logo and link it to the iNZight website.
       title =
         HTML(
-          "<a href = 'https://www.stat.auckland.ac.nz/~wild/iNZight/'>
-                <img src = 'iNZight_lite_logo.png', width = 171, height = 33,
-                     alt = 'iNZight Lite'/></a>"
+          "<img src = 'iNZight_lite_logo.png', width = 171, height = 33 alt = 'iNZight Lite'/>"
         ),
       ## footer = img(src = "pendred_footer.png"),
       ##  Set ID
