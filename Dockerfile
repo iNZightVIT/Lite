@@ -11,7 +11,7 @@ ENV GITHUB_PAT ${GITHUB_PAT}
 RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
 RUN R -e "remotes::install_github(\
     c('tmelliott/surveyspec@0.1.1', \
-      'iNZightVIT/iNZightTools@1.13.2', \
+      'iNZightVIT/iNZightTools@1.13.0', \
       'iNZightVIT/iNZightTS@1.5.10', \
       'iNZightVIT/iNZightRegression@1.3.3', \
       'iNZightVIT/iNZightMR@2.2.7', \

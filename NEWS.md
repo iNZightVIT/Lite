@@ -1,15 +1,3 @@
-# Release 1.1.0
-
-- Remove "Remove dataset module"
-
-- Use `iNZightTools::smart_read` when importing from URL
-
-- Add preview mode for importing data sets
-
-- Allow users to specify comment symbol when importing text files
-
-- Disable redirect when clicking on header logo
-
 - FIX: Provides a temporary fix for an issue caused by passing invalid(?) values of 'varnames' to gg_* plottypes - there are other instances (e.g., colby, sizeby, etc), and further testing/investigation needed.
 
 # Release 1.0.4
