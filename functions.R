@@ -1296,10 +1296,7 @@ help.display = function(title, id, file) {
              <h4 class='modal-title' id='myModalLabel'>",title,"</h4>
              </div>
              <div class='modal-body'>",
-             markdownToHTML(
-               file = file,
-               options = c(""),
-               stylesheet = "www/empty.css"),
+             mark_html(file = file),
              "</div>
              <div class='modal-footer'>
              </div>
