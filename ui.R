@@ -14,6 +14,7 @@ shinyUI(
     tags$head(
       shinyjs::useShinyjs(),
       tags$script(src="vit.js"),
+      tags$script(src="js/disconnect.js"),
       tags$style(HTML("
 			.fill-frame {
 				object-fit: fill;

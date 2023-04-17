@@ -41,7 +41,7 @@ about.panel.ui = function(lite.version,lite.update) {
           p_args <- c(p_args, list("iNZight Lite Version: ", em(lite.version), br()))
         if (lite.update != "")
           p_args <- c(p_args, list("Last updated: ", em(lite.update)))
-        
+
         change_log = list(br(), actionLink(inputId = "change_log_link", label = "CHANGELOG"))
         p_args <- c(
           p_args,
@@ -52,9 +52,10 @@ about.panel.ui = function(lite.version,lite.update) {
       },
       ##  We include the markdown document that contains the
       ##  text for the "About" module.
-      includeMarkdown("panels/A1_About/4_about-panel-text.md")
+      includeMarkdown("panels/A1_About/4_about-panel-text.md"),
+      actionButton('disconnect', 'Disconnect the app')
     ),
-    
+
     ##  Next, we add a helpful footer.
     column(
       width = 12,
