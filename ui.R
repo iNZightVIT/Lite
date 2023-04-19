@@ -15,6 +15,7 @@ shinyUI(
       shinyjs::useShinyjs(),
       tags$script(src="vit.js"),
       tags$script(src="js/disconnect.js"),
+      tags$link(href = "disconnectedModal.css", rel = "stylesheet", type = "text/css"),
       tags$style(HTML("
 			.fill-frame {
 				object-fit: fill;
