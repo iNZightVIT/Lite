@@ -34,6 +34,7 @@ suppressPackageStartupMessages(library(shinyWidgets))
 suppressPackageStartupMessages(library(DT))
 suppressPackageStartupMessages(library(shinycssloaders))
 suppressPackageStartupMessages(library(shinyalert))
+suppressPackageStartupMessages(library(shinylogs))
 
 args=(commandArgs(TRUE))
 
@@ -53,12 +54,12 @@ source("functions.R")
 
 ### We write the server function.
 shinyServer(function(input, output, session) {
+  init_lite_logs()
   desc = read.dcf("DESCRIPTION")
   
   session$allowReconnect(TRUE)
 
   ##Specify all the reactive values
-
   values = reactiveValues()
   values$data.name = NULL
   values$data.dir.global = "data"
