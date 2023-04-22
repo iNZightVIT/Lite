@@ -55,6 +55,10 @@ source("functions.R")
 ### We write the server function.
 shinyServer(function(input, output, session) {
   init_lite_logs()
+  updateQueryString(
+    queryString = paste0("v=lite&sessionId", LITE_SESSION_ID_)
+  )
+  
   desc = read.dcf("DESCRIPTION")
   
   session$allowReconnect(TRUE)
