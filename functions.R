@@ -13,7 +13,7 @@ init_lite_logs = function(
     session = getDefaultReactiveDomain()
 ) {
   what <- match.arg(what, several.ok = TRUE)
-  LITE_SESSION_ID_ <<- session$token
+  LITE_SESSION_ID_ <<- substr(session$token, 1, 10)
   
   app_name = "lite"
   user = shinylogs:::get_user_(session)
