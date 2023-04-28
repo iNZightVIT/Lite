@@ -15,11 +15,18 @@ init_lite_logs = function(
   what <- match.arg(what, several.ok = TRUE)
   LITE_SESSION_ID_ <<- substr(session$token, 1, 10)
   
+  if(!file.exists(log_path)) {
+    dir.create(log_path)
+  }
+  addResourcePath("logs", log_path)
+  
   app_name = "lite"
   user = shinylogs:::get_user_(session)
   storage_mode = store_json(path = log_path)
   timestamp = shinylogs:::get_timestamp(timestamp)
-  log_path = file.path(log_path, paste0("lite_logs_", LITE_SESSION_ID_, ".json"))
+  log_name = paste0("lite_logs_", LITE_SESSION_ID_, ".json")
+  log_path = file.path(log_path, log_name)
+  download_path = file.path("logs", log_name)
     
   timestamp = Sys.time()
   init_log = data.frame(
@@ -47,7 +54,8 @@ init_lite_logs = function(
         exclude_input_regex = exclude_input_regex,
         exclude_input_id = exclude_input_id,
         session_id = init_log$session_id,
-        log_path = log_path
+        log_path = log_path,
+        download_path = download_path
       )), auto_unbox = TRUE, json_verbatim = TRUE)
     )),
     immediate = TRUE,

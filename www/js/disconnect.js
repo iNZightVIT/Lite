@@ -4,7 +4,7 @@ $(function () {
     let log = JSON.parse($("#shinylogs-tracking").html());
     $("body").load("disconnectedModal.html", function () {
       $("#sessionId").html(log.session_id);
-      $("#dlLogButton").attr("href", "files:///" + log.log_path);
+      $("#dlLogButton").attr("href", log.download_path);
     });
   });
 });
