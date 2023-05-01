@@ -577,6 +577,7 @@ observe({
     ## fix the axis limit bug
     plot.par$xlim = NULL
     plot.par$ylim = NULL
+    plot.par$zoombars = NULL
     graphical.par$plottype = "default"
   })
 })
@@ -587,6 +588,7 @@ observe({
     ## fix the axis limit bug
     plot.par$xlim = NULL
     plot.par$ylim = NULL
+    plot.par$zoombars = NULL
     graphical.par$plottype = "default"
   })
 })

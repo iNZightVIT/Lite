@@ -1296,10 +1296,7 @@ help.display = function(title, id, file) {
              <h4 class='modal-title' id='myModalLabel'>",title,"</h4>
              </div>
              <div class='modal-body'>",
-             markdownToHTML(
-               file = file,
-               options = c(""),
-               stylesheet = "www/empty.css"),
+             mark_html(file = file),
              "</div>
              <div class='modal-footer'>
              </div>
@@ -1525,15 +1522,15 @@ get.quantiles = function(subx){
 #' Make Syntactically Valid Names
 #'
 #' @param names vector to be coerced to syntactically valid names.
-#' 
-#' @description Replace spaces with underscores and any other 
+#'
+#' @description Replace spaces with underscores and any other
 #' invalid characters to dots
-#' 
+#'
 #' @return Character vector of valid names
 make_names = function(names) {
   names = gsub("\\s+", "_", names)
   names = make.names(names)
-  
+
   return(names)
 }
 
