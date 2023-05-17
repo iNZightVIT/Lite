@@ -165,7 +165,8 @@ setDesign <- function(x) {
           scale = x$scale,
           rscales = x$rscales,
           type = x$type,
-          calibrate = x$calibrate
+          calibrate = x$calibrate,
+          calfun = if (is.null(x$calibrate)) NULL else "linear"
         )
       ),
       class = "inzsvyspec"

@@ -18,6 +18,8 @@
 
 - FIX: Clear the par$zoombars argument when switching V1/V2 to resolve a bug that could cause duplicated bars.
 
+- FIX: bug in survey calibration specification
+
 # Release 1.0.4
 
 - Fixes a bug in survey imports with functions moved from iNZightTools to surveyspec

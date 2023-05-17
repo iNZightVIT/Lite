@@ -1638,7 +1638,7 @@ get.quantiles = function(subx){
 make_names = function(names) {
   names = gsub("\\s+", "_", names)
   names = make.names(names)
-  
+
   return(names)
 }
 
