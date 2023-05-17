@@ -50,11 +50,15 @@ output$about.panel <- renderUI({
 # pop up for change log
 observeEvent(input$change_log_link, {
   change_log <- includeMarkdown("NEWS.md")
-  
+
   showModal(modalDialog(
     title = "Change Log",
     renderUI(change_log),
     easyClose = TRUE
   ))
-  
+
+})
+
+observeEvent(input$disconnect, {
+  session$close()
 })

@@ -1,6 +1,114 @@
 ##########################################################
 #To be removed when the iNZight tools package is working##
 ##########################################################
+
+# Modified based off: 
+# https://github.com/dreamRs/shinylogs/blob/0195ac0a1f85d213c82143cfee712c9baddd1963/R/tracking.R#L134
+init_lite_logs = function(
+    log_path = tempdir(),
+    what = c("session", "input", "output", "error"),
+    exclude_input_regex = NULL,
+    exclude_input_id = NULL,
+    exclude_users = NULL,
+    session = getDefaultReactiveDomain()
+) {
+  what <- match.arg(what, several.ok = TRUE)
+  LITE_SESSION_ID_ <<- substr(session$token, 1, 10)
+  
+  if(!file.exists(log_path)) {
+    dir.create(log_path)
+  }
+  addResourcePath("logs", log_path)
+  
+  app_name = "lite"
+  user = shinylogs:::get_user_(session)
+  storage_mode = store_json(path = log_path)
+  timestamp = shinylogs:::get_timestamp(timestamp)
+  log_name = paste0("lite_logs_", LITE_SESSION_ID_, ".json")
+  log_path = file.path(log_path, log_name)
+  download_path = file.path("logs", log_name)
+    
+  timestamp = Sys.time()
+  init_log = data.frame(
+    session_id = LITE_SESSION_ID_,
+    app = app_name,
+    user = user,
+    server_connected = timestamp,
+    stringsAsFactors = FALSE
+  )
+  storage_mode$appname <- app_name
+  storage_mode$timestamp <- format(
+    bit64::as.integer64(nanotime::nanotime(timestamp)), 
+    scientific = FALSE
+  )
+  
+  insertUI(
+    selector = "body", where = "afterBegin",
+    ui = singleton(tags$script(
+      id = "shinylogs-tracking",
+      type = "application/json",
+      `data-for` = "shinylogs",
+      toJSON(shinylogs:::dropNulls(list(
+        what = what,
+        logsonunload = FALSE,
+        exclude_input_regex = exclude_input_regex,
+        exclude_input_id = exclude_input_id,
+        session_id = init_log$session_id,
+        log_path = log_path,
+        download_path = download_path
+      )), auto_unbox = TRUE, json_verbatim = TRUE)
+    )),
+    immediate = TRUE,
+    session = session
+  )
+  insertUI(
+    selector = "body", where = "afterBegin",
+    ui = htmltools::attachDependencies(
+      x = tags$div(),
+      value = list(
+        shinylogs:::shinylogs_dependencies()
+      )
+    ),
+    immediate = FALSE,
+    session = session
+  )
+  
+  if (isTRUE(storage_mode$console)) {
+    observe({
+      to_console(session$input$.shinylogs_browserData, init_log)
+    })
+    observe({
+      to_console(session$input$.shinylogs_lastInput)
+    })
+  }
+  
+  onSessionEnded(
+    fun = function() {
+      init_log$server_disconnected <- shinylogs:::get_timestamp(Sys.time())
+      logs <- c(isolate(session$input$.shinylogs_input),
+                isolate(session$input$.shinylogs_error),
+                isolate(session$input$.shinylogs_output))
+      browser_data <- isolate(session$input$.shinylogs_browserData)
+      if (!is.null(browser_data)) {
+        browser_data <- as.data.frame(browser_data)
+        logs$session <- cbind(init_log, browser_data)
+      } else {
+        logs$session <- init_log
+      }
+      if (isTRUE(!user %in% exclude_users)) {
+        # shinylogs:::write_logs(storage_mode, logs)
+        jsonlite::write_json(
+          x = logs, 
+          path = log_path, 
+          auto_unbox = TRUE
+        )
+      }
+    },
+    session = session
+  )
+}
+
+
 #' Reahapes the data that all columns are merged into two
 #' column with the variable names in the first column and
 #' the values in the second column.
@@ -35,11 +143,11 @@ get.missing.categorical = function(dafr,columns){
   colnames(temp) = columns
   new.dafr = data.frame(stringsAsFactors = TRUE,
                         do.call(cbind,lapply(1:length(columns),
-                                  function(index, d, c){
-                                    te = rep("observed",nrow(d))
-                                    te[is.na(d[,index])] = "missing"
-                                    te
-                                  }, temp, columns)))
+                                             function(index, d, c){
+                                               te = rep("observed",nrow(d))
+                                               te[is.na(d[,index])] = "missing"
+                                               te
+                                             }, temp, columns)))
   colnames(new.dafr) = paste("missing",columns,sep=".")
   cbind(dafr, new.dafr)
 }
@@ -170,20 +278,20 @@ get.combinations = function(dafr,simplify=F){
     tabp <- rbind(tabp, x1[c(row4col.order, max(row4col.order)+1)])  #  x1[row4col.order] == numMiss
     names(tabp) <- c(names(x)[row4col.order], "Total")
     row.names(tabp) <- c(seq_len(nrow(tab)), "Total")
-
+    
     tabfinal <- tabp[-nrow(tabp), ]
     tabfinal <- tabfinal[order(tabfinal$Total, decreasing = TRUE), ]
     tabfinal <- rbind(tabfinal, tabp[nrow(tabp), ])
-
+    
     finaltable <- tabfinal
-
+    
     Name <- names(finaltable)
     i <- nrow(finaltable)
     j <- ncol(finaltable)
     index <- order(x1[-j], decreasing = FALSE)
     numMiss <- x1[c(index, j)]
     percMiss <- round(numMiss / numMiss[j], 3)
-
+    
     finaltable = rbind(finaltable,paste0(round(percMiss * 100, 2), "%"))
     colnames(finaltable)[j] <- "Freq"
     finaltable
@@ -236,7 +344,7 @@ get.create.variables = function(dafr,new.formula,new.name=NULL){
     #print(cond)
   },
   finally={
-
+    
   })
 }
 
@@ -314,7 +422,7 @@ get.form.class.interval = function(dafr,column,num.intervals,
     method = "equal.width"
   }
   if(!is.null(labels)&&(length(labels)!=num.intervals||
-                          any(grepl("^\\s*$",intervals)))){
+                        any(grepl("^\\s*$",intervals)))){
     warning("The labels not in the right format and are ignored.")
     labels=NULL
   }
@@ -323,9 +431,9 @@ get.form.class.interval = function(dafr,column,num.intervals,
   num.cols.old = ncol(ret)
   if(!is.null(intervals)&&method%in%"specified"){
     if(!is.numeric(intervals)||any(is.na(intervals))||
-         is.null(intervals)||length(intervals)!=(num.intervals-1)||
-         min(intervals,na.rm=T)<min(dafr[,column],na.rm=T)||
-         max(intervals,na.rm=T)<max(dafr[,column],na.rm=T)){
+       is.null(intervals)||length(intervals)!=(num.intervals-1)||
+       min(intervals,na.rm=T)<min(dafr[,column],na.rm=T)||
+       max(intervals,na.rm=T)<max(dafr[,column],na.rm=T)){
       warning("The \"intervals\" variable is not in the right format.")
       return(dafr)
     }
@@ -500,7 +608,7 @@ aggregate.data= function(aggregate.over,
                          methods=c("mean","median","sum","sd","IQR","count"),
                          dafr){
   if(is.null(aggregate.over)|is.null(methods)|length(methods)==0|
-       length(aggregate.over)==0|is.numeric(aggregate.over)){
+     length(aggregate.over)==0|is.numeric(aggregate.over)){
     stop("aggregate.data : Wrong input")
   }
   if(any(!as.character(aggregate.over)%in%colnames(dafr))){
@@ -530,7 +638,7 @@ aggregate.data= function(aggregate.over,
                                         },d))],
                        by=b, FUN=m[i],na.rm=T,simplify = FALSE)
     }
-
+    
     colnames(temp)[(length(b)+1):ncol(temp)] = paste(m[i],
                                                      colnames(temp)[(length(b)+1):ncol(temp)],sep=".")
     temp
@@ -809,12 +917,12 @@ change.factor.transform = function(temp,columns){
   },temp,columns))
   temp = as.data.frame(stringsAsFactors = TRUE,
                        do.call(cbind,lapply(1:ncol(temp),function(index,temp.data){
-    if(is.numeric(temp.data[,index])){
-      as.character(temp.data[,index])
-    }else{
-      NULL
-    }
-  },temp)),stringsAsFactors=T)
+                         if(is.numeric(temp.data[,index])){
+                           as.character(temp.data[,index])
+                         }else{
+                           NULL
+                         }
+                       },temp)),stringsAsFactors=T)
   if(!is.null(temp)&&ncol(temp)>0&&nrow(temp)>0){
     colnames(temp) = paste("factors",nums,sep="_")
     temp
@@ -912,14 +1020,14 @@ standardize.transform = function(dafr,columns){
   dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
   dafr = as.data.frame(stringsAsFactors = TRUE,
                        do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-    if(is.numeric(d[,index])){
-      (d[,index]-mean(d[,index],na.rm=T))/sd(d[,index],na.rm=T)
-    }else{
-      (as.numeric(factor(d[,index]))
-       -mean(as.numeric(factor(d[,index])),na.rm=T))/
-        sd(as.numeric(factor(d[,index])),na.rm=T)
-    }
-  },dafr)))
+                         if(is.numeric(d[,index])){
+                           (d[,index]-mean(d[,index],na.rm=T))/sd(d[,index],na.rm=T)
+                         }else{
+                           (as.numeric(factor(d[,index]))
+                            -mean(as.numeric(factor(d[,index])),na.rm=T))/
+                             sd(as.numeric(factor(d[,index])),na.rm=T)
+                         }
+                       },dafr)))
   colnames(dafr) = paste("standardize",columns,sep=".")
   dafr
 }
@@ -928,12 +1036,12 @@ center.transform = function(dafr,columns){
   data = as.data.frame(dafr, stringsAsFactors = TRUE)
   temp = as.data.frame(stringsAsFactors = TRUE,
                        do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-    if(is.numeric(d[,index])){
-      d[,index]-mean(d[,index])
-    }else{
-      as.numeric(factor(d[,index]))-mean(as.numeric(factor(d[,index])))
-    }
-  },dafr)))
+                         if(is.numeric(d[,index])){
+                           d[,index]-mean(d[,index])
+                         }else{
+                           as.numeric(factor(d[,index]))-mean(as.numeric(factor(d[,index])))
+                         }
+                       },dafr)))
   colnames(temp) = paste("center",columns,sep=".")
   temp
 }
@@ -946,22 +1054,22 @@ divide.transform = function(dafr,columns){
   }else{
     if(ncol(as.data.frame(stringsAsFactors = TRUE,
                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-      is.numeric(d[,index])
-    },dafr))]))==1){
+                            is.numeric(d[,index])
+                          },dafr))]))==1){
       temp = as.data.frame(stringsAsFactors = TRUE,
                            dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))])
+                             is.numeric(d[,index])
+                           },dafr))])
       colnames(temp) = colnames(data)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },data))]
     }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
                                 dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-      is.numeric(d[,index])
-    },data))]))>1){
+                                  is.numeric(d[,index])
+                                },data))]))>1){
       temp = as.data.frame(stringsAsFactors = TRUE,
                            divide(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])},dafr))]))
+                             is.numeric(d[,index])},dafr))]))
       colnames(temp) = paste0("divide.",
                               paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
                                 is.numeric(d[,index])
@@ -997,23 +1105,23 @@ multiply.transform = function(dafr,columns){
   }else{
     if(ncol(as.data.frame(stringsAsFactors = TRUE,
                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-      is.numeric(d[,index])
-    },dafr))]))==1){
+                            is.numeric(d[,index])
+                          },dafr))]))==1){
       temp = as.data.frame(stringsAsFactors = TRUE,
                            dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))])
+                             is.numeric(d[,index])
+                           },dafr))])
       colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))]
     }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
                                 dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-      is.numeric(d[,index])
-    },dafr))]))>1){
+                                  is.numeric(d[,index])
+                                },dafr))]))>1){
       temp = as.data.frame(stringsAsFactors = TRUE,
                            multiply(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))]))
+                             is.numeric(d[,index])
+                           },dafr))]))
       colnames(temp) = paste0("multiply.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))],collapse="."))
@@ -1048,23 +1156,23 @@ subtract.transform = function(dafr,columns){
   }else{
     if(ncol(as.data.frame(stringsAsFactors = TRUE,
                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-      is.numeric(d[,index])
-    },dafr))]))==1){
+                            is.numeric(d[,index])
+                          },dafr))]))==1){
       temp = as.data.frame(stringsAsFactors = TRUE,
                            dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))])
+                             is.numeric(d[,index])
+                           },dafr))])
       colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))]
     }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
                                 dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-      is.numeric(d[,index])
-    },dafr))]))>1){
+                                  is.numeric(d[,index])
+                                },dafr))]))>1){
       temp = as.data.frame(stringsAsFactors = TRUE,
                            subtract(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))]))
+                             is.numeric(d[,index])
+                           },dafr))]))
       colnames(temp) = paste0("subtract.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
         is.numeric(d[,index])
       },dafr))],collapse="."))
@@ -1100,8 +1208,8 @@ add.transform  = function(temp,columns){
   }else{
     ret = as.data.frame(stringsAsFactors = TRUE,
                         temp[,unlist(lapply(1:ncol(temp),function(index,d){
-      is.numeric(d[,index])
-    },temp))])
+                          is.numeric(d[,index])
+                        },temp))])
     if(ncol(ret)>1){
       ret = as.data.frame(stringsAsFactors = TRUE,
                           apply(ret,1,function(row){sum(row)}))
@@ -1255,12 +1363,12 @@ abs.transform = function(dafr,columns){
   colnames(dafr) = columns
   temp = as.data.frame(stringsAsFactors = TRUE,
                        do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-    if(is.numeric(d[,index])){
-      abs(d[,index])
-    }else{
-      NULL
-    }
-  },dafr)))
+                         if(is.numeric(d[,index])){
+                           abs(d[,index])
+                         }else{
+                           NULL
+                         }
+                       },dafr)))
   #   temp = as.data.frame(temp)
   if(dim(temp)[1]>0&&dim(temp)[2]>0){
     colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,d){
@@ -1341,10 +1449,10 @@ load.data = function(data_dir,fileID=NULL,path=NULL){
         }else if(tolower(ext)%in%"txt"){
           temp = read.delim(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"), stringsAsFactors = TRUE)
         }else if(tolower(ext)%in%"xls"){
-#          temp = read.xlsx(full.name[indexes[1]], 1)
+          #          temp = read.xlsx(full.name[indexes[1]], 1)
           temp = as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
         }else if(tolower(ext)%in%"xlsx"){
-#          temp = read.xlsx(full.name[indexes[1]], 1)
+          #          temp = read.xlsx(full.name[indexes[1]], 1)
           temp = as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
         }else if(tolower(ext)%in%"sas7bdat"){
           temp = as.data.frame(stringsAsFactors = TRUE, read.sas7bdat(full.name[indexes[1]]))
@@ -1454,8 +1562,8 @@ get.vars = function(vars.path){
 file.writable = function(file,debug){
   tryCatch({
     if(file.exists(file)&&
-         "unix"%in%.Platform$OS.type&&
-         "Linux"%in%Sys.info()["sysname"]){
+       "unix"%in%.Platform$OS.type&&
+       "Linux"%in%Sys.info()["sysname"]){
       grepl("777",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
         grepl("775",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
         grepl("755",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])
@@ -1530,7 +1638,7 @@ get.quantiles = function(subx){
 make_names = function(names) {
   names = gsub("\\s+", "_", names)
   names = make.names(names)
-
+  
   return(names)
 }
 
@@ -1562,12 +1670,12 @@ parseQueryString = function(str) {
 get.data.from.URL = function(URL, data.dir.import){
   ret = list()
   URL = URLencode(URL)
-
+  
   if(grepl("docs.google.com", URL)) {
     #if(!grepl("output=csv", URL)) {
     #  URL = paste(URL, "=0&single=true&output=csv", sep = "")
     #}
-
+    
     url.index = gregexpr("output=", URL)
     url.index = unlist(url.index)
     file.type = substr(URL, url.index+7, nchar(URL))
@@ -1581,21 +1689,21 @@ get.data.from.URL = function(URL, data.dir.import){
     name = strsplit(URL,"/")[[1]]
     name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
   }
-
+  
   if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
-        file.writable(data.dir.import)) {
+      file.writable(data.dir.import)) {
     dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
   }
-
-#  print(URL)
-#  print(name)
-
+  
+  #  print(URL)
+  #  print(name)
+  
   tryCatch({
     if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
     else
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-
+    
     temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
     if(!is.null(temp[[2]])){
       ret$data.set = temp[[2]]
@@ -1657,7 +1765,7 @@ get.data.from.googledocs = function(URL, data.dir.import){
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
     else
       download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="curl")
-
+    
     temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
     if(!is.null(temp[[2]])){
       ret$data.set = temp[[2]]
@@ -1718,14 +1826,14 @@ get.transformation.string = function(transform_select,
                                    transform_variable_select,
                                    ")")
   }else if(transform_select%in%"by degree"&&
-             !arg3%in%""){
+           !arg3%in%""){
     transformation.string = paste0("I(",
                                    transform_variable_select,
                                    "^",
                                    arg3,
                                    ")")
   }else if(transform_select%in%"polynomial of degree"&&
-             !arg3%in%""){
+           !arg3%in%""){
     transformation.string = paste0("poly(",
                                    transform_variable_select,
                                    ",",arg3,")")
@@ -1750,14 +1858,14 @@ search.name = function(list.search,search.name=NULL){
   list.out=list()
   search = function(input.list, nam=NULL){
     if(
-#       "list"%in%class(input.list)||
-       "inzplotoutput"%in%class(input.list)||
-       "inzgrid"%in%class(input.list)||
-       "inzpar.list"%in%class(input.list)||
-       "inzdot"%in%class(input.list)||
-       "inzhist"%in%class(input.list)||
-       "inzscatter"%in%class(input.list)||
-       "inzbar"%in%class(input.list)){
+      #       "list"%in%class(input.list)||
+      "inzplotoutput"%in%class(input.list)||
+      "inzgrid"%in%class(input.list)||
+      "inzpar.list"%in%class(input.list)||
+      "inzdot"%in%class(input.list)||
+      "inzhist"%in%class(input.list)||
+      "inzscatter"%in%class(input.list)||
+      "inzbar"%in%class(input.list)){
       for(i in 1:length(input.list)){
         if(!is.null(names(input.list)[i])){
           nam = names(input.list)[i]
@@ -1886,7 +1994,7 @@ aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
   } else {
     fit = aov(as.formula(sprintf("%s ~ %s", y, paste(x, collapse = " * "))), data = data)
     attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y,
-                          paste(x, collapse = " * "), data.name), sprintf("summary(%s)", paste0("aov_", name)))
+                                  paste(x, collapse = " * "), data.name), sprintf("summary(%s)", paste0("aov_", name)))
   }
   fit
 }
@@ -1905,7 +2013,7 @@ aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
 
 aov.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
   fit.str = sprintf("%s ~ %s", y, x)
-
+  
   if(!is.null(blocking) && blocking != ""){
     fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
     attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),

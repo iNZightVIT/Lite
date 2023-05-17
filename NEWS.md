@@ -1,3 +1,7 @@
+- Save logs
+
+- Display disconnected message when connection is lost 
+
 # Release 1.1.0
 
 - Remove "Remove dataset module"

@@ -1,0 +1,84 @@
+<div class="disconnected-modal-container">
+  <div class="disconnected-modal">
+    <div class="disconnected-modal-header">
+      <h1>Oh no, you have been disconnected from iNZight Lite!</h1>
+    </div>
+
+    <div class="disconnected-modal-body">
+      <p>
+        This may have happened because you have been inactive for a while, or
+        there has been a problem with the application.
+      </p>
+
+      <p>
+        Below are some troubleshooting steps that may solve the problem. If you
+        are still having trouble, please use the contact form to get in touch,
+        citing the below session ID in your message.
+      </p>
+
+      <p class="center flex-center">
+        Your session ID: <span id="sessionId"></span>
+      </p>
+      
+      <p class="center flex-center">
+        Or, download the logs and attach send them to us: <a href="" id="dlLogButton" download>Download Logs (JSON)</a>.
+      </p>
+
+      <h2>Troubleshooting</h2>
+
+      <ul>
+        <li>
+          <strong>
+            If the disconnect has occured immediately after loading Lite
+            &hellip;
+          </strong>
+          <p>
+            This is often caused by AWSs caching, and Lite is trying to
+            reconnect to an old server instance. Until we find a better
+            solution, here are some ways to solve this issue:
+          </p>
+          <ul>
+            <li>Try refreshing the page</li>
+            <li>Try in a different browser, <em>or</em> in a private window</li>
+            <li>
+              Try clearing your cookies/website data for this page
+              (lite.docker.stat.auckland.ac.nz)
+            </li>
+            <li>Contact us if you still have no success</li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>
+            If the disconnect occured after you uploaded some data &hellip;
+          </strong>
+          <p>
+            There may be an issue with the dataset, or Lite is running into
+            trouble for some other reason.
+          </p>
+          <ul>
+            <li>If you haven't already, try loading the data again</li>
+            <li>
+              If you are on a Mac, ensure you are <strong>not</strong> trying to
+              upload a Numbers (.numbers) file, as Lite cannot read these
+            </li>
+            <li>
+              Try a different dataset. If you get the same issue, it might be an
+              issue with Lite. In that case, please contact us.
+            </li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>
+            If the disconnect occured after you performed some action &hellip;
+          </strong>
+          <p>
+            This is likely an issue with Lite. Please contact us and quote the
+            above session ID.
+          </p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
