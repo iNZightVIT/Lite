@@ -15,3 +15,11 @@ clean:
 	docker image prune
 pull:
 	docker pull scienceis/uoa-inzight-lite:${TAG}
+
+container: .devcontainer/Dockerfile
+
+# combine the two files to create the Dockerfile
+.devcontainer/Dockerfile: Dockerfile .devcontainer/Dockerfile.template
+	@cat Dockerfile > .devcontainer/Dockerfile
+	@echo "\n\n" >> .devcontainer/Dockerfile
+	@cat .devcontainer/Dockerfile.template >> .devcontainer/Dockerfile
