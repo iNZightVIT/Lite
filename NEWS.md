@@ -1,24 +1,35 @@
-- Save logs
+# June 2023
 
-- Display disconnected message when connection is lost 
+## New Features
 
-# Release 1.1.0
+- Displays a disconnected message when connection is lost or errors are encountered. This shows the user's session ID, which can be sent to the iNZight team for debugging purposes. We also list some possible solutions to common problems.
 
-- Remove "Remove dataset module"
+- Saves logs using `shinylogs`, and provide a link for users to download these (NOTE: currently this only works if an error occurs, and _not_ if the system disconnects for some other reason).
+
+- Adds preview mode for importing data sets, like in iNZight Desktop. This allows users to see the first few rows of their data before importing it, and modify some import settings as needed.
+
+## Changes
+
+- URL datasets are no longer saved on the disk, and instead are saved in temporary files associated with the user's session. These files are deleted once the user disconnects.
+
+- The 'remove dataset' option in the File menu has been removed, as it is no longer needed.
 
 - Use `iNZightTools::smart_read` when importing from URL
+  - Allow users to specify comment symbol when importing text files
 
-- Add preview mode for importing data sets
+## Bug Fixes
 
-- Allow users to specify comment symbol when importing text files
+- Disables redirect when clicking on header logo
 
-- Disable redirect when clicking on header logo
+- Provides a temporary fix for an issue caused by passing invalid(?) values of 'varnames' to gg\_\* plottypes - there are other instances (e.g., colby, sizeby, etc), and further testing/investigation needed.
 
-- FIX: Provides a temporary fix for an issue caused by passing invalid(?) values of 'varnames' to gg\_\* plottypes - there are other instances (e.g., colby, sizeby, etc), and further testing/investigation needed.
+- Clears the `par$zoombars` argument when switching V1/V2 to resolve a bug that could cause duplicated bars.
 
-- FIX: Clear the par$zoombars argument when switching V1/V2 to resolve a bug that could cause duplicated bars.
+- Addresses an issue in survey calibration specification.
 
-- FIX: bug in survey calibration specification
+---
+
+_Switch from semantic to date versioning system_
 
 # Release 1.0.4
 
