@@ -122,8 +122,6 @@ shinyUI(
                           uiOutput('save.data.panel')),
                  tabPanel("Display Dataset",
                           uiOutput('current.data')),
-                 tabPanel("Remove Dataset",
-                          uiOutput("remove.data.panel")),
                  tabPanel("Dataset Examples",
                           uiOutput('switch.data.panel'))),
       tabPanel("Visualize",value="visualize",
