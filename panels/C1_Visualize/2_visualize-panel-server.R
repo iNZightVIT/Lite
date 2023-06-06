@@ -577,7 +577,7 @@ observe({
     ## fix the axis limit bug
     plot.par$xlim = NULL
     plot.par$ylim = NULL
-    plot.par$zoombars = NULL
+    plot.par$zoombar = NULL
     graphical.par$plottype = "default"
   })
 })
@@ -588,7 +588,7 @@ observe({
     ## fix the axis limit bug
     plot.par$xlim = NULL
     plot.par$ylim = NULL
-    plot.par$zoombars = NULL
+    plot.par$zoombar = NULL
     graphical.par$plottype = "default"
   })
 })
@@ -6987,6 +6987,7 @@ output$old_advanced_options_panel = renderUI({
 ## switch variables selected
 observe({
   input$switch1
+
   isolate({
     if(!is.null(input$vari2) && input$vari2 != "none") {
 
