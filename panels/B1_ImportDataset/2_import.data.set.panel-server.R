@@ -267,8 +267,12 @@ observeEvent(input$confirm_import, {
     updatePanel$doit = updatePanel$doit+1
     values$data.restore <<- get.data.set()
     temp.name = make.names(tools::file_path_sans_ext(input$files[1, "name"]))
-    
-    if(length(temp.name)>1){
+
+    if (is.null(temp.name)) {
+      temp.name = "data"
+    } else if (length(temp.name) == 0) {
+      temp.name = "data"
+    } else if(length(temp.name)>1){
       temp.name = temp.name[1:(length(temp.name)-1)]
     }
     values$data.name = temp.name
@@ -310,7 +314,7 @@ observeEvent(input$import_set, {
     
     isolate({
       if(!is.null(input$files) && file.exists(input$files[1, "datapath"]))
-      unlink(input$files[1, "datapath"])
+        unlink(input$files[1, "datapath"])
 
       preview_data$fpath = input_url
       import_success = tryCatch({
