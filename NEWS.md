@@ -27,6 +27,8 @@
 
 - Addresses an issue in survey calibration specification.
 
+- Import via Paste: remove special characters/spaces from variable names and convert strings to factors (via iNZightTools)
+
 ---
 
 _Switch from semantic to date versioning system_
