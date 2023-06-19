@@ -36,16 +36,21 @@ delim_choices = list(
   "Tab" = "\t"
 )
 
-preview_data = reactiveValues(
-  fpath = NULL,
-  data = NULL,
-  preview_data = NULL,
-  delimiter = NULL,
-  ext = NULL,
-  comment_symbol = "#",
-  # use count to prevent rendering multiple times
-  state = NULL
-)
+reset_preview_data = function() {
+  preview_data <<- reactiveValues(
+    fpath = NULL,
+    data = NULL,
+    preview_data = NULL,
+    delimiter = NULL,
+    ext = NULL,
+    comment_symbol = "#",
+    available_dnames = NULL,
+    current_dname = NULL,
+    # use count to prevent rendering multiple times
+    state = NULL
+  )
+}
+reset_preview_data()
 
 output$preview_data = renderDataTable({
   datatable(
@@ -67,7 +72,7 @@ output$preview_data = renderDataTable({
 # }
 
 options(inzighttools.comment = "#")
-lite_read = function(fpath, delimiter = NULL, ext = NULL) {
+lite_read = function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
   # ensure correct type
   delimiter = unlist(delimiter)
   ext = unlist(ext)
@@ -95,13 +100,18 @@ lite_read = function(fpath, delimiter = NULL, ext = NULL) {
       readtext::readtext(fpath)
     } else if(ext == "txt") {
        readtext::readtext(fpath)
-    } else if(ext == "rdta" | ext == "rda") {
-      # get available names
+    } else if(ext == "rdta" | ext == "rda" | ext == "rdata") {
       rda_data = iNZightTools::load_rda(fpath)
-      # store available names
-      values$data.available.dnames = names(rda_data)
-      # by default the first data is read in
-      values$data.current.dname = values$data.available.dnames[1]
+
+      if (is.null(preview_data$current_dname)) {
+        # store available names
+        values$data.available.dnames = names(rda_data)
+        # by default the first data is read in
+        values$data.current.dname = values$data.available.dnames[1]
+        rda_data = rda_data[values$data.current.dname]
+      } else {
+        rda_data = rda_data[preview_data$current_dname]
+      }
       
       as.data.frame(rda_data)
     } else if(ext == "tsv" | ext == "csv") {
@@ -113,15 +123,24 @@ lite_read = function(fpath, delimiter = NULL, ext = NULL) {
     } else if(ext == "numbers") {
       stop("Not a valid file extension: ", ext)
     } else {
-      d = as.data.frame(iNZightTools::smart_read(fpath))
       # if its an excel file
       if(ext == "xls" | ext == "xlsx") {
-        # get available sheets
-        sheet_names = iNZightTools::sheets(d)
-        # store available sheets
-        values$data.available.dnames = sheet_names
-        # by default the first sheet is read in
-        values$data.current.dname = sheet_names[1]
+        if (is.null(preview_data$current_dname)) {
+          d = as.data.frame(iNZightTools::smart_read(fpath))
+          # get available sheets
+          sheet_names = iNZightTools::sheets(d)
+          # store available sheets
+          values$data.available.dnames = sheet_names
+          # by default the first sheet is read in
+          values$data.current.dname = sheet_names[1]
+        } else {
+          d = as.data.frame(
+            iNZightTools::smart_read(
+              fpath, 
+              sheet = preview_data$current_dname
+              )
+            )
+        }
       }
       d
     },
@@ -140,15 +159,22 @@ lite_read = function(fpath, delimiter = NULL, ext = NULL) {
       preview_data$preview_data = as.data.frame(d[1:nr, 1:nc])
       preview_data$ext = ext
       preview_data$delimiter = delimiter
-      # preview_data$state = 0
+      # preview_data$state = 0,
+      if (is.null(preview_data$current_dname)) {
+        preview_data$available_dnames = values$data.available.dnames
+        preview_data$current_dname = values$data.current.dname
+      }
     })
   }
 }
 
 show_preview_modal = function() {
   ext = preview_data$ext
+  is_excel = ext %in% c("xls", "xlsx")
+  is_rda = ext %in% c("rdta", "rda", "rdata")
   delimiter = preview_data$delimiter
   imported_preview_data = preview_data$preview_data
+
   h3_title = ifelse(is.null(imported_preview_data), "Failed to load data", "Preview")
   if(is.null(imported_preview_data)) {
     table_output = NULL
@@ -176,39 +202,56 @@ show_preview_modal = function() {
       delim_selected = names(delimiter)
     }
     
-    select_inputs2 = list(
-      column(
-        width = 5,
-        selectInput(
-          inputId = "preview.delim",
-          label = "Delimiter",
-          selected = delim_selected,
-          choices = names(delim_choices)
-        )
-      ),
-      column(
-        width = 2,
-        textInput(
-          inputId = "preview.comment",
-          label = "Comment symbol",
-          value = preview_data$comment_symbol
-          # placeholder = "#"
+    if(is_excel | is_rda) {
+      select_inputs2 = list(
+        column(
+          width = 5,
+          selectInput(
+            inputId = "preview.sheets",
+            label = ifelse(is_excel, "Sheets", "Data"),
+            selected = preview_data$current_dname,
+            choices = preview_data$available_dnames
+          )
         )
       )
-    )
+    } else {
+      select_inputs2 = list(
+        column(
+          width = 5,
+          selectInput(
+            inputId = "preview.delim",
+            label = "Delimiter",
+            selected = delim_selected,
+            choices = names(delim_choices)
+          )
+        ),
+        column(
+          width = 2,
+          textInput(
+            inputId = "preview.comment",
+            label = "Comment symbol",
+            value = preview_data$comment_symbol
+            # placeholder = "#"
+          )
+        )
+      )
+    }
+
     select_inputs = append(select_inputs, select_inputs2)
   }
   select_inputs = do.call("fluidRow", select_inputs)
-  
+
   m = modalDialog(
     title = "Import file",
     h3(h3_title),
     table_output,
-
     hr(),
     select_inputs,
     footer = tagList(
-      modalButton("Cancel"),
+      actionButton(
+        session$ns("cancel_import"), 
+        style = "background-color: #eeeeee; border-color: #e2e2e2;", "Cancel"
+      ),
       actionButton(session$ns("confirm_import"), "Confirm"),
     ),
     size = "l"
@@ -216,7 +259,16 @@ show_preview_modal = function() {
   showModal(m)
 }
 
-observeEvent(c(input$preview.filetype, input$preview.delim, input$preview.comment), {
+observeEvent(c(
+  input$preview.filetype, 
+  input$preview.delim, 
+  input$preview.comment,
+  input$preview.sheets
+  ), {
+  # check if file type is excel
+  ext = tolower(ext_choices[input$preview.filetype])
+  is_excel = ext %in% c("xls", "xlsx")
+  is_rda = ext %in% c("rdta", "rda", "rdata")
   # if first import failed, manually set the state
   if(is.null(preview_data$state)) {
     preview_data$state = 1
@@ -230,18 +282,31 @@ observeEvent(c(input$preview.filetype, input$preview.delim, input$preview.commen
       preview_data$comment_symbol = input$preview.comment
       options(inzighttools.comment = input$preview.comment)
     }
-    delimiter = input$preview.delim
-    if(!is.null(input$preview.delim) && input$preview.delim == "Detected automatically") {
-      delimiter = preview_data$delimiter
-    } else {
-      delimiter = delim_choices[names(delim_choices) == input$preview.delim][1]
-    }
-    ext = ext_choices[names(ext_choices) == input$preview.filetype][1]
     
+    delimiter = NULL
+    if(is_excel | is_rda) {
+      sheet_name = input$preview.sheets
+      preview_data$current_dname = sheet_name
+    } else {
+      delimiter = input$preview.delim
+      if(!is.null(input$preview.delim) && input$preview.delim == "Detected automatically") {
+        delimiter = preview_data$delimiter
+      } else {
+        delimiter = delim_choices[names(delim_choices) == input$preview.delim][1]
+      }
+    }
+    
+    ext = ext_choices[names(ext_choices) == input$preview.filetype][1]
+    # ext choices have 2 "RData Files (.RData, .rda)" 
+    # default to rda
+    if (tolower(ext) == "rdata") {
+      ext = "rda"
+    }
     lite_read(
       fpath = preview_data$fpath,
       delimiter = delimiter,
-      ext = ext
+      ext = ext,
+      sheet = sheet_name
     )
     show_preview_modal()
   }
@@ -258,6 +323,11 @@ observeEvent(input$files, {
     }
 })
 
+# when user clicks cancel in preview
+observeEvent(input$cancel_import, {
+  reset_preview_data()
+  removeModal()
+})
 # when user confirms the data in preview
 observeEvent(input$confirm_import, {
   if(!is.null(preview_data$data)){
@@ -267,12 +337,8 @@ observeEvent(input$confirm_import, {
     updatePanel$doit = updatePanel$doit+1
     values$data.restore <<- get.data.set()
     temp.name = make.names(tools::file_path_sans_ext(input$files[1, "name"]))
-
-    if (is.null(temp.name)) {
-      temp.name = "data"
-    } else if (length(temp.name) == 0) {
-      temp.name = "data"
-    } else if(length(temp.name)>1){
+    
+    if(length(temp.name)>1){
       temp.name = temp.name[1:(length(temp.name)-1)]
     }
     values$data.name = temp.name
@@ -303,6 +369,7 @@ observeEvent(input$confirm_import, {
     design_params$design = NULL
   }
   removeModal()
+  reset_preview_data()
 })
 
 
@@ -314,7 +381,7 @@ observeEvent(input$import_set, {
     
     isolate({
       if(!is.null(input$files) && file.exists(input$files[1, "datapath"]))
-        unlink(input$files[1, "datapath"])
+      unlink(input$files[1, "datapath"])
 
       preview_data$fpath = input_url
       import_success = tryCatch({
@@ -331,60 +398,61 @@ observeEvent(input$import_set, {
 })
 
 # select input for available sheets/data
-output$data.info = renderUI({
-  # input$files
-  values$data.set
-  dtype = values$data.type
-  
-  if(!is.null(dtype)) {
-    label_name = switch(
-      dtype,
-      "xls" = ,
-      "xlsx" = "Sheet:",
-      "rdta" = ,
-      "rda" = "Dataset:"
-    )
-    
-    if(is.null(label_name)) {
-      return(NULL)
-    }
+# output$data.info = renderUI({
+#   # input$files
+#   values$data.set
+#   dtype = values$data.type
+#   
+#   if(!is.null(dtype)) {
+#     label_name = switch(
+#       dtype,
+#       "xls" = ,
+#       "xlsx" = "Sheet:",
+#       "rdta" = ,
+#       "rda" = "Dataset:"
+#     )
+#     
+#     if(is.null(label_name)) {
+#       return(NULL)
+#     }
+# 
+#     selectInput(
+#       inputId = "data.info",
+#       label = label_name,
+#       selected = values$data.current.dname,
+#       choices = values$data.available.dnames
+#     )
+#   }
+# })
 
-    selectInput(
-      inputId = "data.info",
-      label = label_name,
-      selected = values$data.current.dname,
-      choices = values$data.available.dnames
-    )
-  }
-})
 # reload data when user chooses a different sheet/data
-observeEvent(input$data.info, {
-  # data type
-  dtype = values$data.type
-  # path of data
-  fpath = input$files[1, "datapath"]
-  tryCatch(
-    if(!is.null(dtype) && !is.null(values$data.current.dname)) {
-      # prevent loading data again, if the selected sheet name is the same
-      if(input$data.info != values$data.current.dname) {
-        if(dtype == "xls" | dtype == "xlsx") {
-          values$data.set = as.data.frame(iNZightTools::smart_read(fpath, sheet = input$data.info))
-        } else if(dtype == "rdta" | dtype == "rda") {
-          ind = which(values$data.available.dnames == input$data.info)
-          values$data.set = as.data.frame(iNZightTools::load_rda(fpath)[[ind]])
-        }
-        # update sheet name
-        values$data.current.dname = input$data.info
-      }
-    },
-    error = function(e) {
-      shinyalert::shinyalert(
-        title = "Import failed",
-        text = glue::glue("Failed to switch to data '{input$data.info}'")
-      )
-    }
-  )
-})
+# observeEvent(input$data.info, {
+#   # data type
+#   dtype = values$data.type
+#   # path of data
+#   fpath = input$files[1, "datapath"]
+#   tryCatch(
+#     if(!is.null(dtype) && !is.null(values$data.current.dname)) {
+#       # prevent loading data again, if the selected sheet name is the same
+#       if(input$data.info != values$data.current.dname) {
+#         if(dtype == "xls" | dtype == "xlsx") {
+#           values$data.set = as.data.frame(iNZightTools::smart_read(fpath, sheet = input$data.info))
+#         } else if(dtype == "rdta" | dtype == "rda") {
+#           ind = which(values$data.available.dnames == input$data.info)
+#           values$data.set = as.data.frame(iNZightTools::load_rda(fpath)[[ind]])
+#         }
+#         # update sheet name
+#         values$data.current.dname = input$data.info
+#       }
+#     },
+#     error = function(e) {
+#       shinyalert::shinyalert(
+#         title = "Import failed",
+#         text = glue::glue("Failed to switch to data '{input$data.info}'")
+#       )
+#     }
+#   )
+# })
 
 # whole data import panel
 output$load.data.panel = renderUI({
