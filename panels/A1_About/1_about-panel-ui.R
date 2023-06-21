@@ -1,6 +1,6 @@
-##----------------------------------------###
+## ----------------------------------------###
 ###  UI Functions for the "About" Module  ###
-###---------------------------------------###
+### ---------------------------------------###
 ###
 ###  Date Created  : January 25, 2015.
 ###  Last Modified : February 25, 2015.
@@ -9,7 +9,7 @@
 ###
 ###  * Note: This file is to be sourced locally within "server.R" *
 
-about.panel.ui = function(lite.version,lite.update) {
+about.panel.ui <- function(lite.version, lite.update) {
   ##  We manually set the page width to be 10 columns so that it looks
   ##  (rougly) centred.
   fixedPage(
@@ -37,12 +37,14 @@ about.panel.ui = function(lite.version,lite.update) {
       ##  "lite.update".
       if (lite.version != "" || lite.update != "") {
         p_args <- list()
-        if (lite.version != "")
+        if (lite.version != "") {
           p_args <- c(p_args, list("iNZight Lite Version: ", em(lite.version), br()))
-        if (lite.update != "")
+        }
+        if (lite.update != "") {
           p_args <- c(p_args, list("Last updated: ", em(lite.update)))
+        }
 
-        change_log = list(br(), actionLink(inputId = "change_log_link", label = "CHANGELOG"))
+        change_log <- list(br(), actionLink(inputId = "change_log_link", label = "CHANGELOG"))
         p_args <- c(
           p_args,
           change_log,
@@ -99,6 +101,29 @@ about.panel.ui = function(lite.version,lite.update) {
 	      </div>'
         )
       )
+    )
+  )
+}
+
+logs.panel.ui <- function(logs) {
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(
+        "log_file",
+        "Select a log file",
+        choices = logs,
+        selected = logs[1]
+      )
+    ),
+    mainPanel(
+      h3("Session"),
+      tableOutput("log_session"),
+      h3("Inputs"),
+      tableOutput("log_inputs"),
+      h3("Errors"),
+      tableOutput("log_errors"),
+      h3("Outputs"),
+      tableOutput("log_outputs")
     )
   )
 }
