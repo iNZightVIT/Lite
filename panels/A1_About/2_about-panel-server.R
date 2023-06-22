@@ -70,10 +70,12 @@ observeEvent(input$disconnect, {
 
 observeEvent(input$log_file, {
   log_f <- file.path(tempdir(), input$log_file)
+  print(log_f)
   if (!file.exists(log_f)) {
     return()
   }
 
+  print("reading log file")
   log <- shinylogs::read_json_logs(log_f)
 
   output$log_session <- renderTable({
