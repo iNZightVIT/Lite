@@ -111,8 +111,8 @@ logs.panel.ui <- function(logs) {
       selectInput(
         "log_file",
         "Select a log file",
-        choices = logs,
-        selected = logs[1]
+        choices = c("", logs),
+        selected = ""
       )
     ),
     mainPanel(

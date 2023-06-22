@@ -69,8 +69,13 @@ observeEvent(input$disconnect, {
 })
 
 observeEvent(input$log_file, {
-  log <- shinylogs::read_json_logs(file.path(tempdir(), input$log_file))
-  print(log)
+  log_f <- file.path(tempdir(), input$log_file)
+  if (!file.exists(log_f)) {
+    return()
+  }
+
+  log <- shinylogs::read_json_logs(log_f)
+
   output$log_session <- renderTable({
     log$session |>
       tibble::as_tibble() |>
