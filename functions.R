@@ -11,6 +11,7 @@ init_lite_logs <- function(
     exclude_input_id = NULL,
     exclude_users = NULL,
     session = getDefaultReactiveDomain()) {
+  return()
   what <- match.arg(what, several.ok = TRUE)
   LITE_SESSION_ID_ <<- substr(session$token, 1, 10)
 

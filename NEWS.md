@@ -2,9 +2,7 @@
 
 ## New Features
 
-- Displays a disconnected message when connection is lost or errors are encountered. This shows the user's session ID, which can be sent to the iNZight team for debugging purposes. We also list some possible solutions to common problems.
-
-- Saves logs using `shinylogs`, and provide a link for users to download these (NOTE: currently this only works if an error occurs, and _not_ if the system disconnects for some other reason).
+- Displays a disconnected message when connection is lost or errors are encountered, listing some possible solutions to common problems.
 
 - Adds preview mode for importing data sets, like in iNZight Desktop. This allows users to see the first few rows of their data before importing it, and modify some import settings as needed.
 
