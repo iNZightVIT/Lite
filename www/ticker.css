@@ -1,0 +1,7 @@
+.ticker-item {
+  display: none;
+  background: #165083;
+  color: white;
+  text-align: center;
+  padding: 8px 3em;
+}

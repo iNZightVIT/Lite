@@ -6,6 +6,8 @@
 
 - Adds preview mode for importing data sets, like in iNZight Desktop. This allows users to see the first few rows of their data before importing it, and modify some import settings as needed.
 
+- Ticker added to alert users of new updates, upcoming maintenance, and other important information.
+
 ## Changes
 
 - URL datasets are no longer saved on the disk, and instead are saved in temporary files associated with the user's session. These files are deleted once the user disconnects.
