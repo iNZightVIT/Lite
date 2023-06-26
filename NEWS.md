@@ -13,7 +13,10 @@
 - The 'remove dataset' option in the File menu has been removed, as it is no longer needed.
 
 - Use `iNZightTools::smart_read` when importing from URL
+
   - Allow users to specify comment symbol when importing text files
+
+- Slight redesign of the logo using the same font family and weigt for 'lite', and fix alignment in header
 
 ## Bug Fixes
 
