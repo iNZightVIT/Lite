@@ -26,7 +26,7 @@ about.panel.ui <- function(lite.version, lite.update) {
     #      br(),
     column(
       width = 10, offset = 1,
-      img(src = "/iNZight_lite_logo.png", height = 80),
+      img(src = "/inzight_lite_logo_web.svg", height = 80),
       br(), br(),
       ##  We add version details at the bottom right hand corner
       ##  of the page. "lite.version" is defined in the file
