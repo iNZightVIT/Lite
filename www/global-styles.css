@@ -1,0 +1,71 @@
+.navbar-header {
+  display: flex !important;
+  align-items: center;
+}
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+.navbar-brand img {
+  margin-top: 3px;
+}
+
+.nav {
+  font-size: 16px;
+}
+
+.btn.btn-default.action-button.shiny-bound-input:hover {
+  background-color: #00bafa;
+  border-radius: 8px;
+  border: solid #1f628d 1px;
+  padding: 9px;
+}
+.btn.btn-default.action-button.shiny-bound-input {
+  background-color: #00a7e0;
+  border-radius: 8px;
+  border: solid #1f628d 1px;
+  padding: 9px;
+}
+.player {
+  border: 1px solid;
+  border-radius: 10px;
+  margin-top: 10px;
+  background-color: #a3e7ff;
+}
+.seper {
+  background-color: #a3e7ff;
+  padding-top: 25px;
+}
+#num_columns_sort,
+#numeric_input2,
+#numeric_input3,
+#URLtext,
+#provide_xlab,
+#provide_ylab,
+#provide_season,
+#provide_frequency,
+#numeric_input1,
+#form_class_interval_number,
+#main_title_text,
+#x_axis_text,
+#y_axis_text,
+#arg1,
+#arg2,
+#arg3,
+#offset,
+#new_model_name {
+  background-color: #a3e7ff;
+  border: 1px solid;
+  border-radius: 10px;
+}
+#categorical_variables_select,
+#quick_explore_select,
+#numeric_variables_select {
+  background: #158cba;
+  color: #f8dccd;
+  border-radius: 10px;
+  font-size: 150%;
+}
+#fit_model_button {
+  font-size: 25px;
+}

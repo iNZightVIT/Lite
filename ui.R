@@ -14,68 +14,16 @@ shinyUI(
     tags$head(
       shinyjs::useShinyjs(),
       tags$script(src="vit.js"),
+      tags$script(src="js/disconnect.js"),
+      tags$link(href = "disconnectedModal.css", rel = "stylesheet", type = "text/css"),
       tags$style(HTML("
 			.fill-frame {
 				object-fit: fill;
 				width: 100%;
 				height: 600px;
 			}
-      ")),
-      tags$style(
-        type = "text/css",
-        ".nav {font-size:16px}
-                    .btn.btn-default.action-button.shiny-bound-input:hover {
-                       background-color: #00BAFA;
-                       border-radius: 8px;
-                       border: solid #1f628d 1px;
-                       padding: 9px;}
-                    .btn.btn-default.action-button.shiny-bound-input {
-                       background-color: #00A7E0;
-                       border-radius: 8px;
-                       border: solid #1f628d 1px;
-                       padding: 9px;}
-                    .player {
-                       border: 1px solid;
-                       border-radius: 10px;
-                       margin-top: 10px;
-                       background-color: #A3E7FF;}
-                    .seper {
-                       background-color: #A3E7FF;
-                       padding-top: 25px}
-                    #num_columns_sort,
-                    #numeric_input2,
-                    #numeric_input3,
-                    #URLtext,
-                    #provide_xlab,
-                    #provide_ylab,
-                    #provide_season,
-                    #provide_frequency,
-                    #numeric_input1,
-                    #form_class_interval_number,
-                    #main_title_text,
-                    #x_axis_text,
-                    #y_axis_text,
-                    #arg1,
-                    #arg2,
-                    #arg3,
-                    #offset,
-                    #new_model_name {
-                       background-color: #A3E7FF;
-                       border: 1px solid;
-                       border-radius: 10px;
-                    }
-                    #categorical_variables_select,
-                    #quick_explore_select,
-                    #numeric_variables_select {
-                       background: #158CBA;
-                       color: #F8DCCD
-                       border-radius: 10px;
-                       font-size: 150%;
-                    }
-                    #fit_model_button {
-                      font-size: 25px;
-                    }
-                    ")),
+      "))
+    ),
     ## This code fixes the DataTables warning coming up from time to time.
     tags$head(tags$script("window.alert = (function() {
           var nativeAlert = window.alert;
@@ -89,19 +37,22 @@ shinyUI(
 
     tags$head(tags$script(src="js/testNumeric.js")),
     tags$head(tags$script(src="js/google-analytics.js")),
+    # tags$head(tags$script(src = "js/download-logs.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).
 
 
     theme = "bootstrap.css",
+
+    tags$head(
+      tags$link(href = "global-styles.css", rel = "stylesheet", type = "text/css")
+    ),
     navbarPage(
       ##  Set Window Title
       windowTitle = "iNZight Lite",
       ##  Add logo and link it to the iNZight website.
       title =
         HTML(
-          "<a href = 'https://www.stat.auckland.ac.nz/~wild/iNZight/'>
-                <img src = 'iNZight_lite_logo.png', width = 171, height = 33,
-                     alt = 'iNZight Lite'/></a>"
+          "<img src = 'inzight_lite_logo_web.svg' alt = 'iNZight Lite' height='150%' />"
         ),
       ## footer = img(src = "pendred_footer.png"),
       ##  Set ID
@@ -122,8 +73,6 @@ shinyUI(
                           uiOutput('save.data.panel')),
                  tabPanel("Display Dataset",
                           uiOutput('current.data')),
-                 tabPanel("Remove Dataset",
-                          uiOutput("remove.data.panel")),
                  tabPanel("Dataset Examples",
                           uiOutput('switch.data.panel'))),
       tabPanel("Visualize",value="visualize",

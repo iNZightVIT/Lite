@@ -1,7 +1,7 @@
 Package: iNZightLite
 Type: Shiny Application
 Title: iNZight Lite
-Version: 1.0.4
+Version: 2023.06
 Authors@R: c(
     person("Charco", "Hui", role = c("aut", "cre"),
         email = "charco.hui@auckland.ac.nz"),
@@ -40,6 +40,7 @@ Imports:
     shinycssloaders,
     shinydashboard,
     shinyjs,
+    shinylogs,
     shinyWidgets,
     survey,
     surveyspec,
