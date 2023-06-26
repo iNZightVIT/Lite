@@ -11,8 +11,8 @@ $(function () {
       $.each(data, function (index, value) {
         // if the ticker is not valid, don't show it
         if (
-          new Date(value.validFrom) < new Date() ||
-          new Date(value.validTo) > new Date()
+          new Date(value.validFrom) > new Date() ||
+          new Date(value.validTo) < new Date()
         )
           return;
 
