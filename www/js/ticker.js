@@ -9,6 +9,13 @@ $(function () {
 
       // loop through the ticker data
       $.each(data, function (index, value) {
+        // if the ticker is not valid, don't show it
+        if (
+          new Date(value.validFrom) < new Date() ||
+          new Date(value.validTo) > new Date()
+        )
+          return;
+
         // create a div with class item
         $(".ticker").append(
           "<div class='ticker-item' id='tickerItem" +
