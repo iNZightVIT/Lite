@@ -24,7 +24,7 @@ The desktop application <a href="https://www.stat.auckland.ac.nz/~wild/iNZight/"
 
 ## About the iNZight Project
 
-This project is led by [Professor Chris Wild](http://www.stat.auckland.ac.nz/~wild)and has been primarily supported by the Department of Statistics at the University of Auckland, with additional support from Statistics New Zealand and the NZ Ministry of Education via Census at School.
+This project is led by [Professor Chris Wild](http://www.stat.auckland.ac.nz/~wild) and has been primarily supported by the Department of Statistics at the University of Auckland, with additional support from Statistics New Zealand and the NZ Ministry of Education via Census at School.
 
 If you are an expert programmer or statistician, you can contribute to the project by sending us feedback about our [R source code](https://github.com/iNZightVIT).
 </font>
