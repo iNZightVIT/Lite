@@ -19,6 +19,9 @@ shinyUI(
       tags$script(src = "js/ticker.js"),
       tags$link(href = "ticker.css", rel = "stylesheet", type = "text/css"),
       tags$style(HTML("
+      body > .container-fluid {
+        padding: 0 !important;
+      }
 			.fill-frame {
 				object-fit: fill;
 				width: 100%;
