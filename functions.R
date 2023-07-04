@@ -1,35 +1,37 @@
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 
-# Modified based off: 
+# Modified based off:
 # https://github.com/dreamRs/shinylogs/blob/0195ac0a1f85d213c82143cfee712c9baddd1963/R/tracking.R#L134
-init_lite_logs = function(
+init_lite_logs <- function(
     log_path = tempdir(),
     what = c("session", "input", "output", "error"),
     exclude_input_regex = NULL,
     exclude_input_id = NULL,
     exclude_users = NULL,
-    session = getDefaultReactiveDomain()
-) {
+    session = getDefaultReactiveDomain()) {
+  return()
   what <- match.arg(what, several.ok = TRUE)
   LITE_SESSION_ID_ <<- substr(session$token, 1, 10)
-  
-  if(!file.exists(log_path)) {
+
+  if (!file.exists(log_path)) {
     dir.create(log_path)
   }
   addResourcePath("logs", log_path)
-  
-  app_name = "lite"
-  user = shinylogs:::get_user_(session)
-  storage_mode = store_json(path = log_path)
-  timestamp = shinylogs:::get_timestamp(timestamp)
-  log_name = paste0("lite_logs_", LITE_SESSION_ID_, ".json")
-  log_path = file.path(log_path, log_name)
-  download_path = file.path("logs", log_name)
-    
-  timestamp = Sys.time()
-  init_log = data.frame(
+
+  print(list.files(log_path))
+
+  app_name <- "lite"
+  user <- shinylogs:::get_user_(session)
+  storage_mode <- store_json(path = log_path)
+  timestamp <- shinylogs:::get_timestamp(timestamp)
+  log_name <- paste0("lite_logs_", LITE_SESSION_ID_, ".json")
+  log_path <- file.path(log_path, log_name)
+  download_path <- file.path("logs", log_name)
+
+  timestamp <- Sys.time()
+  init_log <- data.frame(
     session_id = LITE_SESSION_ID_,
     app = app_name,
     user = user,
@@ -38,10 +40,10 @@ init_lite_logs = function(
   )
   storage_mode$appname <- app_name
   storage_mode$timestamp <- format(
-    bit64::as.integer64(nanotime::nanotime(timestamp)), 
+    bit64::as.integer64(nanotime::nanotime(timestamp)),
     scientific = FALSE
   )
-  
+
   insertUI(
     selector = "body", where = "afterBegin",
     ui = singleton(tags$script(
@@ -72,7 +74,7 @@ init_lite_logs = function(
     immediate = FALSE,
     session = session
   )
-  
+
   if (isTRUE(storage_mode$console)) {
     observe({
       to_console(session$input$.shinylogs_browserData, init_log)
@@ -81,13 +83,15 @@ init_lite_logs = function(
       to_console(session$input$.shinylogs_lastInput)
     })
   }
-  
+
   onSessionEnded(
     fun = function() {
       init_log$server_disconnected <- shinylogs:::get_timestamp(Sys.time())
-      logs <- c(isolate(session$input$.shinylogs_input),
-                isolate(session$input$.shinylogs_error),
-                isolate(session$input$.shinylogs_output))
+      logs <- c(
+        isolate(session$input$.shinylogs_input),
+        isolate(session$input$.shinylogs_error),
+        isolate(session$input$.shinylogs_output)
+      )
       browser_data <- isolate(session$input$.shinylogs_browserData)
       if (!is.null(browser_data)) {
         browser_data <- as.data.frame(browser_data)
@@ -98,8 +102,8 @@ init_lite_logs = function(
       if (isTRUE(!user %in% exclude_users)) {
         # shinylogs:::write_logs(storage_mode, logs)
         jsonlite::write_json(
-          x = logs, 
-          path = log_path, 
+          x = logs,
+          path = log_path,
           auto_unbox = TRUE
         )
       }
@@ -118,16 +122,16 @@ init_lite_logs = function(
 #' @return The converted data.frame.
 #'
 #' @author Christoph Knapp
-get.reshape.data = function(dafr){
-  temp = do.call(rbind,lapply(1:ncol(dafr),function(index,d){
-    name = colnames(d)[index]
-    data.frame(groups=name,d[,index], stringsAsFactors = TRUE)
-  },dafr))
-  colnames(temp)[2] = "variables"
+get.reshape.data <- function(dafr) {
+  temp <- do.call(rbind, lapply(1:ncol(dafr), function(index, d) {
+    name <- colnames(d)[index]
+    data.frame(groups = name, d[, index], stringsAsFactors = TRUE)
+  }, dafr))
+  colnames(temp)[2] <- "variables"
   temp
 }
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Converts specified columns into binary factor variables
 #' which get added to the input data.frame.
@@ -138,17 +142,21 @@ get.reshape.data = function(dafr){
 #' @return A data.frame with the binary columns added.
 #'
 #' @author Christoph Knapp
-get.missing.categorical = function(dafr,columns){
-  temp = as.data.frame(dafr[,columns], stringsAsFactors = TRUE)
-  colnames(temp) = columns
-  new.dafr = data.frame(stringsAsFactors = TRUE,
-                        do.call(cbind,lapply(1:length(columns),
-                                             function(index, d, c){
-                                               te = rep("observed",nrow(d))
-                                               te[is.na(d[,index])] = "missing"
-                                               te
-                                             }, temp, columns)))
-  colnames(new.dafr) = paste("missing",columns,sep=".")
+get.missing.categorical <- function(dafr, columns) {
+  temp <- as.data.frame(dafr[, columns], stringsAsFactors = TRUE)
+  colnames(temp) <- columns
+  new.dafr <- data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(
+      1:length(columns),
+      function(index, d, c) {
+        te <- rep("observed", nrow(d))
+        te[is.na(d[, index])] <- "missing"
+        te
+      }, temp, columns
+    ))
+  )
+  colnames(new.dafr) <- paste("missing", columns, sep = ".")
   cbind(dafr, new.dafr)
 }
 
@@ -165,25 +173,24 @@ get.missing.categorical = function(dafr,columns){
 #' @return A data.frame with the new columns added.
 #'
 #' @author Wilson Hu
-display.missing.categorical = function(dafr, columns) {
-  for(i in columns) {
-    temp = dafr[, i]
-    if(is.factor(temp) || is.character(temp)) {
-      temp = as.character(temp)
-      temp[is.na(temp)] = "missing"
-      temp = as.factor(temp)
-      original.level = levels(temp)[levels(temp) != "missing"]
-      temp = factor(temp, levels = c(original.level, "missing"))
+display.missing.categorical <- function(dafr, columns) {
+  for (i in columns) {
+    temp <- dafr[, i]
+    if (is.factor(temp) || is.character(temp)) {
+      temp <- as.character(temp)
+      temp[is.na(temp)] <- "missing"
+      temp <- as.factor(temp)
+      original.level <- levels(temp)[levels(temp) != "missing"]
+      temp <- factor(temp, levels = c(original.level, "missing"))
+    } else {
+      index <- is.na(temp)
+      temp <- rep("observed", length(temp))
+      temp[index] <- "missing"
+      temp <- factor(temp, levels = c("observed", "missing"))
     }
-    else {
-      index = is.na(temp)
-      temp = rep("observed", length(temp))
-      temp[index] = "missing"
-      temp = factor(temp, levels = c("observed", "missing"))
-    }
-    temp = as.data.frame(temp, stringsAsFactors = TRUE)
-    colnames(temp) = paste(i, "missing", sep = "_")
-    dafr = data.frame(dafr, temp, stringsAsFactors = TRUE)
+    temp <- as.data.frame(temp, stringsAsFactors = TRUE)
+    colnames(temp) <- paste(i, "missing", sep = "_")
+    dafr <- data.frame(dafr, temp, stringsAsFactors = TRUE)
   }
   dafr
 }
@@ -198,16 +205,16 @@ display.missing.categorical = function(dafr, columns) {
 #' removed.
 #'
 #' @author Christoph Knapp
-simplify.dafr = function(dafr){
-  ies = c()
-  for(col in 1:ncol(dafr)){
-    if(!any(is.na(dafr[,col]))){
-      ies = c(ies,col)
+simplify.dafr <- function(dafr) {
+  ies <- c()
+  for (col in 1:ncol(dafr)) {
+    if (!any(is.na(dafr[, col]))) {
+      ies <- c(ies, col)
     }
   }
-  dafr = dafr[,-ies]
-  if(ncol(dafr)==0){
-    dafr=NULL
+  dafr <- dafr[, -ies]
+  if (ncol(dafr) == 0) {
+    dafr <- NULL
   }
   dafr
 }
@@ -221,16 +228,16 @@ simplify.dafr = function(dafr){
 #' @return The converted data.frame.
 #'
 #' @author Christoph Knapp
-convert.dafr = function(dafr){
-  if(!is.null(dafr)){
-    temp = do.call(cbind,lapply(1:ncol(dafr),function(i,d){
-      col = rep("observed",nrow(d))
-      col[is.na(d[,i])] = "missing"
+convert.dafr <- function(dafr) {
+  if (!is.null(dafr)) {
+    temp <- do.call(cbind, lapply(1:ncol(dafr), function(i, d) {
+      col <- rep("observed", nrow(d))
+      col[is.na(d[, i])] <- "missing"
       col
-    },dafr))
-    colnames(temp) = colnames(dafr)
+    }, dafr))
+    colnames(temp) <- colnames(dafr)
     temp
-  }else{
+  } else {
     dafr
   }
 }
@@ -252,17 +259,17 @@ convert.dafr = function(dafr){
 #' their counts in the last column.
 #'
 #' @author Christoph Knapp
-get.combinations = function(dafr,simplify=F){
-  dafr = data.frame(dafr, stringsAsFactors = TRUE)
-  index.column = rep(T,ncol(dafr))
+get.combinations <- function(dafr, simplify = F) {
+  dafr <- data.frame(dafr, stringsAsFactors = TRUE)
+  index.column <- rep(T, ncol(dafr))
   rm.na <- function(variable) {
     sum(is.na(variable)) > 0
   }
-  if(simplify){
+  if (simplify) {
     index.column <- sapply(dafr, rm.na)
   }
-  x <- data.frame(dafr[,index.column], stringsAsFactors = TRUE)
-  if(ncol(x)>0){
+  x <- data.frame(dafr[, index.column], stringsAsFactors = TRUE)
+  if (ncol(x) > 0) {
     x1 <- as.numeric(apply(x, 2, function(x) length(which(is.na(x)))))
     row4col.order <- order(x1)
     x1 <- c(x1, nrow(x))
@@ -273,35 +280,35 @@ get.combinations = function(dafr,simplify=F){
     tabp <- t(apply(tab, 1, function(x) {
       unlist(strsplit(x, ",", fixed = TRUE))
     }))
-    tabp <- data.frame(tabp,stringsAsFactors=F)
-    tabp <- tabp[,c(row4col.order, max(row4col.order)+1)]
-    tabp <- rbind(tabp, x1[c(row4col.order, max(row4col.order)+1)])  #  x1[row4col.order] == numMiss
+    tabp <- data.frame(tabp, stringsAsFactors = F)
+    tabp <- tabp[, c(row4col.order, max(row4col.order) + 1)]
+    tabp <- rbind(tabp, x1[c(row4col.order, max(row4col.order) + 1)]) #  x1[row4col.order] == numMiss
     names(tabp) <- c(names(x)[row4col.order], "Total")
     row.names(tabp) <- c(seq_len(nrow(tab)), "Total")
-    
+
     tabfinal <- tabp[-nrow(tabp), ]
     tabfinal <- tabfinal[order(tabfinal$Total, decreasing = TRUE), ]
     tabfinal <- rbind(tabfinal, tabp[nrow(tabp), ])
-    
+
     finaltable <- tabfinal
-    
+
     Name <- names(finaltable)
     i <- nrow(finaltable)
     j <- ncol(finaltable)
     index <- order(x1[-j], decreasing = FALSE)
     numMiss <- x1[c(index, j)]
     percMiss <- round(numMiss / numMiss[j], 3)
-    
-    finaltable = rbind(finaltable,paste0(round(percMiss * 100, 2), "%"))
+
+    finaltable <- rbind(finaltable, paste0(round(percMiss * 100, 2), "%"))
     colnames(finaltable)[j] <- "Freq"
     finaltable
-  }else{
+  } else {
     NULL
   }
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Takes an input string of a formula involving colummn
 #' names in the input data set and tries to evaluate it.
@@ -319,37 +326,40 @@ get.combinations = function(dafr,simplify=F){
 #' expression.
 #'
 #' @author Christoph Knapp
-get.create.variables = function(dafr,new.formula,new.name=NULL){
-  tryCatch({
-    colu = eval(parse(text=new.formula),dafr)
-    if(length(colu)>nrow(dafr)){
-      colu = colu[1:nrow(dafr)]
+get.create.variables <- function(dafr, new.formula, new.name = NULL) {
+  tryCatch(
+    {
+      colu <- eval(parse(text = new.formula), dafr)
+      if (length(colu) > nrow(dafr)) {
+        colu <- colu[1:nrow(dafr)]
+      }
+      temp <- cbind(dafr, colu)
+      if (is.null(new.name) || "" %in% new.name) {
+        new.name <- "new.name"
+      }
+      count <- 0
+      while (new.name %in% colnames(dafr)) {
+        count <- count + 1
+        new.name <- paste(new.name, count, sep = ".")
+      }
+      colnames(temp)[ncol(temp)] <- new.name
+      temp
+    },
+    error = function(cond) {
+      # print(cond)
+      return(NULL)
+    },
+    warning = function(cond) {
+      # print(cond)
+    },
+    finally = {
+
     }
-    temp = cbind(dafr,colu)
-    if(is.null(new.name)||""%in%new.name){
-      new.name = "new.name"
-    }
-    count=0
-    while(new.name%in%colnames(dafr)){
-      count = count+1
-      new.name = paste(new.name,count,sep=".")
-    }
-    colnames(temp)[ncol(temp)] = new.name
-    temp
-  },error=function(cond) {
-    #print(cond)
-    return (NULL)
-  },
-  warning=function(cond) {
-    #print(cond)
-  },
-  finally={
-    
-  })
+  )
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' This function is a wrapper function for the rank method.
 #'
@@ -361,24 +371,27 @@ get.create.variables = function(dafr,new.formula,new.name=NULL){
 #' the ranked variables.
 #'
 #' @author Christoph Knapp
-get.rank.numeric = function(dafr,columns){
-  temp = data.frame(stringsAsFactors = TRUE,
-                    sapply(dafr[,columns],
-                           rank,
-                           ties.method = "min",
-                           na.last = "keep"))
-  nams = paste(columns,"rank",sep=".")
-  count = 0
-  while(any(nams%in%colnames(dafr))){
-    count = count + 1
-    nams = paste(nams,count,sep=".")
+get.rank.numeric <- function(dafr, columns) {
+  temp <- data.frame(
+    stringsAsFactors = TRUE,
+    sapply(dafr[, columns],
+      rank,
+      ties.method = "min",
+      na.last = "keep"
+    )
+  )
+  nams <- paste(columns, "rank", sep = ".")
+  count <- 0
+  while (any(nams %in% colnames(dafr))) {
+    count <- count + 1
+    nams <- paste(nams, count, sep = ".")
   }
-  colnames(temp) = nams
-  cbind(dafr,temp)
+  colnames(temp) <- nams
+  cbind(dafr, temp)
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Form class intervals from a column specified by column
 #' name or column index from the a data.frame.
@@ -409,70 +422,80 @@ get.rank.numeric = function(dafr,columns){
 #' @note This is a wrapper for the cut function. See \code{?cut}.
 #'
 #' @author Christoph Knapp
-get.form.class.interval = function(dafr,column,num.intervals,
-                                   open.left.closed.right=T,
-                                   method=c("equal.width",
-                                            "equal.count",
-                                            "specified"),
-                                   intervals=NULL,
-                                   labels=NULL){
-  if(length(method)>1||!method%in%c("equal.width",
-                                    "equal.count",
-                                    "specified")){
-    method = "equal.width"
+get.form.class.interval <- function(dafr, column, num.intervals,
+                                    open.left.closed.right = T,
+                                    method = c(
+                                      "equal.width",
+                                      "equal.count",
+                                      "specified"
+                                    ),
+                                    intervals = NULL,
+                                    labels = NULL) {
+  if (length(method) > 1 || !method %in% c(
+    "equal.width",
+    "equal.count",
+    "specified"
+  )) {
+    method <- "equal.width"
   }
-  if(!is.null(labels)&&(length(labels)!=num.intervals||
-                        any(grepl("^\\s*$",intervals)))){
+  if (!is.null(labels) && (length(labels) != num.intervals ||
+    any(grepl("^\\s*$", intervals)))) {
     warning("The labels not in the right format and are ignored.")
-    labels=NULL
+    labels <- NULL
   }
-  column.temp = dafr[,column]
-  ret = dafr
-  num.cols.old = ncol(ret)
-  if(!is.null(intervals)&&method%in%"specified"){
-    if(!is.numeric(intervals)||any(is.na(intervals))||
-       is.null(intervals)||length(intervals)!=(num.intervals-1)||
-       min(intervals,na.rm=T)<min(dafr[,column],na.rm=T)||
-       max(intervals,na.rm=T)<max(dafr[,column],na.rm=T)){
+  column.temp <- dafr[, column]
+  ret <- dafr
+  num.cols.old <- ncol(ret)
+  if (!is.null(intervals) && method %in% "specified") {
+    if (!is.numeric(intervals) || any(is.na(intervals)) ||
+      is.null(intervals) || length(intervals) != (num.intervals - 1) ||
+      min(intervals, na.rm = T) < min(dafr[, column], na.rm = T) ||
+      max(intervals, na.rm = T) < max(dafr[, column], na.rm = T)) {
       warning("The \"intervals\" variable is not in the right format.")
       return(dafr)
     }
-    column.temp = dafr[,column]
-    ret = cbind(dafr,cut(column.temp,
-                         breaks=intervals,
-                         labels=labels,
-                         include.lowest=T,
-                         right=open.left.closed.right))
-  }else if(method%in%"equal.width"){
-    ret = cbind(dafr,cut(x=column.temp,
-                         breaks=num.intervals,
-                         right=open.left.closed.right,
-                         labels=labels,
-                         include.lowest=TRUE))
-  }else if(method%in%"equal.count"){
-    ret = cbind(dafr,cut(x=column.temp,
-                         breaks=quantile(column.temp,
-                                         probs=seq(0,1,1/num.intervals,),
-                                         na.rm=TRUE),
-                         include.lowest = TRUE,
-                         right = open.left.closed.right,labels=labels))
+    column.temp <- dafr[, column]
+    ret <- cbind(dafr, cut(column.temp,
+      breaks = intervals,
+      labels = labels,
+      include.lowest = T,
+      right = open.left.closed.right
+    ))
+  } else if (method %in% "equal.width") {
+    ret <- cbind(dafr, cut(
+      x = column.temp,
+      breaks = num.intervals,
+      right = open.left.closed.right,
+      labels = labels,
+      include.lowest = TRUE
+    ))
+  } else if (method %in% "equal.count") {
+    ret <- cbind(dafr, cut(
+      x = column.temp,
+      breaks = quantile(column.temp,
+        probs = seq(0, 1, 1 / num.intervals, ),
+        na.rm = TRUE
+      ),
+      include.lowest = TRUE,
+      right = open.left.closed.right, labels = labels
+    ))
   }
-  if(num.cols.old<ncol(ret)){
-    count = 1
-    col.name = paste(column,method,count,sep=".")
-    while(paste(column,method,count,sep=".")%in%colnames(ret)){
-      count = count+1
-      col.name = paste(column,method,count,sep=".")
+  if (num.cols.old < ncol(ret)) {
+    count <- 1
+    col.name <- paste(column, method, count, sep = ".")
+    while (paste(column, method, count, sep = ".") %in% colnames(ret)) {
+      count <- count + 1
+      col.name <- paste(column, method, count, sep = ".")
     }
-    colnames(ret)[ncol(ret)] = col.name
+    colnames(ret)[ncol(ret)] <- col.name
   }
   ret
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
-#'Combine the levels of factor variables.
+#' Combine the levels of factor variables.
 #'
 #' @param dafr The dataframe containing factor columns
 #' specified in columns.
@@ -483,17 +506,17 @@ get.form.class.interval = function(dafr,column,num.intervals,
 #' which contains the combined levels.
 #'
 #' @author Christoph Knapp
-combine.levels = function(dafr,columns){
-  new.column = do.call(paste,lapply(columns,function(name,d){
-    d[,name]
-  },dafr))
-  dafr = cbind(dafr,gsub(" ",".",new.column))
-  colnames(dafr)[ncol(dafr)] = paste(columns,collapse=".")
+combine.levels <- function(dafr, columns) {
+  new.column <- do.call(paste, lapply(columns, function(name, d) {
+    d[, name]
+  }, dafr))
+  dafr <- cbind(dafr, gsub(" ", ".", new.column))
+  colnames(dafr)[ncol(dafr)] <- paste(columns, collapse = ".")
   dafr
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Renames the levels of a factor.
 #'
@@ -507,17 +530,17 @@ combine.levels = function(dafr,columns){
 #' columns are changed.
 #'
 #' @author Christoph Knapp
-rename.levels = function(dafr,column,new.levels){
-  temp = as.character(dafr[,column])
-  for(i in 1:length(levels(dafr[,column]))){
-    temp[which(dafr[,column]%in%levels(dafr[,column])[i])] = new.levels[i]
+rename.levels <- function(dafr, column, new.levels) {
+  temp <- as.character(dafr[, column])
+  for (i in 1:length(levels(dafr[, column]))) {
+    temp[which(dafr[, column] %in% levels(dafr[, column])[i])] <- new.levels[i]
   }
-  dafr[,column] = factor(temp,levels=new.levels)
+  dafr[, column] <- factor(temp, levels = new.levels)
   dafr
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' This function changes the order of levels in the data.
 #'
@@ -532,13 +555,13 @@ rename.levels = function(dafr,column,new.levels){
 #' reordered
 #'
 #' @author Christoph Knapp
-reorder.levels = function(dafr,column,levels.new){
-  dafr[,column] = factor(dafr[,column],levels=levels.new)
+reorder.levels <- function(dafr, column, levels.new) {
+  dafr[, column] <- factor(dafr[, column], levels = levels.new)
   dafr
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Collapses selected levels in factor vector
 #'
@@ -550,18 +573,18 @@ reorder.levels = function(dafr,column,levels.new){
 #' will be ignored.
 #'
 #' @author Christoph Knapp
-get.collapsed.column = function(column,to.collapse){
-  column = as.character(column)
-  new.level = paste(to.collapse,collapse=".")
-  indices = which(column%in%to.collapse)
-  if(length(indices)>0){
-    column[indices] = new.level
+get.collapsed.column <- function(column, to.collapse) {
+  column <- as.character(column)
+  new.level <- paste(to.collapse, collapse = ".")
+  indices <- which(column %in% to.collapse)
+  if (length(indices) > 0) {
+    column[indices] <- new.level
   }
   as.factor(column)
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Stacks the selected columns onto the data.
 #'
@@ -573,18 +596,18 @@ get.collapsed.column = function(column,to.collapse){
 #' @param dafr a dataframe the stacking is performed on.
 #'
 #' @author Christoph Knapp
-stack.variables.perform = function(columns,dafr){
-  stack = unlist(lapply(1:length(columns),function(index,d,c){
-    d[,which(colnames(d)%in%c[index])]
-  },dafr,columns))
-  colstack = unlist(lapply(1:length(columns),function(index,d,c){
-    rep(c[index],nrow(d))
-  },dafr,columns))
-  cbind(dafr,stack.columns=colstack,stack.variables=stack)
+stack.variables.perform <- function(columns, dafr) {
+  stack <- unlist(lapply(1:length(columns), function(index, d, c) {
+    d[, which(colnames(d) %in% c[index])]
+  }, dafr, columns))
+  colstack <- unlist(lapply(1:length(columns), function(index, d, c) {
+    rep(c[index], nrow(d))
+  }, dafr, columns))
+  cbind(dafr, stack.columns = colstack, stack.variables = stack)
 }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' aggregates the data over selected factor columns
 #'
@@ -604,56 +627,68 @@ stack.variables.perform = function(columns,dafr){
 #' @return A data.frame with the results of the aggregation.
 #'
 #' @author Christoph Knapp
-aggregate.data= function(aggregate.over,
-                         methods=c("mean","median","sum","sd","IQR","count"),
-                         dafr){
-  if(is.null(aggregate.over)|is.null(methods)|length(methods)==0|
-     length(aggregate.over)==0|is.numeric(aggregate.over)){
+aggregate.data <- function(aggregate.over,
+                           methods = c("mean", "median", "sum", "sd", "IQR", "count"),
+                           dafr) {
+  if (is.null(aggregate.over) | is.null(methods) | length(methods) == 0 |
+    length(aggregate.over) == 0 | is.numeric(aggregate.over)) {
     stop("aggregate.data : Wrong input")
   }
-  if(any(!as.character(aggregate.over)%in%colnames(dafr))){
+  if (any(!as.character(aggregate.over) %in% colnames(dafr))) {
     warning("aggregate.data : Some columns in aggregate.over are
             not in the column names for df. They will be ignored.")
   }
-  if(is.character(aggregate.over)){
-    aggregate.over = as.factor(aggregate.over)
+  if (is.character(aggregate.over)) {
+    aggregate.over <- as.factor(aggregate.over)
   }
-  bys = lapply(1:length(aggregate.over),
-               function(i,d,v){
-                 d[,which(colnames(d)%in%v[i])]
-               },dafr,aggregate.over)
-  names(bys) = aggregate.over
-  sets = lapply(1:length(methods),function(i,d,b,m){
-    if("count"%in%m[i]){
-      m[i] = "length"
-      temp = aggregate(d[,unlist(lapply(1:ncol(d),
-                                        function(j,da){
-                                          is.numeric(da[,j])
-                                        },d))],
-                       by=b, FUN=m[i],simplify = FALSE)
-    }else{
-      temp = aggregate(d[,unlist(lapply(1:ncol(d),
-                                        function(j,da){
-                                          is.numeric(da[,j])
-                                        },d))],
-                       by=b, FUN=m[i],na.rm=T,simplify = FALSE)
+  bys <- lapply(
+    1:length(aggregate.over),
+    function(i, d, v) {
+      d[, which(colnames(d) %in% v[i])]
+    }, dafr, aggregate.over
+  )
+  names(bys) <- aggregate.over
+  sets <- lapply(1:length(methods), function(i, d, b, m) {
+    if ("count" %in% m[i]) {
+      m[i] <- "length"
+      temp <- aggregate(
+        d[, unlist(lapply(
+          1:ncol(d),
+          function(j, da) {
+            is.numeric(da[, j])
+          }, d
+        ))],
+        by = b, FUN = m[i], simplify = FALSE
+      )
+    } else {
+      temp <- aggregate(
+        d[, unlist(lapply(
+          1:ncol(d),
+          function(j, da) {
+            is.numeric(da[, j])
+          }, d
+        ))],
+        by = b, FUN = m[i], na.rm = T, simplify = FALSE
+      )
     }
-    
-    colnames(temp)[(length(b)+1):ncol(temp)] = paste(m[i],
-                                                     colnames(temp)[(length(b)+1):ncol(temp)],sep=".")
+
+    colnames(temp)[(length(b) + 1):ncol(temp)] <- paste(m[i],
+      colnames(temp)[(length(b) + 1):ncol(temp)],
+      sep = "."
+    )
     temp
-  },dafr,bys,methods)
-  temp = sets[[1]]
-  if(length(sets)>1){
-    for(i in 2:length(sets)){
-      temp = merge(temp,sets[[i]])
+  }, dafr, bys, methods)
+  temp <- sets[[1]]
+  if (length(sets) > 1) {
+    for (i in 2:length(sets)) {
+      temp <- merge(temp, sets[[i]])
     }
   }
   temp
 }
 
 ## unlist list columns in a dataset
-#unlist.data.frame = function(data) {
+# unlist.data.frame = function(data) {
 #  col_names = colnames(data)
 #  temp1 = sapply(data, is.list)
 #  temp2 = do.call(
@@ -663,10 +698,10 @@ aggregate.data= function(aggregate.over,
 #  colnames(result) = col_names
 #
 #  result
-#}
+# }
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Sorts the df data frame after the input variables
 #'
@@ -684,25 +719,25 @@ aggregate.data= function(aggregate.over,
 #' @return An ordered data.frame
 #'
 #' @author Christoph Knapp
-sort.data = function(vars,sort.type,df){
-  if(any(!vars%in%colnames(df))){
+sort.data <- function(vars, sort.type, df) {
+  if (any(!vars %in% colnames(df))) {
     warning("sort.data : Not all variables in vars could be
             matched to column names in df.")
   }
-  if(length(vars)!=length(sort.type)){
+  if (length(vars) != length(sort.type)) {
     stop("sort.data : vas and sort.type have different length")
   }
-  z = lapply(1:length(vars),function(index,v,t,d){
-    vec = d[,which(colnames(d)%in%v[index])]
-    if(is.factor(vec)|is.character(vec)){
-      vec = xtfrm(as.character(vec))
+  z <- lapply(1:length(vars), function(index, v, t, d) {
+    vec <- d[, which(colnames(d) %in% v[index])]
+    if (is.factor(vec) | is.character(vec)) {
+      vec <- xtfrm(as.character(vec))
     }
-    if(!t[index]){
-      vec = -vec
+    if (!t[index]) {
+      vec <- -vec
     }
     vec
-  },vars,sort.type,df)
-  df[order.overwrite(z),]
+  }, vars, sort.type, df)
+  df[order.overwrite(z), ]
 }
 
 #' The iNZight version of the order function which lets you pass
@@ -722,15 +757,19 @@ sort.data = function(vars,sort.type,df){
 #' available to sort.data
 #'
 #' @author Christoph Knapp
-order.overwrite = function (z, na.last = TRUE, decreasing = FALSE) {
-  if (any(diff(l.z <- vapply(z, length, 1L)) != 0L))
+order.overwrite <- function(z, na.last = TRUE, decreasing = FALSE) {
+  if (any(diff(l.z <- vapply(z, length, 1L)) != 0L)) {
     stop("argument lengths differ")
+  }
   ans <- vapply(z, is.na, rep.int(NA, l.z[1L]))
-  ok <- if (is.matrix(ans))
+  ok <- if (is.matrix(ans)) {
     !apply(ans, 1, any)
-  else !any(ans)
-  if (all(!ok))
+  } else {
+    !any(ans)
+  }
+  if (all(!ok)) {
     return(integer())
+  }
   z[[1L]][!ok] <- NA
   ans <- do.call("order", c(z, decreasing = decreasing))
   keep <- seq_along(ok)[ok]
@@ -739,7 +778,7 @@ order.overwrite = function (z, na.last = TRUE, decreasing = FALSE) {
 
 
 ##########################################################
-#To be removed when the iNZight tools package is working##
+# To be removed when the iNZight tools package is working##
 ##########################################################
 #' Takes a sample of rows from a data.frame
 #'
@@ -759,35 +798,35 @@ order.overwrite = function (z, na.last = TRUE, decreasing = FALSE) {
 #' @author Christoph Knapp
 #'
 #' @export
-sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
-  if(sampleSize>nrow(df)){
-    stop(paste0("This sample is to large. Only ",nrow(df)," samples available."))
+sample.data <- function(df, sampleSize, numSample = 1, bootstrap = F) {
+  if (sampleSize > nrow(df)) {
+    stop(paste0("This sample is to large. Only ", nrow(df), " samples available."))
   }
-  if(sampleSize*numSample>nrow(df)&!bootstrap){
+  if (sampleSize * numSample > nrow(df) & !bootstrap) {
     stop(paste0("Not enough rows in data to sample that many times."))
   }
-  colname = "num.sample"
-  if("num.sample"%in%colnames(df)){
-    count=1
-    while(paste0("num.sample",count)%in%colnames(df)){
-      count = count+1
+  colname <- "num.sample"
+  if ("num.sample" %in% colnames(df)) {
+    count <- 1
+    while (paste0("num.sample", count) %in% colnames(df)) {
+      count <- count + 1
     }
-    colname = paste0("num.sample",count)
+    colname <- paste0("num.sample", count)
   }
-  ret = NULL
-  if(bootstrap){
-    ret = do.call(rbind,lapply(1:numSample,function(index,d,size){
-      cbind(d[sample(1:nrow(d),size),],rep(index,size))
-    },df,sampleSize))
-  }else{
-    ret = do.call(rbind,lapply(1:numSample,function(index,d,size){
-      s = sample(1:nrow(d),size)
-      temp = cbind(d[s,],rep(index,size))
-      d <<- d[-s,]
+  ret <- NULL
+  if (bootstrap) {
+    ret <- do.call(rbind, lapply(1:numSample, function(index, d, size) {
+      cbind(d[sample(1:nrow(d), size), ], rep(index, size))
+    }, df, sampleSize))
+  } else {
+    ret <- do.call(rbind, lapply(1:numSample, function(index, d, size) {
+      s <- sample(1:nrow(d), size)
+      temp <- cbind(d[s, ], rep(index, size))
+      d <<- d[-s, ]
       temp
-    },df,sampleSize))
+    }, df, sampleSize))
   }
-  colnames(ret)[ncol(ret)] = colname
+  colnames(ret)[ncol(ret)] <- colname
   ret
 }
 
@@ -796,10 +835,10 @@ sample.data = function(df,sampleSize,numSample=1,bootstrap=F){
 #' @param dafr The input dataframe to be searched.
 #'
 #' @author Christoph Knapp
-get.numeric.column.names = function(dafr){
-  colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
-    is.numeric(as.data.frame(d, stringsAsFactors = TRUE)[,index])
-  },dafr)))]
+get.numeric.column.names <- function(dafr) {
+  colnames(dafr)[which(unlist(lapply(1:ncol(dafr), function(index, d) {
+    is.numeric(as.data.frame(d, stringsAsFactors = TRUE)[, index])
+  }, dafr)))]
 }
 
 #' Returns the column names of the currently selected data which
@@ -808,10 +847,10 @@ get.numeric.column.names = function(dafr){
 #' @param dafr The input dataframe to be searched.
 #'
 #' @author Christoph Knapp
-get.categorical.column.names = function(dafr){
-  colnames(dafr)[which(unlist(lapply(1:ncol(dafr),function(index,d){
-    class(as.data.frame(d, stringsAsFactors = TRUE)[,index])%in%"factor"||class(as.data.frame(d, stringsAsFactors = TRUE)[,index])%in%"character"
-  },dafr)))]
+get.categorical.column.names <- function(dafr) {
+  colnames(dafr)[which(unlist(lapply(1:ncol(dafr), function(index, d) {
+    class(as.data.frame(d, stringsAsFactors = TRUE)[, index]) %in% "factor" || class(as.data.frame(d, stringsAsFactors = TRUE)[, index]) %in% "character"
+  }, dafr)))]
 }
 
 
@@ -821,7 +860,7 @@ get.categorical.column.names = function(dafr){
 #' @param x any oblect to be tested
 #'
 #' @author Christoph Knapp
-is.convertable.numeric = function(x){
+is.convertable.numeric <- function(x) {
   !suppressWarnings(is.na(as.numeric(x)))
 }
 
@@ -831,23 +870,23 @@ is.convertable.numeric = function(x){
 #' @param x a character or numeric value to test for.
 #'
 #' @author Christoph Knapp
-is.convertable.integer = function(x){
-  temp = is.convertable.numeric(x)
-  temp[temp] = as.numeric(x[temp])%%1==0
+is.convertable.integer <- function(x) {
+  temp <- is.convertable.numeric(x)
+  temp[temp] <- as.numeric(x[temp]) %% 1 == 0
   temp
 }
 
 #' Prints a summary of the currently selected data set.
 #'
 #' @author Christoph Knapp
-data.summary = function(dafr){
-  if(!is.null(dafr)){
-    cat("Number of rows in data: ",nrow(dafr),"\n")
-    cat("Number of columns in data: ",ncol(dafr),"\n")
+data.summary <- function(dafr) {
+  if (!is.null(dafr)) {
+    cat("Number of rows in data: ", nrow(dafr), "\n")
+    cat("Number of columns in data: ", ncol(dafr), "\n")
     cat("\n")
-    for(col in 1:length(colnames(dafr))){
-      cat(colnames(dafr)[col],"\n")
-      print(summary(dafr[,col]))
+    for (col in 1:length(colnames(dafr))) {
+      cat(colnames(dafr)[col], "\n")
+      print(summary(dafr[, col]))
     }
   }
 }
@@ -880,21 +919,37 @@ data.summary = function(dafr){
 #' @param ID.backward inputID for the backward button in the player widget
 #'
 #' @author Christoph Knapp
-get.player = function(ID.forward,ID.player,ID.backward,maxi){
-  fixedRow(column(width=8,offset=2,
-                  div(class='player',
-                      fixedRow(
-                        column(width=1,offset=1,
-                               div(class="seper",
-                                   actionButton(inputId=ID.backward,
-                                                label="",icon=icon("backward")))),
-                        column(width=6,offset=1,
-                               sliderInput(inputId=ID.player,label="",min=1,max=maxi,step=1,
-                                           animate=animationOptions(interval=500,loop=T,play=T),
-                                           width="100%",value=1,ticks=F)),
-                        column(width=1,offset=1,
-                               div(class="seper",actionButton(inputId=ID.forward,label="",icon=icon("forward"))))
-                      ))))
+get.player <- function(ID.forward, ID.player, ID.backward, maxi) {
+  fixedRow(column(
+    width = 8, offset = 2,
+    div(
+      class = "player",
+      fixedRow(
+        column(
+          width = 1, offset = 1,
+          div(
+            class = "seper",
+            actionButton(
+              inputId = ID.backward,
+              label = "", icon = icon("backward")
+            )
+          )
+        ),
+        column(
+          width = 6, offset = 1,
+          sliderInput(
+            inputId = ID.player, label = "", min = 1, max = maxi, step = 1,
+            animate = animationOptions(interval = 500, loop = T, play = T),
+            width = "100%", value = 1, ticks = F
+          )
+        ),
+        column(
+          width = 1, offset = 1,
+          div(class = "seper", actionButton(inputId = ID.forward, label = "", icon = icon("forward")))
+        )
+      )
+    )
+  ))
 }
 
 #' changes numeric columns to factor columns
@@ -906,27 +961,29 @@ get.player = function(ID.forward,ID.player,ID.backward,maxi){
 #' converted into character column
 #'
 #' @author Christoph Knapp
-change.factor.transform = function(temp,columns){
-  temp = as.data.frame(temp, stringsAsFactors = TRUE)
-  nums = unlist(lapply(1:ncol(temp),function(index,temp.data,columns){
-    if(is.numeric(temp.data[,index])){
+change.factor.transform <- function(temp, columns) {
+  temp <- as.data.frame(temp, stringsAsFactors = TRUE)
+  nums <- unlist(lapply(1:ncol(temp), function(index, temp.data, columns) {
+    if (is.numeric(temp.data[, index])) {
       columns[index]
-    }else{
+    } else {
       NULL
     }
-  },temp,columns))
-  temp = as.data.frame(stringsAsFactors = TRUE,
-                       do.call(cbind,lapply(1:ncol(temp),function(index,temp.data){
-                         if(is.numeric(temp.data[,index])){
-                           as.character(temp.data[,index])
-                         }else{
-                           NULL
-                         }
-                       },temp)),stringsAsFactors=T)
-  if(!is.null(temp)&&ncol(temp)>0&&nrow(temp)>0){
-    colnames(temp) = paste("factors",nums,sep="_")
+  }, temp, columns))
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(temp), function(index, temp.data) {
+      if (is.numeric(temp.data[, index])) {
+        as.character(temp.data[, index])
+      } else {
+        NULL
+      }
+    }, temp)), stringsAsFactors = T
+  )
+  if (!is.null(temp) && ncol(temp) > 0 && nrow(temp) > 0) {
+    colnames(temp) <- paste("factors", nums, sep = "_")
     temp
-  }else{
+  } else {
     NULL
   }
 }
@@ -937,284 +994,332 @@ change.factor.transform = function(temp,columns){
 #' @param columns the column names of the columns in dafr
 #'
 #' @author Christoph Knapp
-change.sign.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
-    if(is.numeric(dafr[,index])){
-      as.matrix(dafr[,index]*(-1))
-    }else{
+change.sign.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, dafr) {
+    if (is.numeric(dafr[, index])) {
+      as.matrix(dafr[, index] * (-1))
+    } else {
       NULL
     }
-  },dafr)))
-  if(!is.null(temp)){
-    colnames(temp) = paste("change_sign",columns[unlist(lapply(1:ncol(dafr),function(i,d){
-      is.numeric(d[,i])
-    },dafr))],sep=".")
+  }, dafr)))
+  if (!is.null(temp)) {
+    colnames(temp) <- paste("change_sign", columns[unlist(lapply(1:ncol(dafr), function(i, d) {
+      is.numeric(d[, i])
+    }, dafr))], sep = ".")
   }
   temp
 }
 
-test.for.dates = function(dafr){
-  ret = F
-  if(!is.null(dafr)){
-    ret = unlist(lapply(
-      1:ncol(dafr),function(index,d){
-        tryCatch({
-          is.numeric(as.numeric(as.Date(d[,index], origin = "1900-01-01")))
-        },
-        error=function(cond) {
-          ret = F
-        },
-        warning=function(cond) {
-          print(cond)
-        },
-        finally={})
-      },dafr))
+test.for.dates <- function(dafr) {
+  ret <- F
+  if (!is.null(dafr)) {
+    ret <- unlist(lapply(
+      1:ncol(dafr), function(index, d) {
+        tryCatch(
+          {
+            is.numeric(as.numeric(as.Date(d[, index], origin = "1900-01-01")))
+          },
+          error = function(cond) {
+            ret <- F
+          },
+          warning = function(cond) {
+            print(cond)
+          },
+          finally = {}
+        )
+      }, dafr
+    ))
   }
   ret
 }
 
-copy.transform = function(dafr,columns){
-  data = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = paste("copy",columns,sep=".")
+copy.transform <- function(dafr, columns) {
+  data <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- paste("copy", columns, sep = ".")
   data
 }
 
-reverse.coding.transform = function(dafr,columns){
-  data = as.data.frame(dafr, stringsAsFactors = TRUE)
-  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-    if(is.numeric(d[,index])){
-      min(d[,index],na.rm=T)+max(d[,index],na.rm=T)-d[,index]
-    }else{
+reverse.coding.transform <- function(dafr, columns) {
+  data <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+    if (is.numeric(d[, index])) {
+      min(d[, index], na.rm = T) + max(d[, index], na.rm = T) - d[, index]
+    } else {
       NULL
     }
-  },dafr)))
-  if(!is.null(temp)){
-    colnames(temp) = paste("reverse_coding",
-                           columns[unlist(lapply(1:ncol(dafr),
-                                                 function(i,d){
-                                                   is.numeric(d[,i])
-                                                 },dafr))],sep=".")
+  }, dafr)))
+  if (!is.null(temp)) {
+    colnames(temp) <- paste("reverse_coding",
+      columns[unlist(lapply(
+        1:ncol(dafr),
+        function(i, d) {
+          is.numeric(d[, i])
+        }, dafr
+      ))],
+      sep = "."
+    )
   }
   temp
 }
 
-median.split.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  nums = unlist(lapply(1:ncol(dafr),function(index,dafr){is.numeric(dafr[,index])},dafr))
-  dafr = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-    if(is.numeric(d[,index])){
-      med = median(d[,index],na.rm=T)
-      ret = rep("high",length(d[,index]))
-      ret[which(d[,index]<=med)] = "low"
+median.split.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  nums <- unlist(lapply(1:ncol(dafr), function(index, dafr) {
+    is.numeric(dafr[, index])
+  }, dafr))
+  dafr <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+    if (is.numeric(d[, index])) {
+      med <- median(d[, index], na.rm = T)
+      ret <- rep("high", length(d[, index]))
+      ret[which(d[, index] <= med)] <- "low"
       ret
-    }else{
+    } else {
       NULL
     }
-  },dafr)),stringsAsFactors=T)
-  colnames(dafr) = paste("median_split",columns[nums],sep="_")
+  }, dafr)), stringsAsFactors = T)
+  colnames(dafr) <- paste("median_split", columns[nums], sep = "_")
   dafr
 }
 
-standardize.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  dafr = as.data.frame(stringsAsFactors = TRUE,
-                       do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-                         if(is.numeric(d[,index])){
-                           (d[,index]-mean(d[,index],na.rm=T))/sd(d[,index],na.rm=T)
-                         }else{
-                           (as.numeric(factor(d[,index]))
-                            -mean(as.numeric(factor(d[,index])),na.rm=T))/
-                             sd(as.numeric(factor(d[,index])),na.rm=T)
-                         }
-                       },dafr)))
-  colnames(dafr) = paste("standardize",columns,sep=".")
+standardize.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  dafr <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        (d[, index] - mean(d[, index], na.rm = T)) / sd(d[, index], na.rm = T)
+      } else {
+        (as.numeric(factor(d[, index]))
+        - mean(as.numeric(factor(d[, index])), na.rm = T)) /
+          sd(as.numeric(factor(d[, index])), na.rm = T)
+      }
+    }, dafr))
+  )
+  colnames(dafr) <- paste("standardize", columns, sep = ".")
   dafr
 }
 
-center.transform = function(dafr,columns){
-  data = as.data.frame(dafr, stringsAsFactors = TRUE)
-  temp = as.data.frame(stringsAsFactors = TRUE,
-                       do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-                         if(is.numeric(d[,index])){
-                           d[,index]-mean(d[,index])
-                         }else{
-                           as.numeric(factor(d[,index]))-mean(as.numeric(factor(d[,index])))
-                         }
-                       },dafr)))
-  colnames(temp) = paste("center",columns,sep=".")
+center.transform <- function(dafr, columns) {
+  data <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        d[, index] - mean(d[, index])
+      } else {
+        as.numeric(factor(d[, index])) - mean(as.numeric(factor(d[, index])))
+      }
+    }, dafr))
+  )
+  colnames(temp) <- paste("center", columns, sep = ".")
   temp
 }
 
-divide.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = columns
-  if(is.null(dafr)){
+divide.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- columns
+  if (is.null(dafr)) {
     return(NULL)
-  }else{
-    if(ncol(as.data.frame(stringsAsFactors = TRUE,
-                          dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                            is.numeric(d[,index])
-                          },dafr))]))==1){
-      temp = as.data.frame(stringsAsFactors = TRUE,
-                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                             is.numeric(d[,index])
-                           },dafr))])
-      colnames(temp) = colnames(data)[unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },data))]
-    }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
-                                dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                                  is.numeric(d[,index])
-                                },data))]))>1){
-      temp = as.data.frame(stringsAsFactors = TRUE,
-                           divide(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                             is.numeric(d[,index])},dafr))]))
-      colnames(temp) = paste0("divide.",
-                              paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
-                                is.numeric(d[,index])
-                              },dafr))],collapse="."))
-    }else{
+  } else {
+    if (ncol(as.data.frame(
+      stringsAsFactors = TRUE,
+      dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))]
+    )) == 1) {
+      temp <- as.data.frame(
+        stringsAsFactors = TRUE,
+        dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))]
+      )
+      colnames(temp) <- colnames(data)[unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, data))]
+    } else if (ncol(as.data.frame(
+      stringsAsFactors = TRUE,
+      dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, data))]
+    )) > 1) {
+      temp <- as.data.frame(
+        stringsAsFactors = TRUE,
+        divide(dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))])
+      )
+      colnames(temp) <- paste0(
+        "divide.",
+        paste(colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))], collapse = ".")
+      )
+    } else {
       return(NULL)
     }
   }
   temp
 }
 
-divide = function(dafr){
-  dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-    is.numeric(d[,index])
-  },dafr))]
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  if(ncol(dafr)==1){
-    dafr[,1]
-  }else{
-    start = dafr[,1]
-    for(col in 2:ncol(dafr)){
-      start = start/dafr[,col]
+divide <- function(dafr) {
+  dafr <- dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+    is.numeric(d[, index])
+  }, dafr))]
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  if (ncol(dafr) == 1) {
+    dafr[, 1]
+  } else {
+    start <- dafr[, 1]
+    for (col in 2:ncol(dafr)) {
+      start <- start / dafr[, col]
     }
     start
   }
 }
 
-multiply.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = columns
-  if(is.null(dafr)){
+multiply.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- columns
+  if (is.null(dafr)) {
     return(NULL)
-  }else{
-    if(ncol(as.data.frame(stringsAsFactors = TRUE,
-                          dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                            is.numeric(d[,index])
-                          },dafr))]))==1){
-      temp = as.data.frame(stringsAsFactors = TRUE,
-                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                             is.numeric(d[,index])
-                           },dafr))])
-      colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))]
-    }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
-                                dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                                  is.numeric(d[,index])
-                                },dafr))]))>1){
-      temp = as.data.frame(stringsAsFactors = TRUE,
-                           multiply(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                             is.numeric(d[,index])
-                           },dafr))]))
-      colnames(temp) = paste0("multiply.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))],collapse="."))
-    }else{
+  } else {
+    if (ncol(as.data.frame(
+      stringsAsFactors = TRUE,
+      dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))]
+    )) == 1) {
+      temp <- as.data.frame(
+        stringsAsFactors = TRUE,
+        dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))]
+      )
+      colnames(temp) <- colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))]
+    } else if (ncol(as.data.frame(
+      stringsAsFactors = TRUE,
+      dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))]
+    )) > 1) {
+      temp <- as.data.frame(
+        stringsAsFactors = TRUE,
+        multiply(dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))])
+      )
+      colnames(temp) <- paste0("multiply.", paste(colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))], collapse = "."))
+    } else {
       return(NULL)
     }
   }
   temp
 }
 
-multiply = function(dafr){
-  dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-    is.numeric(d[,index])
-  },dafr))]
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  if(ncol(dafr)==1){
-    dafr[,1]
-  }else{
-    start = dafr[,1]
-    for(col in 2:ncol(dafr)){
-      start = start*dafr[,col]
+multiply <- function(dafr) {
+  dafr <- dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+    is.numeric(d[, index])
+  }, dafr))]
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  if (ncol(dafr) == 1) {
+    dafr[, 1]
+  } else {
+    start <- dafr[, 1]
+    for (col in 2:ncol(dafr)) {
+      start <- start * dafr[, col]
     }
     start
   }
 }
 
-subtract.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = columns
-  if(is.null(dafr)){
+subtract.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- columns
+  if (is.null(dafr)) {
     return(NULL)
-  }else{
-    if(ncol(as.data.frame(stringsAsFactors = TRUE,
-                          dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                            is.numeric(d[,index])
-                          },dafr))]))==1){
-      temp = as.data.frame(stringsAsFactors = TRUE,
-                           dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                             is.numeric(d[,index])
-                           },dafr))])
-      colnames(temp) = colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))]
-    }else if(ncol(as.data.frame(stringsAsFactors = TRUE,
-                                dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                                  is.numeric(d[,index])
-                                },dafr))]))>1){
-      temp = as.data.frame(stringsAsFactors = TRUE,
-                           subtract(dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-                             is.numeric(d[,index])
-                           },dafr))]))
-      colnames(temp) = paste0("subtract.",paste(colnames(dafr)[unlist(lapply(1:ncol(dafr),function(index,d){
-        is.numeric(d[,index])
-      },dafr))],collapse="."))
-    }else{
+  } else {
+    if (ncol(as.data.frame(
+      stringsAsFactors = TRUE,
+      dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))]
+    )) == 1) {
+      temp <- as.data.frame(
+        stringsAsFactors = TRUE,
+        dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))]
+      )
+      colnames(temp) <- colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))]
+    } else if (ncol(as.data.frame(
+      stringsAsFactors = TRUE,
+      dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))]
+    )) > 1) {
+      temp <- as.data.frame(
+        stringsAsFactors = TRUE,
+        subtract(dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))])
+      )
+      colnames(temp) <- paste0("subtract.", paste(colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
+        is.numeric(d[, index])
+      }, dafr))], collapse = "."))
+    } else {
       return(NULL)
     }
   }
   temp
 }
 
-subtract = function(dafr){
-  dafr = dafr[,unlist(lapply(1:ncol(dafr),function(index,d){
-    is.numeric(d[,index])
-  },dafr))]
-  dafr = as.data.frame(stringsAsFactors = TRUE,
-                       dafr)
-  if(ncol(dafr)==1){
-    dafr[,1]
-  }else{
-    start = dafr[,1]
-    for(col in 2:ncol(dafr)){
-      start = start-dafr[,col]
+subtract <- function(dafr) {
+  dafr <- dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
+    is.numeric(d[, index])
+  }, dafr))]
+  dafr <- as.data.frame(
+    stringsAsFactors = TRUE,
+    dafr
+  )
+  if (ncol(dafr) == 1) {
+    dafr[, 1]
+  } else {
+    start <- dafr[, 1]
+    for (col in 2:ncol(dafr)) {
+      start <- start - dafr[, col]
     }
     start
   }
 }
 
-add.transform  = function(temp,columns){
-  temp = as.data.frame(temp, stringsAsFactors = TRUE)
-  colnames(temp) = columns
-  if(is.null(temp)){
+add.transform <- function(temp, columns) {
+  temp <- as.data.frame(temp, stringsAsFactors = TRUE)
+  colnames(temp) <- columns
+  if (is.null(temp)) {
     return(NULL)
-  }else{
-    ret = as.data.frame(stringsAsFactors = TRUE,
-                        temp[,unlist(lapply(1:ncol(temp),function(index,d){
-                          is.numeric(d[,index])
-                        },temp))])
-    if(ncol(ret)>1){
-      ret = as.data.frame(stringsAsFactors = TRUE,
-                          apply(ret,1,function(row){sum(row)}))
-      colnames(ret) = paste0("add_",paste(colnames(temp),collapse="_"))
-    }else{
+  } else {
+    ret <- as.data.frame(
+      stringsAsFactors = TRUE,
+      temp[, unlist(lapply(1:ncol(temp), function(index, d) {
+        is.numeric(d[, index])
+      }, temp))]
+    )
+    if (ncol(ret) > 1) {
+      ret <- as.data.frame(
+        stringsAsFactors = TRUE,
+        apply(ret, 1, function(row) {
+          sum(row)
+        })
+      )
+      colnames(ret) <- paste0("add_", paste(colnames(temp), collapse = "_"))
+    } else {
       return(NULL)
     }
   }
@@ -1223,323 +1328,341 @@ add.transform  = function(temp,columns){
 
 # returns the transformed columns and the original data as
 # dataframe (cbind(data,<transformed columns>)).
-transform.perform = function(dafr,type,columns){
-  temp = transform.get.temp(dafr,type,columns)
-  if(!is.null(temp)){
-    temp = cbind(dafr,temp)
+transform.perform <- function(dafr, type, columns) {
+  temp <- transform.get.temp(dafr, type, columns)
+  if (!is.null(temp)) {
+    temp <- cbind(dafr, temp)
   }
   temp
 }
 
 # returns the transformed columns and the original columns as
 # dataframe (cbind(<original columns>,<transformed columns>)).
-transform.tempTable = function(dafr,type,columns){
-  temp1 = as.data.frame(stringsAsFactors = TRUE,
-                        dafr[,which(colnames(dafr)%in%columns)])
-  colnames(temp1) = columns
-  temp2 = transform.get.temp(dafr,type,columns)
-  if(!is.null(temp2)){
-    temp1 = data.frame(stringsAsFactors = TRUE,temp1,temp2)
+transform.tempTable <- function(dafr, type, columns) {
+  temp1 <- as.data.frame(
+    stringsAsFactors = TRUE,
+    dafr[, which(colnames(dafr) %in% columns)]
+  )
+  colnames(temp1) <- columns
+  temp2 <- transform.get.temp(dafr, type, columns)
+  if (!is.null(temp2)) {
+    temp1 <- data.frame(stringsAsFactors = TRUE, temp1, temp2)
   }
   temp1
 }
 
 # transorms the columns named columns in data with the selected
 # type (type) of transformation.
-transform.get.temp = function(dafr,type,columns){
-  temp = NULL
-  if (!is.null(columns) && type%in%"log"){
-    temp = log.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"add"){
-    temp = add.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"subtract"){
-    temp = subtract.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"multiply"){
-    temp = multiply.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"divide"){
-    temp = divide.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"root"){
-    temp = root.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"square"){
-    temp = square.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"abs"){
-    temp = abs.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"center"){
-    temp = center.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"standardize"){
-    temp = standardize.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"median split"){
-    temp = median.split.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"reverse-coding"){
-    temp = reverse.coding.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"copy"){
-    temp = copy.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"change sign"){
-    temp = change.sign.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%"change to factor"){
-    temp = change.factor.transform(dafr[,columns],columns)
-  } else if (!is.null(columns)&type%in%" "){
-    temp = NULL
+transform.get.temp <- function(dafr, type, columns) {
+  temp <- NULL
+  if (!is.null(columns) && type %in% "log") {
+    temp <- log.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "add") {
+    temp <- add.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "subtract") {
+    temp <- subtract.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "multiply") {
+    temp <- multiply.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "divide") {
+    temp <- divide.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "root") {
+    temp <- root.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "square") {
+    temp <- square.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "abs") {
+    temp <- abs.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "center") {
+    temp <- center.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "standardize") {
+    temp <- standardize.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "median split") {
+    temp <- median.split.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "reverse-coding") {
+    temp <- reverse.coding.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "copy") {
+    temp <- copy.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "change sign") {
+    temp <- change.sign.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% "change to factor") {
+    temp <- change.factor.transform(dafr[, columns], columns)
+  } else if (!is.null(columns) & type %in% " ") {
+    temp <- NULL
   }
   temp
 }
 
-log.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = columns
-  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,dafr){
-    if(is.numeric(dafr[,index])){
-      log(dafr[,index])
-    }else{
+log.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- columns
+  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, dafr) {
+    if (is.numeric(dafr[, index])) {
+      log(dafr[, index])
+    } else {
       NULL
     }
-  },dafr)))
-  if(!is.null(temp)&&dim(temp)[1]>0&&dim(temp)[2]>0){
-    colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,dafr){
-      if(is.numeric(dafr[,index])){
-        paste0("log.",colnames(dafr)[index])
-      }else{
+  }, dafr)))
+  if (!is.null(temp) && dim(temp)[1] > 0 && dim(temp)[2] > 0) {
+    colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, dafr) {
+      if (is.numeric(dafr[, index])) {
+        paste0("log.", colnames(dafr)[index])
+      } else {
         NULL
       }
-    },dafr))
+    }, dafr))
     temp
-  }else{
+  } else {
     NULL
   }
 }
 
-root.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = columns
-  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-    if(is.numeric(d[,index])){
-      sqrt(d[,index])
-    }else{
+root.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- columns
+  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+    if (is.numeric(d[, index])) {
+      sqrt(d[, index])
+    } else {
       NULL
     }
-  },dafr)))
+  }, dafr)))
   ##  temp = as.data.frame(temp)
-  if(dim(temp)[1]>0&&dim(temp)[2]>0){
-    colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,d){
-      if(is.numeric(d[,index])){
-        paste0("root.",colnames(d)[index])
-      }else{
+  if (dim(temp)[1] > 0 && dim(temp)[2] > 0) {
+    colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        paste0("root.", colnames(d)[index])
+      } else {
         NULL
       }
-    },dafr))
+    }, dafr))
     temp
-  }else{
+  } else {
     NULL
   }
 }
 
-square.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = columns
-  temp = as.data.frame(stringsAsFactors = TRUE, do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-    if(is.numeric(d[,index])){
-      d[,index]^2
-    }else{
+square.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- columns
+  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+    if (is.numeric(d[, index])) {
+      d[, index]^2
+    } else {
       NULL
     }
-  },dafr)))
+  }, dafr)))
   ##  temp = as.data.frame(temp)
-  if(dim(temp)[1]>0&&dim(temp)[2]>0){
-    colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,d){
-      if(is.numeric(d[,index])){
-        paste0("square.",colnames(d)[index])
-      }else{
+  if (dim(temp)[1] > 0 && dim(temp)[2] > 0) {
+    colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        paste0("square.", colnames(d)[index])
+      } else {
         NULL
       }
-    },dafr))
+    }, dafr))
     temp
-  }else{
+  } else {
     NULL
   }
 }
 
-abs.transform = function(dafr,columns){
-  dafr = as.data.frame(dafr, stringsAsFactors = TRUE)
-  colnames(dafr) = columns
-  temp = as.data.frame(stringsAsFactors = TRUE,
-                       do.call(cbind,lapply(1:ncol(dafr),function(index,d){
-                         if(is.numeric(d[,index])){
-                           abs(d[,index])
-                         }else{
-                           NULL
-                         }
-                       },dafr)))
+abs.transform <- function(dafr, columns) {
+  dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
+  colnames(dafr) <- columns
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        abs(d[, index])
+      } else {
+        NULL
+      }
+    }, dafr))
+  )
   #   temp = as.data.frame(temp)
-  if(dim(temp)[1]>0&&dim(temp)[2]>0){
-    colnames(temp) = unlist(lapply(1:ncol(dafr),function(index,d){
-      if(is.numeric(d[,index])){
-        paste0("abs.",colnames(d)[index])
-      }else{
+  if (dim(temp)[1] > 0 && dim(temp)[2] > 0) {
+    colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        paste0("abs.", colnames(d)[index])
+      } else {
         NULL
       }
-    },dafr))
+    }, dafr))
     temp
-  }else{
+  } else {
     NULL
   }
 }
 
-delete.old.files = function(data_dir,days){
-  if(length(list.files(paste0(data_dir,"/Imported")))>0){
-    unlink(list.files(paste0(data_dir,"/Imported"))
-           [difftime(Sys.time(),
-                     file.info(list.files(
-                       paste0(data_dir,"/Imported"),full.name=T))
-                     [,"mtime"], units = "days")>days])
+delete.old.files <- function(data_dir, days) {
+  if (length(list.files(paste0(data_dir, "/Imported"))) > 0) {
+    unlink(list.files(paste0(data_dir, "/Imported"))
+    [difftime(Sys.time(),
+        file.info(list.files(
+          paste0(data_dir, "/Imported"),
+          full.name = T
+        ))
+        [, "mtime"],
+        units = "days"
+      ) > days])
   }
 }
 
 ###  A function for displaying help messages.
 
-help.display = function(title, id, file) {
+help.display <- function(title, id, file) {
   HTML(paste("<div class='modal fade' id='", id, "' tabindex='-1' role='dialog' aria-labelledby='basicModal' aria-hidden='true'>
              <div class='modal-dialog'>
              <div class='modal-content'>
              <div class='modal-header'>
-             <h4 class='modal-title' id='myModalLabel'>",title,"</h4>
+             <h4 class='modal-title' id='myModalLabel'>", title, "</h4>
              </div>
              <div class='modal-body'>",
-             mark_html(file = file),
-             "</div>
+    mark_html(file = file),
+    "</div>
              <div class='modal-footer'>
              </div>
              </div>
              </div>
              </div>
-             <a href='#' class='btn btn-xs btn-success' data-toggle='modal' data-target='#", id, "'>Help</a>", sep = ""))
+             <a href='#' class='btn btn-xs btn-success' data-toggle='modal' data-target='#", id, "'>Help</a>",
+    sep = ""
+  ))
 }
 
 ## reads a data set from a filename in the data directory
-load.data = function(data_dir,fileID=NULL,path=NULL){
-  temp = NULL
-  full.name = list.files(data_dir,full.names=T,recursive=T)
-  if(!is.null(fileID)){
-    if(is.null(path)){
-      indexes = grep(paste(fileID,".",sep=""),full.name,fixed=T)
-    }else if(!is.null(path)&file.exists(path)){
-      full.name = path
-      indexes = 1
-    }else{
-      return(list(NULL,NULL))
+load.data <- function(data_dir, fileID = NULL, path = NULL) {
+  temp <- NULL
+  full.name <- list.files(data_dir, full.names = T, recursive = T)
+  if (!is.null(fileID)) {
+    if (is.null(path)) {
+      indexes <- grep(paste(fileID, ".", sep = ""), full.name, fixed = T)
+    } else if (!is.null(path) & file.exists(path)) {
+      full.name <- path
+      indexes <- 1
+    } else {
+      return(list(NULL, NULL))
     }
-    if(length(indexes[1])>0){
-      ext = strsplit(full.name[indexes[1]],".",fixed=T)[[1]]
-      ext = ext[length(ext)]
-      if(!(tolower(ext)%in%c("rds","rda","rdata","csv","txt", "xls", "xlsx"))){
-        ext = strsplit(fileID,".",fixed=T)[[1]]
-        ext = ext[length(ext)]
+    if (length(indexes[1]) > 0) {
+      ext <- strsplit(full.name[indexes[1]], ".", fixed = T)[[1]]
+      ext <- ext[length(ext)]
+      if (!(tolower(ext) %in% c("rds", "rda", "rdata", "csv", "txt", "xls", "xlsx"))) {
+        ext <- strsplit(fileID, ".", fixed = T)[[1]]
+        ext <- ext[length(ext)]
       }
-      if(!file.exists(full.name[indexes[1]])){
-        return(list(NULL,NULL))
+      if (!file.exists(full.name[indexes[1]])) {
+        return(list(NULL, NULL))
       }
       # catch possible problems with user data.
       tryCatch({
-        if(tolower(ext)%in%"rds"){
-          temp = readRDS(file=full.name[indexes[1]])
-        }else if(tolower(ext)%in%"rda"|tolower(ext)%in%"rdata"){
-          name = load(full.name[indexes[1]])
-          temp = get(name)
-        }else if(tolower(ext)%in%"csv"){
-          temp = read.csv(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"), stringsAsFactors=TRUE)
-        }else if(tolower(ext)%in%"txt"){
-          temp = read.delim(full.name[indexes[1]],comment.char="#", na.strings = c("NULL","NA","N/A","#N/A","","<NA>"), stringsAsFactors = TRUE)
-        }else if(tolower(ext)%in%"xls"){
+        if (tolower(ext) %in% "rds") {
+          temp <- readRDS(file = full.name[indexes[1]])
+        } else if (tolower(ext) %in% "rda" | tolower(ext) %in% "rdata") {
+          name <- load(full.name[indexes[1]])
+          temp <- get(name)
+        } else if (tolower(ext) %in% "csv") {
+          temp <- read.csv(full.name[indexes[1]], comment.char = "#", na.strings = c("NULL", "NA", "N/A", "#N/A", "", "<NA>"), stringsAsFactors = TRUE)
+        } else if (tolower(ext) %in% "txt") {
+          temp <- read.delim(full.name[indexes[1]], comment.char = "#", na.strings = c("NULL", "NA", "N/A", "#N/A", "", "<NA>"), stringsAsFactors = TRUE)
+        } else if (tolower(ext) %in% "xls") {
           #          temp = read.xlsx(full.name[indexes[1]], 1)
-          temp = as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
-        }else if(tolower(ext)%in%"xlsx"){
+          temp <- as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
+        } else if (tolower(ext) %in% "xlsx") {
           #          temp = read.xlsx(full.name[indexes[1]], 1)
-          temp = as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
-        }else if(tolower(ext)%in%"sas7bdat"){
-          temp = as.data.frame(stringsAsFactors = TRUE, read.sas7bdat(full.name[indexes[1]]))
-        }else if(tolower(ext)%in%"dta"){
-          temp = as.data.frame(stringsAsFactors = TRUE, read.dta(full.name[indexes[1]]))
-        }else if(tolower(ext)%in%"sav"){
-          temp = as.data.frame(stringsAsFactors = TRUE, read.spss(full.name[indexes[1]], use.value.labels=FALSE,to.data.frame=TRUE))
+          temp <- as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
+        } else if (tolower(ext) %in% "sas7bdat") {
+          temp <- as.data.frame(stringsAsFactors = TRUE, read.sas7bdat(full.name[indexes[1]]))
+        } else if (tolower(ext) %in% "dta") {
+          temp <- as.data.frame(stringsAsFactors = TRUE, read.dta(full.name[indexes[1]]))
+        } else if (tolower(ext) %in% "sav") {
+          temp <- as.data.frame(stringsAsFactors = TRUE, read.spss(full.name[indexes[1]], use.value.labels = FALSE, to.data.frame = TRUE))
         }
       }, error = function(e) {
         print(e)
       }, finally = {})
     }
   }
-  if(is.null(fileID)){
-    list(NULL,temp)
-  }else{
-    list(data.name=basename(fileID),data.set=temp)
+  if (is.null(fileID)) {
+    list(NULL, temp)
+  } else {
+    list(data.name = basename(fileID), data.set = temp)
   }
 }
 
 ## returns directories in the data directory
-get.data.dirs = function(data_dir){
+get.data.dirs <- function(data_dir) {
   list.files(data_dir,
-             include.dirs=T,
-             full.names=T)[file.info(paste(data_dir,
-                                           list.files(data_dir),
-                                           sep="/"))[,"isdir"]]
+    include.dirs = T,
+    full.names = T
+  )[file.info(paste(data_dir,
+    list.files(data_dir),
+    sep = "/"
+  ))[, "isdir"]]
 }
 
 ## returns a radioButton widget, for every filename in the dir.lable directory.
-get.radio.list = function(dir.label,idlabel){
-  files = c()
-  files = list.files(dir.label,
-                     recursive=T,
-                     full.name=T)[!(file.info(list.files(dir.label,
-                                                         recursive=T,
-                                                         full.names=T))[,"isdir"])]
-  temp.files = strsplit(files,"/")
-  files = unlist(lapply(temp.files,
-                        function(x,label){
-                          paste(x[(which(x%in%label)+1):length(x)],collapse="==>")
-                        },strsplit(dir.label,"/",fixed=T)[[1]][length(strsplit(dir.label,"/",fixed=T)[[1]])]))
-  ret=NULL
-  if(length(files)>0){
-    columns = lapply(1:length(files),
-                     function(i,ns){
-                       paste(strsplit(ns[i],".",fixed=T)[[1]][1:(length(strsplit(ns[i],".",fixed=T)[[1]])-1)],collapse=".")
-                     },
-                     basename(files))
-    ret=radioButtons(inputId=paste(basename(dir.label),idlabel,sep=""), label=basename(dir.label), choices=columns, selected=columns[1])
+get.radio.list <- function(dir.label, idlabel) {
+  files <- c()
+  files <- list.files(dir.label,
+    recursive = T,
+    full.name = T
+  )[!(file.info(list.files(dir.label,
+    recursive = T,
+    full.names = T
+  ))[, "isdir"])]
+  temp.files <- strsplit(files, "/")
+  files <- unlist(lapply(
+    temp.files,
+    function(x, label) {
+      paste(x[(which(x %in% label) + 1):length(x)], collapse = "==>")
+    }, strsplit(dir.label, "/", fixed = T)[[1]][length(strsplit(dir.label, "/", fixed = T)[[1]])]
+  ))
+  ret <- NULL
+  if (length(files) > 0) {
+    columns <- lapply(
+      1:length(files),
+      function(i, ns) {
+        paste(strsplit(ns[i], ".", fixed = T)[[1]][1:(length(strsplit(ns[i], ".", fixed = T)[[1]]) - 1)], collapse = ".")
+      },
+      basename(files)
+    )
+    ret <- radioButtons(inputId = paste(basename(dir.label), idlabel, sep = ""), label = basename(dir.label), choices = columns, selected = columns[1])
   }
   ret
 }
 
-change.file.ext = function(name,new.ext){
-  splity = strsplit(name,".",fixed=T)[[1]]
-  if(length(splity)>1){
-    splity = paste(paste(splity[1:(length(splity)-1)],collapse="."),new.ext,sep=".")
-  }else{
-    splity = paste0(splity,".",new.ext)
+change.file.ext <- function(name, new.ext) {
+  splity <- strsplit(name, ".", fixed = T)[[1]]
+  if (length(splity) > 1) {
+    splity <- paste(paste(splity[1:(length(splity) - 1)], collapse = "."), new.ext, sep = ".")
+  } else {
+    splity <- paste0(splity, ".", new.ext)
   }
   splity
 }
 
-get.vars = function(vars.path){
-  lines = c()
-  if(is.null(vars.path)){
-    vars.path = "VARS"
+get.vars <- function(vars.path) {
+  lines <- c()
+  if (is.null(vars.path)) {
+    vars.path <- "VARS"
   }
   if (!file.exists(vars.path)) vars.path <- "VARS.default"
-  if(file.exists(vars.path)){
-    lines = scan(vars.path,what="character",sep="\n",quiet=T)
-  }else{
+  if (file.exists(vars.path)) {
+    lines <- scan(vars.path, what = "character", sep = "\n", quiet = T)
+  } else {
     stop("The VARS file does not exist.")
   }
-  if(length(lines)>0){
-    ret = NULL
-    for(line in lines){
-      if(!grepl("^#",line)){
-        if(grepl("#",line)){
-          line = strsplit(line,"#")[[1]][1]
+  if (length(lines) > 0) {
+    ret <- NULL
+    for (line in lines) {
+      if (!grepl("^#", line)) {
+        if (grepl("#", line)) {
+          line <- strsplit(line, "#")[[1]][1]
         }
-        if(grepl("=",line)&&length(strsplit(line,"=")[[1]])>1){
-          if(is.null(ret)){
-            ret = list()
+        if (grepl("=", line) && length(strsplit(line, "=")[[1]]) > 1) {
+          if (is.null(ret)) {
+            ret <- list()
           }
-          ret[[trim(strsplit(line,"=")[[1]][1])]] = trim(strsplit(line,"=")[[1]][2])
+          ret[[trim(strsplit(line, "=")[[1]][1])]] <- trim(strsplit(line, "=")[[1]][2])
         }
       }
     }
@@ -1559,20 +1682,20 @@ get.vars = function(vars.path){
 #' relevant permission types have been added.
 #'
 #' @author Christoph Knapp
-file.writable = function(file,debug){
+file.writable <- function(file, debug) {
   tryCatch({
-    if(file.exists(file)&&
-       "unix"%in%.Platform$OS.type&&
-       "Linux"%in%Sys.info()["sysname"]){
-      grepl("777",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
-        grepl("775",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])||
-        grepl("755",strsplit(system(paste("stat -c \"%a %n\" ",file,sep=""),intern=T)," ")[[1]][1])
-    }else{
+    if (file.exists(file) &&
+      "unix" %in% .Platform$OS.type &&
+      "Linux" %in% Sys.info()["sysname"]) {
+      grepl("777", strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""), intern = T), " ")[[1]][1]) ||
+        grepl("775", strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""), intern = T), " ")[[1]][1]) ||
+        grepl("755", strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""), intern = T), " ")[[1]][1])
+    } else {
       F
     }
-  },error = function(e){
+  }, error = function(e) {
     return(F)
-  },finally = {})
+  }, finally = {})
 }
 
 #' Wrapper function for \code{dir.create} which returns
@@ -1596,13 +1719,13 @@ file.writable = function(file,debug){
 #' not.
 #'
 #' @author Christoph Knapp
-dir.create.logical = function(path,
-                              showWarnings=TRUE,
-                              recursive = FALSE,
-                              mode="0777"){
-  result = tryCatch({
-    if(!file.exists(path)){
-      dir.create(path,showWarnings,recursive,mode)
+dir.create.logical <- function(path,
+                               showWarnings = TRUE,
+                               recursive = FALSE,
+                               mode = "0777") {
+  result <- tryCatch({
+    if (!file.exists(path)) {
+      dir.create(path, showWarnings, recursive, mode)
     }
     T
   }, warning = function(w) {
@@ -1612,17 +1735,17 @@ dir.create.logical = function(path,
   }, finally = {})
 }
 
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+trim <- function(x) gsub("^\\s+|\\s+$", "", x)
 
-get.quantiles = function(subx){
-  g1 = rep("",length(subx))
-  if(is.numeric(subx)){
-    quant = quantile(subx,na.rm=T)
-    g1[which(subx>=quant[1]&subx<quant[2])] = paste(round(quant[1],2),round(quant[2],2),sep="-")
-    g1[which(subx>=quant[2]&subx<quant[3])] = paste(round(quant[2],2),round(quant[3],2),sep="-")
-    g1[which(subx>=quant[3]&subx<xquant[4])] = paste(round(quant[3],2),round(quant[4],2),sep="-")
-    g1[which(subx>=quant[4]&subx<=quant[5])] = paste(round(quant[4],2),round(quant[5],2),sep="-")
-    g1 = as.factor(g1)
+get.quantiles <- function(subx) {
+  g1 <- rep("", length(subx))
+  if (is.numeric(subx)) {
+    quant <- quantile(subx, na.rm = T)
+    g1[which(subx >= quant[1] & subx < quant[2])] <- paste(round(quant[1], 2), round(quant[2], 2), sep = "-")
+    g1[which(subx >= quant[2] & subx < quant[3])] <- paste(round(quant[2], 2), round(quant[3], 2), sep = "-")
+    g1[which(subx >= quant[3] & subx < xquant[4])] <- paste(round(quant[3], 2), round(quant[4], 2), sep = "-")
+    g1[which(subx >= quant[4] & subx <= quant[5])] <- paste(round(quant[4], 2), round(quant[5], 2), sep = "-")
+    g1 <- as.factor(g1)
   }
   g1
 }
@@ -1635,9 +1758,9 @@ get.quantiles = function(subx){
 #' invalid characters to dots
 #'
 #' @return Character vector of valid names
-make_names = function(names) {
-  names = gsub("\\s+", "_", names)
-  names = make.names(names)
+make_names <- function(names) {
+  names <- gsub("\\s+", "_", names)
+  names <- make.names(names)
 
   return(names)
 }
@@ -1657,131 +1780,133 @@ make_names = function(names) {
 #'
 #' @author Christoph Knapp
 
-parseQueryString = function(str) {
-  if(grepl("docs.google.com", str)) {
-    return(list(url = sub(".*?url=(.*?)&land.*", "\\1", str),
-                land = sub(".*?&land=(.*?)", "\\1", str)))
-  }
-  else
+parseQueryString <- function(str) {
+  if (grepl("docs.google.com", str)) {
+    return(list(
+      url = sub(".*?url=(.*?)&land.*", "\\1", str),
+      land = sub(".*?&land=(.*?)", "\\1", str)
+    ))
+  } else {
     shiny::parseQueryString(str)
+  }
 }
 
 # # deprecated
-get.data.from.URL = function(URL, data.dir.import){
-  ret = list()
-  URL = URLencode(URL)
-  
-  if(grepl("docs.google.com", URL)) {
-    #if(!grepl("output=csv", URL)) {
+get.data.from.URL <- function(URL, data.dir.import) {
+  ret <- list()
+  URL <- URLencode(URL)
+
+  if (grepl("docs.google.com", URL)) {
+    # if(!grepl("output=csv", URL)) {
     #  URL = paste(URL, "=0&single=true&output=csv", sep = "")
-    #}
-    
-    url.index = gregexpr("output=", URL)
-    url.index = unlist(url.index)
-    file.type = substr(URL, url.index+7, nchar(URL))
-    temp.file.name = tempfile()
-    temp.file.name.index = gregexpr("file", temp.file.name)
-    temp.file.name.index = unlist(temp.file.name.index)
-    file.name = substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
-    name = paste(file.name, file.type, sep = ".")
+    # }
+
+    url.index <- gregexpr("output=", URL)
+    url.index <- unlist(url.index)
+    file.type <- substr(URL, url.index + 7, nchar(URL))
+    temp.file.name <- tempfile()
+    temp.file.name.index <- gregexpr("file", temp.file.name)
+    temp.file.name.index <- unlist(temp.file.name.index)
+    file.name <- substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+    name <- paste(file.name, file.type, sep = ".")
+  } else {
+    name <- strsplit(URL, "/")[[1]]
+    name <- strsplit(name[length(name)], "?", fixed = T)[[1]][1]
   }
-  else {
-    name = strsplit(URL,"/")[[1]]
-    name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+
+  if (!file.exists(paste(data.dir.import, "/Imported", sep = "")) &&
+    file.writable(data.dir.import)) {
+    dir.create(paste(data.dir.import, "/Imported", sep = ""), recursive = TRUE)
   }
-  
-  if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
-      file.writable(data.dir.import)) {
-    dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
-  }
-  
+
   #  print(URL)
   #  print(name)
-  
+
   tryCatch({
-    if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    else
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    
-    temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
-    if(!is.null(temp[[2]])){
-      ret$data.set = temp[[2]]
-      ret$data.name = name
-    }else{
+    if (Sys.info()["sysname"] %in% c("Windows", "Linux")) {
+      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "auto")
+    } else {
+      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "auto")
+    }
+
+    temp <- load.data(data.dir.import, fileID = name, path = paste0(data.dir.import, "/Imported/", name))
+    if (!is.null(temp[[2]])) {
+      ret$data.set <- temp[[2]]
+      ret$data.name <- name
+    } else {
       return(NULL)
     }
     ret
-  },error = function(e){
-    if(file.exists(paste0(data.dir.import,"/Imported/",name))){
-      unlink(paste0(data.dir.import,"Imported/",name))
+  }, error = function(e) {
+    if (file.exists(paste0(data.dir.import, "/Imported/", name))) {
+      unlink(paste0(data.dir.import, "Imported/", name))
     }
     print(e)
-  },warning = function(w) {
+  }, warning = function(w) {
     print(w)
-  },finally = {})
+  }, finally = {})
 }
 
-get.data.name.from.URL = function(URL) {
-  if(grepl("docs.google.com", URL)) {
-    url.index = gregexpr("output=", URL)
-    url.index = unlist(url.index)
-    file.type = substr(URL, url.index+7, nchar(URL))
-    temp.file.name = tempfile()
-    temp.file.name.index = gregexpr("file", temp.file.name)
-    temp.file.name.index = unlist(temp.file.name.index)
-    file.name = substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
-    name = paste(file.name, file.type, sep = ".")
-  }
-  else {
-    name = strsplit(URL,"/")[[1]]
-    name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+get.data.name.from.URL <- function(URL) {
+  if (grepl("docs.google.com", URL)) {
+    url.index <- gregexpr("output=", URL)
+    url.index <- unlist(url.index)
+    file.type <- substr(URL, url.index + 7, nchar(URL))
+    temp.file.name <- tempfile()
+    temp.file.name.index <- gregexpr("file", temp.file.name)
+    temp.file.name.index <- unlist(temp.file.name.index)
+    file.name <- substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+    name <- paste(file.name, file.type, sep = ".")
+  } else {
+    name <- strsplit(URL, "/")[[1]]
+    name <- strsplit(name[length(name)], "?", fixed = T)[[1]][1]
   }
   return(name)
 }
 
 # get data from google docs urls
-get.data.from.googledocs = function(URL, data.dir.import){
-  ret = list()
-  #URL = gsub(" ", "%20", URL)
-  URL = URLencode(URL)
-  #print(URL)
-  #name = strsplit(URL,"/")[[1]]
-  #name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
-  url.index = gregexpr("output=", URL)
-  url.index = unlist(url.index)
-  file.type = substr(URL, url.index+7, nchar(URL))
-  temp.file.name = tempfile()
-  temp.file.name.index = gregexpr("file", temp.file.name)
-  temp.file.name.index = unlist(temp.file.name.index)
-  file.name = substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
-  name = paste(file.name, file.type, sep = ".")
-  if (!file.exists(paste(data.dir.import,"/Imported",sep=""))&&
-      file.writable(data.dir.import)) {
-    dir.create(paste(data.dir.import,"/Imported",sep=""), recursive = TRUE)
+get.data.from.googledocs <- function(URL, data.dir.import) {
+  ret <- list()
+  # URL = gsub(" ", "%20", URL)
+  URL <- URLencode(URL)
+  # print(URL)
+  # name = strsplit(URL,"/")[[1]]
+  # name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
+  url.index <- gregexpr("output=", URL)
+  url.index <- unlist(url.index)
+  file.type <- substr(URL, url.index + 7, nchar(URL))
+  temp.file.name <- tempfile()
+  temp.file.name.index <- gregexpr("file", temp.file.name)
+  temp.file.name.index <- unlist(temp.file.name.index)
+  file.name <- substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+  name <- paste(file.name, file.type, sep = ".")
+  if (!file.exists(paste(data.dir.import, "/Imported", sep = "")) &&
+    file.writable(data.dir.import)) {
+    dir.create(paste(data.dir.import, "/Imported", sep = ""), recursive = TRUE)
   }
   tryCatch({
-    if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    else
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="curl")
-    
-    temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
-    if(!is.null(temp[[2]])){
-      ret$data.set = temp[[2]]
-      ret$data.name = name
-    }else{
+    if (Sys.info()["sysname"] %in% c("Windows", "Linux")) {
+      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "auto")
+    } else {
+      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "curl")
+    }
+
+    temp <- load.data(data.dir.import, fileID = name, path = paste0(data.dir.import, "/Imported/", name))
+    if (!is.null(temp[[2]])) {
+      ret$data.set <- temp[[2]]
+      ret$data.name <- name
+    } else {
       return(NULL)
     }
     ret
-  },error = function(e){
-    if(file.exists(paste0(data.dir.import,"/Imported/",name))){
-      unlink(paste0(data.dir.import,"Imported/",name))
+  }, error = function(e) {
+    if (file.exists(paste0(data.dir.import, "/Imported/", name))) {
+      unlink(paste0(data.dir.import, "Imported/", name))
     }
     print(e)
-  },warning = function(w) {
+  }, warning = function(w) {
     print(w)
-  },finally = {})
+  }, finally = {})
 }
 
 #' Connerts transparency or alpha value to a
@@ -1795,48 +1920,56 @@ get.data.from.googledocs = function(URL, data.dir.import){
 #' percentage into fraction (back = T) or
 #' from fraction to percentage (back = F).
 #'
-convert.to.percent = function(value,back=F){
-  #percentage to numeric
-  if(is.null(value)){
-    if(!back){
-      x = 0
-    }else{
-      x = 1
+convert.to.percent <- function(value, back = F) {
+  # percentage to numeric
+  if (is.null(value)) {
+    if (!back) {
+      x <- 0
+    } else {
+      x <- 1
     }
-  }else{
-    if(back){
-      x = (100-value)*0.01
-    }else{
-      x = (1-value)*100
+  } else {
+    if (back) {
+      x <- (100 - value) * 0.01
+    } else {
+      x <- (1 - value) * 100
     }
   }
   x
 }
 
-get.transformation.string = function(transform_select,
-                                     transform_variable_select,
-                                     arg3){
-  transformation.string = ""
-  if(transform_select%in%"log"){
-    transformation.string = paste0("log(",
-                                   transform_variable_select,
-                                   ")")
-  }else if(transform_select%in%"sqrt"){
-    transformation.string = paste0("sqrt(",
-                                   transform_variable_select,
-                                   ")")
-  }else if(transform_select%in%"by degree"&&
-           !arg3%in%""){
-    transformation.string = paste0("I(",
-                                   transform_variable_select,
-                                   "^",
-                                   arg3,
-                                   ")")
-  }else if(transform_select%in%"polynomial of degree"&&
-           !arg3%in%""){
-    transformation.string = paste0("poly(",
-                                   transform_variable_select,
-                                   ",",arg3,")")
+get.transformation.string <- function(transform_select,
+                                      transform_variable_select,
+                                      arg3) {
+  transformation.string <- ""
+  if (transform_select %in% "log") {
+    transformation.string <- paste0(
+      "log(",
+      transform_variable_select,
+      ")"
+    )
+  } else if (transform_select %in% "sqrt") {
+    transformation.string <- paste0(
+      "sqrt(",
+      transform_variable_select,
+      ")"
+    )
+  } else if (transform_select %in% "by degree" &&
+    !arg3 %in% "") {
+    transformation.string <- paste0(
+      "I(",
+      transform_variable_select,
+      "^",
+      arg3,
+      ")"
+    )
+  } else if (transform_select %in% "polynomial of degree" &&
+    !arg3 %in% "") {
+    transformation.string <- paste0(
+      "poly(",
+      transform_variable_select,
+      ",", arg3, ")"
+    )
   }
   transformation.string
 }
@@ -1854,67 +1987,69 @@ get.transformation.string = function(transform_select,
 #' everchanging plot output from iNZightPlot.
 #'
 #' @author Christoph Knapp
-search.name = function(list.search,search.name=NULL){
-  list.out=list()
-  search = function(input.list, nam=NULL){
-    if(
+search.name <- function(list.search, search.name = NULL) {
+  list.out <- list()
+  search <- function(input.list, nam = NULL) {
+    if (
       #       "list"%in%class(input.list)||
-      "inzplotoutput"%in%class(input.list)||
-      "inzgrid"%in%class(input.list)||
-      "inzpar.list"%in%class(input.list)||
-      "inzdot"%in%class(input.list)||
-      "inzhist"%in%class(input.list)||
-      "inzscatter"%in%class(input.list)||
-      "inzbar"%in%class(input.list)){
-      for(i in 1:length(input.list)){
-        if(!is.null(names(input.list)[i])){
-          nam = names(input.list)[i]
-        }else{
-          nam = i
+      "inzplotoutput" %in% class(input.list) ||
+        "inzgrid" %in% class(input.list) ||
+        "inzpar.list" %in% class(input.list) ||
+        "inzdot" %in% class(input.list) ||
+        "inzhist" %in% class(input.list) ||
+        "inzscatter" %in% class(input.list) ||
+        "inzbar" %in% class(input.list)) {
+      for (i in 1:length(input.list)) {
+        if (!is.null(names(input.list)[i])) {
+          nam <- names(input.list)[i]
+        } else {
+          nam <- i
         }
-        search(input.list[[nam]],nam)
+        search(input.list[[nam]], nam)
       }
-    }else{
-      if(is.null(nam)){
-        nam=length(list.out)+1
+    } else {
+      if (is.null(nam)) {
+        nam <- length(list.out) + 1
       }
-      if(!is.null(input.list)){
-        if(nam%in%names(list.out)){
-          temp = list.out[[nam]]
-          list.out[[nam]][[length(list.out[[nam]])+1]] <<- input.list
-        }else{
+      if (!is.null(input.list)) {
+        if (nam %in% names(list.out)) {
+          temp <- list.out[[nam]]
+          list.out[[nam]][[length(list.out[[nam]]) + 1]] <<- input.list
+        } else {
           list.out[[nam]] <<- list(input.list)
         }
       }
     }
   }
   search(list.search)
-  if(is.null(search.name)){
+  if (is.null(search.name)) {
     list.out
-  }else{
+  } else {
     list.out[[search.name]]
   }
 }
 
-modifyList <- function (x, val, keep.null = FALSE)
-{
+modifyList <- function(x, val, keep.null = FALSE) {
   stopifnot(is.list(x), is.list(val))
   xnames <- names(x)
   vnames <- names(val)
   vnames <- vnames[vnames != ""]
   if (keep.null) {
     for (v in vnames) {
-      x[v] <- if (v %in% xnames && is.list(x[[v]]) && is.list(val[[v]]))
+      x[v] <- if (v %in% xnames && is.list(x[[v]]) && is.list(val[[v]])) {
         list(modifyList(x[[v]], val[[v]], keep.null = keep.null))
-      else val[v]
+      } else {
+        val[v]
+      }
     }
-  }
-  else {
+  } else {
     for (v in vnames) {
       x[[v]] <- if (v %in% xnames && is.list(x[[v]]) &&
-                    is.list(val[[v]]))
+        is.list(val[[v]])) {
         modifyList(x[[v]], val[[v]], keep.null = keep.null)
-      else val[[v]]
+      } else {
+        val[[v]]
+      }
     }
   }
   x
@@ -1932,18 +2067,20 @@ modifyList <- function (x, val, keep.null = FALSE)
 #'
 #' @return A fitted model with 'code' attribute
 
-anova.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
-  #code.list = list()
-  fit.str = NULL
-  if(!is.null(blocking)){
-    fit.str = sprintf("%s ~ %s", y, paste(x, collapse = " * "))
-    fit = nlme::lme(as.formula(fit.str), random = as.formula(sprintf("~1|%s", blocking)), data = data)
-    attr(fit, "code") = sprintf("%s = nlme::lme(%s ~ %s, random = ~1|%s, data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name)
+anova.fit <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
+  # code.list = list()
+  fit.str <- NULL
+  if (!is.null(blocking)) {
+    fit.str <- sprintf("%s ~ %s", y, paste(x, collapse = " * "))
+    fit <- nlme::lme(as.formula(fit.str), random = as.formula(sprintf("~1|%s", blocking)), data = data)
+    attr(fit, "code") <- sprintf("%s = nlme::lme(%s ~ %s, random = ~1|%s, data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name)
   } else {
-    fit.str = sprintf("%s ~ %s", y, paste(x, collapse = " * "))
-    fit = lm(as.formula(fit.str), data = data)
-    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y,
-                                paste(x, collapse = " * "), data.name)
+    fit.str <- sprintf("%s ~ %s", y, paste(x, collapse = " * "))
+    fit <- lm(as.formula(fit.str), data = data)
+    attr(fit, "code") <- sprintf(
+      "%s = lm(%s ~ %s, data = %s)", name, y,
+      paste(x, collapse = " * "), data.name
+    )
   }
   fit
 }
@@ -1960,17 +2097,19 @@ anova.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
 #'
 #' @return A fitted model with 'code' attribute
 
-fit.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
-  fit.str = NULL
-  if(!is.null(blocking)){
-    fit.str = sprintf("%s ~ %s", y, x)
-    fit = nlme::lme(as.formula(fit.str), random = as.formula(blocking), data = data)
-    attr(fit, "code") = sprintf("%s = nlme::lme(%s ~ %s, random = %s, data = %s)", name, y, x, blocking, data.name)
+fit.own <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
+  fit.str <- NULL
+  if (!is.null(blocking)) {
+    fit.str <- sprintf("%s ~ %s", y, x)
+    fit <- nlme::lme(as.formula(fit.str), random = as.formula(blocking), data = data)
+    attr(fit, "code") <- sprintf("%s = nlme::lme(%s ~ %s, random = %s, data = %s)", name, y, x, blocking, data.name)
   } else {
-    fit.str = sprintf("%s ~ %s", y, x)
-    fit = lm(as.formula(fit.str), data = data)
-    attr(fit, "code") = sprintf("%s = lm(%s ~ %s, data = %s)", name, y,
-                                x, data.name)
+    fit.str <- sprintf("%s ~ %s", y, x)
+    fit <- lm(as.formula(fit.str), data = data)
+    attr(fit, "code") <- sprintf(
+      "%s = lm(%s ~ %s, data = %s)", name, y,
+      x, data.name
+    )
   }
   fit
 }
@@ -1986,15 +2125,19 @@ fit.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
 #'
 #' @return ANOVA with 'code' attribute
 
-aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
-  if(!is.null(blocking)){
-    fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, paste(x, collapse = " * "), blocking)), data = data)
-    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name),
-                          sprintf("summary(%s)", paste0("aov_", name)))
+aov.fit <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
+  if (!is.null(blocking)) {
+    fit <- aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, paste(x, collapse = " * "), blocking)), data = data)
+    attr(fit, "code") <- c(
+      sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name),
+      sprintf("summary(%s)", paste0("aov_", name))
+    )
   } else {
-    fit = aov(as.formula(sprintf("%s ~ %s", y, paste(x, collapse = " * "))), data = data)
-    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y,
-                                  paste(x, collapse = " * "), data.name), sprintf("summary(%s)", paste0("aov_", name)))
+    fit <- aov(as.formula(sprintf("%s ~ %s", y, paste(x, collapse = " * "))), data = data)
+    attr(fit, "code") <- c(sprintf(
+      "aov_%s = aov(%s ~ %s, data = %s)", name, y,
+      paste(x, collapse = " * "), data.name
+    ), sprintf("summary(%s)", paste0("aov_", name)))
   }
   fit
 }
@@ -2011,17 +2154,21 @@ aov.fit = function(y, x, data = NULL, blocking = NULL, name, data.name){
 #'
 #' @return ANOVA with 'code' attribute
 
-aov.own = function(y, x, data = NULL, blocking = NULL, name, data.name){
-  fit.str = sprintf("%s ~ %s", y, x)
-  
-  if(!is.null(blocking) && blocking != ""){
-    fit = aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
-    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),
-                          sprintf("summary(%s)", paste0("aov_", name)))
+aov.own <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
+  fit.str <- sprintf("%s ~ %s", y, x)
+
+  if (!is.null(blocking) && blocking != "") {
+    fit <- aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
+    attr(fit, "code") <- c(
+      sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),
+      sprintf("summary(%s)", paste0("aov_", name))
+    )
   } else {
-    fit = aov(as.formula(sprintf("%s ~ %s", y, x)), data = data)
-    attr(fit, "code") = c(sprintf("aov_%s = aov(%s ~ %s, data = %s)", name, y,
-                                  x, data.name), sprintf("summary(%s)", paste0("aov_", name)))
+    fit <- aov(as.formula(sprintf("%s ~ %s", y, x)), data = data)
+    attr(fit, "code") <- c(sprintf(
+      "aov_%s = aov(%s ~ %s, data = %s)", name, y,
+      x, data.name
+    ), sprintf("summary(%s)", paste0("aov_", name)))
   }
   fit
 }
