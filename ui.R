@@ -19,6 +19,9 @@ shinyUI(
       tags$script(src = "js/ticker.js"),
       tags$link(href = "ticker.css", rel = "stylesheet", type = "text/css"),
       tags$style(HTML("
+      body > .container-fluid {
+        padding: 0 !important;
+      }
 			.fill-frame {
 				object-fit: fill;
 				width: 100%;
@@ -38,6 +41,7 @@ shinyUI(
         })();")),
     tags$head(tags$script(src = "js/testNumeric.js")),
     tags$head(tags$script(src = "js/google-analytics.js")),
+    tags$head(tags$script(src = "js/user-info.js")),
     # tags$head(tags$script(src = "js/download-logs.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).
     theme = "bootstrap.css",

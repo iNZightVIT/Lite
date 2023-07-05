@@ -13,19 +13,9 @@ about.panel.ui <- function(lite.version, lite.update) {
   ##  We manually set the page width to be 10 columns so that it looks
   ##  (rougly) centred.
   fixedPage(
-    #      column(
-    #        width = 10, offset = 1,
-    #        HTML(
-    #          '<div class="NoticeBox">
-    #         Our website is being hosted on a new server. If you have any problems, please feel free to contact us.
-    #          </div>'
-    #          )
-    #        ),
-    #
-    #        br(),
-    #      br(),
     column(
-      width = 10, offset = 1,
+      style = "font-size: 20px; line-height: 1.4; max-width: 40em; margin-bottom: 6em;",
+      width = 12, offset = 0,
       img(src = "/inzight_lite_logo_web.svg", height = 80),
       br(), br(),
       ##  We add version details at the bottom right hand corner
@@ -64,40 +54,48 @@ about.panel.ui <- function(lite.version, lite.update) {
       HTML(
         glue::glue(
           '<div id = "wrapper">
-		<div id = "footer">
-		  <span style = "float:left;">
-                  <br> &nbsp;
-                    <!-- Direct users to the iNZight website -->
-		    <a href = "https://www.stat.auckland.ac.nz/~wild/iNZight/">
-		      iNZight Project
-		    </a> |
-                    <!--  Direct users to the source code  -->
-                    <a href = "https://github.com/iNZightVIT/Lite/">
-                      R Source Code
-                    </a> |
-                    <!--  Contact link. Excuse the line overlap. -->
-		    <a href = "mailto:inzightlite_support@stat.auckland.ac.nz?Subject=iNZight-Lite%20Feedback" target = "_top">
-		      Contact Us
-		    </a>
-                    <br>
-                    <br>
-                    <!-- Copyright Statement -->
-                      &nbsp; Copyright 2015-{as.integer(format(Sys.Date(), "%Y"))} iNZight | All Rights Reserved
-		  </span>
-		  <span style = "float:right;">
-                    <!-- Links to sponsors -->
-          <a href = "http://stat.auckland.ac.nz">
-                      <img src = "uoa_logo.png", height = 65>
-                    </a> &nbsp; &nbsp;
-                    <a href = "http://www.stats.govt.nz/">
-		      <img src = "stats_nz.png"/, height = 75>
-		    </a> &nbsp; &nbsp;
-                    <a href = "http://www.minedu.govt.nz/">
-		      <img src = "minedu_logo.png"/, height = 60, width = 170>
-		    </a> &nbsp;
+		        <div id = "footer">
+		          <div class = "footer-info-group">
+                <div class = "footer-links">
+                  <!-- Direct users to the iNZight website -->
+                  <a href = "https://inzight.nz">
+                    iNZight Project
+                  </a>
+                  <span>|</span>
+                  <!--  Direct users to the source code  -->
+                  <a href = "https://github.com/iNZightVIT/Lite/">
+                    R Source Code
+                  </a>
+                  <span>|</span>
+                  <a href="https://inzight.nz/about/sponsors">Sponsors</a>
+                  <span>|</span>
+                  <!--  Contact link. Excuse the line overlap. -->
+                  <a href = "mailto:inzightlite_support@stat.auckland.ac.nz?Subject=iNZight-Lite%20Feedback" target = "_top">
+                    Contact Us
+                  </a>
+                </div>
+                <div>
+                  <!-- Copyright Statement -->
+                  Copyright 2015-{as.integer(format(Sys.Date(), "%Y"))} iNZight | All Rights Reserved
+                </div>
+		          </div>
 
-		  </span>
-		</div>
+              <div class="footer-sponsor-group">
+                <div class="footer-sponsor-label">Active development supported by</div>
+                <!-- Links to sponsors -->
+                <div class="footer-sponsors">
+                  <a href = "https://stat.auckland.ac.nz">
+                    <img src = "uoa_logo.png">
+                  </a>
+                  <a href = "https://terourou.org">
+                    <img src = "https://terourou.org/img/logo.png">
+                  </a>
+                  <a href = "https://inzight.co.nz">
+                    <img src = "https://inzight.co.nz/inzight-light.png"/>
+                  </a>
+                </div>
+            </div>
+          </div>
 	      </div>'
         )
       )
