@@ -18,7 +18,9 @@ $(function () {
 
         // create a div with class item
         $(".ticker").append(
-          "<div class='ticker-item' id='tickerItem" +
+          "<div class='ticker-item ticker-" +
+            value.type +
+            "' id='tickerItem" +
             index +
             "'>\
             <strong>" +
