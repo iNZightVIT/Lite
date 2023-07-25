@@ -7,6 +7,14 @@ This is the online version of iNZight (http://lite.docker.stat.auckland.ac.nz)
 
 ## To run locally:
 
+### With Docker
+
+1. Ensure that Docker is installed and running
+2. Either pull the image from dockerhub, or within the root lite directory, run `make build TAG=latest` to build the latest image
+3. In the root lite directory, run `make run TAG=latest` to run on localhost at port 3838
+
+### Directly
+
 iNZight Lite is a shiny app, so you can run it locally if you have R installed. If you use RStudio, see instructions further down.
 
 1. [Download and unzip](https://github.com/iNZightVIT/Lite/archive/master.zip) or clone this repository
@@ -57,38 +65,10 @@ devtools::install_deps(repos = c("http://r.docker.stat.auckland.ac.nz/R",
 
 Send bug reports/errors to inzightlite_support@stat.auckland.ac.nz.
 
-
-
-Recent Updates (Most to least recent):
----------------------------------------- 
-- [visualize] Add various new plot types
-- [R code history] now, we have code history for ggplot, Import dataset, Example dataset, and all the panels under manipulate variables
-
-Package dependencies
---------------------
-This are all the packages which are loaded by iNZight lite.
-Please install all dependencies.
-
-- iNZightPlots
-- iNZightTS
-- iNZightMR
-- markdown
-- GGally
-- gpairs
-- iNZightRegression
-- RJSONIO
-- survey
-- shinyWidgets
-- iNZightTools
-- shinycssloaders
-
 Directories:
 ------------
 - data:
 This directory holds all the data. The data must be placed in sub-directories, which will come up as data categories within iNZight-Lite.
-
-- gui-elements: (removed)
-This directory contains the gui functions for all the old modules (from iNZight revamp). 
 
 - www:
 This directory is used for graphics and/or web-related files such as .css and .gif/.jpeg/.png javascript files. Images are stored in a sub-directory called "images". Javascript code is stored in a subdirectory "js".

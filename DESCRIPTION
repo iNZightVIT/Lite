@@ -1,18 +1,50 @@
 Package: iNZightLite
 Type: Shiny Application
 Title: iNZight Lite
-Version: 0.9.6
-Date: 2017-12-08
-Authors@R: c(person("Shengwei", "Hu", role = c("aut", "cre"),
-                    email = "shengwei.hu@auckland.ac.nz"),
-             person("Chris", "Park", role = c("aut"),
-             email = "cpar137@aucklanduni.ac.nz"),
-             person("Christoph", "Knapp", role = c("aut"),
-             email = "c.knapp@auckland.ac.nz"),
-             person("Junjie", "Zeng", role = c("aut"),
-             email = "jzen188@aucklanduni.ac.nz"))
-Description: A web implementation of iNZight, a simple data analysis tool designed for high school students in New Zealand.
+Version: 2023.06
+Authors@R: c(
+    person("Charco", "Hui", role = c("aut", "cre"),
+        email = "charco.hui@auckland.ac.nz"),
+    person("Tom", "Elliott", role = "ctb",
+        email = "tom.elliott@auckland.ac.nz"),
+    person("Tong", "Chen", role = "aut",
+        email = "tong.chen@auckland.ac.nz"),
+    person("Jason", "Cairns", role = "aut"),
+    person("Shengwei", "Hu", role = "aut"),
+    person("Chris", "Park", role = "aut"),
+    person("Christoph", "Knapp", role = "aut"),
+    person("Junjie", "Zeng", role = "aut"))
+Description: A web implementation of iNZight, a swiss-army-knife data analysis tool designed for ease of use.
 License: GPL-3
-Depends: R (>= 3.1.0), shiny, markdown
-Imports: gpairs, iNZightPlots, iNZightTS, iNZightMR, GGally, iNZightRegression, RJSONIO, survey, colorspace, readxl, sas7bdat, shinydashboard, shinyjs, iNZightTools, viridis, tibble, iNZightMaps
+Depends:
+    R (>= 3.1.0),
+    markdown,
+    shiny
+Imports:
+    colorspace,
+    DT,
+    GGally,
+    gpairs,
+    iNZightMaps,
+    iNZightMR,
+    iNZightPlots,
+    iNZightRegression,
+    iNZightTools,
+    iNZightTS,
+    plotly,
+    readtext,
+    readxl,
+    RJSONIO,
+    sas7bdat,
+    shinyalert,
+    shinycssloaders,
+    shinydashboard,
+    shinyjs,
+    shinylogs,
+    shinyWidgets,
+    survey,
+    surveyspec,
+    tibble,
+    viridis
+Additional_repository: https://r.docker.stat.auckland.ac.nz
 RoxygenNote: 6.0.1

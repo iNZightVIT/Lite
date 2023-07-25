@@ -5,7 +5,8 @@ survey.design.sidebar =  function(){
     selectInput("svytype", label = "Select survey design",
                 c = list("Specify design" = "survey",
                          "Specify replicate design" = "replicate",
-                         "Post stratify" = "post")),
+                         "Post stratify" = "post",
+                         "Read from file" = "read")),
     conditionalPanel("input.svytype == 'survey'",
                      helpText("The design generated is always used with the current data set. 
              Please make sure the right data set is selected first. In case 
@@ -36,6 +37,7 @@ survey.design.sidebar =  function(){
                                                               colnames(get.data.set())),
                                                     selected = " ",
                                                     selectize = F)),
+                              column(12, uiOutput("estimate.pop.size")),
                               
                               column(12,selectInput("fpcVar",
                                                     label="Finite population correction",
@@ -110,6 +112,15 @@ survey.design.sidebar =  function(){
                               column(6,actionButton("remove.design2","Remove design",
                                                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()
     ),
+    conditionalPanel("input.svytype == 'read'",
+                     helpText("Select a survey specification file"),
+                     br(),
+                     fileInput("svy.design.spec", label="Read from file ...", 
+                               multiple=F,
+                               accept = ".svydesign"),
+                     fluidRow(column(6,actionButton("remove.design3","Remove design",
+                                                    style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))),br()
+    ),
     br(),
     help.display('Create design','create_design_help',
                  "panels/D6_SurveyDesign/3_survey.design.help.md"),
@@ -117,6 +128,9 @@ survey.design.sidebar =  function(){
   )
   
 }
+
+
+
 
 create.design.panel = function(data.set){
   if(is.null(data.set)){

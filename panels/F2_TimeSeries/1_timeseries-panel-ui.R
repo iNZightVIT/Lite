@@ -118,21 +118,9 @@ ts.sidebarPanel = function(data.set) {
                column(width = 6, 
                       h5(strong("Plot Type Options:")),
                       div(style = "padding: 0px 0px; margin-top:-1.5em",
-                        conditionalPanel(condition = "input.select_variables.length == 1",
-                                         radioButtons(inputId = "time_plot_info1", label = "", 
-                                                      choices = c("Standard" = 1,
-                                                                  "Decomposed" = 2,
-                                                                  "Recomposed" = 3,
-                                                                  "Seasonal" = 4,
-                                                                  "Forecast" = 5,
-                                                                  "Summary" = 6),
-                                                      selected  = 1)),
-                        conditionalPanel(condition = "input.select_variables.length > 1",
-                                         radioButtons(inputId = "time_plot_info", label = "", 
-                                                      choices = c("Single graph" = 1,
-                                                                  "Separate graphs" = 2),
-                                                      selected  = 1))
-               ))),
+                          uiOutput("ts_plot_type")
+                      )
+                      )),
 
       ##  Section 4: Select Labels
       ##

@@ -528,21 +528,8 @@ output$ts.main.ui <- renderUI({
                      column(width = 3,
                             radioButtons(inputId = "saveForecastplottype", 
                                          label = strong("Select the file type"), 
-                                         choices = list("jpg", "png", "pdf"), inline = TRUE)))
-          ),
-          tabPanel(
-            title = "Interactive Plot (via plotly)",
-            uiOutput("plotly_tsforecastnw"),
-            plotlyOutput("plotly_tsforecast", height = "500px") %>% withSpinner()
-          ))
-      )
-    } else if (!is.null(input$select_variables) && length(input$select_variables) == 1 &&
-               input$time_plot_info1 == 6) {
-      ret = list(
-        tabsetPanel(
-          type = "pills",
-          tabPanel(
-            title = "Summary",
+                                         choices = list("jpg", "png", "pdf"), inline = TRUE))),
+            
             helpText(
               br(),
               "A",
@@ -554,6 +541,11 @@ output$ts.main.ui <- renderUI({
               br()
             ),
             verbatimTextOutput(outputId = "forecast_summary")
+          ),
+          tabPanel(
+            title = "Interactive Plot (via plotly)",
+            uiOutput("plotly_tsforecastnw"),
+            plotlyOutput("plotly_tsforecast", height = "500px") %>% withSpinner()
           ))
       )
     } else if (!is.null(input$select_variables) && length(input$select_variables) > 1 &&
@@ -736,18 +728,18 @@ variable.names = reactive({
 output$timeseries_plot = renderPlot({
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
-        ts.para$tsObj,
-        ## start = start),
-        xlab = input$provide_xlab,
-        ylab = input$provide_ylab,
-        multiplicative = as.logical(season_select_ts$re),
-        t = 100*input$slidersmoothing,
-        smoother = input$timeseries_smoother,
-        model.lim = ts.para$mod.lim,
-        xlim = ts.para$xlim
-      )
-    }, 
+      g<-plot(ts.para$tsObj,
+              ## start = start),
+              xlab = input$provide_xlab,
+              ylab = input$provide_ylab,
+              multiplicative = as.logical(season_select_ts$re),
+              t = 100*input$slidersmoothing,
+              smoother = input$timeseries_smoother,
+              model.lim = ts.para$mod.lim,
+              xlim = ts.para$xlim)
+      dev.off()
+      g
+    },
     #        warning = function(w) {
     #          cat("Warning produced in timseries plot\n")
     #          print(w)
@@ -853,6 +845,8 @@ output$plotly_tsmain = renderPlotly({
           model.lim = ts.para$mod.lim,
           xlim = ts.para$xlim
         )
+        g <- plotly::ggplotly()
+        g
       }, 
       #        warning = function(w) {
       #          cat("Warning produced in timseries plot\n")
@@ -860,9 +854,8 @@ output$plotly_tsmain = renderPlotly({
       #        }, 
       error = function(e) {
         cat("Handled error in timseries plot\n")
-        print(e)
       }, finally = {}))
-      plotly::ggplotly()
+      
     }
   })
 })
@@ -917,7 +910,7 @@ output$seasonal_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      seasonplot(
+      g<-seasonplot(
         ts.para$tsObj,
         ylab = input$provide_ylab,
         xlab = input$provide_xlab,
@@ -925,6 +918,8 @@ output$seasonal_plot = renderPlot({
         t = 100*input$slidersmoothing,
         model.lim = ts.para$mod.lim
       )
+      dev.off()
+      g
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in seasonplot\n")
@@ -1006,16 +1001,18 @@ output$decomposed_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
+      g<-plot(
         iNZightTS::decompose(
           ts.para$tsObj,
           multiplicative = as.logical(season_select_ts$re),
           t = 100*input$slidersmoothing,
           model.lim = ts.para$mod.lim),
-          xlab = input$provide_xlab,
-          ylab = input$provide_ylab,
-          xlim = ts.para$xlim
+        xlab = input$provide_xlab,
+        ylab = input$provide_ylab,
+        xlim = ts.para$xlim
       )
+      dev.off()
+      g
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in decompositionplot \n")
@@ -1095,7 +1092,7 @@ output$trSeasonal_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
+      g<-plot(
         iNZightTS::decompose(
           ts.para$tsObj,
           multiplicative = as.logical(season_select_ts$re),
@@ -1106,6 +1103,8 @@ output$trSeasonal_plot = renderPlot({
         xlim = ts.para$xlim,
         recompose.progress = c(1, nrow(get.data.set()))
       )
+      dev.off()
+      g
     }, 
     #        warning = function(w) {
     #          cat("Warning produced in recompose plot \n")
@@ -1189,7 +1188,7 @@ output$forecast_plot = renderPlot({
   #     input$selector
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
     suppressWarnings(tryCatch({
-      plot(
+      pl <- try(plot(
         ts.para$tsObj,
         multiplicative = as.logical(season_select_ts$re),
         xlab = input$provide_xlab,
@@ -1197,8 +1196,14 @@ output$forecast_plot = renderPlot({
         forecast = ts.para$tsObj$freq * 2,
         model.lim = ts.para$mod.lim,
         xlim = ts.para$xlim
-      )
-    }, 
+      ), silent = TRUE)
+      if (inherits(pl, "try-error")) {
+        return()
+      }
+      dev.off()
+      ts.para$forecasts <- iNZightTS::pred(pl)
+      pl
+      }, 
     #        warning = function(w) {
     #          cat("Warning produced in forecastplot \n")
     #          print(w)
@@ -1363,23 +1368,8 @@ output$saveForecastplot = downloadHandler(
 
 output$forecast_summary = renderPrint({
   if(date_check(get.data.set(),input$select_timevars) || input$time_info == 2){
-    pdf(NULL)
     suppressWarnings(tryCatch({
-      pl <- try(plot(
-        ts.para$tsObj,
-        multiplicative = as.logical(season_select_ts$re),
-        xlab = input$provide_xlab,
-        ylab = input$provide_ylab,
-        forecast = ts.para$tsObj$freq * 2,
-        model.lim = ts.para$mod.lim,
-        xlim = ts.para$xlim
-      ), silent = TRUE)
-      if (inherits(pl, "try-error")) {
-        visible(forecastError) <<- TRUE
-        return()
-      }
-
-      iNZightTS::pred(pl)
+      ts.para$forecasts
     }, warning = function(w) {
       print(w) 
     }, error = function(e) {
@@ -1648,4 +1638,27 @@ output$time.plot.select = renderUI({
                     selectize = FALSE,
                     size = 7)))
 })
+
+
+output$ts_plot_type <- renderUI({
+  input$select_variables
+  list(conditionalPanel(condition = "input.select_variables.length == 1",
+                         radioButtons(inputId = "time_plot_info1", label = "", 
+                                      choices = c("Standard" = 1,
+                                                  "Decomposed" = 2,
+                                                  "Recomposed" = 3,
+                                                  "Seasonal" = 4,
+                                                  "Forecast" = 5),
+                                      selected  = 1)),
+      conditionalPanel(condition = "input.select_variables.length > 1",
+                       radioButtons(inputId = "time_plot_info", label = "", 
+                                    choices = c("Single graph" = 1,
+                                                "Separate graphs" = 2),
+                                    selected  = 1))
+  )
+})
+
+
+
+
 

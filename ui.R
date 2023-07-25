@@ -1,6 +1,6 @@
-###-----------------------###
+### -----------------------###
 ###  UI for iNZight Lite  ###
-###-----------------------###
+### -----------------------###
 ###
 ###  Date Created   :   January 13, 2015
 ###  Last Modified  :   December 15, 2015
@@ -16,6 +16,114 @@ cursor: not-allowed !important;
 border-color: #aaa !important;
 }"
 
+#
+import_tabs = list(
+  import = tabPanel("Import Dataset", uiOutput('load.data.panel')),
+  paste = tabPanel("Paste Dataset", uiOutput('paste.data.panel')),
+  export = tabPanel("Export Dataset",  uiOutput('save.data.panel')),
+  display = tabPanel("Display Dataset", uiOutput('current.data')),
+  # remove = tabPanel("Remove Dataset", uiOutput("remove.data.panel"))
+  examples = tabPanel("Dataset Examples", uiOutput('switch.data.panel'))
+)
+if(LITE2) {
+  import_tabs = import_tabs[!(names(import_tabs) %in% c("export"))]
+}
+import_tabs = do.call("navbarMenu", c("File", import_tabs))
+
+#
+visualize_tabs = tabPanel("Visualize", value = "visualize", uiOutput("visualize.panel"))
+
+#
+row_ops_tabs = navbarMenu(
+  "Dataset",
+  tabPanel(
+    "Filter Dataset",
+    uiOutput("filter.dataset")
+  ),
+  tabPanel(
+    "Sort data by variables",
+    uiOutput("sort.variables")
+  ),
+  tabPanel(
+    "Aggregate data",
+    uiOutput("aggregate.variable")
+  ),
+  tabPanel(
+    "Stack variables",
+    uiOutput("stack.variables")
+  ),
+  tabPanel(
+    "Reshape data",
+    uiOutput("reshape.dataset")
+  ),
+  tabPanel(
+    "Separate columns",
+    uiOutput("separate.columns")
+  ),
+  tabPanel(
+    "Unite columns",
+    uiOutput("unite.columns")
+  ),
+  tabPanel(
+    "Merge/Join datasets",
+    uiOutput("mergejoin.datasets")
+  ),
+  tabPanel(
+    "Alphabetise Variables",
+    uiOutput("alphabetise.variables")
+  ),
+  tabPanel(
+    "Restore data",
+    uiOutput("restore.data")
+  ),
+  tabPanel(
+    "Survey design",
+    uiOutput("survey.design")
+  ),
+  tabPanel(
+    "Frequency tables",
+    uiOutput("frequency.tables")
+  )
+)
+if(LITE2) {
+  row_ops_tabs = NULL
+}
+
+#
+manipulate_tabs = list(
+  convert = tabPanel("Convert to categorical", uiOutput("convert.to.categorical")),
+  categorical = tabPanel("Categorical variables", uiOutput("categorical.variables")),
+  numeric = tabPanel("Numeric variables", uiOutput("numeric.variables")),
+  dates = tabPanel("Dates and Times", uiOutput("dates.times")),
+  rename = tabPanel("Rename Variables", uiOutput("rename.variables")),
+  create = tabPanel("Create Variables", uiOutput("create.variables")),
+  missing = tabPanel("Missing to category", uiOutput("missing.categorical")),
+  # add = tabPanel("Add columns", uiOutput("add.columns")),
+  # reshape = tabPanel("Reshape dataset", uiOutput("reshape.data")),
+  delete = tabPanel("Delete variables", uiOutput("remove.columns"))
+)
+if(LITE2) {
+  manipulate_tabs = import_tabs[!(names(manipulate_tabs) %in% c("create"))]
+}
+manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", import_tabs))
+
+
+advance_tabs = list(
+  quick = tabPanel("Quick explore", uiOutput("quick.explore")),
+  time_series = tabPanel("Time Series", value = "timeSeries", uiOutput("timeseries.panel")),
+  model = tabPanel("Model Fitting", value = "regression", uiOutput("modelfitting.panel")),
+  maps = tabPanel("Maps", uiOutput("newmaps.panel")),
+  design_exp = tabPanel("Design of Experiments", uiOutput("mixedmodel.panel")),
+  multiple = tabPanel("Multiple Response", uiOutput("multiple.response")),
+  multivariate = tabPanel("Multivariate", uiOutput("multivariate.panel")),
+  vit = tabPanel("VIT", uiOutput("VIT.panel"))
+)
+if(LITE2) {
+  advance_tabs = import_tabs[names(advance_tabs) %in% c("multiple", "multivariate")]
+}
+advance_tabs = do.call("navbarMenu", c("Advanced", import_tabs))
+
+
 shinyUI(
   fluidPage(
     shinyjs::useShinyjs(),
@@ -23,61 +131,23 @@ shinyUI(
     #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet-pure-css.css")),
     ##  Set Tabpanel font to be size 16.
     tags$head(
-      tags$style(
-        type = "text/css",
-        ".nav {font-size:16px}
-                    .btn.btn-default.action-button.shiny-bound-input:hover {
-                       background-color: #00BAFA;
-                       border-radius: 8px;
-                       border: solid #1f628d 1px;
-                       padding: 9px;}
-                    .btn.btn-default.action-button.shiny-bound-input {
-                       background-color: #00A7E0;
-                       border-radius: 8px;
-                       border: solid #1f628d 1px;
-                       padding: 9px;}
-                    .player {
-                       border: 1px solid;
-                       border-radius: 10px;
-                       margin-top: 10px;
-                       background-color: #A3E7FF;}
-                    .seper {
-                       background-color: #A3E7FF;
-                       padding-top: 25px}
-                    #num_columns_sort,
-                    #numeric_input2,
-                    #numeric_input3,
-                    #URLtext,
-                    #provide_xlab,
-                    #provide_ylab,
-                    #provide_season,
-                    #provide_frequency,
-                    #numeric_input1,
-                    #form_class_interval_number,
-                    #main_title_text,
-                    #x_axis_text,
-                    #y_axis_text,
-                    #arg1,
-                    #arg2,
-                    #arg3,
-                    #offset,
-                    #new_model_name {
-                       background-color: #A3E7FF;
-                       border: 1px solid;
-                       border-radius: 10px;
-                    }
-                    #categorical_variables_select,
-                    #quick_explore_select,
-                    #numeric_variables_select {
-                       background: #158CBA;
-                       color: #F8DCCD
-                       border-radius: 10px;
-                       font-size: 150%;
-                    }
-                    #fit_model_button {
-                      font-size: 25px;
-                    }
-                    ")),
+      shinyjs::useShinyjs(),
+      tags$script(src = "vit.js"),
+      tags$script(src = "js/disconnect.js"),
+      tags$link(href = "disconnectedModal.css", rel = "stylesheet", type = "text/css"),
+      tags$script(src = "js/ticker.js"),
+      tags$link(href = "ticker.css", rel = "stylesheet", type = "text/css"),
+      tags$style(HTML("
+      body > .container-fluid {
+        padding: 0 !important;
+      }
+			.fill-frame {
+				object-fit: fill;
+				width: 100%;
+				height: 600px;
+			}
+      "))
+    ),
     ## This code fixes the DataTables warning coming up from time to time.
     tags$head(tags$script("window.alert = (function() {
           var nativeAlert = window.alert;
@@ -88,120 +158,51 @@ shinyUI(
               nativeAlert(message);
           }
         })();")),
-    
-    tags$head(tags$script(src="js/testNumeric.js")),
-    tags$head(tags$script(src="js/google-analytics.js")),
+    tags$head(tags$script(src = "js/testNumeric.js")),
+    tags$head(tags$script(src = "js/google-analytics.js")),
+    tags$head(tags$script(src = "js/user-info.js")),
+    # tags$head(tags$script(src = "js/download-logs.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).
-    
-    
     theme = "bootstrap.css",
+    tags$head(
+      tags$link(href = "global-styles.css", rel = "stylesheet", type = "text/css")
+    ),
     navbarPage(
       ##  Set Window Title
       windowTitle = "iNZight Lite",
       ##  Add logo and link it to the iNZight website.
       title =
         HTML(
-          "<a href = 'https://www.stat.auckland.ac.nz/~wild/iNZight/'>
-                <img src = 'iNZight_lite_logo.png', width = 171, height = 33,
-                     alt = 'iNZight Lite'/></a>"
+          "<img src = 'inzight_lite_logo_web.svg' alt = 'iNZight Lite' height='150%' />"
         ),
       ## footer = img(src = "pendred_footer.png"),
       ##  Set ID
       id = "selector",
       ##  Set custom colour and collapse options.
       inverse = TRUE, collapsible = TRUE,
-      
+
       ##  "About" tab.
-      tabPanel("About",
-               uiOutput('about.panel')),
+      tabPanel(
+        "About",
+        uiOutput("about.panel")
+      ),
       ##  "Data" tab.
-      navbarMenu("File",
-                 tabPanel("Import Dataset",
-                          uiOutput('load.data.panel')),
-                 tabPanel("Paste Dataset",
-                          uiOutput('paste.data.panel')),
-                 #tabPanel("Export Dataset", 
-                 #         uiOutput('save.data.panel')),
-                 tabPanel("Display Dataset",
-                          uiOutput('current.data')),
-                 #tabPanel("Remove Dataset",
-                 #         uiOutput("remove.data.panel")),
-                 tabPanel("Dataset Examples",
-                          uiOutput('switch.data.panel'))),
-      tabPanel("Visualize",value="visualize",
-               uiOutput("visualize.panel")),
+      import_tabs,
+      ## "Visualize" tab.
+      visualize_tabs,
       ## Row operations tab
-      #navbarMenu("Dataset",
-      #           tabPanel("Filter Dataset",
-      #                    uiOutput('filter.dataset')),
-      #           tabPanel("Sort data by variables",
-      #                    uiOutput('sort.variables')),
-      #           tabPanel("Aggregate data",
-      #                    uiOutput('aggregate.variable')),
-      #           tabPanel("Stack variables",
-      #                    uiOutput('stack.variables')),
-      #                    uiOutput('reshape.dataset')),
-      #           tabPanel("Separate columns",
-      #                    uiOutput('separate.columns')),
-      #           tabPanel("Unite columns",
-      #                    uiOutput('unite.columns')),
-      #           tabPanel("Merge/Join datasets",
-      #                    uiOutput('mergejoin.datasets')),
-      #           tabPanel("Alphabetise Variables",
-      #                    uiOutput('alphabetise.variables')),
-      #           tabPanel("Restore data",
-      #                    uiOutput('restore.data')),
-      #           tabPanel("Survey design",
-      #                    uiOutput('survey.design')),
-      #           tabPanel("Frequency tables",
-      #                    uiOutput('frequency.tables'))
-      #           
-      #),
+      row_ops_tabs,
       ##  "Manipulate variables" tab.
-      navbarMenu("Manipulate variables",
-                 tabPanel("Convert to categorical",
-                          uiOutput('convert.to.categorical')),
-                 tabPanel("Categorical variables",
-                          uiOutput('categorical.variables')),
-                 tabPanel("Numeric variables",
-                          uiOutput('numeric.variables')),
-                 tabPanel("Dates and Times",
-                          uiOutput('dates.times')),
-                 tabPanel("Rename Variables",
-                          uiOutput("rename.variables")),
-                 #tabPanel("Create Variables",
-                 #         uiOutput("create.variables")),
-                 tabPanel("Missing to category",
-                          uiOutput("missing.categorical")),
-                 #tabPanel("Add columns",
-                 #          uiOutput("add.columns")),
-                 #tabPanel("Reshape dataset",
-                 #          uiOutput("reshape.data")),
-                 tabPanel("Delete variables",
-                          uiOutput("remove.columns"))
-      ),
-      
+      manipulate_tabs,
+
       ##  "Quick Explore" tab.
-      navbarMenu("Advanced",
-                 #tabPanel("Quick explore",
-                 #         uiOutput("quick.explore")),
-                 #tabPanel("Time Series",value="timeSeries",
-                 #         uiOutput("timeseries.panel")),
-                 #tabPanel("Model Fitting",value="regression",
-                 #         uiOutput("modelfitting.panel")),
-                 #tabPanel("Maps",
-                 #         uiOutput("newmaps.panel")),
-                 #tabPanel("Design of Experiments",
-                 #         uiOutput("mixedmodel.panel")),
-                 tabPanel("Multiple Response",
-                          uiOutput("multiple.response")),
-                 tabPanel("Multivariate",
-                          uiOutput("multivariate.panel"))
+      advance_tabs,
       ),
-      
-      tabPanel("R code history", value = "rhistory",
-               uiOutput("code.panel"))
-      
+      tabPanel("R code history",
+        value = "rhistory",
+        uiOutput("code.panel")
+      )
+
       ## Backup Link
       #            navbarMenu("Backup Link",
       #                       tabPanel(HTML("</a><a href=\"http://litebackup1.test-pods.auckland.ac.nz\">Backup Link 1")),

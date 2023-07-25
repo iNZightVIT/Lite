@@ -1,0 +1,23 @@
+.ticker-item {
+  display: none;
+  color: white;
+  background: #165083;
+  text-align: center;
+  padding: 8px 3em;
+}
+
+.ticker-info {
+  background: #165083;
+}
+
+.ticker-success {
+  background: #1c8a18;
+}
+
+.ticker-warning {
+  background: #bb7720;
+}
+
+.ticker-danger {
+  background: #b51010;
+}
