@@ -49,7 +49,7 @@ args=(commandArgs(TRUE))
 #  }
 #}
 
-LITE2 = FALSE
+LITE2 = as.logical(Sys.getenv("LITE2"))
 
 ## read in all the functions used in iNZight Lite
 source("functions.R")

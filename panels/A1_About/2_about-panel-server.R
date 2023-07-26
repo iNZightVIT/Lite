@@ -8,7 +8,7 @@
 ###  Please consult the comments before editing any code.
 ###
 library(openssl)
-library(wkb)
+# library(wkb)
 
 output$about.panel <- renderUI({
   get.vars = parseQueryString(session$clientData$url_search)
@@ -51,7 +51,7 @@ output$about.panel <- renderUI({
 
     f.name = rawToChar(aes_cbc_decrypt(base64_decode(get.vars$filename),
                                        hex2raw(Sys.getenv("LITE_KEY"))),
-                                       hex2raw(get.vars$iv)))
+                                       hex2raw(get.vars$iv))
 
     get.vars$url = paste0(Sys.getenv("LITE_URL"), f.name)
     data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())

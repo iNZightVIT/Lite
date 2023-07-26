@@ -8,6 +8,8 @@
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
 
+LITE2 = as.logical(Sys.getenv("LITE2"))
+
 css <- "
 .nav li a.disabled {
 background-color: #aaa !important;
@@ -28,7 +30,7 @@ import_tabs = list(
 if(LITE2) {
   import_tabs = import_tabs[!(names(import_tabs) %in% c("export"))]
 }
-import_tabs = do.call("navbarMenu", c("File", import_tabs))
+import_tabs = do.call("navbarMenu", c("File", unname(import_tabs)))
 
 #
 visualize_tabs = tabPanel("Visualize", value = "visualize", uiOutput("visualize.panel"))
@@ -103,9 +105,9 @@ manipulate_tabs = list(
   delete = tabPanel("Delete variables", uiOutput("remove.columns"))
 )
 if(LITE2) {
-  manipulate_tabs = import_tabs[!(names(manipulate_tabs) %in% c("create"))]
+  manipulate_tabs = manipulate_tabs[!(names(manipulate_tabs) %in% c("create"))]
 }
-manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", import_tabs))
+manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", unname(manipulate_tabs)))
 
 
 advance_tabs = list(
@@ -119,9 +121,9 @@ advance_tabs = list(
   vit = tabPanel("VIT", uiOutput("VIT.panel"))
 )
 if(LITE2) {
-  advance_tabs = import_tabs[names(advance_tabs) %in% c("multiple", "multivariate")]
+  advance_tabs = advance_tabs[names(advance_tabs) %in% c("multiple", "multivariate")]
 }
-advance_tabs = do.call("navbarMenu", c("Advanced", import_tabs))
+advance_tabs = do.call("navbarMenu", c("Advanced", unname(advance_tabs)))
 
 
 shinyUI(
@@ -194,10 +196,8 @@ shinyUI(
       row_ops_tabs,
       ##  "Manipulate variables" tab.
       manipulate_tabs,
-
       ##  "Quick Explore" tab.
       advance_tabs,
-      ),
       tabPanel("R code history",
         value = "rhistory",
         uiOutput("code.panel")
@@ -211,5 +211,5 @@ shinyUI(
       #                       tabPanel(HTML("</a><a href=\"http://litebackup4.test-pods.auckland.ac.nz\">Backup Link 4"))
       #            )
     )
-  )
-)
+))
+
