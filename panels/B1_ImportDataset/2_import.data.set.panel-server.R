@@ -190,22 +190,20 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
     },
     error = identity
   )
-
+  
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
-    
     if(LITE2){
+      values$data.set = d
       # in preview lite2 should also show the sampled data only
-      values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+      values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set) / 4))
       preview_rows = sample(1:nrow(values$data.set), values$sample.num)
       values$sample.row = preview_rows
 
       # values$data.sample = as.data.frame(values$data.set[values$sample.row,])
       # row.names(values$data.sample) = 1:nrow(values$data.sample)
       # colnames(values$data.sample) = colnames(values$data.set)
-
-      row.names(d) = 1:nrow(d)
-      colnames(d) = colnames(d)
+      # colnames(d) = colnames(d)
     } else {
       preview_rows <- 1:min(nrow(d), 5)
     }
@@ -224,6 +222,11 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       if (is.null(preview_data$current_dname)) {
         preview_data$available_dnames <- values$data.available.dnames
         preview_data$current_dname <- values$data.current.dname
+      }
+      
+      row.names(preview_data$preview_data) = 1:nrow(preview_data$preview_data)
+      if(LITE2) {
+        values$data.sample = preview_data$preview_data
       }
 # >>>>>>> feature/configurable
 
@@ -398,7 +401,7 @@ observeEvent(input$cancel_import, {
       #   values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
       #   values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
       #   values$data.sample = as.data.frame(values$data.set[values$sample.row,])
-      #   row.names(values$data.sample) = 1:nrow(values$data.sample)
+      #   row.names(values$data.sample) =1:nrow(values$data.sample)
       #   colnames(values$data.sample) = colnames(values$data.set)
         
       #   updatePanel$doit = updatePanel$doit+1
@@ -442,13 +445,13 @@ observeEvent(input$confirm_import, {
     values$data.restore <<- get.data.set()
     temp.name <- make.names(tools::file_path_sans_ext(input$files[1, "name"]))
 
-    if(LITE2) {
-      values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
-      values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
-      values$data.sample = as.data.frame(values$data.set[values$sample.row,])
-      row.names(values$data.sample) = 1:nrow(values$data.sample)
-      colnames(values$data.sample) = colnames(values$data.set)
-    }
+    # if(LITE2) {
+    #   values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+    #   values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
+    #   values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+    #   row.names(values$data.sample) = 1:nrow(values$data.sample)
+    #   colnames(values$data.sample) = colnames(values$data.set)
+    # }
 
     if (length(temp.name) > 1) {
       temp.name <- temp.name[1:(length(temp.name) - 1)]
@@ -487,6 +490,7 @@ observeEvent(input$confirm_import, {
   }
   removeModal()
   reset_preview_data()
+  # browser()
   updateTabsetPanel(session, "selector", "visualize")
 })
 

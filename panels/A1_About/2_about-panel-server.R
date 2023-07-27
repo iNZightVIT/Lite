@@ -169,9 +169,9 @@ observeEvent(input$log_file, {
   })
 })
 
-observe({
-  if(!is.null(values$sample.row)){
-    row.names(values$data.sample) = 1:length(values$sample.row)
-    colnames(values$data.sample) = colnames(values$data.set)
-  }
-})
+# observe({
+#   if(!is.null(values$sample.row) && LITE2){
+#     row.names(values$data.sample) = 1:length(values$sample.row)
+#     colnames(values$data.sample) = colnames(values$data.set)
+#   }
+# })

@@ -19,22 +19,14 @@ get.sidebar.load = function(url_load){
 }
 
 load.data.panel = function(url_load){
-  main_panel_args1 = list() 
   if(LITE2) {
-    main_panel_args1 = list(textOutput('import.data.sample.info'), br(), br())
+    main_panel = mainPanel(
+      textOutput('import.data.sample.info'), br(), br(),
+      uiOutput("filedisplay")
+    )
+  } else {
+    main_panel = mainPanel(uiOutput("filedisplay"))
   }
-  main_panel_args = c(main_panel_args1, uiOutput("filedisplay"))
-  main_panel = do.call("mainPanel", main_panel_args)
-
-  # if(LITE2) {
-    
-  #   main_panel = mainPanel(
-  #     textOutput('import.data.sample.info'), br(), br(),
-  #     DTOutput("filetable")
-  #   )
-  # } else {
-  #   mainPanel(uiOutput("filedisplay"))
-  # }
 
   sidebarLayout(
     sidebarPanel(get.sidebar.load(url_load)),
