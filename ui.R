@@ -8,7 +8,7 @@
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
 
-LITE2 = as.logical(Sys.getenv("LITE2"))
+LITE2 = as.logical(as.integer(Sys.getenv("LITE2", 0)))
 
 css <- "
 .nav li a.disabled {

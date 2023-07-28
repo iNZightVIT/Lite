@@ -49,7 +49,9 @@ args=(commandArgs(TRUE))
 #  }
 #}
 
-LITE2 = as.logical(Sys.getenv("LITE2"))
+LITE2 = as.logical(as.integer(Sys.getenv("LITE2", 0)))
+LITE_VER = ifelse(LITE2, "2", "")
+print(paste0("LITE", LITE_VER, " Session"))
 
 ## read in all the functions used in iNZight Lite
 source("functions.R")
