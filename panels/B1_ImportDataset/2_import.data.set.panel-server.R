@@ -194,10 +194,10 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
     if(LITE2){
-      values$data.set = d
+      # values$data.set = d
       # in preview lite2 should also show the sampled data only
-      values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set) / 4))
-      preview_rows = sample(1:nrow(values$data.set), values$sample.num)
+      values$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
+      preview_rows = sample(1:nrow(d), values$sample.num)
       values$sample.row = preview_rows
 
       # values$data.sample = as.data.frame(values$data.set[values$sample.row,])
@@ -225,9 +225,9 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       }
       
       row.names(preview_data$preview_data) = 1:nrow(preview_data$preview_data)
-      if(LITE2) {
-        values$data.sample = preview_data$preview_data
-      }
+      # if(LITE2) {
+      #   values$data.sample = preview_data$preview_data
+      # }
 # >>>>>>> feature/configurable
 
     })
@@ -438,8 +438,14 @@ observeEvent(input$cancel_import, {
 # when user confirms the data in preview
 observeEvent(input$confirm_import, {
   if (!is.null(preview_data$data)) {
+    if(LITE2) {
+      values$data.set <- preview_data$preview_data
+      values$data.sample <- preview_data$preview_data
+    } else {
+      values$data.set <- preview_data$data
+    }
     plot.par$design <- NULL
-    values$data.set <- preview_data$data
+    
     values$data.type <- preview_data$ext
     updatePanel$doit <- updatePanel$doit + 1
     values$data.restore <<- get.data.set()
