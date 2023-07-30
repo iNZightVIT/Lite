@@ -12,11 +12,10 @@ library(openssl)
 
 output$about.panel <- renderUI({
   get.vars = parseQueryString(session$clientData$url_search)
-  # TODO: whats this?
-  # if (!is.null(get.vars$showLogs)) {
-  #   logs <- list.files(tempdir())
-  #   return(logs.panel.ui(logs))
-  # }
+  if (!is.null(get.vars$showLogs)) {
+    logs <- list.files(tempdir())
+    return(logs.panel.ui(logs))
+  }
   if (length(get.vars) > 0 && (any(names(get.vars) %in% "url") || any(names(get.vars) %in% "example"))) {
     data.vals = NULL
     if (!is.null(get.vars$url) && get.vars$url != "") {
