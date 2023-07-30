@@ -49,16 +49,23 @@ reset_preview_data <- function() {
     # use count to prevent rendering multiple times
     state = NULL
   )
+  output$preview_data <<- renderDataTable({
+    datatable(
+      preview_data$preview_data,
+      selection = "single",
+      options = list(dom = "t")
+    )
+  })
 }
 reset_preview_data()
 
-output$preview_data <- renderDataTable({
-  datatable(
-    preview_data$preview_data,
-    selection = "single",
-    options = list(dom = "t")
-  )
-})
+# output$preview_data <- renderDataTable({
+#   datatable(
+#     preview_data$preview_data,
+#     selection = "single",
+#     options = list(dom = "t")
+#   )
+# })
 
 # smart_delimiter = function(fpath) {
 #   ext = tolower(tools::file_ext(fpath[1]))
@@ -190,7 +197,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
     },
     error = identity
   )
-  
+
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
     if(LITE2){
@@ -439,7 +446,7 @@ observeEvent(input$cancel_import, {
 observeEvent(input$confirm_import, {
   if (!is.null(preview_data$data)) {
     if(LITE2) {
-      values$data.set <- preview_data$preview_data
+      values$data.set <- preview_data$data
       values$data.sample <- preview_data$preview_data
     } else {
       values$data.set <- preview_data$data
@@ -496,7 +503,6 @@ observeEvent(input$confirm_import, {
   }
   removeModal()
   reset_preview_data()
-  # browser()
   updateTabsetPanel(session, "selector", "visualize")
 })
 
