@@ -97,6 +97,10 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       ext <- tolower(tools::file_ext(gsub("=", ".", fpath[1])))
     }
   }
+  # treat Rdata as rda
+  if (tolower(ext) == "rdata") {
+    ext <- "rda"
+  }
   # if delimiter not given then guess by its file type
   if (is.null(delimiter)) {
     delimiter <- "auto"
@@ -319,9 +323,6 @@ observeEvent(c(
     ext <- ext_choices[names(ext_choices) == input$preview.filetype][1]
     # ext choices have 2 "RData Files (.RData, .rda)"
     # default to rda
-    if (tolower(ext) == "rdata") {
-      ext <- "rda"
-    }
     lite_read(
       fpath = preview_data$fpath,
       delimiter = delimiter,
