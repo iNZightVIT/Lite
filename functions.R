@@ -2,36 +2,6 @@
 # To be removed when the iNZight tools package is working##
 ##########################################################
 
-# For Lite2
-# https://github.com/ianmcook/wkb/blob/master/R/hex2raw.R
-hex2raw <- function(hex) {
-  if(!(is.character(hex) || (is.list(hex) &&
-                             all(vapply(X = hex, FUN = is.character, FUN.VALUE = logical(1)))))) {
-    stop("hex must be a character string or character vector")
-  }
-  if(is.list(hex) || (length(hex) > 1 &&
-                      all(vapply(X = hex, FUN = nchar, FUN.VALUE = integer(1)) > 2))) {
-    lapply(hex, .hex2raw)
-  } else {
-    .hex2raw(hex)
-  }
-}
-
-.hex2raw <- function(hex) {
-  hex <- gsub("[^0-9a-fA-F]", "", hex)
-  if(length(hex) == 1) {
-    if(nchar(hex) < 2 || nchar(hex) %% 2 != 0) {
-      stop("hex is not a valid hexadecimal representation")
-    }
-    hex <- strsplit(hex, character(0))[[1]]
-    hex <- paste(hex[c(TRUE, FALSE)], hex[c(FALSE, TRUE)], sep = "")
-  }
-  if(!all(vapply(X = hex, FUN = nchar, FUN.VALUE = integer(1)) == 2)) {
-    stop("hex is not a valid hexadecimal representation")
-  }
-  as.raw(as.hexmode(hex))
-}
-
 # Modified based off:
 # https://github.com/dreamRs/shinylogs/blob/0195ac0a1f85d213c82143cfee712c9baddd1963/R/tracking.R#L134
 init_lite_logs <- function(
