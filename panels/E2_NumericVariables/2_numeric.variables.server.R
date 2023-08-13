@@ -20,8 +20,10 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
-        values$data.sample = temp[values$sample.row,]
-        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        if(LITE2) {
+          values$data.sample = temp[values$sample.row,]
+          row.names(values$data.sample) = 1:nrow(values$data.sample)
+        }
         ## code history
         code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
         code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -58,7 +60,7 @@ output$transform.columns.main = renderUI({
   get.transform.main()
 })
 
-
+# TODO: check
 output$table_part.data.sample.info <- renderText({
   if (!is.null(get.data.set()) && !is.null(get.data.name())) {
     paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
@@ -86,7 +88,7 @@ output$standardise.variables.side = renderUI({
 })
 
 
-
+# TODO: check
 output$standardise.variables.table = renderDT({
   if(!is.null(values$data.set)){
     values$data.sample
@@ -108,8 +110,10 @@ observe({
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
       
-      values$data.sample = data[values$sample.row,]
-      row.names(values$data.sample) = 1:nrow(values$data.sample)
+      if(LITE2) {
+        values$data.sample = data[values$sample.row,]
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+      }
       
       ## code history
       code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
@@ -118,6 +122,7 @@ observe({
   })
 })
 
+# TODO: check
 output$standardise.var.data.sample.info <- renderText({
   if (!is.null(get.data.set()) && !is.null(get.data.name())) {
     paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
@@ -147,7 +152,7 @@ output$convert.to.cate.side = renderUI({
 })
 
 
-
+# TODO: check
 output$convert.to.cate.table = renderDT({
   if(!is.null(values$data.set)){
     values$data.sample
@@ -170,8 +175,10 @@ observe({
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
       
-      values$data.sample = data[values$sample.row,]
-      row.names(values$data.sample) = 1:nrow(values$data.sample)
+      if(LITE2) {
+        values$data.sample = data[values$sample.row,]
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+      }
       ## code history
       code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -179,7 +186,7 @@ observe({
   })
 })
 
-
+# TODO: check
 output$convert.to.cate.data.sample.info <- renderText({
   if (!is.null(get.data.set()) && !is.null(get.data.name())) {
     paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
@@ -280,8 +287,10 @@ observe({
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
           
-          values$data.sample = data[values$sample.row,]
-          row.names(values$data.sample) = 1:nrow(values$data.sample)
+          if(LITE2) {
+            values$data.sample = data[values$sample.row,]
+            row.names(values$data.sample) = 1:nrow(values$data.sample)
+          }
           
           shinyalert(title = "Success",
                      text = paste("The new variable",
@@ -304,6 +313,7 @@ observe({
   }
 })
 
+# TODO: check
 output$form.class.interval.table <- renderDT({
   if(!is.null(values$data.set)){
     values$data.sample
@@ -313,6 +323,7 @@ output$form.class.interval.table <- renderDT({
                columns.defaultContent="NA",
                scrollX=T))
 
+# TODO: check
 output$form.class.data.sample.info <- renderText({
   if (!is.null(get.data.set()) && !is.null(get.data.name())) {
     paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
@@ -321,7 +332,7 @@ output$form.class.data.sample.info <- renderText({
 
 
 ## Manipulate variables -> Numeric variables -> Rank numeric
-
+# TODO: check
 output$rank.numeric.table = renderDT({
   if(!is.null(values$data.set)){
     values$data.sample
@@ -349,8 +360,10 @@ observe({
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = data
       
-      values$data.sample = data[values$sample.row,]
-      row.names(values$data.sample) = 1:nrow(values$data.sample)
+      if(LITE2) {
+        values$data.sample = data[values$sample.row,]
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+      }
       
       ## code history
       code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
@@ -359,7 +372,7 @@ observe({
   })
 })
 
-
+# TODO: check
 output$rank.numeric.data.sample.info <- renderText({
   if (!is.null(get.data.set()) && !is.null(get.data.name())) {
     paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")

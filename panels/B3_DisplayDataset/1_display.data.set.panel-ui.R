@@ -1,7 +1,9 @@
 current.data = function(){
   ret = list()
   ret[[1]] = h4(textOutput("current.text"))
-  ret[[2]] = textOutput('data.sample.info')
+  if(LITE2) {
+    ret[[2]] = textOutput('data.sample.info')
+  }
   ret[[3]] = br()
   ret[[4]] = br()
   ret[[5]] = DTOutput(outputId="current")

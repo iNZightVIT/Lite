@@ -62,12 +62,14 @@ observe({
       ## save data
       updatePanel$datachanged = updatePanel$datachanged+1
       
-      values$data.set = as.data.frame(temp)
-      values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
-      values$sample.row = sort(sample(1:nrow(values$data.set), values$sample.num))
-      values$data.sample = as.data.frame(values$data.set[values$sample.row,])
-      row.names(values$data.sample) = 1:nrow(values$data.sample)
-      colnames(values$data.sample) = colnames(values$data.set)
+      if(LITE2) {
+        values$data.set = as.data.frame(temp)
+        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+        values$sample.row = sort(sample(1:nrow(values$data.set), values$sample.num))
+        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        colnames(values$data.sample) = colnames(values$data.set)
+      }
       
       code.save$name = code.save$dataname
       values$data.name = code.save$dataname
@@ -75,6 +77,7 @@ observe({
   })
 })
 
+# TODO: check
 output$unitecolumns.table = renderDT({
   values$data.sample
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))

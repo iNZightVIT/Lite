@@ -17,6 +17,7 @@ frequency.tables.sidebar =  function(){
     )
 }
 
+# TODO: check
 frequency.tables.panel = function(data.set){
   if(is.null(data.set)){
     sidebarLayout(

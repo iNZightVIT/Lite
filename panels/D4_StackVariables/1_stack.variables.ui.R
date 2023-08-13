@@ -23,6 +23,7 @@ stack.variables.sidebar =  function(){
          br())
 }
 
+# TODO: check
 stack.variables.panel =function(){
   if(is.null(get.data.set())){
     sidebarLayout(

@@ -70,6 +70,7 @@ sort.variables.sidebar =  function(){
 #         br()))
 }
 
+# TODO: check
 sort.variables.panel = function(){
   if(is.null(get.data.set())){
     sidebarLayout(

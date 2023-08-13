@@ -33,6 +33,7 @@ aggregate.data.sidebar =  function(){
        br())
 }
 
+# TODO: check
 aggregate.variable.panel =function(){
   if(is.null(get.data.set())){
     sidebarLayout(

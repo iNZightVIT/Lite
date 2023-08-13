@@ -15,7 +15,7 @@ alphabetise.variables.sidebar =  function(data.set){
 }
 
 
-
+# TODO: check
 alphabetise.variables = function(data.set){
   if(is.null(data.set)){
     sidebarLayout(

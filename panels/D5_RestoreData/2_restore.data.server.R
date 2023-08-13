@@ -7,11 +7,13 @@ observe({
       values$data.set = get.data.restore()
       values$data.name = get.name.restore()
       
-      values$sample.num = ifelse(nrow(get.data.restore()) > 2000, 500, round(nrow(get.data.restore())/4))
-      values$sample.row = sort(sample(1:nrow(get.data.restore()), values$sample.num))
-      values$data.sample = as.data.frame(get.data.restore()[values$sample.row,])
-      row.names(values$data.sample) = 1:nrow(values$data.sample)
-      colnames(values$data.sample) = colnames(values$data.set)
+      if(LITE2) {
+        values$sample.num = ifelse(nrow(get.data.restore()) > 2000, 500, round(nrow(get.data.restore())/4))
+        values$sample.row = sort(sample(1:nrow(get.data.restore()), values$sample.num))
+        values$data.sample = as.data.frame(get.data.restore()[values$sample.row,])
+        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        colnames(values$data.sample) = colnames(values$data.set)
+      }
       ## code history
       code = paste0(values$data.name, "_", input$restore_data_button, " <- ", gsub("_ex", "", values$data.name))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -20,6 +22,7 @@ observe({
   }
 })
 
+# TODO: check
 output$data.restore.table = renderDT({
   if(input$selector == "Restore data"){
     values$data.sample
@@ -43,7 +46,7 @@ observe({
   }
 })
 
-
+# TODO: check
 output$data.restore.data.sample.info <- renderText({
   if (!is.null(get.data.set()) && !is.null(get.data.name())) {
     paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")

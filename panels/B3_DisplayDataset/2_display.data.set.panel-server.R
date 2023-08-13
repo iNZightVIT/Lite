@@ -8,16 +8,19 @@ output$current.text <- renderText({
   }
 })
 
-output$data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
-})
+if(LITE2) {
+  output$data.sample.info <- renderText({
+    if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+      paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+    }
+  })
+}
 
 output$current.data <- renderUI({
   current.data()
 })
 
+# TODO: check
 output$current <- renderDT({
   input$selector
   if(!is.null(values$data.set)){

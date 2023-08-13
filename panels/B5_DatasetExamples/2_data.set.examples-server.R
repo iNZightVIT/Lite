@@ -167,10 +167,12 @@ observe({
         values$data.name = new.data[[1]]
         values$data.set = new.data[[2]]
         
-        values$sample.num = ifelse(nrow(new.data[[2]]) > 2000, 500, round(nrow(new.data[[2]])/4))
-        values$sample.row = sample(1:nrow(new.data[[2]]), values$sample.num)
-        values$data.sample = new.data[[2]][values$sample.row,]
-        row.names(values$data.sample) = 1:nrow(values$data.sample)
+        if(LITE2) {
+          values$sample.num = ifelse(nrow(new.data[[2]]) > 2000, 500, round(nrow(new.data[[2]])/4))
+          values$sample.row = sample(1:nrow(new.data[[2]]), values$sample.num)
+          values$data.sample = new.data[[2]][values$sample.row,]
+          row.names(values$data.sample) = 1:nrow(values$data.sample)
+        }
         
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()

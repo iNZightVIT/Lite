@@ -27,6 +27,7 @@ numeric.variables.panel = function(data.set){
                      conditionalPanel("input.numeric_variables_select1=='Convert to categorical type'",
                                       uiOutput("convert.to.cate.side"))
     ),
+    # TODO: check
     list(conditionalPanel("input.numeric_variables_select1=='Transform variables'",
                           uiOutput("transform.columns.main")),
          conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
@@ -62,6 +63,7 @@ get.transform.sidebar =  function(data.set){
        help.display('Modify data','transform_columns',"panels/E2_NumericVariables/4_transform.variables.help.md"),br())
 }
 
+# TODO: check
 get.transform.main = function(){
   list(textOutput('table_part.data.sample.info'), br(), br(),
        DTOutput(outputId="table_part"))
@@ -94,6 +96,7 @@ get.form.class.interval.side = function(data.set){
   )
 }
 
+# TODO: check
 get.form.class.interval.main = function(){
   list(textOutput('form.class.data.sample.info'), br(), br(),
        DTOutput("form.class.interval.table"))
@@ -115,6 +118,7 @@ rank.numeric.sidebar = function(data.set){
                     "panels/E2_NumericVariables/6_rank.numeric.help.md"))
 }
 
+# TODO: check
 rank.numeric.main = function(){
   list(textOutput('rank.numeric.data.sample.info'), br(), br(),
        DTOutput("rank.numeric.table"))

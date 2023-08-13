@@ -59,9 +59,11 @@ output$about.panel <- renderUI({
       values$data.restore = get.data.set()
       values$data.name = "data"
 
-      values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
-      values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
-      values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+      if(LITE2) {
+        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
+        values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
+        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
+      }
 
       if(!is.null(get.data.set())&&
          "land"%in%names(get.vars)&&
