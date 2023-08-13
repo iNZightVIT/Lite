@@ -31,6 +31,7 @@ Imports:
     iNZightRegression,
     iNZightTools,
     iNZightTS,
+    openssl,
     plotly,
     readtext,
     readxl,
@@ -45,6 +46,7 @@ Imports:
     survey,
     surveyspec,
     tibble,
-    viridis
+    viridis,
+    wkb
 Additional_repository: https://r.docker.stat.auckland.ac.nz
 RoxygenNote: 6.0.1
