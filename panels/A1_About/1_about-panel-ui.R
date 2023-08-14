@@ -27,7 +27,7 @@ about.panel.ui <- function(lite.version, lite.update) {
       ##  "lite.update".
       if (lite.version != "" || lite.update != "") {
         p_args <- list()
-        if (lite.version != "") {
+        if (lite.version != "") { 
           ver = ifelse(LITE2, "2", "")
           p_args <- c(p_args, list(paste0("iNZight Lite", ver, " Version: "), em(lite.version), br()))
         }

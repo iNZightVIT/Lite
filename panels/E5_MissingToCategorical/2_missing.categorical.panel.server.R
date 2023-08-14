@@ -35,10 +35,7 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
-        if(LITE2) {
-          values$data.sample = temp[values$sample.row,]
-          row.names(values$data.sample) = 1:nrow(values$data.sample)
-        }
+        values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
         newvariablesadded_reactives$success = T
         ## code history
         code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))

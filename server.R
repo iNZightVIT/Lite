@@ -49,7 +49,7 @@ args=(commandArgs(TRUE))
 #  }
 #}
 
-LITE2 = as.logical(as.integer(Sys.getenv("LITE2", 0)))
+LITE2 <<- as.logical(as.integer(Sys.getenv("LITE2", 0)))
 LITE_VER = ifelse(LITE2, "2", "")
 print(paste0("LITE", LITE_VER, " Session"))
 

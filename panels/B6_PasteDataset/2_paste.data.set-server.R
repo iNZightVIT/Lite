@@ -104,13 +104,7 @@ observe({
         values$data.name = "data"
         values$data.set = as.data.frame(data)
         
-        if(LITE2) {
-          values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
-          values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
-          values$data.sample = as.data.frame(values$data.set[values$sample.row,])
-          row.names(values$data.sample) = 1:nrow(values$data.sample)
-          colnames(values$data.sample) = colnames(values$data.set)
-        }
+        values = sample_if_lite2(rvalues = values, d = values$data.set)
         
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()

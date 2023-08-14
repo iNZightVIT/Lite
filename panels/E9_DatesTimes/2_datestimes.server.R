@@ -114,11 +114,7 @@ observe({
           data = iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
-          
-          if(LITE2) {
-            values$data.sample = data[values$sample.row,]
-            row.names(values$data.sample) = 1:nrow(values$data.sample)
-          }
+          values = sample_if_lite2(rvalues = values, d = data, new_sample = FALSE)
           
           output$convert_datestimes_original_table = renderDT({
             NULL

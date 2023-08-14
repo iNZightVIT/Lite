@@ -7,13 +7,8 @@ observe({
       values$data.set = get.data.restore()
       values$data.name = get.name.restore()
       
-      if(LITE2) {
-        values$sample.num = ifelse(nrow(get.data.restore()) > 2000, 500, round(nrow(get.data.restore())/4))
-        values$sample.row = sort(sample(1:nrow(get.data.restore()), values$sample.num))
-        values$data.sample = as.data.frame(get.data.restore()[values$sample.row,])
-        row.names(values$data.sample) = 1:nrow(values$data.sample)
-        colnames(values$data.sample) = colnames(values$data.set)
-      }
+      values = sample_if_lite2(rvalues = values, d = get.data.restore())
+
       ## code history
       code = paste0(values$data.name, "_", input$restore_data_button, " <- ", gsub("_ex", "", values$data.name))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))

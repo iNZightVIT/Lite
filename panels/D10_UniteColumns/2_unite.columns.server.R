@@ -61,15 +61,9 @@ observe({
       code.save$variable = c(code.save$variable, list(c("\n", code)))
       ## save data
       updatePanel$datachanged = updatePanel$datachanged+1
-      
-      if(LITE2) {
-        values$data.set = as.data.frame(temp)
-        values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
-        values$sample.row = sort(sample(1:nrow(values$data.set), values$sample.num))
-        values$data.sample = as.data.frame(values$data.set[values$sample.row,])
-        row.names(values$data.sample) = 1:nrow(values$data.sample)
-        colnames(values$data.sample) = colnames(values$data.set)
-      }
+
+      values$data.set = as.data.frame(temp)
+      values = sample_if_lite2(rvalues = values, d = values$data.set)
       
       code.save$name = code.save$dataname
       values$data.name = code.save$dataname

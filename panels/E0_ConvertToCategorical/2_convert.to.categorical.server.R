@@ -22,10 +22,7 @@ observe({
       temp = iNZightTools::convertToCat(get.data.set(), orgVar, name)
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = temp
-      if(LITE2) {
-        values$data.sample = temp[values$sample.row,]
-        row.names(values$data.sample) = 1:nrow(values$data.sample)
-      }
+      values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
       ## code history
       code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
