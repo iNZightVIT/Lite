@@ -8,7 +8,6 @@ rename.variables.panel = function(){
       )
     )
   }else{
-    # TODO: check
     sidebarLayout(
       sidebarPanel(uiOutput("rename_variables_two_columns"),
                    actionButton("rename_variables_two_columns_but","Rename",

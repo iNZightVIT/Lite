@@ -133,9 +133,8 @@ observe({
   })
 })
 
-# TODO: check
 output$reshape.table = renderDT({
-  values$data.sample
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$reshape.dataset = renderUI({

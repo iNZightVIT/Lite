@@ -344,18 +344,12 @@ observe({
   })
 })
 
-
-
-
-
-
-# TODO: check
 output$append.table = renderDT({
-  values$data.sample
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
-# TODO: check
+
 output$join.table = renderDT({
-  values$data.sample
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$mergejoin.datasets = renderUI({

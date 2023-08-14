@@ -19,17 +19,11 @@ get.sidebar.load = function(url_load){
 }
 
 load.data.panel = function(url_load){
-  if(LITE2) {
-    main_panel = mainPanel(
+  sidebarLayout(
+    sidebarPanel(get.sidebar.load(url_load)),
+    mainPanel(
       textOutput('import.data.sample.info'), br(), br(),
       uiOutput("filedisplay")
     )
-  } else {
-    main_panel = mainPanel(uiOutput("filedisplay"))
-  }
-
-  sidebarLayout(
-    sidebarPanel(get.sidebar.load(url_load)),
-    main_panel
   )
 }

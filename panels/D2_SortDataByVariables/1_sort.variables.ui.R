@@ -70,7 +70,6 @@ sort.variables.sidebar =  function(){
 #         br()))
 }
 
-# TODO: check
 sort.variables.panel = function(){
   if(is.null(get.data.set())){
     sidebarLayout(
@@ -85,7 +84,8 @@ sort.variables.panel = function(){
       sidebarPanel(sort.variables.sidebar()),
       mainPanel(
         textOutput('sort.table.data.sample.info'), br(), br(),
-        DTOutput("sort.table"))
+        DTOutput("sort.table")
+      )
     )
   }
 }

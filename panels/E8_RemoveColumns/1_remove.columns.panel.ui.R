@@ -23,7 +23,6 @@ get.sidebar.remove= function(data.set){
   )
 }
 
-# TODO: check
 remove.columns.panel = function(data.set){
   if(is.null(data.set)){
     sidebarLayout(

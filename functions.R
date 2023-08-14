@@ -2,21 +2,6 @@
 # To be removed when the iNZight tools package is working##
 ##########################################################
 
-# LITE2
-sample_if_lite2 = function(rvalues, d, new_sample = TRUE) {
-  if(LITE2) {
-    if(new_sample) {
-      rvalues$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
-      rvalues$sample.row = sort(sample(1:nrow(d), rvalues$sample.num))
-    }
-    rvalues$data.sample = as.data.frame(d[rvalues$sample.row,])
-    row.names(rvalues$data.sample) = 1:nrow(rvalues$data.sample)
-    colnames(rvalues$data.sample) = colnames(d)
-    return(rvalues)
-  }
-  return(rvalues)
-}
-
 # Modified based off:
 # https://github.com/dreamRs/shinylogs/blob/0195ac0a1f85d213c82143cfee712c9baddd1963/R/tracking.R#L134
 init_lite_logs <- function(

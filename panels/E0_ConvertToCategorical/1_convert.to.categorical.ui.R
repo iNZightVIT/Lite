@@ -16,7 +16,6 @@ convert.to.categorical.sidebar =  function(){
                     style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"))
 }
 
-# TODO: check
 convert.to.categorical.panel = function(){
   if(is.null(get.data.set())){
     sidebarLayout(
@@ -31,7 +30,7 @@ convert.to.categorical.panel = function(){
       mainPanel(
         textOutput('convert.cate.data.sample.info'), br(), br(),
         DTOutput("convert.to.categorical.table")
-        )
+      )
     )
   }
 }

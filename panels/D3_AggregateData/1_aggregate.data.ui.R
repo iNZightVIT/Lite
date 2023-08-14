@@ -33,7 +33,6 @@ aggregate.data.sidebar =  function(){
        br())
 }
 
-# TODO: check
 aggregate.variable.panel =function(){
   if(is.null(get.data.set())){
     sidebarLayout(
@@ -47,7 +46,8 @@ aggregate.variable.panel =function(){
       sidebarPanel(aggregate.data.sidebar()),
       mainPanel(
         textOutput('aggregate.table.data.sample.info'), br(), br(),
-        DTOutput("aggregate.table"))
+        DTOutput("aggregate.table")
+      )
     )
   }
 }

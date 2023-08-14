@@ -49,9 +49,8 @@ observe({
 #  })
 #})
 
-# TODO: check
 output$stack.table = renderDT({
-  values$data.sample
+  get.data.set.display()
 }, options = list(
   lengthMenu = c(5, 30, 50),
   pageLength = 5,
@@ -62,10 +61,8 @@ output$stack.table = renderDT({
 output$stack.variables = renderUI({
   stack.variables.panel()
 })
-# TODO: check
+
 output$stack.table.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 })
 

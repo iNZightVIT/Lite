@@ -57,11 +57,8 @@ output$transform.columns.main = renderUI({
   get.transform.main()
 })
 
-# TODO: check
 output$table_part.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 })
 
 ##  Manipulate variables -> Numeric variables -> Standardise variables (Perform column transformations)
@@ -85,10 +82,9 @@ output$standardise.variables.side = renderUI({
 })
 
 
-# TODO: check
 output$standardise.variables.table = renderDT({
   if(!is.null(values$data.set)){
-    values$data.sample
+    get.data.set.display()
   }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
@@ -114,11 +110,8 @@ observe({
   })
 })
 
-# TODO: check
 output$standardise.var.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 })
 
 
@@ -144,10 +137,9 @@ output$convert.to.cate.side = renderUI({
 })
 
 
-# TODO: check
 output$convert.to.cate.table = renderDT({
   if(!is.null(values$data.set)){
-    values$data.sample
+    get.data.set.display()
   }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
@@ -174,11 +166,8 @@ observe({
   })
 })
 
-# TODO: check
 output$convert.to.cate.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 })
 
 
@@ -297,29 +286,24 @@ observe({
   }
 })
 
-# TODO: check
 output$form.class.interval.table <- renderDT({
   if(!is.null(values$data.set)){
-    values$data.sample
+    get.data.set.display()
   }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
                columns.defaultContent="NA",
                scrollX=T))
 
-# TODO: check
 output$form.class.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 })
 
 
 ## Manipulate variables -> Numeric variables -> Rank numeric
-# TODO: check
 output$rank.numeric.table = renderDT({
   if(!is.null(values$data.set)){
-    values$data.sample
+    get.data.set.display()
   }
 },options=list(lengthMenu = c(5, 30, 50), 
                pageLength = 5, 
@@ -352,9 +336,6 @@ observe({
   })
 })
 
-# TODO: check
 output$rank.numeric.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 })

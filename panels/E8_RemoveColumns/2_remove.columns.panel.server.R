@@ -27,20 +27,16 @@ observe({
   }
 })
 
-# TODO: check
 output$rem.col.table = renderDT({
-  values$data.sample
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$remove.columns = renderUI({
   remove.columns.panel(get.data.set())
 })
 
-# TODO: check
 output$rem.col.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name()) && !is.null(values$data.sample)) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 }) 
 
 

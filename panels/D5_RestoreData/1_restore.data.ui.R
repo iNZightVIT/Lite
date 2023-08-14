@@ -3,7 +3,7 @@ restore.data.sidebar =  function(){
     helpText("The data set has been restored to the way when it was initially imported."),
     br())
 }
-# TODO: check
+
 restore.data.panel = function(data.set){
   if(is.null(data.set)){
     sidebarLayout(
@@ -18,7 +18,8 @@ restore.data.panel = function(data.set){
       sidebarPanel(restore.data.sidebar()),
       mainPanel(
         textOutput('data.restore.data.sample.info'), br(), br(),
-        DTOutput("data.restore.table"))
+        DTOutput("data.restore.table")
+      )
     )
   }
 }

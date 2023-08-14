@@ -17,7 +17,6 @@ frequency.tables.sidebar =  function(){
     )
 }
 
-# TODO: check
 frequency.tables.panel = function(data.set){
   if(is.null(data.set)){
     sidebarLayout(
@@ -30,8 +29,9 @@ frequency.tables.panel = function(data.set){
     sidebarLayout(
       sidebarPanel(frequency.tables.sidebar()),
       mainPanel(
-        textOutput('ft.expand.dt.data.sample.info'), br(), br(),
-        DTOutput("ft.expand.data.table"))
+          textOutput('ft.expand.dt.data.sample.info'), br(), br(),
+          DTOutput("ft.expand.data.table")
       )
+    )
   }
 }

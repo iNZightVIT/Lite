@@ -128,7 +128,29 @@ shinyServer(function(input, output, session) {
       values$lite.update = vars$lite.update
     }
   }
-
+  
+  # -- LITE2 --
+  sample_if_lite2 = function(rvalues, d, new_sample = TRUE) {
+    if(LITE2) {
+      if(new_sample) {
+        rvalues$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
+        rvalues$sample.row = sort(sample(1:nrow(d), rvalues$sample.num))
+      }
+      rvalues$data.sample = as.data.frame(d[rvalues$sample.row,])
+      row.names(rvalues$data.sample) = 1:nrow(rvalues$data.sample)
+      colnames(rvalues$data.sample) = colnames(d)
+      return(rvalues)
+    }
+    return(rvalues)
+  }
+  
+  sample_info_lite2 = function(){
+    if (LITE2 && !is.null(values$data.sample) && !is.null(get.data.set()) && !is.null(get.data.name())) {
+      return(paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data"))
+    }
+  }
+  # ----------
+  
   get.data.name = reactive({
     values$data.name
   })

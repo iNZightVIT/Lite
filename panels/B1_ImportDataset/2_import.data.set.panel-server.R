@@ -491,11 +491,8 @@ output$filetable <- renderDT(get.data.set.display(),
   )
 )
 
-# TODO: check
 output$import.data.sample.info <- renderText({
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-  }
+  sample_info_lite2()
 })
 
 observe({

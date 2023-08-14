@@ -23,7 +23,6 @@ stack.variables.sidebar =  function(){
          br())
 }
 
-# TODO: check
 stack.variables.panel =function(){
   if(is.null(get.data.set())){
     sidebarLayout(
@@ -38,7 +37,8 @@ stack.variables.panel =function(){
       sidebarPanel(stack.variables.sidebar()),
       mainPanel(
         textOutput('stack.table.data.sample.info'), br(), br(),
-        DTOutput("stack.table"))
+        DTOutput("stack.table")
+      )
     )
   }
 }
