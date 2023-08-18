@@ -59,8 +59,12 @@ observe({
                       value = paste0(new_name, ".dt", sep = ""))
       
       output$convert_datestimes_original_table = renderDT({
-        data = data.frame(Original = data.frame(Original = varx, stringsAsFactors = TRUE)[values$sample.row,])
-        row.names(data) = 1:length(values$sample.row)
+        if(LITE2) {
+          data = data.frame(Original = data.frame(Original = varx, stringsAsFactors = TRUE)[values$sample.row,])
+          row.names(data) = 1:length(values$sample.row)
+        } else {
+          data = data.frame(Original = varx, stringsAsFactors = TRUE)
+        }
         data
       },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
     }
@@ -90,8 +94,10 @@ observe({
             })
           
           output$convert_datestimes_converted_table = renderDT({
-            data = data.frame(Converted = data[values$sample.row,])
-            row.names(data) = 1:length(values$sample.row)
+            if(LITE2) {
+              data = data.frame(Converted = data[values$sample.row,])
+              row.names(data) = 1:length(values$sample.row)
+            }
             data
           },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
         }
