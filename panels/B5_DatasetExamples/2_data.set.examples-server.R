@@ -100,21 +100,21 @@ output$col_dimension_show <- renderText({
   change_col_dim_reac()
 })
 
-change_row_dim_reac <- reactive({
-  input$change_set
-  input$selector
-  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-    paste("Selected data number of rows is: ", dim(get.data.set())[1])
-  } else {
-    ""
-  }
-})
+#change_row_dim_reac <- reactive({
+#  input$change_set
+#  input$selector
+#  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
+#    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
+#  } else {
+#    ""
+#  }
+#})
 
-output$row_dimension_show <- renderText({
-  input$change_set
-  input$selector
-  change_row_dim_reac()
-})
+#output$row_dimension_show <- renderText({
+#  input$change_set
+#  input$selector
+#  change_row_dim_reac()
+#})
 
 change_data_name_reac <- reactive({
   input$change_set
@@ -166,6 +166,9 @@ observe({
         plot.par$design=NULL
         values$data.name = new.data[[1]]
         values$data.set = new.data[[2]]
+        
+        values = sample_if_lite2(rvalues = values, d = new.data[[2]])
+
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
         ## code history

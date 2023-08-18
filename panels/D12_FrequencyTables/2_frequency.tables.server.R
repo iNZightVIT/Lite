@@ -30,7 +30,10 @@ observe({
         
         
         updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = out
+        values$data.set = as.data.frame(out)
+
+        values = sample_if_lite2(rvalues = values, d = values$data.set)
+        
         values$data.name = "data"
       }
     }, error = function(e){})
@@ -39,12 +42,12 @@ observe({
 
 output$ft.expand.data.table = renderDT({
   input$expand_table_button
-  get.data.set()
+  get.data.set.display()
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
-
-
-
+output$ft.expand.dt.data.sample.info <- renderText({
+  sample_info_lite2()
+})
 
 observe({  
   input$expand_table_button 

@@ -8,13 +8,17 @@ output$current.text <- renderText({
   }
 })
 
+output$data.sample.info <- renderText({
+  sample_info_lite2()
+})
+
 output$current.data <- renderUI({
   current.data()
 })
 
 output$current <- renderDT({
   input$selector
-  get.data.set()
+  get.data.set.display()
 }, options =
   list(lengthMenu = c(10, 30, 50), pageLength = 10,
        columns.defaultContent = "NA", scrollX = TRUE))

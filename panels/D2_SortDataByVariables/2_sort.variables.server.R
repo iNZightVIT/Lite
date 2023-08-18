@@ -113,8 +113,12 @@ observe({
         code.save$variable = c(code.save$variable, list(c("\n", code)))
         ## save data
         updatePanel$datachanged = updatePanel$datachanged + 1
-        values$data.set = temp
-        code.save$name = code.save$dataname
+        
+        values$data.set = as.data.frame(temp)
+        
+        values = sample_if_lite2(rvalues = values, d = values$data.set)
+
+        code.save$name = code.save$dataname 
         values$data.name = code.save$dataname
         updateSelectInput(session,
                           "sort1",
@@ -140,7 +144,7 @@ observe({
 
 output$sort.table = renderDT({
   input$sort_vars
-  get.data.set()
+  get.data.set.display()
 }, options = list(
   lengthMenu = c(5, 30, 50),
   pageLength = 5,
@@ -158,3 +162,7 @@ output$sort.variables = renderUI({
 #    num.select.panel(input$num_columns_sort,get.data.set())
 #  })
 #})
+
+output$sort.table.data.sample.info <- renderText({
+  sample_info_lite2()
+})

@@ -78,6 +78,7 @@ observe({
             temp = iNZightTools::reorderLevels(get.data.set(), var, levels, name = name)
             updatePanel$datachanged = updatePanel$datachanged+1
             values$data.set = temp
+            values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
             ## code history
             code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
             code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -87,6 +88,8 @@ observe({
           data = iNZightTools::reorderLevels(get.data.set(), var, freq = TRUE, name = name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
+          values = sample_if_lite2(rvalues = values, d = data, new_sample = FALSE)
+
           ## code history
           code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
           code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -200,6 +203,7 @@ observe({
           temp = iNZightTools::collapseLevels(get.data.set(), var, lvls, lvlname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = temp
+          values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
           ## code history
           code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
           code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -280,6 +284,7 @@ observe({
         if(!is.null(temp)){
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = temp
+          values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
           updateSelectInput(session,"select.rename.column",selected=0)
           ## code history
           code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
@@ -313,6 +318,7 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
+        values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
         ## code history
         code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
         code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))

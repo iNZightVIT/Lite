@@ -7,9 +7,130 @@
 ###
 ###  Please consult the comments before editing any code.
 ###  This file sources the ui files for each panel separately.
+
+LITE2 = as.logical(as.integer(Sys.getenv("LITE2", 0)))
+
+css <- "
+.nav li a.disabled {
+background-color: #aaa !important;
+color: #333 !important;
+cursor: not-allowed !important;
+border-color: #aaa !important;
+}"
+
+#
+import_tabs = list(
+  import = tabPanel("Import Dataset", uiOutput('load.data.panel')),
+  paste = tabPanel("Paste Dataset", uiOutput('paste.data.panel')),
+  export = tabPanel("Export Dataset",  uiOutput('save.data.panel')),
+  display = tabPanel("Display Dataset", uiOutput('current.data')),
+  # remove = tabPanel("Remove Dataset", uiOutput("remove.data.panel"))
+  examples = tabPanel("Dataset Examples", uiOutput('switch.data.panel'))
+)
+if(LITE2) {
+  import_tabs = import_tabs[!(names(import_tabs) %in% c("export"))]
+}
+import_tabs = do.call("navbarMenu", c("File", unname(import_tabs)))
+
+#
+visualize_tabs = tabPanel("Visualize", value = "visualize", uiOutput("visualize.panel"))
+
+#
+row_ops_tabs = navbarMenu(
+  "Dataset",
+  tabPanel(
+    "Filter Dataset",
+    uiOutput("filter.dataset")
+  ),
+  tabPanel(
+    "Sort data by variables",
+    uiOutput("sort.variables")
+  ),
+  tabPanel(
+    "Aggregate data",
+    uiOutput("aggregate.variable")
+  ),
+  tabPanel(
+    "Stack variables",
+    uiOutput("stack.variables")
+  ),
+  tabPanel(
+    "Reshape data",
+    uiOutput("reshape.dataset")
+  ),
+  tabPanel(
+    "Separate columns",
+    uiOutput("separate.columns")
+  ),
+  tabPanel(
+    "Unite columns",
+    uiOutput("unite.columns")
+  ),
+  tabPanel(
+    "Merge/Join datasets",
+    uiOutput("mergejoin.datasets")
+  ),
+  tabPanel(
+    "Alphabetise Variables",
+    uiOutput("alphabetise.variables")
+  ),
+  tabPanel(
+    "Restore data",
+    uiOutput("restore.data")
+  ),
+  tabPanel(
+    "Survey design",
+    uiOutput("survey.design")
+  ),
+  tabPanel(
+    "Frequency tables",
+    uiOutput("frequency.tables")
+  )
+)
+if(LITE2) {
+  row_ops_tabs = NULL
+}
+
+#
+manipulate_tabs = list(
+  convert = tabPanel("Convert to categorical", uiOutput("convert.to.categorical")),
+  categorical = tabPanel("Categorical variables", uiOutput("categorical.variables")),
+  numeric = tabPanel("Numeric variables", uiOutput("numeric.variables")),
+  dates = tabPanel("Dates and Times", uiOutput("dates.times")),
+  rename = tabPanel("Rename Variables", uiOutput("rename.variables")),
+  create = tabPanel("Create Variables", uiOutput("create.variables")),
+  missing = tabPanel("Missing to category", uiOutput("missing.categorical")),
+  # add = tabPanel("Add columns", uiOutput("add.columns")),
+  # reshape = tabPanel("Reshape dataset", uiOutput("reshape.data")),
+  delete = tabPanel("Delete variables", uiOutput("remove.columns"))
+)
+if(LITE2) {
+  manipulate_tabs = manipulate_tabs[!(names(manipulate_tabs) %in% c("create"))]
+}
+manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", unname(manipulate_tabs)))
+
+
+advance_tabs = list(
+  quick = tabPanel("Quick explore", uiOutput("quick.explore")),
+  time_series = tabPanel("Time Series", value = "timeSeries", uiOutput("timeseries.panel")),
+  model = tabPanel("Model Fitting", value = "regression", uiOutput("modelfitting.panel")),
+  maps = tabPanel("Maps", uiOutput("newmaps.panel")),
+  design_exp = tabPanel("Design of Experiments", uiOutput("mixedmodel.panel")),
+  multiple = tabPanel("Multiple Response", uiOutput("multiple.response")),
+  multivariate = tabPanel("Multivariate", uiOutput("multivariate.panel")),
+  vit = tabPanel("VIT", uiOutput("VIT.panel"))
+)
+if(LITE2) {
+  advance_tabs = advance_tabs[names(advance_tabs) %in% c("multiple", "multivariate")]
+}
+advance_tabs = do.call("navbarMenu", c("Advanced", unname(advance_tabs)))
+
+
 shinyUI(
   fluidPage(
-    # tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet-pure-css.css")),
+    shinyjs::useShinyjs(),
+    shinyjs::inlineCSS(css),
+    #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "stylesheet-pure-css.css")),
     ##  Set Tabpanel font to be size 16.
     tags$head(
       shinyjs::useShinyjs(),
@@ -68,162 +189,15 @@ shinyUI(
         uiOutput("about.panel")
       ),
       ##  "Data" tab.
-      navbarMenu(
-        "File",
-        tabPanel(
-          "Import Dataset",
-          uiOutput("load.data.panel")
-        ),
-        tabPanel(
-          "Paste Dataset",
-          uiOutput("paste.data.panel")
-        ),
-        tabPanel(
-          "Export Dataset",
-          uiOutput("save.data.panel")
-        ),
-        tabPanel(
-          "Display Dataset",
-          uiOutput("current.data")
-        ),
-        tabPanel(
-          "Dataset Examples",
-          uiOutput("switch.data.panel")
-        )
-      ),
-      tabPanel("Visualize",
-        value = "visualize",
-        uiOutput("visualize.panel")
-      ),
+      import_tabs,
+      ## "Visualize" tab.
+      visualize_tabs,
       ## Row operations tab
-      navbarMenu(
-        "Dataset",
-        tabPanel(
-          "Filter Dataset",
-          uiOutput("filter.dataset")
-        ),
-        tabPanel(
-          "Sort data by variables",
-          uiOutput("sort.variables")
-        ),
-        tabPanel(
-          "Aggregate data",
-          uiOutput("aggregate.variable")
-        ),
-        tabPanel(
-          "Stack variables",
-          uiOutput("stack.variables")
-        ),
-        tabPanel(
-          "Reshape data",
-          uiOutput("reshape.dataset")
-        ),
-        tabPanel(
-          "Separate columns",
-          uiOutput("separate.columns")
-        ),
-        tabPanel(
-          "Unite columns",
-          uiOutput("unite.columns")
-        ),
-        tabPanel(
-          "Merge/Join datasets",
-          uiOutput("mergejoin.datasets")
-        ),
-        tabPanel(
-          "Alphabetise Variables",
-          uiOutput("alphabetise.variables")
-        ),
-        tabPanel(
-          "Restore data",
-          uiOutput("restore.data")
-        ),
-        tabPanel(
-          "Survey design",
-          uiOutput("survey.design")
-        ),
-        tabPanel(
-          "Frequency tables",
-          uiOutput("frequency.tables")
-        )
-      ),
+      row_ops_tabs,
       ##  "Manipulate variables" tab.
-      navbarMenu(
-        "Manipulate variables",
-        tabPanel(
-          "Convert to categorical",
-          uiOutput("convert.to.categorical")
-        ),
-        tabPanel(
-          "Categorical variables",
-          uiOutput("categorical.variables")
-        ),
-        tabPanel(
-          "Numeric variables",
-          uiOutput("numeric.variables")
-        ),
-        tabPanel(
-          "Dates and Times",
-          uiOutput("dates.times")
-        ),
-        tabPanel(
-          "Rename Variables",
-          uiOutput("rename.variables")
-        ),
-        tabPanel(
-          "Create Variables",
-          uiOutput("create.variables")
-        ),
-        tabPanel(
-          "Missing to category",
-          uiOutput("missing.categorical")
-        ),
-        # tabPanel("Add columns",
-        #          uiOutput("add.columns")),
-        # tabPanel("Reshape dataset",
-        #          uiOutput("reshape.data")),
-        tabPanel(
-          "Delete variables",
-          uiOutput("remove.columns")
-        )
-      ),
-
+      manipulate_tabs,
       ##  "Quick Explore" tab.
-      navbarMenu(
-        "Advanced",
-        tabPanel(
-          "Quick explore",
-          uiOutput("quick.explore")
-        ),
-        tabPanel("Time Series",
-          value = "timeSeries",
-          uiOutput("timeseries.panel")
-        ),
-        tabPanel("Model Fitting",
-          value = "regression",
-          uiOutput("modelfitting.panel")
-        ),
-        tabPanel(
-          "Maps",
-          uiOutput("newmaps.panel")
-        ),
-        tabPanel(
-          "Design of Experiments",
-          uiOutput("mixedmodel.panel")
-        ),
-        tabPanel(
-          "Multiple Response",
-          uiOutput("multiple.response")
-        ),
-        tabPanel(
-          "Multivariate",
-          uiOutput("multivariate.panel")
-        ),
-        tabPanel(
-          "VIT",
-          uiOutput("VIT.panel")
-        )
-      ),
+      advance_tabs,
       tabPanel("R code history",
         value = "rhistory",
         uiOutput("code.panel")
@@ -237,5 +211,5 @@ shinyUI(
       #                       tabPanel(HTML("</a><a href=\"http://litebackup4.test-pods.auckland.ac.nz\">Backup Link 4"))
       #            )
     )
-  )
-)
+))
+

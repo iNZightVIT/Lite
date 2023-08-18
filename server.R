@@ -49,6 +49,10 @@ args=(commandArgs(TRUE))
 #  }
 #}
 
+LITE2 <<- as.logical(as.integer(Sys.getenv("LITE2", 0)))
+LITE_VER = ifelse(LITE2, "2", "")
+print(paste0("LITE", LITE_VER, " Session"))
+
 ## read in all the functions used in iNZight Lite
 source("functions.R")
 
@@ -79,8 +83,12 @@ shinyServer(function(input, output, session) {
   values$button = F
   values$transform.text = ""
   values$create.variables.expression.text = ""
-
-  # dummy variable to update whole panels when the data
+  if(LITE2){
+    values$data.sample = NULL
+    values$sample.row = NULL
+    values$sample.num = NULL
+  }
+  # dummy variable to update whole panels when the data 
   # set is switched but not updated when data is changed.
   updatePanel =  reactiveValues()
   updatePanel$doit = 0
@@ -120,7 +128,31 @@ shinyServer(function(input, output, session) {
       values$lite.update = vars$lite.update
     }
   }
+  
+  # -- LITE2 --
+  sample_if_lite2 = function(rvalues, d, new_sample = TRUE) {
+    if(!LITE2) {
+      return(rvalues)
+    }
 
+    if(new_sample) {
+      rvalues$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
+      rvalues$sample.row = sort(sample(1:nrow(d), rvalues$sample.num))
+    }
+    rvalues$data.sample = as.data.frame(d[rvalues$sample.row,])
+    row.names(rvalues$data.sample) = 1:nrow(rvalues$data.sample)
+    colnames(rvalues$data.sample) = colnames(d)
+
+    return(rvalues)
+  }
+  
+  sample_info_lite2 = function(){
+    if (LITE2 && !is.null(values$data.sample) && !is.null(get.data.set()) && !is.null(get.data.name())) {
+      return(paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data"))
+    }
+  }
+  # ----------
+  
   get.data.name = reactive({
     values$data.name
   })
@@ -135,6 +167,14 @@ shinyServer(function(input, output, session) {
 
   get.data.set = reactive({
     values$data.set
+  })
+
+  get.data.set.display = reactive({
+    if(LITE2) {
+      values$data.sample
+    } else {
+      values$data.set
+    }
   })
 
   get.data.restore = reactive({
@@ -200,9 +240,9 @@ shinyServer(function(input, output, session) {
   ##---------------------------------------##
   ##  B2. "File -> Import Dataset" Module  ##
   ##---------------------------------------##
-  source("panels/B2_ExportDataset/1_export.dataset.panel-ui.R", local = TRUE)
-  source("panels/B2_ExportDataset/2_export.dataset.panel-server.R", local = TRUE)
-
+  #source("panels/B2_ExportDataset/1_export.dataset.panel-ui.R", local = TRUE)
+  #source("panels/B2_ExportDataset/2_export.dataset.panel-server.R", local = TRUE)
+  
   ##---------------------------------------##
   ##  B3. "File -> Export Dataset" Module  ##
   ##---------------------------------------##
@@ -214,7 +254,7 @@ shinyServer(function(input, output, session) {
   ##---------------------------------------##
   # source("panels/B4_RemoveDataset/1_remove.data.set.panel-ui.R", local = TRUE)
   # source("panels/B4_RemoveDataset/2_remove.data.set.panel-server.R", local = TRUE)
-
+  
   ##-----------------------------------------##
   ##  B5. "File -> Dataset Examples" Module  ##
   ##-----------------------------------------##
@@ -333,9 +373,11 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   ##  E4. Create Variables       ##
   ##-----------------------------##
-  source("panels/E4_CreateVariables/1_create.variables.panel.ui.R", local = TRUE)
-  source("panels/E4_CreateVariables/2_create.variables.panel.server.R", local = TRUE)
-
+  if(!LITE2) {
+    source("panels/E4_CreateVariables/1_create.variables.panel.ui.R", local = TRUE)
+    source("panels/E4_CreateVariables/2_create.variables.panel.server.R", local = TRUE)
+  }
+  
   ##-----------------------------##
   ##  E5. Missing to categorical ##
   ##-----------------------------##
@@ -367,43 +409,50 @@ shinyServer(function(input, output, session) {
   source("panels/E9_DatesTimes/2_datestimes.server.R", local = TRUE)
 
   ##-----------------------------##
-  ##  F1. Qick explore           ##
+  ##  F1. Quick explore           ##
   ##-----------------------------##
-  source("panels/F1_QuickExplore/1_quick.explore.ui.R", local = TRUE)
-  source("panels/F1_QuickExplore/2_quick.explore.server.R", local = TRUE)
-
-  #   Advanced --> Time Series
+  if(!LITE2) {
+    source("panels/F1_QuickExplore/1_quick.explore.ui.R", local = TRUE)
+    source("panels/F1_QuickExplore/2_quick.explore.server.R", local = TRUE)
+  }
 
   ##----------------------##
   ##  Time Series Module  ##
   ##----------------------##
-  source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
-  source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
-
+  if(!LITE2) {
+    source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
+    source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
+  }
+  
   #   Advanced --> Model Fitting
 
   ##------------------------##
   ##  Model Fitting Module  ##
   ##------------------------##
-  source("panels/F3_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
-  source("panels/F3_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
-
+  if(!LITE2) {
+    source("panels/F3_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
+    source("panels/F3_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
+  }
+  
   #   Advanced --> Maps
 
   ##---------------##
   ##  Maps Module  ##
   ##---------------##
-  source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
-  source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
-
+  if(!LITE2) {
+    source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
+    source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
+  }
+  
   #   Advanced --> Design of Experiment
 
   ##------------------------------##
   ##  Experimental Design Module  ##
   ##------------------------------##
-  source("panels/F5_DesignofExperiment//1_DesignofExperiment.panel-ui.R", local = TRUE)
-  source("panels/F5_DesignofExperiment//2_DesignofExperiment.panel-server.R", local = TRUE)
-
+  if(!LITE2) {
+    source("panels/F5_DesignofExperiment//1_DesignofExperiment.panel-ui.R", local = TRUE)
+    source("panels/F5_DesignofExperiment//2_DesignofExperiment.panel-server.R", local = TRUE)
+  }
   #   Advanced --> Multiple Response
 
   ##----------------------------##
@@ -417,14 +466,18 @@ shinyServer(function(input, output, session) {
   ##----------------##
   ##  Multivariate  ##
   ##----------------##
-  source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
-  source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
+  if(!LITE2) {
+    source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
+    source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
+  }
 
   ##-------##
   ##  VIT  ##
   ##-------##
-  source("panels/F8_vit/vit.R", local = TRUE)
-
+  if(!LITE2) {
+    source("panels/F8_vit/vit.R", local = TRUE)
+  }
+  
   #   Show code history
 
   ##---------------##
@@ -444,4 +497,19 @@ shinyServer(function(input, output, session) {
   #     output$help.panel <- renderUI({
   #         help.panel.ui(get.lite.version(),get.lite.update())
   #     })
+  
+  ## hide panel
+  #hideTab(inputId = "selector", target = "Remove Dataset")
+  #hideTab(inputId = "selector", target = "Export Dataset")
+  #hideTab(inputId = "selector", target = "Create Variables")
+  #hideTab(inputId = "selector", target = "Quick explore")
+  #hideTab(inputId = "selector", target = "timeSeries")
+  #hideTab(inputId = "selector", target = "regression")
+  #hideTab(inputId = "selector", target = "Maps")
+  #hideTab(inputId = "selector", target = "Design of Experiments")
+  hideTab(inputId = "selector", target = "Multivariate")
+  #hideTab(inputId = "selector", target = "Dataset")
+  
+  
+  
 })

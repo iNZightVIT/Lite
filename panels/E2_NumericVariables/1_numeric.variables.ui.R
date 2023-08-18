@@ -30,12 +30,14 @@ numeric.variables.panel = function(data.set){
     list(conditionalPanel("input.numeric_variables_select1=='Transform variables'",
                           uiOutput("transform.columns.main")),
          conditionalPanel("input.numeric_variables_select1=='Standardise variables'",
+                          textOutput('standardise.var.data.sample.info'), br(), br(),
                           DTOutput("standardise.variables.table")),
          conditionalPanel("input.numeric_variables_select1=='Form class intervals'",
                           uiOutput("form.class.interval.main")),
-         conditionalPanel("input.numeric_variables_select1=='Rank numeric'",
+         conditionalPanel("input.numeric_variables_select1=='Rasamnk numeric'",
                           uiOutput("rank.numeric.main")),
          conditionalPanel("input.numeric_variables_select1=='Convert to categorical type'",
+                          textOutput('convert.to.cate.data.sample.info'), br(), br(),
                           DTOutput("convert.to.cate.table"))))
   }
   if(!is.null(temp)){
@@ -61,7 +63,8 @@ get.transform.sidebar =  function(data.set){
 }
 
 get.transform.main = function(){
-  DTOutput(outputId="table_part")
+  list(textOutput('table_part.data.sample.info'), br(), br(),
+       DTOutput(outputId="table_part"))
 }
 
 get.form.class.interval.side = function(data.set){
@@ -92,7 +95,8 @@ get.form.class.interval.side = function(data.set){
 }
 
 get.form.class.interval.main = function(){
-  DTOutput("form.class.interval.table")
+  list(textOutput('form.class.data.sample.info'), br(), br(),
+       DTOutput("form.class.interval.table"))
 }
 
 
@@ -112,5 +116,6 @@ rank.numeric.sidebar = function(data.set){
 }
 
 rank.numeric.main = function(){
-  DTOutput("rank.numeric.table")
+  list(textOutput('rank.numeric.data.sample.info'), br(), br(),
+       DTOutput("rank.numeric.table"))
 }

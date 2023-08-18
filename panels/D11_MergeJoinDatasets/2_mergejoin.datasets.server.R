@@ -121,8 +121,16 @@ observe({
       
       if(orig_type == new_type|orig_type == "character" & new_type == "factor"|orig_type == "factor" & new_type == "character") {
         temp.join = iNZightTools::joindata(data, newdata, left_col, right_col, join_method, left_name, right_name)
+        
+        data.set = as.data.frame(temp.join)
+        
+        sample.num = ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set)/4))
+        sample.row = sort(sample(1:nrow(data.set), sample.num))
         output$previewjoin.table = renderDT({
-          temp.join
+          temp.d = as.data.frame(data.set[sample.row,])
+          row.names(temp.d) = 1:nrow(temp.d)
+          colnames(temp.d) = colnames(data.set)
+          temp.d
         },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         output$join_true_false = renderPrint({
         })
@@ -196,7 +204,10 @@ observe({
         code.save$variable = c(code.save$variable, list(c("\n", code)))
         ## save data
         updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = temp.join
+        
+        values$data.set = as.data.frame(temp.join)
+        values = sample_if_lite2(rvalues = values, d = values$data.set)
+        
         code.save$name = code.save$dataname
         values$data.name = code.save$dataname
         output$join_true_false = renderPrint({
@@ -275,8 +286,16 @@ observe({
         }
       }
       temp.append = iNZightTools::appendrows(data, newdata, date)
+      
+      data.set = as.data.frame(temp.append)
+      
+      sample.num = ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set)/4))
+      sample.row = sort(sample(1:nrow(data.set), sample.num))
       output$previewappend.table = renderDT({
-        temp.append
+        temp.d = as.data.frame(data.set[sample.row,])
+        row.names(temp.d) = 1:nrow(temp.d)
+        colnames(temp.d) = colnames(data.set)
+        temp.d
       },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
     }
   })
@@ -315,25 +334,22 @@ observe({
       code.save$variable = c(code.save$variable, list(c("\n", code)))
       ## save data
       updatePanel$datachanged = updatePanel$datachanged+1
-      values$data.set = temp.append
+      values$data.set = as.data.frame(temp.append)
+      
+      values = sample_if_lite2(rvalues = values, d = values$data.set)
+      
       code.save$name = code.save$dataname
       values$data.name = code.save$dataname
     }
   })
 })
 
-
-
-
-
-
-
 output$append.table = renderDT({
-  get.data.set()
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$join.table = renderDT({
-  get.data.set()
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$mergejoin.datasets = renderUI({

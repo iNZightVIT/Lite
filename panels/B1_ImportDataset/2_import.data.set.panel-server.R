@@ -49,16 +49,23 @@ reset_preview_data <- function() {
     # use count to prevent rendering multiple times
     state = NULL
   )
+  output$preview_data <<- renderDataTable({
+    datatable(
+      preview_data$preview_data,
+      selection = "single",
+      options = list(dom = "t")
+    )
+  })
 }
 reset_preview_data()
 
-output$preview_data <- renderDataTable({
-  datatable(
-    preview_data$preview_data,
-    selection = "single",
-    options = list(dom = "t")
-  )
-})
+# output$preview_data <- renderDataTable({
+#   datatable(
+#     preview_data$preview_data,
+#     selection = "single",
+#     options = list(dom = "t")
+#   )
+# })
 
 # smart_delimiter = function(fpath) {
 #   ext = tolower(tools::file_ext(fpath[1]))
@@ -89,6 +96,10 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
     if (ext == "") {
       ext <- tolower(tools::file_ext(gsub("=", ".", fpath[1])))
     }
+  }
+  # treat Rdata as rda
+  if (tolower(ext) == "rdata") {
+    ext <- "rda"
   }
   # if delimiter not given then guess by its file type
   if (is.null(delimiter)) {
@@ -150,14 +161,24 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
 
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
-    nr <- min(nrow(d), 5)
-    nc <- min(ncol(d), 5)
+    if(LITE2){
+      # values$data.set = d
+      # in preview lite2 should also show the sampled data only
+      values$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
+      preview_rows = sample(1:nrow(d), values$sample.num)
+      values$sample.row = preview_rows
+    } else {
+      preview_rows <- 1:min(nrow(d), 5)
+    }
+    # show 5 columns no matter lite/lite2
+    preview_cols <- 1:min(ncol(d), 5)
+
     try({
       data_ext <- tolower(tools::file_ext(fpath[1]))
       preview_data$fpath <- fpath
       preview_data$data <- d
       # ensure its a df
-      preview_data$preview_data <- as.data.frame(d[1:nr, 1:nc])
+      preview_data$preview_data <- as.data.frame(d[preview_rows,preview_cols])
       preview_data$ext <- ext
       preview_data$delimiter <- delimiter
       # preview_data$state = 0,
@@ -165,6 +186,9 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
         preview_data$available_dnames <- values$data.available.dnames
         preview_data$current_dname <- values$data.current.dname
       }
+      
+      row.names(preview_data$preview_data) = 1:nrow(preview_data$preview_data)
+
     })
   }
 }
@@ -182,7 +206,6 @@ show_preview_modal <- function() {
   } else {
     table_output <- DT::dataTableOutput("preview_data")
   }
-  # table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
 
   ext_selected <- ifelse(is.null(ext), "", names(which(unlist(ext_choices) == ext)))
   select_inputs <- list(
@@ -300,9 +323,6 @@ observeEvent(c(
     ext <- ext_choices[names(ext_choices) == input$preview.filetype][1]
     # ext choices have 2 "RData Files (.RData, .rda)"
     # default to rda
-    if (tolower(ext) == "rdata") {
-      ext <- "rda"
-    }
     lite_read(
       fpath = preview_data$fpath,
       delimiter = delimiter,
@@ -329,11 +349,18 @@ observeEvent(input$cancel_import, {
   reset_preview_data()
   removeModal()
 })
+
 # when user confirms the data in preview
 observeEvent(input$confirm_import, {
   if (!is.null(preview_data$data)) {
+    if(LITE2) {
+      values$data.set <- preview_data$data
+      values$data.sample <- preview_data$preview_data
+    } else {
+      values$data.set <- preview_data$data
+    }
     plot.par$design <- NULL
-    values$data.set <- preview_data$data
+    
     values$data.type <- preview_data$ext
     updatePanel$doit <- updatePanel$doit + 1
     values$data.restore <<- get.data.set()
@@ -408,63 +435,6 @@ observeEvent(input$import_set, {
   }
 })
 
-# select input for available sheets/data
-# output$data.info = renderUI({
-#   # input$files
-#   values$data.set
-#   dtype = values$data.type
-#
-#   if(!is.null(dtype)) {
-#     label_name = switch(
-#       dtype,
-#       "xls" = ,
-#       "xlsx" = "Sheet:",
-#       "rdta" = ,
-#       "rda" = "Dataset:"
-#     )
-#
-#     if(is.null(label_name)) {
-#       return(NULL)
-#     }
-#
-#     selectInput(
-#       inputId = "data.info",
-#       label = label_name,
-#       selected = values$data.current.dname,
-#       choices = values$data.available.dnames
-#     )
-#   }
-# })
-
-# reload data when user chooses a different sheet/data
-# observeEvent(input$data.info, {
-#   # data type
-#   dtype = values$data.type
-#   # path of data
-#   fpath = input$files[1, "datapath"]
-#   tryCatch(
-#     if(!is.null(dtype) && !is.null(values$data.current.dname)) {
-#       # prevent loading data again, if the selected sheet name is the same
-#       if(input$data.info != values$data.current.dname) {
-#         if(dtype == "xls" | dtype == "xlsx") {
-#           values$data.set = as.data.frame(iNZightTools::smart_read(fpath, sheet = input$data.info))
-#         } else if(dtype == "rdta" | dtype == "rda") {
-#           ind = which(values$data.available.dnames == input$data.info)
-#           values$data.set = as.data.frame(iNZightTools::load_rda(fpath)[[ind]])
-#         }
-#         # update sheet name
-#         values$data.current.dname = input$data.info
-#       }
-#     },
-#     error = function(e) {
-#       shinyalert::shinyalert(
-#         title = "Import failed",
-#         text = glue::glue("Failed to switch to data '{input$data.info}'")
-#       )
-#     }
-#   )
-# })
-
 # whole data import panel
 output$load.data.panel <- renderUI({
   input$selector
@@ -499,11 +469,11 @@ output$filedisplay <- renderUI({
   }
 })
 
-output$fileError <- renderText(safeError(message(get.data.set())))
+output$fileError <- renderText(safeError(message(get.data.set.display())))
 
-output$fileprint <- renderPrint(get.data.set())
+output$fileprint <- renderPrint(get.data.set.display())
 
-output$filetable <- renderDT(get.data.set(),
+output$filetable <- renderDT(get.data.set.display(),
   options = list(
     lengthMenu = c(5, 30, 50),
     pageLength = 5,
@@ -521,7 +491,9 @@ output$filetable <- renderDT(get.data.set(),
   )
 )
 
-
+output$import.data.sample.info <- renderText({
+  sample_info_lite2()
+})
 
 observe({
   input$remove_set
