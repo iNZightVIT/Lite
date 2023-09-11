@@ -90,7 +90,7 @@ observe({
           updatePanel$datachanged = updatePanel$datachanged + 1
           values$data.set = as.data.frame(temp)
           
-          values = sample_if_lite2(rvalues = values, d = values$data.set)
+          values = sample_if_cas(rvalues = values, d = values$data.set)
 
           code.save$name = code.save$dataname
           values$data.name = code.save$dataname
@@ -133,5 +133,5 @@ output$aggregate.table = renderDT({
 ))
 
 output$aggregate.table.data.sample.info <- renderText({
-  sample_info_lite2()
+  sample_info_cas()
 })

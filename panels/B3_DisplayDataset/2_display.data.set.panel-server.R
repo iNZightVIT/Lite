@@ -9,7 +9,7 @@ output$current.text <- renderText({
 })
 
 output$data.sample.info <- renderText({
-  sample_info_lite2()
+  sample_info_cas()
 })
 
 output$current.data <- renderUI({

@@ -59,7 +59,7 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged + 1
         values$data.set = as.data.frame(temp)
-        values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
+        values = sample_if_cas(rvalues = values, d = temp, new_sample = FALSE)
         ## code history
         code = tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
         code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -81,7 +81,7 @@ output$rename.variables = renderUI({
 })
 
 output$rename.var.data.sample.info <- renderText({
-  sample_info_lite2()
+  sample_info_cas()
 })
 
 

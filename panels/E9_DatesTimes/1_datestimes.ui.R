@@ -26,7 +26,6 @@ dates.times.panel =function(){
       )
     )
   }else{
-    # browser()
     sidebarLayout(
       sidebarPanel(dates.times.sidebar()),
       mainPanel(

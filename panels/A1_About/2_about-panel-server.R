@@ -27,12 +27,7 @@ output$about.panel <- renderUI({
       values$data.restore = get.data.set()
       values$data.name = data.vals$data.name
       
-      # if(LITE2) {
-      #   values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set) / 4))
-      #   values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
-      #   values$data.sample = as.data.frame(values$data.set[values$sample.row, ])
-      # }
-      values = sample_if_lite2(rvalues = values, d = values$data.set)
+      values = sample_if_cas(rvalues = values, d = values$data.set)
 
       if (!is.null(get.data.set()) && "land" %in% names(get.vars) && get.vars$land != "" && get.vars$land %in% "visualize") {
         updateTabsetPanel(session, "selector", "visualize")
@@ -45,29 +40,31 @@ output$about.panel <- renderUI({
   } else if (length(get.vars)>0&&
              (any(names(get.vars)%in%"filename")||
               any(names(get.vars)%in%"iv"))){
-    data.vals = NULL
 
+    # Try to remove lite_config=cas from url??
+    # if("lite_config" %in% names(get.vars)) {
+    #   new_vars = get.vars[names(get.vars) != "lite_config"]
+    #   new_vars = paste0(names(get.vars), "=", get.vars, collapse = "&")
+    #   updateQueryString(paste0("?", new_vars, collapse = ""))
+    # }
+    data.vals = NULL
+    
     f.name = rawToChar(
       openssl::aes_cbc_decrypt(
         openssl::base64_decode(get.vars$filename),
-        wkb::hex2raw(Sys.getenv("CAS_KEY")),
+        wkb::hex2raw(LITE_CONFIG$DATA_KEY),
         wkb::hex2raw(get.vars$iv)
       )
     )
 
-    get.vars$url = paste0(Sys.getenv("CAS_URL"), f.name)
+    get.vars$url = paste0(LITE_CONFIG$DATA_URL, f.name)
     data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
     if(!is.null(data.vals)){
       values$data.set = as.data.frame(data.vals$data.set)
       values$data.restore = get.data.set()
       values$data.name = "data"
 
-      # if(LITE2) {
-      #   values$sample.num = ifelse(nrow(values$data.set) > 2000, 500, round(nrow(values$data.set)/4))
-      #   values$sample.row = sample(1:nrow(values$data.set), values$sample.num)
-      #   values$data.sample = as.data.frame(values$data.set[values$sample.row,])
-      # }
-      values = sample_if_lite2(rvalues = values, d = values$data.set)
+      values = sample_if_cas(rvalues = values, d = values$data.set)
 
       if(!is.null(get.data.set())&&
          "land"%in%names(get.vars)&&
@@ -92,6 +89,7 @@ output$about.panel <- renderUI({
 
 # pop up for change log
 observeEvent(input$change_log_link, {
+  # print("change")
   change_log <- includeMarkdown("NEWS.md")
 
   showModal(modalDialog(
@@ -102,10 +100,12 @@ observeEvent(input$change_log_link, {
 })
 
 observeEvent(input$disconnect, {
+  # print("disconnect")
   session$close()
 })
 
 observeEvent(input$log_file, {
+  # print("log_file")
   log_f <- file.path(tempdir(), input$log_file)
   print(log_f)
   if (!file.exists(log_f)) {

@@ -59,7 +59,7 @@ observe({
                       value = paste0(new_name, ".dt", sep = ""))
       
       output$convert_datestimes_original_table = renderDT({
-        if(LITE2) {
+        if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
           data = data.frame(Original = data.frame(Original = varx, stringsAsFactors = TRUE)[values$sample.row,])
           row.names(data) = 1:length(values$sample.row)
         } else {
@@ -94,7 +94,7 @@ observe({
             })
           
           output$convert_datestimes_converted_table = renderDT({
-            if(LITE2) {
+            if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
               data = data.frame(Converted = data[values$sample.row,])
               row.names(data) = 1:length(values$sample.row)
             }
@@ -120,7 +120,7 @@ observe({
           data = iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
-          values = sample_if_lite2(rvalues = values, d = data, new_sample = FALSE)
+          values = sample_if_cas(rvalues = values, d = data, new_sample = FALSE)
           
           output$convert_datestimes_original_table = renderDT({
             NULL
@@ -183,11 +183,11 @@ output$aggregate_datestimes.table = renderDT({
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$convert.datestimes.data.sample.info <- renderText({
-  sample_info_lite2()
+  sample_info_cas()
 })
 
 output$aggregate_datestimes.data.sample.info <- renderText({
-  sample_info_lite2()
+  sample_info_cas()
 })
 
 

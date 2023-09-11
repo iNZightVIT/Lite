@@ -167,7 +167,7 @@ observe({
         values$data.name = new.data[[1]]
         values$data.set = new.data[[2]]
         
-        values = sample_if_lite2(rvalues = values, d = new.data[[2]])
+        values = sample_if_cas(rvalues = values, d = new.data[[2]])
 
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()

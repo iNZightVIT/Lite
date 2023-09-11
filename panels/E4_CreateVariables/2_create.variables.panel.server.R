@@ -49,7 +49,7 @@ observe({
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = temp
-        values = sample_if_lite2(rvalues = values, d = temp, new_sample = FALSE)
+        values = sample_if_cas(rvalues = values, d = temp, new_sample = FALSE)
         
         values$create.variables.expression.text = "";
         ## code history

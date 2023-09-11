@@ -206,7 +206,7 @@ observe({
         updatePanel$datachanged = updatePanel$datachanged+1
         
         values$data.set = as.data.frame(temp.join)
-        values = sample_if_lite2(rvalues = values, d = values$data.set)
+        values = sample_if_cas(rvalues = values, d = values$data.set)
         
         code.save$name = code.save$dataname
         values$data.name = code.save$dataname
@@ -336,7 +336,7 @@ observe({
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = as.data.frame(temp.append)
       
-      values = sample_if_lite2(rvalues = values, d = values$data.set)
+      values = sample_if_cas(rvalues = values, d = values$data.set)
       
       code.save$name = code.save$dataname
       values$data.name = code.save$dataname

@@ -32,7 +32,7 @@ observe({
         updatePanel$datachanged = updatePanel$datachanged+1
         values$data.set = as.data.frame(out)
 
-        values = sample_if_lite2(rvalues = values, d = values$data.set)
+        values = sample_if_cas(rvalues = values, d = values$data.set)
         
         values$data.name = "data"
       }
@@ -46,7 +46,7 @@ output$ft.expand.data.table = renderDT({
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
 output$ft.expand.dt.data.sample.info <- renderText({
-  sample_info_lite2()
+  sample_info_cas()
 })
 
 observe({  

@@ -104,7 +104,7 @@ observe({
         values$data.name = "data"
         values$data.set = as.data.frame(data)
         
-        values = sample_if_lite2(rvalues = values, d = values$data.set)
+        values = sample_if_cas(rvalues = values, d = values$data.set)
         
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()

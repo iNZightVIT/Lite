@@ -1,7 +1,7 @@
 current.data = function(){
   ret = list()
   ret[[1]] = h4(textOutput("current.text"))
-  if(LITE2) {
+  if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
     ret[[2]] = textOutput('data.sample.info')
     ret[[3]] = br()
     ret[[4]] = br()

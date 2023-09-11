@@ -7,7 +7,7 @@ observe({
       values$data.set = get.data.restore()
       values$data.name = get.name.restore()
       
-      values = sample_if_lite2(rvalues = values, d = get.data.restore())
+      values = sample_if_cas(rvalues = values, d = get.data.restore())
 
       ## code history
       code = paste0(values$data.name, "_", input$restore_data_button, " <- ", gsub("_ex", "", values$data.name))
@@ -41,7 +41,7 @@ observe({
 })
 
 output$data.restore.data.sample.info <- renderText({
-  sample_info_lite2()
+  sample_info_cas()
 })
 
 
