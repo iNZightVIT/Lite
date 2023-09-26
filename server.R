@@ -150,9 +150,10 @@ shinyServer(function(input, output, session) {
       rvalues$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
       rvalues$sample.row = sort(sample(1:nrow(d), rvalues$sample.num))
     }
-    rvalues$data.sample = as.data.frame(d[rvalues$sample.row,])
-    row.names(rvalues$data.sample) = 1:nrow(rvalues$data.sample)
-    colnames(rvalues$data.sample) = colnames(d)
+    new_data <- as.data.frame(d[rvalues$sample.row,])
+    row.names(new_data) <- 1:nrow(new_data)
+    colnames(new_data) <- colnames(d)
+    rvalues$data.sample <- new_data
 
     return(rvalues)
   }
