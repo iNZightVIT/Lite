@@ -50,13 +50,12 @@ args=(commandArgs(TRUE))
 #}
 
 # https://new.censusatschool.org.nz/explore-the-whole-data/
+# contains variables used, e.g., keys
+LITE_CONFIG <<- NULL
+# LITE_CONFIG <<- Sys.getenv("LITE_CONFIG")
+# current version of LITE, e.g., CAS
 LITE_VERSION <<- NULL
-LITE_CONFIG <<- Sys.getenv("LITE_CONFIG")
-if(!is.null(LITE_CONFIG) && length(LITE_CONFIG) > 0) {
-  LITE_CONFIG <<- fromJSON(LITE_CONFIG)
-} else {
-  LITE_CONFIG <<- NULL
-}
+
 ## read in all the functions used in iNZight Lite
 source("functions.R")
 
@@ -64,9 +63,15 @@ source("functions.R")
 shinyServer(function(input, output, session) {
   observe({
     params = parseQueryString(session$clientData$url_search)
-    if(!is.null(params$lite_config) && is.null(LITE_VERSION) && !is.null(LITE_CONFIG)) {
-      LITE_VERSION <<- toupper(params$lite_config)
+    if(!is.null(params$lite_config) && is.null(LITE_VERSION)) { #  && !is.null(LITE_CONFIG)
+      # only read in config if the "lite_config" param is present
+      if("lite_config" %in% names(params)) {
+        LITE_CONFIG <<- read_config()
+        # TODO: try read JSON here
+        LITE_VERSION <<- toupper(params$lite_config)
+      }
     }
+    # print(LITE_VERSION)
   })
   # init_lite_logs()
   # updateQueryString(
@@ -154,7 +159,7 @@ shinyServer(function(input, output, session) {
     row.names(new_data) <- 1:nrow(new_data)
     colnames(new_data) <- colnames(d)
     rvalues$data.sample <- new_data
-
+    
     return(rvalues)
   }
   

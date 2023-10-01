@@ -2,6 +2,26 @@
 # To be removed when the iNZight tools package is working##
 ##########################################################
 
+read_config = function() {
+  lite_config = Sys.getenv("LITE_CONFIG")
+  if(!is.null(lite_config) && length(lite_config) > 0) {
+    # read from json
+    lite_config = fromJSON(lite_config)
+    
+    out = list()
+    for(key in names(lite_config)) {
+      values = lite_config[[key]]
+      for(key2 in names(values)) {
+        new_key = paste0(key, "_", key2)
+        out[new_key] = values[key2]
+      }
+    }
+    return(out)
+  } else {
+    return(NULL)
+  }
+}
+
 # Modified based off:
 # https://github.com/dreamRs/shinylogs/blob/0195ac0a1f85d213c82143cfee712c9baddd1963/R/tracking.R#L134
 init_lite_logs <- function(
