@@ -183,7 +183,11 @@ show_preview_modal <- function() {
     table_output <- DT::dataTableOutput("preview_data")
   }
   # table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
-
+  if (is.null(delimiter) || delimiter == "auto") {
+    delim_selected <- "Detected automatically"
+  } else {
+    delim_selected <- names(delimiter)
+  }
   ext_selected <- ifelse(is.null(ext), "", names(which(unlist(ext_choices) == ext)))
   select_inputs <- list(
     column(
@@ -194,15 +198,18 @@ show_preview_modal <- function() {
         selected = ext_selected,
         choices = c("", unique(names(ext_choices)))
       )
+    ),
+    column(
+      width = 5,
+      selectInput(
+        inputId = "preview.delim",
+        label = "Delimiter",
+        selected = delim_selected,
+        choices = names(delim_choices)
+      )
     )
   )
   if (!is.null(delimiter) && !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
-    if (delimiter == "auto") {
-      delim_selected <- "Detected automatically"
-    } else {
-      delim_selected <- names(delimiter)
-    }
-
     if (is_excel | is_rda) {
       select_inputs2 <- list(
         column(
@@ -217,15 +224,6 @@ show_preview_modal <- function() {
       )
     } else {
       select_inputs2 <- list(
-        column(
-          width = 5,
-          selectInput(
-            inputId = "preview.delim",
-            label = "Delimiter",
-            selected = delim_selected,
-            choices = names(delim_choices)
-          )
-        ),
         column(
           width = 2,
           textInput(
