@@ -4,7 +4,7 @@
 
 read_config = function() {
   lite_config = Sys.getenv("LITE_CONFIG")
-  if(!is.null(lite_config) && length(lite_config) > 0) {
+  if(!is.null(lite_config) && nchar(lite_config) > 1) {
     # read from json
     lite_config = fromJSON(lite_config)
     

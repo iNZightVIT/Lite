@@ -67,8 +67,9 @@ shinyServer(function(input, output, session) {
       # only read in config if the "lite_config" param is present
       if("lite_config" %in% names(params)) {
         LITE_CONFIG <<- read_config()
-        # TODO: try read JSON here
-        LITE_VERSION <<- toupper(params$lite_config)
+        if(!is.null(LITE_CONFIG)) {
+          LITE_VERSION <<- toupper(params$lite_config)
+        }
       }
     }
     # print(LITE_VERSION)

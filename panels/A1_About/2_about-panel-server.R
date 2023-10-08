@@ -39,13 +39,13 @@ output$about.panel <- renderUI({
     }
   } else if (
     length(get.vars)>0 &&
+    !is.null(LITE_VERSION) &&
     LITE_VERSION == "CAS" &&
     (any(names(get.vars)%in%"filename") ||
     any(names(get.vars)%in%"iv"))
    ){
-
     data.vals = NULL
-    
+
     f.name = rawToChar(
       openssl::aes_cbc_decrypt(
         openssl::base64_decode(get.vars$filename),
@@ -53,7 +53,7 @@ output$about.panel <- renderUI({
         wkb::hex2raw(get.vars$iv)
       )
     )
-
+    
     get.vars$url = paste0(LITE_CONFIG$CAS_URL, f.name)
     data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
     if(!is.null(data.vals)){
@@ -82,6 +82,9 @@ output$about.panel <- renderUI({
       }
     }
   }
+  LITE_CONFIG <<- NULL
+  LITE_VERSION <<- NULL
+  
   about.panel.ui(get.lite.version(), get.lite.update())
 })
 
