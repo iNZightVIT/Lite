@@ -161,12 +161,12 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
 
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
-    if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS"){
+    if (!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
       # values$data.set = d
       # in preview lite2 should also show the sampled data only
-      values$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
-      preview_rows = sample(1:nrow(d), values$sample.num)
-      values$sample.row = preview_rows
+      values$sample.num <- ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
+      preview_rows <- sample(1:nrow(d), values$sample.num)
+      values$sample.row <- preview_rows
     } else {
       preview_rows <- 1:min(nrow(d), 5)
     }
@@ -178,7 +178,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       preview_data$fpath <- fpath
       preview_data$data <- d
       # ensure its a df
-      preview_data$preview_data <- as.data.frame(d[preview_rows,preview_cols])
+      preview_data$preview_data <- as.data.frame(d[preview_rows, preview_cols])
       preview_data$ext <- ext
       preview_data$delimiter <- delimiter
       # preview_data$state = 0,
@@ -186,9 +186,8 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
         preview_data$available_dnames <- values$data.available.dnames
         preview_data$current_dname <- values$data.current.dname
       }
-      
-      row.names(preview_data$preview_data) = 1:nrow(preview_data$preview_data)
 
+      row.names(preview_data$preview_data) <- 1:nrow(preview_data$preview_data)
     })
   }
 }
@@ -206,7 +205,12 @@ show_preview_modal <- function() {
   } else {
     table_output <- DT::dataTableOutput("preview_data")
   }
-
+  # table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
+  if (is.null(delimiter) || delimiter == "auto") {
+    delim_selected <- "Detected automatically"
+  } else {
+    delim_selected <- names(delimiter)
+  }
   ext_selected <- ifelse(is.null(ext), "", names(which(unlist(ext_choices) == ext)))
   select_inputs <- list(
     column(
@@ -217,15 +221,18 @@ show_preview_modal <- function() {
         selected = ext_selected,
         choices = c("", unique(names(ext_choices)))
       )
+    ),
+    column(
+      width = 5,
+      selectInput(
+        inputId = "preview.delim",
+        label = "Delimiter",
+        selected = delim_selected,
+        choices = names(delim_choices)
+      )
     )
   )
   if (!is.null(delimiter) && !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
-    if (delimiter == "auto") {
-      delim_selected <- "Detected automatically"
-    } else {
-      delim_selected <- names(delimiter)
-    }
-
     if (is_excel | is_rda) {
       select_inputs2 <- list(
         column(
@@ -240,15 +247,6 @@ show_preview_modal <- function() {
       )
     } else {
       select_inputs2 <- list(
-        column(
-          width = 5,
-          selectInput(
-            inputId = "preview.delim",
-            label = "Delimiter",
-            selected = delim_selected,
-            choices = names(delim_choices)
-          )
-        ),
         column(
           width = 2,
           textInput(
@@ -353,14 +351,14 @@ observeEvent(input$cancel_import, {
 # when user confirms the data in preview
 observeEvent(input$confirm_import, {
   if (!is.null(preview_data$data)) {
-    if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+    if (!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
       values$data.set <- preview_data$data
       values$data.sample <- preview_data$preview_data
     } else {
       values$data.set <- preview_data$data
     }
     plot.par$design <- NULL
-    
+
     values$data.type <- preview_data$ext
     updatePanel$doit <- updatePanel$doit + 1
     values$data.restore <<- get.data.set()

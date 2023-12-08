@@ -1,3 +1,7 @@
+- fix bug in Model Fitting module (panel had a duplicate ID, resulting in some weird behaviour)
+
+---
+
 # June 2023
 
 ## New Features
