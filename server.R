@@ -51,10 +51,10 @@ args=(commandArgs(TRUE))
 
 # https://new.censusatschool.org.nz/explore-the-whole-data/
 # contains variables used, e.g., keys
-LITE_CONFIG <<- NULL
+# LITE_CONFIG <<- NULL
 # LITE_CONFIG <<- Sys.getenv("LITE_CONFIG")
 # current version of LITE, e.g., CAS
-LITE_VERSION <<- NULL
+# LITE_VERSION <<- NULL
 
 ## read in all the functions used in iNZight Lite
 source("functions.R")
@@ -63,19 +63,19 @@ source("functions.R")
 shinyServer(function(input, output, session) {
   observe({
     params = parseQueryString(session$clientData$url_search)
-    if(!is.null(params$lite_config) && is.null(LITE_VERSION)) { #  && !is.null(LITE_CONFIG)
+    if(!is.null(params$lite_config) && is.null(session$userData$LITE_VERSION)) {
       # only read in config if the "lite_config" param is present
       if("lite_config" %in% names(params)) {
         config <- read_config()
         if(!is.null(config)) {
-          LITE_VERSION <<- toupper(params$lite_config)
-          if (LITE_VERSION %in% names(config)) {
-            LITE_CONFIG <<- config[[LITE_VERSION]]
+          session$userData$LITE_VERSION <- toupper(params$lite_config)
+          if (session$userData$LITE_VERSION %in% names(config)) {
+            session$userData$LITE_CONFIG <- config[[session$userData$LITE_VERSION]]
           }
         }
-        cat("Version: ", LITE_VERSION, "\n")
       }
     }
+    cat("Version: ", session$userData$LITE_VERSION, "\n")
     # print(LITE_VERSION)
   })
   # init_lite_logs()
@@ -105,7 +105,7 @@ shinyServer(function(input, output, session) {
   values$create.variables.expression.text = ""
   
   # TODO: generalise this
-  if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS"){
+  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS"){
     values$data.sample = NULL
     values$sample.row = NULL
     values$sample.num = NULL
@@ -153,7 +153,7 @@ shinyServer(function(input, output, session) {
   
   # -- LITE2 --
   sample_if_cas = function(rvalues, d, new_sample = TRUE) {
-    if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+    if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
       return(rvalues)
     }
 
@@ -170,7 +170,7 @@ shinyServer(function(input, output, session) {
   }
   
   sample_info_cas = function(){
-    if ((!is.null(LITE_VERSION) && LITE_VERSION == "CAS") && !is.null(values$data.sample) && !is.null(get.data.set()) && !is.null(get.data.name())) {
+    if ((!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") && !is.null(values$data.sample) && !is.null(get.data.set()) && !is.null(get.data.name())) {
       return(paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data"))
     }
   }
@@ -193,7 +193,7 @@ shinyServer(function(input, output, session) {
   })
 
   get.data.set.display = reactive({
-    if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+    if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
       values$data.sample
     } else {
       values$data.set
@@ -396,7 +396,7 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   ##  E4. Create Variables       ##
   ##-----------------------------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/E4_CreateVariables/1_create.variables.panel.ui.R", local = TRUE)
     source("panels/E4_CreateVariables/2_create.variables.panel.server.R", local = TRUE)
   }
@@ -434,7 +434,7 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   ##  F1. Quick explore           ##
   ##-----------------------------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/F1_QuickExplore/1_quick.explore.ui.R", local = TRUE)
     source("panels/F1_QuickExplore/2_quick.explore.server.R", local = TRUE)
   }
@@ -442,7 +442,7 @@ shinyServer(function(input, output, session) {
   ##----------------------##
   ##  Time Series Module  ##
   ##----------------------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
     source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
   }
@@ -452,7 +452,7 @@ shinyServer(function(input, output, session) {
   ##------------------------##
   ##  Model Fitting Module  ##
   ##------------------------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/F3_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
     source("panels/F3_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
   }
@@ -462,7 +462,7 @@ shinyServer(function(input, output, session) {
   ##---------------##
   ##  Maps Module  ##
   ##---------------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
     source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
   }
@@ -472,7 +472,7 @@ shinyServer(function(input, output, session) {
   ##------------------------------##
   ##  Experimental Design Module  ##
   ##------------------------------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/F5_DesignofExperiment//1_DesignofExperiment.panel-ui.R", local = TRUE)
     source("panels/F5_DesignofExperiment//2_DesignofExperiment.panel-server.R", local = TRUE)
   }
@@ -489,7 +489,7 @@ shinyServer(function(input, output, session) {
   ##----------------##
   ##  Multivariate  ##
   ##----------------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
     source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
   }
@@ -497,7 +497,7 @@ shinyServer(function(input, output, session) {
   ##-------##
   ##  VIT  ##
   ##-------##
-  if(!(!is.null(LITE_VERSION) && LITE_VERSION == "CAS")) {
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
     source("panels/F8_vit/vit.R", local = TRUE)
   }
   
@@ -543,7 +543,7 @@ shinyServer(function(input, output, session) {
     # remove = tabPanel("Remove Dataset", uiOutput("remove.data.panel"))
     examples = tabPanel("Dataset Examples", uiOutput('switch.data.panel'))
   )
-  if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
     import_tabs = import_tabs[!(names(import_tabs) %in% c("export"))]
   }
   import_tabs = do.call("navbarMenu", c("File", unname(import_tabs)))
@@ -603,7 +603,7 @@ shinyServer(function(input, output, session) {
       uiOutput("frequency.tables")
     )
   )
-  if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
     row_ops_tabs = NULL
   }
   
@@ -620,7 +620,7 @@ shinyServer(function(input, output, session) {
     # reshape = tabPanel("Reshape dataset", uiOutput("reshape.data")),
     delete = tabPanel("Delete variables", uiOutput("remove.columns"))
   )
-  if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
     manipulate_tabs = manipulate_tabs[!(names(manipulate_tabs) %in% c("create"))]
   }
   manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", unname(manipulate_tabs)))
@@ -636,7 +636,7 @@ shinyServer(function(input, output, session) {
     multivariate = tabPanel("Multivariate", uiOutput("multivariate.panel")),
     vit = tabPanel("VIT", uiOutput("VIT.panel"))
   )
-  if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
     advance_tabs = advance_tabs[names(advance_tabs) %in% c("multiple", "multivariate")]
   }
   advance_tabs = do.call("navbarMenu", c("Advanced", unname(advance_tabs)))

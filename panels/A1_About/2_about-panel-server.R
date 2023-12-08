@@ -39,8 +39,8 @@ output$about.panel <- renderUI({
     }
   } else if (
     length(get.vars)>0 &&
-    !is.null(LITE_VERSION) &&
-    LITE_VERSION == "CAS" &&
+    !is.null(session$userData$LITE_VERSION) &&
+    session$userData$LITE_VERSION == "CAS" &&
     (any(names(get.vars)%in%"filename") ||
     any(names(get.vars)%in%"iv"))
    ){
@@ -49,12 +49,12 @@ output$about.panel <- renderUI({
     f.name = rawToChar(
       openssl::aes_cbc_decrypt(
         openssl::base64_decode(get.vars$filename),
-        wkb::hex2raw(LITE_CONFIG$KEY),
+        wkb::hex2raw(session$userData$LITE_CONFIG$KEY),
         wkb::hex2raw(get.vars$iv)
       )
     )
 
-    get.vars$url = paste0(LITE_CONFIG$URL, f.name)
+    get.vars$url = paste0(session$userData$LITE_CONFIG$URL, f.name)
     data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
     if(!is.null(data.vals)){
       values$data.set = as.data.frame(data.vals$data.set)
