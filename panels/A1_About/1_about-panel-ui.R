@@ -29,7 +29,16 @@ about.panel.ui <- function(lite.version, lite.update) {
         p_args <- list()
         if (lite.version != "") { 
           ver = ifelse(is.null(LITE_VERSION), "", LITE_VERSION)
-          p_args <- c(p_args, list(paste0("iNZight Lite ", ver, " Version: "), em(lite.version), br()))
+          p_args <- c(
+            p_args, 
+            list(
+              paste0("iNZight Lite Version: "), 
+              em(lite.version), 
+              if (!is.null(LITE_VERSION)) 
+                paste0("(configured for ", ver, ")") else NULL,
+              br()
+            )
+          )
         }
         if (lite.update != "") {
           p_args <- c(p_args, list("Last updated: ", em(lite.update)))

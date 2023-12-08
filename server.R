@@ -66,10 +66,14 @@ shinyServer(function(input, output, session) {
     if(!is.null(params$lite_config) && is.null(LITE_VERSION)) { #  && !is.null(LITE_CONFIG)
       # only read in config if the "lite_config" param is present
       if("lite_config" %in% names(params)) {
-        LITE_CONFIG <<- read_config()
-        if(!is.null(LITE_CONFIG)) {
+        config <- read_config()
+        if(!is.null(config)) {
           LITE_VERSION <<- toupper(params$lite_config)
+          if (LITE_VERSION %in% names(config)) {
+            LITE_CONFIG <<- config[[LITE_VERSION]]
+          }
         }
+        cat("Version: ", LITE_VERSION, "\n")
       }
     }
     # print(LITE_VERSION)
@@ -100,6 +104,7 @@ shinyServer(function(input, output, session) {
   values$transform.text = ""
   values$create.variables.expression.text = ""
   
+  # TODO: generalise this
   if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS"){
     values$data.sample = NULL
     values$sample.row = NULL

@@ -26,7 +26,7 @@ output$about.panel <- renderUI({
       values$data.set = data.vals$data.set
       values$data.restore = get.data.set()
       values$data.name = data.vals$data.name
-      
+
       values = sample_if_cas(rvalues = values, d = values$data.set)
 
       if (!is.null(get.data.set()) && "land" %in% names(get.vars) && get.vars$land != "" && get.vars$land %in% "visualize") {
@@ -49,12 +49,12 @@ output$about.panel <- renderUI({
     f.name = rawToChar(
       openssl::aes_cbc_decrypt(
         openssl::base64_decode(get.vars$filename),
-        wkb::hex2raw(LITE_CONFIG$CAS_KEY),
+        wkb::hex2raw(LITE_CONFIG$KEY),
         wkb::hex2raw(get.vars$iv)
       )
     )
-    
-    get.vars$url = paste0(LITE_CONFIG$CAS_URL, f.name)
+
+    get.vars$url = paste0(LITE_CONFIG$URL, f.name)
     data.vals = get.data.from.URL(get.vars$url,get.data.dir.imported())
     if(!is.null(data.vals)){
       values$data.set = as.data.frame(data.vals$data.set)
@@ -63,7 +63,7 @@ output$about.panel <- renderUI({
 
       values = sample_if_cas(rvalues = values, d = values$data.set)
 
-      
+
       if(!is.null(get.data.set())&&
          "land"%in%names(get.vars)&&
          get.vars$land!=""&&
@@ -82,9 +82,10 @@ output$about.panel <- renderUI({
       }
     }
   }
-  LITE_CONFIG <<- NULL
-  LITE_VERSION <<- NULL
-  
+  # TODO: why were these here?
+  # LITE_CONFIG <<- NULL
+  # LITE_VERSION <<- NULL
+
   about.panel.ui(get.lite.version(), get.lite.update())
 })
 

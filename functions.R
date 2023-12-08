@@ -4,22 +4,19 @@
 
 read_config = function() {
   lite_config = Sys.getenv("LITE_CONFIG")
-  if(!is.null(lite_config) && nchar(lite_config) > 1) {
-    # read from json
-    lite_config = fromJSON(lite_config)
-    
-    out = list()
-    for(key in names(lite_config)) {
-      values = lite_config[[key]]
-      for(key2 in names(values)) {
-        new_key = paste0(key, "_", key2)
-        out[new_key] = values[key2]
-      }
-    }
-    return(out)
-  } else {
-    return(NULL)
-  }
+  if (is.null(lite_config) || nchar(lite_config) <= 1) return()
+
+  # read from json
+  fromJSON(lite_config)
+  
+  # out = list()
+  # for(key in names(lite_config)) {
+  #   values = lite_config[[key]]
+  #   for(key2 in names(values)) {
+  #     new_key = paste0(key, "_", key2)
+  #     out[new_key] = values[key2]
+  #   }
+  # }
 }
 
 # Modified based off:
