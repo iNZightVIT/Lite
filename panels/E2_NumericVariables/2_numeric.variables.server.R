@@ -33,7 +33,7 @@ observe({
 
 output$table_part <- renderDT({
   if(!is.null(input$select.transform) && !is.null(input$select.columns.transform)){
-    if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+    if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
     values$data.sample
     } else {
       iNZightTools::transformVar(get.data.set()[input$select.columns.transform],input$select.columns.transform,input$select.transform,)

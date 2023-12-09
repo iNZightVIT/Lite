@@ -59,7 +59,7 @@ observe({
                       value = paste0(new_name, ".dt", sep = ""))
       
       output$convert_datestimes_original_table = renderDT({
-        if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+        if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
           data = data.frame(Original = data.frame(Original = varx, stringsAsFactors = TRUE)[values$sample.row,])
           row.names(data) = 1:length(values$sample.row)
         } else {
@@ -94,7 +94,7 @@ observe({
             })
           
           output$convert_datestimes_converted_table = renderDT({
-            if(!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+            if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
               data = data.frame(Converted = data[values$sample.row,])
               row.names(data) = 1:length(values$sample.row)
             }

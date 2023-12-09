@@ -51,10 +51,6 @@ args=(commandArgs(TRUE))
 
 # https://new.censusatschool.org.nz/explore-the-whole-data/
 # contains variables used, e.g., keys
-# LITE_CONFIG <<- NULL
-# LITE_CONFIG <<- Sys.getenv("LITE_CONFIG")
-# current version of LITE, e.g., CAS
-# LITE_VERSION <<- NULL
 
 ## read in all the functions used in iNZight Lite
 source("functions.R")
@@ -76,7 +72,6 @@ shinyServer(function(input, output, session) {
       }
     }
     cat("Version: ", session$userData$LITE_VERSION, "\n")
-    # print(LITE_VERSION)
   })
   # init_lite_logs()
   # updateQueryString(

@@ -161,7 +161,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
 
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
-    if (!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+    if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
       # values$data.set = d
       # in preview lite2 should also show the sampled data only
       values$sample.num <- ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
@@ -351,7 +351,7 @@ observeEvent(input$cancel_import, {
 # when user confirms the data in preview
 observeEvent(input$confirm_import, {
   if (!is.null(preview_data$data)) {
-    if (!is.null(LITE_VERSION) && LITE_VERSION == "CAS") {
+    if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
       values$data.set <- preview_data$data
       values$data.sample <- preview_data$preview_data
     } else {

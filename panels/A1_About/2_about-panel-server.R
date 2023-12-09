@@ -82,10 +82,6 @@ output$about.panel <- renderUI({
       }
     }
   }
-  # TODO: why were these here?
-  # LITE_CONFIG <<- NULL
-  # LITE_VERSION <<- NULL
-
   about.panel.ui(get.lite.version(), get.lite.update())
 })
 
@@ -175,10 +171,3 @@ observeEvent(input$log_file, {
       dplyr::arrange(dplyr::desc(timestamp))
   })
 })
-
-# observe({
-#   if(!is.null(values$sample.row) && LITE2){
-#     row.names(values$data.sample) = 1:length(values$sample.row)
-#     colnames(values$data.sample) = colnames(values$data.set)
-#   }
-# })
