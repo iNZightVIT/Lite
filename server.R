@@ -258,8 +258,8 @@ shinyServer(function(input, output, session) {
   ##---------------------------------------##
   ##  B2. "File -> Import Dataset" Module  ##
   ##---------------------------------------##
-  #source("panels/B2_ExportDataset/1_export.dataset.panel-ui.R", local = TRUE)
-  #source("panels/B2_ExportDataset/2_export.dataset.panel-server.R", local = TRUE)
+  source("panels/B2_ExportDataset/1_export.dataset.panel-ui.R", local = TRUE)
+  source("panels/B2_ExportDataset/2_export.dataset.panel-server.R", local = TRUE)
   
   ##---------------------------------------##
   ##  B3. "File -> Export Dataset" Module  ##
