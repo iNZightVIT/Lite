@@ -530,7 +530,7 @@ shinyServer(function(input, output, session) {
   
   
   # Panels
-  import_tabs = list(
+  all_import_tabs = list(
     import = tabPanel("Import Dataset", uiOutput('load.data.panel')),
     paste = tabPanel("Paste Dataset", uiOutput('paste.data.panel')),
     export = tabPanel("Export Dataset",  uiOutput('save.data.panel')),
@@ -538,10 +538,21 @@ shinyServer(function(input, output, session) {
     # remove = tabPanel("Remove Dataset", uiOutput("remove.data.panel"))
     examples = tabPanel("Dataset Examples", uiOutput('switch.data.panel'))
   )
-  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
-    import_tabs = import_tabs[!(names(import_tabs) %in% c("export"))]
-  }
-  import_tabs = do.call("navbarMenu", c("File", unname(import_tabs)))
+  import_tabs = do.call("navbarMenu", c("File", unname(all_import_tabs)))
+
+  observe({
+    if(!is.null(session$userData$LITE_VERSION) && 
+       session$userData$LITE_VERSION == "CAS") {
+      new_import_tabs = all_import_tabs[names(all_import_tabs) != "export"]
+      removeTab(inputId = "selector", target = "File")
+      insertTab(
+        inputId = "selector",
+        do.call("navbarMenu", c("File", unname(new_import_tabs))),
+        target = "About",
+        position = "after"
+      )
+    }
+  })
   
   #
   visualize_tabs = tabPanel("Visualize", value = "visualize", uiOutput("visualize.panel"))
