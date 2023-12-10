@@ -3,6 +3,14 @@
 
 
 output$save.data.panel = renderUI({
+  if (!is.null(session$userData$LITE_VERSION) &&
+      session$userData$LITE_VERSION == "CAS") {
+    return(
+      mainPanel(
+        h4("This feature is not available with the current configuration.")
+      )
+    )
+  }
   save.data.panel(get.data.set())
 })
 

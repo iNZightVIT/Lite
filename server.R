@@ -99,12 +99,14 @@ shinyServer(function(input, output, session) {
   values$transform.text = ""
   values$create.variables.expression.text = ""
   
-  # TODO: generalise this
-  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS"){
-    values$data.sample = NULL
-    values$sample.row = NULL
-    values$sample.num = NULL
-  }
+  # TODO: generalise this / does it work?
+  observe({
+    if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS"){
+      values$data.sample = NULL
+      values$sample.row = NULL
+      values$sample.num = NULL
+    }
+  })
   # dummy variable to update whole panels when the data 
   # set is switched but not updated when data is changed.
   updatePanel =  reactiveValues()
@@ -539,20 +541,6 @@ shinyServer(function(input, output, session) {
     examples = tabPanel("Dataset Examples", uiOutput('switch.data.panel'))
   )
   import_tabs = do.call("navbarMenu", c("File", unname(all_import_tabs)))
-
-  observe({
-    if(!is.null(session$userData$LITE_VERSION) && 
-       session$userData$LITE_VERSION == "CAS") {
-      new_import_tabs = all_import_tabs[names(all_import_tabs) != "export"]
-      removeTab(inputId = "selector", target = "File")
-      insertTab(
-        inputId = "selector",
-        do.call("navbarMenu", c("File", unname(new_import_tabs))),
-        target = "About",
-        position = "after"
-      )
-    }
-  })
   
   #
   visualize_tabs = tabPanel("Visualize", value = "visualize", uiOutput("visualize.panel"))
@@ -609,12 +597,9 @@ shinyServer(function(input, output, session) {
       uiOutput("frequency.tables")
     )
   )
-  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
-    row_ops_tabs = NULL
-  }
   
   #
-  manipulate_tabs = list(
+  all_manipulate_tabs = list(
     convert = tabPanel("Convert to categorical", uiOutput("convert.to.categorical")),
     categorical = tabPanel("Categorical variables", uiOutput("categorical.variables")),
     numeric = tabPanel("Numeric variables", uiOutput("numeric.variables")),
@@ -626,13 +611,10 @@ shinyServer(function(input, output, session) {
     # reshape = tabPanel("Reshape dataset", uiOutput("reshape.data")),
     delete = tabPanel("Delete variables", uiOutput("remove.columns"))
   )
-  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
-    manipulate_tabs = manipulate_tabs[!(names(manipulate_tabs) %in% c("create"))]
-  }
-  manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", unname(manipulate_tabs)))
+  manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", unname(all_manipulate_tabs)))
 
   # 
-  advance_tabs = list(
+  all_advance_tabs = list(
     quick = tabPanel("Quick explore", uiOutput("quick.explore")),
     time_series = tabPanel("Time Series", value = "timeSeries", uiOutput("timeseries.panel")),
     model = tabPanel("Model Fitting", value = "regression", uiOutput("modelfitting.panel")),
@@ -642,10 +624,7 @@ shinyServer(function(input, output, session) {
     multivariate = tabPanel("Multivariate", uiOutput("multivariate.panel")),
     vit = tabPanel("VIT", uiOutput("VIT.panel"))
   )
-  if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
-    advance_tabs = advance_tabs[names(advance_tabs) %in% c("multiple", "multivariate")]
-  }
-  advance_tabs = do.call("navbarMenu", c("Advanced", unname(advance_tabs)))
+  advance_tabs = do.call("navbarMenu", c("Advanced", unname(all_advance_tabs)))
   
   if(!is.null(import_tabs)) {
     insertTab(
@@ -684,5 +663,45 @@ shinyServer(function(input, output, session) {
       uiOutput("code.panel")
     )
   )
+
+  # TODO: refactor this (issue #345)
+  observe({
+    if(!is.null(session$userData$LITE_VERSION) && 
+       session$userData$LITE_VERSION == "CAS") {
+      
+      # remove Export from File menu
+      new_import_tabs = all_import_tabs[names(all_import_tabs) != "export"]
+      removeTab(inputId = "selector", target = "File")
+      insertTab(
+        inputId = "selector",
+        do.call("navbarMenu", c("File", unname(new_import_tabs))),
+        target = "About",
+        position = "after"
+      )
+
+      # remove row ops
+      removeTab(inputId = "selector", target = "Dataset")
+
+      # remove Create from Maniuplate Variables menu
+      new_manipulate_tabs = all_manipulate_tabs[names(all_manipulate_tabs) != "create"]
+      removeTab(inputId = "selector", target = "Manipulate variables")
+      insertTab(
+        inputId = "selector",
+        do.call("navbarMenu", c("Manipulate variables", unname(new_manipulate_tabs))),
+        target = "Advanced",
+        position = "before"
+      )
+
+      # remove all except 'Multiple response' from Advanced menu
+      new_advance_tabs = all_advance_tabs[names(all_advance_tabs) %in% c("multiple", "multivariate")]
+      removeTab(inputId = "selector", target = "Advanced")
+      insertTab(
+        inputId = "selector",
+        do.call("navbarMenu", c("Advanced", unname(new_advance_tabs))),
+        target = "Manipulate variables",
+        position = "after"
+      )
+    }
+  })
 
 })
