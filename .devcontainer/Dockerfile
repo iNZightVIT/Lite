@@ -31,7 +31,7 @@ RUN chown -R shiny:shiny /srv/shiny-server
 
 RUN echo "options(\
   shiny.host = '0.0.0.0',\
-  shiny.autoload.R = FALSE \
+  shiny.autoload.r = FALSE \
 )" >> /usr/local/lib/R/etc/Rprofile.site
 
 
