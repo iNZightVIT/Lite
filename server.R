@@ -8,7 +8,6 @@
 ### This file sources the ui files for each panel separately.
 
 ###  We load the packages we require. This is done only ONCE per instance.
-
 message("Starting iNZight Lite Server...")
 
 suppressPackageStartupMessages(library(iNZightPlots))
@@ -34,6 +33,7 @@ suppressPackageStartupMessages(library(shinyWidgets))
 suppressPackageStartupMessages(library(DT))
 suppressPackageStartupMessages(library(shinycssloaders))
 suppressPackageStartupMessages(library(shinyalert))
+suppressPackageStartupMessages(library(rjson))
 # suppressPackageStartupMessages(library(shinylogs))
 
 args=(commandArgs(TRUE))
@@ -49,11 +49,30 @@ args=(commandArgs(TRUE))
 #  }
 #}
 
+# https://new.censusatschool.org.nz/explore-the-whole-data/
+# contains variables used, e.g., keys
+
 ## read in all the functions used in iNZight Lite
 source("functions.R")
 
 ### We write the server function.
 shinyServer(function(input, output, session) {
+  observe({
+    params = parseQueryString(session$clientData$url_search)
+    if(!is.null(params$lite_config) && is.null(session$userData$LITE_VERSION)) {
+      # only read in config if the "lite_config" param is present
+      if("lite_config" %in% names(params)) {
+        config <- read_config()
+        if(!is.null(config)) {
+          session$userData$LITE_VERSION <- toupper(params$lite_config)
+          if (session$userData$LITE_VERSION %in% names(config)) {
+            session$userData$LITE_CONFIG <- config[[session$userData$LITE_VERSION]]
+          }
+        }
+      }
+    }
+    cat("Version: ", session$userData$LITE_VERSION, "\n")
+  })
   # init_lite_logs()
   # updateQueryString(
   #   queryString = paste0("?v=lite&sessionId=", LITE_SESSION_ID_)
@@ -79,8 +98,16 @@ shinyServer(function(input, output, session) {
   values$button = F
   values$transform.text = ""
   values$create.variables.expression.text = ""
-
-  # dummy variable to update whole panels when the data
+  
+  # TODO: generalise this / does it work?
+  observe({
+    if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS"){
+      values$data.sample = NULL
+      values$sample.row = NULL
+      values$sample.num = NULL
+    }
+  })
+  # dummy variable to update whole panels when the data 
   # set is switched but not updated when data is changed.
   updatePanel =  reactiveValues()
   updatePanel$doit = 0
@@ -120,7 +147,32 @@ shinyServer(function(input, output, session) {
       values$lite.update = vars$lite.update
     }
   }
+  
+  # -- LITE2 --
+  sample_if_cas = function(rvalues, d, new_sample = TRUE) {
+    if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+      return(rvalues)
+    }
 
+    if(new_sample) {
+      rvalues$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
+      rvalues$sample.row = sort(sample(1:nrow(d), rvalues$sample.num))
+    }
+    new_data <- as.data.frame(d[rvalues$sample.row,])
+    row.names(new_data) <- 1:nrow(new_data)
+    colnames(new_data) <- colnames(d)
+    rvalues$data.sample <- new_data
+    
+    return(rvalues)
+  }
+  
+  sample_info_cas = function(){
+    if ((!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") && !is.null(values$data.sample) && !is.null(get.data.set()) && !is.null(get.data.name())) {
+      return(paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data"))
+    }
+  }
+  # ----------
+  
   get.data.name = reactive({
     values$data.name
   })
@@ -135,6 +187,14 @@ shinyServer(function(input, output, session) {
 
   get.data.set = reactive({
     values$data.set
+  })
+
+  get.data.set.display = reactive({
+    if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+      values$data.sample
+    } else {
+      values$data.set
+    }
   })
 
   get.data.restore = reactive({
@@ -202,7 +262,7 @@ shinyServer(function(input, output, session) {
   ##---------------------------------------##
   source("panels/B2_ExportDataset/1_export.dataset.panel-ui.R", local = TRUE)
   source("panels/B2_ExportDataset/2_export.dataset.panel-server.R", local = TRUE)
-
+  
   ##---------------------------------------##
   ##  B3. "File -> Export Dataset" Module  ##
   ##---------------------------------------##
@@ -214,7 +274,7 @@ shinyServer(function(input, output, session) {
   ##---------------------------------------##
   # source("panels/B4_RemoveDataset/1_remove.data.set.panel-ui.R", local = TRUE)
   # source("panels/B4_RemoveDataset/2_remove.data.set.panel-server.R", local = TRUE)
-
+  
   ##-----------------------------------------##
   ##  B5. "File -> Dataset Examples" Module  ##
   ##-----------------------------------------##
@@ -333,9 +393,11 @@ shinyServer(function(input, output, session) {
   ##-----------------------------##
   ##  E4. Create Variables       ##
   ##-----------------------------##
-  source("panels/E4_CreateVariables/1_create.variables.panel.ui.R", local = TRUE)
-  source("panels/E4_CreateVariables/2_create.variables.panel.server.R", local = TRUE)
-
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/E4_CreateVariables/1_create.variables.panel.ui.R", local = TRUE)
+    source("panels/E4_CreateVariables/2_create.variables.panel.server.R", local = TRUE)
+  }
+  
   ##-----------------------------##
   ##  E5. Missing to categorical ##
   ##-----------------------------##
@@ -367,43 +429,50 @@ shinyServer(function(input, output, session) {
   source("panels/E9_DatesTimes/2_datestimes.server.R", local = TRUE)
 
   ##-----------------------------##
-  ##  F1. Qick explore           ##
+  ##  F1. Quick explore           ##
   ##-----------------------------##
-  source("panels/F1_QuickExplore/1_quick.explore.ui.R", local = TRUE)
-  source("panels/F1_QuickExplore/2_quick.explore.server.R", local = TRUE)
-
-  #   Advanced --> Time Series
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F1_QuickExplore/1_quick.explore.ui.R", local = TRUE)
+    source("panels/F1_QuickExplore/2_quick.explore.server.R", local = TRUE)
+  }
 
   ##----------------------##
   ##  Time Series Module  ##
   ##----------------------##
-  source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
-  source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
-
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
+    source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
+  }
+  
   #   Advanced --> Model Fitting
 
   ##------------------------##
   ##  Model Fitting Module  ##
   ##------------------------##
-  source("panels/F3_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
-  source("panels/F3_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
-
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F3_ModelFitting//1_modelFitting.panel.ui.R", local = TRUE)
+    source("panels/F3_ModelFitting//2_modelfitting-panel-server.R", local = TRUE)
+  }
+  
   #   Advanced --> Maps
 
   ##---------------##
   ##  Maps Module  ##
   ##---------------##
-  source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
-  source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
-
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
+    source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
+  }
+  
   #   Advanced --> Design of Experiment
 
   ##------------------------------##
   ##  Experimental Design Module  ##
   ##------------------------------##
-  source("panels/F5_DesignofExperiment//1_DesignofExperiment.panel-ui.R", local = TRUE)
-  source("panels/F5_DesignofExperiment//2_DesignofExperiment.panel-server.R", local = TRUE)
-
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F5_DesignofExperiment//1_DesignofExperiment.panel-ui.R", local = TRUE)
+    source("panels/F5_DesignofExperiment//2_DesignofExperiment.panel-server.R", local = TRUE)
+  }
   #   Advanced --> Multiple Response
 
   ##----------------------------##
@@ -417,14 +486,18 @@ shinyServer(function(input, output, session) {
   ##----------------##
   ##  Multivariate  ##
   ##----------------##
-  source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
-  source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
+    source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
+  }
 
   ##-------##
   ##  VIT  ##
   ##-------##
-  source("panels/F8_vit/vit.R", local = TRUE)
-
+  if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F8_vit/vit.R", local = TRUE)
+  }
+  
   #   Show code history
 
   ##---------------##
@@ -444,4 +517,191 @@ shinyServer(function(input, output, session) {
   #     output$help.panel <- renderUI({
   #         help.panel.ui(get.lite.version(),get.lite.update())
   #     })
+  
+  ## hide panel
+  #hideTab(inputId = "selector", target = "Remove Dataset")
+  #hideTab(inputId = "selector", target = "Export Dataset")
+  #hideTab(inputId = "selector", target = "Create Variables")
+  #hideTab(inputId = "selector", target = "Quick explore")
+  #hideTab(inputId = "selector", target = "timeSeries")
+  #hideTab(inputId = "selector", target = "regression")
+  #hideTab(inputId = "selector", target = "Maps")
+  #hideTab(inputId = "selector", target = "Design of Experiments")
+  hideTab(inputId = "selector", target = "Multivariate")
+  #hideTab(inputId = "selector", target = "Dataset")
+  
+  
+  # Panels
+  all_import_tabs = list(
+    import = tabPanel("Import Dataset", uiOutput('load.data.panel')),
+    paste = tabPanel("Paste Dataset", uiOutput('paste.data.panel')),
+    export = tabPanel("Export Dataset",  uiOutput('save.data.panel')),
+    display = tabPanel("Display Dataset", uiOutput('current.data')),
+    # remove = tabPanel("Remove Dataset", uiOutput("remove.data.panel"))
+    examples = tabPanel("Dataset Examples", uiOutput('switch.data.panel'))
+  )
+  import_tabs = do.call("navbarMenu", c("File", unname(all_import_tabs)))
+  
+  #
+  visualize_tabs = tabPanel("Visualize", value = "visualize", uiOutput("visualize.panel"))
+  
+  #
+  row_ops_tabs = navbarMenu(
+    "Dataset",
+    tabPanel(
+      "Filter Dataset",
+      uiOutput("filter.dataset")
+    ),
+    tabPanel(
+      "Sort data by variables",
+      uiOutput("sort.variables")
+    ),
+    tabPanel(
+      "Aggregate data",
+      uiOutput("aggregate.variable")
+    ),
+    tabPanel(
+      "Stack variables",
+      uiOutput("stack.variables")
+    ),
+    tabPanel(
+      "Reshape data",
+      uiOutput("reshape.dataset")
+    ),
+    tabPanel(
+      "Separate columns",
+      uiOutput("separate.columns")
+    ),
+    tabPanel(
+      "Unite columns",
+      uiOutput("unite.columns")
+    ),
+    tabPanel(
+      "Merge/Join datasets",
+      uiOutput("mergejoin.datasets")
+    ),
+    tabPanel(
+      "Alphabetise Variables",
+      uiOutput("alphabetise.variables")
+    ),
+    tabPanel(
+      "Restore data",
+      uiOutput("restore.data")
+    ),
+    tabPanel(
+      "Survey design",
+      uiOutput("survey.design")
+    ),
+    tabPanel(
+      "Frequency tables",
+      uiOutput("frequency.tables")
+    )
+  )
+  
+  #
+  all_manipulate_tabs = list(
+    convert = tabPanel("Convert to categorical", uiOutput("convert.to.categorical")),
+    categorical = tabPanel("Categorical variables", uiOutput("categorical.variables")),
+    numeric = tabPanel("Numeric variables", uiOutput("numeric.variables")),
+    dates = tabPanel("Dates and Times", uiOutput("dates.times")),
+    rename = tabPanel("Rename Variables", uiOutput("rename.variables")),
+    create = tabPanel("Create Variables", uiOutput("create.variables")),
+    missing = tabPanel("Missing to category", uiOutput("missing.categorical")),
+    # add = tabPanel("Add columns", uiOutput("add.columns")),
+    # reshape = tabPanel("Reshape dataset", uiOutput("reshape.data")),
+    delete = tabPanel("Delete variables", uiOutput("remove.columns"))
+  )
+  manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", unname(all_manipulate_tabs)))
+
+  # 
+  all_advance_tabs = list(
+    quick = tabPanel("Quick explore", uiOutput("quick.explore")),
+    time_series = tabPanel("Time Series", value = "timeSeries", uiOutput("timeseries.panel")),
+    model = tabPanel("Model Fitting", value = "regression", uiOutput("modelfitting.panel")),
+    maps = tabPanel("Maps", uiOutput("newmaps.panel")),
+    design_exp = tabPanel("Design of Experiments", uiOutput("mixedmodel.panel")),
+    multiple = tabPanel("Multiple Response", uiOutput("multiple.response")),
+    multivariate = tabPanel("Multivariate", uiOutput("multivariate.panel")),
+    vit = tabPanel("VIT", uiOutput("VIT.panel"))
+  )
+  advance_tabs = do.call("navbarMenu", c("Advanced", unname(all_advance_tabs)))
+  
+  if(!is.null(import_tabs)) {
+    insertTab(
+      inputId = "selector",
+      import_tabs
+    )
+  }
+  if(!is.null(visualize_tabs)) {
+    insertTab(
+      inputId = "selector",
+      visualize_tabs
+    )
+  }
+  if(!is.null(row_ops_tabs)) {
+    insertTab(
+      inputId = "selector",
+      row_ops_tabs
+    )
+  }
+  if(!is.null(manipulate_tabs)) {
+    insertTab(
+      inputId = "selector",
+      manipulate_tabs
+    )
+  }
+  if(!is.null(advance_tabs)) {
+    insertTab(
+      inputId = "selector",
+      advance_tabs
+    )
+  }
+  insertTab(
+    inputId = "selector",
+    tabPanel("R code history",
+      value = "rhistory",
+      uiOutput("code.panel")
+    )
+  )
+
+  # TODO: refactor this (issue #345)
+  observe({
+    if(!is.null(session$userData$LITE_VERSION) && 
+       session$userData$LITE_VERSION == "CAS") {
+      
+      # remove Export from File menu
+      new_import_tabs = all_import_tabs[names(all_import_tabs) != "export"]
+      removeTab(inputId = "selector", target = "File")
+      insertTab(
+        inputId = "selector",
+        do.call("navbarMenu", c("File", unname(new_import_tabs))),
+        target = "About",
+        position = "after"
+      )
+
+      # remove row ops
+      removeTab(inputId = "selector", target = "Dataset")
+
+      # remove Create from Maniuplate Variables menu
+      new_manipulate_tabs = all_manipulate_tabs[names(all_manipulate_tabs) != "create"]
+      removeTab(inputId = "selector", target = "Manipulate variables")
+      insertTab(
+        inputId = "selector",
+        do.call("navbarMenu", c("Manipulate variables", unname(new_manipulate_tabs))),
+        target = "Advanced",
+        position = "before"
+      )
+
+      # remove all except 'Multiple response' from Advanced menu
+      new_advance_tabs = all_advance_tabs[names(all_advance_tabs) %in% c("multiple", "multivariate")]
+      removeTab(inputId = "selector", target = "Advanced")
+      insertTab(
+        inputId = "selector",
+        do.call("navbarMenu", c("Advanced", unname(new_advance_tabs))),
+        target = "Manipulate variables",
+        position = "after"
+      )
+    }
+  })
+
 })

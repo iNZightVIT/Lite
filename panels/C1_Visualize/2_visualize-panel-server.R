@@ -3918,10 +3918,10 @@ output$trend.curve.panel = renderUI({
                                               label="Fit parallel trend lines",
                                               value = T)
     line.width.multiplier.object = fixedRow(column(width = 3, "Line Width Multiplier:"),
-                                            column(width = 6, sliderInput("line.width.multiplier",
-                                                                          label = NULL,
-                                                                          min = 1,
-                                                                          max = 4,
+                                            column(width = 6, sliderInput("line.width.multiplier", 
+                                                                          label = NULL, 
+                                                                          min = 1, 
+                                                                          max = 4, 
                                                                           value = 1, step = 0.5, ticks = FALSE)))
     list(trend.curves.title,
          fixedRow(column(width=3),

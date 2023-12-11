@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>Import Dataset</title>
+<title>Create variables</title>
 <style type="text/css">
 body {
   font-family: sans-serif;
@@ -77,35 +77,24 @@ section.footnotes::before {
 <div class="include-before">
 </div>
 <div class="frontmatter">
-<div class="title"><h1>Import Dataset</h1></div>
+<div class="title"><h1>Create variables</h1></div>
 <div class="author"><h2></h2></div>
 <div class="date"><h3></h3></div>
 </div>
 <div class="body">
-<h5 id="import-dataset">Import Dataset</h5>
-To import your own data, press the "Choose File" button. A new window will appear 
-which lets you select a file. After that is done the data will be presented to 
-you as a table in the middle of the screen. If the file to import is located as 
-a web resource at a URL, paste the URL in the blue text field. <br><br>
-<p>In any case, press the “IMPORT FILE” button to finalize your choice.</p>
-<p>All imported text files are assumed to have a header line and no row names as a
-first unnamed column. The type of the file is estimated from the file extension.<br></p>
- <ul>
-  <li>.csv<br>
-      A comma seperated file.
-  </li>
-  <li>.txt<br>
-      A tab seperated file.
-  </li>
-  <li>.RDA, .RData<br>
-      A R file which stores an R object as a binary file.
-  </li>
-  <li>.RDS<br>
-      A R file which stores an R object as a binary file with slightly different 
-      behaviour than the RDA file above. 
-  </li>
-</ul> 
-<p>In any case, press the “IMPORT FILE” button to finalize your choice.</p>
+<h5 id="create-variables">Create variables</h5>
+New columns or variables can be generated with this calculator like module. A 
+set of controls can be used to generate a function for a new column. 
+- A dropdown menu can be used to select variables from the current data set. 
+- Several operators can be used to construct a function.
+- Twelve buttons can be used to add numbers to the function or delete part of 
+the function.
+- In a text filed the name of the new variable can be specified. The default 
+name is "new.name". A number is added to the name in case more than one variable 
+is generated.
+- Next to the text field, the formula is displayed.
+- The "Create Variable" button adds the new variable to the data.
+- A information message tells whether the function can produce a variable.
 </div>
 <div class="include-after">
 </div>

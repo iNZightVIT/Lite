@@ -16,7 +16,9 @@ observe({
         temp = temp[, order.col.names.dec]
       if(!is.null(temp)){
         updatePanel$datachanged = updatePanel$datachanged+1
-        values$data.set = temp
+        values$data.set = as.data.frame(temp, col.names = col.names(values$data.set))
+        
+        values = sample_if_cas(rvalues = values, d = values$data.set)
       }     
     }
   })
@@ -32,15 +34,14 @@ output$alphabetise.variables = renderUI({
   })
 })
 
-
 output$alphabetise.variables.table = renderDT({
-  get.data.set()
+  get.data.set.display()
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, 
                columns.defaultContent="NA",scrollX=T))
 
-
-
-
+output$alphabetise.var.data.sample.info <- renderText({
+  sample_info_cas()
+})
 
 
 

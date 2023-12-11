@@ -24,12 +24,19 @@ observe({
             right = paste0("col", num + 1)
             num = num + 1
           }
-          temp = data
+          
+          data.set = as.data.frame(data)
+          sample.num = ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set)/4))
+          sample.row = sort(sample(1:nrow(data.set), sample.num))
           output$previewseparatecolumns.table = renderDT({
-            temp
+            temp.d = as.data.frame(data.set[sample.row,])
+            row.names(temp.d) = 1:nrow(temp.d)
+            colnames(temp.d) = colnames(data.set)
+            temp.d
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
           numcol = sum(grepl("^col[1-9]+$", names(temp)))
           separate_colns$n.colnames = numcol
+          
           output$separate_change_column_names = renderUI({
             ret = NULL
             isolate({
@@ -58,8 +65,15 @@ observe({
           sep = input$separator
           data = get.data.set() %>% dplyr::select(col, dplyr::everything())
           temp = iNZightTools::separate(data, col, left, right, sep, check)
+          
+          data.set = as.data.frame(temp)
+          sample.num = ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set)/4))
+          sample.row = sort(sample(1:nrow(data.set), sample.num))
           output$previewseparatecolumns.table = renderDT({
-            temp
+            temp.d = as.data.frame(data.set[sample.row,])
+            row.names(temp.d) = 1:nrow(temp.d)
+            colnames(temp.d) = colnames(data.set)
+            temp.d
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
         }
       }
@@ -118,7 +132,9 @@ observe({
             ret
           })
           updatePanel$datachanged = updatePanel$datachanged+1
-          values$data.set = temp
+          
+          values$data.set = as.data.frame(temp)
+          values = sample_if_cas(rvalues = values, d = values$data.set)
         }
       }
     }
@@ -134,7 +150,9 @@ observe({
             NULL
           },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
           updatePanel$datachanged = updatePanel$datachanged+1
-          values$data.set = temp
+          
+          values$data.set = as.data.frame(temp)
+          values = sample_if_cas(rvalues = values, d = values$data.set)
         }
       }
     }
@@ -142,7 +160,7 @@ observe({
 })
 
 output$separatecolumns.table = renderDT({
-  get.data.set()
+  values$data.sample
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
 output$separate.columns = renderUI({

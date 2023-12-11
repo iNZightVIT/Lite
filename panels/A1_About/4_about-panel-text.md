@@ -21,7 +21,6 @@ Some users are experiencing errors with Lite. You might like to install _Lite_ l
 If you want to provide feedback please fill in the [contact form](http://inzight.nz/support/contact?v=lite).
 
 ## The iNZight Project
-
 The project is led by [Professor Chris Wild](http://www.stat.auckland.ac.nz/~wild) and has been primarily supported by the Department of Statistics at the University of Auckland, with additional support from Statistics New Zealand and the NZ Ministry of Education via Census at School.
 
 If you are an expert programmer or statistician, you can contribute to the project by sending us feedback about our [R source code](https://github.com/iNZightVIT).

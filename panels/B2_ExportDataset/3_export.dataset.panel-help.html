@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>Import Dataset</title>
+<title>Export data</title>
 <style type="text/css">
 body {
   font-family: sans-serif;
@@ -77,35 +77,36 @@ section.footnotes::before {
 <div class="include-before">
 </div>
 <div class="frontmatter">
-<div class="title"><h1>Import Dataset</h1></div>
+<div class="title"><h1>Export data</h1></div>
 <div class="author"><h2></h2></div>
 <div class="date"><h3></h3></div>
 </div>
 <div class="body">
-<h5 id="import-dataset">Import Dataset</h5>
-To import your own data, press the "Choose File" button. A new window will appear 
-which lets you select a file. After that is done the data will be presented to 
-you as a table in the middle of the screen. If the file to import is located as 
-a web resource at a URL, paste the URL in the blue text field. <br><br>
-<p>In any case, press the “IMPORT FILE” button to finalize your choice.</p>
-<p>All imported text files are assumed to have a header line and no row names as a
-first unnamed column. The type of the file is estimated from the file extension.<br></p>
- <ul>
-  <li>.csv<br>
-      A comma seperated file.
+<h5 id="export-data">Export data</h5>
+The current work data set can be downloaded. Select the file type in the 
+dropdown menu at the to left and press the "DOWNLOAD" button.  Several file 
+types are available the data can be saved in. <br>
+<ul>
+   <li>
+      txt<br>
+      A tab delimited text file.
+   </li>
+   <li>
+      csv<br>
+      A comma seperated text file.
+   </li>
+   <li>
+      RData<br>
+      A RData binary file.
   </li>
-  <li>.txt<br>
-      A tab seperated file.
+  <li>
+     RDS<br>
+     A RDS binary file.
   </li>
-  <li>.RDA, .RData<br>
-      A R file which stores an R object as a binary file.
-  </li>
-  <li>.RDS<br>
-      A R file which stores an R object as a binary file with slightly different 
-      behaviour than the RDA file above. 
-  </li>
-</ul> 
-<p>In any case, press the “IMPORT FILE” button to finalize your choice.</p>
+</ul>
+Note, "RData" and "RDS" file are R only. They can be loaded into R with the load 
+or readRDS function. They have the advantage that no information is lost. The 
+txt files (txt and csv) are not able to store some information. 
 </div>
 <div class="include-after">
 </div>
