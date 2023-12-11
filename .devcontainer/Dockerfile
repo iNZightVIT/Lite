@@ -28,7 +28,7 @@ RUN cp /srv/shiny-server/VARS.default /srv/shiny-server/VARS \
   && sed -i "s/^\(lite.update=\).*/\1$(date '+%d %B %Y')/g" /srv/shiny-server/VARS
 RUN chown -R shiny:shiny /srv/shiny-server
 
-
+RUN echo "options(shiny.host = '0.0.0.0')" >> /usr/local/lib/R/etc/Rprofile.site
 
 RUN rm -rf /srv/shiny-server
 RUN ln -s /workspaces/Lite /srv/shiny-server
