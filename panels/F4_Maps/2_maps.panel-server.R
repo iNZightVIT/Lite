@@ -1633,7 +1633,7 @@ output$checkregion_panel = renderUI({
   isolate({
     temp = plot.args2()
     if(!is.null(temp$combinedData)) {
-      options = iNZightMaps::iNZightMapRegions(temp$combinedData)
+      options = suppressWarnings(iNZightMaps::iNZightMapRegions(temp$combinedData))
       ret = selectInput(inputId = "check_regions", 
                         label = NULL, 
                         choices = options, 
@@ -1655,7 +1655,7 @@ observe({
   input$check_regions
   isolate({
     temp = plot.args2()
-    options = iNZightMaps::iNZightMapRegions(temp$combinedData)
+    options = suppressWarnings(iNZightMaps::iNZightMapRegions(temp$combinedData))
     if(!is.null(input$check_regions) && length(input$check_regions) > 0 &&
        length(input$check_regions) != length(options)) {
       args2$mapRegionsPlot = input$check_regions
