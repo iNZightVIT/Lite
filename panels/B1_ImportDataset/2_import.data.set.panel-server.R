@@ -333,8 +333,8 @@ observeEvent(c(
 
 # when user uploads a file
 observeEvent(input$files, {
-  cat(list.files("/tmp/", pattern = "csv$", recursive = TRUE), "\n", file = stdout())
-  cat(input$files, "\n", file = stdout())
+  cat(capture.output(list.files("/tmp/", pattern = "csv$", recursive = TRUE)), "\n", file = stdout())
+  cat(capture.output(input$files), "\n", file = stdout())
   if (file.exists(input$files[1, "datapath"])) {
     # isolate({
     preview_data$fpath <- input$files$datapath
