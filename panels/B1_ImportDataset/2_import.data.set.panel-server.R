@@ -36,6 +36,21 @@ delim_choices <- list(
   "Tab" = "\t"
 )
 
+dec_mark_choices <- list(
+  "Period (.)" = ".",
+  "Comma (,)" = ","
+)
+
+big_mark_choices <- list(
+  "Comma (,)" = ",",
+  "Period (.)" = "."
+)
+
+encoding_choices = c(
+  "UTF-8" = "UTF-8",
+  "ISO-8859-1" = "ISO-8859-1"
+)
+
 reset_preview_data <- function() {
   preview_data <<- reactiveValues(
     fpath = NULL,
@@ -44,10 +59,14 @@ reset_preview_data <- function() {
     delimiter = NULL,
     ext = NULL,
     comment_symbol = "#",
+    dec_mark = NULL,
+    big_mark = NULL,
+    encoding = NULL,
     available_dnames = NULL,
     current_dname = NULL,
     # use count to prevent rendering multiple times
-    state = NULL
+    state = NULL,
+    failed_reason = "Failed to load data"
   )
 }
 reset_preview_data()
@@ -73,7 +92,7 @@ output$preview_data <- renderDataTable({
 # }
 
 options(inzighttools.comment = "#")
-lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
+lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_mark = ",", encoding = "UTF-8", sheet = NULL) {
   # ensure correct type
   delimiter <- unlist(delimiter)
   ext <- unlist(ext)
@@ -95,7 +114,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
     delimiter <- "auto"
     # delimiter = smart_delimiter(fpath)
   }
-
+  
   d <- tryCatch(
     if (any(grepl("pdf|docx?|odt|rtf", ext))) {
       readtext::readtext(fpath)
@@ -119,7 +138,10 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       as.data.frame(iNZightTools::smart_read(
         fpath,
         delimiter = unlist(delimiter),
-        ext = ext
+        ext = ext,
+        decimal_mark = unlist(dec_mark),
+        grouping_mark = unlist(big_mark),
+        encoding = unlist(encoding)
       ))
     } else if (ext == "numbers") {
       stop("Not a valid file extension: ", ext)
@@ -147,7 +169,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
     },
     error = identity
   )
-
+  
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
     nr <- min(nrow(d), 5)
@@ -160,13 +182,19 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       preview_data$preview_data <- as.data.frame(d[1:nr, 1:nc])
       preview_data$ext <- ext
       preview_data$delimiter <- delimiter
+      
       # preview_data$state = 0,
       if (is.null(preview_data$current_dname)) {
         preview_data$available_dnames <- values$data.available.dnames
         preview_data$current_dname <- values$data.current.dname
       }
     })
+  } else if (grepl("mark", d$message) && grepl("different", d$message)) {
+    preview_data$failed_reason <- "Failed to load data: decimal and thousands seperator must be different"
   }
+  preview_data$dec_mark <- dec_mark
+  preview_data$big_mark <- big_mark
+  preview_data$encoding <- encoding
 }
 
 show_preview_modal <- function() {
@@ -174,9 +202,10 @@ show_preview_modal <- function() {
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
   delimiter <- preview_data$delimiter
+  
   imported_preview_data <- preview_data$preview_data
-
-  h3_title <- ifelse(is.null(imported_preview_data), "Failed to load data", "Preview")
+  
+  h3_title <- ifelse(is.null(imported_preview_data), preview_data$failed_reason, "Preview")
   if (is.null(imported_preview_data)) {
     table_output <- NULL
   } else {
@@ -191,7 +220,7 @@ show_preview_modal <- function() {
   ext_selected <- ifelse(is.null(ext), "", names(which(unlist(ext_choices) == ext)))
   select_inputs <- list(
     column(
-      width = 5,
+      width = 6,
       selectInput(
         inputId = "preview.filetype",
         label = "File type",
@@ -200,12 +229,39 @@ show_preview_modal <- function() {
       )
     ),
     column(
-      width = 5,
+      width = 6,
       selectInput(
         inputId = "preview.delim",
         label = "Delimiter",
         selected = delim_selected,
         choices = names(delim_choices)
+      )
+    ),
+    column(
+      width = 3,
+      selectInput(
+        inputId = "preview.decmark",
+        label = "Decimal Mark",
+        selected = names(preview_data$dec_mark),
+        choices = names(dec_mark_choices)
+      )
+    ),
+    column(
+      width = 3,
+      selectInput(
+        inputId = "preview.bigmark",
+        label = "Thousands Seperator",
+        selected = names(preview_data$big_mark),
+        choices = names(big_mark_choices)
+      )
+    ),
+    column(
+      width = 3,
+      selectInput(
+        inputId = "preview.encoding",
+        label = "File Encoding",
+        selected = names(preview_data$encoding),
+        choices = names(encoding_choices)
       )
     )
   )
@@ -262,12 +318,17 @@ observeEvent(c(
   input$preview.filetype,
   input$preview.delim,
   input$preview.comment,
-  input$preview.sheets
+  input$preview.sheets,
+  input$preview.decmark,
+  input$preview.bigmark,
+  input$preview.encoding
 ), {
   # check if file type is excel
   ext <- tolower(ext_choices[input$preview.filetype])
+  
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
+  
   # if first import failed, manually set the state
   if (is.null(preview_data$state)) {
     preview_data$state <- 1
@@ -281,6 +342,10 @@ observeEvent(c(
       preview_data$comment_symbol <- input$preview.comment
       options(inzighttools.comment = input$preview.comment)
     }
+
+    preview_data$dec_mark = dec_mark_choices[names(dec_mark_choices) == input$preview.decmark][1]
+    preview_data$big_mark <- big_mark_choices[names(big_mark_choices) == input$preview.bigmark][1]
+    preview_data$encoding <- encoding_choices[names(encoding_choices) == input$preview.encoding][1]
 
     delimiter <- NULL
     if (is_excel | is_rda) {
@@ -301,11 +366,15 @@ observeEvent(c(
     if (tolower(ext) == "rdata") {
       ext <- "rda"
     }
+
     lite_read(
       fpath = preview_data$fpath,
       delimiter = delimiter,
       ext = ext,
-      sheet = sheet_name
+      sheet = sheet_name,
+      dec_mark = preview_data$dec_mark,
+      big_mark = preview_data$big_mark,
+      encoding = preview_data$encoding
     )
     show_preview_modal()
   }
