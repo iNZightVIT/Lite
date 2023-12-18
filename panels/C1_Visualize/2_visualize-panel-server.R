@@ -7004,31 +7004,27 @@ observeEvent(input$switch1, {
 })
 
 observeEvent(input$switch2, {
-  isolate({
-    if((!is.null(input$vari2) && input$vari2 != "none") ||
-       (!is.null(input$subs1) && input$subs1 != "none")) {
-      var2.old = input$vari2
-      var3.old = input$subs1
+  if((!is.null(input$vari2) && input$vari2 != "none") ||
+      (!is.null(input$subs1) && input$subs1 != "none")) {
+    var2.old = input$vari2
+    var3.old = input$subs1
 
-      updateSelectInput(session, "vari2", selected = var3.old)
+    updateSelectInput(session, "vari2", selected = var3.old)
 
-      ch  = colnames(vis.data())
-      ch  = ch[-which(ch %in% input$vari1)]
-      if(!is.null(var3.old) && var3.old != "none")
-        ch  = ch[-which(ch %in% var3.old)]
-      updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
-    }
-  })
+    ch  = colnames(vis.data())
+    ch  = ch[-which(ch %in% input$vari1)]
+    if(!is.null(var3.old) && var3.old != "none")
+      ch  = ch[-which(ch %in% var3.old)]
+    updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
+  }
 })
 
 observeEvent(input$switch3, {
-  isolate({
-    var3.old = input$subs1
-    var4.old = input$subs2
+  var3.old = input$subs1
+  var4.old = input$subs2
 
-    updateSelectInput(session, "subs1", selected = var4.old)
-    updateSelectInput(session, "subs2", selected = var3.old)
-  })
+  updateSelectInput(session, "subs1", selected = var4.old)
+  updateSelectInput(session, "subs2", selected = var3.old)
 })
 
 
