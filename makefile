@@ -20,6 +20,7 @@ container: .devcontainer/Dockerfile
 
 # combine the two files to create the Dockerfile
 .devcontainer/Dockerfile: Dockerfile .devcontainer/Dockerfile.template
-	@cat Dockerfile > .devcontainer/Dockerfile
+	@echo "# This file is generated using make - do not edit by hand" > .devcontainer/Dockerfile
+	@cat Dockerfile >> .devcontainer/Dockerfile
 	@echo "\n\n" >> .devcontainer/Dockerfile
 	@cat .devcontainer/Dockerfile.template >> .devcontainer/Dockerfile

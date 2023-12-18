@@ -1094,7 +1094,7 @@ observe({
 
 # side bar for model plots
 output$model_plots = renderUI({
-  navlistPanel(id="plot_selector",
+  navlistPanel(id="visualisze_plot_selector",
                "Select Plot Type",
                tabPanel("Graphical Diagnostics"),
                tabPanel("Normality Checks"),
@@ -1106,7 +1106,7 @@ output$model_plots = renderUI({
 # UI for the main window when the plot tab is selected
 output$plots.main = renderUI({
   input$model.select
-  input$plot_selector
+  input$visualisze_plot_selector
   isolate({
     if(is.null(input$model.select)||
        input$model.select%in%""){
@@ -1114,21 +1114,21 @@ output$plots.main = renderUI({
     }else{
       if(!any(modelValues$independent.vars[[input$model.select]]%in%
               get.categorical.column.names(get.data.set()))&&
-         input$plot_selector%in%'Factor level comparison'){
+         input$visualisze_plot_selector%in%'Factor level comparison'){
         h2("No factor variables are fit in this model.")
       }else{
         ch1 = modelValues$independent.vars[[input$model.select]][which(modelValues$independent.vars[[input$model.select]]%in%
                                                                          get.categorical.column.names(get.data.set()))]
         ch2 = get.numeric.column.names(modelValues$models[[input$model.select]]$model)
         ch2 = ch2[which(ch2%in%modelValues$independent.vars[[input$model.select]])]
-        list(conditionalPanel("input.plot_selector=='Factor level comparison'",
+        list(conditionalPanel("input.visualisze_plot_selector=='Factor level comparison'",
                               fixedRow(column(3,selectInput("factor.comp.select",
                                                             label="Select Factor to plot",
                                                             choices=ch1))),
                               plotOutput("factor.comparison.plot"),br(),
                               h4("Comparison matrix of selected factor"),
                               verbatimTextOutput("factor_comparison_matrix")),
-             conditionalPanel("input.plot_selector=='Graphical Diagnostics'",
+             conditionalPanel("input.visualisze_plot_selector=='Graphical Diagnostics'",
                               tabsetPanel(id="navlist_basic_plot",
                                           tabPanel("Basic Plots",
                                                    selectInput("plotlm6.selected",
@@ -1150,7 +1150,7 @@ output$plots.main = renderUI({
                                           tabPanel("Scatter Plot Matrix",
                                                    plotOutput("scatter.plot.matrix")),
                                           type="pills")),
-             conditionalPanel("input.plot_selector=='Normality Checks'",
+             conditionalPanel("input.visualisze_plot_selector=='Normality Checks'",
                               tabsetPanel(id="navlist_basic_plot",
                                           tabPanel("Normal QQ-Plot",
                                                    plotOutput("normal.qq.plot")),

@@ -88,7 +88,10 @@ observe({
           code.save$variable = c(code.save$variable, list(c("\n", code)))
           ## save data
           updatePanel$datachanged = updatePanel$datachanged + 1
-          values$data.set = temp
+          values$data.set = as.data.frame(temp)
+          
+          values = sample_if_cas(rvalues = values, d = values$data.set)
+
           code.save$name = code.save$dataname
           values$data.name = code.save$dataname
           updateSelectInput(
@@ -121,10 +124,14 @@ output$aggregate.variable = renderUI({
 })
 
 output$aggregate.table = renderDT({
-  get.data.set()
+  get.data.set.display()
 }, options = list(
   lengthMenu = c(5, 30, 50),
   pageLength = 5,
   columns.defaultContent = "NA",
   scrollX = T
 ))
+
+output$aggregate.table.data.sample.info <- renderText({
+  sample_info_cas()
+})

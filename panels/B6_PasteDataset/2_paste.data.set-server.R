@@ -13,7 +13,7 @@ output$paste.data.info = renderUI({
   if(!is.null(get.data.set()) && !is.null(get.data.name())) {
     list(
       h3(paste("Selected data set:", get.data.name())),
-      p(paste("Selected data number of rows is: ", dim(get.data.set())[1])),
+      # p(paste("Selected data number of rows is: ", dim(get.data.set())[1])),
       p(paste("Selected data number of columns is: ", dim(get.data.set())[2])),
       p(paste("Column names: ", paste(colnames(get.data.set()), collapse = ", ")))
     )
@@ -47,7 +47,6 @@ output$paste.view.title = renderUI({
     ""
   }
 })
-  
   
 
 output$paste.table.preview = renderDT({
@@ -103,7 +102,10 @@ observe({
         data = dplyr::mutate_if(data, is.character, as.factor)
         plot.par$design=NULL
         values$data.name = "data"
-        values$data.set = data
+        values$data.set = as.data.frame(data)
+        
+        values = sample_if_cas(rvalues = values, d = values$data.set)
+        
         updatePanel$doit = updatePanel$doit+1
         values$data.restore = get.data.set()
         values$name.restore = values$data.name

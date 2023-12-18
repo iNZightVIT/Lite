@@ -47,7 +47,10 @@ observe({
             code.save$variable = c(code.save$variable, list(c("\n", code)))
             ## save data
             updatePanel$datachanged = updatePanel$datachanged + 1
-            values$data.set = temp
+            values$data.set = as.data.frame(temp)
+
+            values = sample_if_cas(rvalues = values, d = values$data.set)
+
             code.save$name = code.save$dataname
             values$data.name = code.save$dataname
             if (class(values$data.set[, which(colnames(get.data.set()) %in%
@@ -102,7 +105,10 @@ observe({
             code.save$variable = c(code.save$variable, list(c("\n", code)))
             ## save data
             updatePanel$datachanged = updatePanel$datachanged + 1
-            values$data.set = temp
+            values$data.set = as.data.frame(temp)
+            
+            values = sample_if_cas(rvalues = values, d = values$data.set)
+            
             code.save$name = code.save$dataname
             values$data.name = code.save$dataname
           }
@@ -121,7 +127,10 @@ observe({
             code.save$variable = c(code.save$variable, list(c("\n", code)))
             ## save data
             updatePanel$datachanged = updatePanel$datachanged + 1
-            values$data.set = temp
+            values$data.set = as.data.frame(temp)
+            
+            values = sample_if_cas(rvalues = values, d = values$data.set)
+
             code.save$name = code.save$dataname
             values$data.name = code.save$dataname
           }
@@ -145,7 +154,10 @@ observe({
             code.save$variable = c(code.save$variable, list(c("\n", code)))
             ## save data
             updatePanel$datachanged = updatePanel$datachanged + 1
-            values$data.set = temp
+            values$data.set = as.data.frame(temp)
+            
+            values = sample_if_cas(rvalues = values, d = values$data.set)
+
             code.save$name = code.save$dataname
             values$data.name = code.save$dataname
           }

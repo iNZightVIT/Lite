@@ -59,7 +59,13 @@ observe({
                       value = paste0(new_name, ".dt", sep = ""))
       
       output$convert_datestimes_original_table = renderDT({
-        data.frame(Original = varx, stringsAsFactors = TRUE)
+        if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+          data = data.frame(Original = data.frame(Original = varx, stringsAsFactors = TRUE)[values$sample.row,])
+          row.names(data) = 1:length(values$sample.row)
+        } else {
+          data = data.frame(Original = varx, stringsAsFactors = TRUE)
+        }
+        data
       },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
     }
   })
@@ -88,6 +94,10 @@ observe({
             })
           
           output$convert_datestimes_converted_table = renderDT({
+            if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+              data = data.frame(Converted = data[values$sample.row,])
+              row.names(data) = 1:length(values$sample.row)
+            }
             data
           },options = list(sDom  = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T))
         }
@@ -110,6 +120,7 @@ observe({
           data = iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)
           updatePanel$datachanged = updatePanel$datachanged+1
           values$data.set = data
+          values = sample_if_cas(rvalues = values, d = data, new_sample = FALSE)
           
           output$convert_datestimes_original_table = renderDT({
             NULL
@@ -159,29 +170,25 @@ output$aggregate_datestimes_panel = renderUI({
   ret
 })
 
-
-
-
-
-
-
-
 output$convert.datestimes.table = renderDT({
-  get.data.set()
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
-
 
 output$dates.times = renderUI({
   dates.times.panel()
 })
 
 output$aggregate_datestimes.table = renderDT({
-  get.data.set()
+  get.data.set.display()
 },options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA",scrollX = T))
 
+output$convert.datestimes.data.sample.info <- renderText({
+  sample_info_cas()
+})
 
-
-
+output$aggregate_datestimes.data.sample.info <- renderText({
+  sample_info_cas()
+})
 
 
 

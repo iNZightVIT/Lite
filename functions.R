@@ -2,6 +2,23 @@
 # To be removed when the iNZight tools package is working##
 ##########################################################
 
+read_config = function() {
+  lite_config = Sys.getenv("LITE_CONFIG")
+  if (is.null(lite_config) || nchar(lite_config) <= 1) return()
+
+  # read from json
+  fromJSON(lite_config)
+  
+  # out = list()
+  # for(key in names(lite_config)) {
+  #   values = lite_config[[key]]
+  #   for(key2 in names(values)) {
+  #     new_key = paste0(key, "_", key2)
+  #     out[new_key] = values[key2]
+  #   }
+  # }
+}
+
 # Modified based off:
 # https://github.com/dreamRs/shinylogs/blob/0195ac0a1f85d213c82143cfee712c9baddd1963/R/tracking.R#L134
 init_lite_logs <- function(
@@ -1885,17 +1902,16 @@ get.data.from.googledocs <- function(URL, data.dir.import) {
     dir.create(paste(data.dir.import, "/Imported", sep = ""), recursive = TRUE)
   }
   tryCatch({
-    if (Sys.info()["sysname"] %in% c("Windows", "Linux")) {
-      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "auto")
-    } else {
-      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "curl")
-    }
-
-    temp <- load.data(data.dir.import, fileID = name, path = paste0(data.dir.import, "/Imported/", name))
-    if (!is.null(temp[[2]])) {
-      ret$data.set <- temp[[2]]
-      ret$data.name <- name
-    } else {
+    if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
+      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
+    else
+      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
+    
+    temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
+    if(!is.null(temp[[2]])){
+      ret$data.set = temp[[2]]
+      ret$data.name = name
+    }else{
       return(NULL)
     }
     ret
