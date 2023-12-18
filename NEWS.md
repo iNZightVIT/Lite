@@ -1,5 +1,6 @@
 - fix bug in Model Fitting module (panel had a duplicate ID, resulting in some weird behaviour)
 - remove gpairs dependency
+- fix bug where variables swap after saving residuals
 
 - major update: integrate instance-configurability to allow various instances to run on the same deployment (e.g., the Census at School build)
 

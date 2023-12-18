@@ -6986,29 +6986,24 @@ output$old_advanced_options_panel = renderUI({
 
 ## switch variables selected
 observeEvent(input$switch1, {
-  # input$switch1
+  if(!is.null(input$vari2) && input$vari2 != "none") {
 
-  isolate({
-    if(!is.null(input$vari2) && input$vari2 != "none") {
+    var1.old = input$vari1
+    var2.old = input$vari2
 
-      var1.old = input$vari1
-      var2.old = input$vari2
+    updateSelectInput(session, "vari1", selected = var2.old)
 
-      updateSelectInput(session, "vari1", selected = var2.old)
+    ch  = colnames(vis.data())
+    #      if(!is.null(input$vari1) && input$vari1 %in% ch){
+    ch  = ch[-which(ch %in% var2.old)]
+    #      }
+    ch = c("none", ch)
 
-      ch  = colnames(vis.data())
-      #      if(!is.null(input$vari1) && input$vari1 %in% ch){
-      ch  = ch[-which(ch %in% var2.old)]
-      #      }
-      ch = c("none", ch)
-
-      updateSelectInput(session,"vari2", choices = ch, selected = var1.old)
-    }
-  })
+    updateSelectInput(session,"vari2", choices = ch, selected = var1.old)
+  }
 })
 
-observe({
-  input$switch2
+observeEvent(input$switch2, {
   isolate({
     if((!is.null(input$vari2) && input$vari2 != "none") ||
        (!is.null(input$subs1) && input$subs1 != "none")) {
@@ -7026,8 +7021,7 @@ observe({
   })
 })
 
-observe({
-  input$switch3
+observeEvent(input$switch3, {
   isolate({
     var3.old = input$subs1
     var4.old = input$subs2
