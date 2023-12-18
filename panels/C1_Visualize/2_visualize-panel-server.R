@@ -6985,8 +6985,8 @@ output$old_advanced_options_panel = renderUI({
 
 
 ## switch variables selected
-observe({
-  input$switch1
+observeEvent(input$switch1, {
+  # input$switch1
 
   isolate({
     if(!is.null(input$vari2) && input$vari2 != "none") {
