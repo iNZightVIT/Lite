@@ -1861,7 +1861,11 @@ get.data.from.URL <- function(URL, data.dir.import) {
     print(e)
   }, warning = function(w) {
     print(w)
-  }, finally = {})
+  }, finally = {
+    if (file.exists(paste0(data.dir.import, "/Imported/", name))) {
+      unlink(paste0(data.dir.import, "/Imported/", name))
+    }
+  })
 }
 
 get.data.name.from.URL <- function(URL) {
