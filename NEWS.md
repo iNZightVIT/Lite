@@ -1,3 +1,5 @@
+# Pre-release, 2023.11.9000
+
 - fix bug in Model Fitting module (panel had a duplicate ID, resulting in some weird behaviour)
 - remove gpairs dependency
 - fix bug where variables swap after saving residuals
