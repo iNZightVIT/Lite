@@ -467,6 +467,8 @@ observeEvent(input$confirm_import, {
   }
   removeModal()
   reset_preview_data()
+  # delete file from temp
+  unlink(input$files[1, "datapath"])
   updateTabsetPanel(session, "selector", "visualize")
 })
 
