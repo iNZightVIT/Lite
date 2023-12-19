@@ -97,9 +97,6 @@ about.panel.ui <- function(lite.version, lite.update) {
                   <a href = "https://stat.auckland.ac.nz">
                     <img src = "uoa_logo.png">
                   </a>
-                  <a href = "https://terourou.org">
-                    <img src = "https://terourou.org/img/logo.png">
-                  </a>
                   <a href = "https://inzight.co.nz">
                     <img src = "https://inzight.co.nz/inzight-light.png"/>
                   </a>
