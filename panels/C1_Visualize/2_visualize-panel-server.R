@@ -6985,56 +6985,46 @@ output$old_advanced_options_panel = renderUI({
 
 
 ## switch variables selected
-observe({
-  input$switch1
+observeEvent(input$switch1, {
+  if(!is.null(input$vari2) && input$vari2 != "none") {
 
-  isolate({
-    if(!is.null(input$vari2) && input$vari2 != "none") {
+    var1.old = input$vari1
+    var2.old = input$vari2
 
-      var1.old = input$vari1
-      var2.old = input$vari2
+    updateSelectInput(session, "vari1", selected = var2.old)
 
-      updateSelectInput(session, "vari1", selected = var2.old)
+    ch  = colnames(vis.data())
+    #      if(!is.null(input$vari1) && input$vari1 %in% ch){
+    ch  = ch[-which(ch %in% var2.old)]
+    #      }
+    ch = c("none", ch)
 
-      ch  = colnames(vis.data())
-      #      if(!is.null(input$vari1) && input$vari1 %in% ch){
-      ch  = ch[-which(ch %in% var2.old)]
-      #      }
-      ch = c("none", ch)
-
-      updateSelectInput(session,"vari2", choices = ch, selected = var1.old)
-    }
-  })
+    updateSelectInput(session,"vari2", choices = ch, selected = var1.old)
+  }
 })
 
-observe({
-  input$switch2
-  isolate({
-    if((!is.null(input$vari2) && input$vari2 != "none") ||
-       (!is.null(input$subs1) && input$subs1 != "none")) {
-      var2.old = input$vari2
-      var3.old = input$subs1
-
-      updateSelectInput(session, "vari2", selected = var3.old)
-
-      ch  = colnames(vis.data())
-      ch  = ch[-which(ch %in% input$vari1)]
-      if(!is.null(var3.old) && var3.old != "none")
-        ch  = ch[-which(ch %in% var3.old)]
-      updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
-    }
-  })
-})
-
-observe({
-  input$switch3
-  isolate({
+observeEvent(input$switch2, {
+  if((!is.null(input$vari2) && input$vari2 != "none") ||
+      (!is.null(input$subs1) && input$subs1 != "none")) {
+    var2.old = input$vari2
     var3.old = input$subs1
-    var4.old = input$subs2
 
-    updateSelectInput(session, "subs1", selected = var4.old)
-    updateSelectInput(session, "subs2", selected = var3.old)
-  })
+    updateSelectInput(session, "vari2", selected = var3.old)
+
+    ch  = colnames(vis.data())
+    ch  = ch[-which(ch %in% input$vari1)]
+    if(!is.null(var3.old) && var3.old != "none")
+      ch  = ch[-which(ch %in% var3.old)]
+    updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
+  }
+})
+
+observeEvent(input$switch3, {
+  var3.old = input$subs1
+  var4.old = input$subs2
+
+  updateSelectInput(session, "subs1", selected = var4.old)
+  updateSelectInput(session, "subs2", selected = var3.old)
 })
 
 
