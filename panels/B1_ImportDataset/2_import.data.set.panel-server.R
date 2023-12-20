@@ -36,6 +36,21 @@ delim_choices <- list(
   "Tab" = "\t"
 )
 
+dec_mark_choices <- list(
+  "Period (.)" = ".",
+  "Comma (,)" = ","
+)
+
+big_mark_choices <- list(
+  "Comma (,)" = ",",
+  "Period (.)" = "."
+)
+
+encoding_choices = c(
+  "UTF-8" = "UTF-8",
+  "ISO-8859-1" = "ISO-8859-1"
+)
+
 reset_preview_data <- function() {
   preview_data <<- reactiveValues(
     fpath = NULL,
@@ -44,21 +59,32 @@ reset_preview_data <- function() {
     delimiter = NULL,
     ext = NULL,
     comment_symbol = "#",
+    dec_mark = NULL,
+    big_mark = NULL,
+    encoding = NULL,
     available_dnames = NULL,
     current_dname = NULL,
     # use count to prevent rendering multiple times
-    state = NULL
+    state = NULL,
+    failed_reason = "Failed to load data"
   )
+  output$preview_data <<- renderDataTable({
+    datatable(
+      preview_data$preview_data,
+      selection = "single",
+      options = list(dom = "t")
+    )
+  })
 }
 reset_preview_data()
 
-output$preview_data <- renderDataTable({
-  datatable(
-    preview_data$preview_data,
-    selection = "single",
-    options = list(dom = "t")
-  )
-})
+# output$preview_data <- renderDataTable({
+#   datatable(
+#     preview_data$preview_data,
+#     selection = "single",
+#     options = list(dom = "t")
+#   )
+# })
 
 # smart_delimiter = function(fpath) {
 #   ext = tolower(tools::file_ext(fpath[1]))
@@ -73,7 +99,7 @@ output$preview_data <- renderDataTable({
 # }
 
 options(inzighttools.comment = "#")
-lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
+lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_mark = ",", encoding = "UTF-8", sheet = NULL) {
   # ensure correct type
   delimiter <- unlist(delimiter)
   ext <- unlist(ext)
@@ -90,12 +116,16 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       ext <- tolower(tools::file_ext(gsub("=", ".", fpath[1])))
     }
   }
+  # treat Rdata as rda
+  if (tolower(ext) == "rdata") {
+    ext <- "rda"
+  }
   # if delimiter not given then guess by its file type
   if (is.null(delimiter)) {
     delimiter <- "auto"
     # delimiter = smart_delimiter(fpath)
   }
-
+  
   d <- tryCatch(
     if (any(grepl("pdf|docx?|odt|rtf", ext))) {
       readtext::readtext(fpath)
@@ -119,7 +149,10 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
       as.data.frame(iNZightTools::smart_read(
         fpath,
         delimiter = unlist(delimiter),
-        ext = ext
+        ext = ext,
+        decimal_mark = unlist(dec_mark),
+        grouping_mark = unlist(big_mark),
+        encoding = unlist(encoding)
       ))
     } else if (ext == "numbers") {
       stop("Not a valid file extension: ", ext)
@@ -147,26 +180,44 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, sheet = NULL) {
     },
     error = identity
   )
-
+  
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
-    nr <- min(nrow(d), 5)
-    nc <- min(ncol(d), 5)
+    if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+      # values$data.set = d
+      # in preview lite2 should also show the sampled data only
+      values$sample.num <- ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
+      preview_rows <- sample(1:nrow(d), values$sample.num)
+      values$sample.row <- preview_rows
+    } else {
+      preview_rows <- 1:min(nrow(d), 5)
+    }
+    # show 5 columns no matter lite/lite2
+    preview_cols <- 1:min(ncol(d), 5)
+
     try({
       data_ext <- tolower(tools::file_ext(fpath[1]))
       preview_data$fpath <- fpath
       preview_data$data <- d
       # ensure its a df
-      preview_data$preview_data <- as.data.frame(d[1:nr, 1:nc])
+      preview_data$preview_data <- as.data.frame(d[preview_rows, preview_cols])
       preview_data$ext <- ext
       preview_data$delimiter <- delimiter
+      
       # preview_data$state = 0,
       if (is.null(preview_data$current_dname)) {
         preview_data$available_dnames <- values$data.available.dnames
         preview_data$current_dname <- values$data.current.dname
       }
+
+      row.names(preview_data$preview_data) <- 1:nrow(preview_data$preview_data)
     })
+  } else if (grepl("mark", d$message) && grepl("different", d$message)) {
+    preview_data$failed_reason <- "Failed to load data: decimal and thousands seperator must be different"
   }
+  preview_data$dec_mark <- dec_mark
+  preview_data$big_mark <- big_mark
+  preview_data$encoding <- encoding
 }
 
 show_preview_modal <- function() {
@@ -174,35 +225,70 @@ show_preview_modal <- function() {
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
   delimiter <- preview_data$delimiter
+  
   imported_preview_data <- preview_data$preview_data
-
-  h3_title <- ifelse(is.null(imported_preview_data), "Failed to load data", "Preview")
+  
+  h3_title <- ifelse(is.null(imported_preview_data), preview_data$failed_reason, "Preview")
   if (is.null(imported_preview_data)) {
     table_output <- NULL
   } else {
     table_output <- DT::dataTableOutput("preview_data")
   }
   # table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
-
+  if (is.null(delimiter) || delimiter == "auto") {
+    delim_selected <- "Detected automatically"
+  } else {
+    delim_selected <- names(delimiter)
+  }
   ext_selected <- ifelse(is.null(ext), "", names(which(unlist(ext_choices) == ext)))
   select_inputs <- list(
     column(
-      width = 5,
+      width = 6,
       selectInput(
         inputId = "preview.filetype",
         label = "File type",
         selected = ext_selected,
         choices = c("", unique(names(ext_choices)))
       )
+    ),
+    column(
+      width = 6,
+      selectInput(
+        inputId = "preview.delim",
+        label = "Delimiter",
+        selected = delim_selected,
+        choices = names(delim_choices)
+      )
+    ),
+    column(
+      width = 3,
+      selectInput(
+        inputId = "preview.decmark",
+        label = "Decimal Mark",
+        selected = names(preview_data$dec_mark),
+        choices = names(dec_mark_choices)
+      )
+    ),
+    column(
+      width = 3,
+      selectInput(
+        inputId = "preview.bigmark",
+        label = "Thousands Seperator",
+        selected = names(preview_data$big_mark),
+        choices = names(big_mark_choices)
+      )
+    ),
+    column(
+      width = 3,
+      selectInput(
+        inputId = "preview.encoding",
+        label = "File Encoding",
+        selected = names(preview_data$encoding),
+        choices = names(encoding_choices)
+      )
     )
   )
   if (!is.null(delimiter) && !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
-    if (delimiter == "auto") {
-      delim_selected <- "Detected automatically"
-    } else {
-      delim_selected <- names(delimiter)
-    }
-
     if (is_excel | is_rda) {
       select_inputs2 <- list(
         column(
@@ -217,15 +303,6 @@ show_preview_modal <- function() {
       )
     } else {
       select_inputs2 <- list(
-        column(
-          width = 5,
-          selectInput(
-            inputId = "preview.delim",
-            label = "Delimiter",
-            selected = delim_selected,
-            choices = names(delim_choices)
-          )
-        ),
         column(
           width = 2,
           textInput(
@@ -264,12 +341,17 @@ observeEvent(c(
   input$preview.filetype,
   input$preview.delim,
   input$preview.comment,
-  input$preview.sheets
+  input$preview.sheets,
+  input$preview.decmark,
+  input$preview.bigmark,
+  input$preview.encoding
 ), {
   # check if file type is excel
   ext <- tolower(ext_choices[input$preview.filetype])
+  
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
+  
   # if first import failed, manually set the state
   if (is.null(preview_data$state)) {
     preview_data$state <- 1
@@ -283,6 +365,10 @@ observeEvent(c(
       preview_data$comment_symbol <- input$preview.comment
       options(inzighttools.comment = input$preview.comment)
     }
+
+    preview_data$dec_mark = dec_mark_choices[names(dec_mark_choices) == input$preview.decmark][1]
+    preview_data$big_mark <- big_mark_choices[names(big_mark_choices) == input$preview.bigmark][1]
+    preview_data$encoding <- encoding_choices[names(encoding_choices) == input$preview.encoding][1]
 
     delimiter <- NULL
     if (is_excel | is_rda) {
@@ -298,16 +384,14 @@ observeEvent(c(
     }
 
     ext <- ext_choices[names(ext_choices) == input$preview.filetype][1]
-    # ext choices have 2 "RData Files (.RData, .rda)"
-    # default to rda
-    if (tolower(ext) == "rdata") {
-      ext <- "rda"
-    }
     lite_read(
       fpath = preview_data$fpath,
       delimiter = delimiter,
       ext = ext,
-      sheet = sheet_name
+      sheet = sheet_name,
+      dec_mark = preview_data$dec_mark,
+      big_mark = preview_data$big_mark,
+      encoding = preview_data$encoding
     )
     show_preview_modal()
   }
@@ -329,11 +413,18 @@ observeEvent(input$cancel_import, {
   reset_preview_data()
   removeModal()
 })
+
 # when user confirms the data in preview
 observeEvent(input$confirm_import, {
   if (!is.null(preview_data$data)) {
+    if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+      values$data.set <- preview_data$data
+      values$data.sample <- preview_data$preview_data
+    } else {
+      values$data.set <- preview_data$data
+    }
     plot.par$design <- NULL
-    values$data.set <- preview_data$data
+
     values$data.type <- preview_data$ext
     updatePanel$doit <- updatePanel$doit + 1
     values$data.restore <<- get.data.set()
@@ -376,6 +467,8 @@ observeEvent(input$confirm_import, {
   }
   removeModal()
   reset_preview_data()
+  # delete file from temp
+  unlink(input$files[1, "datapath"])
   updateTabsetPanel(session, "selector", "visualize")
 })
 
@@ -407,63 +500,6 @@ observeEvent(input$import_set, {
     })
   }
 })
-
-# select input for available sheets/data
-# output$data.info = renderUI({
-#   # input$files
-#   values$data.set
-#   dtype = values$data.type
-#
-#   if(!is.null(dtype)) {
-#     label_name = switch(
-#       dtype,
-#       "xls" = ,
-#       "xlsx" = "Sheet:",
-#       "rdta" = ,
-#       "rda" = "Dataset:"
-#     )
-#
-#     if(is.null(label_name)) {
-#       return(NULL)
-#     }
-#
-#     selectInput(
-#       inputId = "data.info",
-#       label = label_name,
-#       selected = values$data.current.dname,
-#       choices = values$data.available.dnames
-#     )
-#   }
-# })
-
-# reload data when user chooses a different sheet/data
-# observeEvent(input$data.info, {
-#   # data type
-#   dtype = values$data.type
-#   # path of data
-#   fpath = input$files[1, "datapath"]
-#   tryCatch(
-#     if(!is.null(dtype) && !is.null(values$data.current.dname)) {
-#       # prevent loading data again, if the selected sheet name is the same
-#       if(input$data.info != values$data.current.dname) {
-#         if(dtype == "xls" | dtype == "xlsx") {
-#           values$data.set = as.data.frame(iNZightTools::smart_read(fpath, sheet = input$data.info))
-#         } else if(dtype == "rdta" | dtype == "rda") {
-#           ind = which(values$data.available.dnames == input$data.info)
-#           values$data.set = as.data.frame(iNZightTools::load_rda(fpath)[[ind]])
-#         }
-#         # update sheet name
-#         values$data.current.dname = input$data.info
-#       }
-#     },
-#     error = function(e) {
-#       shinyalert::shinyalert(
-#         title = "Import failed",
-#         text = glue::glue("Failed to switch to data '{input$data.info}'")
-#       )
-#     }
-#   )
-# })
 
 # whole data import panel
 output$load.data.panel <- renderUI({
@@ -499,11 +535,11 @@ output$filedisplay <- renderUI({
   }
 })
 
-output$fileError <- renderText(safeError(message(get.data.set())))
+output$fileError <- renderText(safeError(message(get.data.set.display())))
 
-output$fileprint <- renderPrint(get.data.set())
+output$fileprint <- renderPrint(get.data.set.display())
 
-output$filetable <- renderDT(get.data.set(),
+output$filetable <- renderDT(get.data.set.display(),
   options = list(
     lengthMenu = c(5, 30, 50),
     pageLength = 5,
@@ -521,7 +557,9 @@ output$filetable <- renderDT(get.data.set(),
   )
 )
 
-
+output$import.data.sample.info <- renderText({
+  sample_info_cas()
+})
 
 observe({
   input$remove_set

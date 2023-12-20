@@ -35,7 +35,10 @@ stack.variables.panel =function(){
   }else{
     sidebarLayout(
       sidebarPanel(stack.variables.sidebar()),
-      mainPanel(DTOutput("stack.table"))
+      mainPanel(
+        textOutput('stack.table.data.sample.info'), br(), br(),
+        DTOutput("stack.table")
+      )
     )
   }
 }

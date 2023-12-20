@@ -6,6 +6,9 @@ observe({
       updatePanel$datachanged = updatePanel$datachanged+1
       values$data.set = get.data.restore()
       values$data.name = get.name.restore()
+      
+      values = sample_if_cas(rvalues = values, d = get.data.restore())
+
       ## code history
       code = paste0(values$data.name, "_", input$restore_data_button, " <- ", gsub("_ex", "", values$data.name))
       code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
@@ -16,7 +19,7 @@ observe({
 
 output$data.restore.table = renderDT({
   if(input$selector == "Restore data"){
-  get.data.set()
+    get.data.set.display()
   }
 },options=list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent="NA",scrollX=T))
 
@@ -36,3 +39,10 @@ observe({
   })  
   }
 })
+
+output$data.restore.data.sample.info <- renderText({
+  sample_info_cas()
+})
+
+
+

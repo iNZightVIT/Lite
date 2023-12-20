@@ -1,7 +1,7 @@
 Package: iNZightLite
 Type: Shiny Application
 Title: iNZight Lite
-Version: 2023.06
+Version: 2023.11.9000
 Authors@R: c(
     person("Charco", "Hui", role = c("aut", "cre"),
         email = "charco.hui@auckland.ac.nz"),
@@ -24,13 +24,13 @@ Imports:
     colorspace,
     DT,
     GGally,
-    gpairs,
     iNZightMaps,
     iNZightMR,
     iNZightPlots,
     iNZightRegression,
     iNZightTools,
     iNZightTS,
+    openssl,
     plotly,
     readtext,
     readxl,
@@ -45,6 +45,7 @@ Imports:
     survey,
     surveyspec,
     tibble,
-    viridis
+    viridis,
+    wkb
 Additional_repository: https://r.docker.stat.auckland.ac.nz
 RoxygenNote: 6.0.1

@@ -27,8 +27,18 @@ about.panel.ui <- function(lite.version, lite.update) {
       ##  "lite.update".
       if (lite.version != "" || lite.update != "") {
         p_args <- list()
-        if (lite.version != "") {
-          p_args <- c(p_args, list("iNZight Lite Version: ", em(lite.version), br()))
+        if (lite.version != "") { 
+          ver = ifelse(is.null(session$userData$LITE_VERSION), "", session$userData$LITE_VERSION)
+          p_args <- c(
+            p_args, 
+            list(
+              paste0("iNZight Lite Version: "), 
+              em(lite.version), 
+              if (!is.null(session$userData$LITE_VERSION)) 
+                paste0("(configured for ", ver, ")") else NULL,
+              br()
+            )
+          )
         }
         if (lite.update != "") {
           p_args <- c(p_args, list("Last updated: ", em(lite.update)))
@@ -86,9 +96,6 @@ about.panel.ui <- function(lite.version, lite.update) {
                 <div class="footer-sponsors">
                   <a href = "https://stat.auckland.ac.nz">
                     <img src = "uoa_logo.png">
-                  </a>
-                  <a href = "https://terourou.org">
-                    <img src = "https://terourou.org/img/logo.png">
                   </a>
                   <a href = "https://inzight.co.nz">
                     <img src = "https://inzight.co.nz/inzight-light.png"/>
