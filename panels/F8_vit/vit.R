@@ -6,9 +6,9 @@
 # 		actionButton("to_vit_randomisation_variation", label = "VIT Randomisation Variation")
 # 		)
 # })
-# 
+#
 # sv.data <- reactive(get.data.set())
-# 
+#
 # observeEvent(input$to_vit_randomisation_test, {
 # 	df <- as.data.frame(sv.data())
 # 	json_output <- jsonlite::toJSON(df, na = "null")
@@ -31,24 +31,13 @@
 # })
 
 
-output$VIT.panel = renderUI({
+output$VIT.panel <- renderUI({
   shinyjs::runjs(paste0('window.location.href = "https://vit.inzight.nz";'))
-  
-  x = list(
+
+  x <- list(
     "Click",
     a("here", href = "https://vit.inzight.nz"),
     "if you are not redirected automatically."
   )
   h4(x)
 })
-
-
-
-
-
-
-
-
-
-
-

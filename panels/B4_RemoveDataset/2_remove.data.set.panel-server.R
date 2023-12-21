@@ -8,12 +8,17 @@ output$remove.data.panel <- renderUI({
   })
 })
 
-output$removetable <- renderDT({
-  if(!is.null(input$Importedremove)){
-    load.data(get.data.dir.imported(),input$Importedremove)[[2]]
-  } else {
-    NULL
-  }
-}, options =
-  list(lengthMenu = c(5, 30, 50), pageLength = 5,
-       columns.defaultContent = "NA", scrollX = TRUE))
+output$removetable <- renderDT(
+  {
+    if (!is.null(input$Importedremove)) {
+      load.data(get.data.dir.imported(), input$Importedremove)[[2]]
+    } else {
+      NULL
+    }
+  },
+  options =
+    list(
+      lengthMenu = c(5, 30, 50), pageLength = 5,
+      columns.defaultContent = "NA", scrollX = TRUE
+    )
+)

@@ -46,7 +46,7 @@ big_mark_choices <- list(
   "Period (.)" = "."
 )
 
-encoding_choices = c(
+encoding_choices <- c(
   "UTF-8" = "UTF-8",
   "ISO-8859-1" = "ISO-8859-1"
 )
@@ -125,7 +125,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_m
     delimiter <- "auto"
     # delimiter = smart_delimiter(fpath)
   }
-  
+
   d <- tryCatch(
     if (any(grepl("pdf|docx?|odt|rtf", ext))) {
       readtext::readtext(fpath)
@@ -180,7 +180,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_m
     },
     error = identity
   )
-  
+
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
     if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
@@ -203,7 +203,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_m
       preview_data$preview_data <- as.data.frame(d[preview_rows, preview_cols])
       preview_data$ext <- ext
       preview_data$delimiter <- delimiter
-      
+
       # preview_data$state = 0,
       if (is.null(preview_data$current_dname)) {
         preview_data$available_dnames <- values$data.available.dnames
@@ -225,9 +225,9 @@ show_preview_modal <- function() {
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
   delimiter <- preview_data$delimiter
-  
+
   imported_preview_data <- preview_data$preview_data
-  
+
   h3_title <- ifelse(is.null(imported_preview_data), preview_data$failed_reason, "Preview")
   if (is.null(imported_preview_data)) {
     table_output <- NULL
@@ -348,10 +348,10 @@ observeEvent(c(
 ), {
   # check if file type is excel
   ext <- tolower(ext_choices[input$preview.filetype])
-  
+
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
-  
+
   # if first import failed, manually set the state
   if (is.null(preview_data$state)) {
     preview_data$state <- 1
@@ -366,7 +366,7 @@ observeEvent(c(
       options(inzighttools.comment = input$preview.comment)
     }
 
-    preview_data$dec_mark = dec_mark_choices[names(dec_mark_choices) == input$preview.decmark][1]
+    preview_data$dec_mark <- dec_mark_choices[names(dec_mark_choices) == input$preview.decmark][1]
     preview_data$big_mark <- big_mark_choices[names(big_mark_choices) == input$preview.bigmark][1]
     preview_data$encoding <- encoding_choices[names(encoding_choices) == input$preview.encoding][1]
 

@@ -1,6 +1,6 @@
-##---------------------------------------###
+## ---------------------------------------###
 ###  UI Functions for the "Help" Module  ###
-###--------------------------------------###
+### --------------------------------------###
 ###
 ###  Date Created  : February 10, 2015.
 ###  Last Modified : February 25, 2015.
@@ -12,38 +12,40 @@
 
 ###  The code in this file is more or less identical to the panel UI
 ###  file for the "About" panel.
-help.panel.ui  = function(lite.version,lite.update) {
-    ##  We manually set the page width to be 10 columns so that it looks
-    ##  (rougly) centred.
-    fixedPage(
-        column(width = 10, offset = 1,
-               ##  We include the markdown document that contains the
-               ##  text for the "About" module.
-               includeMarkdown('panels/7_Help/4_help-panel-text.md'),
-               ##  We include some line breaks to space things out.
-               br(),
-               br(),
-               br(),
-               br(),
-               br(),
-               ##  We add version details at the bottom right hand corner
-               ##  of the page. "lite.version" is defined in the file
-               ##  "global.R" - this is because the version number is also
-               ##  included in the "help" page, and it would take far too
-               ##  much effort to update the version number more than once.
-               ##  Fortune favours the lazy. The same logic applies to
-               ##  "lite.update".
-               p(em(lite.version),
-                 br(),
-                 em(lite.update),
-                 style = 'color:gray',
-                 align = 'right')
-               ),
-        ##  Next, we add a helpful footer.
-        column(
-            width = 12,
-            HTML(
-                '<div id = "wrapper">
+help.panel.ui <- function(lite.version, lite.update) {
+  ##  We manually set the page width to be 10 columns so that it looks
+  ##  (rougly) centred.
+  fixedPage(
+    column(
+      width = 10, offset = 1,
+      ##  We include the markdown document that contains the
+      ##  text for the "About" module.
+      includeMarkdown("panels/7_Help/4_help-panel-text.md"),
+      ##  We include some line breaks to space things out.
+      br(),
+      br(),
+      br(),
+      br(),
+      br(),
+      ##  We add version details at the bottom right hand corner
+      ##  of the page. "lite.version" is defined in the file
+      ##  "global.R" - this is because the version number is also
+      ##  included in the "help" page, and it would take far too
+      ##  much effort to update the version number more than once.
+      ##  Fortune favours the lazy. The same logic applies to
+      ##  "lite.update".
+      p(em(lite.version),
+        br(),
+        em(lite.update),
+        style = "color:gray",
+        align = "right"
+      )
+    ),
+    ##  Next, we add a helpful footer.
+    column(
+      width = 12,
+      HTML(
+        '<div id = "wrapper">
 		<div id = "footer">
 		  <span style = "float:left;">
                   <br> &nbsp;
@@ -81,7 +83,7 @@ help.panel.ui  = function(lite.version,lite.update) {
 		  </span>
 		</div>
 	      </div>'
-            )
-        )
+      )
     )
+  )
 }

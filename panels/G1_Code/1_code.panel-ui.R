@@ -1,19 +1,20 @@
-###-------------------###
+### -------------------###
 ###  code writing UI  ###
-###-------------------###
+### -------------------###
 
-code.mainPanel = function(){
-  mainPanelUI = list(
+code.mainPanel <- function() {
+  mainPanelUI <- list(
     uiOutput("r.show.code")
-  )## end of mainPanelUI
+  ) ## end of mainPanelUI
 }
 
-code.panel.ui = function(data.set) {
-  fluidPage(  
+code.panel.ui <- function(data.set) {
+  fluidPage(
     if (is.null(data.set)) {
       fluidRow(
         includeMarkdown(
-          "panels/G1_Code/4_code.panel-null.md")
+          "panels/G1_Code/4_code.panel-null.md"
+        )
       )
     } else {
       fluidRow(
