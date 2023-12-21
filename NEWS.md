@@ -1,10 +1,17 @@
-# Pre-release, 2023.12
+# December 2023
 
-- fix bug in Model Fitting module (panel had a duplicate ID, resulting in some weird behaviour)
-- remove gpairs dependency
-- fix bug where variables swap after saving residuals
+## Changes
 
-- major update: integrate instance-configurability to allow various instances to run on the same deployment (e.g., the Census at School build)
+- Add additional advanced options to the 'Import Data' dialog (delimiter, decimal, etc.).
+- Integrates instance-configurability to allow various instances to run on the same deployment (e.g., the Census at School build). This will eventually replace the 'lite2' instance used by CaS.
+- Removes 'gpairs' dependency.
+- Temporary data files are now deleted after import, instead of remaining on the filesystem until the temporary directory is cleared.
+
+## Fixes
+
+- Fixes bug in Model Fitting module (panel had a duplicate ID, resulting in some weird behaviour).
+- Fixes bug where variables swap after saving residuals, and fitted line is removed.
+- Installs iNZightMultivariate package so the module can be used.
 
 ---
 
