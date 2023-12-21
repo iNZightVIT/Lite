@@ -1,4 +1,4 @@
-# Pre-release, 2023.11.9000
+# Pre-release, 2023.12
 
 - fix bug in Model Fitting module (panel had a duplicate ID, resulting in some weird behaviour)
 - remove gpairs dependency
