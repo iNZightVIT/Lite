@@ -577,7 +577,7 @@ shinyServer(function(input, output, session) {
       maps = tabPanel("Maps", uiOutput("newmaps.panel")),
       design_exp = tabPanel("Design of Experiments", uiOutput("mixedmodel.panel")),
       multiple = tabPanel("Multiple Response", uiOutput("multiple.response")),
-      # multivariate = tabPanel("Multivariate", uiOutput("multivariate.panel")),
+      multivariate = tabPanel("Multivariate", uiOutput("multivariate.panel")),
       vit = tabPanel("VIT", uiOutput("VIT.panel"))
     )
     
