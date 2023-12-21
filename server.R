@@ -73,10 +73,7 @@ shinyServer(function(input, output, session) {
     }
     cat("Version: ", session$userData$LITE_VERSION, "\n")
   })
-  
-  # observeEvent(session$userData$LITE_VERSION, {
-  #   print("hi")
-  # })
+
   # init_lite_logs()
   # updateQueryString(
   #   queryString = paste0("?v=lite&sessionId=", LITE_SESSION_ID_)
@@ -157,7 +154,7 @@ shinyServer(function(input, output, session) {
     if(!(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS")) {
       return(rvalues)
     }
-    
+
     if(new_sample) {
       rvalues$sample.num = ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
       rvalues$sample.row = sort(sample(1:nrow(d), rvalues$sample.num))
@@ -192,7 +189,7 @@ shinyServer(function(input, output, session) {
   get.data.set = reactive({
     values$data.set
   })
-  
+
   get.data.set.display = reactive({
     if(!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
       values$data.sample
@@ -200,7 +197,7 @@ shinyServer(function(input, output, session) {
       values$data.set
     }
   })
-  
+
   get.data.restore = reactive({
     values$data.restore
   })
@@ -439,7 +436,7 @@ shinyServer(function(input, output, session) {
     source("panels/F1_QuickExplore/1_quick.explore.ui.R", local = TRUE)
     source("panels/F1_QuickExplore/2_quick.explore.server.R", local = TRUE)
   }
-  
+
   ##----------------------##
   ##  Time Series Module  ##
   ##----------------------##
@@ -494,7 +491,7 @@ shinyServer(function(input, output, session) {
     source("panels/F7_Multivariate//1_Multivariate.panel-ui.R", local = TRUE)
     source("panels/F7_Multivariate//2_Multivariate.panel-server.R", local = TRUE)
   }
-  
+
   ##-------##
   ##  VIT  ##
   ##-------##
@@ -619,4 +616,5 @@ shinyServer(function(input, output, session) {
       }
     }
   })
+
 })
