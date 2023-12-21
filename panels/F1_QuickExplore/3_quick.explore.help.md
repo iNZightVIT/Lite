@@ -5,4 +5,3 @@ This module consists of five sub modules.
 - **All 1 variable plot** Scroll fast through all plots of single variables.
 - **All 2 variable plot** Scroll fast through all plots of two variables.
 - **Compare pairs** All pairs of variables are plotted in a matrix.
-
