@@ -589,7 +589,7 @@ shinyServer(function(input, output, session) {
        session$userData$LITE_VERSION == "CAS") {
       import_tabs = import_tabs[names(import_tabs) != "export"]
       manipulate_tabs = manipulate_tabs[names(manipulate_tabs) != "create"]
-      advance_tabs = advance_tabs[names(advance_tabs) %in% c("multiple", "multivariate")]
+      advance_tabs = advance_tabs[names(advance_tabs) == "multiple"]
       row_ops_tabs = NULL
     }
     
