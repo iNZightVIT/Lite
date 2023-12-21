@@ -26,6 +26,7 @@ Imports:
     GGally,
     iNZightMaps,
     iNZightMR,
+    iNZightMultivariate,
     iNZightPlots,
     iNZightRegression,
     iNZightTools,

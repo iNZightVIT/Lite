@@ -592,6 +592,10 @@ shinyServer(function(input, output, session) {
       advance_tabs = advance_tabs[names(advance_tabs) == "multiple"]
       row_ops_tabs = NULL
     }
+
+    if (!requireNamespace('iNZightMultivariate')) {
+      advance_tabs = advance_tabs[names(advance_tabs) != "multivariate"]
+    }
     
     import_tabs = do.call("navbarMenu", c("File", unname(import_tabs)))
     manipulate_tabs = do.call("navbarMenu", c("Manipulate variables", unname(manipulate_tabs)))

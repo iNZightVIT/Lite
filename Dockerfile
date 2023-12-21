@@ -22,6 +22,14 @@ RUN R -e "remotes::install_github(\
     repos = c('https://cloud.r-project.org'), \
     dependencies = TRUE \
   )"
+RUN R -e "install.packages(\
+  c('iNZightMultivariate'), \
+  repos = c( \
+    'https://r.docker.stat.auckland.ac.nz', \
+    'https://cloud.r-project.org'\
+  ), \
+  dependencies = TRUE \
+)"
 RUN rm .Renviron
 COPY . /srv/shiny-server
 RUN cp /srv/shiny-server/VARS.default /srv/shiny-server/VARS \
