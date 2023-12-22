@@ -1,6 +1,6 @@
-###-----------------------------------------------------###
+### -----------------------------------------------------###
 ###  User Interface for the "Multiple Response" Module  ###
-###-----------------------------------------------------###
+### -----------------------------------------------------###
 ###
 ###
 ###  The UI is divided into two parts:
@@ -12,46 +12,49 @@
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
-###----------------###
+### ----------------###
 ###  Sidebar Panel ###
-###----------------###
+### ----------------###
 
 
-MultipleResponse.sidebarPanel <- function(){
-  sidebarPanelUI = list(
+MultipleResponse.sidebarPanel <- function() {
+  sidebarPanelUI <- list(
     useShinyalert(),
     useShinyjs(),
     fluidRow(
-      column(12,
-             uiOutput("mr.var"),
-             uiOutput("mr.type"),
-             uiOutput("mr.sub1"),
-             uiOutput("mr.sub2"),
-             uiOutput("mr.box"))
+      column(
+        12,
+        uiOutput("mr.var"),
+        uiOutput("mr.type"),
+        uiOutput("mr.sub1"),
+        uiOutput("mr.sub2"),
+        uiOutput("mr.box")
+      )
     )
-  )## end of list
+  ) ## end of list
 }
 
 ### now, we set up the main panel
-MultipleResponse.mainPanel = function(){
-  mainPanelUI = list(
+MultipleResponse.mainPanel <- function() {
+  mainPanelUI <- list(
     uiOutput("mr.ui.main")
-  )## end of mainPanelUI
+  ) ## end of mainPanelUI
 }
 
-###------------------------###
+### ------------------------###
 ###  Multiple Response UI  ###
-###------------------------###
+### ------------------------###
 
 ###  We combine the 2 sidebarPanel() and 2 mainPanel() functions to
 ###  complete the UI for the Mixed Model module.
 
-MultipleResponse.panel.ui = function(data.set) {
-  fluidPage(  
+MultipleResponse.panel.ui <- function(data.set) {
+  fluidPage(
     if (is.null(data.set)) {
       fluidRow(
         includeMarkdown(
-          "panels/F6_MultipleResponse/4_MultipleResponse-panel-null.md")
+          "panels/F6_MultipleResponse/4_MultipleResponse-panel-null.md"
+        )
       )
     } else {
       fluidRow(
@@ -61,8 +64,3 @@ MultipleResponse.panel.ui = function(data.set) {
     }
   )
 }
-
-
-
-
-

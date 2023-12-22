@@ -2,7 +2,7 @@
 
 The Maps Module aims at making it easy to visualise geographical data on a map, and investigate patterns of variables. To use the Maps module in iNZight Lite, one must first select or upload a dataset.
 
-The module is divided up into two distinct vertical *panels*:
+The module is divided up into two distinct vertical _panels_:
 
 - Panel 1: User Input (Left)
 - Panel 2: Maps Plot (Right)
@@ -29,7 +29,7 @@ You can also view multiple subsets easily by selecting one or two sub-setting va
 - **Colour by:** points will be coloured by the chosen variable.
 - **Size by:** the area of each point will be proportional to the value of the chosen variable.
 - **Opacify by:** the opacity (how visible the points are) will be proportional to the value of the selected variable.
-- **Map type:** iNZight Lite Maps uses Google to provide the map, of which there are several type to choose from "roadmap ", "satellite ", "terrain " and "hybrid ". 
+- **Map type:** iNZight Lite Maps uses Google to provide the map, of which there are several type to choose from "roadmap ", "satellite ", "terrain " and "hybrid ".
 - **Colour:** the colour of points (only if **Colour by** is empty).
 - **Point size:** the overall size of points.
 - **Transparency:** the overall transparency of points, where 0 is fully visible, to 1 is fully invisible.
@@ -37,13 +37,11 @@ You can also view multiple subsets easily by selecting one or two sub-setting va
 
 **2. Regions Selected**
 
-- **Colour:** the colour used on the map. 
+- **Colour:** the colour used on the map.
 - **Missing value colour:** the colour used to shade regions with a missing value.
 - **Plot labels:** add labels to the plot. The options include Name, which adds the region names, Value, which adds the value of the chosen variable, and Both, which adds the Name and Value.
-
 
 <br>
 
 <h4> Panel 2: Maps Plot </h4>
 This panel displays the maps plot generated based on your selections in the input panel on the left hand side of the screen. If you chose to subset your variables by one or more variables, it will display one or more sliders that lets you adjust the subset levels.
-

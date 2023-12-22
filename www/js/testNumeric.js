@@ -4,8 +4,8 @@ function isNumber(n) {
 
 function testNumeric(column) {
   for (i = 0; i < column.length; i++) {
-    if(!isNumber(column[i])){
-       return false;
+    if (!isNumber(column[i])) {
+      return false;
     }
   }
   return true;

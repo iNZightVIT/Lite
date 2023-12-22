@@ -46,7 +46,7 @@ big_mark_choices <- list(
   "Period (.)" = "."
 )
 
-encoding_choices = c(
+encoding_choices <- c(
   "UTF-8" = "UTF-8",
   "ISO-8859-1" = "ISO-8859-1"
 )
@@ -78,28 +78,10 @@ reset_preview_data <- function() {
 }
 reset_preview_data()
 
-# output$preview_data <- renderDataTable({
-#   datatable(
-#     preview_data$preview_data,
-#     selection = "single",
-#     options = list(dom = "t")
-#   )
-# })
-
-# smart_delimiter = function(fpath) {
-#   ext = tolower(tools::file_ext(fpath[1]))
-#   switch(
-#     ext,
-#     "csv" = ",",
-#     "tsv" = "\t",
-#     # default txt file delim to tab
-#     "txt" = "\t",
-#     NULL
-#   )
-# }
-
 options(inzighttools.comment = "#")
-lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_mark = ",", encoding = "UTF-8", sheet = NULL) {
+lite_read <- function(
+    fpath, delimiter = NULL, ext = NULL,
+    dec_mark = ".", big_mark = ",", encoding = "UTF-8", sheet = NULL) {
   # ensure correct type
   delimiter <- unlist(delimiter)
   ext <- unlist(ext)
@@ -125,7 +107,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_m
     delimiter <- "auto"
     # delimiter = smart_delimiter(fpath)
   }
-  
+
   d <- tryCatch(
     if (any(grepl("pdf|docx?|odt|rtf", ext))) {
       readtext::readtext(fpath)
@@ -180,10 +162,11 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_m
     },
     error = identity
   )
-  
+
   preview_data$preview_data <- NULL
   if (is.data.frame(d)) {
-    if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+    if (!is.null(session$userData$LITE_VERSION) &&
+      session$userData$LITE_VERSION == "CAS") {
       # values$data.set = d
       # in preview lite2 should also show the sampled data only
       values$sample.num <- ifelse(nrow(d) > 2000, 500, round(nrow(d) / 4))
@@ -203,7 +186,7 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_m
       preview_data$preview_data <- as.data.frame(d[preview_rows, preview_cols])
       preview_data$ext <- ext
       preview_data$delimiter <- delimiter
-      
+
       # preview_data$state = 0,
       if (is.null(preview_data$current_dname)) {
         preview_data$available_dnames <- values$data.available.dnames
@@ -213,7 +196,8 @@ lite_read <- function(fpath, delimiter = NULL, ext = NULL, dec_mark = ".", big_m
       row.names(preview_data$preview_data) <- 1:nrow(preview_data$preview_data)
     })
   } else if (grepl("mark", d$message) && grepl("different", d$message)) {
-    preview_data$failed_reason <- "Failed to load data: decimal and thousands seperator must be different"
+    preview_data$failed_reason <-
+      "Failed to load data: decimal and thousands seperator must be different"
   }
   preview_data$dec_mark <- dec_mark
   preview_data$big_mark <- big_mark
@@ -225,22 +209,25 @@ show_preview_modal <- function() {
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
   delimiter <- preview_data$delimiter
-  
+
   imported_preview_data <- preview_data$preview_data
-  
-  h3_title <- ifelse(is.null(imported_preview_data), preview_data$failed_reason, "Preview")
+
+  h3_title <- ifelse(is.null(imported_preview_data),
+    preview_data$failed_reason, "Preview"
+  )
   if (is.null(imported_preview_data)) {
     table_output <- NULL
   } else {
     table_output <- DT::dataTableOutput("preview_data")
   }
-  # table_output = ifelse(is.null(imported_preview_data), NULL, DT::dataTableOutput("preview_data"))
   if (is.null(delimiter) || delimiter == "auto") {
     delim_selected <- "Detected automatically"
   } else {
     delim_selected <- names(delimiter)
   }
-  ext_selected <- ifelse(is.null(ext), "", names(which(unlist(ext_choices) == ext)))
+  ext_selected <- ifelse(is.null(ext), "",
+    names(which(unlist(ext_choices) == ext))
+  )
   select_inputs <- list(
     column(
       width = 6,
@@ -288,7 +275,8 @@ show_preview_modal <- function() {
       )
     )
   )
-  if (!is.null(delimiter) && !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
+  if (!is.null(delimiter) &&
+    !(delimiter %in% c("txt", "tsv", "csv", "json"))) {
     if (is_excel | is_rda) {
       select_inputs2 <- list(
         column(
@@ -348,10 +336,10 @@ observeEvent(c(
 ), {
   # check if file type is excel
   ext <- tolower(ext_choices[input$preview.filetype])
-  
+
   is_excel <- ext %in% c("xls", "xlsx")
   is_rda <- ext %in% c("rdta", "rda", "rdata")
-  
+
   # if first import failed, manually set the state
   if (is.null(preview_data$state)) {
     preview_data$state <- 1
@@ -366,9 +354,12 @@ observeEvent(c(
       options(inzighttools.comment = input$preview.comment)
     }
 
-    preview_data$dec_mark = dec_mark_choices[names(dec_mark_choices) == input$preview.decmark][1]
-    preview_data$big_mark <- big_mark_choices[names(big_mark_choices) == input$preview.bigmark][1]
-    preview_data$encoding <- encoding_choices[names(encoding_choices) == input$preview.encoding][1]
+    preview_data$dec_mark <-
+      dec_mark_choices[names(dec_mark_choices) == input$preview.decmark][1]
+    preview_data$big_mark <-
+      big_mark_choices[names(big_mark_choices) == input$preview.bigmark][1]
+    preview_data$encoding <-
+      encoding_choices[names(encoding_choices) == input$preview.encoding][1]
 
     delimiter <- NULL
     if (is_excel | is_rda) {
@@ -376,10 +367,12 @@ observeEvent(c(
       preview_data$current_dname <- sheet_name
     } else {
       delimiter <- input$preview.delim
-      if (!is.null(input$preview.delim) && input$preview.delim == "Detected automatically") {
+      if (!is.null(input$preview.delim) &&
+        input$preview.delim == "Detected automatically") {
         delimiter <- preview_data$delimiter
       } else {
-        delimiter <- delim_choices[names(delim_choices) == input$preview.delim][1]
+        delimiter <-
+          delim_choices[names(delim_choices) == input$preview.delim][1]
       }
     }
 
@@ -417,7 +410,8 @@ observeEvent(input$cancel_import, {
 # when user confirms the data in preview
 observeEvent(input$confirm_import, {
   if (!is.null(preview_data$data)) {
-    if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+    if (!is.null(session$userData$LITE_VERSION) &&
+      session$userData$LITE_VERSION == "CAS") {
       values$data.set <- preview_data$data
       values$data.sample <- preview_data$preview_data
     } else {
@@ -444,11 +438,22 @@ observeEvent(input$confirm_import, {
         sprintf("## Exploring the '%s' dataset", code.save$name),
         "\n"
       ))))
-      code <- c(paste0(code.save$name, " <- "), gsub(paste0("\".*(?=.", preview_data$ext, ")"), paste0("\"", values$data.name), iNZightTools::code(preview_data$data), perl = T))
+      code <- c(
+        paste0(code.save$name, " <- "),
+        gsub(
+          paste0("\".*(?=.", preview_data$ext, ")"),
+          paste0("\"", values$data.name),
+          iNZightTools::code(preview_data$data),
+          perl = T
+        )
+      )
       code <- do.call(c, lapply(code, function(x) {
         y <- try(
           {
-            formatR::tidy_source(text = x, width.cutoff = 80, output = F, indent = 4)$text.tidy
+            formatR::tidy_source(
+              text = x, width.cutoff = 80,
+              output = F, indent = 4
+            )$text.tidy
           },
           silent = TRUE
         )
