@@ -1105,7 +1105,7 @@ help.display <- function(title, id, file) {
              <h4 class='modal-title' id='myModalLabel'>", title, "</h4>
              </div>
              <div class='modal-body'>",
-    mark_html(file = file),
+    mark_html(file = file, output = NULL, template = FALSE),
     "</div>
              <div class='modal-footer'>
              </div>

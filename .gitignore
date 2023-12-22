@@ -3,10 +3,13 @@ data/Surveys/*.svydesign
 rsconnect
 .vscode
 
+panels/**/*.html
+
 # renv files
 .Rprofile
 renv.lock
 renv/
+.Rapp.history
 
 # misc files
 NEWS.html
