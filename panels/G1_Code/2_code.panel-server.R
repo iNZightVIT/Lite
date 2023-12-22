@@ -11,8 +11,8 @@ output$code.panel <- renderUI({
 output$r.show.code <- renderUI({
   tags$div(
     style = "min-width: 80%;
-                  white-space: nowrap;
-                  display: inline-block;",
+             white-space: nowrap;
+             display: inline-block;",
     verbatimTextOutput("r.code.history")
   )
 })
@@ -39,14 +39,20 @@ packages.call <- reactive({
   package.load <- c("iNZightPlots", "magrittr")
   if (any(grepl("::", code.list()))) {
     m <- regexpr("[a-zA-Z0-9]+::", code.list()[grepl("::", code.list())])
-    pkg <- substr(code.list()[grepl("::", code.list())], m, m + attr(m, "match.length") - 3)
+    pkg <- substr(
+      code.list()[grepl("::", code.list())], m,
+      m + attr(m, "match.length") - 3
+    )
     for (i in 1:length(pkg)) {
       if (!pkg[i] %in% package.load) package.load <- c(package.load, pkg[i])
     }
   }
   if (any(grepl("library\\([a-zA-Z0-9]+\\)", code.list()))) {
     m <- regexpr("library\\([a-zA-Z0-9]+\\)", code.list())
-    pkg <- gsub(".*library\\(|\\).*", "", substr(code.list(), m, m + attr(m, "match.length")))
+    pkg <- gsub(
+      ".*library\\(|\\).*", "",
+      substr(code.list(), m, m + attr(m, "match.length"))
+    )
     for (i in 1:length(pkg)) {
       if (!pkg[i] %in% package.load) package.load <- c(package.load, pkg[i])
     }
@@ -69,7 +75,10 @@ output$r.code.history <- renderText({
     "## This script assumes you have various iNZight packages installed.\n",
     "## Uncomment the following lines if you don't:\n",
     "\n",
-    paste0(sprintf("# install.packages(c('%s'), ", paste(packages.call(), collapse = "',\n#                    '")), "\n"),
+    paste0(sprintf(
+      "# install.packages(c('%s'), ",
+      paste(packages.call(), collapse = "',\n#                    '")
+    ), "\n"),
     "#     repos = c('https://r.docker.stat.auckland.ac.nz',\n",
     "#               'https://cran.rstudio.com'))\n",
     "\n",
@@ -86,14 +95,6 @@ output$r.code.history <- renderText({
 })
 ## initialize
 keep.last <- reactive(TRUE)
-
-
-## add packages
-# code <- gsub("\ +", " ", # one or more spaces with just one space!
-#             paste(gsub(".dataset", code.save$name, code, fixed = TRUE), collapse = ""))
-# code <- gsub(" %>% ", " %>% \n    ", code)
-# asgnpipe <- paste(code.save$name, "%<>% ")
-# gsub(paste0(code.save$name, " %>% \n    "), asgnpipe, code)
 
 tidy_assign_pipe <- function(code) {
   code <- gsub(

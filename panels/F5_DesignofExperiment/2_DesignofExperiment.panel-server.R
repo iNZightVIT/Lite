@@ -281,7 +281,9 @@ observe({
       if (!is.null(sel) && !sel %in% ch) {
         sel <- ch[1]
       }
-      updateSelectInput(session, "mm_own_model_fixed", choices = ch, selected = sel)
+      updateSelectInput(session, "mm_own_model_fixed",
+        choices = ch, selected = sel
+      )
     })
   }
 })
@@ -344,30 +346,41 @@ observeEvent(input$fit_model_aov, {
     temp$data <- mix.data()
     ## generate model name
     model_Vals$num <- model_Vals$num + 1
-    if (req(input$fit_design) == 1 && req(input$model_design) == 1 && req(input$mm_vari1) != " " &&
+    if (req(input$fit_design) == 1 &&
+      req(input$model_design) == 1 && req(input$mm_vari1) != " " &&
       req(input$mm_vari2) != " ") {
       temp$y <- input$mm_vari1
       temp$x <- input$mm_vari2
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 2 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+    } else if (req(input$fit_design) == 1 &&
+      req(input$model_design) == 2 && req(input$mm_vari1) != " " &&
+      req(input$mm_vari2) != " " &&
       req(input$mm_vari5) != " ") {
       temp$y <- input$mm_vari1
       temp$x <- input$mm_vari2
       temp$blocking <- input$mm_vari5
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 3 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+    } else if (req(input$fit_design) == 1 &&
+      req(input$model_design) == 3 && req(input$mm_vari1) != " " &&
+      req(input$mm_vari2) != " " &&
       req(input$mm_vari3) != " ") {
       temp$y <- input$mm_vari1
       temp$x <- c(input$mm_vari2, input$mm_vari3)
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 4 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+    } else if (req(input$fit_design) == 1 &&
+      req(input$model_design) == 4 && req(input$mm_vari1) != " " &&
+      req(input$mm_vari2) != " " &&
       req(input$mm_vari3) != " " && req(input$mm_vari5) != " ") {
       temp$y <- input$mm_vari1
       temp$x <- c(input$mm_vari2, input$mm_vari3)
       temp$blocking <- input$mm_vari5
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 5 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+    } else if (req(input$fit_design) == 1 &&
+      req(input$model_design) == 5 && req(input$mm_vari1) != " " &&
+      req(input$mm_vari2) != " " &&
       req(input$mm_vari3) != " " && req(input$mm_vari4) != " ") {
       temp$y <- input$mm_vari1
       temp$x <- c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
-    } else if (req(input$fit_design) == 1 && req(input$model_design) == 6 && req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
-      req(input$mm_vari3) != " " && req(input$mm_vari4) != " " && req(input$mm_vari5) != " ") {
+    } else if (req(input$fit_design) == 1 && req(input$model_design) == 6 &&
+      req(input$mm_vari1) != " " && req(input$mm_vari2) != " " &&
+      req(input$mm_vari3) != " " && req(input$mm_vari4) != " " &&
+      req(input$mm_vari5) != " ") {
       temp$y <- input$mm_vari1
       temp$x <- c(input$mm_vari2, input$mm_vari3, input$mm_vari4)
       temp$blocking <- input$mm_vari5
@@ -515,8 +528,11 @@ observe({
 
 
       ## treatment means
-      if (model_Vals$trt[[input$model_select]] == "No blocking or complete blocks") {
-        trt.table <- try(model.tables(model_Vals$aov[[input$model_select]], "means"))
+      if (model_Vals$trt[[input$model_select]] ==
+        "No blocking or complete blocks") {
+        trt.table <- try(model.tables(
+          model_Vals$aov[[input$model_select]], "means"
+        ))
         if (!is.null(trt.table)) {
           if (class(trt.table)[1] == "try-error") {
             output$aov.trtmean <- renderPrint(cat(trt.table[1]))
@@ -524,8 +540,12 @@ observe({
             output$aov.trtmean <- renderPrint(trt.table)
           }
         }
-      } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks") {
-        trt.table <- try(dummy.coef(model_Vals$aov[[input$model_select]])$"(Intercept)"[[1]] + dummy.coef(model_Vals$aov[[input$model_select]])$Within[[1]])
+      } else if (model_Vals$trt[[input$model_select]] ==
+        "balanced incomplete blocks") {
+        trt.table <- try(
+          dummy.coef(model_Vals$aov[[input$model_select]])$"(Intercept)"[[1]] +
+            dummy.coef(model_Vals$aov[[input$model_select]])$Within[[1]]
+        )
         if (!is.null(trt.table)) {
           if (class(trt.table)[1] == "try-error") {
             output$aov.trtmean <- renderPrint(cat(trt.table[1]))
@@ -549,7 +569,8 @@ output$Doe.smy <- renderUI({
   if (length(model_Vals$aov) > 0 &&
     (!is.null(model_Vals$aov[[input$model_select]]) &&
       !is.null(input$model_select))) {
-    if (model_Vals$trt[[input$model_select]] == "No blocking or complete blocks") {
+    if (model_Vals$trt[[input$model_select]] ==
+      "No blocking or complete blocks") {
       list(
         helpText("Computing LSD"),
         fixedRow(
@@ -579,7 +600,8 @@ output$Doe.smy <- renderUI({
         ),
         uiOutput("Doe.tsr.res")
       )
-    } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks") {
+    } else if (model_Vals$trt[[input$model_select]] ==
+      "balanced incomplete blocks") {
       list(
         helpText("Computing LSD"),
         fixedRow(
@@ -618,16 +640,23 @@ output$Doe.smy <- renderUI({
 
 observeEvent(input$Doe.comp.lsd, {
   isolate({
-    if (!stringr::str_detect(input$Doe.lsd.df, "[^.\\d]") && !is.null(input$Doe.lsd.df) && input$Doe.lsd.df != "" &&
-      !stringr::str_detect(input$Doe.lsd.rms, "[^.\\d]") && !is.null(input$Doe.lsd.rms) && input$Doe.lsd.rms != "" &&
-      !stringr::str_detect(input$Doe.lsd.rp, "[^.\\d]") && !is.null(input$Doe.lsd.rp) && input$Doe.lsd.rp != "" &&
-      !stringr::str_detect(input$Doe.lsd.sig, "[^.\\d]") && !is.null(input$Doe.lsd.sig) && input$Doe.lsd.sig != "") {
-      if (model_Vals$trt[[input$model_select]] == "No blocking or complete blocks") {
+    if (!stringr::str_detect(input$Doe.lsd.df, "[^.\\d]") &&
+      !is.null(input$Doe.lsd.df) && input$Doe.lsd.df != "" &&
+      !stringr::str_detect(input$Doe.lsd.rms, "[^.\\d]") &&
+      !is.null(input$Doe.lsd.rms) && input$Doe.lsd.rms != "" &&
+      !stringr::str_detect(input$Doe.lsd.rp, "[^.\\d]") &&
+      !is.null(input$Doe.lsd.rp) && input$Doe.lsd.rp != "" &&
+      !stringr::str_detect(input$Doe.lsd.sig, "[^.\\d]") &&
+      !is.null(input$Doe.lsd.sig) && input$Doe.lsd.sig != "") {
+      if (model_Vals$trt[[input$model_select]] ==
+        "No blocking or complete blocks") {
         output$Doe.lsd.res <- renderUI({
           verbatimTextOutput("Doe.lsd.result")
         })
-      } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks" &&
-        !stringr::str_detect(input$Doe.lsd.eff, "[^.\\d]") && !is.null(input$Doe.lsd.eff) && input$Doe.lsd.eff != "") {
+      } else if (model_Vals$trt[[input$model_select]] ==
+        "balanced incomplete blocks" &&
+        !stringr::str_detect(input$Doe.lsd.eff, "[^.\\d]") &&
+        !is.null(input$Doe.lsd.eff) && input$Doe.lsd.eff != "") {
         output$Doe.lsd.res <- renderUI({
           verbatimTextOutput("Doe.lsd.result")
         })
@@ -635,13 +664,19 @@ observeEvent(input$Doe.comp.lsd, {
         output$Doe.lsd.res <- renderUI({
           list(NULL)
         })
-        shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+        shinyalert(
+          title = "ERROR",
+          text = "The computation cannot be processed", type = "error"
+        )
       }
     } else {
       output$Doe.lsd.res <- renderUI({
         list(NULL)
       })
-      shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+      shinyalert(
+        title = "ERROR",
+        text = "The computation cannot be processed", type = "error"
+      )
     }
   })
 })
@@ -650,10 +685,19 @@ observeEvent(input$Doe.comp.lsd, {
 output$Doe.lsd.result <- renderPrint({
   input$Doe.comp.lsd
   isolate({
-    if (model_Vals$trt[[input$model_select]] == "No blocking or complete blocks") {
-      qt(1 - as.numeric(input$Doe.lsd.sig) / 2, as.numeric(input$Doe.lsd.df)) * sqrt(2 * as.numeric(input$Doe.lsd.rms) / (as.numeric(input$Doe.lsd.rp)))
+    if (model_Vals$trt[[input$model_select]] ==
+      "No blocking or complete blocks") {
+      qt(
+        1 - as.numeric(input$Doe.lsd.sig) / 2,
+        as.numeric(input$Doe.lsd.df)
+      ) *
+        sqrt(2 * as.numeric(input$Doe.lsd.rms) / (as.numeric(input$Doe.lsd.rp)))
     } else {
-      qt(1 - as.numeric(input$Doe.lsd.sig) / 2, as.numeric(input$Doe.lsd.df)) * sqrt(2 * as.numeric(input$Doe.lsd.rms) / (as.numeric(input$Doe.lsd.rp) * as.numeric(input$Doe.lsd.eff)))
+      qt(
+        1 - as.numeric(input$Doe.lsd.sig) / 2,
+        as.numeric(input$Doe.lsd.df)
+      ) * sqrt(2 * as.numeric(input$Doe.lsd.rms) /
+        (as.numeric(input$Doe.lsd.rp) * as.numeric(input$Doe.lsd.eff)))
     }
   })
 })
@@ -665,17 +709,25 @@ output$Doe.lsd.result <- renderPrint({
 
 observeEvent(input$Doe.comp.tsr, {
   isolate({
-    if (!stringr::str_detect(input$Doe.tsr.df, "[^.\\d]") && !is.null(input$Doe.tsr.df) && input$Doe.tsr.df != "" &&
-      !stringr::str_detect(input$Doe.tsr.rms, "[^.\\d]") && !is.null(input$Doe.tsr.rms) && input$Doe.tsr.rms != "" &&
-      !stringr::str_detect(input$Doe.tsr.rp, "[^.\\d]") && !is.null(input$Doe.tsr.rp) && input$Doe.tsr.rp != "" &&
-      !stringr::str_detect(input$Doe.tsr.lev, "[^.\\d]") && !is.null(input$Doe.tsr.lev) && input$Doe.tsr.lev != "" &&
-      !stringr::str_detect(input$Doe.tsr.sig, "[^.\\d]") && !is.null(input$Doe.tsr.sig) && input$Doe.tsr.sig != "") {
-      if (model_Vals$trt[[input$model_select]] == "No blocking or complete blocks") {
+    if (!stringr::str_detect(input$Doe.tsr.df, "[^.\\d]") &&
+      !is.null(input$Doe.tsr.df) && input$Doe.tsr.df != "" &&
+      !stringr::str_detect(input$Doe.tsr.rms, "[^.\\d]") &&
+      !is.null(input$Doe.tsr.rms) && input$Doe.tsr.rms != "" &&
+      !stringr::str_detect(input$Doe.tsr.rp, "[^.\\d]") &&
+      !is.null(input$Doe.tsr.rp) && input$Doe.tsr.rp != "" &&
+      !stringr::str_detect(input$Doe.tsr.lev, "[^.\\d]") &&
+      !is.null(input$Doe.tsr.lev) && input$Doe.tsr.lev != "" &&
+      !stringr::str_detect(input$Doe.tsr.sig, "[^.\\d]") &&
+      !is.null(input$Doe.tsr.sig) && input$Doe.tsr.sig != "") {
+      if (model_Vals$trt[[input$model_select]] ==
+        "No blocking or complete blocks") {
         output$Doe.tsr.res <- renderUI({
           verbatimTextOutput("Doe.tsr.result")
         })
-      } else if (model_Vals$trt[[input$model_select]] == "balanced incomplete blocks" &&
-        !stringr::str_detect(input$Doe.tsr.eff, "[^.\\d]") && !is.null(input$Doe.tsr.eff) && input$Doe.tsr.eff != "") {
+      } else if (model_Vals$trt[[input$model_select]] ==
+        "balanced incomplete blocks" &&
+        !stringr::str_detect(input$Doe.tsr.eff, "[^.\\d]") &&
+        !is.null(input$Doe.tsr.eff) && input$Doe.tsr.eff != "") {
         output$Doe.tsr.res <- renderUI({
           verbatimTextOutput("Doe.tsr.result")
         })
@@ -683,13 +735,19 @@ observeEvent(input$Doe.comp.tsr, {
         output$Doe.tsr.res <- renderUI({
           list(NULL)
         })
-        shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+        shinyalert(
+          title = "ERROR",
+          text = "The computation cannot be processed", type = "error"
+        )
       }
     } else {
       output$Doe.tsr.res <- renderUI({
         list(NULL)
       })
-      shinyalert(title = "ERROR", text = "The computation cannot be processed", type = "error")
+      shinyalert(
+        title = "ERROR",
+        text = "The computation cannot be processed", type = "error"
+      )
     }
   })
 })
@@ -698,10 +756,20 @@ observeEvent(input$Doe.comp.tsr, {
 output$Doe.tsr.result <- renderPrint({
   input$Doe.comp.tsr
   isolate({
-    if (model_Vals$trt[[input$model_select]] == "No blocking or complete blocks") {
-      qtukey(1 - as.numeric(input$Doe.tsr.sig), as.numeric(input$Doe.tsr.lev), as.numeric(input$Doe.tsr.df)) * sqrt(as.numeric(input$Doe.tsr.rms) / (as.numeric(input$Doe.tsr.rp)))
+    if (model_Vals$trt[[input$model_select]] ==
+      "No blocking or complete blocks") {
+      qtukey(
+        1 - as.numeric(input$Doe.tsr.sig),
+        as.numeric(input$Doe.tsr.lev),
+        as.numeric(input$Doe.tsr.df)
+      ) * sqrt(as.numeric(input$Doe.tsr.rms) / (as.numeric(input$Doe.tsr.rp)))
     } else {
-      qtukey(1 - as.numeric(input$Doe.tsr.sig), as.numeric(input$Doe.tsr.lev), as.numeric(input$Doe.tsr.df)) * sqrt(as.numeric(input$Doe.tsr.rms) / (as.numeric(input$Doe.tsr.rp) * as.numeric(input$Doe.tsr.eff)))
+      qtukey(
+        1 - as.numeric(input$Doe.tsr.sig),
+        as.numeric(input$Doe.tsr.lev),
+        as.numeric(input$Doe.tsr.df)
+      ) * sqrt(as.numeric(input$Doe.tsr.rms) / (as.numeric(input$Doe.tsr.rp) *
+        as.numeric(input$Doe.tsr.eff)))
     }
   })
 })
@@ -764,11 +832,14 @@ output$Doe.interaction.plot <- renderPlot({
   input$Doe.int_vari2
   input$Doe.int_vari3
   isolate({
-    if (req(input$Doe.int_vari1 != " ") && req(input$Doe.int_vari2 != " ") && req(input$Doe.int_vari3 != " ")) {
+    if (req(input$Doe.int_vari1 != " ") && req(input$Doe.int_vari2 != " ") &&
+      req(input$Doe.int_vari3 != " ")) {
       data <- get.data.set()
-      interaction.plot(data[[input$Doe.int_vari2]], data[[input$Doe.int_vari3]], data[[input$Doe.int_vari1]],
+      interaction.plot(data[[input$Doe.int_vari2]],
+        data[[input$Doe.int_vari3]], data[[input$Doe.int_vari1]],
         xlab = input$Doe.int_vari2,
-        ylab = paste0("mean of ", input$Doe.int_vari1), trace.label = input$Doe.int_vari3
+        ylab = paste0("mean of ", input$Doe.int_vari1),
+        trace.label = input$Doe.int_vari3
       )
     }
   })
@@ -780,7 +851,9 @@ output$Doe.interaction.plot.save <- renderUI({
   input$Doe.int_vari2
   input$Doe.int_vari3
   isolate({
-    if (req(input$Doe.int_vari1 != " ") && req(input$Doe.int_vari2 != " ") && req(input$Doe.int_vari3 != " ")) {
+    if (req(input$Doe.int_vari1 != " ") &&
+      req(input$Doe.int_vari2 != " ") &&
+      req(input$Doe.int_vari3 != " ")) {
       fixedRow(
         column(
           width = 3,
@@ -828,15 +901,13 @@ output$saveDoe.int.plot <- downloadHandler(
       suppressWarnings(tryCatch(
         {
           data <- get.data.set()
-          interaction.plot(data[[input$Doe.int_vari2]], data[[input$Doe.int_vari3]], data[[input$Doe.int_vari1]],
+          interaction.plot(data[[input$Doe.int_vari2]],
+            data[[input$Doe.int_vari3]], data[[input$Doe.int_vari1]],
             xlab = input$Doe.int_vari2,
-            ylab = paste0("mean of ", input$Doe.int_vari1), trace.label = input$Doe.int_vari3
+            ylab = paste0("mean of ", input$Doe.int_vari1),
+            trace.label = input$Doe.int_vari3
           )
         },
-        #        warning = function(w) {
-        #          cat("Warning produced in timseries plot\n")
-        #          print(w)
-        #        },
         error = function(e) {
           print(e)
         }, finally = {}

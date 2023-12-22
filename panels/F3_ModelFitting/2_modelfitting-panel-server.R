@@ -117,11 +117,7 @@ output$model_fit <- renderUI({
     if (!is.null(input$select_Y)) {
       updatePanel$first <- F
     }
-    # if(!is.null(sel)&&
-    #   !sel%in%""&&
-    #   sel%in%colnames(get.data.set())){
-    #  is.numeric.column = toJSON(get.data.set()[,sel])
-    # }
+
     list(
       br(),
       fixedRow(
@@ -148,7 +144,7 @@ output$model_fit <- renderUI({
         ))),
         conditionalPanel(
           "input.model_framework=='Logistic Regression (Y binary)'||
-                                           input.model_framework=='Poisson Regression (Y counts)'",
+           input.model_framework=='Poisson Regression (Y counts)'",
           h4("Extra Arguments"),
           fixedRow(
             column(6, selectInput("quasi",
@@ -175,20 +171,26 @@ output$model_fit <- renderUI({
         fixedRow(
           column(6, selectInput("independent_variables",
             label = "Variables of interest",
-            choices = colnames(get.data.set())[-which(colnames(get.data.set()) %in% sel)],
+            choices = colnames(get.data.set())[
+              -which(colnames(get.data.set()) %in% sel)
+            ],
             selected = predict.sel,
             selectize = T,
             multiple = T
           )),
           column(6, selectInput("confounding_variables",
             label = "Confounder Variables",
-            choices = colnames(get.data.set())[-which(colnames(get.data.set()) %in% sel)],
+            choices = colnames(get.data.set())[
+              -which(colnames(get.data.set()) %in% sel)
+            ],
             selected = confound.sel,
             selectize = T,
             multiple = T
           ))
         ),
-        checkboxInput("modelfit_inc_int", label = "Include intercept", value = T)
+        checkboxInput("modelfit_inc_int",
+          label = "Include intercept", value = T
+        )
       ),
       fixedRow(
         column(11, h4("Add Interactions")),
@@ -291,7 +293,7 @@ output$model_fit <- renderUI({
             2,
             conditionalPanel(
               "input.transform_select=='by degree'||
-                                                           input.transform_select=='polynomial of degree'",
+               input.transform_select=='polynomial of degree'",
               textInput("arg3",
                 label = "degree",
                 value = input$arg3
@@ -334,7 +336,7 @@ output$model_fit <- renderUI({
       conditionalPanel(
         "input.toggle_check5",
         helpText("The code used for the next model fit. Note,
-                                   this code might not be executable."),
+                  this code might not be executable."),
         verbatimTextOutput("current.code")
       ),
       br(),
@@ -361,7 +363,9 @@ output$mf.trans.y <- renderUI({
                 "sqrt",
                 "^argument"
               ),
-              selected = ifelse(is.null(input$transform_Y), "None", input$transform_Y)
+              selected = ifelse(is.null(input$transform_Y),
+                "None", input$transform_Y
+              )
             )
           ),
           column(6, conditionalPanel(
@@ -420,8 +424,11 @@ observe({
           }, input$interaction.vars.select)))
         }
         if (!dup) {
-          interaction.string <- paste(input$interaction.vars.select, collapse = ":")
-          modelValues$interaction.log[[interaction.string]] <- input$interaction.vars.select
+          interaction.string <- paste(input$interaction.vars.select,
+            collapse = ":"
+          )
+          modelValues$interaction.log[[interaction.string]] <-
+            input$interaction.vars.select
           updateSelectInput(session, "interaction_remove",
             choices = c("none", names(modelValues$interaction.log))
           )
@@ -461,14 +468,17 @@ observe({
         )
         if (!transformation.string %in% "" &&
           !transformation.string %in% names(modelValues$transformation.log)) {
-          modelValues$transformation.log[transformation.string] <- input$transform_variable_select
+          modelValues$transformation.log[transformation.string] <-
+            input$transform_variable_select
           updateSelectInput(session, "transformation_remove",
             choices = c("none", names(modelValues$transformation.log)),
             selected = "none"
           )
           ch <- c(input$independent_variables, input$confounding_variables)
           ch[which(ch %in% modelValues$transformation.log)] <-
-            names(modelValues$transformation.log)[which(modelValues$transformation.log %in% ch)]
+            names(modelValues$transformation.log)[
+              which(modelValues$transformation.log %in% ch)
+            ]
           updateSelectInput(session, "interaction.vars.select",
             choices = ch
           )
@@ -495,17 +505,30 @@ observe({
     if ((!is.null(input$independent_variables) ||
       !is.null(input$confounding_variables)) &&
       !is.null(modelValues$transformation.log)) {
-      if (length(which(!modelValues$transformation.log %in% input$independent_variables ||
-        !modelValues$transformation.log %in% input$confounding_variables)) > 0) {
-        modelValues$transformation.log <- modelValues$transformation.log[-which(!modelValues$transformation.log %in% input$independent_variables ||
-          !modelValues$transformation.log %in% input$confounding_variables)]
+      if (length(
+        which(
+          !modelValues$transformation.log %in% input$independent_variables ||
+            !modelValues$transformation.log %in% input$confounding_variables
+        )
+      ) > 0) {
+        modelValues$transformation.log <-
+          modelValues$transformation.log[
+            -which(
+              !modelValues$transformation.log %in%
+                input$independent_variables ||
+                !modelValues$transformation.log %in%
+                  input$confounding_variables
+            )
+          ]
         updateSelectInput(session, "transformation_remove",
           choices = c("none", names(modelValues$transformation.log)),
           selected = "none"
         )
         ch <- c(input$independent_variables, input$confounding_variables)
         ch[which(ch %in% modelValues$transformation.log)] <-
-          names(modelValues$transformation.log)[which(modelValues$transformation.log %in% ch)]
+          names(modelValues$transformation.log)[
+            which(modelValues$transformation.log %in% ch)
+          ]
         updateSelectInput(session, "interaction.vars.select",
           choices = ch
         )
@@ -522,7 +545,10 @@ observe({
       !is.null(names(modelValues$transformation.log)) &&
       input$transformation_remove %in% names(modelValues$transformation.log)) {
       temp <- modelValues$transformation.log
-      temp <- temp[-which(names(modelValues$transformation.log) %in% input$transformation_remove)]
+      temp <- temp[
+        -which(names(modelValues$transformation.log) %in%
+          input$transformation_remove)
+      ]
       modelValues$transformation.log <- temp
       updateSelectInput(session, "transformation_remove",
         choices = c("none", names(modelValues$transformation.log)),
@@ -530,7 +556,9 @@ observe({
       )
       ch <- c(input$independent_variables, input$confounding_variables)
       ch[which(ch %in% modelValues$transformation.log)] <-
-        names(modelValues$transformation.log)[which(modelValues$transformation.log %in% ch)]
+        names(modelValues$transformation.log)[
+          which(modelValues$transformation.log %in% ch)
+        ]
       updateSelectInput(session, "interaction.vars.select",
         choices = ch
       )
@@ -562,7 +590,8 @@ observe({
 observe({
   input$arg2
   isolate({
-    if (!is.null(input$arg2) && suppressWarnings(is.na(as.numeric(input$arg2)))) {
+    if (!is.null(input$arg2) &&
+      suppressWarnings(is.na(as.numeric(input$arg2)))) {
       updateTextInput(session, "arg2",
         value = ""
       )
@@ -694,17 +723,6 @@ observe({
           }
         }
 
-        # if(length(input$confounding_variables)>0){
-        #  formu = paste(input$select_Y," ~ ",
-        #                paste(input$independent_variables
-        #                      ,collapse=col),col,
-        #                paste(input$confounding_variables,
-        #                      collapse=col),sep="")
-        # }else{
-        #  formu = paste(input$select_Y," ~ ",
-        #                paste(input$independent_variables
-        #                      ,collapse=col),sep="")
-        # }
         if (int.deg) {
           formu <- strsplit(formu, " ~ ")[[1]]
           formu[2] <- paste0("(", formu[2], ")^", input$arg2)
@@ -734,12 +752,21 @@ observe({
                 x[which(x %in% y)] <- names(y)[which(y %in% x)]
               }, modelValues$transformation.log
             )
-            names(new.interaction.log) <- unlist(lapply(new.interaction.log, function(x) {
-              paste(x, collapse = ":")
-            }))
-            formu <- paste(formu, paste(names(new.interaction.log), collapse = " + "), sep = " + ")
+            names(new.interaction.log) <- unlist(
+              lapply(
+                new.interaction.log,
+                function(x) {
+                  paste(x, collapse = ":")
+                }
+              )
+            )
+            formu <- paste(formu, paste(names(new.interaction.log),
+              collapse = " + "
+            ), sep = " + ")
           } else {
-            formu <- paste(formu, paste(names(modelValues$interaction.log), collapse = " + "), sep = " + ")
+            formu <- paste(formu, paste(names(modelValues$interaction.log),
+              collapse = " + "
+            ), sep = " + ")
           }
         }
         if (input$modelfit_inc_int != T) {
@@ -762,7 +789,9 @@ observe({
             } else {
               family0 <- "poisson"
             }
-          } else if (input$model_framework %in% "Logistic Regression (Y binary)") {
+          } else if (
+            input$model_framework %in% "Logistic Regression (Y binary)"
+          ) {
             if (input$quasi) {
               family0 <- "quasibinomial"
             } else {
@@ -773,10 +802,14 @@ observe({
             temp.model <- svyglm(formula(formu), design = design0)
             temp.code <- paste0(
               design.text, "\n", model.name,
-              " = svyglm(", formu, ", design = ", design_params$design$dataDesignName, ")"
+              " = svyglm(", formu, ", design = ",
+              design_params$design$dataDesignName, ")"
             )
           } else {
-            temp.model <- svyglm(formula(formu), design = design0, family = family0, offset = offset0)
+            temp.model <- svyglm(formula(formu),
+              design = design0,
+              family = family0, offset = offset0
+            )
             temp.code <- paste0(
               design.text, "\n", model.name,
               " = svyglm(", formu
@@ -785,46 +818,109 @@ observe({
               temp.code <- paste0(temp.code, ", offset=", offset0)
             }
             temp.code <- paste0(temp.code, ", family = '", family0, "'")
-            temp.code <- paste0(temp.code, ", design = ", design_params$design$dataDesignName, ")")
+            temp.code <- paste0(
+              temp.code, ", design = ",
+              design_params$design$dataDesignName, ")"
+            )
           }
         } else {
           if (input$model_framework %in% "Least Squares") {
             temp.model <- lm(formula(formu), data = dafr)
-            temp.code <- paste0(model.name, " = lm(", formu, ",data=", values$data.name, ")")
-          } else if (input$model_framework %in% "Poisson Regression (Y counts)") {
+            temp.code <- paste0(
+              model.name, " = lm(", formu,
+              ",data=", values$data.name, ")"
+            )
+          } else if (
+            input$model_framework %in% "Poisson Regression (Y counts)"
+          ) {
             if (input$quasi) {
               if (input$offset %in% "") {
-                temp.model <- glm(formula(formu), data = dafr, family = "quasipoisson")
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='quasipoisson')")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "quasipoisson"
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ",data=", values$data.name, ", family='quasipoisson')"
+                )
               } else {
-                temp.model <- glm(formula(formu), data = dafr, family = "quasipoisson", offset = input$offset)
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='quasipoisson',offset=", input$offset, ")")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "quasipoisson", offset = input$offset
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ", data=", values$data.name,
+                  ", family='quasipoisson', offset=", input$offset, ")"
+                )
               }
             } else {
               if (input$offset %in% "") {
-                temp.model <- glm(formula(formu), data = dafr, family = "poisson")
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='poisson'")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "poisson"
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ",data=", values$data.name, ",family='poisson'"
+                )
               } else {
-                temp.model <- glm(formula(formu), data = dafr, family = "poisson", offset = input$offset)
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='poisson',offset=", input$offset, ")")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "poisson", offset = input$offset
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ",data=", values$data.name,
+                  ",family='poisson',offset=", input$offset, ")"
+                )
               }
             }
-          } else if (input$model_framework %in% "Logistic Regression (Y binary)") {
+          } else if (
+            input$model_framework %in% "Logistic Regression (Y binary)"
+          ) {
             if (input$quasi) {
               if (input$offset %in% "") {
-                temp.model <- glm(formula(formu), data = dafr, family = "quasibinomial")
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='quasibinomial')")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "quasibinomial"
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ",data=", values$data.name, ",family='quasibinomial')"
+                )
               } else {
-                temp.model <- glm(formula(formu), data = dafr, family = "quasibinomial", offset = input$offset)
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='quasibinomial',offset=", input$offset, ")")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "quasibinomial", offset = input$offset
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ",data=", values$data.name,
+                  ",family='quasibinomial',offset=", input$offset, ")"
+                )
               }
             } else {
               if (input$offset %in% "") {
-                temp.model <- glm(formula(formu), data = dafr, family = "binomial")
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='binomial')")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "binomial"
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ",data=", values$data.name,
+                  ",family='binomial')"
+                )
               } else {
-                temp.model <- glm(formula(formu), data = dafr, family = "binomial", offset = input$offset)
-                temp.code <- paste0(model.name, " = glm(", formu, ",data=", values$data.name, ",family='binomial',offset=", input$offset, ")")
+                temp.model <- glm(formula(formu),
+                  data = dafr,
+                  family = "binomial", offset = input$offset
+                )
+                temp.code <- paste0(
+                  model.name, " = glm(", formu,
+                  ",data=", values$data.name,
+                  ",family='binomial',offset=", input$offset, ")"
+                )
               }
             }
           }
@@ -832,6 +928,7 @@ observe({
       }, error = function(e) {
         print(e)
       }, finally = {})
+
       modelValues$interaction.log <- list()
       modelValues$transformation.log <- c()
       if (!is.null(temp.model)) {
@@ -880,7 +977,9 @@ observe({
   input$select_Y
   isolate({
     independent_variables <- input$independent_variables
-    ch <- colnames(get.data.set())[-which(colnames(get.data.set()) %in% input$select_Y)]
+    ch <- colnames(get.data.set())[
+      -which(colnames(get.data.set()) %in% input$select_Y)
+    ]
     if (length(independent_variables) > 0) {
       ch <- ch[-which(ch %in% independent_variables)]
     }
@@ -899,7 +998,9 @@ observe({
   input$select_Y
   isolate({
     confounding_variables <- input$confounding_variables
-    ch <- colnames(get.data.set())[-which(colnames(get.data.set()) %in% input$select_Y)]
+    ch <- colnames(get.data.set())[
+      -which(colnames(get.data.set()) %in% input$select_Y)
+    ]
     if (length(confounding_variables) > 0) {
       ch <- ch[-which(ch %in% confounding_variables)]
     }
@@ -920,12 +1021,16 @@ observe({
       input$select_Y %in% colnames(get.data.set()) &&
       !input$select_Y %in% "") {
       if (is.numeric(get.data.set()[, input$select_Y]) ||
-        length(levels(as.factor(na.omit(get.data.set()[, input$select_Y])))) != 2) {
+        length(levels(as.factor(na.omit(
+          get.data.set()[, input$select_Y]
+        )))) != 2) {
         updateSelectInput(session, "model_framework",
           selected = "Least Squares"
         )
       } else {
-        if (length(levels(as.factor(na.omit(get.data.set()[, input$select_Y])))) == 2) {
+        if (length(levels(as.factor(na.omit(
+          get.data.set()[, input$select_Y]
+        )))) == 2) {
           updateSelectInput(session, "model_framework",
             selected = "Logistic Regression (Y binary)"
           )
@@ -1101,12 +1206,18 @@ output$current.code <- renderPrint({
               x[which(x %in% y)] <- names(y)[which(y %in% x)]
             }, modelValues$transformation.log
           )
-          names(new.interaction.log) <- unlist(lapply(new.interaction.log, function(x) {
-            paste(x, collapse = ":")
-          }))
-          func <- paste(func, paste(names(new.interaction.log), collapse = " + "), sep = " + ")
+          names(new.interaction.log) <- unlist(
+            lapply(new.interaction.log, function(x) {
+              paste(x, collapse = ":")
+            })
+          )
+          func <- paste(func, paste(names(new.interaction.log),
+            collapse = " + "
+          ), sep = " + ")
         } else {
-          func <- paste(func, paste(names(modelValues$interaction.log), collapse = " + "), sep = " + ")
+          func <- paste(func, paste(names(modelValues$interaction.log),
+            collapse = " + "
+          ), sep = " + ")
         }
       }
       if (is_survey) {
@@ -1117,31 +1228,48 @@ output$current.code <- renderPrint({
             if (input$offset %in% "") {
               glmcode <- paste0(glmcode, ",family='quasipoisson'")
             } else {
-              glmcode <- paste0(glmcode, ",family='quasipoisson',offset=", input$offset)
+              glmcode <- paste0(
+                glmcode, ",family='quasipoisson',offset=",
+                input$offset
+              )
             }
           } else {
             if (input$offset %in% "") {
               glmcode <- paste0(glmcode, ",family='poisson'")
             } else {
-              glmcode <- paste0(glmcode, ",family='poisson',offset=", input$offset)
+              glmcode <- paste0(
+                glmcode, ",family='poisson',offset=",
+                input$offset
+              )
             }
           }
-        } else if (input$model_framework %in% "Logistic Regression (Y binary)") {
+        } else if (
+          input$model_framework %in% "Logistic Regression (Y binary)"
+        ) {
           if (input$quasi) {
             if (input$offset %in% "") {
               glmcode <- paste0(glmcode, ",family='quasibinomial'")
             } else {
-              glmcode <- paste0(glmcode, ",family='quasibinomial',offset=", input$offset)
+              glmcode <- paste0(
+                glmcode, ",family='quasibinomial',offset=",
+                input$offset
+              )
             }
           } else {
             if (input$offset %in% "") {
               glmcode <- paste0(glmcode, ",family='binomial'")
             } else {
-              glmcode <- paste0(glmcode, ",family='binomial',offset=", input$offset)
+              glmcode <- paste0(
+                glmcode, ",family='binomial',offset=",
+                input$offset
+              )
             }
           }
         }
-        glmcode <- paste0(glmcode, ", design = ", design_params$design$dataDesignName, ")")
+        glmcode <- paste0(
+          glmcode, ", design = ",
+          design_params$design$dataDesignName, ")"
+        )
         cat(design, glmcode, sep = "")
       } else {
         if (input$model_framework %in% "Least Squares") {
@@ -1149,29 +1277,47 @@ output$current.code <- renderPrint({
         } else if (input$model_framework %in% "Poisson Regression (Y counts)") {
           if (input$quasi) {
             if (input$offset %in% "") {
-              cat("glm(", func, ",data=", values$data.name, ",family='quasipoisson')")
+              cat("glm(", func, ",data=", values$data.name, ",
+              family='quasipoisson')")
             } else {
-              cat("glm(", func, ",data=", values$data.name, ",family='quasipoisson',offset=", input$offset, ")")
+              cat("glm(", func, ",data=", values$data.name, ",
+              family='quasipoisson',offset=", input$offset, ")")
             }
           } else {
             if (input$offset %in% "") {
-              cat("glm(", func, ",data=", values$data.name, ",family='poisson')")
+              cat(
+                "glm(", func, ",data=", values$data.name,
+                ",family='poisson')"
+              )
             } else {
-              cat("glm(", func, ",data=", values$data.name, ",family='poisson',offset=", input$offset, ")")
+              cat(
+                "glm(", func, ",data=", values$data.name,
+                ",family='poisson',offset=", input$offset, ")"
+              )
             }
           }
-        } else if (input$model_framework %in% "Logistic Regression (Y binary)") {
+        } else if (
+          input$model_framework %in% "Logistic Regression (Y binary)"
+        ) {
           if (input$quasi) {
             if (input$offset %in% "") {
-              cat("glm(", func, ",data=", values$data.name, ",family='quasibinomial')")
+              cat("glm(", func, ",data=", values$data.name, ",
+              family='quasibinomial')")
             } else {
-              cat("glm(", func, ",data=", values$data.name, ",family='quasibinomial',offset=", input$offset, ")")
+              cat("glm(", func, ",data=", values$data.name, ",
+              family='quasibinomial',offset=", input$offset, ")")
             }
           } else {
             if (input$offset %in% "") {
-              cat("glm(", func, ",data=", values$data.name, ",family='binomial')")
+              cat(
+                "glm(", func, ",data=", values$data.name,
+                ",family='binomial')"
+              )
             } else {
-              cat("glm(", func, ",data=", values$data.name, ",family='binomial',offset=", input$offset, ")")
+              cat(
+                "glm(", func, ",data=", values$data.name,
+                ",family='binomial',offset=", input$offset, ")"
+              )
             }
           }
         } else {
@@ -1192,9 +1338,15 @@ observe({
         !trim(input$new_model_name) %in% "" &&
         !is.null(input$model.select) &&
         !input$new_model_name %in% names(modelValues$models)) {
-        names(modelValues$models)[which(names(modelValues$models) %in% input$model.select)] <- input$new_model_name
-        names(modelValues$code)[which(names(modelValues$code) %in% input$model.select)] <- input$new_model_name
-        names(modelValues$independent.vars)[which(names(modelValues$independent.vars) %in% input$model.select)] <- input$new_model_name
+        names(modelValues$models)[
+          which(names(modelValues$models) %in% input$model.select)
+        ] <- input$new_model_name
+        names(modelValues$code)[
+          which(names(modelValues$code) %in% input$model.select)
+        ] <- input$new_model_name
+        names(modelValues$independent.vars)[
+          which(names(modelValues$independent.vars) %in% input$model.select)
+        ] <- input$new_model_name
         updateSelectInput(session, "model.select",
           choices = names(modelValues$models),
           selected = input$new_model_name
@@ -1347,10 +1499,16 @@ output$plots.main <- renderUI({
         input$visualisze_plot_selector %in% "Factor level comparison") {
         h2("No factor variables are fit in this model.")
       } else {
-        ch1 <- modelValues$independent.vars[[input$model.select]][which(modelValues$independent.vars[[input$model.select]] %in%
-          get.categorical.column.names(get.data.set()))]
-        ch2 <- get.numeric.column.names(modelValues$models[[input$model.select]]$model)
-        ch2 <- ch2[which(ch2 %in% modelValues$independent.vars[[input$model.select]])]
+        ch1 <- modelValues$independent.vars[[input$model.select]][
+          which(modelValues$independent.vars[[input$model.select]] %in%
+            get.categorical.column.names(get.data.set()))
+        ]
+        ch2 <- get.numeric.column.names(
+          modelValues$models[[input$model.select]]$model
+        )
+        ch2 <- ch2[which(
+          ch2 %in% modelValues$independent.vars[[input$model.select]]
+        )]
         list(
           conditionalPanel(
             "input.visualisze_plot_selector=='Factor level comparison'",
@@ -1515,7 +1673,12 @@ output$factor.comparison.plot <- renderPlot({
     if (!is.null(modelValues$models) &&
       !is.null(input$model.select) &&
       !is.null(input$factor.comp.select)) {
-      suppressWarnings(plot(moecalc(modelValues$models[[input$model.select]], input$factor.comp.select)))
+      suppressWarnings(plot(
+        moecalc(
+          modelValues$models[[input$model.select]],
+          input$factor.comp.select
+        )
+      ))
       modelValues$code.history <- paste0(
         modelValues$code.history,
         paste0(
@@ -1535,7 +1698,12 @@ output$factor_comparison_matrix <- renderPrint({
   input$model.select
   input$factor.comp.select
   isolate({
-    print(suppressWarnings(iNZightRegression::factorComp(modelValues$models[[input$model.select]], input$factor.comp.select)))
+    print(suppressWarnings(
+      iNZightRegression::factorComp(
+        modelValues$models[[input$model.select]],
+        input$factor.comp.select
+      )
+    ))
     modelValues$code.history <- paste0(
       modelValues$code.history,
       paste0(
@@ -1558,7 +1726,11 @@ output$scatter.plot.matrix <- renderPlot(
         temp <- modelValues$models[[input$model.select]]$model
         modelValues$code.history <- paste0(
           modelValues$code.history,
-          paste0("ggpairs(", input$model.select, "$model,lower=list(continous='density',combo='box'),upper=list(continous='points',combo='dot'))\n")
+          paste0(
+            "ggpairs(",
+            input$model.select,
+            "$model,lower=list(continous='density',combo='box'),upper=list(continous='points',combo='dot'))\n"
+          )
         )
         suppressWarnings(ggpairs(temp,
           lower = list(
@@ -1609,7 +1781,9 @@ output$plotlm6 <- renderPlot({
         plotindex,
         ")\n"
       )
-      invisible(plotlm6(modelValues$models[[input$model.select]], which = plotindex))
+      invisible(plotlm6(modelValues$models[[input$model.select]],
+        which = plotindex
+      ))
     }
   })
 })

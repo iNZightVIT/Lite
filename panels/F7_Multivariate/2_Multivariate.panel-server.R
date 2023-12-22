@@ -82,7 +82,8 @@ output$multivarate.widgets <- renderUI({
     )
 
 
-    if (input$multivarate.method == "pairs" || input$multivarate.method == "pairs_corr") {
+    if (input$multivarate.method == "pairs" ||
+      input$multivarate.method == "pairs_corr") {
       ret <- multi.var
     } else if (input$multivarate.method == "pcp") {
       ret <- list(
@@ -153,7 +154,8 @@ observe({
 observe({
   input$multivarate.select.var
   isolate({
-    if ((is.null(input$multivarate.select.var) || length(input$multivarate.select.var) == 0) && !is.null(get.data.set())) {
+    if ((is.null(input$multivarate.select.var) ||
+      length(input$multivarate.select.var) == 0) && !is.null(get.data.set())) {
       mrOptions$vars <- get.numeric.column.names(get.data.set())
     } else {
       mrOptions$vars <- input$multivarate.select.var
@@ -174,7 +176,8 @@ observe({
         )
         updateSelectInput(session,
           inputId = "multivarate.select.y",
-          choices = 1:length(mrOptions$vars), selected = min(mrOptions$dim2, length(mrOptions$vars))
+          choices = 1:length(mrOptions$vars),
+          selected = min(mrOptions$dim2, length(mrOptions$vars))
         )
       } else {
         mrOptions$vars <- names(which(sapply(get.data.set(), is.numeric)))
@@ -231,7 +234,11 @@ observe({
 })
 
 observe({
-  mrOptions$k <- if (is.null(get.data.set())) NULL else sum(sapply(get.data.set(), is.numeric))
+  mrOptions$k <- if (is.null(get.data.set())) {
+    NULL
+  } else {
+    sum(sapply(get.data.set(), is.numeric))
+  }
 })
 
 
@@ -316,7 +323,8 @@ output$multivarate.ui.main <- renderUI({
           tabPanel(
             title = "Interactive Plot (via plotly)",
             uiOutput("plotly_pairs_corrmainnw"),
-            plotlyOutput("plotly_pairs_corrmain", height = "500px") %>% withSpinner()
+            plotlyOutput("plotly_pairs_corrmain", height = "500px") |>
+              withSpinner()
           )
         )
       )
@@ -337,7 +345,10 @@ output$multivarate.ui.main <- renderUI({
               ),
               column(
                 width = 3,
-                downloadButton(outputId = "saveMvPcaplot", label = "Download Plot")
+                downloadButton(
+                  outputId = "saveMvPcaplot",
+                  label = "Download Plot"
+                )
               ),
               column(
                 width = 3,
@@ -362,7 +373,8 @@ output$multivarate.ui.main <- renderUI({
           tabPanel(
             title = "Interactive Plot (via plotly)",
             uiOutput("plotly_pcamainnw"),
-            plotlyOutput("plotly_pcamain", height = "500px") %>% withSpinner()
+            plotlyOutput("plotly_pcamain", height = "500px") |>
+              withSpinner()
           )
         )
       )
@@ -383,7 +395,10 @@ output$multivarate.ui.main <- renderUI({
               ),
               column(
                 width = 3,
-                downloadButton(outputId = "saveMvPcaplot", label = "Download Plot")
+                downloadButton(
+                  outputId = "saveMvPcaplot",
+                  label = "Download Plot"
+                )
               ),
               column(
                 width = 3,
@@ -424,7 +439,10 @@ mul.plot.parm <- reactive({
   plot_args <- plot_args[!is.na(names(plot_args))]
 
   if (mrOptions$type == "pairs") {
-    plot(c(0, 1), c(0, 1), ann = FALSE, bty = "n", type = "n", xaxt = "n", yaxt = "n")
+    plot(c(0, 1), c(0, 1),
+      ann = FALSE, bty = "n", type = "n", xaxt = "n",
+      yaxt = "n"
+    )
     text(0.5, 0.5, "Generating pairs plot - please wait... ")
   }
   plot_exprs <- do.call(plot_fun, c(list(values$data.name), plot_args))
@@ -493,7 +511,10 @@ output$saveMvplot <- downloadHandler(
       plot_args <- plot_args[!is.na(names(plot_args))]
 
       if (mrOptions$type == "pairs") {
-        plot(c(0, 1), c(0, 1), ann = FALSE, bty = "n", type = "n", xaxt = "n", yaxt = "n")
+        plot(c(0, 1), c(0, 1),
+          ann = FALSE, bty = "n", type = "n",
+          xaxt = "n", yaxt = "n"
+        )
         text(0.5, 0.5, "Generating pairs plot - please wait... ")
       }
       plot_exprs <- do.call(plot_fun, c(list(values$data.name), plot_args))
@@ -571,8 +592,14 @@ mul.plot.pca <- reactive({
     plot_args <- mrOptions.list[plot_arg_names]
     plot_args <- plot_args[!is.na(names(plot_args))]
 
-    names(plot_args) <- replace(names(plot_args), names(plot_args) == "dim1", "x")
-    names(plot_args) <- replace(names(plot_args), names(plot_args) == "dim2", "y")
+    names(plot_args) <- replace(
+      names(plot_args),
+      names(plot_args) == "dim1", "x"
+    )
+    names(plot_args) <- replace(
+      names(plot_args),
+      names(plot_args) == "dim2", "y"
+    )
 
     plot_exprs <- do.call(analysis_fun, c(list(values$data.name), plot_args))
 
@@ -584,10 +611,13 @@ mul.plot.pca <- reactive({
 
 
     mrOptions$mrObject <- plot_object
-    attr(mrOptions$mrObject, "var_name") <<- as.character(as.list(plot_exprs[[1]])[[2]])
+    attr(mrOptions$mrObject, "var_name") <<-
+      as.character(as.list(plot_exprs[[1]])[[2]])
     attr(mrOptions$mrObject, "code") <<- list(
       "## Perform analysis",
-      analysis = paste0(unname(unlist(lapply(plot_exprs, rlang::expr_text))), collapse = "\n\n")
+      analysis = paste0(unname(unlist(
+        lapply(plot_exprs, rlang::expr_text)
+      )), collapse = "\n\n")
     )
 
     plot_fun <- list(
@@ -632,7 +662,10 @@ mul.plot.pca <- reactive({
         finally = dev.flush()
       )
     }
-    mrOptions$text <- paste0(iNZightMultivariate::summary_inzight.pca(mrOptions$mrObject), sep = "\n")
+    mrOptions$text <- paste0(
+      iNZightMultivariate::summary_inzight.pca(mrOptions$mrObject),
+      sep = "\n"
+    )
   }, error = function(e) {
     print(e)
   }, finally = {})
@@ -688,7 +721,10 @@ output$mv.summary <- renderText({
 })
 
 output$mv.screeplot <- renderPlot({
-  plot(mrOptions$mrObject, type = "l", main = sprintf("Screeplot of PCA on %s", values$data.name))
+  plot(mrOptions$mrObject,
+    type = "l",
+    main = sprintf("Screeplot of PCA on %s", values$data.name)
+  )
 })
 
 

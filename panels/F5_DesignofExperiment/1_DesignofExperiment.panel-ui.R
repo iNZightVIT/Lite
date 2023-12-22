@@ -31,11 +31,14 @@ mixedModel.sidebarPanel <- function() {
         label = "Select Fitted Model",
         choices = c()
       )),
-      tags$div(style = "margin-top: 24px", column(2, offset = 1, actionButton(
-        inputId = "remove.model",
-        label = "Remove",
-        style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
-      )))
+      tags$div(
+        style = "margin-top: 24px",
+        column(2, offset = 1, actionButton(
+          inputId = "remove.model",
+          label = "Remove",
+          style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+        ))
+      )
     ),
     tabsetPanel(
       type = "pills",
@@ -101,11 +104,14 @@ mixedModel.sidebarPanel <- function() {
 
             ## display results
             fluidRow(
-              column(12, textInput("fixed_effect", label = "Fixed effect:", value = "")),
+              column(
+                12,
+                textInput("fixed_effect",
+                  label = "Fixed effect:", value = ""
+                )
+              ),
               hr()
             )
-
-            ## fluidRow(column(10, verbatimTextOutput("fixed.expression.message")))
           ),
           ## select random effect
           checkboxInput(
@@ -117,12 +123,18 @@ mixedModel.sidebarPanel <- function() {
 
             ## select variables and operations
             fluidRow(column(6, uiOutput("own_model_random_panel"))),
-            fluidRow(column(12, textInput("random_effect", label = "Random effect:", value = "")))
+            fluidRow(column(
+              12,
+              textInput("random_effect", label = "Random effect:", value = "")
+            ))
           ),
           fluidRow(column(12, radioButtons(
             inputId = "mm_trt.mean1",
             label = "Treatment means",
-            choices = c("No blocking or complete blocks", "balanced incomplete blocks"),
+            choices = c(
+              "No blocking or complete blocks",
+              "balanced incomplete blocks"
+            ),
             selected = "No blocking or complete blocks"
           ))),
           fluidRow(column(12, hr())),

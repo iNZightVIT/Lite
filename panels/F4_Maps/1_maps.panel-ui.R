@@ -39,7 +39,9 @@ maps.sidebarPanel <- function(data.set) {
               "Coordinate (latitude, longitude)" = 1,
               "Regions (country, state, county, etc.)" = 2
             ),
-          selected = ifelse(("latitude" %in% tolower(colnames(data.set))) & ("longitude" %in% tolower(colnames(data.set))),
+          selected = ifelse(
+            ("latitude" %in% tolower(colnames(data.set))) &
+              ("longitude" %in% tolower(colnames(data.set))),
             1, 2
           )
         ),
@@ -79,15 +81,18 @@ maps.sidebarPanel <- function(data.set) {
             uiOutput("inbuiltmap_panel")
           ),
           conditionalPanel(
-            condition = "input.selectshapefile == 1 & input.selectinbuiltmap == 1",
+            condition =
+              "input.selectshapefile == 1 & input.selectinbuiltmap == 1",
             uiOutput("continentsoptions_panel")
           ),
           conditionalPanel(
-            condition = "input.selectshapefile == 1 & input.selectinbuiltmap == 2",
+            condition =
+              "input.selectshapefile == 1 & input.selectinbuiltmap == 2",
             uiOutput("countriesoptions_panel")
           ),
           conditionalPanel(
-            condition = "input.selectshapefile == 1 & input.selectinbuiltmap == 3",
+            condition =
+              "input.selectshapefile == 1 & input.selectinbuiltmap == 3",
             uiOutput("worldoptions_panel")
           ),
           conditionalPanel(
@@ -115,27 +120,7 @@ maps.sidebarPanel <- function(data.set) {
           ## unmatched data oanel
           uiOutput("unmatched_panel"),
           verbatimTextOutput("unmatchedcounts_panel")
-
-          #          hr(),
-
-          ## mapping variables (country, state and county...)
-          #          uiOutput("maplocation_panel"),
-          #          uiOutput("locationvariable_panel")
-
-          #          hr(),
-
-          ## plotting variable
-          #          h4("Plotting Variable"),
-
-          #          uiOutput("plottingvariable_panel")
         ),
-
-        #        hr(),
-
-        ## subset variables
-        #        uiOutput("mapssubset1_panel"),
-        #        uiOutput("mapssubset2_panel"),
-
         hr(),
         tags$a(
           href = "https://www.stat.auckland.ac.nz/~wild/iNZight/user_guides/add_ons/?topic=maps&ver=lite",
@@ -147,19 +132,6 @@ maps.sidebarPanel <- function(data.set) {
         title = "Select Variables",
         conditionalPanel(
           condition = "input.map_type == 1",
-
-          ## code variables
-          #          h4("Code Variables"),
-
-          #          uiOutput("colourby_panel"),
-          #          uiOutput("sizeby_panel"),
-          #          uiOutput("opacifyby_panel"),
-
-          #          hr(),
-
-          ## plot options
-          #          h4("Plot Options"),
-
           uiOutput("plot_colourcheck_panel"),
 
           #          h4("Colour"),
@@ -212,10 +184,6 @@ maps.sidebarPanel <- function(data.set) {
           uiOutput("plotas_panel"),
           uiOutput("sizeandtransparency_panel"),
           hr()
-
-          #          uiOutput("plot_region_colour_panel"),
-          #          uiOutput("missingvaluecolour_panel"),
-          #          uiOutput("plotlabels_panel")
         )
       )
     )
@@ -247,10 +215,10 @@ maps.mainPanel <- function() {
               actionButton("refreshmap",
                 icon("refresh", "fa-2x"),
                 style = "color: #337ab7;
-                                                        background-color: #ffffff;
-                                                        border-color: #ffffff;
-                                                        padding:4px;
-                                                        font-size:90%"
+                         background-color: #ffffff;
+                         border-color: #ffffff;
+                         padding:4px;
+                         font-size:90%"
               )
             )
           )),
@@ -259,7 +227,10 @@ maps.mainPanel <- function() {
         plotOutput("maps_plot", height = "600px"),
 
         ## to remove flickerings when plot parameters change
-        tags$style(type = "text/css", "#maps_plot.recalculating { opacity: 1.0; }"),
+        tags$style(
+          type = "text/css",
+          "#maps_plot.recalculating { opacity: 1.0; }"
+        ),
         conditionalPanel(
           condition = "input.map_type == 1 &
           input.select_latitude != 'Select Latitude Information' &

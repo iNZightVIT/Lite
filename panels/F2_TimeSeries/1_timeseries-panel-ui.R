@@ -88,8 +88,13 @@ ts.sidebarPanel <- function(data.set) {
       ),
       p("*How many observations per period?"),
       fixedRow(
-        column(6, numericInput("TS.timeStartPeriod", label = "Start date : ", value = 1)),
-        column(6, div(style = "margin-top: 4px;", numericInput("TS.timeStartSeason", label = " ", value = 1)))
+        column(6, numericInput("TS.timeStartPeriod",
+          label = "Start date : ", value = 1
+        )),
+        column(6, div(
+          style = "margin-top: 4px;",
+          numericInput("TS.timeStartSeason", label = " ", value = 1)
+        ))
       ),
       fixedRow(
         column(6, div(style = "margin-top: -8px;", textOutput("TS.startlbl1"))),
@@ -161,7 +166,6 @@ ts.sidebarPanel <- function(data.set) {
       selected = 1,
       inline = T
     ),
-    ## hr(),
     conditionalPanel(
       condition = "input.customize_labels == 2",
       uiOutput("provide_xlab_ts"),

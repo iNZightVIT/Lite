@@ -107,13 +107,29 @@ colourPalettes <-
         inferno = viridis::inferno
       ),
       list(
-        "rainbow (hcl)" = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
+        "rainbow (hcl)" =
+          function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
         blue =
-          function(n) sequential_hcl(n, h = 260, c. = c(80, 10), l = c(30, 95), power = 0.7),
+          function(n) {
+            sequential_hcl(n,
+              h = 260, c. = c(80, 10), l = c(30, 95),
+              power = 0.7
+            )
+          },
         green =
-          function(n) sequential_hcl(n, h = 135, c. = c(50, 10), l = c(40, 95), power = 0.4),
+          function(n) {
+            sequential_hcl(n,
+              h = 135, c. = c(50, 10), l = c(40, 95),
+              power = 0.4
+            )
+          },
         red =
-          function(n) sequential_hcl(n, h = 10, c. = c(80, 10), l = c(30, 95), power = 0.7),
+          function(n) {
+            sequential_hcl(n,
+              h = 10, c. = c(80, 10), l = c(30, 95),
+              power = 0.7
+            )
+          },
         "green-yellow" =
           function(n) {
             terrain_hcl(n,
@@ -131,19 +147,32 @@ colourPalettes <-
         terrain = terrain_hcl,
         heat = heat_hcl,
         "blue/white/pink" =
-          function(n) diverge_hcl(n, h = c(180, 330), c = 59, l = c(75, 95), power = 1.5),
+          function(n) {
+            diverge_hcl(n,
+              h = c(180, 330), c = 59, l = c(75, 95),
+              power = 1.5
+            )
+          },
         "blue/white/red" =
-          function(n) diverge_hcl(n, h = c(260, 0), c = 100, l = c(50, 90), power = 1)
+          function(n) {
+            diverge_hcl(n,
+              h = c(260, 0), c = 100, l = c(50, 90),
+              power = 1
+            )
+          }
       )
     ),
     emphasize = function(n, k, cat = TRUE, ncat = 5,
-                         fn = if (cat) inzpar()$col.default$cat else inzpar()$col.default$cont) {
+                         fn = if (cat) {
+                           inzpar()$col.default$cat
+                         } else {
+                           inzpar()$col.default$cont
+                         }) {
       cols <- fn(n)
       if (!cat) {
         ks <- floor(seq(1, n, length = ncat + 1))
         k <- ks[k]:ks[k + 1]
       }
-      # cols[k] <- iNZightPlots:::shade(cols[k], -0.4)
       cols[-k] <- iNZightPlots:::shade(cols[-k], 0.7)
       cols
     }
@@ -196,42 +225,11 @@ args2 <- reactiveValues(
 
 
 plot.args2 <- reactive({
-  plot.args2 <- modifyList(list(), reactiveValuesToList(args2), keep.null = FALSE)
+  plot.args2 <- modifyList(list(), reactiveValuesToList(args2),
+    keep.null = FALSE
+  )
 })
 
-
-
-## maps plot
-# output$maps_plot = renderPlot({
-#  if(input$map_type == 1) {
-#    condition1 = !is.null(input$select_latitude) &&
-#      input$select_latitude %in% colnames(get.data.set()) &&
-#      !is.null(input$select_longitude) &&
-#      input$select_longitude %in% colnames(get.data.set())
-#    if(condition1) {
-#      temp = plot.args()
-#      tryCatch({do.call(plot, temp)},
-#               error = function(e) {
-#                 print(e)
-#               }, finally = {})
-#    }
-#  }
-#  else if(input$map_type == 2) {
-#    condition2 = !is.null(input$maplocation) &&
-#      input$maplocation != "Select Map Location" &&
-#      !is.null(input$locationvariable) &&
-#      input$locationvariable %in% colnames(get.data.set()) &&
-#      !is.null(input$plottingvariable) &&
-#      input$plottingvariable %in% colnames(get.data.set())
-#    if(condition2) {
-#      temp = plot.args()
-#      tryCatch({do.call(plot, temp)},
-#               error = function(e) {
-#                 print(e)
-#               }, finally = {})
-#    }
-#  }
-# })
 
 
 ## get only numeric type variables
@@ -451,7 +449,8 @@ output$plot_colour_panel <- renderUI({
             inputId = "plot_colour",
             label = NULL,
             choices = c(
-              "mediumvioletred", "grey50", "black", "darkblue", "darkgreen",
+              "mediumvioletred", "grey50", "black", "darkblue",
+              "darkgreen",
               "darkmagenta", "darkslateblue", "hotpink4",
               "lightsalmon2", "palegreen3", "steelblue3"
             ),
@@ -495,7 +494,8 @@ output$plot_colpalette_panel <- renderUI({
             selectize = FALSE
           ))
         )
-      } else if (!is.null(input$colourby) && input$colourby %in% characterVars()) {
+      } else if (!is.null(input$colourby) &&
+        input$colourby %in% characterVars()) {
         ret0 <- fixedRow(
           column(3, h5("Palette:")),
           column(6, selectInput(
@@ -800,17 +800,6 @@ observe({
 })
 
 
-
-
-# observe({
-#  input$transparency
-#  isolate({
-#    if(!is.null(input$transparency))
-#      args$alpha = 1 - input$transparency/100
-#  })
-# })
-
-
 ## set up plot_pointsymbol_panel and plot_symbolcheck_panel
 
 output$plot_symbolcheck_panel <- renderUI({
@@ -839,7 +828,10 @@ output$plot_pointsymbol_panel <- renderUI({
           column(6, selectInput(
             inputId = "symbol",
             label = NULL,
-            choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
+            choices = c(
+              "circle", "square", "diamond", "triangle",
+              "inverted triangle"
+            ),
             selectize = FALSE
           ))
         ),
@@ -895,7 +887,9 @@ observe({
   input$filledin
   input$transparency
   isolate({
-    if (!is.null(input$opacifyby) && input$opacifyby %in% colnames(get.data.set()) && !is.null(input$transparency)) {
+    if (!is.null(input$opacifyby) &&
+      input$opacifyby %in% colnames(get.data.set()) &&
+      !is.null(input$transparency)) {
       args$alpha <- 1 - input$transparency / 100
     } else if (!is.null(input$filledin) && !is.null(input$transparency)) {
       if (input$filledin && input$transparency == 0) {
@@ -1002,14 +996,18 @@ observe({
     ch <- colnames(data.temp)
     if (!is.null(input$mapssubset2) &&
       input$mapssubset2 == "None") {
-      updateSelectInput(session, "mapssubset1", choices = c("None", ch), selected = input$mapssubset1)
+      updateSelectInput(session, "mapssubset1",
+        choices = c("None", ch), selected = input$mapssubset1
+      )
       args$g2 <- NULL
       args$g2.level <- NULL
       args$varnames$g2 <- NULL
     } else if (!is.null(input$mapssubset2) &&
       input$mapssubset2 %in% colnames(get.data.set())) {
       ch <- ch[-which(ch %in% input$mapssubset2)]
-      updateSelectInput(session, "mapssubset1", choices = c("None", ch), selected = input$mapssubset1)
+      updateSelectInput(session, "mapssubset1",
+        choices = c("None", ch), selected = input$mapssubset1
+      )
       index <- which(input$mapssubset2 == colnames(data.temp))
       args$varnames$g2 <- colnames(data.temp)[index]
       args$g2.level <- "_ALL"
@@ -1022,7 +1020,8 @@ observe({
           input$locationvariable %in% colnames(data.temp)) {
           temp <- plot.args()
           data.temp2 <- temp$x$data
-          if (!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index])) {
+          if (!is.numeric(data.temp2[, index]) &
+            !is.ordered(data.temp2[, index])) {
             g2 <- factor(data.temp2[, index], ordered = TRUE)
           } else {
             g2 <- convert.to.factor(data.temp2[, index])
@@ -1046,13 +1045,9 @@ output$mapssubset1_slider_panel <- renderUI({
       if (input$map_type == 1) {
         temp <- convert.to.factor(data.temp[, index])
       } else if (input$map_type == 2) {
-        #        mapsplot.obj = iNZightShapeMap(data = data.temp,
-        #                                       location = input$maplocation,
-        #                                       data.region = input$locationvariable)
-        #        data.temp2 = mapsplot.obj$data
-        #        temp = convert.to.factor(data.temp2[, index])
         data.temp2 <- plot.args()$x$data
-        if (!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index])) {
+        if (!is.numeric(data.temp2[, index]) &
+          !is.ordered(data.temp2[, index])) {
           temp <- factor(data.temp2[, index], ordered = TRUE)
         } else {
           temp <- convert.to.factor(data.temp2[, index])
@@ -1064,7 +1059,9 @@ output$mapssubset1_slider_panel <- renderUI({
         label = paste("Subset '", input$mapssubset1, "':", "_MULTI"),
         min = 0, max = n.levels, value = 0, step = 1,
         animate = animationOptions(
-          interval = ifelse(length(input$delay1) == 0, 600, 1000 * input$delay1),
+          interval = ifelse(length(input$delay1) == 0, 600,
+            1000 * input$delay1
+          ),
           playButton = icon("play", "fa-2x"),
           pauseButton = icon("pause", "fa-2x")
         ),
@@ -1083,17 +1080,12 @@ observe({
       input$mapssubset1 %in% colnames(get.data.set())) {
       data.temp <- get.data.set()
       index <- which(input$mapssubset1 == colnames(data.temp))
-      #      temp = convert.to.factor(data.temp[, index])
       if (input$map_type == 1) {
         temp <- convert.to.factor(data.temp[, index])
       } else if (input$map_type == 2) {
-        #        mapsplot.obj = iNZightShapeMap(data = data.temp,
-        #                                       location = input$maplocation,
-        #                                       data.region = input$locationvariable)
-        #        data.temp2 = mapsplot.obj$data
-        #        temp = convert.to.factor(data.temp2[, index])
         data.temp2 <- plot.args()$x$data
-        if (!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index])) {
+        if (!is.numeric(data.temp2[, index]) &
+          !is.ordered(data.temp2[, index])) {
           temp <- factor(data.temp2[, index], ordered = TRUE)
         } else {
           temp <- convert.to.factor(data.temp2[, index])
@@ -1108,7 +1100,10 @@ observe({
         args$g1.level <- "_MULTI"
       } else {
         updateSliderInput(session, "mapssubset1_slider",
-          label = paste("Subset '", input$mapssubset1, "': ", levels(temp)[level])
+          label = paste(
+            "Subset '", input$mapssubset1, "': ",
+            levels(temp)[level]
+          )
         )
         args$g1.level <- levels(temp)[level]
       }
@@ -1119,12 +1114,6 @@ observe({
         if (!is.null(input$maplocation) &&
           !is.null(input$locationvariable) &&
           input$locationvariable %in% colnames(data.temp)) {
-          #          mapsplot.obj = iNZightShapeMap(data = data.temp,
-          #                                         location = input$maplocation,
-          #                                         data.region = input$locationvariable)
-          #          data.temp2 = mapsplot.obj$data
-          #          g1 = convert.to.factor(data.temp2[, index])
-          #          args$g1 = g1
         }
       }
     }
@@ -1179,7 +1168,9 @@ observe({
     if (!is.null(input$mapssubset1) &&
       input$mapssubset1 %in% colnames(get.data.set())) {
       ch <- ch[-which(ch %in% input$mapssubset1)]
-      updateSelectInput(session, "mapssubset2", choices = c("None", ch), selected = input$mapssubset2)
+      updateSelectInput(session, "mapssubset2",
+        choices = c("None", ch), selected = input$mapssubset2
+      )
       index <- which(input$mapssubset1 == colnames(data.temp))
       args$varnames$g1 <- colnames(data.temp)[index]
       args$g1.level <- "_MULTI"
@@ -1190,13 +1181,10 @@ observe({
         if (!is.null(input$maplocation) &&
           !is.null(input$locationvariable) &&
           input$locationvariable %in% colnames(data.temp)) {
-          #          mapsplot.obj = iNZightMaps::iNZightShapeMap(data = data.temp,
-          #                                                      location = input$maplocation,
-          #                                                      data.region = input$locationvariable)
-          #          data.temp2 = mapsplot.obj$data
           temp <- plot.args()
           data.temp2 <- temp$x$data
-          if (!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index])) {
+          if (!is.numeric(data.temp2[, index]) &
+            !is.ordered(data.temp2[, index])) {
             g1 <- factor(data.temp2[, index], ordered = TRUE)
           } else {
             g1 <- convert.to.factor(data.temp2[, index])
@@ -1206,7 +1194,9 @@ observe({
       }
     } else if (!is.null(input$mapssubset1) &&
       input$mapssubset1 == "None") {
-      updateSelectInput(session, "mapssubset2", choices = c("None", ch), selected = input$mapssubset2)
+      updateSelectInput(session, "mapssubset2",
+        choices = c("None", ch), selected = input$mapssubset2
+      )
       args$g1 <- NULL
       args$g1.level <- NULL
       args$varnames$g1 <- NULL
@@ -1223,12 +1213,12 @@ output$mapssubset2_slider_panel <- renderUI({
     isolate({
       data.temp <- get.data.set()
       index <- which(input$mapssubset2 == colnames(data.temp))
-      #      temp = convert.to.factor(data.temp[, index])
       if (input$map_type == 1) {
         temp <- convert.to.factor(data.temp[, index])
       } else if (input$map_type == 2) {
         data.temp2 <- plot.args()$x$data
-        if (!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index])) {
+        if (!is.numeric(data.temp2[, index]) &
+          !is.ordered(data.temp2[, index])) {
           temp <- factor(data.temp2[, index], ordered = TRUE)
         } else {
           temp <- convert.to.factor(data.temp2[, index])
@@ -1240,7 +1230,9 @@ output$mapssubset2_slider_panel <- renderUI({
         label = paste("Subset '", input$mapssubset2, "': ", "_ALL"),
         min = 0, max = n.levels + 1, value = 0, step = 1,
         animate = animationOptions(
-          interval = ifelse(length(input$delay2) == 0, 600, 1000 * input$delay2),
+          interval = ifelse(length(input$delay2) == 0, 600,
+            1000 * input$delay2
+          ),
           playButton = icon("play", "fa-2x"),
           pauseButton = icon("pause", "fa-2x")
         ),
@@ -1258,12 +1250,12 @@ observe({
       input$mapssubset2 %in% colnames(get.data.set())) {
       data.temp <- get.data.set()
       index <- which(input$mapssubset2 == colnames(data.temp))
-      #      temp = convert.to.factor(data.temp[, index])
       if (input$map_type == 1) {
         temp <- convert.to.factor(data.temp[, index])
       } else if (input$map_type == 2) {
         data.temp2 <- plot.args()$x$data
-        if (!is.numeric(data.temp2[, index]) & !is.ordered(data.temp2[, index])) {
+        if (!is.numeric(data.temp2[, index]) &
+          !is.ordered(data.temp2[, index])) {
           temp <- factor(data.temp2[, index], ordered = TRUE)
         } else {
           temp <- convert.to.factor(data.temp2[, index])
@@ -1284,7 +1276,10 @@ observe({
         args$g2.level <- "_MULTI"
       } else {
         updateSliderInput(session, "mapssubset2_slider",
-          label = paste("Subset '", input$mapssubset2, "': ", levels(temp)[level])
+          label = paste(
+            "Subset '", input$mapssubset2, "': ",
+            levels(temp)[level]
+          )
         )
         args$g2.level <- levels(temp)[level]
       }
@@ -1295,12 +1290,7 @@ observe({
         if (!is.null(input$maplocation) &&
           !is.null(input$locationvariable) &&
           input$locationvariable %in% colnames(data.temp)) {
-          #          mapsplot.obj = iNZightShapeMap(data = data.temp,
-          #                         location = input$maplocation,
-          #                         data.region = input$locationvariable)
-          #          data.temp2 = mapsplot.obj$data
-          #          g2 = convert.to.factor(data.temp2[, index])
-          #          args$g2 = g2
+
         }
       }
     }
@@ -1487,17 +1477,21 @@ observe({
       } else if (input$selectinbuiltmap == 2) {
         dirpath <- "shapefiles/countries/"
         filename <- switch(input$countriesmap,
-          "New Zealand General Electoral Districts (2017)" = "nzl/constituency-2018.rds",
+          "New Zealand General Electoral Districts (2017)" =
+            "nzl/constituency-2018.rds",
           "New Zealand DHBs (2012)" = "nzl/dhb-2012.rds",
-          "New Zealand Regional Councils (2017)" = "nzl/regional-council-2018.rds",
-          "New Zealand Territorial Authorities (2017)" = "nzl/territorial-authority-2018.rds",
+          "New Zealand Regional Councils (2017)" =
+            "nzl/regional-council-2018.rds",
+          "New Zealand Territorial Authorities (2017)" =
+            "nzl/territorial-authority-2018.rds",
           "US States" = "usa/states-2016.rds",
           "US States (Contiguous)" = "usa/states-contig-2016.rds"
         )
       } else if (input$selectinbuiltmap == 3) {
         dirpath <- "shapefiles/world/"
         filename <- switch(input$worldmap,
-          "World Map (Natural Earth) (incl. Antarctica)" = "natural-earth-4.0.rds",
+          "World Map (Natural Earth) (incl. Antarctica)" =
+            "natural-earth-4.0.rds",
           "World Map (Thematic Mapping)" = "thematic-mapping-0.3.rds"
         )
       }
@@ -1506,9 +1500,16 @@ observe({
       filepath <- paste(dirpath, filename, sep = "")
       mapData <- iNZightMaps::retrieveMap(filepath)
       args2$mapData <- mapData
-      map.vars <- as.data.frame(stringsAsFactors = TRUE, mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
+      map.vars <- as.data.frame(
+        stringsAsFactors = TRUE,
+        mapData
+      )[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
       ## get the choices for mapvairable_panel
-      mapvars.update <- colnames(map.vars[, !(apply(map.vars, 2, anyDuplicated, incomparables = c(NA, ""))), drop = FALSE])
+      mapvars.update <- colnames(
+        map.vars[, !(apply(map.vars, 2, anyDuplicated,
+          incomparables = c(NA, "")
+        )), drop = FALSE]
+      )
 
       ## Find the pair of variables with the highest number of matches
       best.vars <- iNZightMaps::findBestMatch(temp.data, map.vars)
@@ -1516,13 +1517,16 @@ observe({
       best.map.var <- best.vars[2]
 
       if (length(input$mapvariable) > 0 && length(input$datavariable) > 0 &&
-        input$mapvariable == best.map.var && input$datavariable == best.data.var) {
+        input$mapvariable == best.map.var &&
+        input$datavariable == best.data.var) {
         temp <- plot.args2()
         args2$updateplot <- temp$updateplot + 1
       }
 
       ## update mapvairable_panel after map file selected
-      updateSelectInput(session, "mapvariable", choices = mapvars.update, selected = best.map.var)
+      updateSelectInput(session, "mapvariable",
+        choices = mapvars.update, selected = best.map.var
+      )
       ## update datavariable_panel
       updateSelectInput(session, "datavariable", selected = best.data.var)
     }
@@ -1538,9 +1542,16 @@ observeEvent(input$loadshapefiles, {
     filepath <- input$loadshapefiles$datapath
     mapData <- iNZightMaps::retrieveMap(filepath)
     args2$mapData <- mapData
-    map.vars <- as.data.frame(stringsAsFactors = TRUE, mapData)[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
+    map.vars <- as.data.frame(
+      stringsAsFactors = TRUE,
+      mapData
+    )[, !(colnames(mapData) %in% "geometry"), drop = FALSE]
     ## get the choices for mapvairable_panel
-    mapvars.update <- colnames(map.vars[, !(apply(map.vars, 2, anyDuplicated, incomparables = c(NA, ""))), drop = FALSE])
+    mapvars.update <- colnames(
+      map.vars[, !(apply(map.vars, 2, anyDuplicated,
+        incomparables = c(NA, "")
+      )), drop = FALSE]
+    )
 
     ## Find the pair of variables with the highest number of matches
     best.vars <- iNZightMaps::findBestMatch(temp.data, map.vars)
@@ -1548,7 +1559,9 @@ observeEvent(input$loadshapefiles, {
     best.map.var <- best.vars[2]
 
     ## update mapvairable_panel after map file selected
-    updateSelectInput(session, "mapvariable", choices = mapvars.update, selected = best.map.var)
+    updateSelectInput(session, "mapvariable",
+      choices = mapvars.update, selected = best.map.var
+    )
     ## update datavariable_panel
     updateSelectInput(session, "datavariable", selected = best.data.var)
   })
@@ -1623,11 +1636,13 @@ observe({
     sequence.var <- NULL
 
     if (!is.null(mapData) && !is.null(match.list) &&
-      !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+      !is.null(input$datavariable) &&
+      input$datavariable %in% colnames(temp.data) &&
       !is.null(input$mapvariable) && input$mapvariable != "") {
       if (match.list$multiple.obs) {
         has.multipleobs <- TRUE
-        if (!is.null(input$sequencevariable) && input$sequencevariable %in% colnames(temp.data)) {
+        if (!is.null(input$sequencevariable) &&
+          input$sequencevariable %in% colnames(temp.data)) {
           sequence.var <- input$sequencevariable
         }
       } else {
@@ -1664,7 +1679,9 @@ output$sequencevariable_panel <- renderUI({
     match.list <- temp$match.list
     if (!is.null(match.list)) {
       if (match.list$multiple.obs) {
-        textpanel <- h5(strong("Multiple observations for each region were found!"))
+        textpanel <- h5(strong(
+          "Multiple observations for each region were found!"
+        ))
         timevar <- grepl("(year|date)", colnames(temp.data), ignore.case = TRUE)
 
         if (any(timevar)) {
@@ -1758,7 +1775,10 @@ output$unmatchedcounts_panel <- renderText({
       match.list <- temp$match.list
       matchedcount <- sum(match.list$data.matched)
       unmatchedcount <- sum(!match.list$data.matched)
-      ret <- paste("Matched Count:", matchedcount, "\n", "Unmatched Count:", unmatchedcount, sep = "")
+      ret <- paste("Matched Count:", matchedcount, "\n",
+        "Unmatched Count:", unmatchedcount,
+        sep = ""
+      )
     }
 
     ret
@@ -1818,7 +1838,9 @@ output$checkregion_panel <- renderUI({
   isolate({
     temp <- plot.args2()
     if (!is.null(temp$combinedData)) {
-      options <- suppressWarnings(iNZightMaps::iNZightMapRegions(temp$combinedData))
+      options <- suppressWarnings(
+        iNZightMaps::iNZightMapRegions(temp$combinedData)
+      )
       ret <- selectInput(
         inputId = "check_regions",
         label = NULL,
@@ -1841,7 +1863,9 @@ observe({
   input$check_regions
   isolate({
     temp <- plot.args2()
-    options <- suppressWarnings(iNZightMaps::iNZightMapRegions(temp$combinedData))
+    options <- suppressWarnings(
+      iNZightMaps::iNZightMapRegions(temp$combinedData)
+    )
     if (!is.null(input$check_regions) && length(input$check_regions) > 0 &&
       length(input$check_regions) != length(options)) {
       args2$mapRegionsPlot <- input$check_regions
@@ -1857,7 +1881,9 @@ observe({
 observe({
   input$advancedmapoptions_projection
   isolate({
-    projection.index <- match(input$advancedmapoptions_projection, plot.args2()$proj.df$Name)
+    projection.index <- match(
+      input$advancedmapoptions_projection, plot.args2()$proj.df$Name
+    )
 
     args2$plotProjection <- plot.args2()$proj.df[projection.index, "PROJ4"]
   })
@@ -2005,7 +2031,12 @@ output$advancedplotoptions_panel <- renderUI({
               selectInput(
                 inputId = "advancedplotoptions_regionlabels",
                 label = NULL,
-                choices = c("Current Variable", iNZightMaps::iNZightMapVars(temp$combinedData, map.vars = TRUE)),
+                choices = c(
+                  "Current Variable",
+                  iNZightMaps::iNZightMapVars(temp$combinedData,
+                    map.vars = TRUE
+                  )
+                ),
                 selected = input$advancedplotoptions_regionlabels,
                 selectize = F
               ),
@@ -2072,7 +2103,8 @@ observe({
 
   isolate({
     if (!is.null(input$regionlabels_click) && input$regionlabels_click) {
-      if (!is.null(input$advancedplotoptions_regionlabels) && length(input$advancedplotoptions_regionlabels) > 0) {
+      if (!is.null(input$advancedplotoptions_regionlabels) &&
+        length(input$advancedplotoptions_regionlabels) > 0) {
         if (input$advancedplotoptions_regionlabels == "Current Variable") {
           args2$plotLabelVar <- "use_colour_var"
         } else {
@@ -2090,11 +2122,14 @@ observe({
 observe({
   input$advancedplotoptions_mapscales
   isolate({
-    if (!is.null(input$advancedplotoptions_mapscales) && length(input$advancedplotoptions_mapscales) > 0) {
+    if (!is.null(input$advancedplotoptions_mapscales) &&
+      length(input$advancedplotoptions_mapscales) > 0) {
       if (!is.null(input$vartodisplay) && length(input$vartodisplay) > 0) {
         args2$plotScaleLimits <- switch(input$advancedplotoptions_mapscales,
           "Independent scales" = NULL,
-          "Same for all plots" = iNZightMaps::getMinMax(plot.args2()$combinedData, input$vartodisplay),
+          "Same for all plots" = iNZightMaps::getMinMax(
+            plot.args2()$combinedData, input$vartodisplay
+          ),
           "Scales fixed at 0-1" = c(0, 1),
           "Scales fixed at 0-100" = c(0, 100)
         )
@@ -2161,26 +2196,6 @@ observe({
 })
 
 
-## observe advancedplotoptions_transparency
-# observe({
-#  input$advancedplotoptions_transparency
-#  isolate({
-#    if(length(input$advancedplotoptions_transparency) > 0)
-#      args2$plotConstantAlpha = 1-input$advancedplotoptions_transparency
-#  })
-# })
-
-
-## observe advancedplotoptions_size
-# observe({
-#  input$advancedplotoptions_size
-#  isolate({
-#    if(length(input$advancedplotoptions_size) > 0)
-#      args2$plotConstantSize = input$advancedplotoptions_size
-#  })
-# })
-
-
 ## set up variabletodisplay_panel
 output$variabletodisplay_panel <- renderUI({
   get.data.set()
@@ -2227,9 +2242,6 @@ output$multipleobsoption_panel <- renderUI({
     temp <- plot.args2()
 
     if (!is.null(temp$match.list) && temp$match.list$multiple.obs) {
-      #      unique.singlevals = unique(as.data.frame(temp$combinedData[["region.data"]])[, temp$combinedData$sequence.var])
-      #      unique.singlevals = unique.singlevals[!is.na(unique.singlevals)]
-
       ret <- list(
         h5(strong("Dataset has multiple observations for regions:")),
         radioButtons(
@@ -2311,8 +2323,12 @@ output$printseqvar <- renderText({
       temp$combinedData[["region.data"]]
     )[, temp$combinedData$sequence.var])
     unique.singlevals <- unique.singlevals[!is.na(unique.singlevals)]
-    if (!is.null(input$sequencevariable) && length(input$sequencevariable) > 0) {
-      paste("Value of", input$sequencevariable, ":", unique.singlevals[input$seqvar_slider])
+    if (!is.null(input$sequencevariable) &&
+      length(input$sequencevariable) > 0) {
+      paste(
+        "Value of", input$sequencevariable, ":",
+        unique.singlevals[input$seqvar_slider]
+      )
     }
   })
 })
@@ -2332,14 +2348,17 @@ output$seqvar_slider_panel <- renderUI({
       )[, temp$combinedData$sequence.var])
       unique.singlevals <- unique.singlevals[!is.na(unique.singlevals)]
       n.unique.singlevals <- length(unique.singlevals)
-      if (!is.null(input$sequencevariable) && length(input$sequencevariable) > 0) {
+      if (!is.null(input$sequencevariable) &&
+        length(input$sequencevariable) > 0) {
         ret <- sliderInput("seqvar_slider",
           label = NULL,
           min = 1,
           max = n.unique.singlevals,
           value = n.unique.singlevals, step = 1,
           animate = animationOptions(
-            interval = ifelse(length(input$slidertimer) == 0, 600, 1000 * input$slidertimer),
+            interval = ifelse(length(input$slidertimer) == 0, 600,
+              1000 * input$slidertimer
+            ),
             playButton = icon("play", "fa-2x"),
             pauseButton = icon("pause", "fa-2x")
           ),
@@ -2394,25 +2413,26 @@ observe({
         unique.singlevals <- unique.singlevals[!is.na(unique.singlevals)]
 
         args2$multipleObsOption <- "singleval"
-        #      args2$combinedData$type = ifelse(input$plotas_options == 1, "region", "points")
         if (!is.null(input$seqvar_slider) && length(input$seqvar_slider) > 0) {
           args2$plotCurrentSeqVal <- unique.singlevals[input$seqvar_slider]
-          args2$combinedData <- iNZightMaps::iNZightMapAggregation(temp$combinedData,
+          args2$combinedData <- iNZightMaps::iNZightMapAggregation(
+            temp$combinedData,
             "singlevalue",
             single.value = unique.singlevals[input$seqvar_slider]
           )
         }
 
-
-        #      print(temp$combinedData$sequence.var)
-        #      print(unique.singlevals[input$seqvar_slider])
-        #      print(plot.args2()$plotCurrentSeqVal)
-
         ## update the plot title
         if (!is.null(input$vartodisplay) && length(input$vartodisplay) == 1) {
-          args2$plotTitle <- paste(input$vartodisplay, " (", unique.singlevals[input$seqvar_slider], ")")
+          args2$plotTitle <- paste(
+            input$vartodisplay, " (",
+            unique.singlevals[input$seqvar_slider], ")"
+          )
           updateTextInput(session, "advancedplotoptions_plottitle",
-            value = paste(input$vartodisplay, " (", unique.singlevals[input$seqvar_slider], ")")
+            value = paste(
+              input$vartodisplay, " (",
+              unique.singlevals[input$seqvar_slider], ")"
+            )
           )
         }
       }
@@ -2439,7 +2459,9 @@ observe({
           plot.args2()$combinedData$region.data
         )[, input$vartodisplay, drop = FALSE], is.numeric)
         if (sum(vars.to.keep) > 0) {
-          updateSelectInput(session, "vartodisplay", selected = input$vartodisplay[vars.to.keep])
+          updateSelectInput(session, "vartodisplay",
+            selected = input$vartodisplay[vars.to.keep]
+          )
         } else {
           updateSelectInput(session, "vartodisplay", selected = NULL)
         }
@@ -2487,7 +2509,8 @@ output$plotas_panel <- renderUI({
 
     if (!is.null(temp$combinedData)) {
       ## conditional when "Single Value" or "Aggregate" is selected
-      if ((!is.null(input$multipleobsoption) && length(input$multipleobsoption) > 0 && input$multipleobsoption != 2) ||
+      if ((!is.null(input$multipleobsoption) &&
+        length(input$multipleobsoption) > 0 && input$multipleobsoption != 2) ||
         (!is.null(temp$match.list) && !temp$match.list$multiple.obs)) {
         ret <- list(
           fixedRow(
@@ -2507,7 +2530,11 @@ output$plotas_panel <- renderUI({
               column(6, selectInput(
                 inputId = "plotas_sizeby",
                 label = NULL,
-                choices = c(" ", sort(iNZightMaps::iNZightMapVars(temp$combinedData, TRUE)[temp$combinedData$var.types %in% c("numeric", "integer")])),
+                choices = c(" ", sort(
+                  iNZightMaps::iNZightMapVars(
+                    temp$combinedData, TRUE
+                  )[temp$combinedData$var.types %in% c("numeric", "integer")]
+                )),
                 selected = input$plotas_sizeby,
                 selectize = F
               ))
@@ -2520,18 +2547,6 @@ output$plotas_panel <- renderUI({
 
   ret
 })
-
-
-## observe plotas_options
-# observe({
-#  input$plotas_options
-#  isolate({
-#    if(length(input$plotas_options) > 0 && input$plotas_options == 2)
-#      args2$mapType = "point"
-#    else
-#      args2$mapType = "region"
-#  })
-# })
 
 ## observe plotas_sizeby
 observe({
@@ -2569,7 +2584,8 @@ output$sizeandtransparency_panel <- renderUI({
             label = NULL,
             min = 0,
             max = 1,
-            value = input$advancedplotoptions_transparency, step = 0.1, ticks = FALSE
+            value = input$advancedplotoptions_transparency, step = 0.1,
+            ticks = FALSE
           ))
         ),
         fixedRow(
@@ -2583,7 +2599,8 @@ output$sizeandtransparency_panel <- renderUI({
         )
       )
     } else if (length(input$plotas_options) > 0 && input$plotas_options == 2 &&
-      (length(input$multipleobsoption) > 0 && (input$multipleobsoption == 1 | input$multipleobsoption == 3) ||
+      (length(input$multipleobsoption) > 0 &&
+        (input$multipleobsoption == 1 | input$multipleobsoption == 3) ||
         !is.null(temp$match.list) && !temp$match.list$multiple.obs)) {
       ret <- fixedRow(
         column(3, h5("Size:")),
@@ -2599,10 +2616,6 @@ output$sizeandtransparency_panel <- renderUI({
 
   ret
 })
-
-
-
-
 
 
 ## set up maplocation_panel and locationvariable_panel
@@ -2679,7 +2692,8 @@ observe({
 })
 
 
-## set up plot_region_colour_panel, missingvaluecolour_panel and plotlabels_panel
+## set up plot_region_colour_panel, missingvaluecolour_panel
+## and plotlabels_panel
 ## update args$col, args$na.fill and args$name
 output$plot_region_colour_panel <- renderUI({
   get.data.set()
@@ -2718,7 +2732,10 @@ output$plotlabels_panel <- renderUI({
     selectInput(
       inputId = "plotlabels",
       label = "Plot Labels:",
-      choices = c(c("None", paste(input$locationvariable, "name"), "Value", "Both")),
+      choices = c(c(
+        "None", paste(input$locationvariable, "name"),
+        "Value", "Both"
+      )),
       selectize = FALSE
     )
   })
@@ -2728,9 +2745,11 @@ output$plotlabels_panel <- renderUI({
 observe({
   input$plot_region_colour
   isolate({
-    if (!is.null(input$plot_region_colour) && input$plot_region_colour %in% c("heat", "terrain")) {
+    if (!is.null(input$plot_region_colour) &&
+      input$plot_region_colour %in% c("heat", "terrain")) {
       args$col.fun <- input$plot_region_colour
-    } else if (!is.null(input$plot_region_colour) && !(input$plot_region_colour %in% c("heat", "terrian"))) {
+    } else if (!is.null(input$plot_region_colour) &&
+      !(input$plot_region_colour %in% c("heat", "terrian"))) {
       args$col.fun <- NULL
     }
     args$col <- input$plot_region_colour
@@ -2844,24 +2863,42 @@ observe({
         updateTextInput(session, "advancedplotoptions_plottitle", value = "")
       } else {
         if (!is.null(temp$match.list) && temp$match.list$multiple.obs) {
-          if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 1) {
+          if (length(input$multipleobsoption) > 0 &&
+            input$multipleobsoption == 1) {
             #                  temp = plot.args2()
-            args2$plotTitle <- paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")")
-            updateTextInput(session, "advancedplotoptions_plottitle",
-              value = paste(input$vartodisplay, " (", temp$plotCurrentSeqVal, ")")
+            args2$plotTitle <- paste(
+              input$vartodisplay,
+              " (", temp$plotCurrentSeqVal, ")"
             )
-          } else if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 3) {
-            args2$plotTitle <- value <- paste(input$vartodisplay, " (", input$aggregateoption, ")")
             updateTextInput(session, "advancedplotoptions_plottitle",
-              value = paste(input$vartodisplay, " (", input$aggregateoption, ")")
+              value = paste(
+                input$vartodisplay, " (",
+                temp$plotCurrentSeqVal, ")"
+              )
+            )
+          } else if (length(input$multipleobsoption) > 0 &&
+            input$multipleobsoption == 3) {
+            args2$plotTitle <- value <- paste(
+              input$vartodisplay,
+              " (", input$aggregateoption, ")"
+            )
+            updateTextInput(session, "advancedplotoptions_plottitle",
+              value = paste(
+                input$vartodisplay, " (",
+                input$aggregateoption, ")"
+              )
             )
           } else {
             args2$plotTitle <- input$vartodisplay
-            updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
+            updateTextInput(session, "advancedplotoptions_plottitle",
+              value = input$vartodisplay
+            )
           }
         } else {
           args2$plotTitle <- input$vartodisplay
-          updateTextInput(session, "advancedplotoptions_plottitle", value = input$vartodisplay)
+          updateTextInput(session, "advancedplotoptions_plottitle",
+            value = input$vartodisplay
+          )
         }
       }
     }
@@ -2944,7 +2981,8 @@ output$maps_plot <- renderPlot({
       mapData <- temp$mapData
 
       if (!is.null(mapData) &&
-        !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+        !is.null(input$datavariable) &&
+        input$datavariable %in% colnames(temp.data) &&
         !is.null(input$mapvariable)) {
         ## update "match.list" information after loading data
         match.list <- iNZightMaps::matchVariables(
@@ -2961,17 +2999,18 @@ output$maps_plot <- renderPlot({
         if (!is.null(temp$combinedData) &&
           !is.null(input$vartodisplay) &&
           all(input$vartodisplay %in% colnames(temp.data))) {
-          #          temp$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
-          #                                          "point", "region")
-          args2$combinedData$type <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+          args2$combinedData$type <- ifelse(
+            length(input$plotas_options) > 0 && input$plotas_options == 2,
             "point", "region"
           )
 
-          args2$mapType <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+          args2$mapType <- ifelse(
+            length(input$plotas_options) > 0 && input$plotas_options == 2,
             "point", "region"
           )
 
-          if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 2) {
+          if (length(input$multipleobsoption) > 0 &&
+            input$multipleobsoption == 2) {
             args2$combinedData$type <- "sparklines"
           }
 
@@ -2997,26 +3036,25 @@ output$maps_plot <- renderPlot({
           }
 
           ## update plotConstantSize (size for points)
-          if (!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0) {
+          if (!is.null(input$advancedplotoptions_size) &&
+            length(input$advancedplotoptions_size) > 0) {
             args2$plotConstantSize <- input$advancedplotoptions_size
           }
 
 
           ## update plotConstantAlpha
-          if (!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0) {
-            args2$plotConstantAlpha <- 1 - input$advancedplotoptions_transparency
+          if (!is.null(input$advancedplotoptions_transparency) &&
+            length(input$advancedplotoptions_transparency) > 0) {
+            args2$plotConstantAlpha <-
+              1 - input$advancedplotoptions_transparency
           }
-
-          ## update advancedplotoptions_plottitle
-          #          if(!is.null(input$advancedplotoptions_plottitle))
-          #            args2$plotTitle = input$advancedplotoptions_plottitle
-
-
 
           temp <- plot.args2()
           grid::grid.draw(plot(temp$combinedData,
             main = temp$plotTitle,
-            axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+            axis.labels = temp$plotAxes,
+            xlab = temp$plotXLab,
+            ylab = temp$plotYLab,
             datum.lines = temp$plotDatumLines,
             projection = temp$plotProjection,
             multiple.vars = multiple.variables,
@@ -3038,7 +3076,12 @@ output$maps_plot <- renderPlot({
           ))
         } else {
           matchplot.colours <- c("#d95f02", "#1b9e77", "#7570b3")
-          tryCatch(plot(sf::st_geometry(mapData$geometry), col = matchplot.colours[match.list$map.matched + 1]), error = function(e) {})
+          tryCatch(
+            plot(sf::st_geometry(mapData$geometry),
+              col = matchplot.colours[match.list$map.matched + 1]
+            ),
+            error = function(e) {}
+          )
 
           legend("topleft",
             legend = c(
@@ -3104,7 +3147,8 @@ output$interactive.maps <- renderUI({
       mapData <- temp$mapData
 
       if (!is.null(mapData) &&
-        !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+        !is.null(input$datavariable) &&
+        input$datavariable %in% colnames(temp.data) &&
         !is.null(input$mapvariable)) {
         ## update "match.list" information after loading data
         match.list <- iNZightMaps::matchVariables(
@@ -3120,15 +3164,18 @@ output$interactive.maps <- renderUI({
         if (!is.null(temp$combinedData) &&
           !is.null(input$vartodisplay) &&
           all(input$vartodisplay %in% colnames(temp.data))) {
-          args2$combinedData$type <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+          args2$combinedData$type <- ifelse(
+            length(input$plotas_options) > 0 && input$plotas_options == 2,
             "point", "region"
           )
 
-          args2$mapType <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+          args2$mapType <- ifelse(
+            length(input$plotas_options) > 0 && input$plotas_options == 2,
             "point", "region"
           )
 
-          if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 2) {
+          if (length(input$multipleobsoption) > 0 &&
+            input$multipleobsoption == 2) {
             args2$combinedData$type <- "sparklines"
           }
 
@@ -3155,24 +3202,24 @@ output$interactive.maps <- renderUI({
             }
 
             ## update plotConstantSize (size for points)
-            if (!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0) {
+            if (!is.null(input$advancedplotoptions_size) &&
+              length(input$advancedplotoptions_size) > 0) {
               args2$plotConstantSize <- input$advancedplotoptions_size
             }
 
 
             ## update plotConstantAlpha
-            if (!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0) {
+            if (!is.null(input$advancedplotoptions_transparency) &&
+              length(input$advancedplotoptions_transparency) > 0) {
               args2$plotConstantAlpha <- 1 - input$advancedplotoptions_transparency
             }
-
-            ## update advancedplotoptions_plottitle
-            #            if(!is.null(input$advancedplotoptions_plottitle))
-            #              args2$plotTitle = input$advancedplotoptions_plottitle
 
             temp <- plot.args2()
             x <- plot(temp$combinedData,
               main = temp$plotTitle,
-              axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+              axis.labels = temp$plotAxes,
+              xlab = temp$plotXLab,
+              ylab = temp$plotYLab,
               datum.lines = temp$plotDatumLines,
               projection = temp$plotProjection,
               multiple.vars = multiple.variables,
@@ -3200,11 +3247,7 @@ output$interactive.maps <- renderUI({
               file = tempfile(fileext = ".html")
             )
 
-
-
             addr <- unclass(addr)
-            #          temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
-            #          addResourcePath("path", temp.dir)
             temp.dir <- substring(addr, 1, regexpr("file", addr) - 1)
             addResourcePath("path", temp.dir)
             filename <- substring(addr, regexpr("file", addr))
@@ -3220,12 +3263,6 @@ output$interactive.maps <- renderUI({
                 height = 600, width = 1200
               )
             )
-            # tags$iframe(
-            #  seamless = "seamless",
-            #  #            src = "path/index.html",
-            #  src = paste("path/", filename, sep = ""),
-            #  height = 600, width = 2000
-            # )
           }
         }
       }
@@ -3242,7 +3279,10 @@ output$interactive.maps <- renderUI({
         )
 
         local.dir <- unclass(local.dir)
-        temp.dir <- substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+        temp.dir <- substr(
+          unclass(local.dir), 1,
+          nchar(unclass(local.dir)) - 11
+        )
         addResourcePath("path", temp.dir)
         tags$div(
           tags$a(
@@ -3256,35 +3296,6 @@ output$interactive.maps <- renderUI({
             height = 600, width = 1200
           )
         )
-        # tags$iframe(
-        #  seamless = "seamless",
-        #  src = "path/index.html",
-        #  height = 600, width = 1200
-        # )
-        #        temp1 = plot.args()
-
-        #        tryCatch({do.call(plot, temp1)},
-        #                 error = function(e) {
-        #                   print(e)
-        #                 }, finally = {})
-
-        #        pdf(NULL)
-        #        addr = iNZightPlots::exportHTML(x = x,
-        #                                        file = tempfile(fileext = ".html"))
-
-
-
-        #        addr = unclass(addr)
-
-        #        temp.dir = substring(addr, 1, regexpr("file", addr)-1)
-        #        addResourcePath("path", temp.dir)
-        #        filename = substring(addr, regexpr("file", addr))
-        #        tags$iframe(
-        #          seamless = "seamless",
-        #            src = "path/index.html",
-        #          src = paste("path/", filename, sep = ""),
-        #          height = 600, width = 2000
-        #        )
       }
     }
   })
@@ -3350,8 +3361,10 @@ output$extra_mapvars_check_panel <- renderUI({
   input$select_latitude
   input$select_longitude
   isolate({
-    if (!is.null(input$select_latitude) && input$select_latitude != "Select Latitude Information" &&
-      !is.null(input$select_longitude) && input$select_longitude != "Select Longitude Information") {
+    if (!is.null(input$select_latitude) &&
+      input$select_latitude != "Select Latitude Information" &&
+      !is.null(input$select_longitude) &&
+      input$select_longitude != "Select Longitude Information") {
       ret <- checkboxInput("extra_mapvars_check",
         strong("Select additional variables:"),
         value = input$extra_mapvars_check
@@ -3369,15 +3382,16 @@ output$extra.mapvars.html <- renderUI({
   get.data.set()
   isolate({
     ch <- colnames(get.data.set())
-    if (!is.null(input$select_latitude) && input$select_latitude != "Select Latitude Information" &&
-      !is.null(input$select_longitude) && input$select_longitude != "Select Longitude Information") {
+    if (!is.null(input$select_latitude) &&
+      input$select_latitude != "Select Latitude Information" &&
+      !is.null(input$select_longitude) &&
+      input$select_longitude != "Select Longitude Information") {
       ch <- ch[-which(ch %in% c(input$select_latitude, input$select_longitude))]
     }
 
 
     selectInput(
       inputId = "export.extra.mapvars.html",
-      # label = strong("Select additional variables to export"),
       label = NULL,
       choices = ch,
       multiple = TRUE,
@@ -3395,11 +3409,15 @@ observe({
   input$extra_mapvars_check
   isolate({
     ch <- colnames(get.data.set())
-    if (!is.null(input$select_latitude) && input$select_latitude != "Select Latitude Information" &&
-      !is.null(input$select_longitude) && input$select_longitude != "Select Longitude Information") {
+    if (!is.null(input$select_latitude) &&
+      input$select_latitude != "Select Latitude Information" &&
+      !is.null(input$select_longitude) &&
+      input$select_longitude != "Select Longitude Information") {
       ch <- ch[-which(ch %in% c(input$select_latitude, input$select_longitude))]
     }
-    updateSelectInput(session, "export.extra.mapvars.html", choices = ch, selected = NULL)
+    updateSelectInput(session, "export.extra.mapvars.html",
+      choices = ch, selected = NULL
+    )
   })
 })
 
@@ -3418,7 +3436,10 @@ extra.mapvars_html <- reactive({
 
 ## reaction to the "save_interactive_mapplot" button
 output$save_interactive_mapplot1 <- downloadHandler(
-  filename = substring(tempfile(pattern = "file", tmpdir = "", fileext = ".html"), 2),
+  filename = substring(tempfile(
+    pattern = "file", tmpdir = "",
+    fileext = ".html"
+  ), 2),
   content = function(file) {
     condition1 <- !is.null(input$select_latitude) &&
       input$select_latitude %in% colnames(get.data.set()) &&
@@ -3440,14 +3461,18 @@ output$save_interactive_mapplot1 <- downloadHandler(
 
 
 output$save_interactive_mapplot2 <- downloadHandler(
-  filename = substring(tempfile(pattern = "file", tmpdir = "", fileext = ".html"), 2),
+  filename = substring(tempfile(
+    pattern = "file", tmpdir = "",
+    fileext = ".html"
+  ), 2),
   content = function(file) {
     temp.data <- get.data.set()
     temp <- plot.args2()
     mapData <- temp$mapData
 
     if (!is.null(mapData) &&
-      !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+      !is.null(input$datavariable) &&
+      input$datavariable %in% colnames(temp.data) &&
       !is.null(input$mapvariable)) {
       ## update "match.list" information after loading data
       match.list <- iNZightMaps::matchVariables(
@@ -3460,15 +3485,18 @@ output$save_interactive_mapplot2 <- downloadHandler(
       if (!is.null(temp$combinedData) &&
         !is.null(input$vartodisplay) &&
         all(input$vartodisplay %in% colnames(temp.data))) {
-        args2$combinedData$type <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+        args2$combinedData$type <- ifelse(
+          length(input$plotas_options) > 0 && input$plotas_options == 2,
           "point", "region"
         )
 
-        args2$mapType <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+        args2$mapType <- ifelse(
+          length(input$plotas_options) > 0 && input$plotas_options == 2,
           "point", "region"
         )
 
-        if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 2) {
+        if (length(input$multipleobsoption) > 0 &&
+          input$multipleobsoption == 2) {
           args2$combinedData$type <- "sparklines"
         }
 
@@ -3495,24 +3523,25 @@ output$save_interactive_mapplot2 <- downloadHandler(
           }
 
           ## update plotConstantSize (size for points)
-          if (!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0) {
+          if (!is.null(input$advancedplotoptions_size) &&
+            length(input$advancedplotoptions_size) > 0) {
             args2$plotConstantSize <- input$advancedplotoptions_size
           }
 
 
           ## update plotConstantAlpha
-          if (!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0) {
-            args2$plotConstantAlpha <- 1 - input$advancedplotoptions_transparency
+          if (!is.null(input$advancedplotoptions_transparency) &&
+            length(input$advancedplotoptions_transparency) > 0) {
+            args2$plotConstantAlpha <-
+              1 - input$advancedplotoptions_transparency
           }
-
-          ## update advancedplotoptions_plottitle
-          #            if(!is.null(input$advancedplotoptions_plottitle))
-          #              args2$plotTitle = input$advancedplotoptions_plottitle
 
           temp <- plot.args2()
           x <- plot(temp$combinedData,
             main = temp$plotTitle,
-            axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+            axis.labels = temp$plotAxes,
+            xlab = temp$plotXLab,
+            ylab = temp$plotYLab,
             datum.lines = temp$plotDatumLines,
             projection = temp$plotProjection,
             multiple.vars = multiple.variables,
@@ -3534,16 +3563,6 @@ output$save_interactive_mapplot2 <- downloadHandler(
           )
 
           pdf(NULL)
-          #            addr = iNZightPlots::exportHTML(x = x,
-          #                                            mapObj = temp$combinedData,
-          #                                            file = tempfile(fileext = ".html"))
-
-
-          #            src = normalizePath(addr)
-          #            owd = setwd(tempdir())
-          #            on.exit(setwd(owd))
-          #            file.copy(src, "index.html")
-          #            file.copy("index.html", file)
           temp.name <- tempfile(fileext = ".html")
           addr <- iNZightPlots::exportHTML(
             x = x,
@@ -3663,7 +3682,8 @@ observe({
           mapData <- temp$mapData
 
           if (!is.null(mapData) &&
-            !is.null(input$datavariable) && input$datavariable %in% colnames(temp.data) &&
+            !is.null(input$datavariable) &&
+            input$datavariable %in% colnames(temp.data) &&
             !is.null(input$mapvariable)) {
             ## update "match.list" information after loading data
             match.list <- iNZightMaps::matchVariables(
@@ -3680,17 +3700,18 @@ observe({
             if (!is.null(temp$combinedData) &&
               !is.null(input$vartodisplay) &&
               all(input$vartodisplay %in% colnames(temp.data))) {
-              #          temp$combinedData$type = ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
-              #                                          "point", "region")
-              args2$combinedData$type <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+              args2$combinedData$type <- ifelse(
+                length(input$plotas_options) > 0 && input$plotas_options == 2,
                 "point", "region"
               )
 
-              args2$mapType <- ifelse(length(input$plotas_options) > 0 && input$plotas_options == 2,
+              args2$mapType <- ifelse(
+                length(input$plotas_options) > 0 && input$plotas_options == 2,
                 "point", "region"
               )
 
-              if (length(input$multipleobsoption) > 0 && input$multipleobsoption == 2) {
+              if (length(input$multipleobsoption) > 0 &&
+                input$multipleobsoption == 2) {
                 args2$combinedData$type <- "sparklines"
               }
 
@@ -3708,7 +3729,8 @@ observe({
                   aggregate.logical <- FALSE
                 }
               } else {
-                if (multiple.variables && temp$multipleObsOption != "allvalues") {
+                if (multiple.variables &&
+                  temp$multipleObsOption != "allvalues") {
                   aggregate.logical <- TRUE
                 } else {
                   aggregate.logical <- FALSE
@@ -3716,26 +3738,25 @@ observe({
               }
 
               ## update plotConstantSize (size for points)
-              if (!is.null(input$advancedplotoptions_size) && length(input$advancedplotoptions_size) > 0) {
+              if (!is.null(input$advancedplotoptions_size) &&
+                length(input$advancedplotoptions_size) > 0) {
                 args2$plotConstantSize <- input$advancedplotoptions_size
               }
 
 
               ## update plotConstantAlpha
-              if (!is.null(input$advancedplotoptions_transparency) && length(input$advancedplotoptions_transparency) > 0) {
+              if (!is.null(input$advancedplotoptions_transparency) &&
+                length(input$advancedplotoptions_transparency) > 0) {
                 args2$plotConstantAlpha <- 1 - input$advancedplotoptions_transparency
               }
-
-              ## update advancedplotoptions_plottitle
-              #          if(!is.null(input$advancedplotoptions_plottitle))
-              #            args2$plotTitle = input$advancedplotoptions_plottitle
-
 
 
               temp <- plot.args2()
               grid::grid.draw(plot(temp$combinedData,
                 main = temp$plotTitle,
-                axis.labels = temp$plotAxes, xlab = temp$plotXLab, ylab = temp$plotYLab,
+                axis.labels = temp$plotAxes,
+                xlab = temp$plotXLab,
+                ylab = temp$plotYLab,
                 datum.lines = temp$plotDatumLines,
                 projection = temp$plotProjection,
                 multiple.vars = multiple.variables,
@@ -3757,7 +3778,9 @@ observe({
               ))
             } else {
               matchplot.colours <- c("#d95f02", "#1b9e77", "#7570b3")
-              plot(sf::st_geometry(mapData$geometry), col = matchplot.colours[match.list$map.matched + 1])
+              plot(sf::st_geometry(mapData$geometry),
+                col = matchplot.colours[match.list$map.matched + 1]
+              )
               legend("topleft",
                 legend = c(
                   "Data present for region",

@@ -63,7 +63,10 @@ output$all.summary <- renderPrint({
 
 output$column.summary <- renderPrint({
   if (!is.null(input$select.column.sum)) {
-    temp <- get.data.set()[, which(colnames(get.data.set()) %in% input$select.column.sum)]
+    temp <- get.data.set()[
+      ,
+      which(colnames(get.data.set()) %in% input$select.column.sum)
+    ]
     if (is.character(temp)) {
       print(as.factor(temp))
       cat("\n\t")
@@ -94,9 +97,15 @@ observe({
       if (which(colnames(get.data.set()) %in% input$select.column.plot) == 1) {
         index <- ncol(get.data.set())
       } else {
-        index <- which(colnames(get.data.set()) %in% input$select.column.plot) - 1
+        index <- which(
+          colnames(get.data.set()) %in% input$select.column.plot
+        ) - 1
       }
-      updateSelectInput(session, inputId = "select.column.plot", choices = colnames(get.data.set()), selected = colnames(get.data.set())[index])
+      updateSelectInput(session,
+        inputId = "select.column.plot",
+        choices = colnames(get.data.set()),
+        selected = colnames(get.data.set())[index]
+      )
       updateSliderInput(session, inputId = "single.play", value = index)
     }
   })
@@ -107,12 +116,20 @@ observe({
   isolate({
     if (!is.null(input$single.forward) && input$single.forward > 0) {
       index <- 1
-      if (which(colnames(get.data.set()) %in% input$select.column.plot) == ncol(get.data.set())) {
+      if (which(
+        colnames(get.data.set()) %in% input$select.column.plot
+      ) == ncol(get.data.set())) {
         index <- 1
       } else {
-        index <- which(colnames(get.data.set()) %in% input$select.column.plot) + 1
+        index <- which(
+          colnames(get.data.set()) %in% input$select.column.plot
+        ) + 1
       }
-      updateSelectInput(session, inputId = "select.column.plot", choices = colnames(get.data.set()), selected = colnames(get.data.set())[index])
+      updateSelectInput(session,
+        inputId = "select.column.plot",
+        choices = colnames(get.data.set()),
+        selected = colnames(get.data.set())[index]
+      )
       updateSliderInput(session, inputId = "single.play", value = index)
     }
   })
@@ -122,7 +139,11 @@ observe({
   input$single.play
   isolate({
     if (!is.null(input$single.play)) {
-      updateSelectInput(session, inputId = "select.column.plot", choices = colnames(get.data.set()), selected = colnames(get.data.set())[input$single.play])
+      updateSelectInput(session,
+        inputId = "select.column.plot",
+        choices = colnames(get.data.set()),
+        selected = colnames(get.data.set())[input$single.play]
+      )
     }
   })
 })
@@ -162,14 +183,22 @@ observe({
       indMat <- rbind(
         1:(ncol(get.data.set()) * (ncol(get.data.set()) - 1)),
         rep(1:(ncol(get.data.set()) - 1), ncol(get.data.set())),
-        ceiling(seq(from = 0.1, to = ncol(get.data.set()), by = 1 / (ncol(get.data.set()) - 1)))
+        ceiling(seq(
+          from = 0.1, to = ncol(get.data.set()),
+          by = 1 / (ncol(get.data.set()) - 1)
+        ))
       )
       index1 <- indMat[3, input$pair.player]
       index2 <- indMat[2, input$pair.player]
       values$button <- T
-      updateSelectInput(session, inputId = "select.column.plot1", selected = colnames(get.data.set())[index1], choices = colnames(get.data.set()))
       updateSelectInput(session,
-        inputId = "select.column.plot2", selected = colnames(get.data.set())[-index1][index2],
+        inputId = "select.column.plot1",
+        selected = colnames(get.data.set())[index1],
+        choices = colnames(get.data.set())
+      )
+      updateSelectInput(session,
+        inputId = "select.column.plot2",
+        selected = colnames(get.data.set())[-index1][index2],
         choices = colnames(get.data.set())[-index1]
       )
     }
@@ -181,7 +210,9 @@ observe({
   isolate({
     if (!is.null(input$pair.backward) && input$pair.backward > 0) {
       index1 <- which(colnames(get.data.set()) %in% input$select.column.plot1)
-      index2 <- which(colnames(get.data.set())[-index1] %in% input$select.column.plot2)
+      index2 <- which(
+        colnames(get.data.set())[-index1] %in% input$select.column.plot2
+      )
       if (index2 == 1) {
         if (index1 == 1) {
           index1 <- ncol(get.data.set())
@@ -189,16 +220,23 @@ observe({
           index1 <- index1 - 1
         }
         values$button <- T
-        updateSelectInput(session, inputId = "select.column.plot1", selected = colnames(get.data.set())[index1], choices = colnames(get.data.set()))
+        updateSelectInput(session,
+          inputId = "select.column.plot1",
+          selected = colnames(get.data.set())[index1],
+          choices = colnames(get.data.set())
+        )
         index2 <- ncol(get.data.set()) - 1
       } else {
         index2 <- index2 - 1
       }
       updateSelectInput(session,
-        inputId = "select.column.plot2", selected = colnames(get.data.set())[-index1][index2],
+        inputId = "select.column.plot2",
+        selected = colnames(get.data.set())[-index1][index2],
         choices = colnames(get.data.set())[-index1]
       )
-      matInd <- which(colnames(get.data.set()) %in% colnames(get.data.set())[-index1][index2])
+      matInd <- which(
+        colnames(get.data.set()) %in% colnames(get.data.set())[-index1][index2]
+      )
       updateSliderInput(session,
         inputId = "pair.player",
         value = matrix(c(unlist(lapply(
@@ -220,7 +258,9 @@ observe({
   isolate({
     if (!is.null(input$pair.forward) && input$pair.forward > 0) {
       index1 <- which(colnames(get.data.set()) %in% input$select.column.plot1)
-      index2 <- which(colnames(get.data.set())[-index1] %in% input$select.column.plot2)
+      index2 <- which(
+        colnames(get.data.set())[-index1] %in% input$select.column.plot2
+      )
       if (index2 == (ncol(get.data.set()) - 1)) {
         if (index1 == ncol(get.data.set())) {
           index1 <- 1
@@ -228,16 +268,23 @@ observe({
           index1 <- index1 + 1
         }
         values$button <- T
-        updateSelectInput(session, inputId = "select.column.plot1", selected = colnames(get.data.set())[index1], choices = colnames(get.data.set()))
+        updateSelectInput(session,
+          inputId = "select.column.plot1",
+          selected = colnames(get.data.set())[index1],
+          choices = colnames(get.data.set())
+        )
         index2 <- 1
       } else {
         index2 <- index2 + 1
       }
       updateSelectInput(session,
-        inputId = "select.column.plot2", selected = colnames(get.data.set())[-index1][index2],
+        inputId = "select.column.plot2",
+        selected = colnames(get.data.set())[-index1][index2],
         choices = colnames(get.data.set())[-index1]
       )
-      matInd <- which(colnames(get.data.set()) %in% colnames(get.data.set())[-index1][index2])
+      matInd <- which(
+        colnames(get.data.set()) %in% colnames(get.data.set())[-index1][index2]
+      )
       updateSliderInput(session,
         inputId = "pair.player",
         value = matrix(c(unlist(lapply(
@@ -261,7 +308,9 @@ observe({
     if (!is.null(choice)) {
       choice2 <- input$select.column.plot2
       i <- 2
-      ch <- colnames(get.data.set())[-which(colnames(get.data.set()) %in% choice)]
+      ch <- colnames(
+        get.data.set()
+      )[-which(colnames(get.data.set()) %in% choice)]
       if (choice == choice2) {
         i <- which(colnames(get.data.set()) %in% choice2)
         if (length(ch) > 0 && i > length(ch)) {
@@ -280,7 +329,8 @@ observe({
 })
 
 output$plot.column.pair <- renderPlot({
-  if (!is.null(input$select.column.plot1) && !is.null(input$select.column.plot2) &&
+  if (!is.null(input$select.column.plot1) &&
+    !is.null(input$select.column.plot2) &&
     !"" %in% input$select.column.plot1 && !"" %in% input$select.column.plot2) {
     index1 <- which(colnames(get.data.set()) %in% input$select.column.plot1)
     index2 <- which(colnames(get.data.set()) %in% input$select.column.plot2)
@@ -342,7 +392,6 @@ output$plot.matrix <- renderPlot({
           continous = "points",
           combo = "dot"
         ),
-        #                                   color=grpVar,
         mapping = ggplot2::aes_string(colour = as.name(grpVar))
       )))
     } else {

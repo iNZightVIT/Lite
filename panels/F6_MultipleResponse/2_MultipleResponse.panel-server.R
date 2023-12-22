@@ -82,12 +82,15 @@ output$mr.type <- renderUI({
   input$mr.select.var
   input$mr.select.sub.var1
   isolate({
-    if (length(req(input$mr.select.var)) > 1 && req(input$mr.select.sub.var1) == " ") {
+    if (length(req(input$mr.select.var)) > 1 &&
+      req(input$mr.select.sub.var1) == " ") {
       radioButtons("mr.result",
-        label = NULL, choices = c("Summary", "Combinations"), selected = "Summary",
+        label = NULL, choices = c("Summary", "Combinations"),
+        selected = "Summary",
         inline = T
       )
-    } else if (length(req(input$mr.select.var)) > 1 && req(input$mr.select.sub.var1) != " ") {
+    } else if (length(req(input$mr.select.var)) > 1 &&
+      req(input$mr.select.sub.var1) != " ") {
       radioButtons("mr.result",
         label = NULL, choices = c("Summary"), selected = "Summary",
         inline = T
@@ -118,7 +121,8 @@ output$mr.sub2 <- renderUI({
   input$mr.select.var
   input$mr.select.sub.var1
   isolate({
-    if (length(req(input$mr.select.var)) > 1 && req(input$mr.select.sub.var1) != " ") {
+    if (length(req(input$mr.select.var)) > 1 &&
+      req(input$mr.select.sub.var1) != " ") {
       selectInput("mr.select.sub.var2",
         label = "Select subset variable 2:",
         choices = c(" ", names(get.data.set())),
@@ -138,7 +142,9 @@ observe({
       if (!is.null(sel) && !sel %in% ch) {
         sel <- ch[1]
       }
-      updateSelectInput(session, "mr.select.sub.var2", choices = ch, selected = sel)
+      updateSelectInput(session, "mr.select.sub.var2",
+        choices = ch, selected = sel
+      )
     })
   }
 })
@@ -149,9 +155,12 @@ output$mr.box <- renderUI({
   input$mr.select.sub.var2
   get.data.set()
   isolate({
-    if (length(req(input$mr.select.var)) > 1 && req(input$mr.select.sub.var1) != " " &&
+    if (length(req(input$mr.select.var)) > 1 &&
+      req(input$mr.select.sub.var1) != " " &&
       req(input$mr.select.sub.var2) != " ") {
-      checkboxInput("mr.box.side", label = "Display subset variable 1 Side-by-side", value = FALSE)
+      checkboxInput("mr.box.side",
+        label = "Display subset variable 1 Side-by-side", value = FALSE
+      )
     }
   })
 })
@@ -207,13 +216,15 @@ output$mr.ui.main <- renderUI({
     )
 
 
-    if (length(req(input$mr.select.var)) > 1 && req(input$mr.result) == "Summary") {
+    if (length(req(input$mr.select.var)) > 1 &&
+      req(input$mr.result) == "Summary") {
       ret <- list(tabsetPanel(
         type = "pills",
         plot.panel,
         summary.panel
       ))
-    } else if (length(req(input$mr.select.var)) > 1 && req(input$mr.select.sub.var1) == " " &&
+    } else if (length(req(input$mr.select.var)) > 1 &&
+      req(input$mr.select.sub.var1) == " " &&
       req(input$mr.result) == "Combinations") {
       ret <- list(tabsetPanel(
         type = "pills",
@@ -238,10 +249,6 @@ output$mrsaveplot <- downloadHandler(
       ),
       sep = "."
     )
-    #    if(input$saveplottype == "interactive html")
-    #      paste("Plot.html")
-    #    else
-    #      paste("Plot", input$saveplottype, sep = ".")
   },
   content = function(file) {
     if (input$mr.save.plottype.out %in% c("jpg", "png", "pdf")) {
@@ -261,10 +268,6 @@ output$mrsaveplot <- downloadHandler(
             iNZightMR::plotcombn(mr.par$mrObject)
           }
         },
-        #        warning = function(w) {
-        #          cat("Warning produced in decompositionplot \n")
-        #          print(w)
-        #        },
         error = function(e) {
           print(e)
         }, finally = {}
@@ -361,9 +364,11 @@ output$mr.summary.out <- renderPrint({
   isolate({
     if (req(input$mr.select.sub.var1) == " ") {
       summary(iNZightMR::mroPara(mr.par$mrObject))
-    } else if (req(input$mr.select.sub.var1) != " " && req(input$mr.select.sub.var2) == " ") {
+    } else if (req(input$mr.select.sub.var1) != " " &&
+      req(input$mr.select.sub.var2) == " ") {
       summary(mr.par$byMRObject, "within")
-    } else if (req(input$mr.select.sub.var1) != " " && req(input$mr.select.sub.var2) != " ") {
+    } else if (req(input$mr.select.sub.var1) != " " &&
+      req(input$mr.select.sub.var2) != " ") {
       summary(mr.par$byMRObject, "between")
     }
   })
@@ -398,12 +403,22 @@ setMRobj <- function() {
 
   responseVars <- binaryVar[responseID]
 
-  frm <- as.formula(paste(mr.par$objName, "~", paste(vars[responseVars], collapse = " + ")))
+  frm <- as.formula(paste(
+    mr.par$objName, "~",
+    paste(vars[responseVars], collapse = " + ")
+  ))
 
-  mr.par$mrObject <- iNZightMR::iNZightMR(frm, data = get.data.set(), Labels = substrsplit)
+  mr.par$mrObject <- iNZightMR::iNZightMR(frm,
+    data = get.data.set(),
+    Labels = substrsplit
+  )
   if (mr.par$mrObject$Labels$Commonstr != mr.par$objName && mr.par$guessName) {
-    if (!(mr.par$objName == "response" && mr.par$mrObject$Labels$Commonstr == "")) {
-      mr.par$objName <- ifelse(mr.par$mrObject$Labels$Commonstr == "", "response", mr.par$mrObject$Labels$Commonstr)
+    if (!(mr.par$objName == "response" &&
+      mr.par$mrObject$Labels$Commonstr == "")) {
+      mr.par$objName <- ifelse(
+        mr.par$mrObject$Labels$Commonstr == "", "response",
+        mr.par$mrObject$Labels$Commonstr
+      )
       setMRobj()
       return(NULL)
     }
@@ -423,10 +438,14 @@ updatePlot <- function() {
     mro <- iNZightMR::mroPara(mr.par$mrObject)
   } else if (is.null(mr.par$plotSet$g2)) {
     by.formula <- paste("~", mr.par$plotSet$g1)
-    mro <- mr.par$byMRObject <- iNZightMR::byMRO(mr.par$mrObject, by.formula, mroPara)
+    mro <- mr.par$byMRObject <- iNZightMR::byMRO(
+      mr.par$mrObject, by.formula, mroPara
+    )
   } else {
     by.formula <- paste("~", paste(mr.par$plotSet$g1, "+", mr.par$plotSet$g2))
-    mro <- mr.par$byMRObject <- iNZightMR::byMRO(mr.par$mrObject, by.formula, mroPara)
+    mro <- mr.par$byMRObject <- iNZightMR::byMRO(
+      mr.par$mrObject, by.formula, mroPara
+    )
     if (!is.null(mr.par$plotSet$sidebyside)) {
       if (mr.par$plotSet$sidebyside) {
         mro <- iNZightMR::between(mro)
