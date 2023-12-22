@@ -20,9 +20,9 @@ reshape.data.panel <- function(data.set) {
       ),
       mainPanel(
         helpText("The table below shows the reshapd dataset. If the
-                         reshape button is pressed on the right, the
-                         selected dataset is reshaped and the reshaped version
-                         of the reshaped dataset is displyed."),
+                  reshape button is pressed on the right, the
+                  selected dataset is reshaped and the reshaped version
+                  of the reshaped dataset is displyed."),
         DTOutput("reshape.data.table")
       )
     )

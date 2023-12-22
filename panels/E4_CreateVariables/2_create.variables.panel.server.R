@@ -58,7 +58,10 @@ observe({
 
         values$create.variables.expression.text <- ""
         ## code history
-        code <- tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+        code <- tidy_assign_pipe(gsub(
+          "get.data.set\\()",
+          code.save$name, iNZightTools::code(values$data.set)
+        ))
         code.save$variable <- c(code.save$variable, list(c("\n", code, "\n")))
       }
     }
@@ -217,7 +220,8 @@ observe({
 observe({
   input$create.variables.dot
   isolate({
-    if (!is.null(input$create.variables.dot) && input$create.variables.dot > 0) {
+    if (!is.null(input$create.variables.dot) &&
+      input$create.variables.dot > 0) {
       values$create.variables.expression.text <- paste(
         values$create.variables.expression.text, ".",
         sep = ""
@@ -229,7 +233,8 @@ observe({
 observe({
   input$create.variables.delete
   isolate({
-    if (!is.null(input$create.variables.delete) && input$create.variables.delete > 0) {
+    if (!is.null(input$create.variables.delete) &&
+      input$create.variables.delete > 0) {
       if (nchar(values$create.variables.expression.text) > 0) {
         values$create.variables.expression.text <- substr(
           values$create.variables.expression.text, 1,

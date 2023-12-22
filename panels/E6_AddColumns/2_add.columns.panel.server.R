@@ -4,7 +4,8 @@ observe({
   input$add_column
   isolate({
     temp <- get.data.set()
-    if (!is.null(get.data.set()) && !is.null(input$new.column) && input$add_column > 0) {
+    if (!is.null(get.data.set()) && !is.null(input$new.column) &&
+      input$add_column > 0) {
       colu <- strsplit(input$new.column, "\n", fixed = T)[[1]]
       if (length(colu) == 1) {
         colu <- strsplit(input$new.column, ",", fixed = T)[[1]]
@@ -74,7 +75,10 @@ output$add.table <- renderDT(
       temp
     })
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 output$add.columns <- renderUI({

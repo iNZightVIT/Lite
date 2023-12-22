@@ -34,20 +34,24 @@ observe({
   input$rename_variables_two_columns_but
   isolate({
     tryCatch({
-      if (rename_variables$num.cols > 0 && !is.null(input$rename_variables_two_columns_but) &&
+      if (rename_variables$num.cols > 0 &&
+        !is.null(input$rename_variables_two_columns_but) &&
         input$rename_variables_two_columns_but > 0) {
-        #      rename.variables.test = FALSE
         old.variable.names <- colnames(get.data.set())
         indexes1 <- grep("^variablenames[0-9]+$", names(input))
         indexes1 <- names(input)[indexes1]
-        indexes1 <- indexes1[indexes1 %in% paste0("variablenames", 1:length(old.variable.names))]
+        indexes1 <- indexes1[indexes1 %in% paste0(
+          "variablenames", 1:length(old.variable.names)
+        )]
         idxmch <- as.numeric(gsub("variablenames", "", indexes1))
         namelist <- list()
         for (i in 1:rename_variables$num.cols) {
           if (!is.null(eval(parse(text = paste0("input$variablenames", i)))) &&
             length(eval(parse(text = paste0("input$variablenames", i)))) > 0 &&
-            !grepl("^\\s*$", eval(parse(text = paste0("input$variablenames", i))))) {
-            #          rename.variables.test = TRUE
+            !grepl("^\\s*$", eval(parse(
+              text =
+                paste0("input$variablenames", i)
+            )))) {
             namelist[i] <- input[[indexes1[i]]]
             names(namelist)[i] <- colnames(get.data.set())[idxmch[i]]
           }
@@ -62,9 +66,15 @@ observe({
         if (!is.null(temp)) {
           updatePanel$datachanged <- updatePanel$datachanged + 1
           values$data.set <- as.data.frame(temp)
-          values <- sample_if_cas(rvalues = values, d = temp, new_sample = FALSE)
+          values <- sample_if_cas(
+            rvalues = values, d = temp,
+            new_sample = FALSE
+          )
           ## code history
-          code <- tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+          code <- tidy_assign_pipe(gsub(
+            "get.data.set\\()",
+            code.save$name, iNZightTools::code(values$data.set)
+          ))
           code.save$variable <- c(code.save$variable, list(c("\n", code, "\n")))
         }
       }
@@ -78,7 +88,10 @@ output$rename.variables.table <- renderDT(
   {
     get.data.set.display()
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 

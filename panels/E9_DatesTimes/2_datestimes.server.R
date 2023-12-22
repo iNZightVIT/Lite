@@ -12,7 +12,9 @@ output$convert_datestimes_panel <- renderUI({
         multiple = TRUE,
         size = 7
       ),
-      textInput("convert_datestimes_newname", label = "Name for the new variable", value = ""),
+      textInput("convert_datestimes_newname",
+        label = "Name for the new variable", value = ""
+      ),
       selectInput(
         inputId = "convert_datestimes_selectorder",
         label = "Select the order format of your data",
@@ -50,7 +52,8 @@ output$convert_datestimes_panel <- renderUI({
 observe({
   input$convert_datestimes_selectvars
   isolate({
-    if (!is.null(input$convert_datestimes_selectvars) && length(input$convert_datestimes_selectvars) > 0) {
+    if (!is.null(input$convert_datestimes_selectvars) &&
+      length(input$convert_datestimes_selectvars) > 0) {
       temp.data <- get.data.set()
       factorname <- input$convert_datestimes_selectvars
       varx <- ""
@@ -67,15 +70,25 @@ observe({
 
       output$convert_datestimes_original_table <- renderDT(
         {
-          if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
-            data <- data.frame(Original = data.frame(Original = varx, stringsAsFactors = TRUE)[values$sample.row, ])
+          if (!is.null(session$userData$LITE_VERSION) &&
+            session$userData$LITE_VERSION == "CAS") {
+            data <- data.frame(
+              Original = data.frame(
+                Original = varx,
+                stringsAsFactors = TRUE
+              )[values$sample.row, ]
+            )
             row.names(data) <- 1:length(values$sample.row)
           } else {
             data <- data.frame(Original = varx, stringsAsFactors = TRUE)
           }
           data
         },
-        options = list(sDom = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+        options = list(
+          sDom = '<"top">lrt<"bottom">ip',
+          lengthMenu = c(5, 30, 50), pageLength = 5,
+          columns.defaultContent = "NA", scrollX = T
+        )
       )
     }
   })
@@ -85,21 +98,29 @@ observe({
 observe({
   input$preview_convert_datestimes
   isolate({
-    if (!is.null(input$convert_datestimes_selectorder) && input$convert_datestimes_selectorder != "") {
+    if (!is.null(input$convert_datestimes_selectorder) &&
+      input$convert_datestimes_selectorder != "") {
       convname <- input$convert_datestimes_selectorder
-      if (!is.null(input$convert_datestimes_selectvars) && length(input$convert_datestimes_selectvars) > 0) {
+      if (!is.null(input$convert_datestimes_selectvars) &&
+        length(input$convert_datestimes_selectvars) > 0) {
         factorname <- input$convert_datestimes_selectvars
-        if (!is.null(input$convert_datestimes_newname) && !grepl("^\\s*$", input$convert_datestimes_newname)) {
+        if (!is.null(input$convert_datestimes_newname) &&
+          !grepl("^\\s*$", input$convert_datestimes_newname)) {
           name <- input$convert_datestimes_newname
 
           data <- tryCatch(
             data.frame(
-              Converted = iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)[[name]],
+              Converted = iNZightTools::convert_to_datetime(
+                get.data.set(), factorname, convname, name
+              )[[name]],
               stringsAsFactors = TRUE
             ),
             warning = function(w) {
               if (w$message == "Failed to parse") {
-                data.frame(Converted = "Invalid format", stringsAsFactors = TRUE)
+                data.frame(
+                  Converted = "Invalid format",
+                  stringsAsFactors = TRUE
+                )
               } else {
                 data.frame(Converted = w$message, stringsAsFactors = TRUE)
               }
@@ -108,13 +129,18 @@ observe({
 
           output$convert_datestimes_converted_table <- renderDT(
             {
-              if (!is.null(session$userData$LITE_VERSION) && session$userData$LITE_VERSION == "CAS") {
+              if (!is.null(session$userData$LITE_VERSION) &&
+                session$userData$LITE_VERSION == "CAS") {
                 data <- data.frame(Converted = data[values$sample.row, ])
                 row.names(data) <- 1:length(values$sample.row)
               }
               data
             },
-            options = list(sDom = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+            options = list(
+              sDom = '<"top">lrt<"bottom">ip',
+              lengthMenu = c(5, 30, 50), pageLength = 5,
+              columns.defaultContent = "NA", scrollX = T
+            )
           )
         }
       }
@@ -126,30 +152,46 @@ observe({
 observe({
   input$convert_datestimes_button
   isolate({
-    if (!is.null(input$convert_datestimes_selectorder) && input$convert_datestimes_selectorder != "") {
+    if (!is.null(input$convert_datestimes_selectorder) &&
+      input$convert_datestimes_selectorder != "") {
       convname <- input$convert_datestimes_selectorder
-      if (!is.null(input$convert_datestimes_selectvars) && length(input$convert_datestimes_selectvars) > 0) {
+      if (!is.null(input$convert_datestimes_selectvars) &&
+        length(input$convert_datestimes_selectvars) > 0) {
         factorname <- input$convert_datestimes_selectvars
-        if (!is.null(input$convert_datestimes_newname) && !grepl("^\\s*$", input$convert_datestimes_newname)) {
+        if (!is.null(input$convert_datestimes_newname) &&
+          !grepl("^\\s*$", input$convert_datestimes_newname)) {
           name <- input$convert_datestimes_newname
 
-          data <- iNZightTools::convert_to_datetime(get.data.set(), factorname, convname, name)
+          data <- iNZightTools::convert_to_datetime(
+            get.data.set(), factorname, convname, name
+          )
           updatePanel$datachanged <- updatePanel$datachanged + 1
           values$data.set <- data
-          values <- sample_if_cas(rvalues = values, d = data, new_sample = FALSE)
+          values <- sample_if_cas(
+            rvalues = values, d = data,
+            new_sample = FALSE
+          )
 
           output$convert_datestimes_original_table <- renderDT(
             {
               NULL
             },
-            options = list(sDom = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+            options = list(
+              sDom = '<"top">lrt<"bottom">ip',
+              lengthMenu = c(5, 30, 50), pageLength = 5,
+              columns.defaultContent = "NA", scrollX = T
+            )
           )
 
           output$convert_datestimes_converted_table <- renderDT(
             {
               NULL
             },
-            options = list(sDom = '<"top">lrt<"bottom">ip', lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+            options = list(
+              sDom = '<"top">lrt<"bottom">ip',
+              lengthMenu = c(5, 30, 50), pageLength = 5,
+              columns.defaultContent = "NA", scrollX = T
+            )
           )
         }
       }
@@ -206,7 +248,10 @@ output$convert.datestimes.table <- renderDT(
   {
     get.data.set.display()
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 output$dates.times <- renderUI({
@@ -217,7 +262,10 @@ output$aggregate_datestimes.table <- renderDT(
   {
     get.data.set.display()
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 output$convert.datestimes.data.sample.info <- renderText({

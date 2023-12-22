@@ -87,7 +87,10 @@ get.transform.sidebar <- function(data.set) {
   choice1 <- colnames(data.set)
   type <- unname(sapply(data.set, class))
   list(
-    selectInput("select.columns.transform", "Select Columns", choices = choice1[type %in% c("numeric", "integer")], multiple = F, selectize = F),
+    selectInput("select.columns.transform", "Select Columns",
+      choices = choice1[type %in% c("numeric", "integer")],
+      multiple = F, selectize = F
+    ),
     selectInput("select.transform", "Select Transformation",
       choices = c(
         "LOG (e)" = "log", "LOG (10)" = "log10",
@@ -99,7 +102,10 @@ get.transform.sidebar <- function(data.set) {
     actionButton("transform", "Transform",
       style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
     ), br(), br(), textOutput("status"), br(), br(),
-    help.display("Modify data", "transform_columns", "panels/E2_NumericVariables/4_transform.variables.help.md"), br()
+    help.display(
+      "Modify data", "transform_columns",
+      "panels/E2_NumericVariables/4_transform.variables.help.md"
+    ), br()
   )
 }
 

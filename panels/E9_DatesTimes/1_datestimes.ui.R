@@ -4,7 +4,10 @@ dates.times.sidebar <- function() {
     selectInput(
       inputId = "select_datestimes",
       label = NULL,
-      choices = c("Convert to a Date-Time variable", "Aggregate datetimes to monthly or quarterly"),
+      choices = c(
+        "Convert to a Date-Time variable",
+        "Aggregate datetimes to monthly or quarterly"
+      ),
       selectize = FALSE,
       multiple = FALSE
     ),

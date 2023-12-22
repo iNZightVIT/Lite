@@ -14,8 +14,10 @@ observe({
 observe({
   input$convert_to_categorical_button
   isolate({
-    if (!is.null(input$select.to.convert) && input$select.to.convert != "" &&
-      !is.null(input$convert_to_name) && !grepl("^\\s*$", input$convert_to_name)) {
+    if (!is.null(input$select.to.convert) &&
+      input$select.to.convert != "" &&
+      !is.null(input$convert_to_name) &&
+      !grepl("^\\s*$", input$convert_to_name)) {
       orgVar <- input$select.to.convert
       name <- gsub("\\n+", "", input$convert_to_name, perl = TRUE)
       temp <- iNZightTools::convertToCat(get.data.set(), orgVar, name)
@@ -23,7 +25,10 @@ observe({
       values$data.set <- temp
       values <- sample_if_cas(rvalues = values, d = temp, new_sample = FALSE)
       ## code history
-      code <- tidy_assign_pipe(gsub("get.data.set\\()", code.save$name, iNZightTools::code(values$data.set)))
+      code <- tidy_assign_pipe(gsub(
+        "get.data.set\\()",
+        code.save$name, iNZightTools::code(values$data.set)
+      ))
       code.save$variable <- c(code.save$variable, list(c("\n", code, "\n")))
     }
   })
@@ -40,7 +45,10 @@ output$convert.to.categorical.table <- renderDT(
       get.data.set.display()
     }
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 
