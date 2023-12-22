@@ -12,6 +12,7 @@
 - Fixes bug in Model Fitting module (panel had a duplicate ID, resulting in some weird behaviour).
 - Fixes bug where variables swap after saving residuals, and fitted line is removed.
 - Installs iNZightMultivariate package so the module can be used.
+- Fix bug where help panels were not being displayed
 
 ---
 
