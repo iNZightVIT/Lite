@@ -27,7 +27,6 @@ output$save_table <- renderDT(
 
 output$downloadData <- downloadHandler(
   filename = function() {
-    #         print(paste(get.data.name(),".",input$select_filetype, sep=''))
     paste(get.data.name(), ".", input$select_filetype, sep = "")
   },
   content = function(file) {

@@ -58,7 +58,7 @@ help.panel.ui <- function(lite.version, lite.update) {
                       R Source Code
                     </a> |
                     <!--  Contact link. Excuse the line overlap. -->
-		    <a href = "mailto:cpar137@aucklanduni.ac.nz?Subject=iNZight-Lite%20Feedback" target = "_top">
+		    <a href = "mailto:inzightlite_support@stat.auckland.ac.nz?Subject=iNZight-Lite%20Feedback" target = "_top">
 		      Contact Us
 		    </a>
                     <br>

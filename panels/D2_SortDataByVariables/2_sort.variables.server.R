@@ -57,29 +57,6 @@ output$sort4_panel <- renderUI({
 observe({
   input$sort_vars
   isolate({
-    #    if(!is.null(input$sort_vars) && input$sort_vars>0){
-    #      indexes1 = grep("^sort[0-9]+$",names(input))
-    #      vars = unlist(lapply(indexes1, function(i,nams){
-    #        input[[nams[i]]]
-    #      },names(input)))
-    #      indexes2 = grep("^increasing[0-9]+$",names(input))
-    #      sort.type = unlist(lapply(indexes2, function(i,nams){
-    #        input[[nams[i]]]
-    #      },names(input)))
-    #      if(anyDuplicated(vars)){
-    #        dups = which(duplicated(vars))
-    #        vars = vars[-dups]
-    #        sort.type =sort.type[-dups]
-    #      }
-    #      if("" %in% vars){
-    #        empties = which(vars %in% "")
-    #        vars = vars[-empties]
-    #        sort.type =sort.type[-empties]
-    #      }
-    #      print(str(vars))
-    #      print(vars)
-    #      print(sort.type)
-
     vars <- NULL
     sort.type <- NULL
     if (!is.null(input$sort1) && input$sort1 != "") {
@@ -142,7 +119,6 @@ observe({
         )
       }
     }
-    #    }
   })
 })
 
@@ -162,13 +138,6 @@ output$sort.table <- renderDT(
 output$sort.variables <- renderUI({
   sort.variables.panel()
 })
-
-# output$num.select = renderUI({
-#  input$num_columns_sort
-#  isolate({
-#    num.select.panel(input$num_columns_sort,get.data.set())
-#  })
-# })
 
 output$sort.table.data.sample.info <- renderText({
   sample_info_cas()

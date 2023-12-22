@@ -51,7 +51,10 @@ output$temp_table <- renderDT(
   options = list(
     lengthMenu = c(5, 30, 50), pageLength = 5,
     columns.defaultContent = "NA", scrollX = TRUE,
-    columnDefs = list(list(className = "dt-center", targets = "_all")), filter = "bottom"
+    columnDefs = list(
+      list(className = "dt-center", targets = "_all")
+    ),
+    filter = "bottom"
   )
 )
 
@@ -72,11 +75,22 @@ set_to_change_reac <- reactive({
           sep = ""
         ))
       }
-      temp <- load.data(get.data.dir.imported(), strsplit(input[[input$data_select]], "==>", fixed = T)[[1]]
-      [length(strsplit(input[[input$data_select]], "==>", fixed = T)[[1]])])[[2]]
+      temp <- load.data(
+        get.data.dir.imported(),
+        strsplit(
+          input[[input$data_select]], "==>",
+          fixed = T
+        )[[1]][
+          length(strsplit(input[[input$data_select]], "==>", fixed = T)[[1]])
+        ]
+      )[[2]]
     } else {
-      temp <- load.data(get.data.dir.global(), strsplit(input[[input$data_select]], "==>", fixed = T)[[1]]
-      [length(strsplit(input[[input$data_select]], "==>", fixed = T)[[1]])])[[2]]
+      temp <- load.data(
+        get.data.dir.global(),
+        strsplit(input[[input$data_select]], "==>", fixed = T)[[1]][
+          length(strsplit(input[[input$data_select]], "==>", fixed = T)[[1]])
+        ]
+      )[[2]]
     }
     if (is.null(temp[[1]]) & is.null(temp[[2]])) {
       "No data to select!"
@@ -124,22 +138,6 @@ output$col_dimension_show <- renderText({
   change_col_dim_reac()
 })
 
-# change_row_dim_reac <- reactive({
-#  input$change_set
-#  input$selector
-#  if (!is.null(get.data.set()) && !is.null(get.data.name())) {
-#    paste("The displayed data is a random sample of", nrow(values$data.sample), "rows from the original data")
-#  } else {
-#    ""
-#  }
-# })
-
-# output$row_dimension_show <- renderText({
-#  input$change_set
-#  input$selector
-#  change_row_dim_reac()
-# })
-
 change_data_name_reac <- reactive({
   input$change_set
   input$selector
@@ -156,7 +154,6 @@ output$data_name_show <- renderText({
   change_data_name_reac()
 })
 
-
 pkgname <- reactive({
   pkgsL <- list(
     "iNZight" = "Examples",
@@ -170,7 +167,6 @@ pkgname <- reactive({
   names(named.pkg[named.pkg %in% input$data_select])
 })
 
-
 observe({
   if (!is.null(input$change_set)) {
     isolate({
@@ -178,18 +174,29 @@ observe({
         new.data <- NULL
         if ("Imported" %in% input$data_select) {
           new.data <-
-            load.data(get.data.dir.imported(), strsplit(input[[input$data_select]],
-              "==>",
-              fixed = TRUE
-            )[[1]]
-            [length(strsplit(input[[input$data_select]], "==>", fixed = T)[[1]])])
+            load.data(
+              get.data.dir.imported(),
+              strsplit(input[[input$data_select]],
+                "==>",
+                fixed = TRUE
+              )[[1]][
+                length(strsplit(
+                  input[[input$data_select]], "==>",
+                  fixed = T
+                )[[1]])
+              ]
+            )
         } else {
           new.data <-
             load.data(get.data.dir.global(), strsplit(input[[input$data_select]],
               "==>",
               fixed = TRUE
-            )[[1]]
-            [length(strsplit(input[[input$data_select]], "==>", fixed = T)[[1]])])
+            )[[1]][
+              length(strsplit(
+                input[[input$data_select]], "==>",
+                fixed = T
+              )[[1]])
+            ])
         }
         plot.par$design <- NULL
         values$data.name <- new.data[[1]]
@@ -213,11 +220,23 @@ observe({
           "## Load example data set\ndata(%s, package = '%s')",
           values$data.name, pkgname()
         ), "\n")))
-        code.save$variable <- c(code.save$variable, list(c("\n", sep(), "\n", paste0(
-          sprintf("## Exploring the '%s' dataset", code.save$name),
-          "\n"
-        ))))
-        code.save$variable <- c(code.save$variable, list(c("\n", sprintf("%s <- %s", code.save$name, values$data.name), "\n")))
+        code.save$variable <- c(
+          code.save$variable,
+          list(c("\n", sep(), "\n", paste0(
+            sprintf("## Exploring the '%s' dataset", code.save$name),
+            "\n"
+          )))
+        )
+        code.save$variable <- c(
+          code.save$variable,
+          list(
+            c(
+              "\n",
+              sprintf("%s <- %s", code.save$name, values$data.name),
+              "\n"
+            )
+          )
+        )
         values$data.name <- code.save$name
         values$name.restore <- code.save$name
         updateSelectInput(session, "subs2", selected = "none")

@@ -9,12 +9,20 @@ get.sidebar.load <- function(url_load) {
     fileInput("files", label = "", multiple = T),
     uiOutput("data.info"),
     helpText("or provide a URL pointing to a file on a web location"),
-    br(), textInput(inputId = "URLtext", label = "paste/enter URL", value = url_load), br(),
+    br(), textInput(
+      inputId = "URLtext", label = "paste/enter URL",
+      value = url_load
+    ), br(),
     helpText("Finalise your choice by pressing the button below."),
-    actionButton(inputId = "import_set", label = "Import file from url"), br(), br(),
+    actionButton(inputId = "import_set", label = "Import file from url"),
+    br(), br(),
     verbatimTextOutput("message.success"),
     DT::dataTableOutput("table"),
-    br(), help.display("Load data", "load_data", "panels/B1_ImportDataset/3_import.data.set.panel.help.md")
+    br(),
+    help.display(
+      "Load data", "load_data",
+      "panels/B1_ImportDataset/3_import.data.set.panel.help.md"
+    )
   )
 }
 

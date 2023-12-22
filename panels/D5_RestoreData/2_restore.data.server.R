@@ -10,7 +10,10 @@ observe({
       values <- sample_if_cas(rvalues = values, d = get.data.restore())
 
       ## code history
-      code <- paste0(values$data.name, "_", input$restore_data_button, " <- ", gsub("_ex", "", values$data.name))
+      code <- paste0(
+        values$data.name, "_",
+        input$restore_data_button, " <- ", gsub("_ex", "", values$data.name)
+      )
       code.save$variable <- c(code.save$variable, list(c("\n", code, "\n")))
       code.save$name <- paste0(values$data.name, "_", input$restore_data_button)
     })
@@ -23,7 +26,10 @@ output$data.restore.table <- renderDT(
       get.data.set.display()
     }
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 output$restore.data <- renderUI({

@@ -47,23 +47,18 @@ vis.sidebarPanel <- function() {
               condition = "output.showsidebar == 1",
               actionButton("hideSidebar",
                 icon("arrow-circle-left", "fa-2x"),
-                style = "color: #337ab7;
-                                                                                background-color: #ffffff;
-                                                                                border-color: #ffffff;
-                                                                                padding:4px;
-                                                                                font-size:100%"
+                style = paste(
+                  "color: #337ab7;",
+                  "background-color: #ffffff;",
+                  "border-color: #ffffff;",
+                  "padding:4px;",
+                  "font-size:100%"
+                )
               )
             )
           )
         ),
         h5(strong("Variable selection")),
-
-        # br(),
-
-        # fixedRow(column(10,h5(strong("Variable selection"))),
-        #         column(2,checkboxInput("change_var_selection",
-        #                                value=F,
-        #                                label=""))),
 
         ##  Select the first variable.
         h5("Select first variable:"),
@@ -71,15 +66,9 @@ vis.sidebarPanel <- function() {
           column(8, uiOutput("vari1_panel")),
           column(2, actionButton("switch1", "",
             icon = icon("arrow-down", "fa-2x"),
-            style = "color: #337ab7;
-                                                                background-color: #ffffff;
-                                                                border-color: #ffffff;
-                                                                padding:4px;
-                                                                font-size:60%"
+            style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:60%"
           ))
         ),
-
-        # uiOutput("vari1_panel"),
 
         ##  Select the second variable.
         h5("Select second variable:"),
@@ -87,18 +76,10 @@ vis.sidebarPanel <- function() {
           column(8, uiOutput("vari2_panel")),
           column(2, actionButton("switch2", "",
             icon = icon("arrow-down", "fa-2x"),
-            style = "color: #337ab7;
-                                                                background-color: #ffffff;
-                                                                border-color: #ffffff;
-                                                                padding:4px;
-                                                                font-size:60%"
+            style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:60%"
           ))
         ),
-
-        # uiOutput("vari2_panel"),
-
         fixedRow(column(10, hr())),
-
 
         ## Select desired subset for the first variable.
         h5("Subset by:"),
@@ -106,31 +87,14 @@ vis.sidebarPanel <- function() {
           column(8, uiOutput("subs1_panel")),
           column(2, actionButton("switch3", "",
             icon = icon("arrow-down", "fa-2x"),
-            style = "color: #337ab7;
-                                                                background-color: #ffffff;
-                                                                border-color: #ffffff;
-                                                                padding:4px;
-                                                                font-size:60%"
+            style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:60%"
           ))
         ),
-
-        # uiOutput("subs1_panel"),
 
         ##  Select desired subset for the second variable.
         h5("Subset by:"),
         fixedRow(column(8, uiOutput("subs2_panel"))),
-        # uiOutput("subs2_panel"),
-
         fixedRow(column(10, hr())),
-
-        # actionButton(inputId = "go.to.old",
-        #             label = "REVERT To Old Version",
-        #             icon("paper-plane"),
-        #             style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-
-        # br(),
-        # br(),
-
         actionButton(
           inputId = "reset.graphics",
           label = "Reset To Default",
@@ -149,28 +113,10 @@ vis.sidebarPanel <- function() {
             condition = "output.showsidebar == 1",
             actionButton("hideSidebar2",
               icon("arrow-circle-left", "fa-2x"),
-              style = "color: #337ab7;
-                                                                          background-color: #ffffff;
-                                                                          border-color: #ffffff;
-                                                                          padding:4px;
-                                                                          font-size:100%"
+              style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:100%"
             )
           ))
         ),
-
-
-        #        fixedRow(column(8,h4("Inference")),
-        #                 column(2,
-        #                        checkboxInput("toggle_inference",
-        #                                      label="",
-        #                                      value=input$toggle_inference))),
-        #        fixedRow(column(width = 8,
-        #                        uiOutput("add_inference"))),
-
-        #        hr(),
-
-        #        h4("Select Additions"),
-
         uiOutput("select_additions_panel"),
         conditionalPanel(
           condition = "input.select_additions=='Customise Plot Appearance'",
@@ -198,12 +144,6 @@ vis.sidebarPanel <- function() {
         ),
         conditionalPanel(
           condition = "input.select_additions=='Add Inference Information'",
-
-          #          fixedRow(column(8,h4("Inference")),
-          #                   column(2,
-          #                          checkboxInput("toggle_inference",
-          #                                        label="",
-          #                                        value=TRUE))),
           fixedRow(column(
             width = 8,
             uiOutput("add_inference")
@@ -224,27 +164,6 @@ vis.mainPanel <- function() {
     toggle_advanced_options <- input$toggle_advanced_options
   }
   panel <- list(
-    ## action button: hide/show sidebar menu
-    #    conditionalPanel(condition = "output.showsidebar == 1",
-    #                     actionButton("hideSidebar",
-    #                                  icon("arrow-circle-left", "fa-2x"),
-    #                                  style = "color: #337ab7;
-    #                                           background-color: #ffffff;
-    #                                           border-color: #ffffff;
-    #                                           padding:4px;
-    #                                           font-size:100%")),
-
-    #    conditionalPanel(condition = "output.showsidebar == 0",
-    #                     actionButton("showSidebar",
-    #                                  icon("arrow-circle-right", "fa-2x"),
-    #                                  style = "color: #337ab7;
-    #                                           background-color: #ffffff;
-    #                                           border-color: #ffffff;
-    #                                           padding:4px;
-    #                                           font-size:100%")),
-
-    #    br(),
-    #    br()
     strong(textOutput("data_info")),
     br(),
     tabsetPanel(
@@ -265,11 +184,7 @@ vis.mainPanel <- function() {
                     condition = "output.showsidebar == 0",
                     actionButton("showSidebar",
                       icon("arrow-circle-right", "fa-2x"),
-                      style = "color: #337ab7;
-                                                                                     background-color: #ffffff;
-                                                                                     border-color: #ffffff;
-                                                                                     padding:4px;
-                                                                                     font-size:100%"
+                      style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:100%"
                     )
                   )
                 ),
@@ -277,11 +192,7 @@ vis.mainPanel <- function() {
                   7,
                   actionButton("refreshplot",
                     icon("refresh", "fa-2x"),
-                    style = "color: #337ab7;
-                                                                          background-color: #ffffff;
-                                                                          border-color: #ffffff;
-                                                                          padding:4px;
-                                                                          font-size:90%"
+                    style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:90%"
                   )
                 )
               )),
@@ -289,22 +200,10 @@ vis.mainPanel <- function() {
             ),
             helpText("Plots for visualizing data."),
             plotOutput("visualize.plot"),
-
-            #                 fixedRow(column(width = 2, offset = 1,
-            #                                 downloadButton(outputId = "saveplot", label = "Save Plot")),
-            #                          column(width = 6,
-            #                                 radioButtons(inputId = "saveplottype",
-            #                                              label = "Select the file type",
-            #                                              choices = list("jpg", "png", "pdf", "interactive html"), inline = TRUE)),
-            #                          column(width = 2,
-            #                                 actionButton(inputId = "gotointeractivehtml",
-            #                                              label = "Interactive HTML"))),
-
             br(),
             fixedRow(
               column(
                 width = 4,
-                # offset = 1,
                 downloadButton(outputId = "saveplot", label = "Download Plot")
               ),
               column(
@@ -315,23 +214,11 @@ vis.mainPanel <- function() {
                   choices = list("jpg", "png", "pdf", "svg"), inline = TRUE
                 )
               ),
-              # column(width = 4,
-              #       conditionalPanel(
-              #         condition = "input.saveplottype == 'interactive html'",
-              #         uiOutput("extra.vars.html")
-              #       )),
               column(
                 width = 3,
                 uiOutput("add.fitted.residuals.panel")
               )
             ),
-
-
-            #                 downloadButton(outputId = "saveplot", label = "Save Plot"),
-            #                 radioButtons(inputId = "saveplottype",
-            #                              label = "Select the file type",
-            #                              choices = list("jpg", "png", "pdf"), inline = TRUE),
-
             fixedRow(
               column(
                 width = 5, offset = 1,
@@ -367,18 +254,11 @@ vis.mainPanel <- function() {
             condition = "output.showsidebar == 0",
             actionButton("showSidebar2",
               icon("arrow-circle-right", "fa-2x"),
-              style = "color: #337ab7;
-                                                         background-color: #ffffff;
-                                                         border-color: #ffffff;
-                                                         padding:4px;
-                                                         font-size:100%"
+              style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:100%"
             )
           )),
           column(10, hr())
         ),
-
-
-        # br(),
         helpText("Statistical Summary for the data."),
         verbatimTextOutput("visualize.summary")
       ),
@@ -390,18 +270,11 @@ vis.mainPanel <- function() {
             condition = "output.showsidebar == 0",
             actionButton("showSidebar3",
               icon("arrow-circle-right", "fa-2x"),
-              style = "color: #337ab7;
-                                                         background-color: #ffffff;
-                                                         border-color: #ffffff;
-                                                         padding:4px;
-                                                         font-size:100%"
+              style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:100%"
             )
           )),
           column(10, hr())
         ),
-
-        # br(),
-
         fixedRow(
           column(3, uiOutput("inference_type")),
           column(3, uiOutput("inference_test")),
@@ -409,8 +282,6 @@ vis.mainPanel <- function() {
           column(2, uiOutput("ci_width")),
           column(3, uiOutput("inference_epi"))
         ),
-        # fixedRow(column(3, actionButton("confirm_inf_button","Confirm",
-        #                                style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"), offset = 3)),
         br(),
         helpText("Statistical Inference for the data."),
         verbatimTextOutput("visualize.inference")
@@ -423,33 +294,18 @@ vis.mainPanel <- function() {
             condition = "output.showsidebar == 0",
             actionButton("showSidebar4",
               icon("arrow-circle-right", "fa-2x"),
-              style = "color: #337ab7;
-                                                         background-color: #ffffff;
-                                                         border-color: #ffffff;
-                                                         padding:4px;
-                                                         font-size:100%"
+              style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:100%"
             )
           )),
           column(10, hr())
         ),
-
-        # br(),
         uiOutput("interactive.plot.select"),
-        # helpText("Interactive Plot"),
         br(),
         htmlOutput("interactive.plot")
-        #        br(),
-        #        actionButton("popup_html",
-        #                     "POP UP",
-        #                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
       ),
       tabPanel(
         value = 2,
         title = "Interactive Plot (via plotly)",
-
-        # actionButton("interactiveplotly",
-        #              "Refresh",
-        #              style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
         uiOutput("plotly_nw"),
         plotlyOutput("plotly_inter", height = "500px") %>% withSpinner()
       ),
@@ -491,15 +347,6 @@ visualize.panel.ui <- function(data.set) {
         column(width = 4, id = "Sidebar", vis.sidebarPanel()),
         column(width = 8, id = "Main", vis.mainPanel())
       )
-
-
-
-      #      tabPanel(NULL,
-      #               div( id ="Sidebar", sidebarPanel(vis.sidebarPanel())),
-      #
-      #
-      #               mainPanel(vis.mainPanel())
-      #      )
     }
   )
 }
@@ -665,7 +512,10 @@ old.vis.mainPanel <- function() {
                   fixedRow(
                     column(
                       width = 2, offset = 1,
-                      downloadButton(outputId = "saveplot2", label = "Save Plot")
+                      downloadButton(
+                        outputId = "saveplot2",
+                        label = "Save Plot"
+                      )
                     ),
                     column(
                       width = 6,

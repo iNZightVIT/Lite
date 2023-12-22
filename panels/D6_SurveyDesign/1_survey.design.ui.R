@@ -68,10 +68,12 @@ survey.design.sidebar <- function() {
       hr(),
       fluidRow(
         column(6, actionButton("create.design", "Create design",
-          style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+          style =
+            "color: #fff; background-color: #337ab7; border-color: #2e6da4"
         )),
         column(6, actionButton("remove.design", "Remove design",
-          style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+          style =
+            "color: #fff; background-color: #337ab7; border-color: #2e6da4"
         ))
       ), br()
     ),
@@ -115,10 +117,16 @@ survey.design.sidebar <- function() {
             textInput("repScale", "Overall scale: "),
             h5("Replicate scales: "),
             fluidRow(
-              column(8, div(style = "display: inline-block;;", fileInput("repRscalesBtn", label = "Read from file ...", multiple = F))),
-              column(2, div(style = "display: inline-block; margin-top: 25px;", actionButton("repRscalesClear", "Clear",
-                style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
-              ))),
+              column(8, div(
+                style = "display: inline-block;;",
+                fileInput("repRscalesBtn", label = "Read from file ...", multiple = F)
+              )),
+              column(
+                2,
+                div(style = "display: inline-block; margin-top: 25px;", actionButton("repRscalesClear", "Clear",
+                  style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+                ))
+              ),
             ),
             tags$div(
               style = "margin-top: -1px;
@@ -127,7 +135,10 @@ survey.design.sidebar <- function() {
                                                    height: 300px;
                                                    overflow-y: auto;
                                                    overflow-x: auto;",
-              tags$head(tags$style("#rscalesTbl table {background-color: #FFFFFF; }", media = "screen", type = "text/css")),
+              tags$head(tags$style(
+                "#rscalesTbl table {background-color: #FFFFFF; }",
+                media = "screen", type = "text/css"
+              )),
               tableOutput("rscalesTbl")
             )
           )

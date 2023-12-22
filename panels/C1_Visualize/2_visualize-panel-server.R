@@ -11,9 +11,7 @@
 
 ###  And on the first day of February, God said "Let there be data":
 vis.data <- reactive({
-  #   values$data.set
   plot.par$data <- get.data.set()
-  #   vis.data <-
   get.data.set()
 })
 
@@ -70,19 +68,34 @@ plot_list <- function(plot_type, x, y) {
     )
 
     if (is.null(y)) {
-      return_list <- append(return_list, list(gg_column2 = "(gg) column/row bar"), length(return_list) - 1)
-      return_list <- append(return_list, list(gg_lollipop = "(gg) lollipop"), length(return_list) - 1)
+      return_list <- append(
+        return_list,
+        list(gg_column2 = "(gg) column/row bar"), length(return_list) - 1
+      )
+      return_list <- append(
+        return_list,
+        list(gg_lollipop = "(gg) lollipop"), length(return_list) - 1
+      )
     }
 
     if (!is.null(y)) {
-      return_list <- append(return_list, list(gg_ridgeline = "(gg) density (ridgeline)"), after = length(return_list) - 1)
+      return_list <- append(return_list,
+        list(gg_ridgeline = "(gg) density (ridgeline)"),
+        after = length(return_list) - 1
+      )
     }
 
-    if ((!is.numeric(y) && nlevels(y) == 2) || (!is.numeric(x) && nlevels(x) == 2)) {
-      return_list <- append(return_list, list(gg_poppyramid = "(gg) pyramid"), after = 2)
+    if ((!is.numeric(y) && nlevels(y) == 2) ||
+      (!is.numeric(x) && nlevels(x) == 2)) {
+      return_list <- append(return_list,
+        list(gg_poppyramid = "(gg) pyramid"),
+        after = 2
+      )
     }
 
-    attr(return_list, "cat.levels") <- ifelse(is.numeric(x), nlevels(y), nlevels(x))
+    attr(return_list, "cat.levels") <- ifelse(is.numeric(x),
+      nlevels(y), nlevels(x)
+    )
   } else if (plot_type %in% c(
     "gg_mosaic",
     "gg_lollipop2",
@@ -107,22 +120,34 @@ plot_list <- function(plot_type, x, y) {
     )
 
     if (is.null(y)) {
-      return_list <- append(return_list, list(gg_gridplot = "(gg) gridplot", gg_pie = "(gg) pie", gg_donut = "(gg) donut"))
+      return_list <- append(
+        return_list,
+        list(gg_gridplot = "(gg) gridplot", gg_pie = "(gg) pie", gg_donut = "(gg) donut")
+      )
     } else {
-      return_list <- append(return_list, list(gg_freqpolygon = "(gg) frequency polygons", gg_heatmap = "(gg) heatmap"))
+      return_list <- append(
+        return_list,
+        list(gg_freqpolygon = "(gg) frequency polygons", gg_heatmap = "(gg) heatmap")
+      )
       if (is.factor(y) && nlevels(y) == 2) {
-        return_list <- append(return_list, list(gg_spine = "(gg) spine/pyramid"), length(return_list) - 1)
+        return_list <- append(
+          return_list,
+          list(gg_spine = "(gg) spine/pyramid"), length(return_list) - 1
+        )
       }
 
       if (is.factor(x) && nlevels(x) >= 3) {
-        return_list <- append(return_list, list(gg_divergingstackedbar = "(gg) diverging stacked bar (likert)"), length(return_list) - 1)
+        return_list <- append(
+          return_list,
+          list(gg_divergingstackedbar = "(gg) diverging stacked bar (likert)"),
+          length(return_list) - 1
+        )
         attr(return_list, "cat.levels") <- nlevels(x)
       }
     }
   }
 
   attr(return_list, "null.y") <- is.null(y)
-
   return_list
 }
 
@@ -132,7 +157,8 @@ valid_colour <- function(colour) {
 
 n_fun <- function(n) {
   if (n > 1000) {
-    if (n > 5 * 10^ceiling(log10(n) - 1) && n > 5 * 10^ceiling(log10(n + 1) - 1)) {
+    if (n > 5 * 10^ceiling(log10(n) - 1) &&
+      n > 5 * 10^ceiling(log10(n + 1) - 1)) {
       10^(floor(log10(n)) - 1)
     } else {
       10^(floor(log10(n)) - 2)
@@ -344,13 +370,30 @@ graphical.par <- reactiveValues(
           inferno = viridis::inferno
         ),
         list(
-          "rainbow (hcl)" = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
+          "rainbow (hcl)" = function(n) {
+            hcl((1:n) / n * 320 + 60, c = 100, l = 50)
+          },
           blue =
-            function(n) sequential_hcl(n, h = 260, c. = c(80, 10), l = c(30, 95), power = 0.7),
+            function(n) {
+              sequential_hcl(n,
+                h = 260, c. = c(80, 10), l = c(30, 95),
+                power = 0.7
+              )
+            },
           green =
-            function(n) sequential_hcl(n, h = 135, c. = c(50, 10), l = c(40, 95), power = 0.4),
+            function(n) {
+              sequential_hcl(n,
+                h = 135, c. = c(50, 10), l = c(40, 95),
+                power = 0.4
+              )
+            },
           red =
-            function(n) sequential_hcl(n, h = 10, c. = c(80, 10), l = c(30, 95), power = 0.7),
+            function(n) {
+              sequential_hcl(n,
+                h = 10, c. = c(80, 10), l = c(30, 95),
+                power = 0.7
+              )
+            },
           "green-yellow" =
             function(n) {
               terrain_hcl(n,
@@ -368,19 +411,32 @@ graphical.par <- reactiveValues(
           terrain = terrain_hcl,
           heat = heat_hcl,
           "blue/white/pink" =
-            function(n) diverge_hcl(n, h = c(180, 330), c = 59, l = c(75, 95), power = 1.5),
+            function(n) {
+              diverge_hcl(n,
+                h = c(180, 330), c = 59, l = c(75, 95),
+                power = 1.5
+              )
+            },
           "blue/white/red" =
-            function(n) diverge_hcl(n, h = c(260, 0), c = 100, l = c(50, 90), power = 1)
+            function(n) {
+              diverge_hcl(n,
+                h = c(260, 0), c = 100, l = c(50, 90),
+                power = 1
+              )
+            }
         )
       ),
       emphasize = function(n, k, cat = TRUE, ncat = 5,
-                           fn = if (cat) inzpar()$col.default$cat else inzpar()$col.default$cont) {
+                           fn = if (cat) {
+                             inzpar()$col.default$cat
+                           } else {
+                             inzpar()$col.default$cont
+                           }) {
         cols <- fn(n)
         if (!cat) {
           ks <- floor(seq(1, n, length = ncat + 1))
           k <- ks[k]:ks[k + 1]
         }
-        # cols[k] <- iNZightPlots:::shade(cols[k], -0.4)
         cols[-k] <- iNZightPlots:::shade(cols[-k], 0.7)
         cols
       }
@@ -463,7 +519,10 @@ output$data_info <- renderText({
       info_text <- paste("Dataset: ", values$data.current.dname)
     } else if (isTRUE(values$data.type %in% c("xls", "xlsx"))) {
       # if xls or xlsx, use data.name + data.current.dname
-      info_text <- paste("Dataset: ", values$data.name, "| Sheet: ", values$data.current.dname)
+      info_text <- paste(
+        "Dataset: ",
+        values$data.name, "| Sheet: ", values$data.current.dname
+      )
     } else {
       # else just use the filename
       info_text <- paste("Dataset: ", values$data.name)
@@ -528,7 +587,8 @@ determine.g <- reactive({
   }
 })
 
-##  Then on the third, he declared the need for parameters for the "visualize" module:
+## Then on the third, he declared the need for parameters for
+## the "visualize" module:
 vis.par <- reactive({
   vis.par <- reactiveValuesToList(plot.par)
 
@@ -551,7 +611,9 @@ vis.par <- reactive({
     # set ci_width in par for plots
     vis.par$ci.width <- ci_width() / 100
 
-    vis.par <- modifyList(reactiveValuesToList(graphical.par), vis.par, keep.null = TRUE)
+    vis.par <- modifyList(reactiveValuesToList(graphical.par), vis.par,
+      keep.null = TRUE
+    )
   } else {
     NULL
   }
@@ -571,7 +633,6 @@ output$vari1_panel <- renderUI({
     get.vars <- parseQueryString(session$clientData$url_search)
     if (!is.null(get.vars$url)) {
       temp <- session$clientData$url_search
-      ## get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
       get.vars$url <- sub(".*?url=(.*?)&land.*", "\\1", temp)
     }
 
@@ -582,26 +643,6 @@ output$vari1_panel <- renderUI({
         !get.vars$x %in% "")) {
       sel <- get.vars$x
     }
-    #    if(!is.null(input$change_var_selection)){
-    #      if(!input$change_var_selection){
-    #        if(is.null(input$vari1) || input$vari1 == "none") {
-    #          selectInput(inputId = "vari1",
-    #                      label = NULL,
-    #                      choices = c("none", colnames(vis.data())),
-    #                      selected = sel,
-    #                      # selectize = T,
-    #                      selectize=F)
-    #        }
-    #        else {
-    #          selectInput(inputId = "vari1",
-    #                      label = NULL,
-    #                      choices = c(colnames(vis.data())),
-    #                      selected = sel,
-    #                      # selectize = T,
-    #                      selectize=F)
-    #        }
-
-    #      }else{
     selectInput(
       inputId = "vari1",
       label = NULL,
@@ -609,8 +650,6 @@ output$vari1_panel <- renderUI({
       selected = sel,
       selectize = F
     )
-    #      }
-    #    }
   })
 })
 
@@ -641,7 +680,6 @@ observe({
 observe({
   if (!is.null(input$vari1)) {
     isolate({
-      # vari1.par = handle.input(input$vari1)$input.out
       plot.par$x <- as.name(input$vari1)
       plot.par$varnames$x <- input$vari1
       if (!is.null(vis.data())) {
@@ -717,7 +755,6 @@ observe({
   input$subs1
   isolate({
     if (!is.null(input$subs1)) {
-      # subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
       plot.par$g1 <- as.name(input$subs1)
       varnames.g1 <- input$subs1
       if (!is.null(varnames.g1) &&
@@ -726,8 +763,10 @@ observe({
         plot.par$g1 <- NULL
       }
       plot.par$varnames$g1 <- varnames.g1
-      # choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-      choices1 <- c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
+      choices1 <- c(
+        "_MULTI",
+        levels(handle.input(input$subs1, subs = TRUE)$input.out)
+      )
       if (is.null(choices1)) {
         choices1 <- 1
       }
@@ -748,7 +787,6 @@ observe({
   input$subs1
   isolate({
     if (!is.null(input$subs1)) {
-      # subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
       plot.par$g1 <- as.name(input$subs1)
       varnames.g1 <- input$subs1
       if (!is.null(varnames.g1) &&
@@ -774,8 +812,10 @@ output$subs1_conditional <- renderUI({
   get.data.set()
   input$speed1
   isolate({
-    # choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-    choices1 <- c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
+    choices1 <- c(
+      "_MULTI",
+      levels(handle.input(input$subs1, subs = TRUE)$input.out)
+    )
     if (is.null(choices1)) {
       choices1 <- 1
     }
@@ -787,7 +827,6 @@ output$subs1_conditional <- renderUI({
       inputId = "sub1_level",
       label = paste0("Subset '", input$subs1, "':"),
       choices = choices1, selected = choices1[1],
-      # animate = TRUE,
       animate = animationOptions(
         interval = ifelse(length(input$speed1) == 0, 600, 1000 * input$speed1),
         playButton = icon("play", "fa-2x"),
@@ -815,11 +854,6 @@ output$speed_value1 <- renderUI({
       )
     ))
   )
-  #  numericInput("speed1",
-  #               "Time delay between plots (seconds):",
-  #               value = 0.6, min = 0.1, max = 3.0, step = 0.1)
-  #  fixedRow(column(8, HTML("Time delay between plots (seconds):")),
-  #           column(4, numericInput("speed1", "", value = 0.6)))
 })
 
 
@@ -853,9 +887,6 @@ observe({
   input$subs1
   g1_level <- input$sub1_level
   isolate({
-    # if (is.null(g1_level) || g1_level == 0) {
-    #  g1_level = NULL
-    # }
     tryCatch(
       {
         if ((is.null(g1_level) || g1_level == 0) && !is.null(input$subs1) && input$subs1 != "none") {
@@ -900,14 +931,12 @@ observe({
 ##  Select variable 2.
 output$vari2_panel <- renderUI({
   get.data.set()
-  #  input$change_var_selection
 
   isolate({
     sel <- input$vari2
     get.vars <- parseQueryString(session$clientData$url_search)
     if (!is.null(get.vars$url)) {
       temp <- session$clientData$url_search
-      ## get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
       get.vars$url <- sub(".*?url=(.*?)&land.*", "\\1", temp)
     }
     if (length(get.vars) > 0 &&
@@ -917,19 +946,6 @@ output$vari2_panel <- renderUI({
         !get.vars$y %in% "")) {
       sel <- get.vars$y
     }
-    #    if(!is.null(input$change_var_selection)){
-    #      ch = colnames(vis.data())
-    #      if(!is.null(input$vari1)&&
-    #           input$vari1%in%colnames(vis.data())){
-    #        ch = ch[-which(ch%in%input$vari1)]
-    #      }
-    #      if(!input$change_var_selection){
-    #        selectInput(inputId = "vari2",
-    #                    label = NULL,
-    #                    choices = c("none",ch),
-    #                    selected = sel,
-    #                    selectize=F)
-    #      }else{
 
     ch <- colnames(vis.data())
     if (!is.null(input$vari1) &&
@@ -943,8 +959,6 @@ output$vari2_panel <- renderUI({
       selected = sel,
       selectize = F
     )
-    #      }
-    #    }
   })
 })
 
@@ -1040,27 +1054,15 @@ observe({
       if (!is.null(input$vari2) && input$vari2 %in% ch) {
         ch <- ch[-which(ch %in% input$vari2)]
       }
-      updateSelectInput(session, "subs1", choices = c("none", ch), selected = input$subs1)
+      updateSelectInput(session, "subs1",
+        choices = c("none", ch),
+        selected = input$subs1
+      )
     }
   })
 })
 
 ##  Subset level (Slider) for variable 2.
-# output$subs2_conditional = renderUI({
-#  get.data.set()
-#  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
-#  if (is.null(choices2))
-#    choices2 = 2
-#  else
-#    choices2 = choices2 + 1
-#  sliderInput(inputId = "sub2_level",
-#              label = paste0("Subset '", input$subs2, "':"),
-#              min = 0, max = choices2, value = 0, step = 1,
-#              animate = TRUE,ticks=F)
-# })
-
-################ modified by Wilson #################
-
 output$subs2_conditional <- renderUI({
   get.data.set()
   choices2 <- levels(handle.input(input$subs2, subs = TRUE)$input.out)
@@ -1073,7 +1075,6 @@ output$subs2_conditional <- renderUI({
     inputId = "sub2_level",
     label = paste0("Subset '", input$subs2, "':"),
     choices = choices2,
-    # animate = TRUE,
     animate = animationOptions(
       interval = ifelse(length(input$speed2) == 0, 600, 1000 * input$speed2),
       playButton = icon("play", "fa-2x"),
@@ -1081,8 +1082,6 @@ output$subs2_conditional <- renderUI({
     )
   )
 })
-
-
 
 output$speed_value2 <- renderUI({
   fixedRow(
@@ -1128,7 +1127,8 @@ observe({
   if (!is.null(input$subs2)) {
     g2 <- as.name(input$subs2)
 
-    if ((is.null(g2_level) || g2_level == 0) && !is.null(input$subs2) && input$subs2 != "none") {
+    if ((is.null(g2_level) || g2_level == 0) &&
+      !is.null(input$subs2) && input$subs2 != "none") {
       g2_level <- "_ALL"
     }
 
@@ -1136,7 +1136,6 @@ observe({
       g2_level <- NULL
       g2 <- NULL
     }
-
 
     g2.level.check <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
     if (!is.null(g2_level) &&
@@ -1148,25 +1147,6 @@ observe({
     plot.par$g2 <- g2
   }
 })
-
-
-
-################## modified by Wilson ###################
-
-
-# ##  Update plot.par$g2.level
-# observe({
-#    input$subs2
-#    g2_level = input$sub2_level
-#    if (!is.null(g2_level) && g2_level == 0) {
-#        g2_level = "_MULTI"
-#    }
-#
-#    plot.par$g2.level = g2_level
-# })
-
-##########################################################
-
 
 observe({
   g2_level <- input$sub2_level_mini
@@ -1186,19 +1166,6 @@ observe({
     plot.par$g2 <- g2
   }
 })
-
-################## modified by Wilson ###################
-
-# observe({
-#  input$subs2
-#  g2_level = input$sub2_level_mini
-#  if (!is.null(g2_level) && g2_level == 0) {
-#    g2_level = "_MULTI"
-#  }
-#  plot.par$g2.level = g2_level
-# })
-
-##########################################################
 
 output$visualize.plot <- renderPlot({
   isolate({
@@ -1230,7 +1197,8 @@ output$visualize.plot <- renderPlot({
       temp$varnames$y <- temp.varnames.x
 
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
         tryCatch({
           plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
         }, warning = function(w) {
@@ -1249,9 +1217,12 @@ output$visualize.plot <- renderPlot({
       }
     } else {
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, vis.par())
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1259,7 +1230,9 @@ output$visualize.plot <- renderPlot({
         }, finally = {})
       } else {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, vis.par())
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1268,7 +1241,6 @@ output$visualize.plot <- renderPlot({
       }
     }
   }
-  #  saveRDS(vis.par(), file = "/Users/wilson/Dropbox/vis_plot.rds")
 })
 
 
@@ -1301,7 +1273,8 @@ output$mini.plot <- renderPlot({
       temp$varnames$x <- temp$varnames$y
       temp$varnames$y <- temp.varnames.x
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
         tryCatch({
           plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
         }, warning = function(w) {
@@ -1310,30 +1283,31 @@ output$mini.plot <- renderPlot({
           print(e)
         }, finally = {})
       } else {
-        plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, temp
+        ))
       }
     } else {
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, vis.par())
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       } else {
-        #         print(plot.par$locate.id)
-        plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, vis.par()
+        ))
       }
     }
   }
 })
-
-
-
-
-
 
 ##  Reset variable selection and graphical parameters.
 observe({
@@ -1358,8 +1332,6 @@ observe({
       updateSelectInput(session, "colourpalette", selected = "default")
       updateCheckboxInput(session, "sort.by.size", value = F)
 
-
-      #      updateRadioButtons(session, "customize_plot", selected = 1)
       graphical.par$alpha <- 1
 
       updateSliderInput(session, "adjust.transparency", value = 0)
@@ -1369,7 +1341,8 @@ observe({
       graphical.par$box.col <- "black"
       graphical.par$box.fill <- "white" # fill colour for the boxplot
       ##  Bar
-      graphical.par$bar.fill <- colors()[81] # colour for inside of bars in bar plot
+      # colour for inside of bars in bar plot
+      graphical.par$bar.fill <- colors()[81]
       updateSelectInput(session, "select.barcolor", selected = colors()[81])
       ##  Line
       updateSliderInput(session, "line.width.multiplier", value = 1)
@@ -1384,7 +1357,6 @@ observe({
       updateSliderInput(session, "adjust.size.points.scatter", value = 0.5)
       graphical.par$cex.dotpt <- 0.5
       updateSliderInput(session, "adjust.size.points.dot", value = 0.5)
-      #      graphical.par$pch = 21
 
       updateSliderInput(session, "adjust.size.scale", value = 1)
       graphical.par$cex <- 1
@@ -1412,7 +1384,7 @@ observe({
       updateCheckboxInput(session, "point_symbol_title", value = F)
 
       updateSelectInput(session, "select.dotcolor", selected = "gray50")
-      # graphical.par$fill.pt = "transparent"
+
       ##  Colours
       graphical.par$col.LOE <- "black"
       graphical.par$LOE <- FALSE
@@ -1451,7 +1423,6 @@ observe({
       graphical.par$cex <- 1
       graphical.par$inference.type <- NULL
       graphical.par$inference.par <- NULL
-      #      graphical.par$largesample = NULL
       graphical.par$lines.by <- FALSE
       graphical.par$trend.by <- FALSE
       updateCheckboxInput(session, "each_level", value = F)
@@ -1463,7 +1434,7 @@ observe({
       graphical.par$plottype <- "default"
       updateSelectInput(session, "select.plot.type", selected = "default")
       graphical.par$hist.bins <- get.default.num.bins()
-      #      updateSliderInput(session,"adjust.num.bins",value=get.default.num.bins())
+
       graphical.par$scatter.grid.bins <- 50
       updateSliderInput(session, "adjust.grid.size", value = 50)
       graphical.par$hex.bins <- 20
@@ -1499,12 +1470,6 @@ observe({
       plot.par$locate.extreme <- NULL
       plot.par$zoombar <- NULL
       plot.par$design <- NULL
-      # design.parameters$id = formula("~1")
-      # design.parameters$strata = NULL
-      # design.parameters$fpc = NULL
-      # design.parameters$nest = F
-      # design.parameters$weights = NULL
-      # design.parameters$data.name = NULL
     })
   }
 })
@@ -1551,7 +1516,8 @@ output$add_inference <- renderUI({
       max = 99,
       icon = list(NULL, "%")
     )
-    if (isFALSE(input$confidence_interval1) | is.null(input$confidence_interval1)) {
+    if (isFALSE(input$confidence_interval1) |
+      is.null(input$confidence_interval1)) {
       ci_width_plot <- disabled(ci_width_plot)
     }
     confidence.interval.check <- fluidRow(
@@ -1653,8 +1619,8 @@ output$add_inference <- renderUI({
           ),
           conditionalPanel(
             "input.inference_parameter1=='Mean'||
-                                                     (input.inference_parameter1=='Median'&&
-                                                     input.inference_type2=='Bootstrap')",
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
             h5(strong("Type of interval")),
             confidence.interval.check,
             comparison.interval.check
@@ -1701,8 +1667,8 @@ output$add_inference <- renderUI({
           ),
           conditionalPanel(
             "input.inference_parameter1=='Mean'||
-                                                   (input.inference_parameter1=='Median'&&
-                                                   input.inference_type2=='Bootstrap')",
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
             h5(strong("Type of interval")),
             confidence.interval.check
           ),
@@ -1715,33 +1681,6 @@ output$add_inference <- renderUI({
   })
   ret
 })
-
-
-
-
-# output$display_conf_values = renderPrint({
-
-#  input$get_conf_values
-
-#  isolate({
-#    temp = unclass(plot.ret.para$parameters)
-#    temp.type = names(temp$all$all$inference.info)
-#    if(length(temp.type) == 0)
-#      cat("No values")
-#    else if(temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0)
-#      print(temp$all$all$inference.info$mean)
-#    else if(temp.type == "median" && length(temp$all$all$inference.info$median) > 0)
-#      print(temp$all$all$inference.info$median)
-#    else
-#      cat("No values")
-#  })
-
-# })
-
-
-
-
-
 
 observe({
   input$inference_parameter1
@@ -1767,7 +1706,8 @@ observe({
       output$display_conf_values <- renderPrint({
         cat("No values")
       })
-    } else if (temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0) {
+    } else if (temp.type == "mean" &&
+      length(temp$all$all$inference.info$mean) > 0) {
       output$display_conf_values <- renderPrint({
         names.table <- names(temp$all$all$inference.info$mean)
         for (index.table in 1:length(names.table)) {
@@ -1780,7 +1720,8 @@ observe({
           }
         }
       })
-    } else if (temp.type == "median" && length(temp$all$all$inference.info$median) > 0) {
+    } else if (temp.type == "median" &&
+      length(temp$all$all$inference.info$median) > 0) {
       output$display_conf_values <- renderPrint({
         names.table <- names(temp$all$all$inference.info$median)
         for (index.table in 1:length(names.table)) {
@@ -1910,7 +1851,6 @@ observe({
       input$vari2 %in% colnames(get.data.set())) &&
       (is.numeric(get.data.set()[, input$vari1]) &&
         is.numeric(get.data.set()[, input$vari2]))) {
-      #      graphical.par$bs.inference = input$add.inference
       if (is.null(input$add.inference)) {
         graphical.par$bs.inference <- F
       } else {
@@ -2021,7 +1961,11 @@ output$plot.appearance.panel.title <- renderUI({
     if (!is.null(plot.ret.para$parameters)) {
       varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE <- attr(plot.ret.para$parameters, "plottype")
-      PLOTTYPES <- plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
+      PLOTTYPES <- plot_list(
+        TYPE,
+        get.data.set()[[varnames["x"]]],
+        get.data.set()[[varnames["y"]]]
+      )
       plot.type.para$plotTypes <- unname(do.call(c, PLOTTYPES))
       plot.type.para$plotTypeValues <- names(PLOTTYPES)
     }
@@ -2043,15 +1987,12 @@ output$plot.appearance.panel.title <- renderUI({
       }
       temp$plot <- F
       tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-      #####################################################################
-      #      large.sample = T
       large.sample <- search.name(tester, "largesample")[[1]]
       if (is.null(large.sample)) {
         large.sample <- F
       }
     }
     select.plot.type.object <- NULL
-    #####################################################################
     select.plot.type.object <- fixedRow(
       column(3, h5("Plot type:")),
       column(6, selectInput(
@@ -2083,7 +2024,11 @@ output$plot.appearance.panel <- renderUI({
     if (!is.null(plot.ret.para$parameters)) {
       varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE <- attr(plot.ret.para$parameters, "plottype")
-      PLOTTYPES <- plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
+      PLOTTYPES <- plot_list(
+        TYPE,
+        get.data.set()[[varnames["x"]]],
+        get.data.set()[[varnames["y"]]]
+      )
       plot.type.para$plotTypes <- unname(do.call(c, PLOTTYPES))
       plot.type.para$plotTypeValues <- names(PLOTTYPES)
     }
@@ -2333,7 +2278,8 @@ output$plot.appearance.panel <- renderUI({
       column(6, selectInput(
         inputId = "colourpalette", label = NULL,
         choices = c(
-          "default", "greyscale", "viridis", "magma", "plasma", "inferno", "BrBG", "PiYG", "PRGn",
+          "default", "greyscale", "viridis", "magma", "plasma",
+          "inferno", "BrBG", "PiYG", "PRGn",
           "Accent", "Dark2", "Paired", "Pastel1", "Set1",
           "Blues", "BuGn", "BuPu", "GnBu"
         ),
@@ -2357,13 +2303,9 @@ output$plot.appearance.panel <- renderUI({
       )
     )
 
-    #    select.barcolor.object = fixedRow(column(3, h5("Bar Colour:")),
-    #                                      column(6, selectInput(inputId="select.barcolor",label=NULL,
-    #                                                            choices=cols2,
-    #                                                            selected=graphical.par$bar.fill)))
-
     select.dotcolor.object <- conditionalPanel(
-      condition = "input.point_colour_title == true & input.color_by_select == ' '",
+      condition = "input.point_colour_title == true &
+                   input.color_by_select == ' '",
       fixedRow(
         column(3, h5("Point Colour:")),
         column(6, selectInput(
@@ -2374,10 +2316,7 @@ output$plot.appearance.panel <- renderUI({
         ))
       )
     )
-    #    select.dotcolor.object = fixedRow(column(3, h5("Point Colour:")),
-    #                                      column(6, selectInput(inputId="select.dotcolor",label=NULL,
-    #                                                            choices=cols3,
-    #                                                            selected=graphical.par$col.pt)))
+
     color.interior <- conditionalPanel(
       condition = "input.point_colour_title == true",
       fixedRow(
@@ -2388,11 +2327,7 @@ output$plot.appearance.panel <- renderUI({
         ))
       )
     )
-    #    color.interior = checkboxInput(inputId="color.interior",label = "Colour interior",
-    #                                   value = FALSE)
 
-    #    select.dotcolor.interior.object = fixedRow(column(5, select.dotcolor.object),
-    #                                               column(4, color.interior))
     if (is.null(graphical.par$cex.dotpt)) {
       graphical.par$cex.dotpt <- 0.5
     }
@@ -2424,15 +2359,6 @@ output$plot.appearance.panel <- renderUI({
     )
     grid.title <- h5(strong("Gridplot Options"))
 
-    #    adjust.size.points.dot.object = fixedRow(column(3, h5("Point size:")),
-    #                                              column(6, sliderInput("adjust.size.points.dot",
-    #                                                                    label = NULL,
-    #                                                                    min = 0.1,
-    #                                                                    max = 3.5,
-    #                                                                    value=graphical.par$cex.dotpt,
-    #                                                                    step=.05,
-    #                                                                    ticks = FALSE)))
-
     adjust.size.points.scatter.object <- conditionalPanel(
       condition = "input.point_size_title == true",
       fixedRow(
@@ -2447,16 +2373,6 @@ output$plot.appearance.panel <- renderUI({
         ))
       )
     )
-
-    #    adjust.size.points.scatter.object = fixedRow(column(3, h5("Point size:")),
-    #                                                 column(6, sliderInput("adjust.size.points.scatter",
-    #                                                                       label = NULL,
-    #                                                                       min = 0.1,
-    #                                                                       max = 3.5,
-    #                                                                       value=graphical.par$cex.dotpt,
-    #                                                                       step=.05,
-    #                                                                       ticks = FALSE)))
-
 
     adjust.grid.size.title <- h5(strong("Size"))
     adjust.grid.size.object <- fixedRow(
@@ -2509,12 +2425,6 @@ output$plot.appearance.panel <- renderUI({
         step = 1, ticks = FALSE
       ))
     )
-    #    adjust.transparency.object = fixedRow(column(3, h5("Transparency:")),
-    #                                          column(6, sliderInput("adjust.transparency",
-    #                                                                label = NULL, min = 0,
-    #                                                                max = 100,
-    #                                                                value=convert.to.percent(graphical.par$alpha),
-    #                                                                step=1, ticks = FALSE)))
 
     if (is.null(graphical.par$hex.bins)) {
       graphical.par$hex.bins <- 20
@@ -2540,9 +2450,6 @@ output$plot.appearance.panel <- renderUI({
       ))
     )
 
-
-
-
     adjust.num.bins.object <- NULL
     if ((!is.null(input$vari1) &
       !is.null(input$vari2)) &&
@@ -2558,13 +2465,12 @@ output$plot.appearance.panel <- renderUI({
       }
       temp$plot <- F
       tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-      #####################################################################
-      #      large.sample = T
+
       large.sample <- search.name(tester, "largesample")[[1]]
       if (is.null(large.sample)) {
         large.sample <- F
       }
-      #####################################################################
+
       # bar plot with one factor variable
       # vari1 = factor , vari2 = none
       if (input$vari2 %in% "none" &&
@@ -2577,7 +2483,8 @@ output$plot.appearance.panel <- renderUI({
           select.barcolor.object
         )
 
-        if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
+        if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) column/row bar") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2587,7 +2494,8 @@ output$plot.appearance.panel <- renderUI({
             sorting.title,
             sortbysize.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) stacked column/row") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2595,7 +2503,8 @@ output$plot.appearance.panel <- renderUI({
             ggtheme.object,
             rotation.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) lollipop") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2609,7 +2518,8 @@ output$plot.appearance.panel <- renderUI({
             sorting.title,
             sortbysize.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("(gg) pie", "(gg) donut")) {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type %in% c("(gg) pie", "(gg) donut")) {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2618,7 +2528,8 @@ output$plot.appearance.panel <- renderUI({
             sorting.title,
             sortbysize.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) gridplot") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) gridplot") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2651,7 +2562,8 @@ output$plot.appearance.panel <- renderUI({
           bar.colour.title
         )
 
-        if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
+        if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) column/row bar") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2661,7 +2573,8 @@ output$plot.appearance.panel <- renderUI({
             sorting.title,
             sortbysize.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) stacked column/row") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2669,7 +2582,8 @@ output$plot.appearance.panel <- renderUI({
             ggtheme.object,
             rotation.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) lollipop") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2683,7 +2597,8 @@ output$plot.appearance.panel <- renderUI({
             sorting.title,
             sortbysize.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) frequency polygons") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) frequency polygons") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2695,7 +2610,8 @@ output$plot.appearance.panel <- renderUI({
             line.title,
             line.width.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) diverging stacked bar (likert)") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) diverging stacked bar (likert)") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2703,7 +2619,8 @@ output$plot.appearance.panel <- renderUI({
             ggtheme.object,
             rotation.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) heatmap") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) heatmap") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2711,7 +2628,8 @@ output$plot.appearance.panel <- renderUI({
             ggtheme.object,
             rotation.object
           )
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) spine/pyramid") {
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) spine/pyramid") {
           ret <- list(
             select.bg.object,
             adjust.size.scale.object,
@@ -2748,7 +2666,6 @@ output$plot.appearance.panel <- renderUI({
           point.colour.title,
           select.dotcolor.object,
           color.interior,
-          #                   select.dotcolor.interior.object,
           adjust.transparency.object
         )
         if ((!is.null(input$select.plot.type) &&
@@ -2762,7 +2679,6 @@ output$plot.appearance.panel <- renderUI({
           nbins <- NULL
           if (is.null(get.nbins())) {
             nbins <- search.name(tester, "hist.bins")[[1]][1]
-            #           nbins = nbins[1]
           } else {
             nbins <- get.nbins()
           }
@@ -3060,11 +2976,7 @@ output$plot.appearance.panel <- renderUI({
             ))
           )
         )
-        #                resize.by.object = fixedRow(column(3, h5("Resize points by:")),
-        #                                    column(6, selectInput("resize.by.select",
-        #                                                          label=NULL,
-        #                                                          choices=c(" ",get.numeric.column.names(vis.data())),
-        #                                                          selected = "input$resize.by.select")))
+
         ret <- list(
           select.bg.object,
           adjust.size.scale.object,
@@ -3074,7 +2986,6 @@ output$plot.appearance.panel <- renderUI({
           point.colour.title,
           select.dotcolor.object,
           color.interior,
-          #                   select.dotcolor.interior.object,
           adjust.transparency.object
         )
         if (!is.null(input$select.plot.type) &&
@@ -3129,13 +3040,12 @@ observe({
         }
         temp$plot <- F
         tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-        ####################################################################
-        #        large.sample = T
+
         large.sample <- search.name(tester, "largesample")[[1]]
         if (is.null(large.sample)) {
           large.sample <- F
         }
-        ####################################################################
+
         if (!is.null(input$advanced_options)) {
           sel <- input$advanced_options
           ch <- NULL
@@ -3259,13 +3169,9 @@ output$plotly_inter <- renderPlotly({
 
   isolate({
     temp <- vis.par()
-    # temp.x = temp$x
-    # temp$x=temp$y
-    # temp$y=temp.x
-    # temp.varnames.x = temp$varnames$x
-    # temp$varnames$x = temp$varnames$y
-    # temp$varnames$y = temp.varnames.x
-    if (!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
+
+    if (!is.null(input$select.plot.type) &&
+      length(input$select.plot.type) > 0) {
       temp$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
       pdf(NULL)
       do.call(iNZightPlots:::iNZightPlot, temp)
@@ -3286,7 +3192,8 @@ output$plotly_nw <- renderUI({
 
   isolate({
     temp <- vis.par()
-    if (!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
+    if (!is.null(input$select.plot.type) &&
+      length(input$select.plot.type) > 0) {
       temp$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
 
       curdir <- getwd()
@@ -3337,21 +3244,29 @@ observe({
         if (!is.null(input$select.plot.type) &&
           input$select.plot.type %in% c(
             "(gg) dot strip", "(gg) barcode", "(gg) boxplot",
-            "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
+            "(gg) beeswarm", "(gg) violin", "(gg) density",
+            "(gg) stacked column/row",
             "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
             "(gg) diverging stacked bar (likert)",
-            "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons", "(gg) spine/pyramid",
-            "(gg) pyramid",
+            "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons",
+            "(gg) spine/pyramid", "(gg) pyramid",
             ""
           )) {
           hideTab(inputId = "plot_selector", target = "1")
           showTab(inputId = "plot_selector", target = "2")
-        } else if ((!is.null(input$select.plot.type) && input$select.plot.type %in% c(
-          "(gg) pie", "(gg) gridplot",
-          "(gg) donut", "(gg) density (ridgeline)"
-        )) ||
-          (!is.null(input$sub1_level) && input$sub1_level == "_MULTI" && input$subs1 != "none") ||
-          !is.null(input$sub2_level) && input$subs2 != "none") {
+        } else if (
+          (
+            !is.null(input$select.plot.type) &&
+              input$select.plot.type %in% c(
+                "(gg) pie", "(gg) gridplot",
+                "(gg) donut", "(gg) density (ridgeline)"
+              )
+          ) || (
+            !is.null(input$sub1_level) && input$sub1_level == "_MULTI" &&
+              input$subs1 != "none"
+          ) ||
+            !is.null(input$sub2_level) && input$subs2 != "none"
+        ) {
           hideTab(inputId = "plot_selector", target = "2")
           hideTab(inputId = "plot_selector", target = "1")
         } else {
@@ -3537,10 +3452,8 @@ observe({
 })
 
 # select the point size
-
 observe({
   input$adjust.size.points.dot
-  #  input$adjust.size.points.scatter
   isolate({
     if (!is.null(input$adjust.size.points.dot)) {
       graphical.par$cex.dotpt <- input$adjust.size.points.dot
@@ -3559,7 +3472,6 @@ observe({
 
 
 # select the colur palette
-
 observe({
   input$colour.palette.reverse
   isolate({
@@ -3570,7 +3482,6 @@ observe({
 })
 
 # select colour ranks or not
-
 observe({
   input$colour.use.ranks
   isolate({
@@ -3587,7 +3498,8 @@ observe({
   isolate({
     if (!is.null(input$select.colour.palette)) {
       if (input$select.colour.palette %in% names(graphical.par$colourPalettes$cat)) {
-        graphical.par$col.fun <- graphical.par$colourPalettes$cat[[input$select.colour.palette]]
+        graphical.par$col.fun <-
+          graphical.par$colourPalettes$cat[[input$select.colour.palette]]
       } else if (input$select.colour.palette %in% names(graphical.par$colourPalettes$cont)) {
         graphical.par$col.fun <- graphical.par$colourPalettes$cont[[input$select.colour.palette]]
       }
@@ -3620,8 +3532,12 @@ observe({
 observe({
   input$select.plot.type
   isolate({
-    if (!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
-      graphical.par$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
+    if (!is.null(input$select.plot.type) &&
+      length(input$select.plot.type) > 0) {
+      graphical.par$plottype <-
+        plot.type.para$plotTypeValues[
+          which(plot.type.para$plotTypes == input$select.plot.type)
+        ]
     }
   })
 })
@@ -3630,7 +3546,8 @@ observe({
 observe({
   input$show_boxplot_title
   isolate({
-    if (!is.null(input$show_boxplot_title) && length(input$show_boxplot_title) > 0) {
+    if (!is.null(input$show_boxplot_title) &&
+      length(input$show_boxplot_title) > 0) {
       graphical.par$boxplot <- input$show_boxplot_title
     }
   })
@@ -3639,7 +3556,8 @@ observe({
 observe({
   input$show_mean_title
   isolate({
-    if (!is.null(input$show_mean_title) && length(input$show_mean_title) > 0) {
+    if (!is.null(input$show_mean_title) &&
+      length(input$show_mean_title) > 0) {
       graphical.par$mean_indicator <- input$show_mean_title
     }
   })
@@ -3653,11 +3571,8 @@ observe({
     isolate({
       if (!is.null(input$select.dotcolor)) {
         if (input$color.interior) {
-          #          graphical.par$pch = 19
           graphical.par$fill.pt <- "fill"
-          #          graphical.par$alpha = 0.3
         } else {
-          #          graphical.par$pch = 1
           graphical.par$fill.pt <- "transparent"
         }
       }
@@ -3711,13 +3626,6 @@ observe({
 observe({
   input$adjust.transparency
   isolate({
-    #    if(!is.null(input$adjust.transparency)){
-    #      if(input$adjust.transparency==0){
-    #        graphical.par$pch=1
-    #      }else{
-    #        graphical.par$pch=19
-    #      }
-    #    }
     graphical.par$alpha <- convert.to.percent(input$adjust.transparency, T)
   })
 })
@@ -3725,13 +3633,6 @@ observe({
 observe({
   input$fill.transparency
   isolate({
-    #    if(!is.null(input$adjust.transparency)){
-    #      if(input$adjust.transparency==0){
-    #        graphical.par$pch=1
-    #      }else{
-    #        graphical.par$pch=19
-    #      }
-    #    }
     graphical.par$alpha <- convert.to.percent(input$fill.transparency, T)
   })
 })
@@ -3779,9 +3680,7 @@ output$customize.labels.panel <- renderUI({
   input$vari2
   isolate({
     plot.par$xlab <- NULL
-    # plot.par$varnames$xlab = NULL
     plot.par$ylab <- NULL
-    # plot.par$varnames$ylab = NULL
     plot.par$main <- NULL
     axis.label.title <- h5(strong("Axis Labels"))
     main_title_text.object <- fixedRow(
@@ -3798,9 +3697,13 @@ output$customize.labels.panel <- renderUI({
     )
     change.labels.button.object <- fixedRow(
       column(4),
-      column(6, actionButton(inputId = "change.labels.button", label = "Submit"))
+      column(6, actionButton(
+        inputId = "change.labels.button",
+        label = "Submit"
+      ))
     )
-    if (!is.null(vis.data()) && !is.null(input$vari1) && !is.null(input$vari2) &&
+    if (!is.null(vis.data()) && !is.null(input$vari1) &&
+      !is.null(input$vari2) &&
       input$vari1 %in% colnames(get.data.set())) {
       if ((class(vis.data()[, input$vari1]) %in% "numeric" |
         class(vis.data()[, input$vari1]) %in% "integer") &
@@ -3841,7 +3744,6 @@ observe({
       if (!is.null(input$x_axis_text) &&
         !input$x_axis_text %in% "") {
         plot.par$xlab <- input$x_axis_text
-        # plot.par$varnames$xlab = input$x_axis_text
       } else {
         plot.par$xlab <- NULL
         plot.par$varnames$xlab <- NULL
@@ -3849,7 +3751,6 @@ observe({
       if (!is.null(input$y_axis_text) &&
         !input$y_axis_text %in% "") {
         plot.par$ylab <- input$y_axis_text
-        # plot.par$varnames$ylab = input$y_axis_text
       } else {
         plot.par$ylab <- NULL
         plot.par$varnames$ylab <- NULL
@@ -3857,9 +3758,6 @@ observe({
     }
   })
 })
-
-
-
 
 # "Code more variables" panel"
 output$code.variables.panel <- renderUI({
@@ -3873,8 +3771,6 @@ output$code.variables.panel <- renderUI({
   isolate({
     select.colour.palette.object <- NULL
     colour.palette.reverse.object <- NULL
-
-
 
     # vari1 = factor, vari2 = factor
     if (!input$vari2 %in% "none" &&
@@ -3906,8 +3802,10 @@ output$code.variables.panel <- renderUI({
 
       if (length(input$select.plot.type) != 0 &&
         (input$select.plot.type %in% c(
-          "(gg) column/row bar", "(gg) stacked column/row", "(gg) lollipop", "(gg) frequency polygons",
-          "(gg) heatmap", "(gg) diverging stacked bar (likert)", "(gg) spine/pyramid"
+          "(gg) column/row bar", "(gg) stacked column/row",
+          "(gg) lollipop", "(gg) frequency polygons",
+          "(gg) heatmap", "(gg) diverging stacked bar (likert)",
+          "(gg) spine/pyramid"
         ))) {
         ret <- list(
           fixedRow(column(10, hr())),
@@ -4003,9 +3901,14 @@ output$code.variables.panel <- renderUI({
                 column(6, selectInput(
                   inputId = "select.colour.palette",
                   label = NULL,
-                  choices = switch(as.character(length(input$color_by_select) > 0 && input$color_by_select %in% get.numeric.column.names(vis.data())),
-                    "TRUE" = names(graphical.par$colourPalettes$cont),
-                    "FALSE" = names(graphical.par$colourPalettes$cat)
+                  ## TODO: FIX ??
+                  choices = switch(as.character(
+                    length(input$color_by_select) > 0 &&
+                      input$color_by_select %in%
+                        get.numeric.column.names(vis.data())
+                  ),
+                  "TRUE" = names(graphical.par$colourPalettes$cont),
+                  "FALSE" = names(graphical.par$colourPalettes$cat)
                   ),
                   selected = input$select.colour.palette,
                   selectize = FALSE
@@ -4044,19 +3947,15 @@ output$code.variables.panel <- renderUI({
               column(3, h5("Symbol:")),
               column(6, selectInput("point_symbol",
                 label = NULL,
-                choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
+                choices = c(
+                  "circle", "square", "diamond", "triangle",
+                  "inverted triangle"
+                ),
                 selected = "circle",
                 selectize = F
               ))
             )
           )
-
-          #          symbol.object = fixedRow(column(3, h5("Point Symbol:")),
-          #                                   column(6, selectInput("point_symbol",
-          #                                                         label=NULL,
-          #                                                         choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
-          #                                                         selected = "circle")))
-
 
           symbol.by.object <- conditionalPanel(
             condition = "input.point_symbol_title == true",
@@ -4070,11 +3969,6 @@ output$code.variables.panel <- renderUI({
               ))
             )
           )
-          #          symbol.by.object = fixedRow(column(3, h5("Symbol by:")),
-          #                                      column(6, selectInput("point_symbol_by",
-          #                                                            label=NULL,
-          #                                                            choices = c(" ", get.categorical.column.names(vis.data())),
-          #                                                            selected = " ")))
 
           symbol.linewidth.object <- conditionalPanel(
             condition = "input.point_symbol_title == true",
@@ -4086,22 +3980,8 @@ output$code.variables.panel <- renderUI({
               ))
             )
           )
-          #          symbol.linewidth.object = fixedRow(column(3, h5("Symbol line width:")),
-          #                                             column(6, sliderInput("symbol_linewidth", label = NULL, min = 1,
-          #                                                                   max = 4, value=2, step=0.2, ticks = FALSE)))
         }
-        #        resize.by.object = NULL
-        #        if((class(vis.data()[,input$vari1])%in%"numeric"|
-        #            class(vis.data()[,input$vari1])%in%"integer")&&
-        #           (!input$vari2%in%"none"&&
-        #            (class(vis.data()[,input$vari2])%in%"numeric"|
-        #             class(vis.data()[,input$vari2])%in%"integer"))){
-        #          resize.by.object = fixedRow(column(3, h5("Resize points by:")),
-        #                                      column(6, selectInput("resize.by.select",
-        #                                                            label=NULL,
-        #                                                            choices=c(" ",get.numeric.column.names(vis.data())),
-        #                                                            selected = "input$resize.by.select")))
-        #        }
+
         if (length(input$select.plot.type) != 0 &&
           (input$select.plot.type %in% "histogram" ||
             input$select.plot.type %in% "hexagonal binning")) {
@@ -4109,8 +3989,10 @@ output$code.variables.panel <- renderUI({
         } else if (length(input$select.plot.type) != 0 &&
           (input$select.plot.type %in% c(
             "(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin",
-            "(gg) density", "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
-            "(gg) stacked column/row", "(gg) pie", "(gg) donut", "(gg) gridplot",
+            "(gg) density", "(gg) column/row bar", "(gg) lollipop",
+            "(gg) cumulative curve",
+            "(gg) stacked column/row", "(gg) pie", "(gg) donut",
+            "(gg) gridplot",
             "(gg) beeswarm", "(gg) pyramid", "(gg) density (ridgeline)"
           ))) {
           ret <- list(
@@ -4125,7 +4007,8 @@ output$code.variables.panel <- renderUI({
             br(),
             br()
           )
-        } else if (length(input$select.plot.type) != 0 && input$select.plot.type == "grid-density") {
+        } else if (length(input$select.plot.type) != 0 &&
+          input$select.plot.type == "grid-density") {
           ret <- NULL
         } else {
           ret <- list(
@@ -4296,18 +4179,28 @@ output$trend.curve.panel <- renderUI({
     smoother.title <- h5(strong("Smoother"))
     check.linear.object <- checkboxInput("check_linear",
       label = "linear",
-      value = ifelse((!is.null(input$inf.trend.linear) && length(input$inf.trend.linear) > 0), input$inf.trend.linear, FALSE)
+      value = ifelse(
+        !is.null(input$inf.trend.linear) && length(input$inf.trend.linear) > 0, input$inf.trend.linear, FALSE
+      )
     )
     check.quadratic.object <- checkboxInput("check_quadratic",
       label = "quadratic",
-      value = ifelse((!is.null(input$inf.trend.quadratic) && length(input$inf.trend.quadratic) > 0), input$inf.trend.quadratic, FALSE)
+      value = ifelse(
+        !is.null(input$inf.trend.quadratic) && length(input$inf.trend.quadratic) > 0, input$inf.trend.quadratic, FALSE
+      )
     )
     check.cubic.object <- checkboxInput("check_cubic",
       label = "cubic",
-      value = ifelse((!is.null(input$inf.trend.cubic) && length(input$inf.trend.cubic) > 0), input$inf.trend.cubic, FALSE)
+      value = ifelse(
+        !is.null(input$inf.trend.cubic) && length(input$inf.trend.cubic) > 0, input$inf.trend.cubic, FALSE
+      )
     )
-    check.smoother.object <- checkboxInput("check_smoother", label = "Add smoother", value = input$check_smoother)
-    check.quantiles.object <- checkboxInput("check_quantiles", label = "Use Quantiles", value = input$check_quantiles)
+    check.smoother.object <- checkboxInput("check_smoother",
+      label = "Add smoother", value = input$check_smoother
+    )
+    check.quantiles.object <- checkboxInput("check_quantiles",
+      label = "Use Quantiles", value = input$check_quantiles
+    )
     color.linear.select <- selectInput("color.linear",
       label = "",
       choices = c(
@@ -4437,9 +4330,6 @@ output$trend.curve.panel <- renderUI({
           column(6, smoother.smooth.slider)
         )
       ),
-
-      #                          fixedRow(width=12,check.quantiles.object),
-      #                          fixedRow(width=12,smoother.smooth.slider)),
       conditionalPanel(
         "input.color_by_select != ' ' &
                           (input.check_linear | input.check_quadratic |
@@ -4497,8 +4387,6 @@ observe({
   input$color.linear
   input$type.linear
   isolate({
-    #    graphical.par$bs.inference = F
-    #    graphical.par$inference.type = NULL
     if (!is.null(input$check_linear)) {
       if (input$check_linear) {
         if (length(which(graphical.par$trend %in% "linear")) == 0) {
@@ -4515,7 +4403,9 @@ observe({
         )
       } else {
         if (length(which(graphical.par$trend %in% "linear")) > 0) {
-          graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "linear")]
+          graphical.par$trend <- graphical.par$trend[
+            -which(graphical.par$trend %in% "linear")
+          ]
           if (length(graphical.par$trend) == 0) {
             graphical.par$trend <- NULL
           }
@@ -4531,7 +4421,6 @@ observe({
   input$color.quadratic
   input$type.quadratic
   isolate({
-    #    graphical.par$bs.inference = F
     if (!is.null(input$check_quadratic)) {
       if (input$check_quadratic) {
         if (length(which(graphical.par$trend %in% "quadratic")) == 0) {
@@ -4548,7 +4437,9 @@ observe({
         )
       } else {
         if (length(which(graphical.par$trend %in% "quadratic")) > 0) {
-          graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "quadratic")]
+          graphical.par$trend <- graphical.par$trend[
+            -which(graphical.par$trend %in% "quadratic")
+          ]
           if (length(graphical.par$trend) == 0) {
             graphical.par$trend <- NULL
           }
@@ -4564,7 +4455,6 @@ observe({
   input$color.cubic
   input$type.cubic
   isolate({
-    #    graphical.par$bs.inference = F
     if (!is.null(input$check_cubic)) {
       if (input$check_cubic) {
         if (length(which(graphical.par$trend %in% "cubic")) == 0) {
@@ -4581,7 +4471,9 @@ observe({
         )
       } else {
         if (length(which(graphical.par$trend %in% "cubic")) > 0) {
-          graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "cubic")]
+          graphical.par$trend <- graphical.par$trend[
+            -which(graphical.par$trend %in% "cubic")
+          ]
           if (length(graphical.par$trend) == 0) {
             graphical.par$trend <- NULL
           }
@@ -4626,7 +4518,6 @@ output$xy.line.panel <- renderUI({
         class(get.data.set()[, input$vari1]) %in% "integer") &&
         (class(get.data.set()[, input$vari2]) %in% "numeric" |
           class(get.data.set()[, input$vari2]) %in% "integer"))) {
-      #      titel.xyline = h5("Add line of equality (x = y)")
       xyline.title <- h5(strong("Trend Line Options"))
       check.xyline.object <- checkboxInput("check.xyline",
         label = "Add y=x line",
@@ -4654,9 +4545,6 @@ output$xy.line.panel <- renderUI({
   })
   ret
 })
-
-
-
 
 # check for changes in color or whether the x=y-line is drawn
 observe({
@@ -4694,15 +4582,12 @@ output$add.jitter.panel <- renderUI({
         class(get.data.set()[, input$vari1]) %in% "integer") &&
         (class(get.data.set()[, input$vari2]) %in% "numeric" |
           class(get.data.set()[, input$vari2]) %in% "integer"))) {
-      #      title.jitter = h5("Add a jitter")
       axis.features.title <- h5(strong("Axis Features"))
       check.jitter.x.object <- checkboxInput("check.jitter.x",
         label = plot.par$varnames$y,
-        # label="height",
         value = input$check.jitter.x
       )
       check.jitter.y.object <- checkboxInput("check.jitter.y",
-        # label="rightfoot",
         label = plot.par$varnames$x,
         value = input$check.jitter.y
       )
@@ -4772,7 +4657,6 @@ output$add.rugs.panel <- renderUI({
         class(get.data.set()[, input$vari1]) %in% "integer") &&
         (class(get.data.set()[, input$vari2]) %in% "numeric" |
           class(get.data.set()[, input$vari2]) %in% "integer"))) {
-      #      title.rugs = h5("Add rugs")
       check.rugs.x.object <- checkboxInput("check.rugs.x",
         label = plot.par$varnames$y,
         value = input$check.rugs.x
@@ -4844,7 +4728,6 @@ output$join.points.panel <- renderUI({
         class(get.data.set()[, input$vari1]) %in% "integer") &&
         (class(get.data.set()[, input$vari2]) %in% "numeric" |
           class(get.data.set()[, input$vari2]) %in% "integer"))) {
-      #      title.join = h5("Join points by lines")
       join.points.title <- h5(strong("Join points"))
       check.join.object <- checkboxInput("check.join",
         label = "Join points",
@@ -4940,13 +4823,11 @@ output$adjust.axis.panel <- renderUI({
             input$vari2 %in% colnames(get.data.set())))) {
         ret <- list(h5(strong("Axis Limits")))
         temp <- list()
-        #        temp$x = get.data.set()[,input$vari1]
         temp$x <- vis.data()[[plot.par$x]]
 
         if (input$vari2 %in% "none") {
           temp$y <- NULL
         } else {
-          #          temp$y = get.data.set()[,input$vari2]
           temp$y <- vis.data()[[plot.par$y]]
         }
         temp$plot <- F
@@ -4954,8 +4835,6 @@ output$adjust.axis.panel <- renderUI({
         ###################################################################
         #      large.sample = T
         large.sample <- search.name(tester, "largesample")[[1]]
-        #        limits.x = search.name(tester,"ylim")[[1]]
-        #        limits.y = search.name(tester,"xlim")[[1]]
         if (is.null(large.sample)) {
           large.sample <- F
         }
@@ -5154,10 +5033,7 @@ observe({
       } else {
         temp$x <- get.data.set()[, input$vari2]
       }
-      #      temp$plot = F
-      #      temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
-      #      limits.x = search.name(temp,"xlim")[[1]]
-      #      limits.y = search.name(temp,"ylim")[[1]]
+
       if ((!input$vari2 %in% "none" &&
         ((class(get.data.set()[, input$vari1]) %in% "numeric" |
           class(get.data.set()[, input$vari1]) %in% "integer") &&
@@ -5304,14 +5180,15 @@ output$points.identify.panel <- renderUI({
           class(get.data.set()[, input$vari1]) %in% "integer") &&
           (class(get.data.set()[, input$vari2]) %in% "numeric" |
             class(get.data.set()[, input$vari2]) %in% "integer")))) {
-      #      plot.par$locate=NULL
       plot.par$locate.id <- NULL
       plot.par$locate.col <- NULL
       plot.par$locate.extreme <- NULL
       plot.par.stored$locate.id <- NULL
       identified.points$values <- list()
       ret <- list()
-      ret[[1]] <- fixedRow(column(11, h5(strong("How do you want to label points?"))))
+      ret[[1]] <- fixedRow(
+        column(11, h5(strong("How do you want to label points?")))
+      )
       ret[[2]] <- fixedRow(
         column(
           4,
@@ -5394,11 +5271,14 @@ output$points.identify.panel <- renderUI({
             input$vari2 %in% colnames(get.data.set()))) {
           ch <- ""
           if (!is.null(input$by.value.column.select)) {
-            ch <- c("none", sort(get.data.set()[, input$by.value.column.select]))
+            ch <- c(
+              "none",
+              sort(get.data.set()[, input$by.value.column.select])
+            )
           }
           ret[[6]] <- conditionalPanel(
             "input.select_identify_method=='Select by value'&&
-                                      (input.label_observation_check||input.color_points_check)",
+             (input.label_observation_check||input.color_points_check)",
             checkboxInput("single_vs_multiple_check",
               label = "Single value",
               value = F
@@ -5460,7 +5340,7 @@ output$points.identify.panel <- renderUI({
               is.numeric(get.data.set()[, input$vari2]))) {
             ret[[7]] <- conditionalPanel(
               "input.select_identify_method=='Extremes'&&
-                                        (input.label_observation_check||input.color_points_check)",
+               (input.label_observation_check||input.color_points_check)",
               sliderInput("extremes.slider",
                 label = "Number of points",
                 min = 0,
@@ -5479,7 +5359,7 @@ output$points.identify.panel <- renderUI({
               is.numeric(get.data.set()[, input$vari1]))) {
             ret[[7]] <- conditionalPanel(
               "input.select_identify_method == 'Extremes' &&
-                                        (input.label_observation_check||input.color_points_check)",
+               (input.label_observation_check||input.color_points_check)",
               sliderInput("extreme.lower",
                 label = "Select lower range",
                 min = 0,
@@ -5496,24 +5376,11 @@ output$points.identify.panel <- renderUI({
                 value = 0,
                 ticks = F
               )
-
-              #                                        fixedRow(column(4,numericInput("extreme.lower",
-              #                                                                       label="Lower",
-              #                                                                       value=0,
-              #                                                                       min=0,
-              #                                                                       max=nrow(get.data.set()),
-              #                                                                       step=1)),
-              #                                                 column(4,numericInput("extreme.upper",
-              #                                                                       label="Upper",
-              #                                                                       value=0,
-              #                                                                       min=0,
-              #                                                                       max=nrow(get.data.set()),
-              #                                                                       step=1)))
             )
           }
           ret[[8]] <- conditionalPanel(
             "input.select_identify_method=='Range of values'&&
-                                      (input.label_observation_check||input.color_points_check)",
+             (input.label_observation_check||input.color_points_check)",
             fixedRow(
               column(
                 6,
@@ -5614,7 +5481,10 @@ observe({
             temp <- NULL
           }
         } else {
-          temp <- which(get.data.set()[, input$by.value.column.select] %in% input$value.select)
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
           if (length(temp) == 0) {
             temp <- NULL
           }
@@ -5767,7 +5637,10 @@ observe({
             temp <- NULL
           }
         } else {
-          temp <- which(get.data.set()[, input$by.value.column.select] %in% input$value.select)
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
           if (length(temp) == 0) {
             temp <- NULL
           }
@@ -5811,7 +5684,10 @@ observe({
             temp <- NULL
           }
         } else {
-          temp <- which(get.data.set()[, input$by.value.column.select] %in% input$value.select)
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
           if (length(temp) == 0) {
             temp <- NULL
           }
@@ -5928,8 +5804,7 @@ observe({
   if (!is.null(input$by.value.column.select)) {
     isolate({
       plot.par$locate.id <- NULL
-      if (class(get.data.set()[, input$by.value.column.select]) %in% "numeric" ||
-        class(get.data.set()[, input$by.value.column.select]) %in% "integer") {
+      if (is.numeric(get.data.set()[, input$by.value.column.select])) {
         temp <- sort(get.data.set()[, input$by.value.column.select])
       } else {
         temp <- sort(levels(get.data.set()[, input$by.value.column.select]))
@@ -5949,7 +5824,10 @@ observe({
     isolate({
       if (!is.null(input$same.level.of.select) &&
         input$same.level.of.select %in% colnames(get.data.set())) {
-        temp <- which(get.data.set()[, input$by.value.column.select] %in% input$value.select)
+        temp <- which(
+          get.data.set()[, input$by.value.column.select] %in%
+            input$value.select
+        )
         if (input$same_level_of_check) {
           temp <- which(get.data.set()[, input$same.level.of.select] %in%
             get.data.set()[, input$same.level.of.select][temp])
@@ -5971,7 +5849,10 @@ observe({
     if (!is.null(input$select_identify_method)) {
       if (input$select_identify_method %in% "Select by value") {
         if (!input$single_vs_multiple_check) {
-          temp <- which(get.data.set()[, input$by.value.column.select] %in% input$value.select)
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
           if (input$same_level_of_check) {
             temp <- which(get.data.set()[, input$same.level.of.select] %in%
               get.data.set()[, input$same.level.of.select][temp])
@@ -6015,7 +5896,10 @@ observe({
             plot.par$locate.extreme <- c(input$extreme.lower, input$extreme.upper)
           } else {
             plot.par$locate.id <- NULL
-            plot.par$locate.extreme <- c(input$extreme.lower, input$extreme.upper)
+            plot.par$locate.extreme <- c(
+              input$extreme.lower,
+              input$extreme.upper
+            )
           }
         }
       } else {
@@ -6135,7 +6019,10 @@ observe({
             temp <- NULL
           }
         } else {
-          temp <- which(get.data.set()[, input$by.value.column.select] %in% input$value.select)
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
           if (length(temp) == 0) {
             temp <- NULL
           }
@@ -6338,7 +6225,8 @@ create.html <- function() {
       temp$varnames$x <- temp$varnames$y
       temp$varnames$y <- temp.varnames.x
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
         tryCatch({
           plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
         }, warning = function(w) {
@@ -6347,20 +6235,27 @@ create.html <- function() {
           print(e)
         }, finally = {})
       } else {
-        plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, temp
+        ))
       }
     } else {
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, vis.par())
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       } else {
-        plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, vis.par()
+        ))
       }
 
       ## add to fix interactive dotplot bug ..
@@ -6386,10 +6281,6 @@ output$saveplot <- downloadHandler(
       ),
       sep = "."
     )
-    #    if(input$saveplottype == "interactive html")
-    #      paste("Plot.html")
-    #    else
-    #      paste("Plot", input$saveplottype, sep = ".")
   },
   content = function(file) {
     if (input$saveplottype %in% c("jpg", "png", "pdf")) {
@@ -6403,8 +6294,10 @@ output$saveplot <- downloadHandler(
 
       if (!is.null(vis.par())) {
         dafr <- get.data.set()
-        if (!is.null(plot.par$x) && !is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]) &&
-          !is.null(plot.par$y) && !is.null(input$vari2) && is.numeric(vis.data()[[plot.par$y]])) {
+        if (!is.null(plot.par$x) && !is.null(input$vari1) &&
+          is.numeric(vis.data()[[plot.par$x]]) &&
+          !is.null(plot.par$y) && !is.null(input$vari2) &&
+          is.numeric(vis.data()[[plot.par$y]])) {
           temp <- vis.par()
           temp$trend.parallel <- graphical.par$trend.parallel
           temp.x <- temp$x
@@ -6414,29 +6307,39 @@ output$saveplot <- downloadHandler(
           temp$varnames$x <- temp$varnames$y
           temp$varnames$y <- temp.varnames.x
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+              "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, temp
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+            plot.ret.para$parameters <- try(do.call(
+              iNZightPlots:::iNZightPlot, temp
+            ))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+              "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, vis.par())
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, vis.par()
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
+            plot.ret.para$parameters <- try(do.call(
+              iNZightPlots:::iNZightPlot, vis.par()
+            ))
           }
         }
       }
@@ -6636,22 +6539,6 @@ output$interactive.plot.select.beta2 <- renderUI({
 
 ## the check box for selecting extra variables
 
-
-# output$extra_vars_check_panel = renderUI({
-#  get.data.set()
-#  input$vari2
-#  isolate({
-#    if(!is.null(input$vari2) && input$vari2 != "none")
-#      ret = checkboxInput("extra_vars_check",
-#                          strong("Select additional variables:"),
-#                          value = input$extra_vars_check)
-#    else
-#      ret = NULL
-#
-#    ret
-#  })
-# })
-
 output$extra_vars_check_panel <- renderUI({
   get.data.set()
   input$vari1
@@ -6660,7 +6547,8 @@ output$extra_vars_check_panel <- renderUI({
     if ((!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
       !is.null(input$vari2) && input$vari2 == "none") |
       (!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
-        !is.null(input$vari2) && input$vari2 != "none" && !is.numeric(vis.data()[[plot.par$y]]))) {
+        !is.null(input$vari2) && input$vari2 != "none" &&
+        !is.numeric(vis.data()[[plot.par$y]]))) {
       ret <- NULL
     } else {
       ret <- checkboxInput("extra_vars_check",
@@ -6708,37 +6596,6 @@ observe({
 
 ## select additional variables to export in dynamic plot
 
-# output$extra.vars.html = renderUI({
-#  get.data.set()
-#  input$extra_vars_check
-#  input$vari2
-#  isolate({
-#    if(!is.null(input$extra_vars_check) &&
-#       input$extra_vars_check &&
-#       !is.null(input$vari2) &&
-#       input$vari2 %in% colnames(vis.data())) {
-#      ch = colnames(vis.data())
-#      ch = ch[-which(ch %in% input$vari1)]
-#      ch = ch[-which(ch %in% input$vari2)]
-#
-#      extra.vars.html.panel = selectInput(inputId = "export.extra.vars.html",
-#                                          #label = strong("Select additional variables to export"),
-#                                          label = NULL,
-#                                          choices = ch,
-#                                          multiple = TRUE,
-#                                          selected = input$export.extra.vars.html,
-#                                          size = 2,
-#                                          selectize = FALSE)
-#    }
-#    else
-#      extra.vars.html.panel = NULL
-#
-#    extra.vars.html.panel
-#  })
-# })
-
-
-
 output$extra.vars.html <- renderUI({
   get.data.set()
   # input$extra_vars_check
@@ -6752,7 +6609,6 @@ output$extra.vars.html <- renderUI({
 
     selectInput(
       inputId = "export.extra.vars.html",
-      # label = strong("Select additional variables to export"),
       label = NULL,
       choices = ch,
       multiple = TRUE,
@@ -6767,8 +6623,7 @@ output$extra.vars.html <- renderUI({
 
 output$extra.vars.html.beta2 <- renderUI({
   get.data.set()
-  # input$extra_vars_check
-  # input$vari2
+
   isolate({
     ch <- colnames(vis.data())
     ch <- ch[-which(ch %in% input$vari1)]
@@ -6776,7 +6631,6 @@ output$extra.vars.html.beta2 <- renderUI({
 
     selectInput(
       inputId = "export.extra.vars.html.beta2",
-      # label = strong("Select additional variables to export"),
       label = NULL,
       choices = ch,
       multiple = TRUE,
@@ -6800,7 +6654,10 @@ observe({
       input$vari2 %in% colnames(vis.data())) {
       ch <- ch[-which(ch %in% input$vari2)]
     }
-    updateSelectInput(session, "export.extra.vars.html", choices = ch, selected = NULL)
+    updateSelectInput(session, "export.extra.vars.html",
+      choices = ch,
+      selected = NULL
+    )
   })
 })
 
@@ -6816,7 +6673,9 @@ observe({
       input$vari2 %in% colnames(vis.data())) {
       ch <- ch[-which(ch %in% input$vari2)]
     }
-    updateSelectInput(session, "export.extra.vars.html.beta2", choices = ch, selected = NULL)
+    updateSelectInput(session, "export.extra.vars.html.beta2",
+      choices = ch, selected = NULL
+    )
   })
 })
 
@@ -6826,15 +6685,15 @@ observe({
 ## the confirm button for selecting extra variables
 output$extra_vars_confirm <- renderUI({
   get.data.set()
-  #  input$extra_vars_check
-  #  input$export.extra.vars.html
+
   input$vari1
   input$vari2
   isolate({
     if (nrow(vis.data()) > 200 &&
       any(
         !is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]),
-        !is.null(input$vari2) && input$vari2 != "none" && is.numeric(vis.data()[[plot.par$y]])
+        !is.null(input$vari2) && input$vari2 != "none" &&
+          is.numeric(vis.data()[[plot.par$y]])
       )) {
       ret <- list(
         actionButton("extra_vars_confirm_button",
@@ -6936,39 +6795,8 @@ observe({
     if (!is.null(input$produce_interactive_plot) && input$produce_interactive_plot > 0) {
       output$interactive.plot.beta2 <- renderUI({
         dafr <- get.data.set()
-        # vis.par()
-        # input$vari1
-        # input$vari2
-        # input$extra_vars_check
-        # input$extra_vars_confirm_button
-        # input$subs1
-        # input$subs2
+
         isolate({
-          #         if((!is.null(input$subs1) &&
-          #              input$subs1 %in% colnames(vis.data())) ||
-          #             (!is.null(input$subs2) &&
-          #              input$subs2 %in% colnames(vis.data()))) {
-          #            h4("iNZight doesn't handle interactive panel plots ... yet!
-          #               Please remove the subset variable(s)")
-          #          } else {
-          #            if(!is.null(input$select.plot.type) &&
-          #               input$select.plot.type == "grid-density plot") {
-          #              h4("iNZight doesn't handle interactive grid-density plots ... yet!
-          #                 Please select other plot types")
-          #            }else if(!is.null(input$select.plot.type) &&
-          #                    (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-          #                    !is.null(input$color_by_select) &&
-          #                    input$color_by_select != " ") {
-          #              h4("iNZight doesn't handle interactive coloured hex bins plots ... yet!
-          #                 Please select other plot types")
-          #            } else {
-          #              if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
-          #                  (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
-          #                 !is.null(input$export.extra.vars.html.beta2) &&
-          #                 all(input$export.extra.vars.html.beta2 %in% colnames(vis.data()))) {
-          #                h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-          #              }
-          #              else {
           local.dir <- iNZightPlots::exportHTML(create.html,
             data = data_html_beta2(),
             extra.vars = extra.vars_html_beta2(),
@@ -6983,9 +6811,6 @@ observe({
             src = "path/index.html",
             height = 600, width = 1200
           )
-          #              }
-          #            }
-          # }
         })
       })
     }
@@ -7003,40 +6828,10 @@ output$interactive.plot <- renderUI({
     vis.par()
     input$vari1
     input$vari2
-    # input$extra_vars_check
     input$export.extra.vars.html
-    # input$extra_vars_confirm_button
     input$subs1
     input$subs2
     isolate({
-      #      if((!is.null(input$subs1) &&
-      #          input$subs1 %in% colnames(vis.data())) ||
-      #         (!is.null(input$subs2) &&
-      #          input$subs2 %in% colnames(vis.data()))) {
-      #        h4("iNZight doesn't handle interactive panel plots ... yet!
-      #           Please remove the subset variable(s)")
-      ##      }
-      #      else {
-      #        if(!is.null(input$select.plot.type) &&
-      #           input$select.plot.type == "grid-density plot") {
-      #          h4("iNZight doesn't handle interactive grid-density plots ... yet!
-      #             Please select other plot types")
-      #        }
-      #        else if(!is.null(input$select.plot.type) &&
-      #                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-      #                !is.null(input$color_by_select) &&
-      #                input$color_by_select != " ") {
-      #          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet!
-      #             Please select other plot types")
-      #        }
-      #        else {
-      #          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-      #              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-      #             !is.null(input$export.extra.vars.html) &&
-      #             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-      #            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-      #          }
-      #          else {
       local.dir <- iNZightPlots::exportHTML(create.html,
         data = data_html(),
         extra.vars = extra.vars_html(),
@@ -7058,43 +6853,12 @@ output$interactive.plot <- renderUI({
           height = 600, width = 1200
         )
       )
-
-      #         }
-      #        }
-      #        }
     })
   } else {
     dafr <- get.data.set()
     input$extra_vars_confirm_button
+
     isolate({
-      # if((!is.null(input$subs1) &&
-      #      input$subs1 %in% colnames(vis.data())) ||
-      #     (!is.null(input$subs2) &&
-      #      input$subs2 %in% colnames(vis.data()))) {
-      #    h4("iNZight doesn't handle interactive panel plots ... yet!
-      #       Please remove the subset variable(s)")
-      #  }
-      #  else {
-      #    if(!is.null(input$select.plot.type) &&
-      #       input$select.plot.type == "grid-density plot") {
-      #      h4("iNZight doesn't handle interactive grid-density plots ... yet!
-      #         Please select other plot types")
-      #    }
-      #    else if(!is.null(input$select.plot.type) &&
-      #            (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-      #            !is.null(input$color_by_select) &&
-      #            input$color_by_select != " ") {
-      #      h4("iNZight doesn't handle interactive coloured hex bins plots ... yet!
-      #     Please select other plot types")
-      #    }
-      #    else {
-      #      if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-      #          (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-      #         !is.null(input$export.extra.vars.html) &&
-      #         all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-      #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-      #      }
-      #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
       local.dir <- iNZightPlots::exportHTML(create.html,
         data = data_html(),
         extra.vars = extra.vars_html(),
@@ -7117,9 +6881,6 @@ output$interactive.plot <- renderUI({
           height = 600, width = 1200
         )
       )
-      #       }
-      #   }
-      #  }
     })
   }
 })
@@ -7138,8 +6899,10 @@ output$add.fitted.residuals.panel <- renderUI({
       is.null(plot.par$g2) &&
       !is.null(plot.par$y) &&
       (iNZightTools::is_num(xvar) | iNZightTools::is_num(yvar)) &&
-      (!is.null(graphical.par$trend) | (graphical.par$smooth > 0 && !is.null(graphical.par$smooth)) |
-        !iNZightTools::is_num(xvar) | !iNZightTools::is_num(yvar))) {
+      (!is.null(graphical.par$trend) |
+        (graphical.par$smooth > 0 && !is.null(graphical.par$smooth)) |
+        !iNZightTools::is_num(xvar) | !iNZightTools::is_num(yvar))
+    ) {
       ret <- list(
         add.fitted.values.button = actionButton("store_fitted_values",
           "Store fitted values",
@@ -7160,7 +6923,8 @@ output$add.fitted.residuals.panel <- renderUI({
 
 observeEvent(input$store_fitted_values, {
   if (!is.null(plot.par$x)) {
-    if (iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
+    if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+      !is.null(plot.par$x) &&
       iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
@@ -7217,7 +6981,13 @@ observeEvent(input$store_fitted_values, {
         h5(strong("Specify names for the new variables")),
         fixedRow(column(6, textInput(
           inputId = "add_numcat_fitted_values",
-          value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".predict", sep = ""),
+          value = paste(
+            ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+              input$vari1, input$vari2
+            ),
+            ".predict",
+            sep = ""
+          ),
           label = NULL
         ))),
         actionButton("store_fitted_values_ok", "OK"),
@@ -7297,7 +7067,13 @@ observeEvent(input$store_residuals, {
       h5(strong("Specify names for the new variables")),
       fixedRow(column(6, textInput(
         inputId = "add_numcat_residuals",
-        value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".residuals", sep = ""),
+        value = paste(
+          ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+            input$vari1, input$vari2
+          ),
+          ".residuals",
+          sep = ""
+        ),
         label = NULL
       ))),
       actionButton("store_resisuals_ok", "OK"),
@@ -7325,41 +7101,69 @@ observe({
       temp1 <- input$vari1
       temp2 <- input$vari2
       temp <- get.data.set()
-      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
-        iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
+      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+        !is.null(plot.par$x) &&
+        iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
+        !is.null(plot.par$y)) {
         linear_trend <- FALSE
         quadratic_trend <- FALSE
         cubic_trend <- FALSE
         smoother_trend <- FALSE
         if ("linear" %in% graphical.par$trend) {
           linear_trend <- TRUE
-          fit.linear <- with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude))
+          fit.linear <- with(
+            vis.par(),
+            lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              na.action = na.exclude
+            )
+          )
           resi.linear <- data.frame(residuals(fit.linear), stringsAsFactors = TRUE)
           colnames(resi.linear) <- input$add_linear_residuals
           temp <- cbind(temp, resi.linear)
         }
         if ("quadratic" %in% graphical.par$trend) {
           quadratic_trend <- TRUE
-          fit.quadratic <- with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2), na.action = na.exclude))
+          fit.quadratic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2),
+              na.action = na.exclude
+            )
+          )
           resi.quadratic <- data.frame(residuals(fit.quadratic), stringsAsFactors = TRUE)
           colnames(resi.quadratic) <- input$add_quadratic_residuals
           temp <- cbind(temp, resi.quadratic)
         }
         if ("cubic" %in% graphical.par$trend) {
           cubic_trend <- TRUE
-          fit.cubic <- with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3), na.action = na.exclude))
-          resi.cubic <- data.frame(residuals(fit.cubic), stringsAsFactors = TRUE)
+          fit.cubic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
+              na.action = na.exclude
+            )
+          )
+          resi.cubic <- data.frame(residuals(fit.cubic),
+            stringsAsFactors = TRUE
+          )
           colnames(resi.cubic) <- input$add_cubic_residuals
           temp <- cbind(temp, resi.cubic)
         }
         if (graphical.par$smooth > 0) {
           temp3 <- graphical.par$smooth
           smoother_trend <- TRUE
-          fit.smooth <- with(vis.par(), loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-            span = graphical.par$smooth,
-            family = "gaussian", degree = 1, na.action = "na.exclude"
-          ))
-          resi.smooth <- data.frame(residuals(fit.smooth), stringsAsFactors = TRUE)
+          fit.smooth <- with(
+            vis.par(),
+            loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              span = graphical.par$smooth,
+              family = "gaussian", degree = 1, na.action = "na.exclude"
+            )
+          )
+          resi.smooth <- data.frame(residuals(fit.smooth),
+            stringsAsFactors = TRUE
+          )
           colnames(resi.smooth) <- input$add_smoother_residuals
           temp <- cbind(temp, resi.smooth)
         }
@@ -7378,9 +7182,17 @@ observe({
         }
       } else {
         if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
-          fit <- lm(formula = vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]], na.action = na.exclude)
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
+            na.action = na.exclude
+          )
         } else {
-          fit <- lm(formula = vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude)
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+            na.action = na.exclude
+          )
         }
         resi.numcat <- data.frame(residuals(fit), stringsAsFactors = TRUE)
         colnames(resi.numcat) <- input$add_numcat_residuals
@@ -7402,16 +7214,29 @@ observe({
       temp1 <- input$vari1
       temp2 <- input$vari2
       temp <- get.data.set()
-      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
-        iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
+      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+        !is.null(plot.par$x) &&
+        iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
+        !is.null(plot.par$y)) {
         linear_trend <- FALSE
         quadratic_trend <- FALSE
         cubic_trend <- FALSE
         smoother_trend <- FALSE
         if ("linear" %in% graphical.par$trend) {
           linear_trend <- TRUE
-          fit.linear <- with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude))
-          pred.linear <- data.frame(predict(fit.linear, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+          fit.linear <- with(
+            vis.par(),
+            lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              na.action = na.exclude
+            )
+          )
+          pred.linear <- data.frame(
+            predict(fit.linear,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
             stringsAsFactors = TRUE
           )
           colnames(pred.linear) <- input$add_linear_fitted_values
@@ -7419,8 +7244,21 @@ observe({
         }
         if ("quadratic" %in% graphical.par$trend) {
           quadratic_trend <- TRUE
-          fit.quadratic <- with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2), na.action = na.exclude))
-          pred.quadratic <- data.frame(predict(fit.quadratic, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+          fit.quadratic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2),
+              na.action = na.exclude
+            )
+          )
+          pred.quadratic <- data.frame(
+            predict(fit.quadratic,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
             stringsAsFactors = TRUE
           )
           colnames(pred.quadratic) <- input$add_quadratic_fitted_values
@@ -7428,8 +7266,21 @@ observe({
         }
         if ("cubic" %in% graphical.par$trend) {
           cubic_trend <- TRUE
-          fit.cubic <- with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3), na.action = na.exclude))
-          pred.cubic <- data.frame(predict(fit.cubic, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+          fit.cubic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
+              na.action = na.exclude
+            )
+          )
+          pred.cubic <- data.frame(
+            predict(fit.cubic,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
             stringsAsFactors = TRUE
           )
           colnames(pred.cubic) <- input$add_cubic_fitted_values
@@ -7438,11 +7289,20 @@ observe({
         if (graphical.par$smooth > 0) {
           temp3 <- graphical.par$smooth
           smoother_trend <- TRUE
-          fit.smooth <- with(vis.par(), loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-            span = graphical.par$smooth,
-            family = "gaussian", degree = 1, na.action = "na.exclude"
-          ))
-          pred.smooth <- data.frame(predict(fit.smooth, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
+          fit.smooth <- with(
+            vis.par(),
+            loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              span = graphical.par$smooth,
+              family = "gaussian", degree = 1, na.action = "na.exclude"
+            )
+          )
+          pred.smooth <- data.frame(
+            predict(fit.smooth,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
             stringsAsFactors = TRUE
           )
           colnames(pred.smooth) <- input$add_smoother_fitted_values
@@ -7463,13 +7323,23 @@ observe({
         }
       } else {
         if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
-          fit <- lm(formula = vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]], na.action = na.exclude)
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
+            na.action = na.exclude
+          )
         } else {
-          fit <- lm(formula = vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude)
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+            na.action = na.exclude
+          )
         }
         pred.numcat <- data.frame(
           predict(fit, newdata = data.frame(
-            x = ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), vis.data()[[plot.par$y]], vis.data()[[plot.par$x]]),
+            x = ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+              vis.data()[[plot.par$y]], vis.data()[[plot.par$x]]
+            ),
             stringsAsFactors = TRUE
           )),
           stringsAsFactors = TRUE
@@ -7612,9 +7482,9 @@ output$old_add_inference <- renderUI({
           "input.toggle_inference",
           conditionalPanel(
             "input.check_linear||
-                                                     input.check_quadratic||
-                                                     input.check_cubic||
-                                                     input.check_smoother",
+             input.check_quadratic||
+             input.check_cubic||
+             input.check_smoother",
             add_inference.check
           )
         ))
@@ -7642,8 +7512,8 @@ output$old_add_inference <- renderUI({
           ),
           conditionalPanel(
             "input.inference_parameter1=='Mean'||
-                                                     (input.inference_parameter1=='Median'&&
-                                                     input.inference_type2=='Bootstrap')",
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
             h5("Type of interval"),
             confidence.interval.check,
             comparison.interval.check
@@ -7686,8 +7556,8 @@ output$old_add_inference <- renderUI({
           ),
           conditionalPanel(
             "input.inference_parameter1=='Mean'||
-                                                     (input.inference_parameter1=='Median'&&
-                                                     input.inference_type2=='Bootstrap')",
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
             h5("Type of interval"),
             confidence.interval.check
           )
@@ -7848,9 +7718,7 @@ observeEvent(input$switch1, {
     updateSelectInput(session, "vari1", selected = var2.old)
 
     ch <- colnames(vis.data())
-    #      if(!is.null(input$vari1) && input$vari1 %in% ch){
     ch <- ch[-which(ch %in% var2.old)]
-    #      }
     ch <- c("none", ch)
 
     updateSelectInput(session, "vari2", choices = ch, selected = var1.old)
@@ -7960,7 +7828,6 @@ observeEvent(input$showSidebar4, {
 ## refresh the plot after click the "refresh" button
 observe({
   input$refreshplot
-  #  if (!is.null(input$hideSidebar) && input$hideSidebar > 0) {
   isolate({
     output$visualize.plot <- renderPlot({
       isolate({
@@ -7996,22 +7863,27 @@ observe({
           temp$varnames$y <- temp.varnames.x
 
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, temp)
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+            plot.ret.para$parameters <- try(do.call(
+              iNZightPlots:::iNZightPlot, temp))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, vis.par())
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, vis.par())
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
@@ -8024,7 +7896,6 @@ observe({
       }
     })
   })
-  #  }
 })
 
 

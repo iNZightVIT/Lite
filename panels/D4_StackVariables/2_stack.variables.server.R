@@ -32,23 +32,6 @@ observe({
   })
 })
 
-# observe({
-#  input$stack_vars_which
-#  isolate({
-#    if(!is.null(input$stack_vars_which)&&!""%in%input$stack_vars_which){
-#      if("categorical"%in%input$stack_vars_which){
-#        updateSelectInput(session,inputId="stack_vars_column",
-#                          choices=get.categorical.column.names(get.data.set()),
-#                          selected=1)
-#      }else{
-#        updateSelectInput(session,inputId="stack_vars_column",
-#                          choices=get.numeric.column.names(get.data.set()),
-#                          selected=1)
-#      }
-#    }
-#  })
-# })
-
 output$stack.table <- renderDT(
   {
     get.data.set.display()

@@ -3,7 +3,8 @@ output$reshape_main_panel <- renderUI({
   input$select_reshape_mode
   ret <- NULL
   isolate({
-    if (!is.null(input$select_reshape_mode) && input$select_reshape_mode == "Wide to long") {
+    if (!is.null(input$select_reshape_mode) &&
+      input$select_reshape_mode == "Wide to long") {
       ret <- list(
         selectInput(
           inputId = "select_colname",
@@ -22,7 +23,8 @@ output$reshape_main_panel <- renderUI({
           value = "value"
         )
       )
-    } else if (!is.null(input$select_reshape_mode) && input$select_reshape_mode == "Long to wide") {
+    } else if (!is.null(input$select_reshape_mode) &&
+      input$select_reshape_mode == "Long to wide") {
       ret <- list(
         selectInput(
           inputId = "select_col1",
@@ -51,15 +53,21 @@ observe({
     value <- "value"
     col1 <- ""
     col2 <- ""
-    if (!is.null(input$select_reshape_mode) && input$select_reshape_mode == "Wide to long") {
+    if (!is.null(input$select_reshape_mode) &&
+      input$select_reshape_mode == "Wide to long") {
       if (!is.null(input$select_colname) && length(input$select_colname) > 0) {
         colname <- input$select_colname
         key <- ifelse(length(input$new_colname) == 0, "key", input$new_colname)
         value <- ifelse(length(input$new_value) == 0, "value", input$new_value)
-        temp <- iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "wide")
+        temp <- iNZightTools::reshape_data(
+          get.data.set(), col1, col2, colname, key, value,
+          check = "wide"
+        )
 
         data.set <- as.data.frame(temp)
-        sample.num <- ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set) / 4))
+        sample.num <- ifelse(
+          nrow(data.set) > 2000, 500, round(nrow(data.set) / 4)
+        )
         sample.row <- sort(sample(1:nrow(data.set), sample.num))
         output$preview.reshape.table <- renderDT(
           {
@@ -68,19 +76,29 @@ observe({
             colnames(temp.d) <- colnames(data.set)
             temp.d
           },
-          options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+          options = list(
+            lengthMenu = c(5, 30, 50),
+            pageLength = 5,
+            columns.defaultContent = "NA",
+            scrollX = T
+          )
         )
       }
-    } else if (!is.null(input$select_reshape_mode) && input$select_reshape_mode == "Long to wide") {
+    } else if (!is.null(input$select_reshape_mode) &&
+      input$select_reshape_mode == "Long to wide") {
       if (!is.null(input$select_col1) && input$select_col1 != "" &&
         !is.null(input$select_col2) && input$select_col2 != "") {
         col1 <- input$select_col1
         col2 <- input$select_col2
-        temp <- iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "long")
-
+        temp <- iNZightTools::reshape_data(
+          get.data.set(), col1, col2, colname, key, value,
+          check = "long"
+        )
 
         data.set <- as.data.frame(temp)
-        sample.num <- ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set) / 4))
+        sample.num <- ifelse(
+          nrow(data.set) > 2000, 500, round(nrow(data.set) / 4)
+        )
         sample.row <- sort(sample(1:nrow(data.set), sample.num))
 
         output$preview.reshape.table <- renderDT(
@@ -90,7 +108,12 @@ observe({
             colnames(temp.d) <- colnames(data.set)
             temp.d
           },
-          options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+          options = list(
+            lengthMenu = c(5, 30, 50),
+            pageLength = 5,
+            columns.defaultContent = "NA",
+            scrollX = T
+          )
         )
       }
     }
@@ -106,17 +129,26 @@ observe({
     value <- "value"
     col1 <- ""
     col2 <- ""
-    if (!is.null(input$select_reshape_mode) && input$select_reshape_mode == "Wide to long") {
+    if (!is.null(input$select_reshape_mode) &&
+      input$select_reshape_mode == "Wide to long") {
       if (!is.null(input$select_colname) && length(input$select_colname) > 0) {
         colname <- input$select_colname
         key <- ifelse(length(input$new_colname) == 0, "key", input$new_colname)
         value <- ifelse(length(input$new_value) == 0, "value", input$new_value)
-        temp <- iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "wide")
+        temp <- iNZightTools::reshape_data(
+          get.data.set(), col1, col2, colname, key, value,
+          check = "wide"
+        )
         output$preview.reshape.table <- renderDT(
           {
             NULL
           },
-          options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+          options = list(
+            lengthMenu = c(5, 30, 50),
+            pageLength = 5,
+            columns.defaultContent = "NA",
+            scrollX = T
+          )
         )
         ## save code
         code.save$dataname <- paste(code.save$name, "reshaped", sep = ".")
@@ -131,17 +163,26 @@ observe({
         code.save$name <- code.save$dataname
         values$data.name <- code.save$dataname
       }
-    } else if (!is.null(input$select_reshape_mode) && input$select_reshape_mode == "Long to wide") {
+    } else if (!is.null(input$select_reshape_mode) &&
+      input$select_reshape_mode == "Long to wide") {
       if (!is.null(input$select_col1) && input$select_col1 != "" &&
         !is.null(input$select_col2) && input$select_col2 != "") {
         col1 <- input$select_col1
         col2 <- input$select_col2
-        temp <- iNZightTools::reshape_data(get.data.set(), col1, col2, colname, key, value, check = "long")
+        temp <- iNZightTools::reshape_data(
+          get.data.set(), col1, col2, colname, key, value,
+          check = "long"
+        )
         output$preview.reshape.table <- renderDT(
           {
             NULL
           },
-          options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+          options = list(
+            lengthMenu = c(5, 30, 50),
+            pageLength = 5,
+            columns.defaultContent = "NA",
+            scrollX = T
+          )
         )
         ## save code
         code.save$dataname <- paste(code.save$name, "reshaped", sep = ".")
@@ -165,7 +206,12 @@ output$reshape.table <- renderDT(
   {
     get.data.set.display()
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50),
+    pageLength = 5,
+    columns.defaultContent = "NA",
+    scrollX = T
+  )
 )
 
 output$reshape.dataset <- renderUI({

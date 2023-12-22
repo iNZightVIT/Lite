@@ -51,7 +51,9 @@ get.sidebar.switch <- function(data.dir.global, data.dir.imported) {
       }
     }
   }
-  ret[[length(ret) + 1]] <- actionButton(inputId = "change_set", label = "Select Set")
+  ret[[length(ret) + 1]] <- actionButton(
+    inputId = "change_set", label = "Select Set"
+  )
   ret
 }
 

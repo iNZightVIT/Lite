@@ -45,11 +45,6 @@ observe({
   input$aggregate_vars
   isolate({
     if (!is.null(input$aggregate_vars) && input$aggregate_vars > 0) {
-      #      vars = input$aggros
-      #      rem = which(vars %in% "")
-      #      if(length(rem)>0){
-      #        vars = vars[-rem]
-      #      }
       vars <- NULL
       if (!is.null(input$aggros1) && input$aggros1 != "") {
         vars <- c(vars, input$aggros1)
@@ -70,13 +65,6 @@ observe({
         }
       }
 
-      #      rem  = which(methods %in% "")
-      #      if(length(rem) > 0){
-      #        methods = methods[-rem]
-      #      }
-      #      print(vars)
-      #      print(methods)
-      #      print(get.data.set())
       if (length(vars) > 0 &
         length(methods) > 0 & !is.null(get.data.set())) {
         temp <- iNZightTools::aggregateData(get.data.set(),

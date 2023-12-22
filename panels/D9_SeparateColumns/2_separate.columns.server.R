@@ -11,9 +11,11 @@ observe({
     left <- "col1"
     right <- "col2"
     num <- 2
-    if (!is.null(input$select_separate_mode) && input$select_separate_mode == "Separate a column into several columns") {
+    if (!is.null(input$select_separate_mode) &&
+      input$select_separate_mode == "Separate a column into several columns") {
       check <- "Column"
-      if (!is.null(input$select_column_to_separate) && input$select_column_to_separate != "") {
+      if (!is.null(input$select_column_to_separate) &&
+        input$select_column_to_separate != "") {
         col <- input$select_column_to_separate
         varx <- get.data.set()[[col]]
         if (!is.null(input$separator) && !grepl("^\\s*$", input$separator)) {
@@ -29,7 +31,9 @@ observe({
           }
 
           data.set <- as.data.frame(data)
-          sample.num <- ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set) / 4))
+          sample.num <- ifelse(nrow(data.set) > 2000, 500,
+            round(nrow(data.set) / 4)
+          )
           sample.row <- sort(sample(1:nrow(data.set), sample.num))
           output$previewseparatecolumns.table <- renderDT(
             {
@@ -38,7 +42,10 @@ observe({
               colnames(temp.d) <- colnames(data.set)
               temp.d
             },
-            options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+            options = list(
+              lengthMenu = c(5, 30, 50), pageLength = 5,
+              columns.defaultContent = "NA", scrollX = T
+            )
           )
           numcol <- sum(grepl("^col[1-9]+$", names(temp)))
           separate_colns$n.colnames <- numcol
@@ -65,9 +72,11 @@ observe({
           })
         }
       }
-    } else if (!is.null(input$select_separate_mode) && input$select_separate_mode == "Separate a column to make several rows") {
+    } else if (!is.null(input$select_separate_mode) &&
+      input$select_separate_mode == "Separate a column to make several rows") {
       check <- "Row"
-      if (!is.null(input$select_column_to_separate) && input$select_column_to_separate != "") {
+      if (!is.null(input$select_column_to_separate) &&
+        input$select_column_to_separate != "") {
         col <- input$select_column_to_separate
         if (!is.null(input$separator) && !grepl("^\\s*$", input$separator)) {
           sep <- input$separator
@@ -75,7 +84,9 @@ observe({
           temp <- iNZightTools::separate(data, col, left, right, sep, check)
 
           data.set <- as.data.frame(temp)
-          sample.num <- ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set) / 4))
+          sample.num <- ifelse(nrow(data.set) > 2000, 500,
+            round(nrow(data.set) / 4)
+          )
           sample.row <- sort(sample(1:nrow(data.set), sample.num))
           output$previewseparatecolumns.table <- renderDT(
             {
@@ -84,7 +95,10 @@ observe({
               colnames(temp.d) <- colnames(data.set)
               temp.d
             },
-            options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+            options = list(
+              lengthMenu = c(5, 30, 50), pageLength = 5,
+              columns.defaultContent = "NA", scrollX = T
+            )
           )
         }
       }
@@ -102,9 +116,11 @@ observe({
     left <- "col1"
     right <- "col2"
     num <- 2
-    if (!is.null(input$select_separate_mode) && input$select_separate_mode == "Separate a column into several columns") {
+    if (!is.null(input$select_separate_mode) &&
+      input$select_separate_mode == "Separate a column into several columns") {
       check <- "Column"
-      if (!is.null(input$select_column_to_separate) && input$select_column_to_separate != "") {
+      if (!is.null(input$select_column_to_separate) &&
+        input$select_column_to_separate != "") {
         col <- input$select_column_to_separate
         varx <- get.data.set()[[col]]
         if (!is.null(input$separator) && !grepl("^\\s*$", input$separator)) {
@@ -124,11 +140,20 @@ observe({
             vec.index <- NULL
             vec.colnames <- NULL
             for (i in 1:separate_colns$n.colnames) {
-              if (!is.null(eval(parse(text = paste0("input$changecolname", i)))) &&
-                length(eval(parse(text = paste0("input$changecolname", i)))) > 0 &&
-                !grepl("^\\s*$", eval(parse(text = paste0("input$changecolname", i))))) {
+              if (!is.null(eval(parse(
+                text =
+                  paste0("input$changecolname", i)
+              ))) &&
+                length(eval(parse(
+                  text = paste0("input$changecolname", i)
+                ))) > 0 &&
+                !grepl("^\\s*$", eval(parse(
+                  text = paste0("input$changecolname", i)
+                )))) {
                 vec.index <- c(vec.index, i)
-                vec.colnames <- c(vec.colnames, eval(parse(text = paste0("input$changecolname", i))))
+                vec.colnames <- c(vec.colnames, eval(parse(
+                  text = paste0("input$changecolname", i)
+                )))
               }
             }
             if (length(vec.index) > 0) {
@@ -140,7 +165,10 @@ observe({
             {
               NULL
             },
-            options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+            options = list(
+              lengthMenu = c(5, 30, 50), pageLength = 5,
+              columns.defaultContent = "NA", scrollX = T
+            )
           )
 
           output$separate_change_column_names <- renderUI({
@@ -156,9 +184,11 @@ observe({
           values <- sample_if_cas(rvalues = values, d = values$data.set)
         }
       }
-    } else if (!is.null(input$select_separate_mode) && input$select_separate_mode == "Separate a column to make several rows") {
+    } else if (!is.null(input$select_separate_mode) &&
+      input$select_separate_mode == "Separate a column to make several rows") {
       check <- "Row"
-      if (!is.null(input$select_column_to_separate) && input$select_column_to_separate != "") {
+      if (!is.null(input$select_column_to_separate) &&
+        input$select_column_to_separate != "") {
         col <- input$select_column_to_separate
         if (!is.null(input$separator) && !grepl("^\\s*$", input$separator)) {
           sep <- input$separator
@@ -168,7 +198,10 @@ observe({
             {
               NULL
             },
-            options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+            options = list(
+              lengthMenu = c(5, 30, 50), pageLength = 5,
+              columns.defaultContent = "NA", scrollX = T
+            )
           )
           updatePanel$datachanged <- updatePanel$datachanged + 1
 
@@ -184,7 +217,10 @@ output$separatecolumns.table <- renderDT(
   {
     values$data.sample
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 output$separate.columns <- renderUI({

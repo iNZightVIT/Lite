@@ -2,7 +2,8 @@ observe({
   input$alphabetise.var.button
 
   isolate({
-    if ((!is.null(input$alphabetise.var.button) && input$alphabetise.var.button > 0)) {
+    if ((!is.null(input$alphabetise.var.button) &&
+      input$alphabetise.var.button > 0)) {
       temp <- get.data.set()
       col.names <- colnames(temp)
       order.col.names <- order(col.names)
@@ -15,7 +16,9 @@ observe({
       }
       if (!is.null(temp)) {
         updatePanel$datachanged <- updatePanel$datachanged + 1
-        values$data.set <- as.data.frame(temp, col.names = col.names(values$data.set))
+        values$data.set <- as.data.frame(temp,
+          col.names = col.names(values$data.set)
+        )
 
         values <- sample_if_cas(rvalues = values, d = values$data.set)
       }

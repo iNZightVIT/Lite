@@ -4,7 +4,10 @@ separate.columns.sidebar <- function() {
     selectInput(
       inputId = "select_separate_mode",
       label = "Select separate mode",
-      choices = c("", "Separate a column into several columns", "Separate a column to make several rows"),
+      choices = c(
+        "", "Separate a column into several columns",
+        "Separate a column to make several rows"
+      ),
       selectize = FALSE,
       multiple = F
     ),

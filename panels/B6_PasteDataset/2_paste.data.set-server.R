@@ -13,9 +13,10 @@ output$paste.data.info <- renderUI({
   if (!is.null(get.data.set()) && !is.null(get.data.name())) {
     list(
       h3(paste("Selected data set:", get.data.name())),
-      # p(paste("Selected data number of rows is: ", dim(get.data.set())[1])),
       p(paste("Selected data number of columns is: ", dim(get.data.set())[2])),
-      p(paste("Column names: ", paste(colnames(get.data.set()), collapse = ", ")))
+      p(paste("Column names: ", paste(colnames(get.data.set()),
+        collapse = ", "
+      )))
     )
   } else {
     h3("No data selected!")
@@ -25,7 +26,10 @@ output$paste.data.info <- renderUI({
 output$paste.type.delimiter <- renderUI({
   ret <- NULL
   if (input$paste.delimiter == "type delimiter") {
-    ret <- tags$div(style = "margin-top: -25px", textInput("paste.type.delimiter", label = "", value = "", width = "30%"))
+    ret <- tags$div(
+      style = "margin-top: -25px",
+      textInput("paste.type.delimiter", label = "", value = "", width = "30%")
+    )
   }
   ret
 })

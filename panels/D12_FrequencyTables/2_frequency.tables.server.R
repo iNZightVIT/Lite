@@ -10,7 +10,8 @@ observe({
   isolate({
     tryCatch(
       {
-        if (!is.null(input$expand_table_button) && input$expand_table_button > 0) {
+        if (!is.null(input$expand_table_button) &&
+          input$expand_table_button > 0) {
           dat <- get.data.set()
           dat <- tryCatch(
             {
@@ -56,7 +57,10 @@ output$ft.expand.data.table <- renderDT(
     input$expand_table_button
     get.data.set.display()
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 output$ft.expand.dt.data.sample.info <- renderText({

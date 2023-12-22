@@ -1,18 +1,10 @@
 stack.variables.sidebar <- function() {
   list(
     h5(strong("Choose variables to stack")),
-
-    #       selectInput(inputId="stack_vars_which",
-    #                   label="Select categorical or numeric",
-    #                   choices=c("","categorical","numeric"),
-    #                   selected=1,
-    #                   selectize=F),
-
     selectInput(
       inputId = "stack_vars_column",
       label = "Variables",
       choices = get.numeric.column.names(get.data.set()),
-      #                selected = 1,
       selectize = FALSE,
       multiple = T,
       size = 10

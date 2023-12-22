@@ -2,14 +2,18 @@
 observe({
   input$select_unite_columns
   isolate({
-    if (!is.null(input$select_unite_columns) && length(input$select_unite_columns) > 1) {
+    if (!is.null(input$select_unite_columns) &&
+      length(input$select_unite_columns) > 1) {
       temp_select_unite_columns <- input$select_unite_columns
       name_select_unite_columns <- temp_select_unite_columns[1]
       for (i in 2:length(temp_select_unite_columns)) {
         n <- temp_select_unite_columns[i]
-        name_select_unite_columns <- paste(name_select_unite_columns, n, sep = ".")
+        name_select_unite_columns <-
+          paste(name_select_unite_columns, n, sep = ".")
       }
-      updateTextInput(session, "name_unite_columns", value = name_select_unite_columns)
+      updateTextInput(session, "name_unite_columns",
+        value = name_select_unite_columns
+      )
     }
   })
 })
@@ -21,14 +25,20 @@ observe({
   isolate({
     name <- ""
     sep <- "_"
-    if (!is.null(input$select_unite_columns) && length(input$select_unite_columns) > 1) {
+    if (!is.null(input$select_unite_columns) &&
+      length(input$select_unite_columns) > 1) {
       col <- input$select_unite_columns
-      name <- ifelse(input$name_unite_columns == "", "newcol", input$name_unite_columns)
+      name <- ifelse(
+        input$name_unite_columns == "", "newcol",
+        input$name_unite_columns
+      )
       sep <- input$sep_unite_columns
       temp <- iNZightTools::unite(get.data.set(), name, col, sep)
 
       data.set <- as.data.frame(temp)
-      sample.num <- ifelse(nrow(data.set) > 2000, 500, round(nrow(data.set) / 4))
+      sample.num <- ifelse(nrow(data.set) > 2000, 500,
+        round(nrow(data.set) / 4)
+      )
       sample.row <- sort(sample(1:nrow(data.set), sample.num))
       output$previewunitecolumns.table <- renderDT(
         {
@@ -37,7 +47,10 @@ observe({
           colnames(temp.d) <- colnames(data.set)
           temp.d
         },
-        options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+        options = list(
+          lengthMenu = c(5, 30, 50), pageLength = 5,
+          columns.defaultContent = "NA", scrollX = T
+        )
       )
     }
   })
@@ -50,16 +63,22 @@ observe({
   isolate({
     name <- ""
     sep <- "_"
-    if (!is.null(input$select_unite_columns) && length(input$select_unite_columns) > 1) {
+    if (!is.null(input$select_unite_columns) &&
+      length(input$select_unite_columns) > 1) {
       col <- input$select_unite_columns
-      name <- ifelse(input$name_unite_columns == "", "newcol", input$name_unite_columns)
+      name <- ifelse(input$name_unite_columns == "", "newcol",
+        input$name_unite_columns
+      )
       sep <- input$sep_unite_columns
       temp <- iNZightTools::unite(get.data.set(), name, col, sep)
       output$previewunitecolumns.table <- renderDT(
         {
           NULL
         },
-        options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+        options = list(
+          lengthMenu = c(5, 30, 50), pageLength = 5,
+          columns.defaultContent = "NA", scrollX = T
+        )
       )
       ## save code
       code.save$dataname <- paste(code.save$name, "united", sep = ".")
@@ -81,7 +100,10 @@ output$unitecolumns.table <- renderDT(
   {
     get.data.set.display()
   },
-  options = list(lengthMenu = c(5, 30, 50), pageLength = 5, columns.defaultContent = "NA", scrollX = T)
+  options = list(
+    lengthMenu = c(5, 30, 50), pageLength = 5,
+    columns.defaultContent = "NA", scrollX = T
+  )
 )
 
 output$unite.columns <- renderUI({

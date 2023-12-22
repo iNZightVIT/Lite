@@ -20,12 +20,16 @@ paste.data.panel <- function(data.set) {
     sidebarPanel(
       useShinyjs(),
       textAreaInput("paste.data.area",
-        label = "Copy data from Excel/Google Sheets/etc and paste below:", value = "",
+        label = "Copy data from Excel/Google Sheets/etc and paste below:",
+        value = "",
         height = "250px", placeholder = "Paste data here"
       ),
       radioButtons("paste.delimiter",
         label = "Choose delimiter (or type one) :",
-        choices = list("tab (    )" = "\t", "comma (,)" = ",", "semicolon (;)" = ";", "type delimiter"),
+        choices = list(
+          "tab (    )" = "\t", "comma (,)" = ",",
+          "semicolon (;)" = ";", "type delimiter"
+        ),
         selected = "\t"
       ),
       uiOutput("paste.type.delimiter"),

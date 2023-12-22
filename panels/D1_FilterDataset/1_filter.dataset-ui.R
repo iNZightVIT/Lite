@@ -38,7 +38,10 @@ filter.data.sidebar <- function(data.set) {
         choices = c("", c("", "<", ">", "<=", ">=", "==", "!=")),
         selected = 1, selectize = F
       ),
-      textInput(inputId = "numeric_input1", label = "Provide a numeric value to test for"),
+      textInput(
+        inputId = "numeric_input1",
+        label = "Provide a numeric value to test for"
+      ),
       verbatimTextOutput("message1")
     ),
     conditionalPanel(
@@ -49,23 +52,36 @@ filter.data.sidebar <- function(data.set) {
     ),
     conditionalPanel(
       "input.select_filter=='randomly'",
-      textInput(inputId = "numeric_input2", label = "Type in the size of the sample"),
-      textInput(inputId = "numeric_input3", label = "Specify the number of samples to take"),
-      # checkboxInput("bootstrap_check",label="Check to sample with replacement", value=F)
+      textInput(
+        inputId = "numeric_input2",
+        label = "Type in the size of the sample"
+      ),
+      textInput(
+        inputId = "numeric_input3",
+        label = "Specify the number of samples to take"
+      ),
     ),
     actionButton("filter_data_perform", "PERFORM OPERATION",
       style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
     ),
     br(), br(),
-    ## textOutput("op_status"),br(),br(),
-    help.display("Filter datset", "row_op_help", "panels/D1_FilterDataset/3_filter.dataset-help.md"), br()
+    help.display(
+      "Filter datset", "row_op_help",
+      "panels/D1_FilterDataset/3_filter.dataset-help.md"
+    ),
+    br()
   )
 }
 
 filter.data.panel <- function(data.set) {
   if (is.null(data.set)) {
     sidebarLayout(
-      sidebarPanel(help.display("Filter datset", "row_op_help", "panels/D1_FilterDataset/3_filter.dataset-help.md")),
+      sidebarPanel(
+        help.display(
+          "Filter datset", "row_op_help",
+          "panels/D1_FilterDataset/3_filter.dataset-help.md"
+        )
+      ),
       mainPanel(
         h1("Please select or import a data set.")
       )

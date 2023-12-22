@@ -14,7 +14,8 @@ output$about.panel <- renderUI({
     logs <- list.files(tempdir())
     return(logs.panel.ui(logs))
   }
-  if (length(get.vars) > 0 && (any(names(get.vars) %in% "url") || any(names(get.vars) %in% "example"))) {
+  if (length(get.vars) > 0 &&
+    (any(names(get.vars) %in% "url") || any(names(get.vars) %in% "example"))) {
     data.vals <- NULL
     if (!is.null(get.vars$url) && get.vars$url != "") {
       data.vals <- get.data.from.URL(get.vars$url, get.data.dir.imported())
@@ -29,11 +30,14 @@ output$about.panel <- renderUI({
 
       values <- sample_if_cas(rvalues = values, d = values$data.set)
 
-      if (!is.null(get.data.set()) && "land" %in% names(get.vars) && get.vars$land != "" && get.vars$land %in% "visualize") {
+      if (!is.null(get.data.set()) && "land" %in% names(get.vars) &&
+        get.vars$land != "" && get.vars$land %in% "visualize") {
         updateTabsetPanel(session, "selector", "visualize")
-      } else if (!is.null(get.data.set()) && "land" %in% names(get.vars) && get.vars$land != "" && get.vars$land %in% "timeSeries") {
+      } else if (!is.null(get.data.set()) && "land" %in% names(get.vars) &&
+        get.vars$land != "" && get.vars$land %in% "timeSeries") {
         updateTabsetPanel(session, "selector", "timeSeries")
-      } else if (!is.null(get.data.set()) && "land" %in% names(get.vars) && get.vars$land != "" && get.vars$land %in% "regression") {
+      } else if (!is.null(get.data.set()) && "land" %in% names(get.vars) &&
+        get.vars$land != "" && get.vars$land %in% "regression") {
         updateTabsetPanel(session, "selector", "regression")
       }
     }
