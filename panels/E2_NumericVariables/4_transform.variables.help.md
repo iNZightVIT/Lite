@@ -27,7 +27,7 @@ In a first step exactly the same method is performed as described in "Center Tra
 <h4>Median Split Transformation</h4>
 All numeric selected columns are converted into a binary variable such that all values above the median are classified as "high" and all values below the median are classified as "low".
 <h4>Reverse-coding Transformation</h4>
-The selected numeric columns are revers coded such that the minimum and maximum of Column X is added and X is subtracted from this value ((min(X)+max(X))-X).  
+The selected numeric columns are revers coded such that the minimum and maximum of Column X is added and X is subtracted from this value ((min(X)+max(X))-X).
 <h4>Copy Transformation</h4>
 Copies the selected coulms so that they become duplicates in the current data set.
 <h4>Change sign Transformation</h4>

@@ -2,21 +2,14 @@
 # To be removed when the iNZight tools package is working##
 ##########################################################
 
-read_config = function() {
-  lite_config = Sys.getenv("LITE_CONFIG")
-  if (is.null(lite_config) || nchar(lite_config) <= 1) return()
+read_config <- function() {
+  lite_config <- Sys.getenv("LITE_CONFIG")
+  if (is.null(lite_config) || nchar(lite_config) <= 1) {
+    return()
+  }
 
   # read from json
   fromJSON(lite_config)
-  
-  # out = list()
-  # for(key in names(lite_config)) {
-  #   values = lite_config[[key]]
-  #   for(key2 in names(values)) {
-  #     new_key = paste0(key, "_", key2)
-  #     out[new_key] = values[key2]
-  #   }
-  # }
 }
 
 # Modified based off:
@@ -129,7 +122,6 @@ init_lite_logs <- function(
   )
 }
 
-
 #' Reahapes the data that all columns are merged into two
 #' column with the variable names in the first column and
 #' the values in the second column.
@@ -147,38 +139,6 @@ get.reshape.data <- function(dafr) {
   colnames(temp)[2] <- "variables"
   temp
 }
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' Converts specified columns into binary factor variables
-#' which get added to the input data.frame.
-#'
-#' @param dafr The input data.frame.
-#' @param The column names or indexes to be converted.
-#'
-#' @return A data.frame with the binary columns added.
-#'
-#' @author Christoph Knapp
-get.missing.categorical <- function(dafr, columns) {
-  temp <- as.data.frame(dafr[, columns], stringsAsFactors = TRUE)
-  colnames(temp) <- columns
-  new.dafr <- data.frame(
-    stringsAsFactors = TRUE,
-    do.call(cbind, lapply(
-      1:length(columns),
-      function(index, d, c) {
-        te <- rep("observed", nrow(d))
-        te[is.na(d[, index])] <- "missing"
-        te
-      }, temp, columns
-    ))
-  )
-  colnames(new.dafr) <- paste("missing", columns, sep = ".")
-  cbind(dafr, new.dafr)
-}
-
-
-
 
 #' add new columns to the original dataframe which replace "NA"
 #' with "missing" so that the missing values could be displayed
@@ -286,42 +246,47 @@ get.combinations <- function(dafr, simplify = F) {
     index.column <- sapply(dafr, rm.na)
   }
   x <- data.frame(dafr[, index.column], stringsAsFactors = TRUE)
-  if (ncol(x) > 0) {
-    x1 <- as.numeric(apply(x, 2, function(x) length(which(is.na(x)))))
-    row4col.order <- order(x1)
-    x1 <- c(x1, nrow(x))
-    z1 <- ifelse(is.na(x), "missing", "observed")
-    tab <- table(apply(z1, 1, paste, collapse = ","))
-    tab <- tab[order(names(tab), decreasing = TRUE)]
-    tab <- data.frame(combination = names(tab), count = as.numeric(tab), stringsAsFactors = TRUE)
-    tabp <- t(apply(tab, 1, function(x) {
-      unlist(strsplit(x, ",", fixed = TRUE))
-    }))
-    tabp <- data.frame(tabp, stringsAsFactors = F)
-    tabp <- tabp[, c(row4col.order, max(row4col.order) + 1)]
-    tabp <- rbind(tabp, x1[c(row4col.order, max(row4col.order) + 1)]) #  x1[row4col.order] == numMiss
-    names(tabp) <- c(names(x)[row4col.order], "Total")
-    row.names(tabp) <- c(seq_len(nrow(tab)), "Total")
-
-    tabfinal <- tabp[-nrow(tabp), ]
-    tabfinal <- tabfinal[order(tabfinal$Total, decreasing = TRUE), ]
-    tabfinal <- rbind(tabfinal, tabp[nrow(tabp), ])
-
-    finaltable <- tabfinal
-
-    Name <- names(finaltable)
-    i <- nrow(finaltable)
-    j <- ncol(finaltable)
-    index <- order(x1[-j], decreasing = FALSE)
-    numMiss <- x1[c(index, j)]
-    percMiss <- round(numMiss / numMiss[j], 3)
-
-    finaltable <- rbind(finaltable, paste0(round(percMiss * 100, 2), "%"))
-    colnames(finaltable)[j] <- "Freq"
-    finaltable
-  } else {
-    NULL
+  if (ncol(x) == 0) {
+    return(NULL)
   }
+
+  x1 <- as.numeric(apply(x, 2, function(x) length(which(is.na(x)))))
+  row4col.order <- order(x1)
+  x1 <- c(x1, nrow(x))
+  z1 <- ifelse(is.na(x), "missing", "observed")
+  tab <- table(apply(z1, 1, paste, collapse = ","))
+  tab <- tab[order(names(tab), decreasing = TRUE)]
+  tab <- data.frame(
+    combination = names(tab),
+    count = as.numeric(tab), stringsAsFactors = TRUE
+  )
+  tabp <- t(apply(tab, 1, function(x) {
+    unlist(strsplit(x, ",", fixed = TRUE))
+  }))
+  tabp <- data.frame(tabp, stringsAsFactors = F)
+  tabp <- tabp[, c(row4col.order, max(row4col.order) + 1)]
+
+  #  x1[row4col.order] == numMiss
+  tabp <- rbind(tabp, x1[c(row4col.order, max(row4col.order) + 1)])
+  names(tabp) <- c(names(x)[row4col.order], "Total")
+  row.names(tabp) <- c(seq_len(nrow(tab)), "Total")
+
+  tabfinal <- tabp[-nrow(tabp), ]
+  tabfinal <- tabfinal[order(tabfinal$Total, decreasing = TRUE), ]
+  tabfinal <- rbind(tabfinal, tabp[nrow(tabp), ])
+
+  finaltable <- tabfinal
+
+  Name <- names(finaltable)
+  i <- nrow(finaltable)
+  j <- ncol(finaltable)
+  index <- order(x1[-j], decreasing = FALSE)
+  numMiss <- x1[c(index, j)]
+  percMiss <- round(numMiss / numMiss[j], 3)
+
+  finaltable <- rbind(finaltable, paste0(round(percMiss * 100, 2), "%"))
+  colnames(finaltable)[j] <- "Freq"
+  finaltable
 }
 
 ##########################################################
@@ -363,218 +328,11 @@ get.create.variables <- function(dafr, new.formula, new.name = NULL) {
       temp
     },
     error = function(cond) {
-      # print(cond)
       return(NULL)
     },
-    warning = function(cond) {
-      # print(cond)
-    },
-    finally = {
-
-    }
+    warning = function(cond) {},
+    finally = {}
   )
-}
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' This function is a wrapper function for the rank method.
-#'
-#' @param dafr A dataframe with variables to be ranked.
-#' @param columns Character of column names or column
-#' indices of the columns to be ranked.
-#'
-#' @return A data.frame containig the original data plus
-#' the ranked variables.
-#'
-#' @author Christoph Knapp
-get.rank.numeric <- function(dafr, columns) {
-  temp <- data.frame(
-    stringsAsFactors = TRUE,
-    sapply(dafr[, columns],
-      rank,
-      ties.method = "min",
-      na.last = "keep"
-    )
-  )
-  nams <- paste(columns, "rank", sep = ".")
-  count <- 0
-  while (any(nams %in% colnames(dafr))) {
-    count <- count + 1
-    nams <- paste(nams, count, sep = ".")
-  }
-  colnames(temp) <- nams
-  cbind(dafr, temp)
-}
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' Form class intervals from a column specified by column
-#' name or column index from the a data.frame.
-#'
-#' @param dafr The data frame the column can be retrieved from.
-#' @param column The column name or index to produce class
-#' intervals from.
-#' @param num.intervals The number of intervals the column
-#' should be separated in.
-#' @param open.left.closed.right Logical variable specifying
-#' whether the output should be in the format
-#' [open left, closed right) or (closed left, open right]
-#' @param method The method used to generate the class
-#' intervals.
-#' @param intervals If method="specified" this needs to be
-#' provided as a vector of numeric values. The length of the
-#' vector needs to be num.intervals-1 and the minimum and
-#' maximum needs to be within range of the minimum and maximum
-#' of the selected column.
-#' @param labels Optional labels for the intervals. By default
-#' the range of the labels will be used.
-#'
-#' @return The same data.frame as dafr except that the class
-#' intervals are added as additional column or the the unchanged
-#' dafr data.frame is returned if the input is wrong. Warnings
-#' are provided in this case.
-#'
-#' @note This is a wrapper for the cut function. See \code{?cut}.
-#'
-#' @author Christoph Knapp
-get.form.class.interval <- function(dafr, column, num.intervals,
-                                    open.left.closed.right = T,
-                                    method = c(
-                                      "equal.width",
-                                      "equal.count",
-                                      "specified"
-                                    ),
-                                    intervals = NULL,
-                                    labels = NULL) {
-  if (length(method) > 1 || !method %in% c(
-    "equal.width",
-    "equal.count",
-    "specified"
-  )) {
-    method <- "equal.width"
-  }
-  if (!is.null(labels) && (length(labels) != num.intervals ||
-    any(grepl("^\\s*$", intervals)))) {
-    warning("The labels not in the right format and are ignored.")
-    labels <- NULL
-  }
-  column.temp <- dafr[, column]
-  ret <- dafr
-  num.cols.old <- ncol(ret)
-  if (!is.null(intervals) && method %in% "specified") {
-    if (!is.numeric(intervals) || any(is.na(intervals)) ||
-      is.null(intervals) || length(intervals) != (num.intervals - 1) ||
-      min(intervals, na.rm = T) < min(dafr[, column], na.rm = T) ||
-      max(intervals, na.rm = T) < max(dafr[, column], na.rm = T)) {
-      warning("The \"intervals\" variable is not in the right format.")
-      return(dafr)
-    }
-    column.temp <- dafr[, column]
-    ret <- cbind(dafr, cut(column.temp,
-      breaks = intervals,
-      labels = labels,
-      include.lowest = T,
-      right = open.left.closed.right
-    ))
-  } else if (method %in% "equal.width") {
-    ret <- cbind(dafr, cut(
-      x = column.temp,
-      breaks = num.intervals,
-      right = open.left.closed.right,
-      labels = labels,
-      include.lowest = TRUE
-    ))
-  } else if (method %in% "equal.count") {
-    ret <- cbind(dafr, cut(
-      x = column.temp,
-      breaks = quantile(column.temp,
-        probs = seq(0, 1, 1 / num.intervals, ),
-        na.rm = TRUE
-      ),
-      include.lowest = TRUE,
-      right = open.left.closed.right, labels = labels
-    ))
-  }
-  if (num.cols.old < ncol(ret)) {
-    count <- 1
-    col.name <- paste(column, method, count, sep = ".")
-    while (paste(column, method, count, sep = ".") %in% colnames(ret)) {
-      count <- count + 1
-      col.name <- paste(column, method, count, sep = ".")
-    }
-    colnames(ret)[ncol(ret)] <- col.name
-  }
-  ret
-}
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' Combine the levels of factor variables.
-#'
-#' @param dafr The dataframe containing factor columns
-#' specified in columns.
-#' @param columns The column names of the columns in dafr
-#' to combine.
-#'
-#' @return A data.frame with one additional column as dafr,
-#' which contains the combined levels.
-#'
-#' @author Christoph Knapp
-combine.levels <- function(dafr, columns) {
-  new.column <- do.call(paste, lapply(columns, function(name, d) {
-    d[, name]
-  }, dafr))
-  dafr <- cbind(dafr, gsub(" ", ".", new.column))
-  colnames(dafr)[ncol(dafr)] <- paste(columns, collapse = ".")
-  dafr
-}
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' Renames the levels of a factor.
-#'
-#' @param dafr A data.frame of the data to change.
-#' @param column The column name of the column to change.
-#' @param new.levels A character variabel of the length of
-#' the number of factors of the column to change. This
-#' vector contains the new levels.
-#'
-#' @return A data.frame where the levels of the specified
-#' columns are changed.
-#'
-#' @author Christoph Knapp
-rename.levels <- function(dafr, column, new.levels) {
-  temp <- as.character(dafr[, column])
-  for (i in 1:length(levels(dafr[, column]))) {
-    temp[which(dafr[, column] %in% levels(dafr[, column])[i])] <- new.levels[i]
-  }
-  dafr[, column] <- factor(temp, levels = new.levels)
-  dafr
-}
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' This function changes the order of levels in the data.
-#'
-#' @param dafr The data to be changed
-#' @param column the factor column where the order of
-#' levels should be changed.
-#' @param levels.new A vector of all levels in the column
-#' specified by column in the order they should be
-#' ordered.
-#'
-#' @return A data.frame with the levels of one column
-#' reordered
-#'
-#' @author Christoph Knapp
-reorder.levels <- function(dafr, column, levels.new) {
-  dafr[, column] <- factor(dafr[, column], levels = levels.new)
-  dafr
 }
 
 ##########################################################
@@ -598,163 +356,6 @@ get.collapsed.column <- function(column, to.collapse) {
     column[indices] <- new.level
   }
   as.factor(column)
-}
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' Stacks the selected columns onto the data.
-#'
-#' Multiplies the data.set by adding rows to the data for
-#' every selected column. The selected columns are stacked
-#' onto each other and added as an additional column
-#'
-#' @param columns The columns to stack.
-#' @param dafr a dataframe the stacking is performed on.
-#'
-#' @author Christoph Knapp
-stack.variables.perform <- function(columns, dafr) {
-  stack <- unlist(lapply(1:length(columns), function(index, d, c) {
-    d[, which(colnames(d) %in% c[index])]
-  }, dafr, columns))
-  colstack <- unlist(lapply(1:length(columns), function(index, d, c) {
-    rep(c[index], nrow(d))
-  }, dafr, columns))
-  cbind(dafr, stack.columns = colstack, stack.variables = stack)
-}
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' aggregates the data over selected factor columns
-#'
-#' The dimensions of the df data frame will change so that
-#' all possible combinations of factors selected will be
-#' the number of rows and the number of all selected factor
-#' columns + a column for all methods selected will be the
-#' number of columns in the return data.frame.
-#'
-#' @param aggregate.over column names of factor variables
-#' in data to aggregate over
-#' @param methods A set of methods which can be used to
-#' aggregate.
-#' @param df A data.frame containing at least on factor
-#' column and one numeric column.
-#'
-#' @return A data.frame with the results of the aggregation.
-#'
-#' @author Christoph Knapp
-aggregate.data <- function(aggregate.over,
-                           methods = c("mean", "median", "sum", "sd", "IQR", "count"),
-                           dafr) {
-  if (is.null(aggregate.over) | is.null(methods) | length(methods) == 0 |
-    length(aggregate.over) == 0 | is.numeric(aggregate.over)) {
-    stop("aggregate.data : Wrong input")
-  }
-  if (any(!as.character(aggregate.over) %in% colnames(dafr))) {
-    warning("aggregate.data : Some columns in aggregate.over are
-            not in the column names for df. They will be ignored.")
-  }
-  if (is.character(aggregate.over)) {
-    aggregate.over <- as.factor(aggregate.over)
-  }
-  bys <- lapply(
-    1:length(aggregate.over),
-    function(i, d, v) {
-      d[, which(colnames(d) %in% v[i])]
-    }, dafr, aggregate.over
-  )
-  names(bys) <- aggregate.over
-  sets <- lapply(1:length(methods), function(i, d, b, m) {
-    if ("count" %in% m[i]) {
-      m[i] <- "length"
-      temp <- aggregate(
-        d[, unlist(lapply(
-          1:ncol(d),
-          function(j, da) {
-            is.numeric(da[, j])
-          }, d
-        ))],
-        by = b, FUN = m[i], simplify = FALSE
-      )
-    } else {
-      temp <- aggregate(
-        d[, unlist(lapply(
-          1:ncol(d),
-          function(j, da) {
-            is.numeric(da[, j])
-          }, d
-        ))],
-        by = b, FUN = m[i], na.rm = T, simplify = FALSE
-      )
-    }
-
-    colnames(temp)[(length(b) + 1):ncol(temp)] <- paste(m[i],
-      colnames(temp)[(length(b) + 1):ncol(temp)],
-      sep = "."
-    )
-    temp
-  }, dafr, bys, methods)
-  temp <- sets[[1]]
-  if (length(sets) > 1) {
-    for (i in 2:length(sets)) {
-      temp <- merge(temp, sets[[i]])
-    }
-  }
-  temp
-}
-
-## unlist list columns in a dataset
-# unlist.data.frame = function(data) {
-#  col_names = colnames(data)
-#  temp1 = sapply(data, is.list)
-#  temp2 = do.call(
-#    cbind, lapply(data[temp1], function(x)
-#      data.frame(do.call(rbind, x), check.names=FALSE)))
-#  result = cbind(data[!temp1], temp2)
-#  colnames(result) = col_names
-#
-#  result
-# }
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' Sorts the df data frame after the input variables
-#'
-#' Warnings will be given if the colnames in vars will not
-#' match the column in df. This is a wrapper function for
-#' sort. See \code{?sort} for more information.
-#'
-#' @param vars The column names in the order the df data.frame
-#' should be sorted.
-#' @param sort.type A logical vector of the same length as
-#' vars. If the element in the vector is TRUE the corresponding
-#' element in vars will be sorted in increasing order.
-#' @ param The data.fram or matrix to sort.
-#'
-#' @return An ordered data.frame
-#'
-#' @author Christoph Knapp
-sort.data <- function(vars, sort.type, df) {
-  if (any(!vars %in% colnames(df))) {
-    warning("sort.data : Not all variables in vars could be
-            matched to column names in df.")
-  }
-  if (length(vars) != length(sort.type)) {
-    stop("sort.data : vas and sort.type have different length")
-  }
-  z <- lapply(1:length(vars), function(index, v, t, d) {
-    vec <- d[, which(colnames(d) %in% v[index])]
-    if (is.factor(vec) | is.character(vec)) {
-      vec <- xtfrm(as.character(vec))
-    }
-    if (!t[index]) {
-      vec <- -vec
-    }
-    vec
-  }, vars, sort.type, df)
-  df[order.overwrite(z), ]
 }
 
 #' The iNZight version of the order function which lets you pass
@@ -793,60 +394,6 @@ order.overwrite <- function(z, na.last = TRUE, decreasing = FALSE) {
   ans[ans %in% keep]
 }
 
-
-##########################################################
-# To be removed when the iNZight tools package is working##
-##########################################################
-#' Takes a sample of rows from a data.frame
-#'
-#' This function samples rows from a data.frame with or
-#' without replacment.
-#'
-#' @param df A data.frame the sample is taken from.
-#' @param sampleSize The size of the samples to be taken.
-#' @param numSample The number of samples to be taken.
-#' @param bootstrap TRUE if samples with replacement is
-#' desired, FALSE if no replacement.
-#'
-#' @return A data.frame with the samples merged together.
-#' An additional column is added where the sampling
-#' iteration is stored.
-#'
-#' @author Christoph Knapp
-#'
-#' @export
-sample.data <- function(df, sampleSize, numSample = 1, bootstrap = F) {
-  if (sampleSize > nrow(df)) {
-    stop(paste0("This sample is to large. Only ", nrow(df), " samples available."))
-  }
-  if (sampleSize * numSample > nrow(df) & !bootstrap) {
-    stop(paste0("Not enough rows in data to sample that many times."))
-  }
-  colname <- "num.sample"
-  if ("num.sample" %in% colnames(df)) {
-    count <- 1
-    while (paste0("num.sample", count) %in% colnames(df)) {
-      count <- count + 1
-    }
-    colname <- paste0("num.sample", count)
-  }
-  ret <- NULL
-  if (bootstrap) {
-    ret <- do.call(rbind, lapply(1:numSample, function(index, d, size) {
-      cbind(d[sample(1:nrow(d), size), ], rep(index, size))
-    }, df, sampleSize))
-  } else {
-    ret <- do.call(rbind, lapply(1:numSample, function(index, d, size) {
-      s <- sample(1:nrow(d), size)
-      temp <- cbind(d[s, ], rep(index, size))
-      d <<- d[-s, ]
-      temp
-    }, df, sampleSize))
-  }
-  colnames(ret)[ncol(ret)] <- colname
-  ret
-}
-
 #' Returns the names of all numeric columns in data
 #'
 #' @param dafr The input dataframe to be searched.
@@ -866,7 +413,8 @@ get.numeric.column.names <- function(dafr) {
 #' @author Christoph Knapp
 get.categorical.column.names <- function(dafr) {
   colnames(dafr)[which(unlist(lapply(1:ncol(dafr), function(index, d) {
-    class(as.data.frame(d, stringsAsFactors = TRUE)[, index]) %in% "factor" || class(as.data.frame(d, stringsAsFactors = TRUE)[, index]) %in% "character"
+    class(as.data.frame(d, stringsAsFactors = TRUE)[, index]) %in% "factor" ||
+      class(as.data.frame(d, stringsAsFactors = TRUE)[, index]) %in% "character"
   }, dafr)))]
 }
 
@@ -908,27 +456,6 @@ data.summary <- function(dafr) {
   }
 }
 
-# #' Creates a widget for moving through plots quickly.
-# #'
-# #' @param ID.forward inputID for the forward button in the player widget
-# #' @param ID.player inputID for the slider in the player widget
-# #' @param ID.backward inputID for the backward button in the player widget
-# #'
-# #' @author Christoph Knapp
-# get.player = function(ID.forward,ID.player,ID.backward,maxi){
-#   fixedRow(column(width=8,offset=2,
-#                   div(class='player',
-#                       fixedRow(
-#                         column(width=1,offset=1,
-#                                div(class="seper",actionButton(inputId=ID.backward,label="",icon=icon("backward")))),
-#                         column(width=6,offset=1,
-#                                sliderInput(inputId=ID.player,label="",min=1,max=maxi,step=1,
-#                                            animate=animationOptions(interval=500,loop=T,play=T),
-#                                            width="100%",value=1,ticks=F)),
-#                         column(width=1,offset=1,
-#                                div(class="seper",actionButton(inputId=ID.forward,label="",icon=icon("forward"))))
-#                       ))))
-# }
 #' Creates a widget for moving through plots quickly.
 #'
 #' @param ID.forward inputID for the forward button in the player widget
@@ -962,7 +489,13 @@ get.player <- function(ID.forward, ID.player, ID.backward, maxi) {
         ),
         column(
           width = 1, offset = 1,
-          div(class = "seper", actionButton(inputId = ID.forward, label = "", icon = icon("forward")))
+          div(
+            class = "seper",
+            actionButton(
+              inputId = ID.forward,
+              label = "", icon = icon("forward")
+            )
+          )
         )
       )
     )
@@ -1013,17 +546,23 @@ change.factor.transform <- function(temp, columns) {
 #' @author Christoph Knapp
 change.sign.transform <- function(dafr, columns) {
   dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
-  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, dafr) {
-    if (is.numeric(dafr[, index])) {
-      as.matrix(dafr[, index] * (-1))
-    } else {
-      NULL
-    }
-  }, dafr)))
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, dafr) {
+      if (is.numeric(dafr[, index])) {
+        as.matrix(dafr[, index] * (-1))
+      } else {
+        NULL
+      }
+    }, dafr))
+  )
   if (!is.null(temp)) {
-    colnames(temp) <- paste("change_sign", columns[unlist(lapply(1:ncol(dafr), function(i, d) {
-      is.numeric(d[, i])
-    }, dafr))], sep = ".")
+    colnames(temp) <- paste("change_sign",
+      columns[unlist(lapply(1:ncol(dafr), function(i, d) {
+        is.numeric(d[, i])
+      }, dafr))],
+      sep = "."
+    )
   }
   temp
 }
@@ -1059,13 +598,16 @@ copy.transform <- function(dafr, columns) {
 
 reverse.coding.transform <- function(dafr, columns) {
   data <- as.data.frame(dafr, stringsAsFactors = TRUE)
-  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
-    if (is.numeric(d[, index])) {
-      min(d[, index], na.rm = T) + max(d[, index], na.rm = T) - d[, index]
-    } else {
-      NULL
-    }
-  }, dafr)))
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        min(d[, index], na.rm = T) + max(d[, index], na.rm = T) - d[, index]
+      } else {
+        NULL
+      }
+    }, dafr))
+  )
   if (!is.null(temp)) {
     colnames(temp) <- paste("reverse_coding",
       columns[unlist(lapply(
@@ -1085,16 +627,19 @@ median.split.transform <- function(dafr, columns) {
   nums <- unlist(lapply(1:ncol(dafr), function(index, dafr) {
     is.numeric(dafr[, index])
   }, dafr))
-  dafr <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
-    if (is.numeric(d[, index])) {
-      med <- median(d[, index], na.rm = T)
-      ret <- rep("high", length(d[, index]))
-      ret[which(d[, index] <= med)] <- "low"
-      ret
-    } else {
-      NULL
-    }
-  }, dafr)), stringsAsFactors = T)
+  dafr <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        med <- median(d[, index], na.rm = T)
+        ret <- rep("high", length(d[, index]))
+        ret[which(d[, index] <= med)] <- "low"
+        ret
+      } else {
+        NULL
+      }
+    }, dafr)), stringsAsFactors = T
+  )
   colnames(dafr) <- paste("median_split", columns[nums], sep = "_")
   dafr
 }
@@ -1151,9 +696,12 @@ divide.transform <- function(dafr, columns) {
           is.numeric(d[, index])
         }, dafr))]
       )
-      colnames(temp) <- colnames(data)[unlist(lapply(1:ncol(dafr), function(index, d) {
-        is.numeric(d[, index])
-      }, data))]
+      colnames(temp) <- colnames(data)[unlist(lapply(
+        1:ncol(dafr),
+        function(index, d) {
+          is.numeric(d[, index])
+        }, data
+      ))]
     } else if (ncol(as.data.frame(
       stringsAsFactors = TRUE,
       dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
@@ -1213,9 +761,12 @@ multiply.transform <- function(dafr, columns) {
           is.numeric(d[, index])
         }, dafr))]
       )
-      colnames(temp) <- colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
-        is.numeric(d[, index])
-      }, dafr))]
+      colnames(temp) <- colnames(dafr)[unlist(lapply(
+        1:ncol(dafr),
+        function(index, d) {
+          is.numeric(d[, index])
+        }, dafr
+      ))]
     } else if (ncol(as.data.frame(
       stringsAsFactors = TRUE,
       dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
@@ -1228,9 +779,12 @@ multiply.transform <- function(dafr, columns) {
           is.numeric(d[, index])
         }, dafr))])
       )
-      colnames(temp) <- paste0("multiply.", paste(colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
-        is.numeric(d[, index])
-      }, dafr))], collapse = "."))
+      colnames(temp) <- paste0(
+        "multiply.",
+        paste(colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))], collapse = ".")
+      )
     } else {
       return(NULL)
     }
@@ -1272,9 +826,12 @@ subtract.transform <- function(dafr, columns) {
           is.numeric(d[, index])
         }, dafr))]
       )
-      colnames(temp) <- colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
-        is.numeric(d[, index])
-      }, dafr))]
+      colnames(temp) <- colnames(dafr)[unlist(lapply(
+        1:ncol(dafr),
+        function(index, d) {
+          is.numeric(d[, index])
+        }, dafr
+      ))]
     } else if (ncol(as.data.frame(
       stringsAsFactors = TRUE,
       dafr[, unlist(lapply(1:ncol(dafr), function(index, d) {
@@ -1287,9 +844,12 @@ subtract.transform <- function(dafr, columns) {
           is.numeric(d[, index])
         }, dafr))])
       )
-      colnames(temp) <- paste0("subtract.", paste(colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
-        is.numeric(d[, index])
-      }, dafr))], collapse = "."))
+      colnames(temp) <- paste0(
+        "subtract.",
+        paste(colnames(dafr)[unlist(lapply(1:ncol(dafr), function(index, d) {
+          is.numeric(d[, index])
+        }, dafr))], collapse = ".")
+      )
     } else {
       return(NULL)
     }
@@ -1411,13 +971,16 @@ transform.get.temp <- function(dafr, type, columns) {
 log.transform <- function(dafr, columns) {
   dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) <- columns
-  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, dafr) {
-    if (is.numeric(dafr[, index])) {
-      log(dafr[, index])
-    } else {
-      NULL
-    }
-  }, dafr)))
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, dafr) {
+      if (is.numeric(dafr[, index])) {
+        log(dafr[, index])
+      } else {
+        NULL
+      }
+    }, dafr))
+  )
   if (!is.null(temp) && dim(temp)[1] > 0 && dim(temp)[2] > 0) {
     colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, dafr) {
       if (is.numeric(dafr[, index])) {
@@ -1435,13 +998,16 @@ log.transform <- function(dafr, columns) {
 root.transform <- function(dafr, columns) {
   dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) <- columns
-  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
-    if (is.numeric(d[, index])) {
-      sqrt(d[, index])
-    } else {
-      NULL
-    }
-  }, dafr)))
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        sqrt(d[, index])
+      } else {
+        NULL
+      }
+    }, dafr))
+  )
   ##  temp = as.data.frame(temp)
   if (dim(temp)[1] > 0 && dim(temp)[2] > 0) {
     colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, d) {
@@ -1460,13 +1026,16 @@ root.transform <- function(dafr, columns) {
 square.transform <- function(dafr, columns) {
   dafr <- as.data.frame(dafr, stringsAsFactors = TRUE)
   colnames(dafr) <- columns
-  temp <- as.data.frame(stringsAsFactors = TRUE, do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
-    if (is.numeric(d[, index])) {
-      d[, index]^2
-    } else {
-      NULL
-    }
-  }, dafr)))
+  temp <- as.data.frame(
+    stringsAsFactors = TRUE,
+    do.call(cbind, lapply(1:ncol(dafr), function(index, d) {
+      if (is.numeric(d[, index])) {
+        d[, index]^2
+      } else {
+        NULL
+      }
+    }, dafr))
+  )
   ##  temp = as.data.frame(temp)
   if (dim(temp)[1] > 0 && dim(temp)[2] > 0) {
     colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, d) {
@@ -1495,7 +1064,6 @@ abs.transform <- function(dafr, columns) {
       }
     }, dafr))
   )
-  #   temp = as.data.frame(temp)
   if (dim(temp)[1] > 0 && dim(temp)[2] > 0) {
     colnames(temp) <- unlist(lapply(1:ncol(dafr), function(index, d) {
       if (is.numeric(d[, index])) {
@@ -1512,36 +1080,40 @@ abs.transform <- function(dafr, columns) {
 
 delete.old.files <- function(data_dir, days) {
   if (length(list.files(paste0(data_dir, "/Imported"))) > 0) {
-    unlink(list.files(paste0(data_dir, "/Imported"))
-    [difftime(Sys.time(),
+    unlink(list.files(paste0(data_dir, "/Imported"))[
+      difftime(Sys.time(),
         file.info(list.files(
           paste0(data_dir, "/Imported"),
           full.name = T
         ))
         [, "mtime"],
         units = "days"
-      ) > days])
+      ) > days
+    ])
   }
 }
 
 ###  A function for displaying help messages.
 
 help.display <- function(title, id, file) {
-  HTML(paste("<div class='modal fade' id='", id, "' tabindex='-1' role='dialog' aria-labelledby='basicModal' aria-hidden='true'>
+  HTML(paste("<div class='modal fade' id='", id,
+    "' tabindex='-1' role='dialog' aria-labelledby='basicModal'
+       aria-hidden='true'>
              <div class='modal-dialog'>
              <div class='modal-content'>
              <div class='modal-header'>
              <h4 class='modal-title' id='myModalLabel'>", title, "</h4>
              </div>
              <div class='modal-body'>",
-    mark_html(file = file),
+    mark_html(file = file, output = NULL, template = FALSE),
     "</div>
              <div class='modal-footer'>
              </div>
              </div>
              </div>
              </div>
-             <a href='#' class='btn btn-xs btn-success' data-toggle='modal' data-target='#", id, "'>Help</a>",
+             <a href='#' class='btn btn-xs btn-success' data-toggle='modal'
+              data-target='#", id, "'>Help</a>",
     sep = ""
   ))
 }
@@ -1562,7 +1134,9 @@ load.data <- function(data_dir, fileID = NULL, path = NULL) {
     if (length(indexes[1]) > 0) {
       ext <- strsplit(full.name[indexes[1]], ".", fixed = T)[[1]]
       ext <- ext[length(ext)]
-      if (!(tolower(ext) %in% c("rds", "rda", "rdata", "csv", "txt", "xls", "xlsx"))) {
+      if (!(tolower(ext) %in% c(
+        "rds", "rda", "rdata", "csv", "txt", "xls", "xlsx"
+      ))) {
         ext <- strsplit(fileID, ".", fixed = T)[[1]]
         ext <- ext[length(ext)]
       }
@@ -1577,21 +1151,44 @@ load.data <- function(data_dir, fileID = NULL, path = NULL) {
           name <- load(full.name[indexes[1]])
           temp <- get(name)
         } else if (tolower(ext) %in% "csv") {
-          temp <- read.csv(full.name[indexes[1]], comment.char = "#", na.strings = c("NULL", "NA", "N/A", "#N/A", "", "<NA>"), stringsAsFactors = TRUE)
+          temp <- read.csv(full.name[indexes[1]],
+            comment.char = "#",
+            na.strings = c("NULL", "NA", "N/A", "#N/A", "", "<NA>"),
+            stringsAsFactors = TRUE
+          )
         } else if (tolower(ext) %in% "txt") {
-          temp <- read.delim(full.name[indexes[1]], comment.char = "#", na.strings = c("NULL", "NA", "N/A", "#N/A", "", "<NA>"), stringsAsFactors = TRUE)
+          temp <- read.delim(full.name[indexes[1]],
+            comment.char = "#",
+            na.strings = c("NULL", "NA", "N/A", "#N/A", "", "<NA>"),
+            stringsAsFactors = TRUE
+          )
         } else if (tolower(ext) %in% "xls") {
-          #          temp = read.xlsx(full.name[indexes[1]], 1)
-          temp <- as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
+          temp <- as.data.frame(
+            stringsAsFactors = TRUE,
+            read_excel(full.name[indexes[1]])
+          )
         } else if (tolower(ext) %in% "xlsx") {
-          #          temp = read.xlsx(full.name[indexes[1]], 1)
-          temp <- as.data.frame(stringsAsFactors = TRUE, read_excel(full.name[indexes[1]]))
+          temp <- as.data.frame(
+            stringsAsFactors = TRUE,
+            read_excel(full.name[indexes[1]])
+          )
         } else if (tolower(ext) %in% "sas7bdat") {
-          temp <- as.data.frame(stringsAsFactors = TRUE, read.sas7bdat(full.name[indexes[1]]))
+          temp <- as.data.frame(
+            stringsAsFactors = TRUE,
+            read.sas7bdat(full.name[indexes[1]])
+          )
         } else if (tolower(ext) %in% "dta") {
-          temp <- as.data.frame(stringsAsFactors = TRUE, read.dta(full.name[indexes[1]]))
+          temp <- as.data.frame(
+            stringsAsFactors = TRUE,
+            read.dta(full.name[indexes[1]])
+          )
         } else if (tolower(ext) %in% "sav") {
-          temp <- as.data.frame(stringsAsFactors = TRUE, read.spss(full.name[indexes[1]], use.value.labels = FALSE, to.data.frame = TRUE))
+          temp <- as.data.frame(
+            stringsAsFactors = TRUE,
+            read.spss(full.name[indexes[1]],
+              use.value.labels = FALSE, to.data.frame = TRUE
+            )
+          )
         }
       }, error = function(e) {
         print(e)
@@ -1631,18 +1228,27 @@ get.radio.list <- function(dir.label, idlabel) {
     temp.files,
     function(x, label) {
       paste(x[(which(x %in% label) + 1):length(x)], collapse = "==>")
-    }, strsplit(dir.label, "/", fixed = T)[[1]][length(strsplit(dir.label, "/", fixed = T)[[1]])]
+    },
+    strsplit(dir.label, "/", fixed = T)[[1]][
+      length(strsplit(dir.label, "/", fixed = T)[[1]])
+    ]
   ))
   ret <- NULL
   if (length(files) > 0) {
     columns <- lapply(
       1:length(files),
       function(i, ns) {
-        paste(strsplit(ns[i], ".", fixed = T)[[1]][1:(length(strsplit(ns[i], ".", fixed = T)[[1]]) - 1)], collapse = ".")
+        paste(strsplit(ns[i], ".", fixed = T)[[1]][
+          1:(length(strsplit(ns[i], ".", fixed = T)[[1]]) - 1)
+        ], collapse = ".")
       },
       basename(files)
     )
-    ret <- radioButtons(inputId = paste(basename(dir.label), idlabel, sep = ""), label = basename(dir.label), choices = columns, selected = columns[1])
+    ret <- radioButtons(
+      inputId = paste(basename(dir.label), idlabel, sep = ""),
+      label = basename(dir.label), choices = columns,
+      selected = columns[1]
+    )
   }
   ret
 }
@@ -1650,7 +1256,10 @@ get.radio.list <- function(dir.label, idlabel) {
 change.file.ext <- function(name, new.ext) {
   splity <- strsplit(name, ".", fixed = T)[[1]]
   if (length(splity) > 1) {
-    splity <- paste(paste(splity[1:(length(splity) - 1)], collapse = "."), new.ext, sep = ".")
+    splity <- paste(paste(splity[1:(length(splity) - 1)], collapse = "."),
+      new.ext,
+      sep = "."
+    )
   } else {
     splity <- paste0(splity, ".", new.ext)
   }
@@ -1679,7 +1288,8 @@ get.vars <- function(vars.path) {
           if (is.null(ret)) {
             ret <- list()
           }
-          ret[[trim(strsplit(line, "=")[[1]][1])]] <- trim(strsplit(line, "=")[[1]][2])
+          ret[[trim(strsplit(line, "=")[[1]][1])]] <-
+            trim(strsplit(line, "=")[[1]][2])
         }
       }
     }
@@ -1704,14 +1314,29 @@ file.writable <- function(file, debug) {
     if (file.exists(file) &&
       "unix" %in% .Platform$OS.type &&
       "Linux" %in% Sys.info()["sysname"]) {
-      grepl("777", strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""), intern = T), " ")[[1]][1]) ||
-        grepl("775", strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""), intern = T), " ")[[1]][1]) ||
-        grepl("755", strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""), intern = T), " ")[[1]][1])
+      grepl(
+        "777",
+        strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""),
+          intern = T
+        ), " ")[[1]][1]
+      ) ||
+        grepl(
+          "775",
+          strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""),
+            intern = T
+          ), " ")[[1]][1]
+        ) ||
+        grepl(
+          "755",
+          strsplit(system(paste("stat -c \"%a %n\" ", file, sep = ""),
+            intern = T
+          ), " ")[[1]][1]
+        )
     } else {
-      F
+      FALSE
     }
   }, error = function(e) {
-    return(F)
+    return(FALSE)
   }, finally = {})
 }
 
@@ -1744,11 +1369,11 @@ dir.create.logical <- function(path,
     if (!file.exists(path)) {
       dir.create(path, showWarnings, recursive, mode)
     }
-    T
+    TRUE
   }, warning = function(w) {
-    return(F)
+    return(FALSE)
   }, error = function(e) {
-    return(F)
+    return(FALSE)
   }, finally = {})
 }
 
@@ -1758,10 +1383,14 @@ get.quantiles <- function(subx) {
   g1 <- rep("", length(subx))
   if (is.numeric(subx)) {
     quant <- quantile(subx, na.rm = T)
-    g1[which(subx >= quant[1] & subx < quant[2])] <- paste(round(quant[1], 2), round(quant[2], 2), sep = "-")
-    g1[which(subx >= quant[2] & subx < quant[3])] <- paste(round(quant[2], 2), round(quant[3], 2), sep = "-")
-    g1[which(subx >= quant[3] & subx < xquant[4])] <- paste(round(quant[3], 2), round(quant[4], 2), sep = "-")
-    g1[which(subx >= quant[4] & subx <= quant[5])] <- paste(round(quant[4], 2), round(quant[5], 2), sep = "-")
+    g1[which(subx >= quant[1] & subx < quant[2])] <-
+      paste(round(quant[1], 2), round(quant[2], 2), sep = "-")
+    g1[which(subx >= quant[2] & subx < quant[3])] <-
+      paste(round(quant[2], 2), round(quant[3], 2), sep = "-")
+    g1[which(subx >= quant[3] & subx < xquant[4])] <-
+      paste(round(quant[3], 2), round(quant[4], 2), sep = "-")
+    g1[which(subx >= quant[4] & subx <= quant[5])] <-
+      paste(round(quant[4], 2), round(quant[5], 2), sep = "-")
     g1 <- as.factor(g1)
   }
   g1
@@ -1814,17 +1443,16 @@ get.data.from.URL <- function(URL, data.dir.import) {
   URL <- URLencode(URL)
 
   if (grepl("docs.google.com", URL)) {
-    # if(!grepl("output=csv", URL)) {
-    #  URL = paste(URL, "=0&single=true&output=csv", sep = "")
-    # }
-
     url.index <- gregexpr("output=", URL)
     url.index <- unlist(url.index)
     file.type <- substr(URL, url.index + 7, nchar(URL))
     temp.file.name <- tempfile()
     temp.file.name.index <- gregexpr("file", temp.file.name)
     temp.file.name.index <- unlist(temp.file.name.index)
-    file.name <- substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+    file.name <- substr(
+      temp.file.name,
+      temp.file.name.index, nchar(temp.file.name)
+    )
     name <- paste(file.name, file.type, sep = ".")
   } else {
     name <- strsplit(URL, "/")[[1]]
@@ -1836,17 +1464,23 @@ get.data.from.URL <- function(URL, data.dir.import) {
     dir.create(paste(data.dir.import, "/Imported", sep = ""), recursive = TRUE)
   }
 
-  #  print(URL)
-  #  print(name)
-
   tryCatch({
     if (Sys.info()["sysname"] %in% c("Windows", "Linux")) {
-      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "auto")
+      download.file(
+        url = URL,
+        destfile = paste0(data.dir.import, "/Imported/", name), method = "auto"
+      )
     } else {
-      download.file(url = URL, destfile = paste0(data.dir.import, "/Imported/", name), method = "auto")
+      download.file(
+        url = URL,
+        destfile = paste0(data.dir.import, "/Imported/", name), method = "auto"
+      )
     }
 
-    temp <- load.data(data.dir.import, fileID = name, path = paste0(data.dir.import, "/Imported/", name))
+    temp <- load.data(data.dir.import,
+      fileID = name,
+      path = paste0(data.dir.import, "/Imported/", name)
+    )
     if (!is.null(temp[[2]])) {
       ret$data.set <- temp[[2]]
       ret$data.name <- name
@@ -1876,7 +1510,10 @@ get.data.name.from.URL <- function(URL) {
     temp.file.name <- tempfile()
     temp.file.name.index <- gregexpr("file", temp.file.name)
     temp.file.name.index <- unlist(temp.file.name.index)
-    file.name <- substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+    file.name <- substr(
+      temp.file.name,
+      temp.file.name.index, nchar(temp.file.name)
+    )
     name <- paste(file.name, file.type, sep = ".")
   } else {
     name <- strsplit(URL, "/")[[1]]
@@ -1888,34 +1525,43 @@ get.data.name.from.URL <- function(URL) {
 # get data from google docs urls
 get.data.from.googledocs <- function(URL, data.dir.import) {
   ret <- list()
-  # URL = gsub(" ", "%20", URL)
   URL <- URLencode(URL)
-  # print(URL)
-  # name = strsplit(URL,"/")[[1]]
-  # name = strsplit(name[length(name)],"?",fixed=T)[[1]][1]
   url.index <- gregexpr("output=", URL)
   url.index <- unlist(url.index)
   file.type <- substr(URL, url.index + 7, nchar(URL))
   temp.file.name <- tempfile()
   temp.file.name.index <- gregexpr("file", temp.file.name)
   temp.file.name.index <- unlist(temp.file.name.index)
-  file.name <- substr(temp.file.name, temp.file.name.index, nchar(temp.file.name))
+  file.name <- substr(
+    temp.file.name,
+    temp.file.name.index, nchar(temp.file.name)
+  )
   name <- paste(file.name, file.type, sep = ".")
   if (!file.exists(paste(data.dir.import, "/Imported", sep = "")) &&
     file.writable(data.dir.import)) {
     dir.create(paste(data.dir.import, "/Imported", sep = ""), recursive = TRUE)
   }
   tryCatch({
-    if(Sys.info()["sysname"] %in% c("Windows", "Linux"))
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    else
-      download.file(url=URL,destfile=paste0(data.dir.import,"/Imported/",name),method="auto")
-    
-    temp = load.data(data.dir.import,fileID = name, path = paste0(data.dir.import,"/Imported/",name))
-    if(!is.null(temp[[2]])){
-      ret$data.set = temp[[2]]
-      ret$data.name = name
-    }else{
+    if (Sys.info()["sysname"] %in% c("Windows", "Linux")) {
+      download.file(
+        url = URL,
+        destfile = paste0(data.dir.import, "/Imported/", name), method = "auto"
+      )
+    } else {
+      download.file(
+        url = URL,
+        destfile = paste0(data.dir.import, "/Imported/", name), method = "auto"
+      )
+    }
+
+    temp <- load.data(data.dir.import,
+      fileID = name,
+      path = paste0(data.dir.import, "/Imported/", name)
+    )
+    if (!is.null(temp[[2]])) {
+      ret$data.set <- temp[[2]]
+      ret$data.name <- name
+    } else {
       return(NULL)
     }
     ret
@@ -2092,8 +1738,13 @@ anova.fit <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
   fit.str <- NULL
   if (!is.null(blocking)) {
     fit.str <- sprintf("%s ~ %s", y, paste(x, collapse = " * "))
-    fit <- nlme::lme(as.formula(fit.str), random = as.formula(sprintf("~1|%s", blocking)), data = data)
-    attr(fit, "code") <- sprintf("%s = nlme::lme(%s ~ %s, random = ~1|%s, data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name)
+    fit <- nlme::lme(as.formula(fit.str),
+      random = as.formula(sprintf("~1|%s", blocking)), data = data
+    )
+    attr(fit, "code") <- sprintf(
+      "%s = nlme::lme(%s ~ %s, random = ~1|%s, data = %s)",
+      name, y, paste(x, collapse = " * "), blocking, data.name
+    )
   } else {
     fit.str <- sprintf("%s ~ %s", y, paste(x, collapse = " * "))
     fit <- lm(as.formula(fit.str), data = data)
@@ -2121,8 +1772,13 @@ fit.own <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
   fit.str <- NULL
   if (!is.null(blocking)) {
     fit.str <- sprintf("%s ~ %s", y, x)
-    fit <- nlme::lme(as.formula(fit.str), random = as.formula(blocking), data = data)
-    attr(fit, "code") <- sprintf("%s = nlme::lme(%s ~ %s, random = %s, data = %s)", name, y, x, blocking, data.name)
+    fit <- nlme::lme(as.formula(fit.str),
+      random = as.formula(blocking), data = data
+    )
+    attr(fit, "code") <- sprintf(
+      "%s = nlme::lme(%s ~ %s, random = %s, data = %s)",
+      name, y, x, blocking, data.name
+    )
   } else {
     fit.str <- sprintf("%s ~ %s", y, x)
     fit <- lm(as.formula(fit.str), data = data)
@@ -2147,13 +1803,20 @@ fit.own <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
 
 aov.fit <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
   if (!is.null(blocking)) {
-    fit <- aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, paste(x, collapse = " * "), blocking)), data = data)
+    fit <- aov(as.formula(
+      sprintf("%s ~ %s + Error(%s)", y, paste(x, collapse = " * "), blocking)
+    ), data = data)
     attr(fit, "code") <- c(
-      sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, paste(x, collapse = " * "), blocking, data.name),
+      sprintf(
+        "aov_%s = aov(%s ~ %s + Error(%s), data = %s)",
+        name, y, paste(x, collapse = " * "), blocking, data.name
+      ),
       sprintf("summary(%s)", paste0("aov_", name))
     )
   } else {
-    fit <- aov(as.formula(sprintf("%s ~ %s", y, paste(x, collapse = " * "))), data = data)
+    fit <- aov(as.formula(sprintf("%s ~ %s", y, paste(x, collapse = " * "))),
+      data = data
+    )
     attr(fit, "code") <- c(sprintf(
       "aov_%s = aov(%s ~ %s, data = %s)", name, y,
       paste(x, collapse = " * "), data.name
@@ -2178,9 +1841,15 @@ aov.own <- function(y, x, data = NULL, blocking = NULL, name, data.name) {
   fit.str <- sprintf("%s ~ %s", y, x)
 
   if (!is.null(blocking) && blocking != "") {
-    fit <- aov(as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)), data = data)
+    fit <- aov(
+      as.formula(sprintf("%s ~ %s + Error(%s)", y, x, blocking)),
+      data = data
+    )
     attr(fit, "code") <- c(
-      sprintf("aov_%s = aov(%s ~ %s + Error(%s), data = %s)", name, y, x, blocking, data.name),
+      sprintf(
+        "aov_%s = aov(%s ~ %s + Error(%s), data = %s)",
+        name, y, x, blocking, data.name
+      ),
       sprintf("summary(%s)", paste0("aov_", name))
     )
   } else {

@@ -1,6 +1,6 @@
-###-----------------------------------------------###
+### -----------------------------------------------###
 ###  Server Functions for the "Visualize" Module  ###
-###-----------------------------------------------###
+### -----------------------------------------------###
 ###
 ###  Date Created   :   February 1, 2015
 ###  Last Modified  :   May 31, 2020.
@@ -11,9 +11,7 @@
 
 ###  And on the first day of February, God said "Let there be data":
 vis.data <- reactive({
-  #   values$data.set
-  plot.par$data = get.data.set()
-  #   vis.data <-
+  plot.par$data <- get.data.set()
   get.data.set()
 })
 
@@ -58,7 +56,7 @@ plot_list <- function(plot_type, x, y) {
     "gg_quasirandom"
   )) {
     return_list <- list(
-      dot  = "dot plot",
+      dot = "dot plot",
       hist = "histogram",
       gg_dotstrip = "(gg) dot strip",
       gg_barcode3 = "(gg) barcode",
@@ -70,19 +68,34 @@ plot_list <- function(plot_type, x, y) {
     )
 
     if (is.null(y)) {
-      return_list <- append(return_list, list(gg_column2 = "(gg) column/row bar"), length(return_list) - 1)
-      return_list <- append(return_list, list(gg_lollipop = "(gg) lollipop"), length(return_list) - 1)
+      return_list <- append(
+        return_list,
+        list(gg_column2 = "(gg) column/row bar"), length(return_list) - 1
+      )
+      return_list <- append(
+        return_list,
+        list(gg_lollipop = "(gg) lollipop"), length(return_list) - 1
+      )
     }
 
     if (!is.null(y)) {
-      return_list <- append(return_list, list(gg_ridgeline = "(gg) density (ridgeline)"), after = length(return_list) - 1)
+      return_list <- append(return_list,
+        list(gg_ridgeline = "(gg) density (ridgeline)"),
+        after = length(return_list) - 1
+      )
     }
 
-    if ((!is.numeric(y) && nlevels(y) == 2) || (!is.numeric(x) && nlevels(x) == 2)) {
-      return_list <- append(return_list, list(gg_poppyramid = "(gg) pyramid"), after = 2)
+    if ((!is.numeric(y) && nlevels(y) == 2) ||
+      (!is.numeric(x) && nlevels(x) == 2)) {
+      return_list <- append(return_list,
+        list(gg_poppyramid = "(gg) pyramid"),
+        after = 2
+      )
     }
 
-    attr(return_list, "cat.levels") <- ifelse(is.numeric(x), nlevels(y), nlevels(x))
+    attr(return_list, "cat.levels") <- ifelse(is.numeric(x),
+      nlevels(y), nlevels(x)
+    )
   } else if (plot_type %in% c(
     "gg_mosaic",
     "gg_lollipop2",
@@ -107,22 +120,34 @@ plot_list <- function(plot_type, x, y) {
     )
 
     if (is.null(y)) {
-      return_list <- append(return_list, list(gg_gridplot = "(gg) gridplot", gg_pie = "(gg) pie", gg_donut = "(gg) donut"))
+      return_list <- append(
+        return_list,
+        list(gg_gridplot = "(gg) gridplot", gg_pie = "(gg) pie", gg_donut = "(gg) donut")
+      )
     } else {
-      return_list <- append(return_list, list(gg_freqpolygon = "(gg) frequency polygons", gg_heatmap = "(gg) heatmap"))
+      return_list <- append(
+        return_list,
+        list(gg_freqpolygon = "(gg) frequency polygons", gg_heatmap = "(gg) heatmap")
+      )
       if (is.factor(y) && nlevels(y) == 2) {
-        return_list <- append(return_list, list(gg_spine = "(gg) spine/pyramid"), length(return_list) - 1)
+        return_list <- append(
+          return_list,
+          list(gg_spine = "(gg) spine/pyramid"), length(return_list) - 1
+        )
       }
 
       if (is.factor(x) && nlevels(x) >= 3) {
-        return_list <- append(return_list, list(gg_divergingstackedbar = "(gg) diverging stacked bar (likert)"), length(return_list) - 1)
+        return_list <- append(
+          return_list,
+          list(gg_divergingstackedbar = "(gg) diverging stacked bar (likert)"),
+          length(return_list) - 1
+        )
         attr(return_list, "cat.levels") <- nlevels(x)
       }
     }
   }
 
   attr(return_list, "null.y") <- is.null(y)
-
   return_list
 }
 
@@ -132,7 +157,8 @@ valid_colour <- function(colour) {
 
 n_fun <- function(n) {
   if (n > 1000) {
-    if (n > 5 * 10^ceiling(log10(n) - 1) && n > 5 * 10^ceiling(log10(n + 1) - 1)) {
+    if (n > 5 * 10^ceiling(log10(n) - 1) &&
+      n > 5 * 10^ceiling(log10(n + 1) - 1)) {
       10^(floor(log10(n)) - 1)
     } else {
       10^(floor(log10(n)) - 2)
@@ -145,18 +171,20 @@ n_fun <- function(n) {
 ###  Then on the second day, he siad let there be parameters for
 ###  iNZightPlot():
 
-plot.par.stored = reactiveValues(
-  locate.id=NULL
+plot.par.stored <- reactiveValues(
+  locate.id = NULL
 )
 
 plot.par <- reactiveValues(
   data_name = "data_name",
   x = NULL,
   y = NULL,
-  varnames = list(x = NULL, y = NULL,
-                  xlab = NULL, ylab = NULL,
-                  g1 = NULL, g2 = NULL,
-                  colby=NULL,sizeby=NULL, symbolby = NULL),
+  varnames = list(
+    x = NULL, y = NULL,
+    xlab = NULL, ylab = NULL,
+    g1 = NULL, g2 = NULL,
+    colby = NULL, sizeby = NULL, symbolby = NULL
+  ),
   g1 = NULL,
   g2 = NULL,
   g1.level = 0,
@@ -164,60 +192,60 @@ plot.par <- reactiveValues(
   main = NULL,
   xlab = NULL,
   ylab = NULL,
-  xlim =  NULL,
+  xlim = NULL,
   ylim = NULL,
   inzpars = inzpar(),
-  colby=NULL,
-  sizeby=NULL,
+  colby = NULL,
+  sizeby = NULL,
   symbolby = NULL,
-  data=NULL,
-  locate=NULL,
-  locate.id=NULL,
-  locate.col=NULL,
-  locate.extreme=NULL,
-  zoombar=NULL,
-  design=NULL
+  data = NULL,
+  locate = NULL,
+  locate.id = NULL,
+  locate.col = NULL,
+  locate.extreme = NULL,
+  zoombar = NULL,
+  design = NULL
 )
 
-identified.points = reactiveValues(values=list())
+identified.points <- reactiveValues(values = list())
 
-get.identified.points = reactive({
+get.identified.points <- reactive({
   sort(unique(unlist(identified.points$values)))
 })
 
-plot.ret.para = reactiveValues(
+plot.ret.para <- reactiveValues(
   parameters = NULL,
-  default.num.bins=NULL
+  default.num.bins = NULL
 )
 
-plot.type.para = reactiveValues(
+plot.type.para <- reactiveValues(
   plotTypes = NULL,
-  plotTypeValues=NULL
+  plotTypeValues = NULL
 )
 
-get.plottype = reactive({
-  attr(plot.ret.para$parameters,"plottype")
+get.plottype <- reactive({
+  attr(plot.ret.para$parameters, "plottype")
 })
 
-get.nbins = reactive({
-  attr(plot.ret.para$parameters,"nbins")
+get.nbins <- reactive({
+  attr(plot.ret.para$parameters, "nbins")
 })
 
-get.default.num.bins = reactive({
+get.default.num.bins <- reactive({
   plot.ret.para$default.num.bins
 })
 
 
 ##  These are the list of parameters in inzPlotDefaults()
-graphical.par = reactiveValues(
-
-
+graphical.par <- reactiveValues(
   boxplot = TRUE,
   mean_indicator = FALSE,
   fill_colour = "",
   rotation = FALSE,
-  rotate_labels = list(y = FALSE,
-                       x = FALSE),
+  rotate_labels = list(
+    y = FALSE,
+    x = FALSE
+  ),
   gg_size = 5,
   gg_method = "quasirandom",
   gg_theme = "grey",
@@ -232,7 +260,7 @@ graphical.par = reactiveValues(
   gg_bins = 30,
   showsidebar = TRUE,
   alpha = 1,
-  bg = "grey93", #background colour
+  bg = "grey93", # background colour
   ##  Box
   box.col = "black",
   box.fill = "white", # fill colour for the boxplot
@@ -254,9 +282,11 @@ graphical.par = reactiveValues(
   ##  Colours
   LOE = FALSE,
   col.LOE = "black",
-  col.trend =  list(linear = "",
-                    quadratic = "",
-                    cubic =  ""),
+  col.trend = list(
+    linear = "",
+    quadratic = "",
+    cubic = ""
+  ),
   col.smooth = "",
   col.fun = NULL,
   col.method = "linear",
@@ -274,9 +304,11 @@ graphical.par = reactiveValues(
   lines.by = FALSE,
   trend.by = FALSE,
   trend.parallel = TRUE,
-  lty.trend = list(linear = 1,
-                   quadratic = 1,
-                   cubic = 1),
+  lty.trend = list(
+    linear = 1,
+    quadratic = 1,
+    cubic = 1
+  ),
   smooth = 0,
   szsym = 1,
   tpsym = 1,
@@ -285,82 +317,143 @@ graphical.par = reactiveValues(
   scatter.grid.bins = 50,
   hex.bins = 20,
   hex.style = "size",
-  bs.inference=F,
+  bs.inference = F,
   reverse.palette = FALSE,
   colourPalettes =
-    list(cat = c(
-      #      if (.rcb)
-      list("contrast (max 8)" =
-             function(n)
-               if (n > 8) inzpar()$col.default$cat(n)
-           else RColorBrewer::brewer.pal(n, "Set2")[1:n],
-           "bright (max 9)" =
-             function(n)
-               if (n > 9) inzpar()$col.default$cat(n)
-           else RColorBrewer::brewer.pal(n, "Set1")[1:n],
-           "light (max 12)" =
-             function(n)
-               if (n > 12) inzpar()$col.default$cat(n)
-           else RColorBrewer::brewer.pal(n, "Set3")[1:n]),
-      #      if (.viridis)
-      list(viridis = viridis::viridis,
-           magma = viridis::magma,
-           plasma = viridis::plasma,
-           inferno = viridis::inferno),
-      list("Colourblind Friendly" = inzpar()$col.default$cat,
-           'rainbow (hcl)' = function(n) hcl((1:n) / n * 360, c = 80, l = 50))
-    ),
-    cont = c(
-      #      if (.viridis)
-      list(viridis = viridis::viridis,
-           magma = viridis::magma,
-           plasma = viridis::plasma,
-           inferno = viridis::inferno),
-      list(
-        'rainbow (hcl)' = function(n) hcl((1:n) / n * 320 + 60, c = 100, l = 50),
-        blue =
-          function(n) sequential_hcl(n, h = 260, c. = c(80, 10), l = c(30, 95), power = 0.7),
-        green =
-          function(n) sequential_hcl(n, h = 135, c. = c(50, 10), l = c(40, 95), power = 0.4),
-        red =
-          function(n) sequential_hcl(n, h = 10, c. = c(80, 10), l = c(30, 95), power = 0.7),
-        "green-yellow" =
-          function(n) terrain_hcl(n, h = c(130, 30), c. = c(65, 0), l = c(45, 90),
-                                  power = c(0.5, 1.5)),
-        "red-blue" =
-          function(n) terrain_hcl(n, h = c(0, -100), c. = c(80, 40), l = c(40, 75),
-                                  power = c(1, 1)),
-        terrain = terrain_hcl,
-        heat = heat_hcl,
-        "blue/white/pink" =
-          function(n) diverge_hcl(n, h = c(180, 330), c = 59, l = c(75, 95), power = 1.5),
-        "blue/white/red" =
-          function(n) diverge_hcl(n, h = c(260, 0), c = 100, l = c(50, 90), power = 1))
-    ),
-    emphasize = function(n, k, cat = TRUE, ncat = 5,
-                         fn = if (cat) inzpar()$col.default$cat else inzpar()$col.default$cont) {
-      cols <- fn(n)
-      if (!cat) {
-        ks <- floor(seq(1, n, length = ncat + 1))
-        k <- ks[k]:ks[k+1]
+    list(
+      cat = c(
+        #      if (.rcb)
+        list(
+          "contrast (max 8)" =
+            function(n) {
+              if (n > 8) {
+                inzpar()$col.default$cat(n)
+              } else {
+                RColorBrewer::brewer.pal(n, "Set2")[1:n]
+              }
+            },
+          "bright (max 9)" =
+            function(n) {
+              if (n > 9) {
+                inzpar()$col.default$cat(n)
+              } else {
+                RColorBrewer::brewer.pal(n, "Set1")[1:n]
+              }
+            },
+          "light (max 12)" =
+            function(n) {
+              if (n > 12) {
+                inzpar()$col.default$cat(n)
+              } else {
+                RColorBrewer::brewer.pal(n, "Set3")[1:n]
+              }
+            }
+        ),
+        #      if (.viridis)
+        list(
+          viridis = viridis::viridis,
+          magma = viridis::magma,
+          plasma = viridis::plasma,
+          inferno = viridis::inferno
+        ),
+        list(
+          "Colourblind Friendly" = inzpar()$col.default$cat,
+          "rainbow (hcl)" = function(n) hcl((1:n) / n * 360, c = 80, l = 50)
+        )
+      ),
+      cont = c(
+        #      if (.viridis)
+        list(
+          viridis = viridis::viridis,
+          magma = viridis::magma,
+          plasma = viridis::plasma,
+          inferno = viridis::inferno
+        ),
+        list(
+          "rainbow (hcl)" = function(n) {
+            hcl((1:n) / n * 320 + 60, c = 100, l = 50)
+          },
+          blue =
+            function(n) {
+              sequential_hcl(n,
+                h = 260, c. = c(80, 10), l = c(30, 95),
+                power = 0.7
+              )
+            },
+          green =
+            function(n) {
+              sequential_hcl(n,
+                h = 135, c. = c(50, 10), l = c(40, 95),
+                power = 0.4
+              )
+            },
+          red =
+            function(n) {
+              sequential_hcl(n,
+                h = 10, c. = c(80, 10), l = c(30, 95),
+                power = 0.7
+              )
+            },
+          "green-yellow" =
+            function(n) {
+              terrain_hcl(n,
+                h = c(130, 30), c. = c(65, 0), l = c(45, 90),
+                power = c(0.5, 1.5)
+              )
+            },
+          "red-blue" =
+            function(n) {
+              terrain_hcl(n,
+                h = c(0, -100), c. = c(80, 40), l = c(40, 75),
+                power = c(1, 1)
+              )
+            },
+          terrain = terrain_hcl,
+          heat = heat_hcl,
+          "blue/white/pink" =
+            function(n) {
+              diverge_hcl(n,
+                h = c(180, 330), c = 59, l = c(75, 95),
+                power = 1.5
+              )
+            },
+          "blue/white/red" =
+            function(n) {
+              diverge_hcl(n,
+                h = c(260, 0), c = 100, l = c(50, 90),
+                power = 1
+              )
+            }
+        )
+      ),
+      emphasize = function(n, k, cat = TRUE, ncat = 5,
+                           fn = if (cat) {
+                             inzpar()$col.default$cat
+                           } else {
+                             inzpar()$col.default$cont
+                           }) {
+        cols <- fn(n)
+        if (!cat) {
+          ks <- floor(seq(1, n, length = ncat + 1))
+          k <- ks[k]:ks[k + 1]
+        }
+        cols[-k] <- iNZightPlots:::shade(cols[-k], 0.7)
+        cols
       }
-      #cols[k] <- iNZightPlots:::shade(cols[k], -0.4)
-      cols[-k] <- iNZightPlots:::shade(cols[-k], 0.7)
-      cols
-    })
+    )
 )
 
 ##  Data handling
-determine.class = function(input) {
+determine.class <- function(input) {
   if (is.null(input)) {
     return(NULL)
   }
   if (class(input) == "integer") {
-    input.class = "numeric"
+    input.class <- "numeric"
   } else if (class(input) == "character") {
-    input.class = "factor"
+    input.class <- "factor"
   } else {
-    input.class = class(input)
+    input.class <- class(input)
   }
   input.class
 }
@@ -384,49 +477,55 @@ determine.class = function(input) {
 #' by input is returned.
 #'
 #' @author Chris Park
-handle.input = function(input, subs = FALSE) {
+handle.input <- function(input, subs = FALSE) {
   if (is.null(input)) {
     return()
   }
-  input.out = NULL
-  factor.levels = NULL
+  input.out <- NULL
+  factor.levels <- NULL
   if (input != "none" && input %in% names(vis.data())) {
     if (subs) {
-      if(class(vis.data()[, input])%in%"factor"||
-         class(vis.data()[, input])%in%"character"){
-        input.out = as.factor(vis.data()[, input])
-        factor.levels = nlevels(input.out)
-      }else{
-        tryCatch({
-          input.out = convert.to.factor(vis.data()[, input])
-          factor.levels = nlevels(input.out)
-        },error=function(e){
-          print(e)
-        })
+      if (class(vis.data()[, input]) %in% "factor" ||
+        class(vis.data()[, input]) %in% "character") {
+        input.out <- as.factor(vis.data()[, input])
+        factor.levels <- nlevels(input.out)
+      } else {
+        tryCatch(
+          {
+            input.out <- convert.to.factor(vis.data()[, input])
+            factor.levels <- nlevels(input.out)
+          },
+          error = function(e) {
+            print(e)
+          }
+        )
       }
     } else {
-      input.out = vis.data()[, input]
-      factor.levels = NULL
+      input.out <- vis.data()[, input]
+      factor.levels <- NULL
     }
   } else {
-    input.out = NULL
-    factor.levels = NULL
+    input.out <- NULL
+    factor.levels <- NULL
   }
   list(input.out = input.out, factor.levels = factor.levels)
 }
 
-output$data_info = renderText({
-  info_text = NULL
-  if(!is.null(values$data.name)) {
-    if(isTRUE(values$data.type %in% c("rda", "rdta"))) {
+output$data_info <- renderText({
+  info_text <- NULL
+  if (!is.null(values$data.name)) {
+    if (isTRUE(values$data.type %in% c("rda", "rdta"))) {
       # if is rda or rdta, use data.current.dname
-      info_text = paste("Dataset: ", values$data.current.dname)
-    } else if(isTRUE(values$data.type %in% c("xls", "xlsx"))) {
+      info_text <- paste("Dataset: ", values$data.current.dname)
+    } else if (isTRUE(values$data.type %in% c("xls", "xlsx"))) {
       # if xls or xlsx, use data.name + data.current.dname
-      info_text = paste("Dataset: ", values$data.name, "| Sheet: ", values$data.current.dname)
+      info_text <- paste(
+        "Dataset: ",
+        values$data.name, "| Sheet: ", values$data.current.dname
+      )
     } else {
       # else just use the filename
-      info_text = paste("Dataset: ", values$data.name)
+      info_text <- paste("Dataset: ", values$data.name)
     }
   }
   info_text
@@ -439,20 +538,20 @@ output$visualize.panel <- renderUI({
   })
 })
 
-x.class = reactive({
+x.class <- reactive({
   determine.class(vis.data()[[plot.par$x]])
 })
 
-y.class = reactive({
-  if(!is.null(plot.par$y)){
+y.class <- reactive({
+  if (!is.null(plot.par$y)) {
     determine.class(vis.data()[[plot.par$y]])
   } else {
     NULL
   }
 })
 
-determine.g = reactive({
-  xy.class = c(x.class(), y.class())
+determine.g <- reactive({
+  xy.class <- c(x.class(), y.class())
   ##  0: x, y == NULL
   if (is.null(x.class()) && is.null(y.class())) {
     return(0)
@@ -482,34 +581,39 @@ determine.g = reactive({
     return(6)
   }
   ##  7: Special structure (e.g. "ts" object)
-  id = !(xy.class %in% c("numeric", "factor"))
+  id <- !(xy.class %in% c("numeric", "factor"))
   if (id) {
     return(c("x of incorrect class", "y of incorrect class")[id])
   }
 })
 
-##  Then on the third, he declared the need for parameters for the "visualize" module:
-vis.par = reactive({
-  vis.par = reactiveValuesToList(plot.par)
+## Then on the third, he declared the need for parameters for
+## the "visualize" module:
+vis.par <- reactive({
+  vis.par <- reactiveValuesToList(plot.par)
 
   if (!is.null(vis.par$x) && plot.par$varnames$x != "") {
-    if(any(na.omit(vis.par$x) == "")){
-      vis.par$x[which(vis.par$x == "")] = NA
+    if (any(na.omit(vis.par$x) == "")) {
+      vis.par$x[which(vis.par$x == "")] <- NA
     }
     if (determine.g() == 6) {
-      temp = list(x = NULL, y = NULL,
-                  varnames = list(x = "", y = ""))
-      temp$x = vis.par$x
-      temp$y = vis.par$y
-      temp$varnames$x = vis.par$varnames$x
-      temp$varnames$y = vis.par$varnames$y
+      temp <- list(
+        x = NULL, y = NULL,
+        varnames = list(x = "", y = "")
+      )
+      temp$x <- vis.par$x
+      temp$y <- vis.par$y
+      temp$varnames$x <- vis.par$varnames$x
+      temp$varnames$y <- vis.par$varnames$y
 
-      vis.par = modifyList(vis.par, temp, keep.null = TRUE)
+      vis.par <- modifyList(vis.par, temp, keep.null = TRUE)
     }
     # set ci_width in par for plots
-    vis.par$ci.width = ci_width() / 100
+    vis.par$ci.width <- ci_width() / 100
 
-    vis.par = modifyList(reactiveValuesToList(graphical.par), vis.par, keep.null = TRUE)
+    vis.par <- modifyList(reactiveValuesToList(graphical.par), vis.par,
+      keep.null = TRUE
+    )
   } else {
     NULL
   }
@@ -520,53 +624,32 @@ vis.par = reactive({
 ##  Variable 1
 ##
 ##  Select variable 1.
-output$vari1_panel = renderUI({
+output$vari1_panel <- renderUI({
   get.data.set()
   #  input$change_var_selection
   isolate({
-    sel = input$vari1
+    sel <- input$vari1
 
-    get.vars = parseQueryString(session$clientData$url_search)
-    if(!is.null(get.vars$url)) {
-      temp = session$clientData$url_search
-      ## get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
-      get.vars$url = sub(".*?url=(.*?)&land.*", "\\1", temp)
+    get.vars <- parseQueryString(session$clientData$url_search)
+    if (!is.null(get.vars$url)) {
+      temp <- session$clientData$url_search
+      get.vars$url <- sub(".*?url=(.*?)&land.*", "\\1", temp)
     }
 
-    if(length(get.vars)>0&&
-       (any(names(get.vars)%in%"url")||
-        any(names(get.vars)%in%"example"))&&
-       (any(names(get.vars)%in%"x")&&
-        !get.vars$x%in%"")){
-      sel=get.vars$x
+    if (length(get.vars) > 0 &&
+      (any(names(get.vars) %in% "url") ||
+        any(names(get.vars) %in% "example")) &&
+      (any(names(get.vars) %in% "x") &&
+        !get.vars$x %in% "")) {
+      sel <- get.vars$x
     }
-    #    if(!is.null(input$change_var_selection)){
-    #      if(!input$change_var_selection){
-    #        if(is.null(input$vari1) || input$vari1 == "none") {
-    #          selectInput(inputId = "vari1",
-    #                      label = NULL,
-    #                      choices = c("none", colnames(vis.data())),
-    #                      selected = sel,
-    #                      # selectize = T,
-    #                      selectize=F)
-    #        }
-    #        else {
-    #          selectInput(inputId = "vari1",
-    #                      label = NULL,
-    #                      choices = c(colnames(vis.data())),
-    #                      selected = sel,
-    #                      # selectize = T,
-    #                      selectize=F)
-    #        }
-
-    #      }else{
-    selectInput(inputId = "vari1",
-                label = NULL,
-                choices = c(colnames(vis.data())),
-                selected = sel,
-                selectize = F)
-    #      }
-    #    }
+    selectInput(
+      inputId = "vari1",
+      label = NULL,
+      choices = c(colnames(vis.data())),
+      selected = sel,
+      selectize = F
+    )
   })
 })
 
@@ -575,10 +658,10 @@ observe({
   input$vari1
   isolate({
     ## fix the axis limit bug
-    plot.par$xlim = NULL
-    plot.par$ylim = NULL
-    plot.par$zoombar = NULL
-    graphical.par$plottype = "default"
+    plot.par$xlim <- NULL
+    plot.par$ylim <- NULL
+    plot.par$zoombar <- NULL
+    graphical.par$plottype <- "default"
   })
 })
 
@@ -586,57 +669,56 @@ observe({
   input$vari2
   isolate({
     ## fix the axis limit bug
-    plot.par$xlim = NULL
-    plot.par$ylim = NULL
-    plot.par$zoombar = NULL
-    graphical.par$plottype = "default"
+    plot.par$xlim <- NULL
+    plot.par$ylim <- NULL
+    plot.par$zoombar <- NULL
+    graphical.par$plottype <- "default"
   })
 })
 
 ##  Update plot.par$x.
 observe({
-  if(!is.null(input$vari1)){
+  if (!is.null(input$vari1)) {
     isolate({
-      #vari1.par = handle.input(input$vari1)$input.out
-      plot.par$x = as.name(input$vari1)
-      plot.par$varnames$x = input$vari1
-      if(!is.null(vis.data())){
-        ch  = colnames(vis.data())
-        if(!is.null(input$vari1)&&input$vari1%in%ch){
-          ch  = ch[-which(colnames(vis.data())%in%input$vari1)]
+      plot.par$x <- as.name(input$vari1)
+      plot.par$varnames$x <- input$vari1
+      if (!is.null(vis.data())) {
+        ch <- colnames(vis.data())
+        if (!is.null(input$vari1) && input$vari1 %in% ch) {
+          ch <- ch[-which(colnames(vis.data()) %in% input$vari1)]
         }
-        ch = c("none",ch)
-        sel = input$vari2
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
+        ch <- c("none", ch)
+        sel <- input$vari2
+        if (!is.null(sel) && !sel %in% ch) {
+          sel <- ch[1]
         }
-        updateSelectInput(session,"vari2",choices=ch,selected=sel)
-        ch  = colnames(vis.data())
-        if(!is.null(input$vari1)&&input$vari1%in%ch){
-          ch  = ch[-which(ch%in%input$vari1)]
+        updateSelectInput(session, "vari2", choices = ch, selected = sel)
+        ch <- colnames(vis.data())
+        if (!is.null(input$vari1) && input$vari1 %in% ch) {
+          ch <- ch[-which(ch %in% input$vari1)]
         }
-        if(!is.null(input$vari2)&&input$vari2%in%ch){
-          ch  = ch[-which(ch%in%input$vari2)]
+        if (!is.null(input$vari2) && input$vari2 %in% ch) {
+          ch <- ch[-which(ch %in% input$vari2)]
         }
-        ch = c("none",ch)
-        sel = input$subs1
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
+        ch <- c("none", ch)
+        sel <- input$subs1
+        if (!is.null(sel) && !sel %in% ch) {
+          sel <- ch[1]
         }
-        updateSelectInput(session,"subs1",choices=ch,selected=sel)
-        ch  = colnames(vis.data())
-        if(!is.null(input$vari1)){
-          ch  = ch[-which(ch%in%input$vari1)]
+        updateSelectInput(session, "subs1", choices = ch, selected = sel)
+        ch <- colnames(vis.data())
+        if (!is.null(input$vari1)) {
+          ch <- ch[-which(ch %in% input$vari1)]
         }
-        if(!is.null(input$vari2)&&input$vari2%in%ch){
-          ch  = ch[-which(ch%in%input$vari2)]
+        if (!is.null(input$vari2) && input$vari2 %in% ch) {
+          ch <- ch[-which(ch %in% input$vari2)]
         }
-        ch  = c("none",ch)
-        sel = input$subs2
-        if(!is.null(sel)&&!sel%in%ch){
-          sel = ch[1]
+        ch <- c("none", ch)
+        sel <- input$subs2
+        if (!is.null(sel) && !sel %in% ch) {
+          sel <- ch[1]
         }
-        updateSelectInput(session,"subs2",choices=ch,selected=sel)
+        updateSelectInput(session, "subs2", choices = ch, selected = sel)
       }
     })
   }
@@ -644,25 +726,27 @@ observe({
 
 
 #  Subset variable 1.
-output$subs1_panel = renderUI({
+output$subs1_panel <- renderUI({
   get.data.set()
   isolate({
-    ch  = colnames(vis.data())
-    if(!is.null(input$vari1)&&input$vari1%in%ch){
-      ch  = ch[-which(ch%in%input$vari1)]
+    ch <- colnames(vis.data())
+    if (!is.null(input$vari1) && input$vari1 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari1)]
     }
-    if(!is.null(input$vari2)&&input$vari2%in%ch){
-      ch  = ch[-which(ch%in%input$vari2)]
+    if (!is.null(input$vari2) && input$vari2 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari2)]
     }
-    if(!is.null(input$subs2)&&input$subs2%in%ch){
-      ch  = ch[-which(ch%in%input$subs2)]
+    if (!is.null(input$subs2) && input$subs2 %in% ch) {
+      ch <- ch[-which(ch %in% input$subs2)]
     }
-    sel = input$subs1
-    selectInput(inputId = "subs1",
-                label = NULL,
-                choices = c("none", ch),
-                selected = sel,
-                selectize=F)
+    sel <- input$subs1
+    selectInput(
+      inputId = "subs1",
+      label = NULL,
+      choices = c("none", ch),
+      selected = sel,
+      selectize = F
+    )
   })
 })
 
@@ -670,27 +754,29 @@ output$subs1_panel = renderUI({
 observe({
   input$subs1
   isolate({
-    if(!is.null(input$subs1)){
-      #subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
-      plot.par$g1 = as.name(input$subs1)
-      varnames.g1 = input$subs1
-      if(!is.null(varnames.g1)&&
-         varnames.g1%in%"none"){
-        varnames.g1 = NULL
-        plot.par$g1 = NULL
+    if (!is.null(input$subs1)) {
+      plot.par$g1 <- as.name(input$subs1)
+      varnames.g1 <- input$subs1
+      if (!is.null(varnames.g1) &&
+        varnames.g1 %in% "none") {
+        varnames.g1 <- NULL
+        plot.par$g1 <- NULL
       }
-      plot.par$varnames$g1 = varnames.g1
-      #choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-      choices1 = c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
-      if(is.null(choices1)){
-        choices1 = 1
+      plot.par$varnames$g1 <- varnames.g1
+      choices1 <- c(
+        "_MULTI",
+        levels(handle.input(input$subs1, subs = TRUE)$input.out)
+      )
+      if (is.null(choices1)) {
+        choices1 <- 1
       }
-      if(!is.null(input$subs1)&&
-         !input$subs1%in%""&&
-         !input$subs1%in%"none"){
-        updateSliderTextInput(session,"sub1_level",
-                              label = paste0("Subset '", input$subs1, "':"),
-                              choices = choices1, selected = choices1[1])
+      if (!is.null(input$subs1) &&
+        !input$subs1 %in% "" &&
+        !input$subs1 %in% "none") {
+        updateSliderTextInput(session, "sub1_level",
+          label = paste0("Subset '", input$subs1, "':"),
+          choices = choices1, selected = choices1[1]
+        )
       }
     }
   })
@@ -700,90 +786,98 @@ observe({
 observe({
   input$subs1
   isolate({
-    if(!is.null(input$subs1)){
-      #subs1.par = handle.input(input$subs1, subs = TRUE)$input.out
-      plot.par$g1 = as.name(input$subs1)
-      varnames.g1 = input$subs1
-      if(!is.null(varnames.g1)&&
-         varnames.g1%in%"none"){
-        varnames.g1 = NULL
-        plot.par$g1 = NULL
+    if (!is.null(input$subs1)) {
+      plot.par$g1 <- as.name(input$subs1)
+      varnames.g1 <- input$subs1
+      if (!is.null(varnames.g1) &&
+        varnames.g1 %in% "none") {
+        varnames.g1 <- NULL
+        plot.par$g1 <- NULL
       }
-      plot.par$varnames$g1 = varnames.g1
-      choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-      if(is.null(choices1)){
-        choices1 = 1
+      plot.par$varnames$g1 <- varnames.g1
+      choices1 <- handle.input(input$subs1, subs = TRUE)$factor.levels
+      if (is.null(choices1)) {
+        choices1 <- 1
       }
-      updateSliderInput(session,"sub1_level_mini",
-                        label = paste0("Subset '", input$subs1, "':"),
-                        min = 0, max = choices1, value = 0,step=1)
+      updateSliderInput(session, "sub1_level_mini",
+        label = paste0("Subset '", input$subs1, "':"),
+        min = 0, max = choices1, value = 0, step = 1
+      )
     }
   })
 })
 
 #  Subset level (Slider) for variable 1.
-output$subs1_conditional = renderUI({
+output$subs1_conditional <- renderUI({
   get.data.set()
   input$speed1
   isolate({
-    #choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-    choices1 = c("_MULTI", levels(handle.input(input$subs1, subs = TRUE)$input.out))
-    if (is.null(choices1)){
-      choices1 = 1
+    choices1 <- c(
+      "_MULTI",
+      levels(handle.input(input$subs1, subs = TRUE)$input.out)
+    )
+    if (is.null(choices1)) {
+      choices1 <- 1
     }
-    v=0
-    if(!is.null(input$sub1_level_mini)){
-      v = input$sub1_level_mini
+    v <- 0
+    if (!is.null(input$sub1_level_mini)) {
+      v <- input$sub1_level_mini
     }
-    sliderTextInput(inputId = "sub1_level",
-                    label = paste0("Subset '", input$subs1, "':"),
-                    choices = choices1, selected = choices1[1],
-                    #animate = TRUE,
-                    animate = animationOptions(interval = ifelse(length(input$speed1) == 0, 600, 1000*input$speed1),
-                                               playButton = icon('play', "fa-2x"),
-                                               pauseButton = icon('pause', "fa-2x")))
+    sliderTextInput(
+      inputId = "sub1_level",
+      label = paste0("Subset '", input$subs1, "':"),
+      choices = choices1, selected = choices1[1],
+      animate = animationOptions(
+        interval = ifelse(length(input$speed1) == 0, 600, 1000 * input$speed1),
+        playButton = icon("play", "fa-2x"),
+        pauseButton = icon("pause", "fa-2x")
+      )
+    )
   })
 })
 
 
 output$speed_value1 <- renderUI({
-  fixedRow((column(5, checkboxInput("select_speed1",
-                                    label = "Time delay between plots (seconds):",
-                                    value = input$select_speed1))),
-           column(3, conditionalPanel("input.select_speed1",
-                                      numericInput("speed1",
-                                                   "",
-                                                   value = 0.6,
-                                                   min = 0.1,
-                                                   max = 3.0,
-                                                   step = 0.1))))
-  #  numericInput("speed1",
-  #               "Time delay between plots (seconds):",
-  #               value = 0.6, min = 0.1, max = 3.0, step = 0.1)
-  #  fixedRow(column(8, HTML("Time delay between plots (seconds):")),
-  #           column(4, numericInput("speed1", "", value = 0.6)))
+  fixedRow(
+    (column(5, checkboxInput("select_speed1",
+      label = "Time delay between plots (seconds):",
+      value = input$select_speed1
+    ))),
+    column(3, conditionalPanel(
+      "input.select_speed1",
+      numericInput("speed1",
+        "",
+        value = 0.6,
+        min = 0.1,
+        max = 3.0,
+        step = 0.1
+      )
+    ))
+  )
 })
 
 
 
 
 #  Subset level (Slider) for variable 1 (mini plot).
-output$subs1_conditional_mini = renderUI({
+output$subs1_conditional_mini <- renderUI({
   get.data.set()
   isolate({
-    choices1 = handle.input(input$subs1, subs = TRUE)$factor.levels
-    if (is.null(choices1)){
-      choices1 = 1
+    choices1 <- handle.input(input$subs1, subs = TRUE)$factor.levels
+    if (is.null(choices1)) {
+      choices1 <- 1
     }
-    v = 0
-    if(!is.null(input$sub1_level)){
-      v = input$sub1_level
+    v <- 0
+    if (!is.null(input$sub1_level)) {
+      v <- input$sub1_level
     }
-    sliderInput(inputId = "sub1_level_mini",
-                label = paste0("Subset '", input$subs1, "':"),
-                min = 0, max = choices1, value = v, step = 1,
-                animate = TRUE,
-                ticks=F)
+    sliderInput(
+      inputId = "sub1_level_mini",
+      label = paste0("Subset '", input$subs1, "':"),
+      min = 0, max = choices1, value = v, step = 1,
+      animate = TRUE,
+      ticks = F
+    )
   })
 })
 
@@ -791,92 +885,80 @@ output$subs1_conditional_mini = renderUI({
 #  Update plot$g1.level
 observe({
   input$subs1
-  g1_level = input$sub1_level
+  g1_level <- input$sub1_level
   isolate({
-    #if (is.null(g1_level) || g1_level == 0) {
-    #  g1_level = NULL
-    #}
-    tryCatch({
-      if ((is.null(g1_level) || g1_level == 0) && !is.null(input$subs1) && input$subs1 != "none") {
-        g1_level = "_MULTI"
+    tryCatch(
+      {
+        if ((is.null(g1_level) || g1_level == 0) && !is.null(input$subs1) && input$subs1 != "none") {
+          g1_level <- "_MULTI"
+        }
+        if ((is.null(g1_level) || g1_level == 0 || input$subs1 == "none")) {
+          g1_level <- NULL
+        }
+        plot.par$g1.level <- g1_level
+        if (is.null(g1_level)) {
+          g1_level <- 0
+        }
+        updateSliderInput(session, "sub1_level_mini",
+          value = g1_level
+        )
+      },
+      error = function(e) {
+        print(e)
       }
-      if ((is.null(g1_level) || g1_level == 0 || input$subs1 == "none")){
-        g1_level = NULL
-      }
-      plot.par$g1.level = g1_level
-      if(is.null(g1_level)){
-        g1_level = 0
-      }
-      updateSliderInput(session,"sub1_level_mini",
-                        value=g1_level)
-    }, error = function(e) {print(e)})
+    )
   })
 })
 
 observe({
-  g1_level = input$sub1_level_mini
+  g1_level <- input$sub1_level_mini
   isolate({
     if (is.null(g1_level) || g1_level == 0) {
-      g1_level = NULL
+      g1_level <- NULL
     }
-    plot.par$g1.level = g1_level
-    if(is.null(g1_level)){
-      g1_level = 0
+    plot.par$g1.level <- g1_level
+    if (is.null(g1_level)) {
+      g1_level <- 0
     }
-    updateSliderInput(session,"sub1_level",
-                      value=g1_level)
+    updateSliderInput(session, "sub1_level",
+      value = g1_level
+    )
   })
 })
 
 ##  Variable 2  ##
 ##
 ##  Select variable 2.
-output$vari2_panel = renderUI({
+output$vari2_panel <- renderUI({
   get.data.set()
-  #  input$change_var_selection
 
   isolate({
+    sel <- input$vari2
+    get.vars <- parseQueryString(session$clientData$url_search)
+    if (!is.null(get.vars$url)) {
+      temp <- session$clientData$url_search
+      get.vars$url <- sub(".*?url=(.*?)&land.*", "\\1", temp)
+    }
+    if (length(get.vars) > 0 &&
+      (any(names(get.vars) %in% "url") ||
+        any(names(get.vars) %in% "example")) &&
+      (any(names(get.vars) %in% "y") &&
+        !get.vars$y %in% "")) {
+      sel <- get.vars$y
+    }
 
-    sel = input$vari2
-    get.vars = parseQueryString(session$clientData$url_search)
-    if(!is.null(get.vars$url)) {
-      temp = session$clientData$url_search
-      ## get.vars$url = sub(".*?url=(.*?)&.*", "\\1", temp)
-      get.vars$url = sub(".*?url=(.*?)&land.*", "\\1", temp)
+    ch <- colnames(vis.data())
+    if (!is.null(input$vari1) &&
+      input$vari1 %in% colnames(vis.data())) {
+      ch <- ch[-which(ch %in% input$vari1)]
     }
-    if(length(get.vars)>0&&
-       (any(names(get.vars)%in%"url")||
-        any(names(get.vars)%in%"example"))&&
-       (any(names(get.vars)%in%"y")&&
-        !get.vars$y%in%"")){
-      sel=get.vars$y
-    }
-    #    if(!is.null(input$change_var_selection)){
-    #      ch = colnames(vis.data())
-    #      if(!is.null(input$vari1)&&
-    #           input$vari1%in%colnames(vis.data())){
-    #        ch = ch[-which(ch%in%input$vari1)]
-    #      }
-    #      if(!input$change_var_selection){
-    #        selectInput(inputId = "vari2",
-    #                    label = NULL,
-    #                    choices = c("none",ch),
-    #                    selected = sel,
-    #                    selectize=F)
-    #      }else{
-
-    ch = colnames(vis.data())
-    if(!is.null(input$vari1)&&
-       input$vari1%in%colnames(vis.data())){
-      ch = ch[-which(ch%in%input$vari1)]
-    }
-    selectInput(inputId = "vari2",
-                label = NULL,
-                choices = c("none",ch),
-                selected = sel,
-                selectize = F)
-    #      }
-    #    }
+    selectInput(
+      inputId = "vari2",
+      label = NULL,
+      choices = c("none", ch),
+      selected = sel,
+      selectize = F
+    )
   })
 })
 
@@ -884,67 +966,69 @@ output$vari2_panel = renderUI({
 observe({
   input$vari2
   isolate({
-    if(!is.null(vis.data()) && !is.null(input$vari2)){
-      plot.par$y = as.name(input$vari2)
-      varnames.y = input$vari2
-      if(!is.null(varnames.y)&&
-         varnames.y%in%"none"){
-        varnames.y = NULL
-        plot.par$y = NULL
+    if (!is.null(vis.data()) && !is.null(input$vari2)) {
+      plot.par$y <- as.name(input$vari2)
+      varnames.y <- input$vari2
+      if (!is.null(varnames.y) &&
+        varnames.y %in% "none") {
+        varnames.y <- NULL
+        plot.par$y <- NULL
       }
-      plot.par$varnames$y = varnames.y
-      ch  = colnames(vis.data())
-      if(!is.null(input$vari1)&&input$vari1%in%ch){
-        ch  = ch[-which(ch%in%input$vari1)]
+      plot.par$varnames$y <- varnames.y
+      ch <- colnames(vis.data())
+      if (!is.null(input$vari1) && input$vari1 %in% ch) {
+        ch <- ch[-which(ch %in% input$vari1)]
       }
-      if(!is.null(input$vari2)&&input$vari2%in%ch){
-        ch  = ch[-which(ch%in%input$vari2)]
+      if (!is.null(input$vari2) && input$vari2 %in% ch) {
+        ch <- ch[-which(ch %in% input$vari2)]
       }
-      ch = c("none",ch)
-      sel = input$subs1
-      if(!is.null(sel)&&!sel%in%ch){
-        sel = ch[1]
+      ch <- c("none", ch)
+      sel <- input$subs1
+      if (!is.null(sel) && !sel %in% ch) {
+        sel <- ch[1]
       }
-      updateSelectInput(session,"subs1",choices=ch,selected=sel)
-      ch  = colnames(vis.data())
-      if(!is.null(input$vari1)&&input$vari1%in%ch){
-        ch  = ch[-which(ch%in%input$vari1)]
+      updateSelectInput(session, "subs1", choices = ch, selected = sel)
+      ch <- colnames(vis.data())
+      if (!is.null(input$vari1) && input$vari1 %in% ch) {
+        ch <- ch[-which(ch %in% input$vari1)]
       }
-      if(!is.null(input$vari2)&&input$vari2%in%ch){
-        ch  = ch[-which(ch%in%input$vari2)]
+      if (!is.null(input$vari2) && input$vari2 %in% ch) {
+        ch <- ch[-which(ch %in% input$vari2)]
       }
-      ch = c("none",ch)
-      sel = input$subs2
-      if(!is.null(sel)&&!sel%in%ch){
-        sel = ch[1]
+      ch <- c("none", ch)
+      sel <- input$subs2
+      if (!is.null(sel) && !sel %in% ch) {
+        sel <- ch[1]
       }
-      updateSelectInput(session,"subs2",choices=ch,selected=sel)
+      updateSelectInput(session, "subs2", choices = ch, selected = sel)
     }
   })
 })
 
 #  Subset variable 2.
-output$subs2_panel = renderUI({
+output$subs2_panel <- renderUI({
   get.data.set()
   isolate({
-    ch = colnames(vis.data())
-    if(!is.null(input$vari1)&&input$vari1%in%ch){
-      ch  = ch[-which(ch%in%input$vari1)]
+    ch <- colnames(vis.data())
+    if (!is.null(input$vari1) && input$vari1 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari1)]
     }
-    if(!is.null(input$vari2)&&input$vari2%in%ch){
-      ch  = ch[-which(ch%in%input$vari2)]
+    if (!is.null(input$vari2) && input$vari2 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari2)]
     }
     # ..added by Wilson
-    if(!is.null(input$subs1)&&input$subs1%in%ch){
-      ch  = ch[-which(ch%in%input$subs1)]
+    if (!is.null(input$subs1) && input$subs1 %in% ch) {
+      ch <- ch[-which(ch %in% input$subs1)]
     }
 
-    sel = input$subs2
-    selectInput(inputId = "subs2",
-                label = NULL,
-                choices = c("none", ch),
-                selected = sel,
-                selectize=F)
+    sel <- input$subs2
+    selectInput(
+      inputId = "subs2",
+      label = NULL,
+      choices = c("none", ch),
+      selected = sel,
+      selectize = F
+    )
   })
 })
 
@@ -954,506 +1038,477 @@ output$subs2_panel = renderUI({
 observe({
   input$subs2
   isolate({
-    if(!is.null(input$subs2)){
-      plot.par$g2 = as.name(input$subs2)
-      varnames.g2 = input$subs2
-      if(!is.null(varnames.g2)&&
-         varnames.g2%in%"none"){
-        varnames.g2 = NULL
-        plot.par$g2 = NULL
+    if (!is.null(input$subs2)) {
+      plot.par$g2 <- as.name(input$subs2)
+      varnames.g2 <- input$subs2
+      if (!is.null(varnames.g2) &&
+        varnames.g2 %in% "none") {
+        varnames.g2 <- NULL
+        plot.par$g2 <- NULL
       }
-      plot.par$varnames$g2 = varnames.g2
-      ch = colnames(vis.data())
-      if(!is.null(input$vari1)&&input$vari1%in%ch){
-        ch  = ch[-which(ch%in%input$vari1)]
+      plot.par$varnames$g2 <- varnames.g2
+      ch <- colnames(vis.data())
+      if (!is.null(input$vari1) && input$vari1 %in% ch) {
+        ch <- ch[-which(ch %in% input$vari1)]
       }
-      if(!is.null(input$vari2)&&input$vari2%in%ch){
-        ch  = ch[-which(ch%in%input$vari2)]
+      if (!is.null(input$vari2) && input$vari2 %in% ch) {
+        ch <- ch[-which(ch %in% input$vari2)]
       }
-      updateSelectInput(session,"subs1",choices=c("none",ch),selected=input$subs1)
+      updateSelectInput(session, "subs1",
+        choices = c("none", ch),
+        selected = input$subs1
+      )
     }
   })
 })
 
 ##  Subset level (Slider) for variable 2.
-#output$subs2_conditional = renderUI({
-#  get.data.set()
-#  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
-#  if (is.null(choices2))
-#    choices2 = 2
-#  else
-#    choices2 = choices2 + 1
-#  sliderInput(inputId = "sub2_level",
-#              label = paste0("Subset '", input$subs2, "':"),
-#              min = 0, max = choices2, value = 0, step = 1,
-#              animate = TRUE,ticks=F)
-#})
-
-################ modified by Wilson #################
-
-output$subs2_conditional = renderUI({
+output$subs2_conditional <- renderUI({
   get.data.set()
-  choices2 = levels(handle.input(input$subs2, subs = TRUE)$input.out)
-  if (is.null(choices2))
-    choices2 = 2
-  else
-    choices2 = c("_ALL", choices2, "_MULTI")
-  sliderTextInput(inputId = "sub2_level",
-                  label = paste0("Subset '", input$subs2, "':"),
-                  choices = choices2,
-                  #animate = TRUE,
-                  animate = animationOptions(interval = ifelse(length(input$speed2) == 0, 600, 1000*input$speed2),
-                                             playButton = icon('play', "fa-2x"),
-                                             pauseButton = icon('pause', "fa-2x")))
+  choices2 <- levels(handle.input(input$subs2, subs = TRUE)$input.out)
+  if (is.null(choices2)) {
+    choices2 <- 2
+  } else {
+    choices2 <- c("_ALL", choices2, "_MULTI")
+  }
+  sliderTextInput(
+    inputId = "sub2_level",
+    label = paste0("Subset '", input$subs2, "':"),
+    choices = choices2,
+    animate = animationOptions(
+      interval = ifelse(length(input$speed2) == 0, 600, 1000 * input$speed2),
+      playButton = icon("play", "fa-2x"),
+      pauseButton = icon("pause", "fa-2x")
+    )
+  )
 })
 
-
-
 output$speed_value2 <- renderUI({
-  fixedRow((column(5, checkboxInput("select_speed2",
-                                    label = "Time delay between plots (seconds):",
-                                    value = input$select_speed2))),
-           column(3, conditionalPanel("input.select_speed2",
-                                      numericInput("speed2",
-                                                   "",
-                                                   value = 0.6,
-                                                   min = 0.1,
-                                                   max = 3.0,
-                                                   step = 0.1))))
+  fixedRow(
+    (column(5, checkboxInput("select_speed2",
+      label = "Time delay between plots (seconds):",
+      value = input$select_speed2
+    ))),
+    column(3, conditionalPanel(
+      "input.select_speed2",
+      numericInput("speed2",
+        "",
+        value = 0.6,
+        min = 0.1,
+        max = 3.0,
+        step = 0.1
+      )
+    ))
+  )
 })
 
 
 ##  Subset level (Slider) for variable 2.
-output$subs2_conditional_mini = renderUI({
+output$subs2_conditional_mini <- renderUI({
   get.data.set()
-  choices2 = handle.input(input$subs2, subs = TRUE)$factor.levels
-  if (is.null(choices2))
-    choices2 = 2
-  else
-    choices2 = choices2 + 1
-  sliderInput(inputId = "sub2_level_mini",
-              label = paste0("Subset '", input$subs2, "':"),
-              min = 0, max = choices2, value = 0, step = 1,
-              animate = TRUE,ticks=F)
+  choices2 <- handle.input(input$subs2, subs = TRUE)$factor.levels
+  if (is.null(choices2)) {
+    choices2 <- 2
+  } else {
+    choices2 <- choices2 + 1
+  }
+  sliderInput(
+    inputId = "sub2_level_mini",
+    label = paste0("Subset '", input$subs2, "':"),
+    min = 0, max = choices2, value = 0, step = 1,
+    animate = TRUE, ticks = F
+  )
 })
 
 
 # ##  Update plot.par$g2.level
 observe({
-  g2_level = input$sub2_level
-  if(!is.null(input$subs2)){
-    g2 = as.name(input$subs2)
+  g2_level <- input$sub2_level
+  if (!is.null(input$subs2)) {
+    g2 <- as.name(input$subs2)
 
-    if ((is.null(g2_level) || g2_level == 0) && !is.null(input$subs2) && input$subs2 != "none") {
-      g2_level = "_ALL"
+    if ((is.null(g2_level) || g2_level == 0) &&
+      !is.null(input$subs2) && input$subs2 != "none") {
+      g2_level <- "_ALL"
     }
 
     if (is.null(g2_level) || g2_level == 0 || input$subs2 == "none") {
-      g2_level = NULL
-      g2 = NULL
+      g2_level <- NULL
+      g2 <- NULL
     }
 
-
-    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    g2.level.check <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
     if (!is.null(g2_level) &&
-        length(g2.level.check) == 1 &&
-        g2_level == g2.level.check) {
-      g2_level = "_MULTI"
+      length(g2.level.check) == 1 &&
+      g2_level == g2.level.check) {
+      g2_level <- "_MULTI"
     }
-    plot.par$g2.level = g2_level
-    plot.par$g2 = g2
+    plot.par$g2.level <- g2_level
+    plot.par$g2 <- g2
   }
 })
-
-
-
-################## modified by Wilson ###################
-
-
-# ##  Update plot.par$g2.level
-#observe({
-#    input$subs2
-#    g2_level = input$sub2_level
-#    if (!is.null(g2_level) && g2_level == 0) {
-#        g2_level = "_MULTI"
-#    }
-#
-#    plot.par$g2.level = g2_level
-#})
-
-##########################################################
-
 
 observe({
-  g2_level = input$sub2_level_mini
-  if(!is.null(input$subs2)){
-    g2 = as.name(input$subs2)
+  g2_level <- input$sub2_level_mini
+  if (!is.null(input$subs2)) {
+    g2 <- as.name(input$subs2)
     if (is.null(g2_level) || g2_level == 0) {
-      g2_level = NULL
-      g2 = NULL
+      g2_level <- NULL
+      g2 <- NULL
     }
-    g2.level.check = handle.input(input$subs2, subs = TRUE)$factor.levels + 1
+    g2.level.check <- handle.input(input$subs2, subs = TRUE)$factor.levels + 1
     if (!is.null(g2_level) &&
-        length(g2.level.check) == 1 &&
-        g2_level == g2.level.check) {
-      g2_level = "_MULTI"
+      length(g2.level.check) == 1 &&
+      g2_level == g2.level.check) {
+      g2_level <- "_MULTI"
     }
-    plot.par$g2.level = g2_level
-    plot.par$g2 = g2
+    plot.par$g2.level <- g2_level
+    plot.par$g2 <- g2
   }
 })
 
-################## modified by Wilson ###################
-
-#observe({
-#  input$subs2
-#  g2_level = input$sub2_level_mini
-#  if (!is.null(g2_level) && g2_level == 0) {
-#    g2_level = "_MULTI"
-#  }
-#  plot.par$g2.level = g2_level
-#})
-
-##########################################################
-
-output$visualize.plot = renderPlot({
+output$visualize.plot <- renderPlot({
   isolate({
     # some of the graphical parameters need
     # to be reminded what there default
     # values are
-    if(is.null(graphical.par$cex.dotpt)){
-      graphical.par$cex.dotpt  = 0.5
+    if (is.null(graphical.par$cex.dotpt)) {
+      graphical.par$cex.dotpt <- 0.5
     }
-    if(is.null(graphical.par$alpha)){
-      graphical.par$alpha  = 1
+    if (is.null(graphical.par$alpha)) {
+      graphical.par$alpha <- 1
     }
-    if(is.null(graphical.par$scatter.grid.bins)){
-      graphical.par$scatter.grid.bins  = 50
+    if (is.null(graphical.par$scatter.grid.bins)) {
+      graphical.par$scatter.grid.bins <- 50
     }
   })
   # plot it
   if (!is.null(vis.par())) {
-    dafr = get.data.set()
-    if(is.numeric(vis.data()[[plot.par$x]])&
-       is.numeric(vis.data()[[plot.par$y]])){
-      temp = vis.par()
-      temp$trend.parallel = graphical.par$trend.parallel
-      temp.x = temp$x
-      temp$x=temp$y
-      temp$y=temp.x
-      temp.varnames.x = temp$varnames$x
-      temp$varnames$x = temp$varnames$y
-      temp$varnames$y = temp.varnames.x
+    dafr <- get.data.set()
+    if (is.numeric(vis.data()[[plot.par$x]]) &
+      is.numeric(vis.data()[[plot.par$y]])) {
+      temp <- vis.par()
+      temp$trend.parallel <- graphical.par$trend.parallel
+      temp.x <- temp$x
+      temp$x <- temp$y
+      temp$y <- temp.x
+      temp.varnames.x <- temp$varnames$x
+      temp$varnames$x <- temp$varnames$y
+      temp$varnames$y <- temp.varnames.x
 
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-      }else{
-
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+      } else {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       }
-    }else{
-
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, vis.par())
+    } else {
+      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-
-      }else{
-
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, vis.par())
+      } else {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-
       }
     }
   }
-  #  saveRDS(vis.par(), file = "/Users/wilson/Dropbox/vis_plot.rds")
 })
 
 
-output$mini.plot = renderPlot({
+output$mini.plot <- renderPlot({
   isolate({
     # some of the graphical parameters need
     # to be reminded what their default
     # values are
-    if(is.null(graphical.par$cex.dotpt)){
-      graphical.par$cex.dotpt  = 0.5
+    if (is.null(graphical.par$cex.dotpt)) {
+      graphical.par$cex.dotpt <- 0.5
     }
-    if(is.null(graphical.par$alpha)){
-      graphical.par$alpha  = 1
+    if (is.null(graphical.par$alpha)) {
+      graphical.par$alpha <- 1
     }
-    if(is.null(graphical.par$scatter.grid.bins)){
-      graphical.par$scatter.grid.bins  = 50
+    if (is.null(graphical.par$scatter.grid.bins)) {
+      graphical.par$scatter.grid.bins <- 50
     }
   })
   # plot it
   if (!is.null(vis.par())) {
-    dafr = get.data.set()
-    if(is.numeric(vis.data()[[plot.par$x]])&
-       is.numeric(vis.data()[[plot.par$y]])){
-      temp = vis.par()
-      temp$trend.parallel = graphical.par$trend.parallel
-      temp.x = temp$x
-      temp$x=temp$y
-      temp$y=temp.x
-      temp.varnames.x = temp$varnames$x
-      temp$varnames$x = temp$varnames$y
-      temp$varnames$y = temp.varnames.x
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+    dafr <- get.data.set()
+    if (is.numeric(vis.data()[[plot.par$x]]) &
+      is.numeric(vis.data()[[plot.par$y]])) {
+      temp <- vis.par()
+      temp$trend.parallel <- graphical.par$trend.parallel
+      temp.x <- temp$x
+      temp$x <- temp$y
+      temp$y <- temp.x
+      temp.varnames.x <- temp$varnames$x
+      temp$varnames$x <- temp$varnames$y
+      temp$varnames$y <- temp.varnames.x
+      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-      }else{
-        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      } else {
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, temp
+        ))
       }
-    }else{
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+    } else {
+      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-      }else{
-        #         print(plot.par$locate.id)
-        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+      } else {
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, vis.par()
+        ))
       }
     }
   }
 })
-
-
-
-
-
 
 ##  Reset variable selection and graphical parameters.
 observe({
   input$reset.graphics
   input$go.to.new
   input$go.to.old
-  if ((!is.null(input$reset.graphics)&&input$reset.graphics > 0) ||
-      (!is.null(input$go.to.new)&&input$go.to.new > 0) ||
-      (!is.null(input$go.to.old)&&input$go.to.old > 0)) {
+  if ((!is.null(input$reset.graphics) && input$reset.graphics > 0) ||
+    (!is.null(input$go.to.new) && input$go.to.new > 0) ||
+    (!is.null(input$go.to.old) && input$go.to.old > 0)) {
     isolate({
       updateCheckboxInput(session, "show_boxplot_title", value = T)
       updateCheckboxInput(session, "show_mean_title", value = F)
-      updateSelectInput(session,"fill.color",selected = "")
-      updateCheckboxInput(session,"rotation", value = F)
-      updateSliderInput(session,"fill.transparency",value=0)
-      updateSliderInput(session,"gg.size",value = 5)
-      updateSelectInput(session,"gg.theme",selected="Default")
-      updateSliderInput(session,"bar.width",value = 1)
-      updateSliderInput(session,"bar.height",value = 1)
-      updateSliderInput(session,"line.width",value = 1)
-      updateSliderInput(session,"smooth.adjust",value = 1)
-      updateSelectInput(session,"colourpalette",selected = "default")
-      updateCheckboxInput(session,"sort.by.size", value = F)
+      updateSelectInput(session, "fill.color", selected = "")
+      updateCheckboxInput(session, "rotation", value = F)
+      updateSliderInput(session, "fill.transparency", value = 0)
+      updateSliderInput(session, "gg.size", value = 5)
+      updateSelectInput(session, "gg.theme", selected = "Default")
+      updateSliderInput(session, "bar.width", value = 1)
+      updateSliderInput(session, "bar.height", value = 1)
+      updateSliderInput(session, "line.width", value = 1)
+      updateSliderInput(session, "smooth.adjust", value = 1)
+      updateSelectInput(session, "colourpalette", selected = "default")
+      updateCheckboxInput(session, "sort.by.size", value = F)
 
+      graphical.par$alpha <- 1
 
-      #      updateRadioButtons(session, "customize_plot", selected = 1)
-      graphical.par$alpha = 1
-
-      updateSliderInput(session,"adjust.transparency", value=0)
-      graphical.par$bg = "grey93" #background colour
-      updateSelectInput(session,"select.bg1",selected="grey93")
+      updateSliderInput(session, "adjust.transparency", value = 0)
+      graphical.par$bg <- "grey93" # background colour
+      updateSelectInput(session, "select.bg1", selected = "grey93")
       ##  Box
-      graphical.par$box.col = "black"
-      graphical.par$box.fill = "white" # fill colour for the boxplot
+      graphical.par$box.col <- "black"
+      graphical.par$box.fill <- "white" # fill colour for the boxplot
       ##  Bar
-      graphical.par$bar.fill = colors()[81] # colour for inside of bars in bar plot
-      updateSelectInput(session,"select.barcolor",selected=colors()[81])
+      # colour for inside of bars in bar plot
+      graphical.par$bar.fill <- colors()[81]
+      updateSelectInput(session, "select.barcolor", selected = colors()[81])
       ##  Line
-      updateSliderInput(session,"line.width.multiplier",value=1)
-      graphical.par$lty = 1
-      graphical.par$lwd.pt = 2
-      graphical.par$col.line = "blue"
-      graphical.par$join = FALSE
-      updateCheckboxInput(session,"check.join",value=F)
-      updateSelectInput(session,"color.join",selected="blue")
+      updateSliderInput(session, "line.width.multiplier", value = 1)
+      graphical.par$lty <- 1
+      graphical.par$lwd.pt <- 2
+      graphical.par$col.line <- "blue"
+      graphical.par$join <- FALSE
+      updateCheckboxInput(session, "check.join", value = F)
+      updateSelectInput(session, "color.join", selected = "blue")
       ##  Point
-      graphical.par$cex.pt = 0.5
-      updateSliderInput(session,"adjust.size.points.scatter",value=0.5)
-      graphical.par$cex.dotpt = 0.5
-      updateSliderInput(session,"adjust.size.points.dot",value=0.5)
-      #      graphical.par$pch = 21
+      graphical.par$cex.pt <- 0.5
+      updateSliderInput(session, "adjust.size.points.scatter", value = 0.5)
+      graphical.par$cex.dotpt <- 0.5
+      updateSliderInput(session, "adjust.size.points.dot", value = 0.5)
 
-      updateSliderInput(session,"adjust.size.scale",value = 1)
-      graphical.par$cex = 1
+      updateSliderInput(session, "adjust.size.scale", value = 1)
+      graphical.par$cex <- 1
 
-      updateSelectInput(session,"point_symbol", selected = "circle")
-      graphical.par$pch = 21
+      updateSelectInput(session, "point_symbol", selected = "circle")
+      graphical.par$pch <- 21
 
-      updateSliderInput(session,"symbol_linewidth", value = 2)
-      graphical.par$lwd.pt = 2
-
+      updateSliderInput(session, "symbol_linewidth", value = 2)
+      graphical.par$lwd.pt <- 2
 
 
-      updateCheckboxInput(session,"color.interior", value = F)
+
+      updateCheckboxInput(session, "color.interior", value = F)
       #      graphical.par$col.pt = "gray50"
-      graphical.par$fill.pt = "transparent"
+      graphical.par$fill.pt <- "transparent"
 
-      updateCheckboxInput(session,"colour.use.ranks", value = F)
-      graphical.par$col.method = "linear"
+      updateCheckboxInput(session, "colour.use.ranks", value = F)
+      graphical.par$col.method <- "linear"
 
-      updateCheckboxInput(session,"colour.palette.reverse", value = F)
-      graphical.par$reverse.palette = FALSE
+      updateCheckboxInput(session, "colour.palette.reverse", value = F)
+      graphical.par$reverse.palette <- FALSE
 
-      updateCheckboxInput(session,"point_size_title", value = F)
-      updateCheckboxInput(session,"point_colour_title", value = F)
-      updateCheckboxInput(session,"point_symbol_title", value = F)
+      updateCheckboxInput(session, "point_size_title", value = F)
+      updateCheckboxInput(session, "point_colour_title", value = F)
+      updateCheckboxInput(session, "point_symbol_title", value = F)
 
-      updateSelectInput(session,"select.dotcolor",selected="gray50")
-      #graphical.par$fill.pt = "transparent"
+      updateSelectInput(session, "select.dotcolor", selected = "gray50")
+
       ##  Colours
-      graphical.par$col.LOE = "black"
-      graphical.par$LOE = FALSE
-      updateCheckboxInput(session,"check.xyline",value=F)
-      updateSelectInput(session,"color.xyline",selected="black")
-      graphical.par$col.trend =
-        list(linear = "",
-             quadratic = "",
-             cubic =  "")
-      updateCheckboxInput(session,"check_linear",value=F)
-      updateCheckboxInput(session,"check_quadratic",value=F)
-      updateCheckboxInput(session,"check_cubic",value=F)
-      updateSelectInput(session,"type.linear",selected="solid")
-      updateSelectInput(session,"type.quadratic",selected="solid")
-      updateSelectInput(session,"type.cubic",selected="solid")
-      updateSelectInput(session,"color.linear",selected="blue")
-      updateSelectInput(session,"color.quadratic",selected="red")
-      updateSelectInput(session,"color.cubic",selected="green4")
-      graphical.par$col.smooth = ""
-      updateSelectInput(session,"color.smoother",selected="magenta")
-      graphical.par$quant.smooth = NULL
-      updateCheckboxInput(session,"check_smoother",value=F)
-      updateCheckboxInput(session,"check.quantiles",value=F)
-      updateSliderInput(session,"smoother.smooth",value=0.7)
+      graphical.par$col.LOE <- "black"
+      graphical.par$LOE <- FALSE
+      updateCheckboxInput(session, "check.xyline", value = F)
+      updateSelectInput(session, "color.xyline", selected = "black")
+      graphical.par$col.trend <-
+        list(
+          linear = "",
+          quadratic = "",
+          cubic = ""
+        )
+      updateCheckboxInput(session, "check_linear", value = F)
+      updateCheckboxInput(session, "check_quadratic", value = F)
+      updateCheckboxInput(session, "check_cubic", value = F)
+      updateSelectInput(session, "type.linear", selected = "solid")
+      updateSelectInput(session, "type.quadratic", selected = "solid")
+      updateSelectInput(session, "type.cubic", selected = "solid")
+      updateSelectInput(session, "color.linear", selected = "blue")
+      updateSelectInput(session, "color.quadratic", selected = "red")
+      updateSelectInput(session, "color.cubic", selected = "green4")
+      graphical.par$col.smooth <- ""
+      updateSelectInput(session, "color.smoother", selected = "magenta")
+      graphical.par$quant.smooth <- NULL
+      updateCheckboxInput(session, "check_smoother", value = F)
+      updateCheckboxInput(session, "check.quantiles", value = F)
+      updateSliderInput(session, "smoother.smooth", value = 0.7)
       ##  Jitter, rugs, and trend
-      graphical.par$jitter = ""
-      updateCheckboxInput(session,"check.jitter.x",value=F)
-      updateCheckboxInput(session,"check.jitter.y",value=F)
-      graphical.par$rugs = ""
-      updateCheckboxInput(session,"check.rugs.x",value=F)
-      updateCheckboxInput(session,"check.rugs.y",value=F)
-      graphical.par$trend = NULL
+      graphical.par$jitter <- ""
+      updateCheckboxInput(session, "check.jitter.x", value = F)
+      updateCheckboxInput(session, "check.jitter.y", value = F)
+      graphical.par$rugs <- ""
+      updateCheckboxInput(session, "check.rugs.x", value = F)
+      updateCheckboxInput(session, "check.rugs.y", value = F)
+      graphical.par$trend <- NULL
       ##  Others
-      graphical.par$cex = 1
-      graphical.par$inference.type = NULL
-      graphical.par$inference.par = NULL
-      #      graphical.par$largesample = NULL
-      graphical.par$lines.by = FALSE
-      graphical.par$trend.by = FALSE
-      updateCheckboxInput(session,"each_level",value=F)
-      graphical.par$trend.parallel = T
-      updateCheckboxInput(session,"each_level_seperate",value=T)
-      graphical.par$smooth = 0
-      graphical.par$szsym = 1
-      graphical.par$tpsym = 1
-      graphical.par$plottype="default"
-      updateSelectInput(session,"select.plot.type",selected="default")
-      graphical.par$hist.bins=get.default.num.bins()
-      #      updateSliderInput(session,"adjust.num.bins",value=get.default.num.bins())
-      graphical.par$scatter.grid.bins=50
-      updateSliderInput(session,"adjust.grid.size",value=50)
-      graphical.par$hex.bins=20
-      updateSliderInput(session,"adjust.hex.bins",value=20)
-      graphical.par$bs.inference=F
-      graphical.par$varnames = list(x = NULL, y = NULL,
-                                    xlab = NULL, ylab = NULL,
-                                    g1 = NULL, g2 = NULL,
-                                    colby=NULL,sizeby=NULL, symbolby = NULL)
+      graphical.par$cex <- 1
+      graphical.par$inference.type <- NULL
+      graphical.par$inference.par <- NULL
+      graphical.par$lines.by <- FALSE
+      graphical.par$trend.by <- FALSE
+      updateCheckboxInput(session, "each_level", value = F)
+      graphical.par$trend.parallel <- T
+      updateCheckboxInput(session, "each_level_seperate", value = T)
+      graphical.par$smooth <- 0
+      graphical.par$szsym <- 1
+      graphical.par$tpsym <- 1
+      graphical.par$plottype <- "default"
+      updateSelectInput(session, "select.plot.type", selected = "default")
+      graphical.par$hist.bins <- get.default.num.bins()
+
+      graphical.par$scatter.grid.bins <- 50
+      updateSliderInput(session, "adjust.grid.size", value = 50)
+      graphical.par$hex.bins <- 20
+      updateSliderInput(session, "adjust.hex.bins", value = 20)
+      graphical.par$bs.inference <- F
+      graphical.par$varnames <- list(
+        x = NULL, y = NULL,
+        xlab = NULL, ylab = NULL,
+        g1 = NULL, g2 = NULL,
+        colby = NULL, sizeby = NULL, symbolby = NULL
+      )
       # time delay between plots
       updateCheckboxInput(session, "select_speed1", value = F)
       updateCheckboxInput(session, "select_speed2", value = F)
       updateNumericInput(session, "speed1", value = 0.6)
       updateNumericInput(session, "speed2", value = 0.6)
 
-      plot.par$main=NULL
-      updateTextInput(session,"main_title_text",value="")
-      plot.par$xlab=NULL
-      updateTextInput(session,"x_axis_text",value="")
-      plot.par$ylab=NULL
-      updateTextInput(session,"y_axis_text",value="")
-      plot.par$colby=NULL
-      updateSelectInput(session,"color_by_select",selected=" ")
-      plot.par$sizeby=NULL
-      updateSelectInput(session,"resize.by.select",selected=" ")
-      plot.par$symbolby = NULL
-      updateSelectInput(session,"point_symbol_by",selected=" ")
-      plot.par$locate=NULL
-      plot.par$locate.id=NULL
-      plot.par$locate.col=NULL
-      plot.par$locate.extreme=NULL
-      plot.par$zoombar=NULL
-      plot.par$design=NULL
-      #design.parameters$id = formula("~1")
-      #design.parameters$strata = NULL
-      #design.parameters$fpc = NULL
-      #design.parameters$nest = F
-      #design.parameters$weights = NULL
-      #design.parameters$data.name = NULL
+      plot.par$main <- NULL
+      updateTextInput(session, "main_title_text", value = "")
+      plot.par$xlab <- NULL
+      updateTextInput(session, "x_axis_text", value = "")
+      plot.par$ylab <- NULL
+      updateTextInput(session, "y_axis_text", value = "")
+      plot.par$colby <- NULL
+      updateSelectInput(session, "color_by_select", selected = " ")
+      plot.par$sizeby <- NULL
+      updateSelectInput(session, "resize.by.select", selected = " ")
+      plot.par$symbolby <- NULL
+      updateSelectInput(session, "point_symbol_by", selected = " ")
+      plot.par$locate <- NULL
+      plot.par$locate.id <- NULL
+      plot.par$locate.col <- NULL
+      plot.par$locate.extreme <- NULL
+      plot.par$zoombar <- NULL
+      plot.par$design <- NULL
     })
   }
 })
 
 # This refreshes the infernce parameters.
 # add "get values" button
-output$add_inference = renderUI({
+output$add_inference <- renderUI({
   get.data.set()
   input$vari1
   input$vari2
   ci_width()
-  ret = NULL
+  ret <- NULL
   isolate({
-    dafr = get.data.set()
-    add_inference.check = checkboxInput("add.inference",
-                                        label="Add inference",
-                                        value=input$add.inference)
-    mean_median.radio = radioButtons("inference_parameter1",
-                                     label=h5(strong("Parameter")),
-                                     choices=c("Mean","Median"),
-                                     selected=input$inference_parameter1,
-                                     inline=T)
-    normal_bootstrap.radio = radioButtons("inference_type1",
-                                          label=h5(strong("Type of inference")),
-                                          choices=c("Normal","Bootstrap"),
-                                          selected=input$inference_type1,
-                                          inline=T)
+    dafr <- get.data.set()
+    add_inference.check <- checkboxInput("add.inference",
+      label = "Add inference",
+      value = input$add.inference
+    )
+    mean_median.radio <- radioButtons("inference_parameter1",
+      label = h5(strong("Parameter")),
+      choices = c("Mean", "Median"),
+      selected = input$inference_parameter1,
+      inline = T
+    )
+    normal_bootstrap.radio <- radioButtons("inference_type1",
+      label = h5(strong("Type of inference")),
+      choices = c("Normal", "Bootstrap"),
+      selected = input$inference_type1,
+      inline = T
+    )
 
-    confidence.interval.check = checkboxInput(
+    confidence.interval.check <- checkboxInput(
       "confidence_interval1",
       label = p("Confidence interval (%)"),
       value = input$confidence_interval1
     )
     # prevent re-rendering the ci width plot input as disabled by default
     # when the reactive ci_with() changes
-    ci_width_plot = numericInputIcon(
+    ci_width_plot <- numericInputIcon(
       inputId = "ci.width.plot",
       label = "",
       value = ci_width(),
@@ -1461,172 +1516,171 @@ output$add_inference = renderUI({
       max = 99,
       icon = list(NULL, "%")
     )
-    if(isFALSE(input$confidence_interval1) | is.null(input$confidence_interval1)) {
-      ci_width_plot = disabled(ci_width_plot)
+    if (isFALSE(input$confidence_interval1) |
+      is.null(input$confidence_interval1)) {
+      ci_width_plot <- disabled(ci_width_plot)
     }
-    confidence.interval.check = fluidRow(
+    confidence.interval.check <- fluidRow(
       column(6, confidence.interval.check),
       column(6, ci_width_plot)
     )
 
 
-    comparison.interval.check = checkboxInput("comparison_interval1",
-                                              label="Comparison interval",
-                                              value=input$comparison_interval1)
-    year12_bootstrap.radio = radioButtons("inference_type2",
-                                          label=h5(strong("Type of inference")),
-                                          choices=c("Year 12","Bootstrap"),
-                                          selected=input$inference_type2,
-                                          inline=T)
+    comparison.interval.check <- checkboxInput("comparison_interval1",
+      label = "Comparison interval",
+      value = input$comparison_interval1
+    )
+    year12_bootstrap.radio <- radioButtons("inference_type2",
+      label = h5(strong("Type of inference")),
+      choices = c("Year 12", "Bootstrap"),
+      selected = input$inference_type2,
+      inline = T
+    )
 
-    get_conf_values_button = actionButton(inputId = "get_conf_values",
-                                          label = "Get values",
-                                          style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+    get_conf_values_button <- actionButton(
+      inputId = "get_conf_values",
+      label = "Get values",
+      style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+    )
 
 
 
-    intervals = NULL
-    graphical.par$inference.par = NULL
-    graphical.par$bs.inference = F
-    if((!is.null(input$vari1)&&
-        !is.null(input$vari2))&&
-       (input$vari1%in%colnames(get.data.set())&&
-        (input$vari2%in%colnames(get.data.set())||
-         input$vari2%in%'none'))){
-      if((!is.null(input$confidence_interval1)&&
-          input$confidence_interval1)||
-         (!is.null(input$comparison_interval1)&&
-          input$comparison_interval1)){
-        if(!is.null(input$confidence_interval1)&&
-           input$confidence_interval1){
-          intervals = c(intervals,"conf")
+    intervals <- NULL
+    graphical.par$inference.par <- NULL
+    graphical.par$bs.inference <- F
+    if ((!is.null(input$vari1) &&
+      !is.null(input$vari2)) &&
+      (input$vari1 %in% colnames(get.data.set()) &&
+        (input$vari2 %in% colnames(get.data.set()) ||
+          input$vari2 %in% "none"))) {
+      if ((!is.null(input$confidence_interval1) &&
+        input$confidence_interval1) ||
+        (!is.null(input$comparison_interval1) &&
+          input$comparison_interval1)) {
+        if (!is.null(input$confidence_interval1) &&
+          input$confidence_interval1) {
+          intervals <- c(intervals, "conf")
         }
-        if(!is.null(input$comparison_interval1)&&
-           input$comparison_interval1){
-          intervals = c(intervals,"comp")
+        if (!is.null(input$comparison_interval1) &&
+          input$comparison_interval1) {
+          intervals <- c(intervals, "comp")
         }
-        if(!is.null(input$inference_parameter1)&&
-           input$inference_parameter1%in%"Mean"){
-          graphical.par$inference.par = "mean"
-        }else if(!is.null(input$inference_parameter1)&&
-                 input$inference_parameter1%in%"Median"){
-          graphical.par$inference.par = "median"
+        if (!is.null(input$inference_parameter1) &&
+          input$inference_parameter1 %in% "Mean") {
+          graphical.par$inference.par <- "mean"
+        } else if (!is.null(input$inference_parameter1) &&
+          input$inference_parameter1 %in% "Median") {
+          graphical.par$inference.par <- "median"
         }
-        if((!is.null(input$inference_type1)&&
-            input$inference_type1%in%"Bootstrap")||
-           (!is.null(input$inference_type2)&&
-            input$inference_type2%in%"Bootstrap")){
-          graphical.par$bs.inference = T
-        }else{
-          graphical.par$bs.inference = F
+        if ((!is.null(input$inference_type1) &&
+          input$inference_type1 %in% "Bootstrap") ||
+          (!is.null(input$inference_type2) &&
+            input$inference_type2 %in% "Bootstrap")) {
+          graphical.par$bs.inference <- T
+        } else {
+          graphical.par$bs.inference <- F
         }
       }
-      graphical.par$inference.type = intervals
+      graphical.par$inference.type <- intervals
       # vari1 = numeric; vari2 = numeric
-      if(!input$vari2%in%"none"&&
-         (class(dafr[,input$vari1])%in%"numeric"|
-          class(dafr[,input$vari1])%in%"integer")&&
-         (class(dafr[,input$vari2])%in%"numeric"|
-          class(dafr[,input$vari2])%in%"integer")){
-        ret = list(conditionalPanel("input.check_linear||
+      if (!input$vari2 %in% "none" &&
+        (class(dafr[, input$vari1]) %in% "numeric" |
+          class(dafr[, input$vari1]) %in% "integer") &&
+        (class(dafr[, input$vari2]) %in% "numeric" |
+          class(dafr[, input$vari2]) %in% "integer")) {
+        ret <- list(conditionalPanel(
+          "input.check_linear||
                                     input.check_quadratic||
                                     input.check_cubic||
                                     input.check_smoother",
-                                    add_inference.check))
+          add_inference.check
+        ))
 
         # vari1 = numeric; vari2 = factor or
         # vari1 = factor; vari2 = numeric
-      }else if(!input$vari2%in%"none"&&
-               (((class(dafr[,input$vari1])%in%"numeric"|
-                  class(dafr[,input$vari1])%in%"integer")&&
-                 (class(dafr[,input$vari2])%in%"factor"|
-                  class(dafr[,input$vari2])%in%"character"))||
-                ((class(dafr[,input$vari1])%in%"factor"|
-                  class(dafr[,input$vari1])%in%"character")&&
-                 (class(dafr[,input$vari2])%in%"numeric"|
-                  class(dafr[,input$vari2])%in%"integer")))){
-        ret = list(mean_median.radio,
-                   conditionalPanel("input.inference_parameter1=='Mean'",
-                                    normal_bootstrap.radio),
-                   conditionalPanel("input.inference_parameter1=='Median'",
-                                    year12_bootstrap.radio),
-                   conditionalPanel("input.inference_parameter1=='Mean'||
-                                                     (input.inference_parameter1=='Median'&&
-                                                     input.inference_type2=='Bootstrap')",
-                                    h5(strong("Type of interval")),
-                                    confidence.interval.check,
-                                    comparison.interval.check),
-                   get_conf_values_button,
-                   br(),
-                   br(),
-                   verbatimTextOutput("display_conf_values")
+      } else if (!input$vari2 %in% "none" &&
+        (((class(dafr[, input$vari1]) %in% "numeric" |
+          class(dafr[, input$vari1]) %in% "integer") &&
+          (class(dafr[, input$vari2]) %in% "factor" |
+            class(dafr[, input$vari2]) %in% "character")) ||
+          ((class(dafr[, input$vari1]) %in% "factor" |
+            class(dafr[, input$vari1]) %in% "character") &&
+            (class(dafr[, input$vari2]) %in% "numeric" |
+              class(dafr[, input$vari2]) %in% "integer")))) {
+        ret <- list(
+          mean_median.radio,
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'",
+            normal_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Median'",
+            year12_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'||
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
+            h5(strong("Type of interval")),
+            confidence.interval.check,
+            comparison.interval.check
+          ),
+          get_conf_values_button,
+          br(),
+          br(),
+          verbatimTextOutput("display_conf_values")
         )
         # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
-      }else if((!input$vari2%in%"none"&&
-                ((class(dafr[,input$vari1])%in%"factor"|
-                  class(dafr[,input$vari1])%in%"character")&&
-                 (class(dafr[,input$vari2])%in%"factor"|
-                  class(dafr[,input$vari2])%in%"character")))||
-               (input$vari2%in%"none"&&
-                (class(dafr[,input$vari1])%in%"factor"|
-                 class(dafr[,input$vari1])%in%"character"))){
-        ret = list(h5(strong("Parameter")),
-                   helpText("Proportions"),
-                   normal_bootstrap.radio,
-                   h5(strong("Type of interval")),
-                   confidence.interval.check,
-                   conditionalPanel("input.inference_type1=='Normal'",
-                                    comparison.interval.check))
+      } else if ((!input$vari2 %in% "none" &&
+        ((class(dafr[, input$vari1]) %in% "factor" |
+          class(dafr[, input$vari1]) %in% "character") &&
+          (class(dafr[, input$vari2]) %in% "factor" |
+            class(dafr[, input$vari2]) %in% "character"))) ||
+        (input$vari2 %in% "none" &&
+          (class(dafr[, input$vari1]) %in% "factor" |
+            class(dafr[, input$vari1]) %in% "character"))) {
+        ret <- list(
+          h5(strong("Parameter")),
+          helpText("Proportions"),
+          normal_bootstrap.radio,
+          h5(strong("Type of interval")),
+          confidence.interval.check,
+          conditionalPanel(
+            "input.inference_type1=='Normal'",
+            comparison.interval.check
+          )
+        )
 
         # var1 = numeric; vari2 = none
-      }else if((input$vari2%in%"none"&&
-                (class(dafr[,input$vari1])%in%"numeric"|
-                 class(dafr[,input$vari1])%in%"integer"))){
-        ret = list(mean_median.radio,
-                   conditionalPanel("input.inference_parameter1=='Mean'",
-                                    normal_bootstrap.radio),
-                   conditionalPanel("input.inference_parameter1=='Median'",
-                                    year12_bootstrap.radio),
-                   conditionalPanel("input.inference_parameter1=='Mean'||
-                                                   (input.inference_parameter1=='Median'&&
-                                                   input.inference_type2=='Bootstrap')",
-                                    h5(strong("Type of interval")),
-                                    confidence.interval.check),
-                   get_conf_values_button,
-                   br(), br(),
-                   verbatimTextOutput("display_conf_values"))
+      } else if ((input$vari2 %in% "none" &&
+        (class(dafr[, input$vari1]) %in% "numeric" |
+          class(dafr[, input$vari1]) %in% "integer"))) {
+        ret <- list(
+          mean_median.radio,
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'",
+            normal_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Median'",
+            year12_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'||
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
+            h5(strong("Type of interval")),
+            confidence.interval.check
+          ),
+          get_conf_values_button,
+          br(), br(),
+          verbatimTextOutput("display_conf_values")
+        )
       }
     }
   })
   ret
 })
-
-
-
-
-#output$display_conf_values = renderPrint({
-
-#  input$get_conf_values
-
-#  isolate({
-#    temp = unclass(plot.ret.para$parameters)
-#    temp.type = names(temp$all$all$inference.info)
-#    if(length(temp.type) == 0)
-#      cat("No values")
-#    else if(temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0)
-#      print(temp$all$all$inference.info$mean)
-#    else if(temp.type == "median" && length(temp$all$all$inference.info$median) > 0)
-#      print(temp$all$all$inference.info$median)
-#    else
-#      cat("No values")
-#  })
-
-#})
-
-
-
-
-
 
 observe({
   input$inference_parameter1
@@ -1634,7 +1688,7 @@ observe({
   input$inference_type2
 
   isolate({
-    output$display_conf_values = renderPrint({
+    output$display_conf_values <- renderPrint({
       cat("No values")
     })
   })
@@ -1646,54 +1700,46 @@ observe({
   input$get_conf_values
 
   isolate({
-    temp = unclass(plot.ret.para$parameters)
-    temp.type = names(temp$all$all$inference.info)
-    if(length(temp.type) == 0)
-      output$display_conf_values = renderPrint({
+    temp <- unclass(plot.ret.para$parameters)
+    temp.type <- names(temp$all$all$inference.info)
+    if (length(temp.type) == 0) {
+      output$display_conf_values <- renderPrint({
         cat("No values")
       })
-
-    else if(temp.type == "mean" && length(temp$all$all$inference.info$mean) > 0) {
-      output$display_conf_values = renderPrint({
-        names.table = names(temp$all$all$inference.info$mean)
-        for(index.table in 1:length(names.table)) {
-          if(names.table[index.table] == "conf") {
+    } else if (temp.type == "mean" &&
+      length(temp$all$all$inference.info$mean) > 0) {
+      output$display_conf_values <- renderPrint({
+        names.table <- names(temp$all$all$inference.info$mean)
+        for (index.table in 1:length(names.table)) {
+          if (names.table[index.table] == "conf") {
             cat("Conf :", "\r")
             print(temp$all$all$inference.info$mean$conf[, 1:2])
-          }
-          else if(names.table[index.table] == "comp") {
+          } else if (names.table[index.table] == "comp") {
             cat("Comp :", "\r")
             print(temp$all$all$inference.info$mean$comp[, 1:2])
           }
         }
       })
-    }
-
-    else if(temp.type == "median" && length(temp$all$all$inference.info$median) > 0) {
-      output$display_conf_values = renderPrint({
-        names.table = names(temp$all$all$inference.info$median)
-        for(index.table in 1:length(names.table)) {
-          if(names.table[index.table] == "conf") {
+    } else if (temp.type == "median" &&
+      length(temp$all$all$inference.info$median) > 0) {
+      output$display_conf_values <- renderPrint({
+        names.table <- names(temp$all$all$inference.info$median)
+        for (index.table in 1:length(names.table)) {
+          if (names.table[index.table] == "conf") {
             cat("Conf :", "\r")
             print(temp$all$all$inference.info$median$conf[, 1:2])
-          }
-          else if(names.table[index.table] == "comp") {
+          } else if (names.table[index.table] == "comp") {
             cat("Comp :", "\r")
             print(temp$all$all$inference.info$median$comp[, 1:2])
           }
         }
-
       })
-    }
-
-
-    else
-      output$display_conf_values = renderPrint({
+    } else {
+      output$display_conf_values <- renderPrint({
         cat("No values")
       })
-
+    }
   })
-
 })
 
 
@@ -1710,189 +1756,189 @@ observe({
   input$ci.width.plot
   input$add.inference
   isolate({
-    graphical.par$inference.par = NULL
-    intervals = NULL
-    graphical.par$bs.inference = F
+    graphical.par$inference.par <- NULL
+    intervals <- NULL
+    graphical.par$bs.inference <- F
 
     # only allow CI input when checkbox is checked
-    if(isTRUE(input$confidence_interval1)) {
+    if (isTRUE(input$confidence_interval1)) {
       shinyjs::enable("ci.width.plot")
     } else if (is.null(input$confidence_interval1)) {
       # prevent errors, check null
       shinyjs::disable("ci.width.plot")
-    }else {
+    } else {
       shinyjs::disable("ci.width.plot")
     }
     # update `ci_width()` since input$ci.width also uses this value
     # ci width on plot won't be used unless the checkbox is checked
-    if(!is.null(input$ci.width.plot)) {
+    if (!is.null(input$ci.width.plot)) {
       ci_width(input$ci.width.plot)
     }
 
     # vari1 = numeric; vari2 = none
-    if((!is.null(input$vari1)&&
-        !is.null(input$vari2)&&
-        input$vari1%in%colnames(get.data.set())&&
-        input$vari2%in%"none")&&
-       (is.numeric(get.data.set()[,input$vari1])|
-        is.integer(get.data.set()[,input$vari1]))){
-      if(!is.null(input$inference_parameter1)&&
-         input$inference_parameter1%in%"Mean"&&
-         (!is.null(input$confidence_interval1)&&
-          input$confidence_interval1)){
-        graphical.par$inference.par = "mean"
-        if(!is.null(input$confidence_interval1)&&
-           input$confidence_interval1){
-          intervals = c(intervals,"conf")
+    if ((!is.null(input$vari1) &&
+      !is.null(input$vari2) &&
+      input$vari1 %in% colnames(get.data.set()) &&
+      input$vari2 %in% "none") &&
+      (is.numeric(get.data.set()[, input$vari1]) |
+        is.integer(get.data.set()[, input$vari1]))) {
+      if (!is.null(input$inference_parameter1) &&
+        input$inference_parameter1 %in% "Mean" &&
+        (!is.null(input$confidence_interval1) &&
+          input$confidence_interval1)) {
+        graphical.par$inference.par <- "mean"
+        if (!is.null(input$confidence_interval1) &&
+          input$confidence_interval1) {
+          intervals <- c(intervals, "conf")
         }
-        if(length(intervals)>0){
-          if(input$inference_type1%in%"Normal"){
-            graphical.par$bs.inference = F
-          }else if(input$inference_type1%in%"Bootstrap"){
-            graphical.par$bs.inference = T
+        if (length(intervals) > 0) {
+          if (input$inference_type1 %in% "Normal") {
+            graphical.par$bs.inference <- F
+          } else if (input$inference_type1 %in% "Bootstrap") {
+            graphical.par$bs.inference <- T
           }
         }
-      }else if((!is.null(input$inference_parameter1)&&
-                input$inference_parameter1%in%"Median")){
-        graphical.par$inference.par = "median"
-        intervals = c(intervals,"conf")
-        graphical.par$bs.inference = F
-        if(input$inference_type2%in%"Bootstrap"&&
-           (!is.null(input$confidence_interval1)&&
-            input$confidence_interval1)){
-          graphical.par$bs.inference = T
-        }else if(input$inference_type2%in%"Bootstrap"){
-          graphical.par$bs.inference = T
-          intervals = NULL
+      } else if ((!is.null(input$inference_parameter1) &&
+        input$inference_parameter1 %in% "Median")) {
+        graphical.par$inference.par <- "median"
+        intervals <- c(intervals, "conf")
+        graphical.par$bs.inference <- F
+        if (input$inference_type2 %in% "Bootstrap" &&
+          (!is.null(input$confidence_interval1) &&
+            input$confidence_interval1)) {
+          graphical.par$bs.inference <- T
+        } else if (input$inference_type2 %in% "Bootstrap") {
+          graphical.par$bs.inference <- T
+          intervals <- NULL
         }
       }
       # vari1 = factor; vari2 = none or vari1 = factor; vari2 = factor
-    }else if(!is.null(input$vari1)&&
-             input$vari1%in%colnames(get.data.set())&&
-             (input$vari2%in%"none"&&
-              (is.character(get.data.set()[,input$vari1])|
-               is.factor(get.data.set()[,input$vari1])))||
-             ((!input$vari2%in%"none"&&
-               input$vari2%in%colnames(get.data.set()))&&
-              ((is.factor(get.data.set()[,input$vari1])|
-                is.character(get.data.set()[,input$vari1]))&&
-               (is.factor(get.data.set()[,input$vari2])|
-                is.character(get.data.set()[,input$vari2]))))){
-      graphical.par$inference.par = "proportion"
-      if(!is.null(input$inference_type1)&&
-         input$inference_type1%in%"Normal"){
-        graphical.par$bs.inference = F
-        if(!is.null(input$confidence_interval1)&&
-           input$confidence_interval1){
-          intervals = c(intervals,"conf")
+    } else if (!is.null(input$vari1) &&
+      input$vari1 %in% colnames(get.data.set()) &&
+      (input$vari2 %in% "none" &&
+        (is.character(get.data.set()[, input$vari1]) |
+          is.factor(get.data.set()[, input$vari1]))) ||
+      ((!input$vari2 %in% "none" &&
+        input$vari2 %in% colnames(get.data.set())) &&
+        ((is.factor(get.data.set()[, input$vari1]) |
+          is.character(get.data.set()[, input$vari1])) &&
+          (is.factor(get.data.set()[, input$vari2]) |
+            is.character(get.data.set()[, input$vari2]))))) {
+      graphical.par$inference.par <- "proportion"
+      if (!is.null(input$inference_type1) &&
+        input$inference_type1 %in% "Normal") {
+        graphical.par$bs.inference <- F
+        if (!is.null(input$confidence_interval1) &&
+          input$confidence_interval1) {
+          intervals <- c(intervals, "conf")
         }
-        if(!is.null(input$comparison_interval1)&&
-           input$comparison_interval1){
-          intervals = c(intervals,"comp")
+        if (!is.null(input$comparison_interval1) &&
+          input$comparison_interval1) {
+          intervals <- c(intervals, "comp")
         }
-      }else if(!is.null(input$inference_type1)&&
-               input$inference_type1%in%"Bootstrap"){
-        graphical.par$bs.inference = T
-        if(!is.null(input$confidence_interval1)&&
-           input$confidence_interval1){
-          intervals = c(intervals,"conf")
+      } else if (!is.null(input$inference_type1) &&
+        input$inference_type1 %in% "Bootstrap") {
+        graphical.par$bs.inference <- T
+        if (!is.null(input$confidence_interval1) &&
+          input$confidence_interval1) {
+          intervals <- c(intervals, "conf")
         }
       }
       # vari1 = numeric; vari2 = numeric
-    }else if((!is.null(input$vari1)&&
-              !is.null(input$vari2)&&
-              input$vari1%in%colnames(get.data.set())&&
-              input$vari2%in%colnames(get.data.set()))&&
-             (is.numeric(get.data.set()[,input$vari1])&&
-              is.numeric(get.data.set()[,input$vari2]))){
-      #      graphical.par$bs.inference = input$add.inference
-      if(is.null(input$add.inference))
-        graphical.par$bs.inference = F
-      else
-        graphical.par$bs.inference = input$add.inference
+    } else if ((!is.null(input$vari1) &&
+      !is.null(input$vari2) &&
+      input$vari1 %in% colnames(get.data.set()) &&
+      input$vari2 %in% colnames(get.data.set())) &&
+      (is.numeric(get.data.set()[, input$vari1]) &&
+        is.numeric(get.data.set()[, input$vari2]))) {
+      if (is.null(input$add.inference)) {
+        graphical.par$bs.inference <- F
+      } else {
+        graphical.par$bs.inference <- input$add.inference
+      }
 
       # vari1 = numeric; vari2 = factor or
       # vari1 = factor; vari2 = numeric
-    }else if((!is.null(input$vari1)&&
-              !is.null(input$vari2)&&
-              input$vari1%in%colnames(get.data.set())&&
-              input$vari1%in%colnames(get.data.set()))&&
-             (((is.factor(get.data.set()[,input$vari1])|
-                is.character(get.data.set()[,input$vari1]))&&
-               (is.numeric(get.data.set()[,input$vari2])|
-                is.integer(get.data.set()[,input$vari2])))||
-              ((is.numeric(get.data.set()[,input$vari1])|
-                is.integer(get.data.set()[,input$vari1]))&&
-               (is.factor(get.data.set()[,input$vari2])|
-                is.character(get.data.set()[,input$vari2]))))){
-      if(!is.null(input$inference_parameter1)&&
-         input$inference_parameter1%in%"Mean"&&
-         ((!is.null(input$confidence_interval1)&&
-           input$confidence_interval1)|
-          (!is.null(input$comparison_interval1)&&
-           input$comparison_interval1))){
-        graphical.par$inference.par = "mean"
-        if(!is.null(input$inference_type1)&&
-           input$inference_type1%in%"Normal"){
-          graphical.par$bs.inference = F
-          if(!is.null(input$confidence_interval1)&&
-             input$confidence_interval1){
-            intervals = c(intervals,"conf")
+    } else if ((!is.null(input$vari1) &&
+      !is.null(input$vari2) &&
+      input$vari1 %in% colnames(get.data.set()) &&
+      input$vari1 %in% colnames(get.data.set())) &&
+      (((is.factor(get.data.set()[, input$vari1]) |
+        is.character(get.data.set()[, input$vari1])) &&
+        (is.numeric(get.data.set()[, input$vari2]) |
+          is.integer(get.data.set()[, input$vari2]))) ||
+        ((is.numeric(get.data.set()[, input$vari1]) |
+          is.integer(get.data.set()[, input$vari1])) &&
+          (is.factor(get.data.set()[, input$vari2]) |
+            is.character(get.data.set()[, input$vari2]))))) {
+      if (!is.null(input$inference_parameter1) &&
+        input$inference_parameter1 %in% "Mean" &&
+        ((!is.null(input$confidence_interval1) &&
+          input$confidence_interval1) |
+          (!is.null(input$comparison_interval1) &&
+            input$comparison_interval1))) {
+        graphical.par$inference.par <- "mean"
+        if (!is.null(input$inference_type1) &&
+          input$inference_type1 %in% "Normal") {
+          graphical.par$bs.inference <- F
+          if (!is.null(input$confidence_interval1) &&
+            input$confidence_interval1) {
+            intervals <- c(intervals, "conf")
           }
-          if(!is.null(input$comparison_interval1)&&
-             input$comparison_interval1){
-            intervals = c(intervals,"comp")
+          if (!is.null(input$comparison_interval1) &&
+            input$comparison_interval1) {
+            intervals <- c(intervals, "comp")
           }
-        }else if(!is.null(input$inference_type1)&&
-                 input$inference_type1%in%"Bootstrap"){
-          graphical.par$bs.inference = T
-          if(!is.null(input$confidence_interval1)&&
-             input$confidence_interval1){
-            intervals = c(intervals,"conf")
+        } else if (!is.null(input$inference_type1) &&
+          input$inference_type1 %in% "Bootstrap") {
+          graphical.par$bs.inference <- T
+          if (!is.null(input$confidence_interval1) &&
+            input$confidence_interval1) {
+            intervals <- c(intervals, "conf")
           }
-          if(!is.null(input$comparison_interval1)&&
-             input$comparison_interval1){
-            intervals = c(intervals,"comp")
+          if (!is.null(input$comparison_interval1) &&
+            input$comparison_interval1) {
+            intervals <- c(intervals, "comp")
           }
         }
-      }else if(!is.null(input$inference_parameter1)&&
-               input$inference_parameter1%in%"Median"&&
-               ((!is.null(input$confidence_interval1)&&
-                 input$confidence_interval1)|
-                (!is.null(input$comparison_interval1)&&
-                 input$comparison_interval1))){
-        graphical.par$inference.par = "median"
-        intervals = c(intervals,"conf")
-        graphical.par$bs.inference = F
-        if(input$inference_type2%in%"Bootstrap"&&
-           ((!is.null(input$confidence_interval1)&&
-             input$confidence_interval1)|
-            (!is.null(input$comparison_interval1)&&
-             input$comparison_interval1))){
-          intervals = NULL
-          if(!is.null(input$confidence_interval1)&&
-             input$confidence_interval1){
-            intervals = c(intervals,"conf")
+      } else if (!is.null(input$inference_parameter1) &&
+        input$inference_parameter1 %in% "Median" &&
+        ((!is.null(input$confidence_interval1) &&
+          input$confidence_interval1) |
+          (!is.null(input$comparison_interval1) &&
+            input$comparison_interval1))) {
+        graphical.par$inference.par <- "median"
+        intervals <- c(intervals, "conf")
+        graphical.par$bs.inference <- F
+        if (input$inference_type2 %in% "Bootstrap" &&
+          ((!is.null(input$confidence_interval1) &&
+            input$confidence_interval1) |
+            (!is.null(input$comparison_interval1) &&
+              input$comparison_interval1))) {
+          intervals <- NULL
+          if (!is.null(input$confidence_interval1) &&
+            input$confidence_interval1) {
+            intervals <- c(intervals, "conf")
           }
-          if(!is.null(input$comparison_interval1)&&
-             input$comparison_interval1){
-            intervals = c(intervals,"comp")
+          if (!is.null(input$comparison_interval1) &&
+            input$comparison_interval1) {
+            intervals <- c(intervals, "comp")
           }
-          graphical.par$bs.inference = T
-        }else if(input$inference_type2%in%"Bootstrap"){
-          graphical.par$bs.inference = T
-          intervals=NULL
+          graphical.par$bs.inference <- T
+        } else if (input$inference_type2 %in% "Bootstrap") {
+          graphical.par$bs.inference <- T
+          intervals <- NULL
         }
-      }else if(!is.null(input$inference_parameter1)&&
-               input$inference_parameter1%in%"Median"){
-        if(input$inference_type2%in%"Year 12"){
-          graphical.par$inference.par = "median"
-          intervals = c(intervals,"conf")
-          graphical.par$bs.inference = F
+      } else if (!is.null(input$inference_parameter1) &&
+        input$inference_parameter1 %in% "Median") {
+        if (input$inference_type2 %in% "Year 12") {
+          graphical.par$inference.par <- "median"
+          intervals <- c(intervals, "conf")
+          graphical.par$bs.inference <- F
         }
       }
     }
-    graphical.par$inference.type = intervals
+    graphical.par$inference.type <- intervals
   })
 })
 
@@ -1905,903 +1951,1071 @@ observe({
 
 
 
-output$plot.appearance.panel.title = renderUI({
+output$plot.appearance.panel.title <- renderUI({
   get.data.set()
-  ret=NULL
+  ret <- NULL
   input$vari1
   input$vari2
   plot.par$design
   isolate({
-    if(!is.null(plot.ret.para$parameters)) {
-      varnames = unlist(attr(plot.ret.para$parameters, "varnames"))
-      TYPE = attr(plot.ret.para$parameters, "plottype")
-      PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
-      plot.type.para$plotTypes = unname(do.call(c, PLOTTYPES))
-      plot.type.para$plotTypeValues = names(PLOTTYPES)
+    if (!is.null(plot.ret.para$parameters)) {
+      varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
+      TYPE <- attr(plot.ret.para$parameters, "plottype")
+      PLOTTYPES <- plot_list(
+        TYPE,
+        get.data.set()[[varnames["x"]]],
+        get.data.set()[[varnames["y"]]]
+      )
+      plot.type.para$plotTypes <- unname(do.call(c, PLOTTYPES))
+      plot.type.para$plotTypeValues <- names(PLOTTYPES)
     }
 
-    general.appearance.title = h5(strong("General Appearance"))
+    general.appearance.title <- h5(strong("General Appearance"))
 
-    adjust.num.bins.object = NULL
-    if((!is.null(input$vari1)&
-        !is.null(input$vari2))&&
-       (input$vari1%in%colnames(get.data.set())&&
-        (input$vari2%in%colnames(get.data.set())|
-         input$vari2%in%"none"))){
-      temp = list()
-      temp$x = get.data.set()[,input$vari1]
-      if(input$vari2%in%'none'){
-        temp$y = NULL
-      }else{
-        temp$y = get.data.set()[,input$vari2]
+    adjust.num.bins.object <- NULL
+    if ((!is.null(input$vari1) &
+      !is.null(input$vari2)) &&
+      (input$vari1 %in% colnames(get.data.set()) &&
+        (input$vari2 %in% colnames(get.data.set()) |
+          input$vari2 %in% "none"))) {
+      temp <- list()
+      temp$x <- get.data.set()[, input$vari1]
+      if (input$vari2 %in% "none") {
+        temp$y <- NULL
+      } else {
+        temp$y <- get.data.set()[, input$vari2]
       }
-      temp$plot = F
-      tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
-      #####################################################################
-      #      large.sample = T
-      large.sample = search.name(tester,"largesample")[[1]]
-      if(is.null(large.sample)){
-        large.sample = F
+      temp$plot <- F
+      tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      large.sample <- search.name(tester, "largesample")[[1]]
+      if (is.null(large.sample)) {
+        large.sample <- F
       }
     }
-    select.plot.type.object = NULL
-    #####################################################################
-    select.plot.type.object = fixedRow(column(3, h5("Plot type:")),
-                                       column(6, selectInput(inputId = "select.plot.type",
-                                                             label = NULL,
-                                                             choices=plot.type.para$plotTypes,
-                                                             selected=plot.type.para$plotTypes[1],
-                                                             selectize = F)))
-    ret = list(general.appearance.title,
-               select.plot.type.object)
+    select.plot.type.object <- NULL
+    select.plot.type.object <- fixedRow(
+      column(3, h5("Plot type:")),
+      column(6, selectInput(
+        inputId = "select.plot.type",
+        label = NULL,
+        choices = plot.type.para$plotTypes,
+        selected = plot.type.para$plotTypes[1],
+        selectize = F
+      ))
+    )
+    ret <- list(
+      general.appearance.title,
+      select.plot.type.object
+    )
   })
   ret
-
 })
 
 # Advanced options panel ->
-output$plot.appearance.panel = renderUI({
+output$plot.appearance.panel <- renderUI({
   get.data.set()
-  ret=NULL
+  ret <- NULL
   input$vari1
   input$vari2
   input$select.plot.type
   plot.par$design
 
   isolate({
-    if(!is.null(plot.ret.para$parameters)) {
-      varnames = unlist(attr(plot.ret.para$parameters, "varnames"))
-      TYPE = attr(plot.ret.para$parameters, "plottype")
-      PLOTTYPES = plot_list(TYPE, get.data.set()[[varnames["x"]]], get.data.set()[[varnames["y"]]])
-      plot.type.para$plotTypes = unname(do.call(c, PLOTTYPES))
-      plot.type.para$plotTypeValues = names(PLOTTYPES)
+    if (!is.null(plot.ret.para$parameters)) {
+      varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
+      TYPE <- attr(plot.ret.para$parameters, "plottype")
+      PLOTTYPES <- plot_list(
+        TYPE,
+        get.data.set()[[varnames["x"]]],
+        get.data.set()[[varnames["y"]]]
+      )
+      plot.type.para$plotTypes <- unname(do.call(c, PLOTTYPES))
+      plot.type.para$plotTypeValues <- names(PLOTTYPES)
     }
 
 
 
     # barplot with one factor variable the other one not specified
-    cols1 = colors()[c(354, 1,3,16,19,63,87,109,259,
-                       399,419,558,600,626,647)]
-    cols2 = colors()[c(81,73,84,107,371,426,517,617)]
-    cols3 = colors()[c(203,73,81,84,107,371,425,517,617)]
+    cols1 <- colors()[c(
+      354, 1, 3, 16, 19, 63, 87, 109, 259,
+      399, 419, 558, 600, 626, 647
+    )]
+    cols2 <- colors()[c(81, 73, 84, 107, 371, 426, 517, 617)]
+    cols3 <- colors()[c(203, 73, 81, 84, 107, 371, 425, 517, 617)]
 
-    bar.colour.title = h5(strong("Bar Colour"))
+    bar.colour.title <- h5(strong("Bar Colour"))
 
-    point.options.title = h5(strong("Point Options"))
+    point.options.title <- h5(strong("Point Options"))
 
-    barchart.title = h5(strong("Barchart Options"))
+    barchart.title <- h5(strong("Barchart Options"))
 
-    barcode.title = h5(strong("Barcode Options"))
+    barcode.title <- h5(strong("Barcode Options"))
 
-    line.title = h5(strong("Line Options"))
+    line.title <- h5(strong("Line Options"))
 
-    Beeswarm.title = h5(strong("Beeswarm Options"))
+    Beeswarm.title <- h5(strong("Beeswarm Options"))
 
-    density.title = h5(strong("Density Options"))
+    density.title <- h5(strong("Density Options"))
 
-    sorting.title = h5(strong("Sorting"))
+    sorting.title <- h5(strong("Sorting"))
 
-    pyramid.title = h5(strong("Pyramid Options"))
+    pyramid.title <- h5(strong("Pyramid Options"))
 
-    point.size.title = checkboxInput(inputId = "point_size_title",
-                                     label = strong("Point Size"),
-                                     value = input$point_size_title)
-
-    point.colour.title = checkboxInput(inputId = "point_colour_title",
-                                       label = strong("Point Colour"),
-                                       value = input$point_colour_title)
-
-    select.bg.object = fixedRow(column(3, h5("Background colour:")),
-                                column(6, selectInput(inputId="select.bg1",
-                                                      label=NULL,
-                                                      choices=cols1,
-                                                      selected=graphical.par$bg,
-                                                      selectize = F)))
-
-
-    show.boxplot.title = checkboxInput(inputId = "show_boxplot_title",
-                                       label = "Show boxplot",
-                                       value = TRUE)
-
-    show.mean.title = checkboxInput(inputId = "show_mean_title",
-                                    label = "Show mean",
-                                    value = FALSE)
-
-    fill.color.object = fixedRow(column(3, h5("Fill colour:")),
-                                 column(6, selectInput(inputId="fill.color",label=NULL,
-                                                       choices=c("", "darkgreen", "lightgreen", "darkblue",
-                                                                 "lightblue", "red", "pink",
-                                                                 "lightpink", "grey", "darkgrey"),
-                                                       selected=graphical.par$fill_colour,
-                                                       selectize = F)))
-
-
-    rotation.object = fixedRow(column(3, h5("Rotation:")),
-                               column(6, checkboxInput(inputId = "rotation",
-                                                       label = "Plot",
-                                                       value = FALSE)),
-                               column(3, checkboxInput(inputId = "rotationx",
-                                                       label = "x-axis Labels",
-                                                       value = FALSE), offset = 3),
-                               column(3, checkboxInput(inputId = "rotationy",
-                                                       label = "y-axis Labels",
-                                                       value = FALSE))
+    point.size.title <- checkboxInput(
+      inputId = "point_size_title",
+      label = strong("Point Size"),
+      value = input$point_size_title
     )
 
-    swarmWidth = fixedRow(column(3, h5("Swarm width:")),
-                          column(6, sliderInput("gg.swarmwidth",
-                                                label = NULL,
-                                                min = 0.1,
-                                                max = 1,
-                                                value=graphical.par$gg_swarmwidth,
-                                                step=0.1,
-                                                ticks = FALSE)))
+    point.colour.title <- checkboxInput(
+      inputId = "point_colour_title",
+      label = strong("Point Colour"),
+      value = input$point_colour_title
+    )
 
-    swarmMethod = fixedRow(column(3, h5("Methods:")),
-                           column(6, selectInput(inputId="gg.swarmMethod",label=NULL,
-                                                 choices=c("quasirandom",
-                                                           "pseudorandom",
-                                                           "smiley",
-                                                           "frowney"),
-                                                 selected=input$gg.swarmMethod,
-                                                 selectize = F)))
-
+    select.bg.object <- fixedRow(
+      column(3, h5("Background colour:")),
+      column(6, selectInput(
+        inputId = "select.bg1",
+        label = NULL,
+        choices = cols1,
+        selected = graphical.par$bg,
+        selectize = F
+      ))
+    )
 
 
-    sortbysize.object = fixedRow(column(3, h5("Sort by size:")),
-                                 column(6,selectInput(inputId="sort.by.size",label=NULL,
-                                                      choices=c("None",
-                                                                "Ascending",
-                                                                "Descending"),
-                                                      selected=input$sort.by.size,
-                                                      selectize = F)))
+    show.boxplot.title <- checkboxInput(
+      inputId = "show_boxplot_title",
+      label = "Show boxplot",
+      value = TRUE
+    )
 
-    ggsize.object = fixedRow(column(3, h5("Point size:")),
-                             column(6, sliderInput("gg.size",
-                                                   label = NULL,
-                                                   min = 1,
-                                                   max = 10,
-                                                   value=graphical.par$gg_size,
-                                                   step=1,
-                                                   ticks = FALSE)))
+    show.mean.title <- checkboxInput(
+      inputId = "show_mean_title",
+      label = "Show mean",
+      value = FALSE
+    )
 
-    pyramid.slider.object = fixedRow(column(3, h5("Number of bins:")),
-                                     column(6, sliderInput("pyramid.bins",
-                                                           label = NULL,
-                                                           value = graphical.par$gg_bins,
-                                                           min = 5,
-                                                           max = 50,
-                                                           step = 5)))
-
-    gridplot.object = fixedRow(column(3, h5("Observations / square:")),
-                               column(6, numericInput("grid.square",
-                                                      label = NULL,
-                                                      value=n_fun(nrow(vis.data())))))
+    fill.color.object <- fixedRow(
+      column(3, h5("Fill colour:")),
+      column(6, selectInput(
+        inputId = "fill.color", label = NULL,
+        choices = c(
+          "", "darkgreen", "lightgreen", "darkblue",
+          "lightblue", "red", "pink",
+          "lightpink", "grey", "darkgrey"
+        ),
+        selected = graphical.par$fill_colour,
+        selectize = F
+      ))
+    )
 
 
-    ggtheme.object = fixedRow(column(3, h5("Theme:")),
-                              column(6, selectInput(inputId="gg.theme",label=NULL,
-                                                    choices=c("Default",
-                                                              "Black & White",
-                                                              "Light",
-                                                              "Dark",
-                                                              "Minimal",
-                                                              "Classic",
-                                                              "Void"),
-                                                    selected=input$gg.theme,
-                                                    selectize = F)))
+    rotation.object <- fixedRow(
+      column(3, h5("Rotation:")),
+      column(6, checkboxInput(
+        inputId = "rotation",
+        label = "Plot",
+        value = FALSE
+      )),
+      column(3, checkboxInput(
+        inputId = "rotationx",
+        label = "x-axis Labels",
+        value = FALSE
+      ), offset = 3),
+      column(3, checkboxInput(
+        inputId = "rotationy",
+        label = "y-axis Labels",
+        value = FALSE
+      ))
+    )
 
-    barwidth.object = fixedRow(column(3, h5("Bar width:")),
-                               column(6, sliderInput("bar.width",
-                                                     label = NULL,
-                                                     min = 1,
-                                                     max = 5,
-                                                     value = graphical.par$gg_width,
-                                                     step=1,
-                                                     ticks = FALSE)))
+    swarmWidth <- fixedRow(
+      column(3, h5("Swarm width:")),
+      column(6, sliderInput("gg.swarmwidth",
+        label = NULL,
+        min = 0.1,
+        max = 1,
+        value = graphical.par$gg_swarmwidth,
+        step = 0.1,
+        ticks = FALSE
+      ))
+    )
 
-    barheight.object = fixedRow(column(3, h5("Bar height:")),
-                                column(6, sliderInput("bar.height",
-                                                      label = NULL,
-                                                      min = 0.1,
-                                                      max = 1,
-                                                      value = graphical.par$gg_height,
-                                                      step = 0.1,
-                                                      ticks = FALSE)))
-
-    line.width.object = fixedRow(column(3, h5("Line width:")),
-                                 column(6, sliderInput("line.width",
-                                                       label = NULL,
-                                                       min = 1,
-                                                       max = 5,
-                                                       value = graphical.par$gg_lwd,
-                                                       step = 1,
-                                                       ticks = FALSE)))
-
-    smooth.adjust.object = fixedRow(column(3, h5("Smoothing:")),
-                                    column(6, sliderInput("smooth.adjust",
-                                                          label = NULL,
-                                                          min = 0.25,
-                                                          max = 4,
-                                                          value = graphical.par$adjust,
-                                                          step = 0.25,
-                                                          ticks = FALSE)))
-
-
-    colourpalette.object = fixedRow(column(3, h5("Colour palette:")),
-                                    column(6, selectInput(inputId="colourpalette",label=NULL,
-                                                          choices=c("default", "greyscale", "viridis", "magma", "plasma", "inferno", "BrBG", "PiYG", "PRGn",
-                                                                    "Accent", "Dark2", "Paired", "Pastel1", "Set1",
-                                                                    "Blues", "BuGn", "BuPu", "GnBu"),
-                                                          selected=graphical.par$palette,
-                                                          selectize = F)))
+    swarmMethod <- fixedRow(
+      column(3, h5("Methods:")),
+      column(6, selectInput(
+        inputId = "gg.swarmMethod", label = NULL,
+        choices = c(
+          "quasirandom",
+          "pseudorandom",
+          "smiley",
+          "frowney"
+        ),
+        selected = input$gg.swarmMethod,
+        selectize = F
+      ))
+    )
 
 
 
-    select.barcolor.object = conditionalPanel(
+    sortbysize.object <- fixedRow(
+      column(3, h5("Sort by size:")),
+      column(6, selectInput(
+        inputId = "sort.by.size", label = NULL,
+        choices = c(
+          "None",
+          "Ascending",
+          "Descending"
+        ),
+        selected = input$sort.by.size,
+        selectize = F
+      ))
+    )
+
+    ggsize.object <- fixedRow(
+      column(3, h5("Point size:")),
+      column(6, sliderInput("gg.size",
+        label = NULL,
+        min = 1,
+        max = 10,
+        value = graphical.par$gg_size,
+        step = 1,
+        ticks = FALSE
+      ))
+    )
+
+    pyramid.slider.object <- fixedRow(
+      column(3, h5("Number of bins:")),
+      column(6, sliderInput("pyramid.bins",
+        label = NULL,
+        value = graphical.par$gg_bins,
+        min = 5,
+        max = 50,
+        step = 5
+      ))
+    )
+
+    gridplot.object <- fixedRow(
+      column(3, h5("Observations / square:")),
+      column(6, numericInput("grid.square",
+        label = NULL,
+        value = n_fun(nrow(vis.data()))
+      ))
+    )
+
+
+    ggtheme.object <- fixedRow(
+      column(3, h5("Theme:")),
+      column(6, selectInput(
+        inputId = "gg.theme", label = NULL,
+        choices = c(
+          "Default",
+          "Black & White",
+          "Light",
+          "Dark",
+          "Minimal",
+          "Classic",
+          "Void"
+        ),
+        selected = input$gg.theme,
+        selectize = F
+      ))
+    )
+
+    barwidth.object <- fixedRow(
+      column(3, h5("Bar width:")),
+      column(6, sliderInput("bar.width",
+        label = NULL,
+        min = 1,
+        max = 5,
+        value = graphical.par$gg_width,
+        step = 1,
+        ticks = FALSE
+      ))
+    )
+
+    barheight.object <- fixedRow(
+      column(3, h5("Bar height:")),
+      column(6, sliderInput("bar.height",
+        label = NULL,
+        min = 0.1,
+        max = 1,
+        value = graphical.par$gg_height,
+        step = 0.1,
+        ticks = FALSE
+      ))
+    )
+
+    line.width.object <- fixedRow(
+      column(3, h5("Line width:")),
+      column(6, sliderInput("line.width",
+        label = NULL,
+        min = 1,
+        max = 5,
+        value = graphical.par$gg_lwd,
+        step = 1,
+        ticks = FALSE
+      ))
+    )
+
+    smooth.adjust.object <- fixedRow(
+      column(3, h5("Smoothing:")),
+      column(6, sliderInput("smooth.adjust",
+        label = NULL,
+        min = 0.25,
+        max = 4,
+        value = graphical.par$adjust,
+        step = 0.25,
+        ticks = FALSE
+      ))
+    )
+
+
+    colourpalette.object <- fixedRow(
+      column(3, h5("Colour palette:")),
+      column(6, selectInput(
+        inputId = "colourpalette", label = NULL,
+        choices = c(
+          "default", "greyscale", "viridis", "magma", "plasma",
+          "inferno", "BrBG", "PiYG", "PRGn",
+          "Accent", "Dark2", "Paired", "Pastel1", "Set1",
+          "Blues", "BuGn", "BuPu", "GnBu"
+        ),
+        selected = graphical.par$palette,
+        selectize = F
+      ))
+    )
+
+
+
+    select.barcolor.object <- conditionalPanel(
       condition = "input.color_by_select == ' '",
-
-      fixedRow(column(3, h5("Bar Colour:")),
-               column(6, selectInput(inputId="select.barcolor",label=NULL,
-                                     choices=cols2,
-                                     selected=graphical.par$bar.fill,
-                                     selectize = T)))
+      fixedRow(
+        column(3, h5("Bar Colour:")),
+        column(6, selectInput(
+          inputId = "select.barcolor", label = NULL,
+          choices = cols2,
+          selected = graphical.par$bar.fill,
+          selectize = T
+        ))
+      )
     )
 
-    #    select.barcolor.object = fixedRow(column(3, h5("Bar Colour:")),
-    #                                      column(6, selectInput(inputId="select.barcolor",label=NULL,
-    #                                                            choices=cols2,
-    #                                                            selected=graphical.par$bar.fill)))
+    select.dotcolor.object <- conditionalPanel(
+      condition = "input.point_colour_title == true &
+                   input.color_by_select == ' '",
+      fixedRow(
+        column(3, h5("Point Colour:")),
+        column(6, selectInput(
+          inputId = "select.dotcolor", label = NULL,
+          choices = cols3,
+          selected = graphical.par$col.pt,
+          selectize = F
+        ))
+      )
+    )
 
-    select.dotcolor.object = conditionalPanel(condition = "input.point_colour_title == true & input.color_by_select == ' '",
-                                              fixedRow(column(3, h5("Point Colour:")),
-                                                       column(6, selectInput(inputId="select.dotcolor",label=NULL,
-                                                                             choices=cols3,
-                                                                             selected=graphical.par$col.pt,
-                                                                             selectize = F))))
-    #    select.dotcolor.object = fixedRow(column(3, h5("Point Colour:")),
-    #                                      column(6, selectInput(inputId="select.dotcolor",label=NULL,
-    #                                                            choices=cols3,
-    #                                                            selected=graphical.par$col.pt)))
-    color.interior = conditionalPanel(condition = "input.point_colour_title == true",
-                                      fixedRow(column(3),
-                                               column(6, checkboxInput(inputId="color.interior",label = "Colour interior",
-                                                                       value = FALSE))))
-    #    color.interior = checkboxInput(inputId="color.interior",label = "Colour interior",
-    #                                   value = FALSE)
+    color.interior <- conditionalPanel(
+      condition = "input.point_colour_title == true",
+      fixedRow(
+        column(3),
+        column(6, checkboxInput(
+          inputId = "color.interior", label = "Colour interior",
+          value = FALSE
+        ))
+      )
+    )
 
-    #    select.dotcolor.interior.object = fixedRow(column(5, select.dotcolor.object),
-    #                                               column(4, color.interior))
-    if(is.null(graphical.par$cex.dotpt)){
-      graphical.par$cex.dotpt = 0.5
+    if (is.null(graphical.par$cex.dotpt)) {
+      graphical.par$cex.dotpt <- 0.5
     }
 
-    adjust.size.scale.object = fixedRow(column(3, h5("Overall size scale:")),
-                                        column(6, sliderInput("adjust.size.scale",
-                                                              label = NULL,
-                                                              min = 0.5,
-                                                              max = 2,
-                                                              value = 1, step = .05, ticks = FALSE)))
+    adjust.size.scale.object <- fixedRow(
+      column(3, h5("Overall size scale:")),
+      column(6, sliderInput("adjust.size.scale",
+        label = NULL,
+        min = 0.5,
+        max = 2,
+        value = 1, step = .05, ticks = FALSE
+      ))
+    )
 
 
-    adjust.size.points.dot.object = conditionalPanel(condition = "input.point_size_title == true",
-                                                     fixedRow(column(3, h5("Point size:")),
-                                                              column(6, sliderInput("adjust.size.points.dot",
-                                                                                    label = NULL,
-                                                                                    min = 0.1,
-                                                                                    max = 3.5,
-                                                                                    value=graphical.par$cex.dotpt,
-                                                                                    step=.05,
-                                                                                    ticks = FALSE))))
-    grid.title = h5(strong("Gridplot Options"))
+    adjust.size.points.dot.object <- conditionalPanel(
+      condition = "input.point_size_title == true",
+      fixedRow(
+        column(3, h5("Point size:")),
+        column(6, sliderInput("adjust.size.points.dot",
+          label = NULL,
+          min = 0.1,
+          max = 3.5,
+          value = graphical.par$cex.dotpt,
+          step = .05,
+          ticks = FALSE
+        ))
+      )
+    )
+    grid.title <- h5(strong("Gridplot Options"))
 
-    #    adjust.size.points.dot.object = fixedRow(column(3, h5("Point size:")),
-    #                                              column(6, sliderInput("adjust.size.points.dot",
-    #                                                                    label = NULL,
-    #                                                                    min = 0.1,
-    #                                                                    max = 3.5,
-    #                                                                    value=graphical.par$cex.dotpt,
-    #                                                                    step=.05,
-    #                                                                    ticks = FALSE)))
+    adjust.size.points.scatter.object <- conditionalPanel(
+      condition = "input.point_size_title == true",
+      fixedRow(
+        column(3, h5("Point size:")),
+        column(6, sliderInput("adjust.size.points.scatter",
+          label = NULL,
+          min = 0.1,
+          max = 3.5,
+          value = graphical.par$cex.dotpt,
+          step = .05,
+          ticks = FALSE
+        ))
+      )
+    )
 
-    adjust.size.points.scatter.object = conditionalPanel(condition = "input.point_size_title == true",
-                                                         fixedRow(column(3, h5("Point size:")),
-                                                                  column(6, sliderInput("adjust.size.points.scatter",
-                                                                                        label = NULL,
-                                                                                        min = 0.1,
-                                                                                        max = 3.5,
-                                                                                        value=graphical.par$cex.dotpt,
-                                                                                        step=.05,
-                                                                                        ticks = FALSE))))
+    adjust.grid.size.title <- h5(strong("Size"))
+    adjust.grid.size.object <- fixedRow(
+      column(3, h5("Bin size:")),
+      column(6, sliderInput("adjust.grid.size",
+        label = NULL,
+        min = 10, max = 250,
+        value = graphical.par$scatter.grid.bins,
+        step = 1,
+        ticks = FALSE
+      ))
+    )
 
-    #    adjust.size.points.scatter.object = fixedRow(column(3, h5("Point size:")),
-    #                                                 column(6, sliderInput("adjust.size.points.scatter",
-    #                                                                       label = NULL,
-    #                                                                       min = 0.1,
-    #                                                                       max = 3.5,
-    #                                                                       value=graphical.par$cex.dotpt,
-    #                                                                       step=.05,
-    #                                                                       ticks = FALSE)))
-
-
-    adjust.grid.size.title = h5(strong("Size"))
-    adjust.grid.size.object = fixedRow(column(3, h5("Bin size:")),
-                                       column(6, sliderInput("adjust.grid.size",
-                                                             label = NULL,
-                                                             min = 10, max = 250,
-                                                             value=graphical.par$scatter.grid.bins,
-                                                             step=1,
-                                                             ticks = FALSE)))
-
-    adjust.min.count.grid.object = fixedRow(column(3, h5("Min-count colour (% grey):")),
-                                            column(6, sliderInput("adjust.min.count.grid",
-                                                                  label = NULL,
-                                                                  min = 0,
-                                                                  max = 100,
-                                                                  value=convert.to.percent(graphical.par$alpha),
-                                                                  step=1,
-                                                                  ticks = FALSE)))
+    adjust.min.count.grid.object <- fixedRow(
+      column(3, h5("Min-count colour (% grey):")),
+      column(6, sliderInput("adjust.min.count.grid",
+        label = NULL,
+        min = 0,
+        max = 100,
+        value = convert.to.percent(graphical.par$alpha),
+        step = 1,
+        ticks = FALSE
+      ))
+    )
 
 
 
-    if(is.null(graphical.par$alpha)){
-      graphical.par$alpha = 1
+    if (is.null(graphical.par$alpha)) {
+      graphical.par$alpha <- 1
     }
-    adjust.transparency.object = conditionalPanel(condition = "input.point_colour_title == true",
-                                                  fixedRow(column(3, h5("Transparency:")),
-                                                           column(6, sliderInput("adjust.transparency",
-                                                                                 label = NULL, min = 0,
-                                                                                 max = 100,
-                                                                                 value=convert.to.percent(graphical.par$alpha),
-                                                                                 step=1, ticks = FALSE))))
+    adjust.transparency.object <- conditionalPanel(
+      condition = "input.point_colour_title == true",
+      fixedRow(
+        column(3, h5("Transparency:")),
+        column(6, sliderInput("adjust.transparency",
+          label = NULL, min = 0,
+          max = 100,
+          value = convert.to.percent(graphical.par$alpha),
+          step = 1, ticks = FALSE
+        ))
+      )
+    )
 
-    fillin.transparency.object = fixedRow(column(3, h5("Transparency:")),
-                                          column(6, sliderInput("fill.transparency",
-                                                                label = NULL, min = 0,
-                                                                max = 100,
-                                                                value=convert.to.percent(graphical.par$alpha),
-                                                                step=1, ticks = FALSE)))
-    #    adjust.transparency.object = fixedRow(column(3, h5("Transparency:")),
-    #                                          column(6, sliderInput("adjust.transparency",
-    #                                                                label = NULL, min = 0,
-    #                                                                max = 100,
-    #                                                                value=convert.to.percent(graphical.par$alpha),
-    #                                                                step=1, ticks = FALSE)))
+    fillin.transparency.object <- fixedRow(
+      column(3, h5("Transparency:")),
+      column(6, sliderInput("fill.transparency",
+        label = NULL, min = 0,
+        max = 100,
+        value = convert.to.percent(graphical.par$alpha),
+        step = 1, ticks = FALSE
+      ))
+    )
 
-    if(is.null(graphical.par$hex.bins)){
-      graphical.par$hex.bins = 20
+    if (is.null(graphical.par$hex.bins)) {
+      graphical.par$hex.bins <- 20
     }
-    adjust.hex.bins.title = h5(strong("Size"))
-    adjust.hex.bins.object = fixedRow(column(3, h5("Hexagon size:")),
-                                      column(6, sliderInput("adjust.hex.bins",
-                                                            label = NULL, min = 2,
-                                                            max = 70,
-                                                            value=graphical.par$hex.bins,
-                                                            step=1, ticks = FALSE)))
+    adjust.hex.bins.title <- h5(strong("Size"))
+    adjust.hex.bins.object <- fixedRow(
+      column(3, h5("Hexagon size:")),
+      column(6, sliderInput("adjust.hex.bins",
+        label = NULL, min = 2,
+        max = 70,
+        value = graphical.par$hex.bins,
+        step = 1, ticks = FALSE
+      ))
+    )
 
-    hex.bins.object.style = fixedRow(column(3, h5("Style:")),
-                                     column(6, selectInput(inputId="select.hex.style",label=NULL,
-                                                           choices= c("size", "alpha"),
-                                                           selected= "size",
-                                                           selectize = F)))
+    hex.bins.object.style <- fixedRow(
+      column(3, h5("Style:")),
+      column(6, selectInput(
+        inputId = "select.hex.style", label = NULL,
+        choices = c("size", "alpha"),
+        selected = "size",
+        selectize = F
+      ))
+    )
 
-
-
-
-    adjust.num.bins.object = NULL
-    if((!is.null(input$vari1)&
-        !is.null(input$vari2))&&
-       (input$vari1%in%colnames(get.data.set())&&
-        (input$vari2%in%colnames(get.data.set())|
-         input$vari2%in%"none"))){
-      temp = list()
-      temp$x = get.data.set()[,input$vari1]
-      if(input$vari2%in%'none'){
-        temp$y = NULL
-      }else{
-        temp$y = get.data.set()[,input$vari2]
+    adjust.num.bins.object <- NULL
+    if ((!is.null(input$vari1) &
+      !is.null(input$vari2)) &&
+      (input$vari1 %in% colnames(get.data.set()) &&
+        (input$vari2 %in% colnames(get.data.set()) |
+          input$vari2 %in% "none"))) {
+      temp <- list()
+      temp$x <- get.data.set()[, input$vari1]
+      if (input$vari2 %in% "none") {
+        temp$y <- NULL
+      } else {
+        temp$y <- get.data.set()[, input$vari2]
       }
-      temp$plot = F
-      tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
-      #####################################################################
-      #      large.sample = T
-      large.sample = search.name(tester,"largesample")[[1]]
-      if(is.null(large.sample)){
-        large.sample = F
+      temp$plot <- F
+      tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+
+      large.sample <- search.name(tester, "largesample")[[1]]
+      if (is.null(large.sample)) {
+        large.sample <- F
       }
-      #####################################################################
+
       # bar plot with one factor variable
       # vari1 = factor , vari2 = none
-      if(input$vari2%in%"none"&&
-         (class(get.data.set()[,input$vari1])%in%"factor"|
-          class(get.data.set()[,input$vari1])%in%"character")){
+      if (input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character")) {
+        ret <- list(
+          select.bg.object,
+          adjust.size.scale.object,
+          bar.colour.title,
+          select.barcolor.object
+        )
 
-        ret = list(select.bg.object,
-                   adjust.size.scale.object,
-                   bar.colour.title,
-                   select.barcolor.object)
-
-        if(!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object,
-                     sorting.title,
-                     sortbysize.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     fill.color.object,
-                     ggtheme.object,
-                     rotation.object,
-                     point.options.title,
-                     ggsize.object,
-                     line.title,
-                     line.width.object,
-                     sorting.title,
-                     sortbysize.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type %in% c("(gg) pie", "(gg) donut")) {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     sorting.title,
-                     sortbysize.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) gridplot") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object,
-                     grid.title,
-                     gridplot.object)
-
+        if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) column/row bar") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object,
+            sorting.title,
+            sortbysize.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) stacked column/row") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) lollipop") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            fill.color.object,
+            ggtheme.object,
+            rotation.object,
+            point.options.title,
+            ggsize.object,
+            line.title,
+            line.width.object,
+            sorting.title,
+            sortbysize.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type %in% c("(gg) pie", "(gg) donut")) {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            sorting.title,
+            sortbysize.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) gridplot") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object,
+            grid.title,
+            gridplot.object
+          )
         }
         # bar plot with two factor variables
         # vari1 = factor , vari2 = factor
-      }else if(!input$vari2%in%"none"&&
-               ((class(get.data.set()[,input$vari1])%in%"factor"|
-                 class(get.data.set()[,input$vari1])%in%"character")&&
-                (class(get.data.set()[,input$vari2])%in%"factor"|
-                 class(get.data.set()[,input$vari2])%in%"character"))){
-        select.bg.object = fixedRow(column(3, h5("Background colour:")),
-                                    column(6, selectInput(inputId="select.bg1",label=NULL,
-                                                          choices=cols1,
-                                                          selected=graphical.par$bg,
-                                                          selectize = F)))
-        ret = list(select.bg.object,
-                   adjust.size.scale.object,
-                   bar.colour.title)
+      } else if (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "factor" |
+            class(get.data.set()[, input$vari2]) %in% "character"))) {
+        select.bg.object <- fixedRow(
+          column(3, h5("Background colour:")),
+          column(6, selectInput(
+            inputId = "select.bg1", label = NULL,
+            choices = cols1,
+            selected = graphical.par$bg,
+            selectize = F
+          ))
+        )
+        ret <- list(
+          select.bg.object,
+          adjust.size.scale.object,
+          bar.colour.title
+        )
 
-        if(!is.null(input$select.plot.type) && input$select.plot.type == "(gg) column/row bar") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object,
-                     sorting.title,
-                     sortbysize.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) stacked column/row") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) lollipop") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object,
-                     point.options.title,
-                     ggsize.object,
-                     line.title,
-                     line.width.object,
-                     sorting.title,
-                     sortbysize.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) frequency polygons") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object,
-                     point.options.title,
-                     ggsize.object,
-                     line.title,
-                     line.width.object)
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) diverging stacked bar (likert)") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object)
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) heatmap") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object
+        if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) column/row bar") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object,
+            sorting.title,
+            sortbysize.object
           )
-
-        } else if (!is.null(input$select.plot.type) && input$select.plot.type == "(gg) spine/pyramid") {
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     colourpalette.object,
-                     ggtheme.object,
-                     rotation.object)
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) stacked column/row") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) lollipop") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object,
+            point.options.title,
+            ggsize.object,
+            line.title,
+            line.width.object,
+            sorting.title,
+            sortbysize.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) frequency polygons") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object,
+            point.options.title,
+            ggsize.object,
+            line.title,
+            line.width.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) diverging stacked bar (likert)") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) heatmap") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type == "(gg) spine/pyramid") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            colourpalette.object,
+            ggtheme.object,
+            rotation.object
+          )
         }
         # dotplot or histogram for numeric varible in x or
         # dotplot or histogram for one numeric one factor variable
         # vari1 = numeric , vari2 = none
         # vari1 = factor , vari2 = numeric or
         # vari1 = numeric , vari2 = factor
-      }else if((input$vari2%in%"none"&&
-                (class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer"))||
-               (!input$vari2%in%"none"&&
-                ((class(get.data.set()[,input$vari1])%in%"factor"|
-                  class(get.data.set()[,input$vari1])%in%"character")&&
-                 (class(get.data.set()[,input$vari2])%in%"integer"|
-                  class(get.data.set()[,input$vari2])%in%"numeric")))||
-               (!input$vari2%in%"none"&&
-                ((class(get.data.set()[,input$vari1])%in%"integer"|
-                  class(get.data.set()[,input$vari1])%in%"numeric")&
-                 (class(get.data.set()[,input$vari2])%in%"character"|
-                  class(get.data.set()[,input$vari2])%in%"factor")))){
-
-        ret = list(select.bg.object,
-                   adjust.size.scale.object,
-                   show.boxplot.title,
-                   show.mean.title,
-                   point.size.title,
-                   adjust.size.points.dot.object,
-                   point.colour.title,
-                   select.dotcolor.object,
-                   color.interior,
-                   #                   select.dotcolor.interior.object,
-                   adjust.transparency.object)
-        if((!is.null(input$select.plot.type)&&
-            (input$select.plot.type%in%"histogram"||
-             (large.sample&&input$select.plot.type%in%"default")))||
-           !is.null(plot.par$design)){
+      } else if ((input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer")) ||
+        (!input$vari2 %in% "none" &&
+          ((class(get.data.set()[, input$vari1]) %in% "factor" |
+            class(get.data.set()[, input$vari1]) %in% "character") &&
+            (class(get.data.set()[, input$vari2]) %in% "integer" |
+              class(get.data.set()[, input$vari2]) %in% "numeric"))) ||
+        (!input$vari2 %in% "none" &&
+          ((class(get.data.set()[, input$vari1]) %in% "integer" |
+            class(get.data.set()[, input$vari1]) %in% "numeric") &
+            (class(get.data.set()[, input$vari2]) %in% "character" |
+              class(get.data.set()[, input$vari2]) %in% "factor")))) {
+        ret <- list(
+          select.bg.object,
+          adjust.size.scale.object,
+          show.boxplot.title,
+          show.mean.title,
+          point.size.title,
+          adjust.size.points.dot.object,
+          point.colour.title,
+          select.dotcolor.object,
+          color.interior,
+          adjust.transparency.object
+        )
+        if ((!is.null(input$select.plot.type) &&
+          (input$select.plot.type %in% "histogram" ||
+            (large.sample && input$select.plot.type %in% "default"))) ||
+          !is.null(plot.par$design)) {
           isolate({
-            temp = vis.par()
+            temp <- vis.par()
           })
-          temp$plot = F
-          nbins=NULL
-          if(is.null(get.nbins())){
-            nbins  = search.name(tester,"hist.bins")[[1]][1]
-            #           nbins = nbins[1]
-          }else{
-            nbins = get.nbins()
+          temp$plot <- F
+          nbins <- NULL
+          if (is.null(get.nbins())) {
+            nbins <- search.name(tester, "hist.bins")[[1]][1]
+          } else {
+            nbins <- get.nbins()
           }
-          if(is.null(nbins)||is.na(nbins)){
-            nbins=50
+          if (is.null(nbins) || is.na(nbins)) {
+            nbins <- 50
           }
 
-          m = length(unique(get.data.set()[,input$vari1]))
-          if(!is.null(input$vari2)&&
-             !input$vari2%in%"none"&&
-             input$vari2%in%colnames(get.data.set())){
-            m = max(c(length(unique(get.data.set()[,input$vari1])),
-                      length(unique(get.data.set()[,input$vari2]))))
+          m <- length(unique(get.data.set()[, input$vari1]))
+          if (!is.null(input$vari2) &&
+            !input$vari2 %in% "none" &&
+            input$vari2 %in% colnames(get.data.set())) {
+            m <- max(c(
+              length(unique(get.data.set()[, input$vari1])),
+              length(unique(get.data.set()[, input$vari2]))
+            ))
           }
-          if(m<nbins){
-            m=nbins
+          if (m < nbins) {
+            m <- nbins
           }
-          adjust.num.bins.title = h5(strong("Size"))
-          adjust.num.bins.object = fixedRow(column(3, h5("Number of bars:")),
-                                            column(6, sliderInput("adjust.num.bins", label = NULL, min = 1,
-                                                                  max = m, value=nbins,step=1, ticks = FALSE)))
-          if(is.null(plot.par$design)){
-            ret=list(select.bg.object,
-                     adjust.size.scale.object,
-                     bar.colour.title,
-                     select.barcolor.object,
-                     adjust.num.bins.title,
-                     adjust.num.bins.object,
-                     show.boxplot.title,
-                     show.mean.title)
-          }else{
-            ret=list(select.bg.object,
-                     adjust.size.scale.object,
-                     bar.colour.title,
-                     select.barcolor.object,
-                     adjust.num.bins.title,
-                     adjust.num.bins.object,
-                     show.boxplot.title,
-                     show.mean.title)
+          adjust.num.bins.title <- h5(strong("Size"))
+          adjust.num.bins.object <- fixedRow(
+            column(3, h5("Number of bars:")),
+            column(6, sliderInput("adjust.num.bins",
+              label = NULL, min = 1,
+              max = m, value = nbins, step = 1, ticks = FALSE
+            ))
+          )
+          if (is.null(plot.par$design)) {
+            ret <- list(
+              select.bg.object,
+              adjust.size.scale.object,
+              bar.colour.title,
+              select.barcolor.object,
+              adjust.num.bins.title,
+              adjust.num.bins.object,
+              show.boxplot.title,
+              show.mean.title
+            )
+          } else {
+            ret <- list(
+              select.bg.object,
+              adjust.size.scale.object,
+              bar.colour.title,
+              select.barcolor.object,
+              adjust.num.bins.title,
+              adjust.num.bins.object,
+              show.boxplot.title,
+              show.mean.title
+            )
           }
         } else {
-
-          if(input$vari2%in%"none"&&
-             (class(get.data.set()[,input$vari1])%in%"numeric"|
-              class(get.data.set()[,input$vari1])%in%"integer")) {
-
-            if(!is.null(input$select.plot.type) &&
-               (input$select.plot.type == "(gg) dot strip")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       point.options.title,
-                       ggsize.object,
-                       fillin.transparency.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) barcode")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       barcode.title,
-                       fillin.transparency.object,
-                       barwidth.object,
-                       barheight.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) boxplot")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       line.title,
-                       line.width.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) beeswarm")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       Beeswarm.title,
-                       swarmWidth,
-                       swarmMethod
+          if (input$vari2 %in% "none" &&
+            (class(get.data.set()[, input$vari1]) %in% "numeric" |
+              class(get.data.set()[, input$vari1]) %in% "integer")) {
+            if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) dot strip")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                point.options.title,
+                ggsize.object,
+                fillin.transparency.object
               )
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) violin")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       density.title,
-                       smooth.adjust.object,
-                       fillin.transparency.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) density")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       density.title,
-                       smooth.adjust.object,
-                       fillin.transparency.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) column/row bar")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) barcode")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                barcode.title,
+                fillin.transparency.object,
+                barwidth.object,
+                barheight.object
               )
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) lollipop")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       point.options.title,
-                       ggsize.object,
-                       line.title,
-                       line.width.object
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) boxplot")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                line.title,
+                line.width.object
               )
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) cumulative curve")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       fill.color.object,
-                       ggtheme.object,
-                       rotation.object,
-                       line.title,
-                       line.width.object
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) beeswarm")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                Beeswarm.title,
+                swarmWidth,
+                swarmMethod
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) violin")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                density.title,
+                smooth.adjust.object,
+                fillin.transparency.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) density")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                density.title,
+                smooth.adjust.object,
+                fillin.transparency.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) column/row bar")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) lollipop")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                point.options.title,
+                ggsize.object,
+                line.title,
+                line.width.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) cumulative curve")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                fill.color.object,
+                ggtheme.object,
+                rotation.object,
+                line.title,
+                line.width.object
               )
             }
-
-
           } else {
-
-            if(!is.null(input$select.plot.type) &&
-               (input$select.plot.type == "(gg) dot strip")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       point.options.title,
-                       ggsize.object,
-                       fillin.transparency.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) barcode")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       barcode.title,
-                       fillin.transparency.object,
-                       barwidth.object,
-                       barheight.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) boxplot")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       line.title,
-                       line.width.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) violin")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       density.title,
-                       smooth.adjust.object,
-                       fillin.transparency.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) density")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       density.title,
-                       smooth.adjust.object,
-                       fillin.transparency.object)
-            }  else if(!is.null(input$select.plot.type) &&
-                       (input$select.plot.type == "(gg) cumulative curve")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       line.title,
-                       line.width.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) density (ridgeline)")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) pyramid")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       pyramid.title,
-                       pyramid.slider.object)
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) column/row bar")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object
+            if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) dot strip")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                point.options.title,
+                ggsize.object,
+                fillin.transparency.object
               )
-            } else if(!is.null(input$select.plot.type) &&
-                      (input$select.plot.type == "(gg) beeswarm")) {
-              ret=list(select.bg.object,
-                       adjust.size.scale.object,
-                       colourpalette.object,
-                       ggtheme.object,
-                       rotation.object,
-                       Beeswarm.title,
-                       swarmWidth,
-                       swarmMethod
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) barcode")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                barcode.title,
+                fillin.transparency.object,
+                barwidth.object,
+                barheight.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) boxplot")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                line.title,
+                line.width.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) violin")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                density.title,
+                smooth.adjust.object,
+                fillin.transparency.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) density")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                density.title,
+                smooth.adjust.object,
+                fillin.transparency.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) cumulative curve")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                line.title,
+                line.width.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) density (ridgeline)")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) pyramid")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                pyramid.title,
+                pyramid.slider.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) column/row bar")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object
+              )
+            } else if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type == "(gg) beeswarm")) {
+              ret <- list(
+                select.bg.object,
+                adjust.size.scale.object,
+                colourpalette.object,
+                ggtheme.object,
+                rotation.object,
+                Beeswarm.title,
+                swarmWidth,
+                swarmMethod
               )
             }
           }
-
-
         }
 
 
         # scatter plot
         # vari1 = numeric , vari2 = numeric
-      }else if(!input$vari2%in%"none"&&
-               ((class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer")&&
-                (class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer"))){
+      } else if (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer") &&
+          (class(get.data.set()[, input$vari1]) %in% "numeric" |
+            class(get.data.set()[, input$vari1]) %in% "integer"))) {
+        resize.by.object <- conditionalPanel(
+          condition = "input.point_size_title == true",
+          fixedRow(
+            column(3, h5("Resize points by:")),
+            column(6, selectInput("resize.by.select",
+              label = NULL,
+              choices = c(" ", get.numeric.column.names(vis.data())),
+              selected = "input$resize.by.select",
+              selectize = F
+            ))
+          )
+        )
 
-        resize.by.object = conditionalPanel(condition = "input.point_size_title == true",
-                                            fixedRow(column(3, h5("Resize points by:")),
-                                                     column(6, selectInput("resize.by.select",
-                                                                           label=NULL,
-                                                                           choices=c(" ",get.numeric.column.names(vis.data())),
-                                                                           selected = "input$resize.by.select",
-                                                                           selectize = F))))
-        #                resize.by.object = fixedRow(column(3, h5("Resize points by:")),
-        #                                    column(6, selectInput("resize.by.select",
-        #                                                          label=NULL,
-        #                                                          choices=c(" ",get.numeric.column.names(vis.data())),
-        #                                                          selected = "input$resize.by.select")))
-        ret = list(select.bg.object,
-                   adjust.size.scale.object,
-                   point.size.title,
-                   adjust.size.points.scatter.object,
-                   resize.by.object,
-                   point.colour.title,
-                   select.dotcolor.object,
-                   color.interior,
-                   #                   select.dotcolor.interior.object,
-                   adjust.transparency.object)
-        if(!is.null(input$select.plot.type)&&
-           (input$select.plot.type%in%"grid-density plot"||
-            (large.sample&&input$select.plot.type%in%"default"))){
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     adjust.grid.size.title,
-                     adjust.grid.size.object)
-        }else if(!is.null(input$select.plot.type)&&
-                 input$select.plot.type%in%"hexagonal binning"){
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     adjust.hex.bins.title,
-                     adjust.hex.bins.object,
-                     hex.bins.object.style,
-                     point.colour.title,
-                     select.dotcolor.object)
-        }else if(!is.null(input$select.plot.type)&&
-                 input$select.plot.type%in%"grid-density"){
-          ret = list(select.bg.object,
-                     adjust.size.scale.object,
-                     adjust.grid.size.title,
-                     adjust.grid.size.object)
+        ret <- list(
+          select.bg.object,
+          adjust.size.scale.object,
+          point.size.title,
+          adjust.size.points.scatter.object,
+          resize.by.object,
+          point.colour.title,
+          select.dotcolor.object,
+          color.interior,
+          adjust.transparency.object
+        )
+        if (!is.null(input$select.plot.type) &&
+          (input$select.plot.type %in% "grid-density plot" ||
+            (large.sample && input$select.plot.type %in% "default"))) {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            adjust.grid.size.title,
+            adjust.grid.size.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type %in% "hexagonal binning") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            adjust.hex.bins.title,
+            adjust.hex.bins.object,
+            hex.bins.object.style,
+            point.colour.title,
+            select.dotcolor.object
+          )
+        } else if (!is.null(input$select.plot.type) &&
+          input$select.plot.type %in% "grid-density") {
+          ret <- list(
+            select.bg.object,
+            adjust.size.scale.object,
+            adjust.grid.size.title,
+            adjust.grid.size.object
+          )
         }
       }
     }
@@ -2812,119 +3026,132 @@ output$plot.appearance.panel = renderUI({
 # observe the plot type and change 'Advanced options' select input
 observe({
   input$select.plot.type
-  if(!is.null(input$vari1)&!is.null(input$vari2)){
+  if (!is.null(input$vari1) & !is.null(input$vari2)) {
     isolate({
-      if(input$vari1%in%colnames(get.data.set())&&
-         (input$vari2%in%colnames(get.data.set())||
-          input$vari2%in%"none")){
-        temp = list()
-        temp$x = get.data.set()[,input$vari1]
-        if(input$vari2%in%'none'){
-          temp$y = NULL
-        }else{
-          temp$y = get.data.set()[,input$vari2]
+      if (input$vari1 %in% colnames(get.data.set()) &&
+        (input$vari2 %in% colnames(get.data.set()) ||
+          input$vari2 %in% "none")) {
+        temp <- list()
+        temp$x <- get.data.set()[, input$vari1]
+        if (input$vari2 %in% "none") {
+          temp$y <- NULL
+        } else {
+          temp$y <- get.data.set()[, input$vari2]
         }
-        temp$plot = F
-        tester = try(do.call(iNZightPlots:::iNZightPlot,temp))
-        ####################################################################
-        #        large.sample = T
-        large.sample = search.name(tester,"largesample")[[1]]
-        if(is.null(large.sample)){
-          large.sample = F
+        temp$plot <- F
+        tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+
+        large.sample <- search.name(tester, "largesample")[[1]]
+        if (is.null(large.sample)) {
+          large.sample <- F
         }
-        ####################################################################
-        if(!is.null(input$advanced_options)){
-          sel = input$advanced_options
-          ch = NULL
+
+        if (!is.null(input$advanced_options)) {
+          sel <- input$advanced_options
+          ch <- NULL
           # vari1 = factor, vari2 = none
-          if((class(get.data.set()[,input$vari1])%in%"factor"|
-              class(get.data.set()[,input$vari1])%in%"character")&
-             input$vari2%in%"none"){
-            ch = c('Code more variables',
-                   'Change plot appearance',
-                   'Customize labels',
-                   'Adjust number of Bars')
-            if(!sel%in%ch){
-              sel = 'Change plot appearance'
+          if ((class(get.data.set()[, input$vari1]) %in% "factor" |
+            class(get.data.set()[, input$vari1]) %in% "character") &
+            input$vari2 %in% "none") {
+            ch <- c(
+              "Code more variables",
+              "Change plot appearance",
+              "Customize labels",
+              "Adjust number of Bars"
+            )
+            if (!sel %in% ch) {
+              sel <- "Change plot appearance"
             }
             # vari1 = factor, vari2 = factor
-          }else if((class(get.data.set()[,input$vari1])%in%"factor"|
-                    class(get.data.set()[,input$vari1])%in%"character")&
-                   !input$vari2%in%"none"&&
-                   (class(get.data.set()[,input$vari2])%in%"factor"|
-                    class(get.data.set()[,input$vari2])%in%"character")){
-            ch = c('Change plot appearance',
-                   'Customize labels',
-                   'Adjust number of Bars')
-            if(!sel%in%ch){
-              sel = 'Change plot appearance'
+          } else if ((class(get.data.set()[, input$vari1]) %in% "factor" |
+            class(get.data.set()[, input$vari1]) %in% "character") &
+            !input$vari2 %in% "none" &&
+            (class(get.data.set()[, input$vari2]) %in% "factor" |
+              class(get.data.set()[, input$vari2]) %in% "character")) {
+            ch <- c(
+              "Change plot appearance",
+              "Customize labels",
+              "Adjust number of Bars"
+            )
+            if (!sel %in% ch) {
+              sel <- "Change plot appearance"
             }
             # vari1 = numeric, vari2 = none or
             # vari1 = factor, vari2 = numeric or
             # vari1 = numeric, vari2 = factor
-          }else if(((class(get.data.set()[,input$vari1])%in%"numeric"|
-                     class(get.data.set()[,input$vari1])%in%"integer")&
-                    input$vari2%in%"none")|
-                   ((class(get.data.set()[,input$vari1])%in%"factor"|
-                     class(get.data.set()[,input$vari1])%in%"character")&
-                    !input$vari2%in%"none"&&
-                    (class(get.data.set()[,input$vari2])%in%"integer"|
-                     class(get.data.set()[,input$vari2])%in%"numeric"))|
-                   ((class(get.data.set()[,input$vari1])%in%"integer"|
-                     class(get.data.set()[,input$vari1])%in%"numeric")&
-                    !input$vari2%in%"none"&&
-                    (class(get.data.set()[,input$vari2])%in%"factor"|
-                     class(get.data.set()[,input$vari2])%in%"character"))){
-            ch = c('Code more variables',
-                   'Change plot appearance',
-                   'Identify points',
-                   'Customize labels',
-                   'Adjust axis limits')
-            if(!is.null(input$select.plot.type)&&
-               (input$select.plot.type%in%"histogram"||
-                (large.sample&&
-                 input$select.plot.type%in%"default"))){
-              ch = c('Change plot appearance',
-                     'Customize labels',
-                     'Adjust axis limits')
+          } else if (((class(get.data.set()[, input$vari1]) %in% "numeric" |
+            class(get.data.set()[, input$vari1]) %in% "integer") &
+            input$vari2 %in% "none") |
+            ((class(get.data.set()[, input$vari1]) %in% "factor" |
+              class(get.data.set()[, input$vari1]) %in% "character") &
+              !input$vari2 %in% "none" &&
+              (class(get.data.set()[, input$vari2]) %in% "integer" |
+                class(get.data.set()[, input$vari2]) %in% "numeric")) |
+            ((class(get.data.set()[, input$vari1]) %in% "integer" |
+              class(get.data.set()[, input$vari1]) %in% "numeric") &
+              !input$vari2 %in% "none" &&
+              (class(get.data.set()[, input$vari2]) %in% "factor" |
+                class(get.data.set()[, input$vari2]) %in% "character"))) {
+            ch <- c(
+              "Code more variables",
+              "Change plot appearance",
+              "Identify points",
+              "Customize labels",
+              "Adjust axis limits"
+            )
+            if (!is.null(input$select.plot.type) &&
+              (input$select.plot.type %in% "histogram" ||
+                (large.sample &&
+                  input$select.plot.type %in% "default"))) {
+              ch <- c(
+                "Change plot appearance",
+                "Customize labels",
+                "Adjust axis limits"
+              )
             }
-            if(!sel%in%ch){
-              sel = 'Change plot appearance'
+            if (!sel %in% ch) {
+              sel <- "Change plot appearance"
             }
             # vari1 = numeric, vari2 = numeric
-          }else if((class(get.data.set()[,input$vari1])%in%"numeric"|
-                    class(get.data.set()[,input$vari1])%in%"integer")&
-                   !input$vari2%in%"none"&&
-                   (class(get.data.set()[,input$vari2])%in%"numeric"|
-                    class(get.data.set()[,input$vari2])%in%"integer")){
-            ch = c('Code more variables',
-                   'Add trend curves',
-                   'Add x=y line',
-                   'Add a jitter',
-                   'Add rugs',
-                   'Join points by line',
-                   'Change plot appearance',
-                   'Identify points',
-                   'Customize labels',
-                   'Adjust axis limits')
-            if(!is.null(input$select.plot.type)&&
-               ((input$select.plot.type%in%"grid-density"|
-                 input$select.plot.type%in%"hexagonal binning")||
-                large.sample&&
-                input$select.plot.type%in%"default")){
-              ch = c('Add trend curves',
-                     'Add x=y line',
-                     'Change plot appearance',
-                     'Customize labels',
-                     'Adjust axis limits')
+          } else if ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+            class(get.data.set()[, input$vari1]) %in% "integer") &
+            !input$vari2 %in% "none" &&
+            (class(get.data.set()[, input$vari2]) %in% "numeric" |
+              class(get.data.set()[, input$vari2]) %in% "integer")) {
+            ch <- c(
+              "Code more variables",
+              "Add trend curves",
+              "Add x=y line",
+              "Add a jitter",
+              "Add rugs",
+              "Join points by line",
+              "Change plot appearance",
+              "Identify points",
+              "Customize labels",
+              "Adjust axis limits"
+            )
+            if (!is.null(input$select.plot.type) &&
+              ((input$select.plot.type %in% "grid-density" |
+                input$select.plot.type %in% "hexagonal binning") ||
+                large.sample &&
+                  input$select.plot.type %in% "default")) {
+              ch <- c(
+                "Add trend curves",
+                "Add x=y line",
+                "Change plot appearance",
+                "Customize labels",
+                "Adjust axis limits"
+              )
             }
-            if(!sel%in%ch){
-              sel = 'Change plot appearance'
+            if (!sel %in% ch) {
+              sel <- "Change plot appearance"
             }
           }
-          updateSelectInput(session,inputId = "advanced_options",
-                            choices = ch,
-                            selected = sel)
+          updateSelectInput(session,
+            inputId = "advanced_options",
+            choices = ch,
+            selected = sel
+          )
         }
       }
     })
@@ -2933,7 +3160,7 @@ observe({
 
 
 
-output$plotly_inter = renderPlotly({
+output$plotly_inter <- renderPlotly({
   vis.par()
   input$vari1
   input$vari2
@@ -2941,18 +3168,14 @@ output$plotly_inter = renderPlotly({
   input$subs2
 
   isolate({
-    temp = vis.par()
-    #temp.x = temp$x
-    #temp$x=temp$y
-    #temp$y=temp.x
-    #temp.varnames.x = temp$varnames$x
-    #temp$varnames$x = temp$varnames$y
-    #temp$varnames$y = temp.varnames.x
-    if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
-      temp$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
+    temp <- vis.par()
+
+    if (!is.null(input$select.plot.type) &&
+      length(input$select.plot.type) > 0) {
+      temp$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
       pdf(NULL)
       do.call(iNZightPlots:::iNZightPlot, temp)
-      g<-plotly::ggplotly()
+      g <- plotly::ggplotly()
       dev.off()
       g
     }
@@ -2960,7 +3183,7 @@ output$plotly_inter = renderPlotly({
 })
 
 ## open plotly in a new window
-output$plotly_nw = renderUI({
+output$plotly_nw <- renderUI({
   vis.par()
   input$vari1
   input$vari2
@@ -2968,13 +3191,14 @@ output$plotly_nw = renderUI({
   input$subs2
 
   isolate({
-    temp = vis.par()
-    if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
-      temp$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
+    temp <- vis.par()
+    if (!is.null(input$select.plot.type) &&
+      length(input$select.plot.type) > 0) {
+      temp$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
 
       curdir <- getwd()
       on.exit(setwd(curdir))
-      #set to temp directory
+      # set to temp directory
       tdir <- tempdir()
       setwd(tdir)
       pdf(NULL)
@@ -2987,11 +3211,14 @@ output$plotly_nw = renderUI({
       list(
         br(),
         br(),
-        tags$a(href = "path/index.html",
-               "Open in a new window",
-               target="_blank"),
+        tags$a(
+          href = "path/index.html",
+          "Open in a new window",
+          target = "_blank"
+        ),
         br(),
-        br())
+        br()
+      )
     }
   })
 })
@@ -3012,29 +3239,45 @@ observe({
   input$sub2_level
   input$subs2
   isolate({
-    tryCatch({
-      if(!is.null(input$select.plot.type) &&
-         input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot",
-                                       "(gg) beeswarm", "(gg) violin", "(gg) density", "(gg) stacked column/row",
-                                       "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
-                                       "(gg) diverging stacked bar (likert)",
-                                       "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons", "(gg) spine/pyramid",
-                                       "(gg) pyramid",
-                                       "")) {
-        hideTab(inputId = "plot_selector", target = "1")
-        showTab(inputId = "plot_selector", target = "2")
-      } else if ((!is.null(input$select.plot.type) &&  input$select.plot.type %in% c("(gg) pie", "(gg) gridplot",
-                                                                                     "(gg) donut", "(gg) density (ridgeline)")) ||
-                 (!is.null(input$sub1_level) && input$sub1_level == "_MULTI" && input$subs1 != "none") ||
-                 !is.null(input$sub2_level) && input$subs2 != "none") {
-        hideTab(inputId = "plot_selector", target = "2")
-        hideTab(inputId = "plot_selector", target = "1")
-      } else {
-        hideTab(inputId = "plot_selector", target = "2")
-        showTab(inputId = "plot_selector", target = "1")
+    tryCatch(
+      {
+        if (!is.null(input$select.plot.type) &&
+          input$select.plot.type %in% c(
+            "(gg) dot strip", "(gg) barcode", "(gg) boxplot",
+            "(gg) beeswarm", "(gg) violin", "(gg) density",
+            "(gg) stacked column/row",
+            "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
+            "(gg) diverging stacked bar (likert)",
+            "(gg) barcode", "(gg) heatmap", "(gg) frequency polygons",
+            "(gg) spine/pyramid", "(gg) pyramid",
+            ""
+          )) {
+          hideTab(inputId = "plot_selector", target = "1")
+          showTab(inputId = "plot_selector", target = "2")
+        } else if (
+          (
+            !is.null(input$select.plot.type) &&
+              input$select.plot.type %in% c(
+                "(gg) pie", "(gg) gridplot",
+                "(gg) donut", "(gg) density (ridgeline)"
+              )
+          ) || (
+            !is.null(input$sub1_level) && input$sub1_level == "_MULTI" &&
+              input$subs1 != "none"
+          ) ||
+            !is.null(input$sub2_level) && input$subs2 != "none"
+        ) {
+          hideTab(inputId = "plot_selector", target = "2")
+          hideTab(inputId = "plot_selector", target = "1")
+        } else {
+          hideTab(inputId = "plot_selector", target = "2")
+          showTab(inputId = "plot_selector", target = "1")
+        }
+      },
+      error = function(e) {
+        print(e)
       }
-    }, error = function(e){print(e)})
-
+    )
   })
 })
 
@@ -3042,40 +3285,45 @@ observe({
 observe({
   input$fill.color
   isolate({
-    if(!is.null(input$fill.color))
-      graphical.par$fill_colour = input$fill.color
+    if (!is.null(input$fill.color)) {
+      graphical.par$fill_colour <- input$fill.color
+    }
   })
 })
 
 observe({
   input$rotation
   isolate({
-    if(!is.null(input$rotation))
-      graphical.par$rotation = input$rotation
+    if (!is.null(input$rotation)) {
+      graphical.par$rotation <- input$rotation
+    }
   })
 })
 
 observe({
   input$gg.size
   isolate({
-    if(!is.null(input$gg.size))
-      graphical.par$gg_size = input$gg.size
+    if (!is.null(input$gg.size)) {
+      graphical.par$gg_size <- input$gg.size
+    }
   })
 })
 
 observe({
   input$gg.swarmMethod
   isolate({
-    if(!is.null(input$gg.swarmMethod))
-      graphical.par$gg_method = input$gg.swarmMethod
+    if (!is.null(input$gg.swarmMethod)) {
+      graphical.par$gg_method <- input$gg.swarmMethod
+    }
   })
 })
 
 observe({
   input$select.hex.style
   isolate({
-    if(!is.null(input$select.hex.style))
-      graphical.par$hex.style = input$select.hex.style
+    if (!is.null(input$select.hex.style)) {
+      graphical.par$hex.style <- input$select.hex.style
+    }
   })
 })
 
@@ -3083,16 +3331,18 @@ observe({
 observe({
   input$rotationx
   isolate({
-    if(!is.null(input$rotationx))
-      graphical.par$rotate_labels$x = input$rotationx
+    if (!is.null(input$rotationx)) {
+      graphical.par$rotate_labels$x <- input$rotationx
+    }
   })
 })
 
 observe({
   input$pyramid.bins
   isolate({
-    if(!is.null(input$pyramid.bins))
-      graphical.par$gg_bins = as.numeric(input$pyramid.bins)
+    if (!is.null(input$pyramid.bins)) {
+      graphical.par$gg_bins <- as.numeric(input$pyramid.bins)
+    }
   })
 })
 
@@ -3101,24 +3351,27 @@ observe({
 observe({
   input$grid.square
   isolate({
-    if(!is.null(input$grid.square))
-      graphical.par$gg_perN = input$grid.square
+    if (!is.null(input$grid.square)) {
+      graphical.par$gg_perN <- input$grid.square
+    }
   })
 })
 
 observe({
   input$rotationy
   isolate({
-    if(!is.null(input$rotationy))
-      graphical.par$rotate_labels$y = input$rotationy
+    if (!is.null(input$rotationy)) {
+      graphical.par$rotate_labels$y <- input$rotationy
+    }
   })
 })
 
 observe({
   input$bar.width
   isolate({
-    if(!is.null(input$bar.width))
-      graphical.par$gg_width = input$bar.width
+    if (!is.null(input$bar.width)) {
+      graphical.par$gg_width <- input$bar.width
+    }
   })
 })
 
@@ -3126,120 +3379,131 @@ observe({
 observe({
   input$gg.swarmwidth
   isolate({
-    if(!is.null(input$gg.swarmwidth))
-      graphical.par$gg_swarmwidth = input$gg.swarmwidth
+    if (!is.null(input$gg.swarmwidth)) {
+      graphical.par$gg_swarmwidth <- input$gg.swarmwidth
+    }
   })
 })
 
 observe({
   input$sort.by.size
   isolate({
-    if(!is.null(input$sort.by.size))
-      graphical.par$ordered = switch(input$sort.by.size,
-                                     "None" = FALSE,
-                                     "Ascending" = "asc",
-                                     "Descending" = "desc")
+    if (!is.null(input$sort.by.size)) {
+      graphical.par$ordered <- switch(input$sort.by.size,
+        "None" = FALSE,
+        "Ascending" = "asc",
+        "Descending" = "desc"
+      )
+    }
   })
 })
 
 observe({
   input$line.width
   isolate({
-    if(!is.null(input$line.width))
-      graphical.par$gg_lwd = input$line.width
+    if (!is.null(input$line.width)) {
+      graphical.par$gg_lwd <- input$line.width
+    }
   })
 })
 
 observe({
   input$smooth.adjust
   isolate({
-    if(!is.null(input$smooth.adjust))
-      graphical.par$adjust = input$smooth.adjust
+    if (!is.null(input$smooth.adjust)) {
+      graphical.par$adjust <- input$smooth.adjust
+    }
   })
 })
 
 observe({
   input$colourpalette
   isolate({
-    if(!is.null(input$colourpalette))
-      graphical.par$palette = input$colourpalette
+    if (!is.null(input$colourpalette)) {
+      graphical.par$palette <- input$colourpalette
+    }
   })
 })
 
 observe({
   input$bar.height
   isolate({
-    if(!is.null(input$bar.height))
-      graphical.par$gg_height = input$bar.height
+    if (!is.null(input$bar.height)) {
+      graphical.par$gg_height <- input$bar.height
+    }
   })
 })
 
 observe({
   input$gg.theme
   isolate({
-    if(!is.null(input$gg.theme)) {
-      graphical.par$gg_theme = switch(input$gg.theme,
-                                      "Default" = "grey",
-                                      "Black & White" = "bw",
-                                      "Light" = "light",
-                                      "Dark" = "dark",
-                                      "Minimal" = "minimal",
-                                      "Classic" = "classic",
-                                      "Void" = "void")
+    if (!is.null(input$gg.theme)) {
+      graphical.par$gg_theme <- switch(input$gg.theme,
+        "Default" = "grey",
+        "Black & White" = "bw",
+        "Light" = "light",
+        "Dark" = "dark",
+        "Minimal" = "minimal",
+        "Classic" = "classic",
+        "Void" = "void"
+      )
     }
   })
 })
 
 # select the point size
-
 observe({
   input$adjust.size.points.dot
-  #  input$adjust.size.points.scatter
   isolate({
-    if(!is.null(input$adjust.size.points.dot))
-      graphical.par$cex.dotpt = input$adjust.size.points.dot
+    if (!is.null(input$adjust.size.points.dot)) {
+      graphical.par$cex.dotpt <- input$adjust.size.points.dot
+    }
   })
 })
 
 observe({
   input$adjust.size.points.scatter
   isolate({
-    if(!is.null(input$adjust.size.points.scatter))
-      graphical.par$cex.dotpt = input$adjust.size.points.scatter
+    if (!is.null(input$adjust.size.points.scatter)) {
+      graphical.par$cex.dotpt <- input$adjust.size.points.scatter
+    }
   })
 })
 
 
 # select the colur palette
-
 observe({
   input$colour.palette.reverse
   isolate({
-    if(!is.null(input$colour.palette.reverse))
-      graphical.par$reverse.palette = input$colour.palette.reverse
+    if (!is.null(input$colour.palette.reverse)) {
+      graphical.par$reverse.palette <- input$colour.palette.reverse
+    }
   })
 })
 
 # select colour ranks or not
-
 observe({
   input$colour.use.ranks
   isolate({
-    if(!is.null(input$colour.use.ranks) && input$colour.use.ranks == TRUE)
-      graphical.par$col.method = "rank"
-    else
-      graphical.par$col.method = "linear"
+    if (!is.null(input$colour.use.ranks) && input$colour.use.ranks == TRUE) {
+      graphical.par$col.method <- "rank"
+    } else {
+      graphical.par$col.method <- "linear"
+    }
   })
 })
 
 observe({
   input$select.colour.palette
   isolate({
-    if(!is.null(input$select.colour.palette))
-      if(input$select.colour.palette %in% names(graphical.par$colourPalettes$cat))
-        graphical.par$col.fun = graphical.par$colourPalettes$cat[[input$select.colour.palette]]
-    else if(input$select.colour.palette %in% names(graphical.par$colourPalettes$cont))
-      graphical.par$col.fun = graphical.par$colourPalettes$cont[[input$select.colour.palette]]
+    if (!is.null(input$select.colour.palette)) {
+      if (input$select.colour.palette %in% names(graphical.par$colourPalettes$cat)) {
+        graphical.par$col.fun <-
+          graphical.par$colourPalettes$cat[[input$select.colour.palette]]
+      } else if (input$select.colour.palette %in% names(graphical.par$colourPalettes$cont)) {
+        graphical.par$col.fun <- graphical.par$colourPalettes$cont[[input$select.colour.palette]]
+      }
+    }
   })
 })
 
@@ -3248,8 +3512,8 @@ observe({
 observe({
   input$select.bg1
   isolate({
-    if(!is.null(input$select.bg1)){
-      graphical.par$bg = input$select.bg1
+    if (!is.null(input$select.bg1)) {
+      graphical.par$bg <- input$select.bg1
     }
   })
 })
@@ -3258,8 +3522,8 @@ observe({
 observe({
   input$select.barcolor
   isolate({
-    if(!is.null(input$select.barcolor)){
-      graphical.par$bar.fill = input$select.barcolor
+    if (!is.null(input$select.barcolor)) {
+      graphical.par$bar.fill <- input$select.barcolor
     }
   })
 })
@@ -3268,10 +3532,13 @@ observe({
 observe({
   input$select.plot.type
   isolate({
-    if(!is.null(input$select.plot.type) && length(input$select.plot.type) > 0) {
-      graphical.par$plottype = plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
+    if (!is.null(input$select.plot.type) &&
+      length(input$select.plot.type) > 0) {
+      graphical.par$plottype <-
+        plot.type.para$plotTypeValues[
+          which(plot.type.para$plotTypes == input$select.plot.type)
+        ]
     }
-
   })
 })
 
@@ -3279,16 +3546,20 @@ observe({
 observe({
   input$show_boxplot_title
   isolate({
-    if(!is.null(input$show_boxplot_title) && length(input$show_boxplot_title) > 0)
-      graphical.par$boxplot = input$show_boxplot_title
+    if (!is.null(input$show_boxplot_title) &&
+      length(input$show_boxplot_title) > 0) {
+      graphical.par$boxplot <- input$show_boxplot_title
+    }
   })
 })
 
 observe({
   input$show_mean_title
   isolate({
-    if(!is.null(input$show_mean_title) && length(input$show_mean_title) > 0)
-      graphical.par$mean_indicator = input$show_mean_title
+    if (!is.null(input$show_mean_title) &&
+      length(input$show_mean_title) > 0) {
+      graphical.par$mean_indicator <- input$show_mean_title
+    }
   })
 })
 
@@ -3296,16 +3567,13 @@ observe({
 
 # change whether the points interior is drawn.
 observe({
-  if(!is.null(input$color.interior)){
+  if (!is.null(input$color.interior)) {
     isolate({
-      if(!is.null(input$select.dotcolor)){
-        if(input$color.interior){
-          #          graphical.par$pch = 19
-          graphical.par$fill.pt = "fill"
-          #          graphical.par$alpha = 0.3
-        }else{
-          #          graphical.par$pch = 1
-          graphical.par$fill.pt = "transparent"
+      if (!is.null(input$select.dotcolor)) {
+        if (input$color.interior) {
+          graphical.par$fill.pt <- "fill"
+        } else {
+          graphical.par$fill.pt <- "transparent"
         }
       }
     })
@@ -3314,9 +3582,9 @@ observe({
 
 # select the dot color
 observe({
-  if(!is.null(input$select.dotcolor)){
+  if (!is.null(input$select.dotcolor)) {
     isolate({
-      graphical.par$col.pt = input$select.dotcolor
+      graphical.par$col.pt <- input$select.dotcolor
     })
   }
 })
@@ -3326,7 +3594,7 @@ observe({
 observe({
   input$adjust.size.scale
   isolate({
-    graphical.par$cex = input$adjust.size.scale
+    graphical.par$cex <- input$adjust.size.scale
   })
 })
 
@@ -3337,8 +3605,8 @@ observe({
 observe({
   input$adjust.size.points.dot
   isolate({
-    if("dot"%in%get.plottype()){
-      graphical.par$cex.dotpt = input$adjust.size.points.dot
+    if ("dot" %in% get.plottype()) {
+      graphical.par$cex.dotpt <- input$adjust.size.points.dot
     }
   })
 })
@@ -3347,8 +3615,8 @@ observe({
 observe({
   input$adjust.size.points.scatter
   isolate({
-    if("scatter"%in%get.plottype()){
-      graphical.par$cex.pt = input$adjust.size.points.scatter
+    if ("scatter" %in% get.plottype()) {
+      graphical.par$cex.pt <- input$adjust.size.points.scatter
     }
   })
 })
@@ -3358,28 +3626,14 @@ observe({
 observe({
   input$adjust.transparency
   isolate({
-    #    if(!is.null(input$adjust.transparency)){
-    #      if(input$adjust.transparency==0){
-    #        graphical.par$pch=1
-    #      }else{
-    #        graphical.par$pch=19
-    #      }
-    #    }
-    graphical.par$alpha = convert.to.percent(input$adjust.transparency,T)
+    graphical.par$alpha <- convert.to.percent(input$adjust.transparency, T)
   })
 })
 
 observe({
   input$fill.transparency
   isolate({
-    #    if(!is.null(input$adjust.transparency)){
-    #      if(input$adjust.transparency==0){
-    #        graphical.par$pch=1
-    #      }else{
-    #        graphical.par$pch=19
-    #      }
-    #    }
-    graphical.par$alpha = convert.to.percent(input$fill.transparency, T)
+    graphical.par$alpha <- convert.to.percent(input$fill.transparency, T)
   })
 })
 
@@ -3387,7 +3641,7 @@ observe({
 observe({
   input$adjust.num.bins
   isolate({
-    graphical.par$hist.bins = input$adjust.num.bins
+    graphical.par$hist.bins <- input$adjust.num.bins
   })
 })
 
@@ -3395,7 +3649,7 @@ observe({
 observe({
   input$adjust.grid.size
   isolate({
-    graphical.par$scatter.grid.bins = input$adjust.grid.size
+    graphical.par$scatter.grid.bins <- input$adjust.grid.size
   })
 })
 
@@ -3403,7 +3657,7 @@ observe({
 observe({
   input$adjust.min.count.grid
   isolate({
-    graphical.par$alpha = convert.to.percent(input$adjust.min.count.grid,T)
+    graphical.par$alpha <- convert.to.percent(input$adjust.min.count.grid, T)
   })
 })
 
@@ -3411,51 +3665,65 @@ observe({
 observe({
   input$adjust.hex.bins
   isolate({
-    if(!is.null(input$adjust.hex.bins)){
-      graphical.par$hex.bins = input$adjust.hex.bins
+    if (!is.null(input$adjust.hex.bins)) {
+      graphical.par$hex.bins <- input$adjust.hex.bins
     } else {
-      graphical.par$hex.bins = 20
+      graphical.par$hex.bins <- 20
     }
   })
 })
 
 # Customize labels UI
-output$customize.labels.panel = renderUI({
+output$customize.labels.panel <- renderUI({
   get.data.set()
   input$vari1
   input$vari2
   isolate({
-    plot.par$xlab = NULL
-    # plot.par$varnames$xlab = NULL
-    plot.par$ylab = NULL
-    # plot.par$varnames$ylab = NULL
-    plot.par$main = NULL
-    axis.label.title = h5(strong("Axis Labels"))
-    main_title_text.object = fixedRow(column(4, h5("Main title:")),
-                                      column(6, textInput(inputId="main_title_text",label=NULL)))
-    x_axis_text.object = fixedRow(column(4, h5("X-axis label:")),
-                                  column(6, textInput(inputId="x_axis_text",label=NULL)))
-    y_axis_text.object = fixedRow(column(4, h5("Y-axis label:")),
-                                  column(6, textInput(inputId="y_axis_text",label=NULL)))
-    change.labels.button.object = fixedRow(column(4),
-                                           column(6, actionButton(inputId="change.labels.button",label="Submit")))
-    if(!is.null(vis.data())&&!is.null(input$vari1)&&!is.null(input$vari2)&&
-       input$vari1%in%colnames(get.data.set())){
-      if((class(vis.data()[,input$vari1])%in%"numeric"|
-          class(vis.data()[,input$vari1])%in%"integer")&
-         !is.null(input$vari2)&&!input$vari2%in%"none"&&
-         (class(vis.data()[,input$vari2])%in%"numeric"|
-          class(vis.data()[,input$vari2])%in%"integer")){
-        list(axis.label.title,
-             main_title_text.object,
-             x_axis_text.object,
-             y_axis_text.object,
-             change.labels.button.object)
-      }else{
-        list(axis.label.title,
-             main_title_text.object,
-             x_axis_text.object,
-             change.labels.button.object)
+    plot.par$xlab <- NULL
+    plot.par$ylab <- NULL
+    plot.par$main <- NULL
+    axis.label.title <- h5(strong("Axis Labels"))
+    main_title_text.object <- fixedRow(
+      column(4, h5("Main title:")),
+      column(6, textInput(inputId = "main_title_text", label = NULL))
+    )
+    x_axis_text.object <- fixedRow(
+      column(4, h5("X-axis label:")),
+      column(6, textInput(inputId = "x_axis_text", label = NULL))
+    )
+    y_axis_text.object <- fixedRow(
+      column(4, h5("Y-axis label:")),
+      column(6, textInput(inputId = "y_axis_text", label = NULL))
+    )
+    change.labels.button.object <- fixedRow(
+      column(4),
+      column(6, actionButton(
+        inputId = "change.labels.button",
+        label = "Submit"
+      ))
+    )
+    if (!is.null(vis.data()) && !is.null(input$vari1) &&
+      !is.null(input$vari2) &&
+      input$vari1 %in% colnames(get.data.set())) {
+      if ((class(vis.data()[, input$vari1]) %in% "numeric" |
+        class(vis.data()[, input$vari1]) %in% "integer") &
+        !is.null(input$vari2) && !input$vari2 %in% "none" &&
+        (class(vis.data()[, input$vari2]) %in% "numeric" |
+          class(vis.data()[, input$vari2]) %in% "integer")) {
+        list(
+          axis.label.title,
+          main_title_text.object,
+          x_axis_text.object,
+          y_axis_text.object,
+          change.labels.button.object
+        )
+      } else {
+        list(
+          axis.label.title,
+          main_title_text.object,
+          x_axis_text.object,
+          change.labels.button.object
+        )
       }
     }
   })
@@ -3465,293 +3733,339 @@ output$customize.labels.panel = renderUI({
 observe({
   input$change.labels.button
   isolate({
-    if(!is.null(input$change.labels.button)&&
-       input$change.labels.button>0){
-      if(!is.null(input$main_title_text)&&
-         !input$main_title_text%in%""){
-        plot.par$main = input$main_title_text
-      }else{
-        plot.par$main = NULL
+    if (!is.null(input$change.labels.button) &&
+      input$change.labels.button > 0) {
+      if (!is.null(input$main_title_text) &&
+        !input$main_title_text %in% "") {
+        plot.par$main <- input$main_title_text
+      } else {
+        plot.par$main <- NULL
       }
-      if(!is.null(input$x_axis_text)&&
-         !input$x_axis_text%in%""){
-        plot.par$xlab = input$x_axis_text
-        # plot.par$varnames$xlab = input$x_axis_text
-      }else{
-        plot.par$xlab = NULL
-        plot.par$varnames$xlab = NULL
+      if (!is.null(input$x_axis_text) &&
+        !input$x_axis_text %in% "") {
+        plot.par$xlab <- input$x_axis_text
+      } else {
+        plot.par$xlab <- NULL
+        plot.par$varnames$xlab <- NULL
       }
-      if(!is.null(input$y_axis_text)&&
-         !input$y_axis_text%in%""){
-        plot.par$ylab = input$y_axis_text
-        # plot.par$varnames$ylab = input$y_axis_text
-      }else{
-        plot.par$ylab = NULL
-        plot.par$varnames$ylab = NULL
+      if (!is.null(input$y_axis_text) &&
+        !input$y_axis_text %in% "") {
+        plot.par$ylab <- input$y_axis_text
+      } else {
+        plot.par$ylab <- NULL
+        plot.par$varnames$ylab <- NULL
       }
     }
   })
 })
 
-
-
-
 # "Code more variables" panel"
-output$code.variables.panel = renderUI({
+output$code.variables.panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
   input$vari1
   input$vari2
   input$select.plot.type
   input$color_by_select
   input$point_colour_title
   isolate({
-
-
-
-    select.colour.palette.object = NULL
-    colour.palette.reverse.object = NULL
-
-
+    select.colour.palette.object <- NULL
+    colour.palette.reverse.object <- NULL
 
     # vari1 = factor, vari2 = factor
-    if(!input$vari2%in%"none"&&
-       ((class(get.data.set()[,input$vari1])%in%"factor"|
-         class(get.data.set()[,input$vari1])%in%"character")&&
-        (class(get.data.set()[,input$vari2])%in%"factor"|
-         class(get.data.set()[,input$vari2])%in%"character"))) {
+    if (!input$vari2 %in% "none" &&
+      ((class(get.data.set()[, input$vari1]) %in% "factor" |
+        class(get.data.set()[, input$vari1]) %in% "character") &&
+        (class(get.data.set()[, input$vari2]) %in% "factor" |
+          class(get.data.set()[, input$vari2]) %in% "character"))) {
+      select.colour.palette.object <- fixedRow(
+        column(3, h5("Colour palette:")),
+        column(6, selectInput(
+          inputId = "select.colour.palette", label = NULL,
+          choices = names(graphical.par$colourPalettes$cat),
+          selected = "Colourblind Friendly",
+          selectize = FALSE
+        ))
+      )
+      colour.palette.reverse.object <- fixedRow(
+        column(3),
+        column(6, checkboxInput(
+          inputId = "colour.palette.reverse", label = "Reverse palette",
+          value = FALSE
+        ))
+      )
 
-      select.colour.palette.object = fixedRow(column(3, h5("Colour palette:")),
-                                              column(6, selectInput(inputId="select.colour.palette",label=NULL,
-                                                                    choices=names(graphical.par$colourPalettes$cat),
-                                                                    selected = "Colourblind Friendly",
-                                                                    selectize = FALSE)))
-      colour.palette.reverse.object = fixedRow(column(3),
-                                               column(6, checkboxInput(inputId = "colour.palette.reverse", label = "Reverse palette",
-                                                                       value = FALSE)))
+      ret <- list(
+        select.colour.palette.object,
+        colour.palette.reverse.object
+      )
 
-      ret = list(select.colour.palette.object,
-                 colour.palette.reverse.object)
-
-      if(length(input$select.plot.type) != 0 &&
-         (input$select.plot.type %in% c("(gg) column/row bar", "(gg) stacked column/row", "(gg) lollipop", "(gg) frequency polygons",
-                                        "(gg) heatmap", "(gg) diverging stacked bar (likert)", "(gg) spine/pyramid"))) {
-        ret = list(fixedRow(column(10, hr())),
-                   actionButton(inputId = "get_code_plot",
-                                label = "Store code",
-                                style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-                   br(),
-                   br(),
-                   br(),
-                   br())
+      if (length(input$select.plot.type) != 0 &&
+        (input$select.plot.type %in% c(
+          "(gg) column/row bar", "(gg) stacked column/row",
+          "(gg) lollipop", "(gg) frequency polygons",
+          "(gg) heatmap", "(gg) diverging stacked bar (likert)",
+          "(gg) spine/pyramid"
+        ))) {
+        ret <- list(
+          fixedRow(column(10, hr())),
+          actionButton(
+            inputId = "get_code_plot",
+            label = "Store code",
+            style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+          ),
+          br(),
+          br(),
+          br(),
+          br()
+        )
       }
-    }
-
-    else {
-      point.symbol.title = NULL
-      symbol.object = NULL
-      symbol.by.object = NULL
-      symbol.linewidth.object = NULL
+    } else {
+      point.symbol.title <- NULL
+      symbol.object <- NULL
+      symbol.by.object <- NULL
+      symbol.linewidth.object <- NULL
 
 
-      color.by.object  = NULL
+      color.by.object <- NULL
 
-      color.use.ranks.object = NULL
+      color.use.ranks.object <- NULL
 
-      if((!is.null(input$vari1)&&
-          !is.null(input$vari2))&&
-         (input$vari1%in%colnames(get.data.set())&&
-          (input$vari2%in%'none'||
-           input$vari2%in%colnames(get.data.set())))){
-        if((class(vis.data()[,input$vari1])%in%"factor"|
-            class(vis.data()[,input$vari1])%in%"character")&&
-           (is.null(input$vari2)|input$vari2%in%"none")){
-          color.by.object = list(fixedRow(column(3, h5("Colour by:")),
-                                          column(6, selectInput("color_by_select",
-                                                                label=NULL,
-                                                                choices = c(" ",get.categorical.column.names(vis.data())),
-                                                                selected = input$color_by_select,
-                                                                selectize = F))),
-
-                                 conditionalPanel("input.color_by_select != ' '",
-                                                  fixedRow(column(3, h5("Colour palette:")),
-                                                           column(6, selectInput(inputId="select.colour.palette",label=NULL,
-                                                                                 choices=names(graphical.par$colourPalettes$cat),
-                                                                                 selected = "Colourblind Friendly",
-                                                                                 selectize=FALSE))),
-                                                  conditionalPanel("input.color_by_select != ' '",
-                                                                   fixedRow(column(3),
-                                                                            column(6, checkboxInput(inputId = "colour.palette.reverse",
-                                                                                                    label = "Reverse palette",
-                                                                                                    value = input$colour.palette.reverse))))))
-
-
-
-        }else{
-          point.symbol.title = checkboxInput(inputId = "point_symbol_title",
-                                             label = strong("Point Symbol"),
-                                             value = input$point_symbol_title)
-
-
-          color.by.object = list(conditionalPanel(condition = "input.point_colour_title == true",
-                                                  fixedRow(column(3, h5("Colour by:")),
-                                                           column(6, selectInput("color_by_select",
-                                                                                 label=NULL,
-                                                                                 choices=c(" ",colnames(vis.data())),
-                                                                                 selected = input$color_by_select,
-                                                                                 selectize = F)))),
-
-                                 conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
-                                                  fixedRow(column(3, h5("Colour palette:")),
-                                                           column(6, selectInput(inputId="select.colour.palette",
-                                                                                 label=NULL,
-
-                                                                                 choices = switch(as.character(length(input$color_by_select) > 0 && input$color_by_select %in% get.numeric.column.names(vis.data())),
-                                                                                                  "TRUE" = names(graphical.par$colourPalettes$cont),
-                                                                                                  "FALSE" = names(graphical.par$colourPalettes$cat)),
-                                                                                 selected = input$select.colour.palette,
-                                                                                 selectize = FALSE))),
-                                                  conditionalPanel("input.color_by_select != ' ' & input.point_colour_title == true",
-                                                                   fixedRow(column(3),
-                                                                            column(6, checkboxInput(inputId = "colour.palette.reverse",
-                                                                                                    label = "Reverse palette",
-                                                                                                    value = input$colour.palette.reverse))))
-                                 ))
-
-          if(length(input$color_by_select) != 0 &&
-             input$color_by_select %in% get.numeric.column.names(vis.data()) &&
-             input$point_colour_title == TRUE)
-            color.use.ranks.object = fixedRow(column(3),
-                                              column(6, checkboxInput(inputId = "colour.use.ranks",
-                                                                      label = "Use Ranks",
-                                                                      value = input$colour.use.ranks)))
-
-          symbol.object = conditionalPanel(condition = "input.point_symbol_title == true",
-                                           fixedRow(column(3, h5("Symbol:")),
-                                                    column(6, selectInput("point_symbol",
-                                                                          label=NULL,
-                                                                          choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
-                                                                          selected = "circle",
-                                                                          selectize = F))))
-
-          #          symbol.object = fixedRow(column(3, h5("Point Symbol:")),
-          #                                   column(6, selectInput("point_symbol",
-          #                                                         label=NULL,
-          #                                                         choices = c("circle", "square", "diamond", "triangle", "inverted triangle"),
-          #                                                         selected = "circle")))
-
-
-          symbol.by.object = conditionalPanel(condition = "input.point_symbol_title == true",
-                                              fixedRow(column(3, h5("Symbol by:")),
-                                                       column(6, selectInput("point_symbol_by",
-                                                                             label=NULL,
-                                                                             choices = c(" ", get.categorical.column.names(vis.data())),
-                                                                             selected = " ",
-                                                                             selectize = F))))
-          #          symbol.by.object = fixedRow(column(3, h5("Symbol by:")),
-          #                                      column(6, selectInput("point_symbol_by",
-          #                                                            label=NULL,
-          #                                                            choices = c(" ", get.categorical.column.names(vis.data())),
-          #                                                            selected = " ")))
-
-          symbol.linewidth.object = conditionalPanel(condition = "input.point_symbol_title == true",
-                                                     fixedRow(column(3, h5("Symbol line width:")),
-                                                              column(6, sliderInput("symbol_linewidth", label = NULL, min = 1,
-                                                                                    max = 4, value=2, step=0.2, ticks = FALSE))))
-          #          symbol.linewidth.object = fixedRow(column(3, h5("Symbol line width:")),
-          #                                             column(6, sliderInput("symbol_linewidth", label = NULL, min = 1,
-          #                                                                   max = 4, value=2, step=0.2, ticks = FALSE)))
-        }
-        #        resize.by.object = NULL
-        #        if((class(vis.data()[,input$vari1])%in%"numeric"|
-        #            class(vis.data()[,input$vari1])%in%"integer")&&
-        #           (!input$vari2%in%"none"&&
-        #            (class(vis.data()[,input$vari2])%in%"numeric"|
-        #             class(vis.data()[,input$vari2])%in%"integer"))){
-        #          resize.by.object = fixedRow(column(3, h5("Resize points by:")),
-        #                                      column(6, selectInput("resize.by.select",
-        #                                                            label=NULL,
-        #                                                            choices=c(" ",get.numeric.column.names(vis.data())),
-        #                                                            selected = "input$resize.by.select")))
-        #        }
-        if(length(input$select.plot.type) != 0 &&
-           (input$select.plot.type %in% "histogram" ||
-            input$select.plot.type %in% "hexagonal binning"))
-          ret = list(color.by.object)
-        else if (length(input$select.plot.type) != 0 &&
-                 (input$select.plot.type %in% c("(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin",
-                                                "(gg) density", "(gg) column/row bar", "(gg) lollipop", "(gg) cumulative curve",
-                                                "(gg) stacked column/row", "(gg) pie", "(gg) donut", "(gg) gridplot",
-                                                "(gg) beeswarm", "(gg) pyramid", "(gg) density (ridgeline)"))) {
-          ret = list(fixedRow(column(10, hr())),
-                     actionButton(inputId = "get_code_plot",
-                                  label = "Store code",
-                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-                     br(),
-                     br(),
-                     br(),
-                     br())
-
-        } else if (length(input$select.plot.type) != 0 && input$select.plot.type == "grid-density") {
-          ret = NULL
+      if ((!is.null(input$vari1) &&
+        !is.null(input$vari2)) &&
+        (input$vari1 %in% colnames(get.data.set()) &&
+          (input$vari2 %in% "none" ||
+            input$vari2 %in% colnames(get.data.set())))) {
+        if ((class(vis.data()[, input$vari1]) %in% "factor" |
+          class(vis.data()[, input$vari1]) %in% "character") &&
+          (is.null(input$vari2) | input$vari2 %in% "none")) {
+          color.by.object <- list(
+            fixedRow(
+              column(3, h5("Colour by:")),
+              column(6, selectInput("color_by_select",
+                label = NULL,
+                choices = c(" ", get.categorical.column.names(vis.data())),
+                selected = input$color_by_select,
+                selectize = F
+              ))
+            ),
+            conditionalPanel(
+              "input.color_by_select != ' '",
+              fixedRow(
+                column(3, h5("Colour palette:")),
+                column(6, selectInput(
+                  inputId = "select.colour.palette", label = NULL,
+                  choices = names(graphical.par$colourPalettes$cat),
+                  selected = "Colourblind Friendly",
+                  selectize = FALSE
+                ))
+              ),
+              conditionalPanel(
+                "input.color_by_select != ' '",
+                fixedRow(
+                  column(3),
+                  column(6, checkboxInput(
+                    inputId = "colour.palette.reverse",
+                    label = "Reverse palette",
+                    value = input$colour.palette.reverse
+                  ))
+                )
+              )
+            )
+          )
         } else {
-          ret = list(color.by.object,
-                     color.use.ranks.object,
-                     point.symbol.title,
-                     symbol.object,
-                     symbol.by.object,
-                     symbol.linewidth.object)
+          point.symbol.title <- checkboxInput(
+            inputId = "point_symbol_title",
+            label = strong("Point Symbol"),
+            value = input$point_symbol_title
+          )
+
+
+          color.by.object <- list(
+            conditionalPanel(
+              condition = "input.point_colour_title == true",
+              fixedRow(
+                column(3, h5("Colour by:")),
+                column(6, selectInput("color_by_select",
+                  label = NULL,
+                  choices = c(" ", colnames(vis.data())),
+                  selected = input$color_by_select,
+                  selectize = F
+                ))
+              )
+            ),
+            conditionalPanel(
+              "input.color_by_select != ' ' & input.point_colour_title == true",
+              fixedRow(
+                column(3, h5("Colour palette:")),
+                column(6, selectInput(
+                  inputId = "select.colour.palette",
+                  label = NULL,
+                  ## TODO: FIX ??
+                  choices = switch(as.character(
+                    length(input$color_by_select) > 0 &&
+                      input$color_by_select %in%
+                        get.numeric.column.names(vis.data())
+                  ),
+                  "TRUE" = names(graphical.par$colourPalettes$cont),
+                  "FALSE" = names(graphical.par$colourPalettes$cat)
+                  ),
+                  selected = input$select.colour.palette,
+                  selectize = FALSE
+                ))
+              ),
+              conditionalPanel(
+                "input.color_by_select != ' ' & input.point_colour_title == true",
+                fixedRow(
+                  column(3),
+                  column(6, checkboxInput(
+                    inputId = "colour.palette.reverse",
+                    label = "Reverse palette",
+                    value = input$colour.palette.reverse
+                  ))
+                )
+              )
+            )
+          )
+
+          if (length(input$color_by_select) != 0 &&
+            input$color_by_select %in% get.numeric.column.names(vis.data()) &&
+            input$point_colour_title == TRUE) {
+            color.use.ranks.object <- fixedRow(
+              column(3),
+              column(6, checkboxInput(
+                inputId = "colour.use.ranks",
+                label = "Use Ranks",
+                value = input$colour.use.ranks
+              ))
+            )
+          }
+
+          symbol.object <- conditionalPanel(
+            condition = "input.point_symbol_title == true",
+            fixedRow(
+              column(3, h5("Symbol:")),
+              column(6, selectInput("point_symbol",
+                label = NULL,
+                choices = c(
+                  "circle", "square", "diamond", "triangle",
+                  "inverted triangle"
+                ),
+                selected = "circle",
+                selectize = F
+              ))
+            )
+          )
+
+          symbol.by.object <- conditionalPanel(
+            condition = "input.point_symbol_title == true",
+            fixedRow(
+              column(3, h5("Symbol by:")),
+              column(6, selectInput("point_symbol_by",
+                label = NULL,
+                choices = c(" ", get.categorical.column.names(vis.data())),
+                selected = " ",
+                selectize = F
+              ))
+            )
+          )
+
+          symbol.linewidth.object <- conditionalPanel(
+            condition = "input.point_symbol_title == true",
+            fixedRow(
+              column(3, h5("Symbol line width:")),
+              column(6, sliderInput("symbol_linewidth",
+                label = NULL, min = 1,
+                max = 4, value = 2, step = 0.2, ticks = FALSE
+              ))
+            )
+          )
         }
 
-
+        if (length(input$select.plot.type) != 0 &&
+          (input$select.plot.type %in% "histogram" ||
+            input$select.plot.type %in% "hexagonal binning")) {
+          ret <- list(color.by.object)
+        } else if (length(input$select.plot.type) != 0 &&
+          (input$select.plot.type %in% c(
+            "(gg) dot strip", "(gg) barcode", "(gg) boxplot", "(gg) violin",
+            "(gg) density", "(gg) column/row bar", "(gg) lollipop",
+            "(gg) cumulative curve",
+            "(gg) stacked column/row", "(gg) pie", "(gg) donut",
+            "(gg) gridplot",
+            "(gg) beeswarm", "(gg) pyramid", "(gg) density (ridgeline)"
+          ))) {
+          ret <- list(
+            fixedRow(column(10, hr())),
+            actionButton(
+              inputId = "get_code_plot",
+              label = "Store code",
+              style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+            ),
+            br(),
+            br(),
+            br(),
+            br()
+          )
+        } else if (length(input$select.plot.type) != 0 &&
+          input$select.plot.type == "grid-density") {
+          ret <- NULL
+        } else {
+          ret <- list(
+            color.by.object,
+            color.use.ranks.object,
+            point.symbol.title,
+            symbol.object,
+            symbol.by.object,
+            symbol.linewidth.object
+          )
+        }
       }
 
       # vari1 = numeric , vari2 = none or
       # vari1 = numeric , vari2 = factor or
       # vari1 = factor , vari2 = numeric or
       # vari1 = numeric , vari2 = numeric
-      if((input$vari2%in%"none"&&
-          (class(get.data.set()[,input$vari1])%in%"numeric"|
-           class(get.data.set()[,input$vari1])%in%"integer"))||
-         (!input$vari2%in%"none"&&
-          (class(get.data.set()[,input$vari1])%in%"factor"|
-           class(get.data.set()[,input$vari1])%in%"character")&&
-          (class(get.data.set()[,input$vari2])%in%"integer"|
-           class(get.data.set()[,input$vari2])%in%"numeric"))||
-         (!input$vari2%in%"none"&&
-          (class(get.data.set()[,input$vari1])%in%"integer"|
-           class(get.data.set()[,input$vari1])%in%"numeric")&&
-          (class(get.data.set()[,input$vari2])%in%"character"|
-           class(get.data.set()[,input$vari2])%in%"factor")) ||
-         (!input$vari2%in%"none"&&
-          ((class(get.data.set()[,input$vari1])%in%"numeric"|
-            class(get.data.set()[,input$vari1])%in%"integer")&&
-           (class(get.data.set()[,input$vari2])%in%"numeric"|
-            class(get.data.set()[,input$vari2])%in%"integer")))) {
-
-        temp = list()
-        temp$x = get.data.set()[,input$vari1]
-        if(input$vari2%in%'none'){
-          temp$y = NULL
-        }else{
-          temp$y = get.data.set()[,input$vari2]
+      if ((input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer")) ||
+        (!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "factor" |
+            class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "integer" |
+            class(get.data.set()[, input$vari2]) %in% "numeric")) ||
+        (!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "integer" |
+            class(get.data.set()[, input$vari1]) %in% "numeric") &&
+          (class(get.data.set()[, input$vari2]) %in% "character" |
+            class(get.data.set()[, input$vari2]) %in% "factor")) ||
+        (!input$vari2 %in% "none" &&
+          ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+            class(get.data.set()[, input$vari1]) %in% "integer") &&
+            (class(get.data.set()[, input$vari2]) %in% "numeric" |
+              class(get.data.set()[, input$vari2]) %in% "integer")))) {
+        temp <- list()
+        temp$x <- get.data.set()[, input$vari1]
+        if (input$vari2 %in% "none") {
+          temp$y <- NULL
+        } else {
+          temp$y <- get.data.set()[, input$vari2]
         }
-        temp$plot = F
-        temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+        temp$plot <- F
+        temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
         ##################################################################
         #    large.sample = T
-        large.sample = search.name(temp,"largesample")[[1]]
-        if(is.null(large.sample)){
-          large.sample=F
+        large.sample <- search.name(temp, "largesample")[[1]]
+        if (is.null(large.sample)) {
+          large.sample <- F
         }
         ##################################################################
 
-        if(large.sample)
-          ret = NULL
+        if (large.sample) {
+          ret <- NULL
+        }
       }
-
     }
-
   })
   ret
 })
@@ -3761,15 +4075,15 @@ output$code.variables.panel = renderUI({
 observe({
   input$color_by_select
   isolate({
-    if(is.null(input$color_by_select)|
-       (!is.null(input$color_by_select)&&
-        input$color_by_select%in%" ")){
-      plot.par$colby = NULL
-      plot.par$varnames$colby = NULL
-    }else{
-      if(input$color_by_select%in%colnames(vis.data())){
-        plot.par$colby = as.name(input$color_by_select)
-        plot.par$varnames$colby = input$color_by_select
+    if (is.null(input$color_by_select) |
+      (!is.null(input$color_by_select) &&
+        input$color_by_select %in% " ")) {
+      plot.par$colby <- NULL
+      plot.par$varnames$colby <- NULL
+    } else {
+      if (input$color_by_select %in% colnames(vis.data())) {
+        plot.par$colby <- as.name(input$color_by_select)
+        plot.par$varnames$colby <- input$color_by_select
       }
     }
   })
@@ -3779,14 +4093,14 @@ observe({
 observe({
   input$resize.by.select
   isolate({
-    if(is.null(input$resize.by.select)|
-       (!is.null(input$resize.by.select)&&
-        input$resize.by.select%in%" ")){
-      plot.par$sizeby = NULL
-      plot.par$varnames$sizeby = NULL
-    }else{
-      plot.par$sizeby = as.name(input$resize.by.select)
-      plot.par$varnames$sizeby = input$resize.by.select
+    if (is.null(input$resize.by.select) |
+      (!is.null(input$resize.by.select) &&
+        input$resize.by.select %in% " ")) {
+      plot.par$sizeby <- NULL
+      plot.par$varnames$sizeby <- NULL
+    } else {
+      plot.par$sizeby <- as.name(input$resize.by.select)
+      plot.par$varnames$sizeby <- input$resize.by.select
     }
   })
 })
@@ -3797,15 +4111,17 @@ observe({
 observe({
   input$point_symbol
   isolate({
-    if(length(input$point_symbol) == 0)
-      graphical.par$pch = 21
-    else
-      graphical.par$pch = switch(input$point_symbol,
-                                 "circle" = 21,
-                                 "square" = 22,
-                                 "diamond" = 23,
-                                 "triangle" = 24,
-                                 "inverted triangle" = 25)
+    if (length(input$point_symbol) == 0) {
+      graphical.par$pch <- 21
+    } else {
+      graphical.par$pch <- switch(input$point_symbol,
+        "circle" = 21,
+        "square" = 22,
+        "diamond" = 23,
+        "triangle" = 24,
+        "inverted triangle" = 25
+      )
+    }
   })
 })
 
@@ -3813,14 +4129,14 @@ observe({
 observe({
   input$point_symbol_by
   isolate({
-    if(is.null(input$point_symbol_by)|
-       (!is.null(input$point_symbol_by)&&
-        input$point_symbol_by == " ")){
-      plot.par$symbolby = NULL
-      plot.par$varnames$symbolby = NULL
-    }else{
-      plot.par$symbolby = as.name(input$point_symbol_by)
-      plot.par$varnames$symbolby = input$point_symbol_by
+    if (is.null(input$point_symbol_by) |
+      (!is.null(input$point_symbol_by) &&
+        input$point_symbol_by == " ")) {
+      plot.par$symbolby <- NULL
+      plot.par$varnames$symbolby <- NULL
+    } else {
+      plot.par$symbolby <- as.name(input$point_symbol_by)
+      plot.par$varnames$symbolby <- input$point_symbol_by
     }
   })
 })
@@ -3830,10 +4146,11 @@ observe({
 observe({
   input$symbol_linewidth
   isolate({
-    if(length(input$symbol_linewidth) == 0)
-      graphical.par$lwd.pt = 2
-    else
-      graphical.par$lwd.pt = input$symbol_linewidth
+    if (length(input$symbol_linewidth) == 0) {
+      graphical.par$lwd.pt <- 2
+    } else {
+      graphical.par$lwd.pt <- input$symbol_linewidth
+    }
   })
 })
 
@@ -3843,118 +4160,188 @@ observe({
 observe({
   input$color_by_select
   isolate({
-    updateCheckboxInput(session,"each_level",
-                        label=paste("Fit trend for every level of",
-                                    input$color_by_select),
-                        value=input$each_level)
+    updateCheckboxInput(session, "each_level",
+      label = paste(
+        "Fit trend for every level of",
+        input$color_by_select
+      ),
+      value = input$each_level
+    )
   })
 })
 
 # add trends and curves
-output$trend.curve.panel = renderUI({
+output$trend.curve.panel <- renderUI({
   get.data.set()
   isolate({
     #    title.add.trend.curve = h5("Add trend curves")
-    trend.curves.title = h5(strong("Trend Curves"))
-    smoother.title = h5(strong("Smoother"))
-    check.linear.object = checkboxInput("check_linear",label="linear",
-                                        value = ifelse((!is.null(input$inf.trend.linear)&&length(input$inf.trend.linear)>0),input$inf.trend.linear, FALSE))
-    check.quadratic.object = checkboxInput("check_quadratic",label="quadratic",
-                                           value = ifelse((!is.null(input$inf.trend.quadratic)&&length(input$inf.trend.quadratic)>0),input$inf.trend.quadratic, FALSE))
-    check.cubic.object = checkboxInput("check_cubic",label="cubic",
-                                       value = ifelse((!is.null(input$inf.trend.cubic)&&length(input$inf.trend.cubic)>0),input$inf.trend.cubic, FALSE))
-    check.smoother.object = checkboxInput("check_smoother",label="Add smoother",value = input$check_smoother)
-    check.quantiles.object = checkboxInput("check_quantiles",label="Use Quantiles",value = input$check_quantiles)
-    color.linear.select = selectInput("color.linear",label="",
-                                      choices=c("blue", "red","black",
-                                                "green4","yellow","pink",
-                                                "grey","orange"),
-                                      selected=input$color.linear,
-                                      selectize = F)
-    type.linear.select = selectInput("type.linear", label = "",
-                                     choices = c("solid", "dashed",
-                                                 "dotted", "dotdash",
-                                                 "longdash", "twodash"),
-                                     selected = input$type.linear,
-                                     selectize = F)
-    color.quadratic.select = selectInput("color.quadratic",label="",
-                                         choices=c("red","black","blue",
-                                                   "green4","yellow","pink",
-                                                   "grey","orange"),
-                                         selected=input$color.quadratic,
-                                         selectize = F)
-    type.quadratic.select = selectInput("type.quadratic", label = "",
-                                        choices = c("solid", "dashed",
-                                                    "dotted", "dotdash",
-                                                    "longdash", "twodash"),
-                                        selected = input$type.quadratic,
-                                        selectize = F)
-    color.cubic.select = selectInput("color.cubic",label="",
-                                     choices=c("green4","red","black","blue",
-                                               "yellow","pink",
-                                               "grey","orange"),
-                                     selected=input$color.cubic,
-                                     selectize = F)
-    type.cubic.select = selectInput("type.cubic", label = "",
-                                    choices = c("solid", "dashed",
-                                                "dotted", "dotdash",
-                                                "longdash", "twodash"),
-                                    selected = input$type.cubic,
-                                    selectize = F)
-    color.smoother.select = selectInput("color.smoother",label="",
-                                        choices=c("red","black","blue",
-                                                  "green4","yellow","magenta",
-                                                  "grey","orange"),
-                                        selected="magenta",
-                                        selectize = F)
-    smoother.smooth.slider = sliderInput("smoother.smooth",
-                                         label="",min=0.01,max=1,value=0.7,
-                                         step=0.01,ticks=F)
+    trend.curves.title <- h5(strong("Trend Curves"))
+    smoother.title <- h5(strong("Smoother"))
+    check.linear.object <- checkboxInput("check_linear",
+      label = "linear",
+      value = ifelse(
+        !is.null(input$inf.trend.linear) && length(input$inf.trend.linear) > 0, input$inf.trend.linear, FALSE
+      )
+    )
+    check.quadratic.object <- checkboxInput("check_quadratic",
+      label = "quadratic",
+      value = ifelse(
+        !is.null(input$inf.trend.quadratic) && length(input$inf.trend.quadratic) > 0, input$inf.trend.quadratic, FALSE
+      )
+    )
+    check.cubic.object <- checkboxInput("check_cubic",
+      label = "cubic",
+      value = ifelse(
+        !is.null(input$inf.trend.cubic) && length(input$inf.trend.cubic) > 0, input$inf.trend.cubic, FALSE
+      )
+    )
+    check.smoother.object <- checkboxInput("check_smoother",
+      label = "Add smoother", value = input$check_smoother
+    )
+    check.quantiles.object <- checkboxInput("check_quantiles",
+      label = "Use Quantiles", value = input$check_quantiles
+    )
+    color.linear.select <- selectInput("color.linear",
+      label = "",
+      choices = c(
+        "blue", "red", "black",
+        "green4", "yellow", "pink",
+        "grey", "orange"
+      ),
+      selected = input$color.linear,
+      selectize = F
+    )
+    type.linear.select <- selectInput("type.linear",
+      label = "",
+      choices = c(
+        "solid", "dashed",
+        "dotted", "dotdash",
+        "longdash", "twodash"
+      ),
+      selected = input$type.linear,
+      selectize = F
+    )
+    color.quadratic.select <- selectInput("color.quadratic",
+      label = "",
+      choices = c(
+        "red", "black", "blue",
+        "green4", "yellow", "pink",
+        "grey", "orange"
+      ),
+      selected = input$color.quadratic,
+      selectize = F
+    )
+    type.quadratic.select <- selectInput("type.quadratic",
+      label = "",
+      choices = c(
+        "solid", "dashed",
+        "dotted", "dotdash",
+        "longdash", "twodash"
+      ),
+      selected = input$type.quadratic,
+      selectize = F
+    )
+    color.cubic.select <- selectInput("color.cubic",
+      label = "",
+      choices = c(
+        "green4", "red", "black", "blue",
+        "yellow", "pink",
+        "grey", "orange"
+      ),
+      selected = input$color.cubic,
+      selectize = F
+    )
+    type.cubic.select <- selectInput("type.cubic",
+      label = "",
+      choices = c(
+        "solid", "dashed",
+        "dotted", "dotdash",
+        "longdash", "twodash"
+      ),
+      selected = input$type.cubic,
+      selectize = F
+    )
+    color.smoother.select <- selectInput("color.smoother",
+      label = "",
+      choices = c(
+        "red", "black", "blue",
+        "green4", "yellow", "magenta",
+        "grey", "orange"
+      ),
+      selected = "magenta",
+      selectize = F
+    )
+    smoother.smooth.slider <- sliderInput("smoother.smooth",
+      label = "", min = 0.01, max = 1, value = 0.7,
+      step = 0.01, ticks = F
+    )
 
-    each_level.check = checkboxInput("each_level",
-                                     label=paste("Fit trend for every level of",
-                                                 input$color_by_select))
-    each_level_seperate.check = checkboxInput("each_level_seperate",
-                                              label="Fit parallel trend lines",
-                                              value = T)
-    line.width.multiplier.object = fixedRow(column(width = 3, "Line Width Multiplier:"),
-                                            column(width = 6, sliderInput("line.width.multiplier", 
-                                                                          label = NULL, 
-                                                                          min = 1, 
-                                                                          max = 4, 
-                                                                          value = 1, step = 0.5, ticks = FALSE)))
-    list(trend.curves.title,
-         fixedRow(column(width=3),
-                  column(width=4,"Line colour"),
-                  column(width=4,"Line type")),
-         fixedRow(column(width=3,check.linear.object),
-                  column(width=4,color.linear.select),
-                  column(width=4,type.linear.select)),
-         fixedRow(column(width=3,check.quadratic.object),
-                  column(width=4,color.quadratic.select),
-                  column(width=4,type.quadratic.select)),
-         fixedRow(column(width=3,check.cubic.object),
-                  column(width=4,color.cubic.select),
-                  column(width=4,type.cubic.select)),
-         line.width.multiplier.object,
-         smoother.title,
-         fixedRow(column(width=3,check.smoother.object),
-                  column(width=6,color.smoother.select)),
-         conditionalPanel("input.check_smoother",
-                          fixedRow(
-                            column(3, check.quantiles.object),
-                            column(6, smoother.smooth.slider)
-                          )),
-
-         #                          fixedRow(width=12,check.quantiles.object),
-         #                          fixedRow(width=12,smoother.smooth.slider)),
-         conditionalPanel("input.color_by_select != ' ' &
+    each_level.check <- checkboxInput("each_level",
+      label = paste(
+        "Fit trend for every level of",
+        input$color_by_select
+      )
+    )
+    each_level_seperate.check <- checkboxInput("each_level_seperate",
+      label = "Fit parallel trend lines",
+      value = T
+    )
+    line.width.multiplier.object <- fixedRow(
+      column(width = 3, "Line Width Multiplier:"),
+      column(width = 6, sliderInput("line.width.multiplier",
+        label = NULL,
+        min = 1,
+        max = 4,
+        value = 1, step = 0.5, ticks = FALSE
+      ))
+    )
+    list(
+      trend.curves.title,
+      fixedRow(
+        column(width = 3),
+        column(width = 4, "Line colour"),
+        column(width = 4, "Line type")
+      ),
+      fixedRow(
+        column(width = 3, check.linear.object),
+        column(width = 4, color.linear.select),
+        column(width = 4, type.linear.select)
+      ),
+      fixedRow(
+        column(width = 3, check.quadratic.object),
+        column(width = 4, color.quadratic.select),
+        column(width = 4, type.quadratic.select)
+      ),
+      fixedRow(
+        column(width = 3, check.cubic.object),
+        column(width = 4, color.cubic.select),
+        column(width = 4, type.cubic.select)
+      ),
+      line.width.multiplier.object,
+      smoother.title,
+      fixedRow(
+        column(width = 3, check.smoother.object),
+        column(width = 6, color.smoother.select)
+      ),
+      conditionalPanel(
+        "input.check_smoother",
+        fixedRow(
+          column(3, check.quantiles.object),
+          column(6, smoother.smooth.slider)
+        )
+      ),
+      conditionalPanel(
+        "input.color_by_select != ' ' &
                           (input.check_linear | input.check_quadratic |
                           input.check_cubic | input.check_smoother) &
                           !input.check_quantiles",
-                          each_level.check),
-         conditionalPanel("input.each_level",
-                          each_level_seperate.check))
+        each_level.check
+      ),
+      conditionalPanel(
+        "input.each_level",
+        each_level_seperate.check
+      )
+    )
   })
 })
 
@@ -3964,7 +4351,7 @@ output$trend.curve.panel = renderUI({
 observe({
   input$each_level_seperate
   isolate({
-    graphical.par$trend.parallel = input$each_level_seperate
+    graphical.par$trend.parallel <- input$each_level_seperate
   })
 })
 
@@ -3972,12 +4359,12 @@ observe({
 observe({
   input$check_quantiles
   isolate({
-    if(!is.null(input$check_quantiles)&&input$check_quantiles){
-      updateCheckboxInput(session,"each_level",value=F)
-      graphical.par$quant.smooth = c(0.25, 0.5, 0.75)
+    if (!is.null(input$check_quantiles) && input$check_quantiles) {
+      updateCheckboxInput(session, "each_level", value = F)
+      graphical.par$quant.smooth <- c(0.25, 0.5, 0.75)
       shinyjs::hide("smoother.smooth")
-    }else{
-      graphical.par$quant.smooth = NULL
+    } else {
+      graphical.par$quant.smooth <- NULL
       shinyjs::show("smoother.smooth")
     }
   })
@@ -3988,8 +4375,8 @@ observe({
 observe({
   input$each_level
   isolate({
-    if(!is.null(input$each_level)){
-      graphical.par$trend.by = input$each_level
+    if (!is.null(input$each_level)) {
+      graphical.par$trend.by <- input$each_level
     }
   })
 })
@@ -4000,23 +4387,27 @@ observe({
   input$color.linear
   input$type.linear
   isolate({
-    #    graphical.par$bs.inference = F
-    #    graphical.par$inference.type = NULL
-    if(!is.null(input$check_linear)){
-      if(input$check_linear){
-        if(length(which(graphical.par$trend%in%"linear"))==0){
-          graphical.par$trend=c(graphical.par$trend,"linear")
+    if (!is.null(input$check_linear)) {
+      if (input$check_linear) {
+        if (length(which(graphical.par$trend %in% "linear")) == 0) {
+          graphical.par$trend <- c(graphical.par$trend, "linear")
         }
-        graphical.par$col.trend[["linear"]] = input$color.linear
-        graphical.par$lty.trend[["linear"]] = switch(input$type.linear,
-                                                     "solid" = 1, "dashed" = 2,
-                                                     "dotted" = 3, "dotdash" = 4,
-                                                     "longdash" = 5, "twodash" = 6)
-      }else{
-        if(length(which(graphical.par$trend%in%"linear"))>0){
-          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"linear")]
-          if(length(graphical.par$trend)==0){
-            graphical.par$trend=NULL
+        graphical.par$col.trend[["linear"]] <- input$color.linear
+        graphical.par$lty.trend[["linear"]] <- switch(input$type.linear,
+          "solid" = 1,
+          "dashed" = 2,
+          "dotted" = 3,
+          "dotdash" = 4,
+          "longdash" = 5,
+          "twodash" = 6
+        )
+      } else {
+        if (length(which(graphical.par$trend %in% "linear")) > 0) {
+          graphical.par$trend <- graphical.par$trend[
+            -which(graphical.par$trend %in% "linear")
+          ]
+          if (length(graphical.par$trend) == 0) {
+            graphical.par$trend <- NULL
           }
         }
       }
@@ -4030,22 +4421,27 @@ observe({
   input$color.quadratic
   input$type.quadratic
   isolate({
-    #    graphical.par$bs.inference = F
-    if(!is.null(input$check_quadratic)){
-      if(input$check_quadratic){
-        if(length(which(graphical.par$trend%in%"quadratic"))==0){
-          graphical.par$trend=c(graphical.par$trend,"quadratic")
+    if (!is.null(input$check_quadratic)) {
+      if (input$check_quadratic) {
+        if (length(which(graphical.par$trend %in% "quadratic")) == 0) {
+          graphical.par$trend <- c(graphical.par$trend, "quadratic")
         }
-        graphical.par$col.trend[["quadratic"]] = input$color.quadratic
-        graphical.par$lty.trend[["quadratic"]] = switch(input$type.quadratic,
-                                                        "solid" = 1, "dashed" = 2,
-                                                        "dotted" = 3, "dotdash" = 4,
-                                                        "longdash" = 5, "twodash" = 6)
-      }else{
-        if(length(which(graphical.par$trend%in%"quadratic"))>0){
-          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"quadratic")]
-          if(length(graphical.par$trend)==0){
-            graphical.par$trend=NULL
+        graphical.par$col.trend[["quadratic"]] <- input$color.quadratic
+        graphical.par$lty.trend[["quadratic"]] <- switch(input$type.quadratic,
+          "solid" = 1,
+          "dashed" = 2,
+          "dotted" = 3,
+          "dotdash" = 4,
+          "longdash" = 5,
+          "twodash" = 6
+        )
+      } else {
+        if (length(which(graphical.par$trend %in% "quadratic")) > 0) {
+          graphical.par$trend <- graphical.par$trend[
+            -which(graphical.par$trend %in% "quadratic")
+          ]
+          if (length(graphical.par$trend) == 0) {
+            graphical.par$trend <- NULL
           }
         }
       }
@@ -4059,22 +4455,27 @@ observe({
   input$color.cubic
   input$type.cubic
   isolate({
-    #    graphical.par$bs.inference = F
-    if(!is.null(input$check_cubic)){
-      if(input$check_cubic){
-        if(length(which(graphical.par$trend%in%"cubic"))==0){
-          graphical.par$trend=c(graphical.par$trend,"cubic")
+    if (!is.null(input$check_cubic)) {
+      if (input$check_cubic) {
+        if (length(which(graphical.par$trend %in% "cubic")) == 0) {
+          graphical.par$trend <- c(graphical.par$trend, "cubic")
         }
-        graphical.par$col.trend[["cubic"]] = input$color.cubic
-        graphical.par$lty.trend[["cubic"]] = switch(input$type.cubic,
-                                                    "solid" = 1, "dashed" = 2,
-                                                    "dotted" = 3, "dotdash" = 4,
-                                                    "longdash" = 5, "twodash" = 6)
-      }else{
-        if(length(which(graphical.par$trend%in%"cubic"))>0){
-          graphical.par$trend=graphical.par$trend[-which(graphical.par$trend%in%"cubic")]
-          if(length(graphical.par$trend)==0){
-            graphical.par$trend=NULL
+        graphical.par$col.trend[["cubic"]] <- input$color.cubic
+        graphical.par$lty.trend[["cubic"]] <- switch(input$type.cubic,
+          "solid" = 1,
+          "dashed" = 2,
+          "dotted" = 3,
+          "dotdash" = 4,
+          "longdash" = 5,
+          "twodash" = 6
+        )
+      } else {
+        if (length(which(graphical.par$trend %in% "cubic")) > 0) {
+          graphical.par$trend <- graphical.par$trend[
+            -which(graphical.par$trend %in% "cubic")
+          ]
+          if (length(graphical.par$trend) == 0) {
+            graphical.par$trend <- NULL
           }
         }
       }
@@ -4089,69 +4490,73 @@ observe({
   input$color.smoother
   input$smoother.smooth
   isolate({
-    if(!is.null(input$check_smoother)&&input$check_smoother){
-      graphical.par$smooth = input$smoother.smooth
-      graphical.par$col.smooth = input$color.smoother
-      if(!is.null(input$check.quantiles)&&input$check.quantiles){
-        graphical.par$quant.smooth = "default"
-      }else{
-        graphical.par$quant.smooth = NULL
+    if (!is.null(input$check_smoother) && input$check_smoother) {
+      graphical.par$smooth <- input$smoother.smooth
+      graphical.par$col.smooth <- input$color.smoother
+      if (!is.null(input$check.quantiles) && input$check.quantiles) {
+        graphical.par$quant.smooth <- "default"
+      } else {
+        graphical.par$quant.smooth <- NULL
       }
-    }else{
-      graphical.par$smooth = 0
-      graphical.par$quant.smooth = NULL
-      graphical.par$col.smooth = ""
-      updateCheckboxInput(session,"check.quantiles",value=F)
+    } else {
+      graphical.par$smooth <- 0
+      graphical.par$quant.smooth <- NULL
+      graphical.par$col.smooth <- ""
+      updateCheckboxInput(session, "check.quantiles", value = F)
     }
   })
 })
 
 # add a x=y line
-output$xy.line.panel = renderUI({
+output$xy.line.panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
 
   isolate({
+    if (!input$vari2 %in% "none" &&
+      ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+        class(get.data.set()[, input$vari1]) %in% "integer") &&
+        (class(get.data.set()[, input$vari2]) %in% "numeric" |
+          class(get.data.set()[, input$vari2]) %in% "integer"))) {
+      xyline.title <- h5(strong("Trend Line Options"))
+      check.xyline.object <- checkboxInput("check.xyline",
+        label = "Add y=x line",
+        value = F
+      )
+      color.xyline.select <- selectInput("color.xyline",
+        label = "",
+        choices = c(
+          "red", "black", "blue",
+          "green4", "yellow", "pink",
+          "grey", "orange"
+        ),
+        selected = "black",
+        selectize = F
+      )
 
-    if(!input$vari2%in%"none"&&
-       ((class(get.data.set()[,input$vari1])%in%"numeric"|
-         class(get.data.set()[,input$vari1])%in%"integer")&&
-        (class(get.data.set()[,input$vari2])%in%"numeric"|
-         class(get.data.set()[,input$vari2])%in%"integer"))) {
-      #      titel.xyline = h5("Add line of equality (x = y)")
-      xyline.title = h5(strong("Trend Line Options"))
-      check.xyline.object = checkboxInput("check.xyline",
-                                          label="Add y=x line",
-                                          value=F)
-      color.xyline.select = selectInput("color.xyline",label="",
-                                        choices=c("red","black","blue",
-                                                  "green4","yellow","pink",
-                                                  "grey","orange"),
-                                        selected="black",
-                                        selectize = F)
-
-      ret = list(xyline.title,
-                 fixedRow(column(width=3,check.xyline.object),
-                          column(width=6,color.xyline.select)))
+      ret <- list(
+        xyline.title,
+        fixedRow(
+          column(width = 3, check.xyline.object),
+          column(width = 6, color.xyline.select)
+        )
+      )
     }
   })
   ret
 })
 
-
-
-
 # check for changes in color or whether the x=y-line is drawn
 observe({
   input$check.xyline
   input$color.xyline
-  if(!is.null(input$check.xyline)&&
-     input$check.xyline){
-    graphical.par$LOE = T
-    graphical.par$col.LOE = input$color.xyline
-  }else{
-    graphical.par$LOE = F
-    graphical.par$col.LOE = NULL
+  if (!is.null(input$check.xyline) &&
+    input$check.xyline) {
+    graphical.par$LOE <- T
+    graphical.par$col.LOE <- input$color.xyline
+  } else {
+    graphical.par$LOE <- F
+    graphical.par$col.LOE <- NULL
   }
 })
 
@@ -4159,57 +4564,62 @@ observe({
 # trend line width
 observe({
   input$line.width.multiplier
-  if(!is.null(input$line.width.multiplier))
-    graphical.par$lwd = input$line.width.multiplier
+  if (!is.null(input$line.width.multiplier)) {
+    graphical.par$lwd <- input$line.width.multiplier
+  }
 })
 
 # add jitter to the plot
-output$add.jitter.panel = renderUI({
+output$add.jitter.panel <- renderUI({
   get.data.set()
   input$vari1
   input$vari2
-  ret = NULL
+  ret <- NULL
 
   isolate({
-    if(!input$vari2%in%"none"&&
-       ((class(get.data.set()[,input$vari1])%in%"numeric"|
-         class(get.data.set()[,input$vari1])%in%"integer")&&
-        (class(get.data.set()[,input$vari2])%in%"numeric"|
-         class(get.data.set()[,input$vari2])%in%"integer"))) {
-      #      title.jitter = h5("Add a jitter")
-      axis.features.title = h5(strong("Axis Features"))
-      check.jitter.x.object = checkboxInput("check.jitter.x",
-                                            label = plot.par$varnames$y,
-                                            #label="height",
-                                            value=input$check.jitter.x)
-      check.jitter.y.object = checkboxInput("check.jitter.y",
-                                            #label="rightfoot",
-                                            label = plot.par$varnames$x,
-                                            value=input$check.jitter.y)
-      ret = list(axis.features.title,
-                 fixedRow(column(2, h5("Jitter:")),
-                          column(width=4,check.jitter.x.object),
-                          column(width=4,check.jitter.y.object)))
+    if (!input$vari2 %in% "none" &&
+      ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+        class(get.data.set()[, input$vari1]) %in% "integer") &&
+        (class(get.data.set()[, input$vari2]) %in% "numeric" |
+          class(get.data.set()[, input$vari2]) %in% "integer"))) {
+      axis.features.title <- h5(strong("Axis Features"))
+      check.jitter.x.object <- checkboxInput("check.jitter.x",
+        label = plot.par$varnames$y,
+        value = input$check.jitter.x
+      )
+      check.jitter.y.object <- checkboxInput("check.jitter.y",
+        label = plot.par$varnames$x,
+        value = input$check.jitter.y
+      )
+      ret <- list(
+        axis.features.title,
+        fixedRow(
+          column(2, h5("Jitter:")),
+          column(width = 4, check.jitter.x.object),
+          column(width = 4, check.jitter.y.object)
+        )
+      )
 
-      temp = list()
-      temp$x = get.data.set()[,input$vari1]
-      if(input$vari2%in%'none'){
-        temp$y = NULL
-      }else{
-        temp$y = get.data.set()[,input$vari2]
+      temp <- list()
+      temp$x <- get.data.set()[, input$vari1]
+      if (input$vari2 %in% "none") {
+        temp$y <- NULL
+      } else {
+        temp$y <- get.data.set()[, input$vari2]
       }
-      temp$plot = F
-      temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      temp$plot <- F
+      temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
       ##################################################################
       #    large.sample = T
-      large.sample = search.name(temp,"largesample")[[1]]
-      if(is.null(large.sample)){
-        large.sample=F
+      large.sample <- search.name(temp, "largesample")[[1]]
+      if (is.null(large.sample)) {
+        large.sample <- F
       }
       ##################################################################
 
-      if(large.sample)
-        ret = NULL
+      if (large.sample) {
+        ret <- NULL
+      }
     }
   })
   ret
@@ -4220,70 +4630,73 @@ observe({
   input$check.jitter.x
   input$check.jitter.y
   isolate({
-    graphical.par$jitter = ""
-    if(!is.null(input$check.jitter.x)&&input$check.jitter.x&&
-       !is.null(input$check.jitter.y)&&!input$check.jitter.y){
-      graphical.par$jitter = "x"
-    }else if(!is.null(input$check.jitter.x)&&!input$check.jitter.x&&
-             !is.null(input$check.jitter.y)&&input$check.jitter.y){
-      graphical.par$jitter = "y"
-    }else if(!is.null(input$check.jitter.x)&&input$check.jitter.x&&
-             !is.null(input$check.jitter.y)&&input$check.jitter.y){
-      graphical.par$jitter = "xy"
+    graphical.par$jitter <- ""
+    if (!is.null(input$check.jitter.x) && input$check.jitter.x &&
+      !is.null(input$check.jitter.y) && !input$check.jitter.y) {
+      graphical.par$jitter <- "x"
+    } else if (!is.null(input$check.jitter.x) && !input$check.jitter.x &&
+      !is.null(input$check.jitter.y) && input$check.jitter.y) {
+      graphical.par$jitter <- "y"
+    } else if (!is.null(input$check.jitter.x) && input$check.jitter.x &&
+      !is.null(input$check.jitter.y) && input$check.jitter.y) {
+      graphical.par$jitter <- "xy"
     }
   })
 })
 
 # add rugs to plot
-output$add.rugs.panel = renderUI({
+output$add.rugs.panel <- renderUI({
   get.data.set()
   input$vari1
   input$vari2
-  ret = NULL
+  ret <- NULL
 
   isolate({
+    if (!input$vari2 %in% "none" &&
+      ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+        class(get.data.set()[, input$vari1]) %in% "integer") &&
+        (class(get.data.set()[, input$vari2]) %in% "numeric" |
+          class(get.data.set()[, input$vari2]) %in% "integer"))) {
+      check.rugs.x.object <- checkboxInput("check.rugs.x",
+        label = plot.par$varnames$y,
+        value = input$check.rugs.x
+      )
+      check.rugs.y.object <- checkboxInput("check.rugs.y",
+        label = plot.par$varnames$x,
+        value = input$check.rugs.y
+      )
 
-    if(!input$vari2%in%"none"&&
-       ((class(get.data.set()[,input$vari1])%in%"numeric"|
-         class(get.data.set()[,input$vari1])%in%"integer")&&
-        (class(get.data.set()[,input$vari2])%in%"numeric"|
-         class(get.data.set()[,input$vari2])%in%"integer"))) {
-      #      title.rugs = h5("Add rugs")
-      check.rugs.x.object = checkboxInput("check.rugs.x",
-                                          label=plot.par$varnames$y,
-                                          value=input$check.rugs.x)
-      check.rugs.y.object = checkboxInput("check.rugs.y",
-                                          label=plot.par$varnames$x,
-                                          value=input$check.rugs.y)
+      ret <- list(
+        fixedRow(
+          column(2, h5("Rugs:")),
+          column(width = 4, check.rugs.x.object),
+          column(width = 4, check.rugs.y.object)
+        )
+      )
 
-      ret = list(
-        fixedRow(column(2, h5("Rugs:")),
-                 column(width=4,check.rugs.x.object),
-                 column(width=4,check.rugs.y.object)))
-
-      temp = list()
-      temp$x = get.data.set()[,input$vari1]
-      if(input$vari2%in%'none'){
-        temp$y = NULL
-      }else{
-        temp$y = get.data.set()[,input$vari2]
+      temp <- list()
+      temp$x <- get.data.set()[, input$vari1]
+      if (input$vari2 %in% "none") {
+        temp$y <- NULL
+      } else {
+        temp$y <- get.data.set()[, input$vari2]
       }
-      temp$plot = F
-      temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      temp$plot <- F
+      temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
       ##################################################################
       #    large.sample = T
-      large.sample = search.name(temp,"largesample")[[1]]
-      if(is.null(large.sample)){
-        large.sample=F
+      large.sample <- search.name(temp, "largesample")[[1]]
+      if (is.null(large.sample)) {
+        large.sample <- F
       }
       ##################################################################
 
-      if(large.sample)
-        ret = NULL
+      if (large.sample) {
+        ret <- NULL
+      }
     }
   })
   ret
-
 })
 
 # observe whether rugs should be added
@@ -4291,65 +4704,73 @@ observe({
   input$check.rugs.x
   input$check.rugs.y
   isolate({
-    graphical.par$rugs = ""
-    if(!is.null(input$check.rugs.x)&&input$check.rugs.x&&
-       !is.null(input$check.rugs.y)&&!input$check.rugs.y){
-      graphical.par$rugs = "x"
-    }else if(!is.null(input$check.rugs.x)&&!input$check.rugs.x&&
-             !is.null(input$check.rugs.y)&&input$check.rugs.y){
-      graphical.par$rugs = "y"
-    }else if(!is.null(input$check.rugs.x)&&input$check.rugs.x&&
-             !is.null(input$check.rugs.y)&&input$check.rugs.y){
-      graphical.par$rugs = "xy"
+    graphical.par$rugs <- ""
+    if (!is.null(input$check.rugs.x) && input$check.rugs.x &&
+      !is.null(input$check.rugs.y) && !input$check.rugs.y) {
+      graphical.par$rugs <- "x"
+    } else if (!is.null(input$check.rugs.x) && !input$check.rugs.x &&
+      !is.null(input$check.rugs.y) && input$check.rugs.y) {
+      graphical.par$rugs <- "y"
+    } else if (!is.null(input$check.rugs.x) && input$check.rugs.x &&
+      !is.null(input$check.rugs.y) && input$check.rugs.y) {
+      graphical.par$rugs <- "xy"
     }
   })
 })
 
 # join points panel
-output$join.points.panel = renderUI({
+output$join.points.panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
   isolate({
-    if(!input$vari2%in%"none"&&
-       ((class(get.data.set()[,input$vari1])%in%"numeric"|
-         class(get.data.set()[,input$vari1])%in%"integer")&&
-        (class(get.data.set()[,input$vari2])%in%"numeric"|
-         class(get.data.set()[,input$vari2])%in%"integer"))) {
+    if (!input$vari2 %in% "none" &&
+      ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+        class(get.data.set()[, input$vari1]) %in% "integer") &&
+        (class(get.data.set()[, input$vari2]) %in% "numeric" |
+          class(get.data.set()[, input$vari2]) %in% "integer"))) {
+      join.points.title <- h5(strong("Join points"))
+      check.join.object <- checkboxInput("check.join",
+        label = "Join points",
+        value = F
+      )
+      color.join.select <- selectInput("color.join",
+        label = "",
+        choices = c(
+          "red", "black", "blue",
+          "green4", "yellow", "pink",
+          "grey", "orange"
+        ),
+        selected = "blue",
+        selectize = F
+      )
+      ret <- list(
+        join.points.title,
+        fixedRow(
+          column(width = 3, check.join.object),
+          column(width = 6, color.join.select)
+        )
+      )
 
-      #      title.join = h5("Join points by lines")
-      join.points.title = h5(strong("Join points"))
-      check.join.object = checkboxInput("check.join",
-                                        label="Join points",
-                                        value=F)
-      color.join.select = selectInput("color.join",label="",
-                                      choices=c("red","black","blue",
-                                                "green4","yellow","pink",
-                                                "grey","orange"),
-                                      selected="blue",
-                                      selectize = F)
-      ret = list(join.points.title,
-                 fixedRow(column(width=3,check.join.object),
-                          column(width=6,color.join.select)))
-
-      temp = list()
-      temp$x = get.data.set()[,input$vari1]
-      if(input$vari2%in%'none'){
-        temp$y = NULL
-      }else{
-        temp$y = get.data.set()[,input$vari2]
+      temp <- list()
+      temp$x <- get.data.set()[, input$vari1]
+      if (input$vari2 %in% "none") {
+        temp$y <- NULL
+      } else {
+        temp$y <- get.data.set()[, input$vari2]
       }
-      temp$plot = F
-      temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      temp$plot <- F
+      temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
       ##################################################################
       #    large.sample = T
-      large.sample = search.name(temp,"largesample")[[1]]
-      if(is.null(large.sample)){
-        large.sample=F
+      large.sample <- search.name(temp, "largesample")[[1]]
+      if (is.null(large.sample)) {
+        large.sample <- F
       }
       ##################################################################
 
-      if(large.sample)
-        ret = NULL
+      if (large.sample) {
+        ret <- NULL
+      }
     }
   })
   ret
@@ -4360,128 +4781,140 @@ observe({
   input$check.join
   input$color.join
   isolate({
-    if(!is.null(input$check.join)){
-      graphical.par$col.line = input$color.join
-      graphical.par$join = input$check.join
+    if (!is.null(input$check.join)) {
+      graphical.par$col.line <- input$color.join
+      graphical.par$join <- input$check.join
     }
   })
 })
 
 # panel for wigets to adjust the x and y axis limits
-output$adjust.axis.panel = renderUI({
+output$adjust.axis.panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
   input$vari1
   input$vari2
   #  plot.ret.para$parameters
   isolate({
+    if ((input$vari2 %in% "none" &&
+      (class(get.data.set()[, input$vari1]) %in% "numeric" |
+        class(get.data.set()[, input$vari1]) %in% "integer")) ||
+      (!input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character") &&
+        (class(get.data.set()[, input$vari2]) %in% "integer" |
+          class(get.data.set()[, input$vari2]) %in% "numeric")) ||
+      (!input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "integer" |
+          class(get.data.set()[, input$vari1]) %in% "numeric") &&
+        (class(get.data.set()[, input$vari2]) %in% "character" |
+          class(get.data.set()[, input$vari2]) %in% "factor")) ||
+      (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer") &&
+          (class(get.data.set()[, input$vari2]) %in% "numeric" |
+            class(get.data.set()[, input$vari2]) %in% "integer")))) {
+      plot.par$xlim <- NULL
+      plot.par$ylim <- NULL
+      if ((!is.null(input$vari1) &&
+        !is.null(input$vari2)) &&
+        (input$vari1 %in% colnames(get.data.set()) &&
+          (input$vari2 %in% "none" ||
+            input$vari2 %in% colnames(get.data.set())))) {
+        ret <- list(h5(strong("Axis Limits")))
+        temp <- list()
+        temp$x <- vis.data()[[plot.par$x]]
 
-    if((input$vari2%in%"none"&&
-        (class(get.data.set()[,input$vari1])%in%"numeric"|
-         class(get.data.set()[,input$vari1])%in%"integer"))||
-       (!input$vari2%in%"none"&&
-        (class(get.data.set()[,input$vari1])%in%"factor"|
-         class(get.data.set()[,input$vari1])%in%"character")&&
-        (class(get.data.set()[,input$vari2])%in%"integer"|
-         class(get.data.set()[,input$vari2])%in%"numeric"))||
-       (!input$vari2%in%"none"&&
-        (class(get.data.set()[,input$vari1])%in%"integer"|
-         class(get.data.set()[,input$vari1])%in%"numeric")&&
-        (class(get.data.set()[,input$vari2])%in%"character"|
-         class(get.data.set()[,input$vari2])%in%"factor")) ||
-       (!input$vari2%in%"none"&&
-        ((class(get.data.set()[,input$vari1])%in%"numeric"|
-          class(get.data.set()[,input$vari1])%in%"integer")&&
-         (class(get.data.set()[,input$vari2])%in%"numeric"|
-          class(get.data.set()[,input$vari2])%in%"integer")))) {
-
-      plot.par$xlim = NULL
-      plot.par$ylim = NULL
-      if((!is.null(input$vari1)&&
-          !is.null(input$vari2))&&
-         (input$vari1%in%colnames(get.data.set())&&
-          (input$vari2%in%"none"||
-           input$vari2%in%colnames(get.data.set())))){
-        ret = list(h5(strong('Axis Limits')))
-        temp = list()
-        #        temp$x = get.data.set()[,input$vari1]
-        temp$x = vis.data()[[plot.par$x]]
-
-        if(input$vari2%in%'none'){
-          temp$y = NULL
-        }else{
-          #          temp$y = get.data.set()[,input$vari2]
-          temp$y = vis.data()[[plot.par$y]]
+        if (input$vari2 %in% "none") {
+          temp$y <- NULL
+        } else {
+          temp$y <- vis.data()[[plot.par$y]]
         }
-        temp$plot = F
-        tester = try(do.call(iNZightPlots:::iNZightPlot, temp))
+        temp$plot <- F
+        tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
         ###################################################################
         #      large.sample = T
-        large.sample = search.name(tester,"largesample")[[1]]
-        #        limits.x = search.name(tester,"ylim")[[1]]
-        #        limits.y = search.name(tester,"xlim")[[1]]
-        if(is.null(large.sample)){
-          large.sample = F
+        large.sample <- search.name(tester, "largesample")[[1]]
+        if (is.null(large.sample)) {
+          large.sample <- F
         }
         ###################################################################
-        if((input$vari2%in%"none"&&
-            (class(get.data.set()[,input$vari1])%in%"numeric"|
-             class(get.data.set()[,input$vari1])%in%"integer"))||
-           (!input$vari2%in%"none"&&
-            (class(get.data.set()[,input$vari1])%in%"integer"|
-             class(get.data.set()[,input$vari1])%in%"numeric")&&
-            (class(get.data.set()[,input$vari2])%in%"character"|
-             class(get.data.set()[,input$vari2])%in%"factor"))){
-          limits.x = range(temp$x, na.rm = TRUE)
-          ret[[2]] = fixedRow(column(2,h5("x-axis:")),
-                              column(4,textInput("x_axis_low_text",
-                                                 label="",
-                                                 value=limits.x[1])),
-                              column(4,textInput("x_axis_hig_text",
-                                                 label="",
-                                                 value=limits.x[2])))
-
+        if ((input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "numeric" |
+            class(get.data.set()[, input$vari1]) %in% "integer")) ||
+          (!input$vari2 %in% "none" &&
+            (class(get.data.set()[, input$vari1]) %in% "integer" |
+              class(get.data.set()[, input$vari1]) %in% "numeric") &&
+            (class(get.data.set()[, input$vari2]) %in% "character" |
+              class(get.data.set()[, input$vari2]) %in% "factor"))) {
+          limits.x <- range(temp$x, na.rm = TRUE)
+          ret[[2]] <- fixedRow(
+            column(2, h5("x-axis:")),
+            column(4, textInput("x_axis_low_text",
+              label = "",
+              value = limits.x[1]
+            )),
+            column(4, textInput("x_axis_hig_text",
+              label = "",
+              value = limits.x[2]
+            ))
+          )
+        } else if ((!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "factor" |
+            class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "integer" |
+            class(get.data.set()[, input$vari2]) %in% "numeric"))) {
+          limits.y <- range(temp$y, na.rm = TRUE)
+          ret[[2]] <- fixedRow(
+            column(2, h5("x-axis:")),
+            column(4, textInput("x_axis_low_text",
+              label = "",
+              value = limits.y[1]
+            )),
+            column(4, textInput("x_axis_hig_text",
+              label = "",
+              value = limits.y[2]
+            ))
+          )
+        } else if ((!input$vari2 %in% "none" &&
+          ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+            class(get.data.set()[, input$vari1]) %in% "integer") &&
+            (class(get.data.set()[, input$vari2]) %in% "numeric" |
+              class(get.data.set()[, input$vari2]) %in% "integer")))) {
+          limits.x <- range(temp$x, na.rm = TRUE)
+          limits.y <- range(temp$y, na.rm = TRUE)
+          ret[[2]] <- fixedRow(
+            column(2, h5("x-axis:")),
+            column(4, textInput("x_axis_low_text",
+              label = "",
+              value = limits.y[1]
+            )),
+            column(4, textInput("x_axis_hig_text",
+              label = "",
+              value = limits.y[2]
+            ))
+          )
+          ret[[3]] <- fixedRow(
+            column(2, h5("y-axis:")),
+            column(4, textInput("y_axis_low_text",
+              label = "",
+              value = limits.x[1]
+            )),
+            column(4, textInput("y_axis_hig_text",
+              label = "",
+              value = limits.x[2]
+            ))
+          )
         }
-        else if((!input$vari2%in%"none"&&
-                 (class(get.data.set()[,input$vari1])%in%"factor"|
-                  class(get.data.set()[,input$vari1])%in%"character")&&
-                 (class(get.data.set()[,input$vari2])%in%"integer"|
-                  class(get.data.set()[,input$vari2])%in%"numeric"))) {
-          limits.y = range(temp$y, na.rm = TRUE)
-          ret[[2]] = fixedRow(column(2,h5("x-axis:")),
-                              column(4,textInput("x_axis_low_text",
-                                                 label="",
-                                                 value=limits.y[1])),
-                              column(4,textInput("x_axis_hig_text",
-                                                 label="",
-                                                 value=limits.y[2])))
-        }
-        else if((!input$vari2%in%"none"&&
-                 ((class(get.data.set()[,input$vari1])%in%"numeric"|
-                   class(get.data.set()[,input$vari1])%in%"integer")&&
-                  (class(get.data.set()[,input$vari2])%in%"numeric"|
-                   class(get.data.set()[,input$vari2])%in%"integer")))){
-          limits.x = range(temp$x, na.rm = TRUE)
-          limits.y = range(temp$y, na.rm = TRUE)
-          ret[[2]] = fixedRow(column(2,h5("x-axis:")),
-                              column(4,textInput("x_axis_low_text",
-                                                 label="",
-                                                 value=limits.y[1])),
-                              column(4,textInput("x_axis_hig_text",
-                                                 label="",
-                                                 value=limits.y[2])))
-          ret[[3]] = fixedRow(column(2,h5("y-axis:")),
-                              column(4,textInput("y_axis_low_text",
-                                                 label="",
-                                                 value=limits.x[1])),
-                              column(4,textInput("y_axis_hig_text",
-                                                 label="",
-                                                 value=limits.x[2])))
-        }
-        ret[[length(ret)+1]] = fixedRow(column(2),
-                                        column(8,
-                                               actionButton("reset_axis_limits_button",
-                                                            label='Reset')))
+        ret[[length(ret) + 1]] <- fixedRow(
+          column(2),
+          column(
+            8,
+            actionButton("reset_axis_limits_button",
+              label = "Reset"
+            )
+          )
+        )
       }
     }
   })
@@ -4494,38 +4927,44 @@ observe({
   input$x_axis_low_text
   input$x_axis_hig_text
   isolate({
-    if(!is.null(input$x_axis_low_text)&&
-       !is.null(input$x_axis_hig_text)){
+    if (!is.null(input$x_axis_low_text) &&
+      !is.null(input$x_axis_hig_text)) {
       tryCatch({
-        xlim = c(as.numeric(input$x_axis_low_text),
-                 as.numeric(input$x_axis_hig_text))
-        if(is.na(as.numeric(input$x_axis_low_text))){
-          xlim[1] = 0
+        xlim <- c(
+          as.numeric(input$x_axis_low_text),
+          as.numeric(input$x_axis_hig_text)
+        )
+        if (is.na(as.numeric(input$x_axis_low_text))) {
+          xlim[1] <- 0
         }
-        if(is.na(as.numeric(input$x_axis_hig_text))){
-          xlim[2] = 0
+        if (is.na(as.numeric(input$x_axis_hig_text))) {
+          xlim[2] <- 0
         }
-        plot.par$xlim = xlim
+        plot.par$xlim <- xlim
       }, warning = function(w) {
-        if(is.na(suppressWarnings(as.numeric(input$x_axis_low_text)))){
-          updateTextInput(session,"x_axis_low_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$x_axis_low_text)))) {
+          updateTextInput(session, "x_axis_low_text",
+            value = ""
+          )
         }
-        if(is.na(suppressWarnings(as.numeric(input$x_axis_hig_text)))){
-          updateTextInput(session,"x_axis_hig_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$x_axis_hig_text)))) {
+          updateTextInput(session, "x_axis_hig_text",
+            value = ""
+          )
         }
-        plot.par$xlim = NULL
+        plot.par$xlim <- NULL
       }, error = function(e) {
-        if(is.na(suppressWarnings(as.numeric(input$x_axis_low_text)))){
-          updateTextInput(session,"x_axis_low_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$x_axis_low_text)))) {
+          updateTextInput(session, "x_axis_low_text",
+            value = ""
+          )
         }
-        if(is.na(suppressWarnings(as.numeric(input$x_axis_hig_text)))){
-          updateTextInput(session,"x_axis_hig_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$x_axis_hig_text)))) {
+          updateTextInput(session, "x_axis_hig_text",
+            value = ""
+          )
         }
-        plot.par$xlim = NULL
+        plot.par$xlim <- NULL
       }, finally = {})
     }
   })
@@ -4536,38 +4975,44 @@ observe({
   input$y_axis_low_text
   input$y_axis_hig_text
   isolate({
-    if(!is.null(input$y_axis_low_text)&&
-       !is.null(input$y_axis_hig_text)){
+    if (!is.null(input$y_axis_low_text) &&
+      !is.null(input$y_axis_hig_text)) {
       tryCatch({
-        ylim = c(as.numeric(input$y_axis_low_text),
-                 as.numeric(input$y_axis_hig_text))
-        if(is.na(as.numeric(input$y_axis_low_text))){
-          ylim[1] = 0
+        ylim <- c(
+          as.numeric(input$y_axis_low_text),
+          as.numeric(input$y_axis_hig_text)
+        )
+        if (is.na(as.numeric(input$y_axis_low_text))) {
+          ylim[1] <- 0
         }
-        if(is.na(as.numeric(input$y_axis_hig_text))){
-          ylim[2] = 0
+        if (is.na(as.numeric(input$y_axis_hig_text))) {
+          ylim[2] <- 0
         }
-        plot.par$ylim = ylim
+        plot.par$ylim <- ylim
       }, warning = function(w) {
-        if(is.na(suppressWarnings(as.numeric(input$y_axis_low_text)))){
-          updateTextInput(session,"y_axis_low_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$y_axis_low_text)))) {
+          updateTextInput(session, "y_axis_low_text",
+            value = ""
+          )
         }
-        if(is.na(suppressWarnings(as.numeric(input$y_axis_hig_text)))){
-          updateTextInput(session,"y_axis_hig_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$y_axis_hig_text)))) {
+          updateTextInput(session, "y_axis_hig_text",
+            value = ""
+          )
         }
-        plot.par$ylim = NULL
+        plot.par$ylim <- NULL
       }, error = function(e) {
-        if(is.na(suppressWarnings(as.numeric(input$y_axis_low_text)))){
-          updateTextInput(session,"y_axis_low_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$y_axis_low_text)))) {
+          updateTextInput(session, "y_axis_low_text",
+            value = ""
+          )
         }
-        if(is.na(suppressWarnings(as.numeric(input$y_axis_hig_text)))){
-          updateTextInput(session,"y_axis_hig_text",
-                          value = "")
+        if (is.na(suppressWarnings(as.numeric(input$y_axis_hig_text)))) {
+          updateTextInput(session, "y_axis_hig_text",
+            value = ""
+          )
         }
-        plot.par$ylim = NULL
+        plot.par$ylim <- NULL
       }, finally = {})
     }
   })
@@ -4577,109 +5022,113 @@ observe({
 observe({
   input$reset_axis_limits_button
   isolate({
-    if(!is.null(input$reset_axis_limits_button)&&
-       input$reset_axis_limits_button>0){
-      plot.par$xlim = NULL
-      plot.par$ylim = NULL
-      temp = list()
-      temp$y = get.data.set()[,input$vari1]
-      if(input$vari2%in%'none'){
-        temp$x = NULL
-      }else{
-        temp$x = get.data.set()[,input$vari2]
-      }
-      #      temp$plot = F
-      #      temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
-      #      limits.x = search.name(temp,"xlim")[[1]]
-      #      limits.y = search.name(temp,"ylim")[[1]]
-      if((!input$vari2%in%"none"&&
-          ((class(get.data.set()[,input$vari1])%in%"numeric"|
-            class(get.data.set()[,input$vari1])%in%"integer")&&
-           (class(get.data.set()[,input$vari2])%in%"numeric"|
-            class(get.data.set()[,input$vari2])%in%"integer")))) {
-        limits.x = range(temp$x, na.rm = TRUE)
-        limits.y = range(temp$y, na.rm = TRUE)
-        updateTextInput(session,"x_axis_low_text",
-                        value = limits.x[1])
-        updateTextInput(session,"x_axis_hig_text",
-                        value = limits.x[2])
-        updateTextInput(session,"y_axis_low_text",
-                        value = limits.y[1])
-        updateTextInput(session,"y_axis_hig_text",
-                        value = limits.y[2])
-      }
-      else if((input$vari2%in%"none"&&
-               (class(get.data.set()[,input$vari1])%in%"numeric"|
-                class(get.data.set()[,input$vari1])%in%"integer"))||
-              (!input$vari2%in%"none"&&
-               (class(get.data.set()[,input$vari1])%in%"integer"|
-                class(get.data.set()[,input$vari1])%in%"numeric")&&
-               (class(get.data.set()[,input$vari2])%in%"character"|
-                class(get.data.set()[,input$vari2])%in%"factor"))) {
-        limits.y = range(temp$y, na.rm = TRUE)
-        updateTextInput(session,"x_axis_low_text",
-                        value = limits.y[1])
-        updateTextInput(session,"x_axis_hig_text",
-                        value = limits.y[2])
-      }
-      else if((!input$vari2%in%"none"&&
-               (class(get.data.set()[,input$vari1])%in%"factor"|
-                class(get.data.set()[,input$vari1])%in%"character")&&
-               (class(get.data.set()[,input$vari2])%in%"integer"|
-                class(get.data.set()[,input$vari2])%in%"numeric"))) {
-        limits.x = range(temp$x, na.rm = TRUE)
-        updateTextInput(session,"x_axis_low_text",
-                        value = limits.x[1])
-        updateTextInput(session,"x_axis_hig_text",
-                        value = limits.x[2])
+    if (!is.null(input$reset_axis_limits_button) &&
+      input$reset_axis_limits_button > 0) {
+      plot.par$xlim <- NULL
+      plot.par$ylim <- NULL
+      temp <- list()
+      temp$y <- get.data.set()[, input$vari1]
+      if (input$vari2 %in% "none") {
+        temp$x <- NULL
+      } else {
+        temp$x <- get.data.set()[, input$vari2]
       }
 
+      if ((!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer") &&
+          (class(get.data.set()[, input$vari2]) %in% "numeric" |
+            class(get.data.set()[, input$vari2]) %in% "integer")))) {
+        limits.x <- range(temp$x, na.rm = TRUE)
+        limits.y <- range(temp$y, na.rm = TRUE)
+        updateTextInput(session, "x_axis_low_text",
+          value = limits.x[1]
+        )
+        updateTextInput(session, "x_axis_hig_text",
+          value = limits.x[2]
+        )
+        updateTextInput(session, "y_axis_low_text",
+          value = limits.y[1]
+        )
+        updateTextInput(session, "y_axis_hig_text",
+          value = limits.y[2]
+        )
+      } else if ((input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer")) ||
+        (!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "integer" |
+            class(get.data.set()[, input$vari1]) %in% "numeric") &&
+          (class(get.data.set()[, input$vari2]) %in% "character" |
+            class(get.data.set()[, input$vari2]) %in% "factor"))) {
+        limits.y <- range(temp$y, na.rm = TRUE)
+        updateTextInput(session, "x_axis_low_text",
+          value = limits.y[1]
+        )
+        updateTextInput(session, "x_axis_hig_text",
+          value = limits.y[2]
+        )
+      } else if ((!input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character") &&
+        (class(get.data.set()[, input$vari2]) %in% "integer" |
+          class(get.data.set()[, input$vari2]) %in% "numeric"))) {
+        limits.x <- range(temp$x, na.rm = TRUE)
+        updateTextInput(session, "x_axis_low_text",
+          value = limits.x[1]
+        )
+        updateTextInput(session, "x_axis_hig_text",
+          value = limits.x[2]
+        )
+      }
     }
   })
 })
 
-output$adjust.number.bars.panel = renderUI({
+output$adjust.number.bars.panel <- renderUI({
   get.data.set()
   input$vari1
   input$vari2
-  ret = NULL
+  ret <- NULL
   isolate({
+    if ((input$vari2 %in% "none" &&
+      (class(get.data.set()[, input$vari1]) %in% "factor" |
+        class(get.data.set()[, input$vari1]) %in% "character")) ||
+      (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "factor" |
+            class(get.data.set()[, input$vari2]) %in% "character")))) {
+      plot.par$zoombar <- NULL
 
-    if((input$vari2%in%"none"&&
-        (class(get.data.set()[,input$vari1])%in%"factor"|
-         class(get.data.set()[,input$vari1])%in%"character")) ||
-       (!input$vari2%in%"none"&&
-        ((class(get.data.set()[,input$vari1])%in%"factor"|
-          class(get.data.set()[,input$vari1])%in%"character")&&
-         (class(get.data.set()[,input$vari2])%in%"factor"|
-          class(get.data.set()[,input$vari2])%in%"character")))) {
-      plot.par$zoombar = NULL
-
-      if((!is.null(input$vari1)&&
-          !is.null(input$vari2))&&
-         (input$vari1%in%colnames(get.data.set())&&
-          (input$vari1%in%colnames(get.data.set())||
-           input$vari1%in%"none"))){
-        if(length(levels(get.data.set()[,input$vari1]))>2){
-          ret = list(sliderInput("num.bars.slider",
-                                 label = "Number of Bars:",
-                                 min=2,
-                                 max=length(levels(get.data.set()[,input$vari1])),
-                                 step=1,
-                                 ticks=F,
-                                 value=length(levels(get.data.set()[,input$vari1]))),
-                     sliderInput("starting.bars.slider",
-                                 label = "Starting Point:",
-                                 min=1,
-                                 max=length(levels(get.data.set()[,input$vari1]))-1,
-                                 step=1,
-                                 ticks=F,
-                                 value=1),
-                     actionButton("reset.zoombars","Reset"))
+      if ((!is.null(input$vari1) &&
+        !is.null(input$vari2)) &&
+        (input$vari1 %in% colnames(get.data.set()) &&
+          (input$vari1 %in% colnames(get.data.set()) ||
+            input$vari1 %in% "none"))) {
+        if (length(levels(get.data.set()[, input$vari1])) > 2) {
+          ret <- list(
+            sliderInput("num.bars.slider",
+              label = "Number of Bars:",
+              min = 2,
+              max = length(levels(get.data.set()[, input$vari1])),
+              step = 1,
+              ticks = F,
+              value = length(levels(get.data.set()[, input$vari1]))
+            ),
+            sliderInput("starting.bars.slider",
+              label = "Starting Point:",
+              min = 1,
+              max = length(levels(get.data.set()[, input$vari1])) - 1,
+              step = 1,
+              ticks = F,
+              value = 1
+            ),
+            actionButton("reset.zoombars", "Reset")
+          )
         }
       }
     }
-
   })
   ret
 })
@@ -4689,211 +5138,288 @@ observe({
   input$num.bars.slider
   input$starting.bars.slider
   isolate({
-    plot.par$zoombar = c(input$starting.bars.slider,input$num.bars.slider)
+    plot.par$zoombar <- c(input$starting.bars.slider, input$num.bars.slider)
   })
 })
 
-#observe the reset button for adjusting bars
+# observe the reset button for adjusting bars
 observe({
   input$reset.zoombars
   isolate({
-    updateSliderInput(session,"num.bars.slider",
-                      value=length(levels(get.data.set()[,input$vari1])))
-    updateSliderInput(session,"starting.bars.slider",
-                      value=1)
+    updateSliderInput(session, "num.bars.slider",
+      value = length(levels(get.data.set()[, input$vari1]))
+    )
+    updateSliderInput(session, "starting.bars.slider",
+      value = 1
+    )
   })
 })
 
 # identify points panel
-output$points.identify.panel = renderUI({
+output$points.identify.panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
   input$vari1
   input$vari2
   isolate({
+    if ((input$vari2 %in% "none" &&
+      (class(get.data.set()[, input$vari1]) %in% "numeric" |
+        class(get.data.set()[, input$vari1]) %in% "integer")) ||
+      (!input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character") &&
+        (class(get.data.set()[, input$vari2]) %in% "integer" |
+          class(get.data.set()[, input$vari2]) %in% "numeric")) ||
+      (!input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "integer" |
+          class(get.data.set()[, input$vari1]) %in% "numeric") &&
+        (class(get.data.set()[, input$vari2]) %in% "character" |
+          class(get.data.set()[, input$vari2]) %in% "factor")) ||
+      (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer") &&
+          (class(get.data.set()[, input$vari2]) %in% "numeric" |
+            class(get.data.set()[, input$vari2]) %in% "integer")))) {
+      plot.par$locate.id <- NULL
+      plot.par$locate.col <- NULL
+      plot.par$locate.extreme <- NULL
+      plot.par.stored$locate.id <- NULL
+      identified.points$values <- list()
+      ret <- list()
+      ret[[1]] <- fixedRow(
+        column(11, h5(strong("How do you want to label points?")))
+      )
+      ret[[2]] <- fixedRow(
+        column(
+          4,
+          checkboxInput("label_observation_check",
+            label = "Text label",
+            value = input$label_observation_check
+          )
+        ),
+        column(
+          6,
+          conditionalPanel(
+            "input.label_observation_check",
+            selectInput("label.select",
+              label = "",
+              choices = c(
+                "id",
+                colnames(get.data.set())
+              ),
+              selectize = F
+            )
+          )
+        )
+      )
 
-    if((input$vari2%in%"none"&&
-        (class(get.data.set()[,input$vari1])%in%"numeric"|
-         class(get.data.set()[,input$vari1])%in%"integer"))||
-       (!input$vari2%in%"none"&&
-        (class(get.data.set()[,input$vari1])%in%"factor"|
-         class(get.data.set()[,input$vari1])%in%"character")&&
-        (class(get.data.set()[,input$vari2])%in%"integer"|
-         class(get.data.set()[,input$vari2])%in%"numeric"))||
-       (!input$vari2%in%"none"&&
-        (class(get.data.set()[,input$vari1])%in%"integer"|
-         class(get.data.set()[,input$vari1])%in%"numeric")&&
-        (class(get.data.set()[,input$vari2])%in%"character"|
-         class(get.data.set()[,input$vari2])%in%"factor")) ||
-       (!input$vari2%in%"none"&&
-        ((class(get.data.set()[,input$vari1])%in%"numeric"|
-          class(get.data.set()[,input$vari1])%in%"integer")&&
-         (class(get.data.set()[,input$vari2])%in%"numeric"|
-          class(get.data.set()[,input$vari2])%in%"integer")))) {
-      #      plot.par$locate=NULL
-      plot.par$locate.id=NULL
-      plot.par$locate.col=NULL
-      plot.par$locate.extreme=NULL
-      plot.par.stored$locate.id=NULL
-      identified.points$values=list()
-      ret = list()
-      ret[[1]] = fixedRow(column(11,h5(strong("How do you want to label points?"))))
-      ret[[2]] = fixedRow(column(4,
-                                 checkboxInput("label_observation_check",
-                                               label="Text label",
-                                               value=input$label_observation_check)),
-                          column(6,
-                                 conditionalPanel("input.label_observation_check",
-                                                  selectInput("label.select",
-                                                              label="",
-                                                              choices=c("id",
-                                                                        colnames(get.data.set())),
-                                                              selectize = F))))
-
-      ret[[3]] = fixedRow(column(4,
-                                 checkboxInput("color_points_check",
-                                               label="Colour",
-                                               value=F)),
-                          column(6,
-                                 conditionalPanel("input.color_points_check",
-                                                  selectInput("color.select",
-                                                              label="Select Colour",
-                                                              choices=c("red",
-                                                                        "blue",
-                                                                        "green4"),
-                                                              selectize = F))))
-      ret[[4]] = fixedRow(column(4,
-                                 checkboxInput("same_level_of_check",
-                                               label="With the same level of",
-                                               value=F)),
-                          column(6,
-                                 conditionalPanel("input.same_level_of_check",
-                                                  selectInput("same.level.of.select",
-                                                              label="",
-                                                              choices=colnames(get.data.set()),
-                                                              selectize = F))))
-      ret[[5]] = radioButtons("select_identify_method",
-                              label = h5(strong("Select method of selection")),
-                              choices = c("Select by value",
-                                          "Extremes",
-                                          "Range of values"))
-      if(!is.null(input$vari1)&&!is.null(input$vari2)){
-        if(input$vari1%in%colnames(get.data.set())&&
-           (input$vari2%in%"none"||
-            input$vari2%in%colnames(get.data.set()))){
-          ch = ""
-          if(!is.null(input$by.value.column.select)){
-            ch = c("none",sort(get.data.set()[,input$by.value.column.select]))
-          }
-          ret[[6]] = conditionalPanel("input.select_identify_method=='Select by value'&&
-                                      (input.label_observation_check||input.color_points_check)",
-                                      checkboxInput("single_vs_multiple_check",
-                                                    label="Single value",
-                                                    value=F),
-                                      conditionalPanel("!input.single_vs_multiple_check",
-                                                       fixedRow(column(6,
-                                                                       selectInput("by.value.column.select",
-                                                                                   label="Select a column",
-                                                                                   choices=colnames(get.data.set()),
-                                                                                   selectize = F)),
-                                                                column(4,
-                                                                       selectInput("value.select",
-                                                                                   label="Select multiple values",
-                                                                                   choices=ch,
-                                                                                   multiple=T,
-                                                                                   selectize=F,
-                                                                                   selected="none",
-                                                                                   size=8)))),
-                                      conditionalPanel("input.single_vs_multiple_check",
-                                                       fixedRow(column(6,
-                                                                       sliderInput("select.unique.value.slider",
-                                                                                   label="Select single value",
-                                                                                   min=0,
-                                                                                   max=nrow(get.data.set()),
-                                                                                   value=0,
-                                                                                   step=1,
-                                                                                   ticks=F)),
-                                                                column(3,
-                                                                       numericInput("specify.correct.numeric",
-                                                                                    label="",
-                                                                                    value=0,
-                                                                                    min=0,
-                                                                                    max=nrow(get.data.set()),
-                                                                                    step=1)))))
-
-          if(is.numeric(get.data.set()[,input$vari1])&&
-             (!input$vari2%in%"none"&&
-              is.numeric(get.data.set()[,input$vari2]))){
-            ret[[7]] = conditionalPanel("input.select_identify_method=='Extremes'&&
-                                        (input.label_observation_check||input.color_points_check)",
-                                        sliderInput("extremes.slider",
-                                                    label="Number of points",
-                                                    min=0,
-                                                    max=nrow(get.data.set()),
-                                                    step=1,
-                                                    value=0,
-                                                    ticks=F))
-          }else if((!input$vari2%in%"none"&&
-                    ((!is.numeric(get.data.set()[,input$vari1])&&
-                      is.numeric(get.data.set()[,input$vari2]))||
-                     (is.numeric(get.data.set()[,input$vari1])&&
-                      !is.numeric(get.data.set()[,input$vari2]))))||
-                   (input$vari2%in%"none"&&
-                    is.numeric(get.data.set()[,input$vari1]))){
-            ret[[7]] = conditionalPanel("input.select_identify_method == 'Extremes' &&
-                                        (input.label_observation_check||input.color_points_check)",
-                                        sliderInput("extreme.lower",
-                                                    label="Select lower range",
-                                                    min=0,
-                                                    max=nrow(get.data.set()),
-                                                    step=1,
-                                                    value=0,
-                                                    ticks=F),
-                                        sliderInput("extreme.upper",
-                                                    label="Select upper range",
-                                                    min=0,
-                                                    max=nrow(get.data.set()),
-                                                    step=1,
-                                                    value=0,
-                                                    ticks=F)
-
-                                        #                                        fixedRow(column(4,numericInput("extreme.lower",
-                                        #                                                                       label="Lower",
-                                        #                                                                       value=0,
-                                        #                                                                       min=0,
-                                        #                                                                       max=nrow(get.data.set()),
-                                        #                                                                       step=1)),
-                                        #                                                 column(4,numericInput("extreme.upper",
-                                        #                                                                       label="Upper",
-                                        #                                                                       value=0,
-                                        #                                                                       min=0,
-                                        #                                                                       max=nrow(get.data.set()),
-                                        #                                                                       step=1)))
+      ret[[3]] <- fixedRow(
+        column(
+          4,
+          checkboxInput("color_points_check",
+            label = "Colour",
+            value = F
+          )
+        ),
+        column(
+          6,
+          conditionalPanel(
+            "input.color_points_check",
+            selectInput("color.select",
+              label = "Select Colour",
+              choices = c(
+                "red",
+                "blue",
+                "green4"
+              ),
+              selectize = F
+            )
+          )
+        )
+      )
+      ret[[4]] <- fixedRow(
+        column(
+          4,
+          checkboxInput("same_level_of_check",
+            label = "With the same level of",
+            value = F
+          )
+        ),
+        column(
+          6,
+          conditionalPanel(
+            "input.same_level_of_check",
+            selectInput("same.level.of.select",
+              label = "",
+              choices = colnames(get.data.set()),
+              selectize = F
+            )
+          )
+        )
+      )
+      ret[[5]] <- radioButtons("select_identify_method",
+        label = h5(strong("Select method of selection")),
+        choices = c(
+          "Select by value",
+          "Extremes",
+          "Range of values"
+        )
+      )
+      if (!is.null(input$vari1) && !is.null(input$vari2)) {
+        if (input$vari1 %in% colnames(get.data.set()) &&
+          (input$vari2 %in% "none" ||
+            input$vari2 %in% colnames(get.data.set()))) {
+          ch <- ""
+          if (!is.null(input$by.value.column.select)) {
+            ch <- c(
+              "none",
+              sort(get.data.set()[, input$by.value.column.select])
             )
           }
-          ret[[8]] = conditionalPanel("input.select_identify_method=='Range of values'&&
-                                      (input.label_observation_check||input.color_points_check)",
-                                      fixedRow(column(6,
-                                                      sliderInput("range.values.slider",
-                                                                  label = "Select range",
-                                                                  min = 0,
-                                                                  max = nrow(get.data.set()),
-                                                                  value = c(0, 0),
-                                                                  ticks=F)),
-                                               column(5,
-                                                      selectInput("range.column.select",
-                                                                  label="Select column",
-                                                                  choices=colnames(get.data.set()),
-                                                                  selectize = F))))
-          ret[[9]] = fixedRow(column(3,checkboxInput("show.stored.check",
-                                                     label="Show stored",
-                                                     value=T)),
-                              column(4,
-                                     actionButton("store.obs.button",
-                                                  label="Store selected")),
-                              column(4,
-                                     actionButton("reset.obs.button",
-                                                  label="Forget stored")))
+          ret[[6]] <- conditionalPanel(
+            "input.select_identify_method=='Select by value'&&
+             (input.label_observation_check||input.color_points_check)",
+            checkboxInput("single_vs_multiple_check",
+              label = "Single value",
+              value = F
+            ),
+            conditionalPanel(
+              "!input.single_vs_multiple_check",
+              fixedRow(
+                column(
+                  6,
+                  selectInput("by.value.column.select",
+                    label = "Select a column",
+                    choices = colnames(get.data.set()),
+                    selectize = F
+                  )
+                ),
+                column(
+                  4,
+                  selectInput("value.select",
+                    label = "Select multiple values",
+                    choices = ch,
+                    multiple = T,
+                    selectize = F,
+                    selected = "none",
+                    size = 8
+                  )
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.single_vs_multiple_check",
+              fixedRow(
+                column(
+                  6,
+                  sliderInput("select.unique.value.slider",
+                    label = "Select single value",
+                    min = 0,
+                    max = nrow(get.data.set()),
+                    value = 0,
+                    step = 1,
+                    ticks = F
+                  )
+                ),
+                column(
+                  3,
+                  numericInput("specify.correct.numeric",
+                    label = "",
+                    value = 0,
+                    min = 0,
+                    max = nrow(get.data.set()),
+                    step = 1
+                  )
+                )
+              )
+            )
+          )
+
+          if (is.numeric(get.data.set()[, input$vari1]) &&
+            (!input$vari2 %in% "none" &&
+              is.numeric(get.data.set()[, input$vari2]))) {
+            ret[[7]] <- conditionalPanel(
+              "input.select_identify_method=='Extremes'&&
+               (input.label_observation_check||input.color_points_check)",
+              sliderInput("extremes.slider",
+                label = "Number of points",
+                min = 0,
+                max = nrow(get.data.set()),
+                step = 1,
+                value = 0,
+                ticks = F
+              )
+            )
+          } else if ((!input$vari2 %in% "none" &&
+            ((!is.numeric(get.data.set()[, input$vari1]) &&
+              is.numeric(get.data.set()[, input$vari2])) ||
+              (is.numeric(get.data.set()[, input$vari1]) &&
+                !is.numeric(get.data.set()[, input$vari2])))) ||
+            (input$vari2 %in% "none" &&
+              is.numeric(get.data.set()[, input$vari1]))) {
+            ret[[7]] <- conditionalPanel(
+              "input.select_identify_method == 'Extremes' &&
+               (input.label_observation_check||input.color_points_check)",
+              sliderInput("extreme.lower",
+                label = "Select lower range",
+                min = 0,
+                max = nrow(get.data.set()),
+                step = 1,
+                value = 0,
+                ticks = F
+              ),
+              sliderInput("extreme.upper",
+                label = "Select upper range",
+                min = 0,
+                max = nrow(get.data.set()),
+                step = 1,
+                value = 0,
+                ticks = F
+              )
+            )
+          }
+          ret[[8]] <- conditionalPanel(
+            "input.select_identify_method=='Range of values'&&
+             (input.label_observation_check||input.color_points_check)",
+            fixedRow(
+              column(
+                6,
+                sliderInput("range.values.slider",
+                  label = "Select range",
+                  min = 0,
+                  max = nrow(get.data.set()),
+                  value = c(0, 0),
+                  ticks = F
+                )
+              ),
+              column(
+                5,
+                selectInput("range.column.select",
+                  label = "Select column",
+                  choices = colnames(get.data.set()),
+                  selectize = F
+                )
+              )
+            )
+          )
+          ret[[9]] <- fixedRow(
+            column(3, checkboxInput("show.stored.check",
+              label = "Show stored",
+              value = T
+            )),
+            column(
+              4,
+              actionButton("store.obs.button",
+                label = "Store selected"
+              )
+            ),
+            column(
+              4,
+              actionButton("reset.obs.button",
+                label = "Forget stored"
+              )
+            )
+          )
         }
       }
     }
@@ -4906,19 +5432,18 @@ observe({
   input$label_observation_check
   input$label.select
   isolate({
-    if(!is.null(input$label_observation_check)&&
-       !is.null(input$label.select)&&
-       (input$label.select%in%colnames(get.data.set())||
-        input$label.select%in%"id")){
-      if(input$label_observation_check){
-        if(input$label.select%in%"id"){
-          plot.par$locate=1:nrow(get.data.set())
-        }else{
-          plot.par$locate=get.data.set()[,input$label.select]
+    if (!is.null(input$label_observation_check) &&
+      !is.null(input$label.select) &&
+      (input$label.select %in% colnames(get.data.set()) ||
+        input$label.select %in% "id")) {
+      if (input$label_observation_check) {
+        if (input$label.select %in% "id") {
+          plot.par$locate <- 1:nrow(get.data.set())
+        } else {
+          plot.par$locate <- get.data.set()[, input$label.select]
         }
-      }
-      else{
-        plot.par$locate=NULL
+      } else {
+        plot.par$locate <- NULL
       }
     }
   })
@@ -4929,15 +5454,15 @@ observe({
   input$color_points_check
   input$color.select
   isolate({
-    if(!is.null(input$color_points_check)&&
-       !is.null(input$color.select)){
-      if(input$color_points_check){
-        plot.par$locate.col=input$color.select
-      }else{
-        plot.par$locate.col=NULL
+    if (!is.null(input$color_points_check) &&
+      !is.null(input$color.select)) {
+      if (input$color_points_check) {
+        plot.par$locate.col <- input$color.select
+      } else {
+        plot.par$locate.col <- NULL
       }
-    }else{
-      plot.par$locate.col=NULL
+    } else {
+      plot.par$locate.col <- NULL
     }
   })
 })
@@ -4947,106 +5472,119 @@ observe({
 observe({
   input$select_identify_method
   isolate({
-    temp = NULL
-    if(!is.null(input$select_identify_method)){
-      if(input$select_identify_method%in%"Select by value"){
-        if(input$single_vs_multiple_check){
-          temp = input$select.unique.value.slider
-          if(temp==0){
-            temp=NULL
+    temp <- NULL
+    if (!is.null(input$select_identify_method)) {
+      if (input$select_identify_method %in% "Select by value") {
+        if (input$single_vs_multiple_check) {
+          temp <- input$select.unique.value.slider
+          if (temp == 0) {
+            temp <- NULL
           }
-        }else{
-          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
-          if(length(temp)==0){
-            temp=NULL
+        } else {
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
+          if (length(temp) == 0) {
+            temp <- NULL
           }
         }
-      }else if(input$select_identify_method%in%"Range of values"){
-        range = input$range.values.slider
-        if(!all(range%in%0)){
-          range[which(range%in%0)] = 1
-          temp = get.data.set()[,input$range.column.select]
-          names(temp) = 1:length(temp)
-          temp = sort(temp)
-          temp = as.numeric(names(temp)[range[1]:range[2]])
-          temp = which(get.data.set()[,input$range.column.select]%in%
-                         get.data.set()[,input$range.column.select][temp])
-        }else{
-          temp = NULL
+      } else if (input$select_identify_method %in% "Range of values") {
+        range <- input$range.values.slider
+        if (!all(range %in% 0)) {
+          range[which(range %in% 0)] <- 1
+          temp <- get.data.set()[, input$range.column.select]
+          names(temp) <- 1:length(temp)
+          temp <- sort(temp)
+          temp <- as.numeric(names(temp)[range[1]:range[2]])
+          temp <- which(get.data.set()[, input$range.column.select] %in%
+            get.data.set()[, input$range.column.select][temp])
+        } else {
+          temp <- NULL
         }
       }
-      if(!input$select_identify_method%in%"Extremes"){
-        if(input$same_level_of_check){
-          temp = which(get.data.set()[,input$same.level.of.select]%in%
-                         get.data.set()[,input$same.level.of.select][temp])
+      if (!input$select_identify_method %in% "Extremes") {
+        if (input$same_level_of_check) {
+          temp <- which(get.data.set()[, input$same.level.of.select] %in%
+            get.data.set()[, input$same.level.of.select][temp])
         }
-        if(input$show.stored.check){
-          temp = unique(c(plot.par.stored$locate.id,temp))
+        if (input$show.stored.check) {
+          temp <- unique(c(plot.par.stored$locate.id, temp))
         }
       }
-      if(length(temp)==0){
-        temp = NULL
+      if (length(temp) == 0) {
+        temp <- NULL
       }
     }
-    plot.par$locate.id = temp
-    plot.par$locate.extreme=NULL
+    plot.par$locate.id <- temp
+    plot.par$locate.extreme <- NULL
     updateSelectInput(session,
-                      "by.value.column.select",
-                      choices=colnames(get.data.set()),
-                      selected=colnames(get.data.set())[1])
-    ch = ""
-    if(!is.null(input$by.value.column.select)){
-      ch = c("none",sort(get.data.set()[,input$by.value.column.select]))
+      "by.value.column.select",
+      choices = colnames(get.data.set()),
+      selected = colnames(get.data.set())[1]
+    )
+    ch <- ""
+    if (!is.null(input$by.value.column.select)) {
+      ch <- c("none", sort(get.data.set()[, input$by.value.column.select]))
     }
     updateSelectInput(session,
-                      "value.select",
-                      choices=ch,
-                      selected=ch[1])
+      "value.select",
+      choices = ch,
+      selected = ch[1]
+    )
     updateCheckboxInput(session,
-                        "input.single_vs_multiple_check",
-                        value=F)
+      "input.single_vs_multiple_check",
+      value = F
+    )
     updateSliderInput(session,
-                      "select.unique.value.slider",
-                      max=length(ch),
-                      value=0)
+      "select.unique.value.slider",
+      max = length(ch),
+      value = 0
+    )
     updateNumericInput(session,
-                       "specify.correct.numeric",
-                       value=0,
-                       max=length(ch))
+      "specify.correct.numeric",
+      value = 0,
+      max = length(ch)
+    )
     updateSliderInput(session,
-                      "extremes.slider",
-                      max=nrow(get.data.set()),
-                      value=0)
+      "extremes.slider",
+      max = nrow(get.data.set()),
+      value = 0
+    )
     updateNumericInput(session,
-                       "extreme.lower",
-                       value=0,
-                       max=nrow(get.data.set()))
+      "extreme.lower",
+      value = 0,
+      max = nrow(get.data.set())
+    )
     updateNumericInput(session,
-                       "extreme.upper",
-                       value=0,
-                       max=nrow(get.data.set()))
+      "extreme.upper",
+      value = 0,
+      max = nrow(get.data.set())
+    )
     updateSliderInput(session,
-                      "range.values.slider",
-                      max = nrow(get.data.set()),
-                      value = c(0, 0))
+      "range.values.slider",
+      max = nrow(get.data.set()),
+      value = c(0, 0)
+    )
     updateSelectInput(session,
-                      "range.column.select",
-                      choices=colnames(get.data.set()),
-                      selected = colnames(get.data.set())[1])
+      "range.column.select",
+      choices = colnames(get.data.set()),
+      selected = colnames(get.data.set())[1]
+    )
   })
 })
 
 # extreme slider for scatter plots
 observe({
-  if(!is.null(input$extremes.slider)){
+  if (!is.null(input$extremes.slider)) {
     isolate({
-      if(!is.null(input$select_identify_method)&&
-         input$select_identify_method%in%"Extremes"){
-        plot.par$locate.id = NULL
-        if(input$extremes.slider == 0){
-          plot.par$locate.extreme = NULL
-        }else{
-          plot.par$locate.extreme = input$extremes.slider
+      if (!is.null(input$select_identify_method) &&
+        input$select_identify_method %in% "Extremes") {
+        plot.par$locate.id <- NULL
+        if (input$extremes.slider == 0) {
+          plot.par$locate.extreme <- NULL
+        } else {
+          plot.par$locate.extreme <- input$extremes.slider
         }
       }
     })
@@ -5057,14 +5595,14 @@ observe({
 observe({
   input$extreme.upper
   isolate({
-    if(!is.null(input$select_identify_method)&&
-       input$select_identify_method%in%"Extremes"){
-      plot.par$locate.id = NULL
-      if(!is.null(input$extreme.upper)){
-        if(is.null(plot.par$locate.extreme)){
-          plot.par$locate.extreme = c(0,0)
+    if (!is.null(input$select_identify_method) &&
+      input$select_identify_method %in% "Extremes") {
+      plot.par$locate.id <- NULL
+      if (!is.null(input$extreme.upper)) {
+        if (is.null(plot.par$locate.extreme)) {
+          plot.par$locate.extreme <- c(0, 0)
         }
-        plot.par$locate.extreme[2] = input$extreme.upper
+        plot.par$locate.extreme[2] <- input$extreme.upper
       }
     }
   })
@@ -5074,14 +5612,14 @@ observe({
 observe({
   input$extreme.lower
   isolate({
-    if(!is.null(input$select_identify_method)&&
-       input$select_identify_method%in%"Extremes"){
-      plot.par$locate.id = NULL
-      if(!is.null(input$extreme.lower)){
-        if(is.null(plot.par$locate.extreme)){
-          plot.par$locate.extreme = c(0,0)
+    if (!is.null(input$select_identify_method) &&
+      input$select_identify_method %in% "Extremes") {
+      plot.par$locate.id <- NULL
+      if (!is.null(input$extreme.lower)) {
+        if (is.null(plot.par$locate.extreme)) {
+          plot.par$locate.extreme <- c(0, 0)
         }
-        plot.par$locate.extreme[1] = input$extreme.lower
+        plot.par$locate.extreme[1] <- input$extreme.lower
       }
     }
   })
@@ -5089,134 +5627,142 @@ observe({
 
 # With the same level of is checked
 observe({
-  if(!is.null(input$same_level_of_check)){
+  if (!is.null(input$same_level_of_check)) {
     isolate({
-      temp = NULL
-      if(input$select_identify_method%in%"Select by value"){
-        if(input$single_vs_multiple_check){
-          temp = input$select.unique.value.slider
-          if(temp==0){
-            temp=NULL
+      temp <- NULL
+      if (input$select_identify_method %in% "Select by value") {
+        if (input$single_vs_multiple_check) {
+          temp <- input$select.unique.value.slider
+          if (temp == 0) {
+            temp <- NULL
           }
-        }else{
-          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
-          if(length(temp)==0){
-            temp=NULL
+        } else {
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
+          if (length(temp) == 0) {
+            temp <- NULL
           }
         }
-      }else if(input$select_identify_method%in%"Range of values"){
-        range = input$range.values.slider
-        if(!all(range%in%0)){
-          range[which(range%in%0)] = 1
-          temp = get.data.set()[,input$range.column.select]
-          names(temp) = 1:length(temp)
-          temp = sort(temp)
-          temp = as.numeric(names(temp)[range[1]:range[2]])
-          temp = which(get.data.set()[,input$range.column.select]%in%
-                         get.data.set()[,input$range.column.select][temp])
+      } else if (input$select_identify_method %in% "Range of values") {
+        range <- input$range.values.slider
+        if (!all(range %in% 0)) {
+          range[which(range %in% 0)] <- 1
+          temp <- get.data.set()[, input$range.column.select]
+          names(temp) <- 1:length(temp)
+          temp <- sort(temp)
+          temp <- as.numeric(names(temp)[range[1]:range[2]])
+          temp <- which(get.data.set()[, input$range.column.select] %in%
+            get.data.set()[, input$range.column.select][temp])
         }
       }
-      if(input$same_level_of_check){
-        temp = which(get.data.set()[,input$same.level.of.select]%in%
-                       get.data.set()[,input$same.level.of.select][temp])
-        if(length(temp)==0){
-          temp = NULL
+      if (input$same_level_of_check) {
+        temp <- which(get.data.set()[, input$same.level.of.select] %in%
+          get.data.set()[, input$same.level.of.select][temp])
+        if (length(temp) == 0) {
+          temp <- NULL
         }
       }
-      if(input$show.stored.check){
-        temp = unique(c(plot.par.stored$locate.id,temp))
+      if (input$show.stored.check) {
+        temp <- unique(c(plot.par.stored$locate.id, temp))
       }
-      plot.par$locate.id = temp
+      plot.par$locate.id <- temp
     })
   }
 })
 
 # variable for with the same level of is changed
 observe({
-  if(!is.null(input$same.level.of.select)){
+  if (!is.null(input$same.level.of.select)) {
     isolate({
-      temp = NULL
-      if(input$select_identify_method%in%"Select by value"){
-        if(input$single_vs_multiple_check){
-          temp = input$select.unique.value.slider
-          if(temp==0){
-            temp=NULL
+      temp <- NULL
+      if (input$select_identify_method %in% "Select by value") {
+        if (input$single_vs_multiple_check) {
+          temp <- input$select.unique.value.slider
+          if (temp == 0) {
+            temp <- NULL
           }
-        }else{
-          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
-          if(length(temp)==0){
-            temp=NULL
+        } else {
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
+          if (length(temp) == 0) {
+            temp <- NULL
           }
         }
-      }else if(input$select_identify_method%in%"Range of values"){
-        range = input$range.values.slider
-        if(!all(range%in%0)){
-          range[which(range%in%0)] = 1
-          temp = get.data.set()[,input$range.column.select]
-          names(temp) = 1:length(temp)
-          temp = sort(temp)
-          temp = as.numeric(names(temp)[range[1]:range[2]])
-          temp = which(get.data.set()[,input$range.column.select]%in%
-                         get.data.set()[,input$range.column.select][temp])
-        }else{
-          temp = NULL
+      } else if (input$select_identify_method %in% "Range of values") {
+        range <- input$range.values.slider
+        if (!all(range %in% 0)) {
+          range[which(range %in% 0)] <- 1
+          temp <- get.data.set()[, input$range.column.select]
+          names(temp) <- 1:length(temp)
+          temp <- sort(temp)
+          temp <- as.numeric(names(temp)[range[1]:range[2]])
+          temp <- which(get.data.set()[, input$range.column.select] %in%
+            get.data.set()[, input$range.column.select][temp])
+        } else {
+          temp <- NULL
         }
       }
-      temp = which(get.data.set()[,input$same.level.of.select]%in%
-                     get.data.set()[,input$same.level.of.select][temp])
-      if(length(temp)==0){
-        temp = NULL
+      temp <- which(get.data.set()[, input$same.level.of.select] %in%
+        get.data.set()[, input$same.level.of.select][temp])
+      if (length(temp) == 0) {
+        temp <- NULL
       }
-      if(input$show.stored.check){
-        temp = unique(c(plot.par.stored$locate.id,temp))
+      if (input$show.stored.check) {
+        temp <- unique(c(plot.par.stored$locate.id, temp))
       }
-      plot.par$locate.id = temp
+      plot.par$locate.id <- temp
     })
   }
 })
 
 # unique value slider
 observe({
-  if(!is.null(input$select.unique.value.slider)){
+  if (!is.null(input$select.unique.value.slider)) {
     isolate({
-      if(!is.null(input$same.level.of.select)&&
-         input$same.level.of.select%in%colnames(get.data.set())){
-        temp = input$select.unique.value.slider
-        if(input$same_level_of_check){
-          temp = which(get.data.set()[,input$same.level.of.select]%in%
-                         get.data.set()[,input$same.level.of.select][temp])
+      if (!is.null(input$same.level.of.select) &&
+        input$same.level.of.select %in% colnames(get.data.set())) {
+        temp <- input$select.unique.value.slider
+        if (input$same_level_of_check) {
+          temp <- which(get.data.set()[, input$same.level.of.select] %in%
+            get.data.set()[, input$same.level.of.select][temp])
         }
-        if(input$show.stored.check){
-          plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
-        }else{
-          plot.par$locate.id=temp
+        if (input$show.stored.check) {
+          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
+        } else {
+          plot.par$locate.id <- temp
         }
       }
-      updateNumericInput(session,"specify.correct.numeric",
-                         value=input$select.unique.value.slider)
+      updateNumericInput(session, "specify.correct.numeric",
+        value = input$select.unique.value.slider
+      )
     })
   }
 })
 
 # unique numeric
 observe({
-  if(!is.null(input$specify.correct.numeric)){
+  if (!is.null(input$specify.correct.numeric)) {
     isolate({
-      if(!is.null(input$same.level.of.select)&&
-         input$same.level.of.select%in%colnames(get.data.set())){
-        temp = input$specify.correct.numeric
-        if(input$same_level_of_check){
-          temp = which(get.data.set()[,input$same.level.of.select]%in%
-                         get.data.set()[,input$same.level.of.select][temp])
+      if (!is.null(input$same.level.of.select) &&
+        input$same.level.of.select %in% colnames(get.data.set())) {
+        temp <- input$specify.correct.numeric
+        if (input$same_level_of_check) {
+          temp <- which(get.data.set()[, input$same.level.of.select] %in%
+            get.data.set()[, input$same.level.of.select][temp])
         }
-        if(input$show.stored.check){
-          plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
-        }else{
-          plot.par$locate.id=temp
+        if (input$show.stored.check) {
+          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
+        } else {
+          plot.par$locate.id <- temp
         }
       }
-      updateNumericInput(session,"select.unique.value.slider",
-                         value=input$specify.correct.numeric)
+      updateNumericInput(session, "select.unique.value.slider",
+        value = input$specify.correct.numeric
+      )
     })
   }
 })
@@ -5225,64 +5771,71 @@ observe({
 observe({
   input$single_vs_multiple_check
   isolate({
-    plot.par$locate.id=NULL
+    plot.par$locate.id <- NULL
     updateSelectInput(session,
-                      "by.value.column.select",
-                      choices=colnames(get.data.set()),
-                      selected=colnames(get.data.set())[1])
-    ch = ""
-    if(!is.null(input$by.value.column.select)){
-      ch = c("none",sort(get.data.set()[,input$by.value.column.select]))
+      "by.value.column.select",
+      choices = colnames(get.data.set()),
+      selected = colnames(get.data.set())[1]
+    )
+    ch <- ""
+    if (!is.null(input$by.value.column.select)) {
+      ch <- c("none", sort(get.data.set()[, input$by.value.column.select]))
     }
     updateSelectInput(session,
-                      "value.select",
-                      choices=ch,
-                      selected=ch[1])
+      "value.select",
+      choices = ch,
+      selected = ch[1]
+    )
     updateSliderInput(session,
-                      "select.unique.value.slider",
-                      max=length(ch),
-                      value=0)
+      "select.unique.value.slider",
+      max = length(ch),
+      value = 0
+    )
     updateNumericInput(session,
-                       "specify.correct.numeric",
-                       value=0,
-                       max=length(ch))
+      "specify.correct.numeric",
+      value = 0,
+      max = length(ch)
+    )
   })
 })
 
 # update the values for picking multiple values when the variable is changed
 observe({
-  if(!is.null(input$by.value.column.select)){
+  if (!is.null(input$by.value.column.select)) {
     isolate({
-      plot.par$locate.id=NULL
-      if(class(get.data.set()[,input$by.value.column.select])%in%"numeric"||
-         class(get.data.set()[,input$by.value.column.select])%in%"integer"){
-        temp = sort(get.data.set()[,input$by.value.column.select])
-      }else{
-        temp = sort(levels(get.data.set()[,input$by.value.column.select]))
+      plot.par$locate.id <- NULL
+      if (is.numeric(get.data.set()[, input$by.value.column.select])) {
+        temp <- sort(get.data.set()[, input$by.value.column.select])
+      } else {
+        temp <- sort(levels(get.data.set()[, input$by.value.column.select]))
       }
       updateSelectInput(session,
-                        "value.select",
-                        choices=c("none",temp),
-                        selected=c("none",temp)[1])
+        "value.select",
+        choices = c("none", temp),
+        selected = c("none", temp)[1]
+      )
     })
   }
 })
 
 # update locate.id for multiple values
 observe({
-  if(!is.null(input$value.select)){
+  if (!is.null(input$value.select)) {
     isolate({
-      if(!is.null(input$same.level.of.select)&&
-         input$same.level.of.select%in%colnames(get.data.set())){
-        temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
-        if(input$same_level_of_check){
-          temp = which(get.data.set()[,input$same.level.of.select]%in%
-                         get.data.set()[,input$same.level.of.select][temp])
+      if (!is.null(input$same.level.of.select) &&
+        input$same.level.of.select %in% colnames(get.data.set())) {
+        temp <- which(
+          get.data.set()[, input$by.value.column.select] %in%
+            input$value.select
+        )
+        if (input$same_level_of_check) {
+          temp <- which(get.data.set()[, input$same.level.of.select] %in%
+            get.data.set()[, input$same.level.of.select][temp])
         }
-        if(input$show.stored.check){
-          plot.par$locate.id=unique(c(plot.par.stored$locate.id,temp))
-        }else{
-          plot.par$locate.id=temp
+        if (input$show.stored.check) {
+          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
+        } else {
+          plot.par$locate.id <- temp
         }
       }
     })
@@ -5293,82 +5846,88 @@ observe({
 observe({
   input$show.stored.check
   isolate({
-    if(!is.null(input$select_identify_method)){
-      if(input$select_identify_method%in%"Select by value"){
-        if(!input$single_vs_multiple_check){
-          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
-          if(input$same_level_of_check){
-            temp = which(get.data.set()[,input$same.level.of.select]%in%
-                           get.data.set()[,input$same.level.of.select][temp])
+    if (!is.null(input$select_identify_method)) {
+      if (input$select_identify_method %in% "Select by value") {
+        if (!input$single_vs_multiple_check) {
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
+          if (input$same_level_of_check) {
+            temp <- which(get.data.set()[, input$same.level.of.select] %in%
+              get.data.set()[, input$same.level.of.select][temp])
           }
-          if(input$show.stored.check){
-            plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
-          }else{
-            plot.par$locate.id = temp
+          if (input$show.stored.check) {
+            plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
+          } else {
+            plot.par$locate.id <- temp
           }
-        }else{
-          if(input$select.unique.value.slider!=0&&
-             input$specify.correct.numeric!=0){
-            temp = input$specify.correct.numeric
-            if(input$same_level_of_check){
-              temp = which(get.data.set()[,input$same.level.of.select]%in%
-                             get.data.set()[,input$same.level.of.select][temp])
+        } else {
+          if (input$select.unique.value.slider != 0 &&
+            input$specify.correct.numeric != 0) {
+            temp <- input$specify.correct.numeric
+            if (input$same_level_of_check) {
+              temp <- which(get.data.set()[, input$same.level.of.select] %in%
+                get.data.set()[, input$same.level.of.select][temp])
             }
-            if(input$show.stored.check){
-              plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
-            }else{
-              plot.par$locate.id = temp
+            if (input$show.stored.check) {
+              plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
+            } else {
+              plot.par$locate.id <- temp
             }
           }
         }
-      }else if(input$select_identify_method%in%"Extreme"){
+      } else if (input$select_identify_method %in% "Extreme") {
         # This needs work if the iNZight developer ever makes
         # it possible to use locate.id and locate.extreme at
         # the same time
-        if(input$extremes.slider!=0){
-          if(input$show.stored.check){
-            plot.par$locate.id = NULL
-            plot.par$locate.extreme = input$extremes.slider
-          }else{
-            plot.par$locate.id = NULL
-            plot.par$locate.extreme = input$extremes.slider
+        if (input$extremes.slider != 0) {
+          if (input$show.stored.check) {
+            plot.par$locate.id <- NULL
+            plot.par$locate.extreme <- input$extremes.slider
+          } else {
+            plot.par$locate.id <- NULL
+            plot.par$locate.extreme <- input$extremes.slider
           }
-        }else if(input$extreme.lower!=0||
-                 input$extreme.upper!=0){
-          if(input$show.stored.check){
-            plot.par$locate.id = NULL
-            plot.par$locate.extreme = c(input$extreme.lower,input$extreme.upper)
-          }else{
-            plot.par$locate.id = NULL
-            plot.par$locate.extreme = c(input$extreme.lower,input$extreme.upper)
+        } else if (input$extreme.lower != 0 ||
+          input$extreme.upper != 0) {
+          if (input$show.stored.check) {
+            plot.par$locate.id <- NULL
+            plot.par$locate.extreme <- c(input$extreme.lower, input$extreme.upper)
+          } else {
+            plot.par$locate.id <- NULL
+            plot.par$locate.extreme <- c(
+              input$extreme.lower,
+              input$extreme.upper
+            )
           }
         }
-      }else{
-        if(any(input$range.values.slider>0)){
-          if(input$range.column.select%in%colnames(get.data.set())){
-            range = input$range.values.slider
-            range[which(range%in%0)] = 1
-            temp = get.data.set()[,input$range.column.select]
-            names(temp) = 1:length(temp)
-            temp = sort(temp)
-            temp = as.numeric(names(temp)[range[1]:range[2]])
-            temp = which(get.data.set()[,input$range.column.select]%in%
-                           get.data.set()[,input$range.column.select][temp])
-            if(input$same_level_of_check){
-              temp = which(get.data.set()[,input$same.level.of.select]%in%
-                             get.data.set()[,input$same.level.of.select][temp])
+      } else {
+        if (any(input$range.values.slider > 0)) {
+          if (input$range.column.select %in% colnames(get.data.set())) {
+            range <- input$range.values.slider
+            range[which(range %in% 0)] <- 1
+            temp <- get.data.set()[, input$range.column.select]
+            names(temp) <- 1:length(temp)
+            temp <- sort(temp)
+            temp <- as.numeric(names(temp)[range[1]:range[2]])
+            temp <- which(get.data.set()[, input$range.column.select] %in%
+              get.data.set()[, input$range.column.select][temp])
+            if (input$same_level_of_check) {
+              temp <- which(get.data.set()[, input$same.level.of.select] %in%
+                get.data.set()[, input$same.level.of.select][temp])
             }
-            if(input$show.stored.check){
-              plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
-            }else{
-              plot.par$locate.id = temp
+            if (input$show.stored.check) {
+              plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
+            } else {
+              plot.par$locate.id <- temp
             }
           }
-        }else{
-          if(input$show.stored.check){
-            plot.par$locate.id = plot.par.stored$locate.id
-          }else{
-            plot.par$locate.id = NULL
+        } else {
+          if (input$show.stored.check) {
+            plot.par$locate.id <- plot.par.stored$locate.id
+          } else {
+            plot.par$locate.id <- NULL
           }
         }
       }
@@ -5378,33 +5937,33 @@ observe({
 
 # set a range of values
 observe({
-  if(!is.null(input$range.values.slider)&&
-     !is.null(input$range.column.select)&&
-     input$range.column.select%in%colnames(get.data.set())){
+  if (!is.null(input$range.values.slider) &&
+    !is.null(input$range.column.select) &&
+    input$range.column.select %in% colnames(get.data.set())) {
     isolate({
-      range = input$range.values.slider
-      if(length(which(range%in%0))<2){
-        range[which(range%in%0)] = 1
-        temp = get.data.set()[,input$range.column.select]
-        names(temp) = 1:length(temp)
-        temp = sort(temp)
-        temp = as.numeric(names(temp)[range[1]:range[2]])
-        temp = which(get.data.set()[,input$range.column.select]%in%
-                       get.data.set()[,input$range.column.select][temp])
-        if(input$same_level_of_check){
-          temp = which(get.data.set()[,input$same.level.of.select]%in%
-                         get.data.set()[,input$same.level.of.select][temp])
+      range <- input$range.values.slider
+      if (length(which(range %in% 0)) < 2) {
+        range[which(range %in% 0)] <- 1
+        temp <- get.data.set()[, input$range.column.select]
+        names(temp) <- 1:length(temp)
+        temp <- sort(temp)
+        temp <- as.numeric(names(temp)[range[1]:range[2]])
+        temp <- which(get.data.set()[, input$range.column.select] %in%
+          get.data.set()[, input$range.column.select][temp])
+        if (input$same_level_of_check) {
+          temp <- which(get.data.set()[, input$same.level.of.select] %in%
+            get.data.set()[, input$same.level.of.select][temp])
         }
-        if(input$show.stored.check){
-          plot.par$locate.id = unique(c(plot.par.stored$locate.id,temp))
-        }else{
-          plot.par$locate.id = temp
+        if (input$show.stored.check) {
+          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
+        } else {
+          plot.par$locate.id <- temp
         }
-      }else{
-        if(input$show.stored.check){
-          plot.par$locate.id = plot.par.stored$locate.id
-        }else{
-          plot.par$locate.id = NULL
+      } else {
+        if (input$show.stored.check) {
+          plot.par$locate.id <- plot.par.stored$locate.id
+        } else {
+          plot.par$locate.id <- NULL
         }
       }
     })
@@ -5415,28 +5974,31 @@ observe({
 observe({
   input$store.obs.button
   isolate({
-    if(!is.null(input$store.obs.button)&&
-       input$store.obs.button>0){
-      if((is.null(plot.par$locate.id)||
-          length(plot.par$locate.id)==0)&&
-         length(plot.par$locate.extreme)>0){
-        temp = list()
-        temp$x = get.data.set()[,input$vari1]
-        if(input$vari2%in%'none'){
-          temp$y = NULL
-        }else{
-          temp$y = get.data.set()[,input$vari2]
+    if (!is.null(input$store.obs.button) &&
+      input$store.obs.button > 0) {
+      if ((is.null(plot.par$locate.id) ||
+        length(plot.par$locate.id) == 0) &&
+        length(plot.par$locate.extreme) > 0) {
+        temp <- list()
+        temp$x <- get.data.set()[, input$vari1]
+        if (input$vari2 %in% "none") {
+          temp$y <- NULL
+        } else {
+          temp$y <- get.data.set()[, input$vari2]
         }
-        temp$locate.extreme = plot.par$locate.extreme
-        temp$plot = F
-        temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
-        extreme.ids = search.name(temp,"extreme.ids")[[1]]
-        plot.par.stored$locate.id = unique(c(plot.par.stored$locate.id,
-                                             extreme.ids))
-
-      }else if(length(plot.par$locate.id)>0){
-        plot.par.stored$locate.id = unique(c(plot.par$locate.id,
-                                             plot.par.stored$locate.id))
+        temp$locate.extreme <- plot.par$locate.extreme
+        temp$plot <- F
+        temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        extreme.ids <- search.name(temp, "extreme.ids")[[1]]
+        plot.par.stored$locate.id <- unique(c(
+          plot.par.stored$locate.id,
+          extreme.ids
+        ))
+      } else if (length(plot.par$locate.id) > 0) {
+        plot.par.stored$locate.id <- unique(c(
+          plot.par$locate.id,
+          plot.par.stored$locate.id
+        ))
       }
     }
   })
@@ -5446,47 +6008,50 @@ observe({
 observe({
   input$reset.obs.button
   isolate({
-    if(!is.null(input$reset.obs.button)&&
-       input$reset.obs.button>0){
-      plot.par.stored$locate.id = NULL
-      temp = NULL
-      if(input$select_identify_method%in%"Select by value"){
-        if(input$single_vs_multiple_check){
-          temp = input$select.unique.value.slider
-          if(temp==0){
-            temp=NULL
+    if (!is.null(input$reset.obs.button) &&
+      input$reset.obs.button > 0) {
+      plot.par.stored$locate.id <- NULL
+      temp <- NULL
+      if (input$select_identify_method %in% "Select by value") {
+        if (input$single_vs_multiple_check) {
+          temp <- input$select.unique.value.slider
+          if (temp == 0) {
+            temp <- NULL
           }
-        }else{
-          temp = which(get.data.set()[,input$by.value.column.select]%in%input$value.select)
-          if(length(temp)==0){
-            temp=NULL
+        } else {
+          temp <- which(
+            get.data.set()[, input$by.value.column.select] %in%
+              input$value.select
+          )
+          if (length(temp) == 0) {
+            temp <- NULL
           }
         }
-      }else if(input$select_identify_method%in%"Range of values"){
-        range = input$range.values.slider
-        if(!all(range%in%0)){
-          range[which(range%in%0)] = 1
-          temp = get.data.set()[,input$range.column.select]
-          names(temp) = 1:length(temp)
-          temp = sort(temp)
-          temp = as.numeric(names(temp)[range[1]:range[2]])
-          temp = which(get.data.set()[,input$range.column.select]%in%
-                         get.data.set()[,input$range.column.select][temp])
-        }else{
-          temp = NULL
+      } else if (input$select_identify_method %in% "Range of values") {
+        range <- input$range.values.slider
+        if (!all(range %in% 0)) {
+          range[which(range %in% 0)] <- 1
+          temp <- get.data.set()[, input$range.column.select]
+          names(temp) <- 1:length(temp)
+          temp <- sort(temp)
+          temp <- as.numeric(names(temp)[range[1]:range[2]])
+          temp <- which(get.data.set()[, input$range.column.select] %in%
+            get.data.set()[, input$range.column.select][temp])
+        } else {
+          temp <- NULL
         }
       }
-      if(input$same_level_of_check){
-        temp = which(get.data.set()[,input$same.level.of.select]%in%
-                       get.data.set()[,input$same.level.of.select][temp])
+      if (input$same_level_of_check) {
+        temp <- which(get.data.set()[, input$same.level.of.select] %in%
+          get.data.set()[, input$same.level.of.select][temp])
       }
-      if(length(temp)==0){
-        temp = NULL
+      if (length(temp) == 0) {
+        temp <- NULL
       }
-      if(input$show.stored.check){
-        temp = unique(c(plot.par.stored$locate.id,temp))
+      if (input$show.stored.check) {
+        temp <- unique(c(plot.par.stored$locate.id, temp))
       }
-      plot.par$locate.id = temp
+      plot.par$locate.id <- temp
     }
   })
 })
@@ -5494,126 +6059,150 @@ observe({
 
 
 
-output$select_additions_panel = renderUI({
+output$select_additions_panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
   input$vari1
   input$vari2
 
   isolate({
+    temp <- list()
 
-    temp = list()
-
-    temp$x = get.data.set()[,input$vari1]
-    if(input$vari2%in%'none'){
-      temp$y = NULL
-    }else{
-      temp$y = get.data.set()[,input$vari2]
+    temp$x <- get.data.set()[, input$vari1]
+    if (input$vari2 %in% "none") {
+      temp$y <- NULL
+    } else {
+      temp$y <- get.data.set()[, input$vari2]
     }
-    temp$plot = F
-    temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+    temp$plot <- F
+    temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
 
     ##################################################################
     #    large.sample = T
-    large.sample = search.name(temp, "largesample")[[1]]
-    if(is.null(large.sample)){
-      large.sample=F
+    large.sample <- search.name(temp, "largesample")[[1]]
+    if (is.null(large.sample)) {
+      large.sample <- F
     }
     ##################################################################
-    if((!is.null(input$vari1)&&
-        !is.null(input$vari2))&&
-       (input$vari1%in%colnames(get.data.set())&&
-        (input$vari2%in%"none"|
-         input$vari2%in%colnames(get.data.set()))))
+    if ((!is.null(input$vari1) &&
+      !is.null(input$vari2)) &&
+      (input$vari1 %in% colnames(get.data.set()) &&
+        (input$vari2 %in% "none" |
+          input$vari2 %in% colnames(get.data.set())))) {
 
       # vari = factor, vari = none
-      if(input$vari2%in%"none"&&
-         (class(get.data.set()[,input$vari1])%in%"factor"|
-          class(get.data.set()[,input$vari1])%in%"character")){
-        ret = selectInput(inputId = "select_additions",
-                          label = NULL,
-                          choices = c('Customise Plot Appearance',
-                                      'Axes and Labels',
-                                      'Add Inference Information'),
-                          selected = input$select_additions,
-                          selectize = F)
+      if (input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character")) {
+        ret <- selectInput(
+          inputId = "select_additions",
+          label = NULL,
+          choices = c(
+            "Customise Plot Appearance",
+            "Axes and Labels",
+            "Add Inference Information"
+          ),
+          selected = input$select_additions,
+          selectize = F
+        )
 
         # vari1 = factor, vari2 = factor
-      }else if(!input$vari2%in%"none"&&
-               ((class(get.data.set()[,input$vari1])%in%"factor"|
-                 class(get.data.set()[,input$vari1])%in%"character")&&
-                (class(get.data.set()[,input$vari2])%in%"factor"|
-                 class(get.data.set()[,input$vari2])%in%"character"))){
-        ret = selectInput(inputId = "select_additions",
-                          label = NULL,
-                          choices = c('Customise Plot Appearance',
-                                      'Axes and Labels',
-                                      'Add Inference Information'),
-                          selected = input$select_additions,
-                          selectize = F)
+      } else if (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "factor" |
+            class(get.data.set()[, input$vari2]) %in% "character"))) {
+        ret <- selectInput(
+          inputId = "select_additions",
+          label = NULL,
+          choices = c(
+            "Customise Plot Appearance",
+            "Axes and Labels",
+            "Add Inference Information"
+          ),
+          selected = input$select_additions,
+          selectize = F
+        )
 
         # vari1 = numeric , vari2 = none or
         # vari1 = numeric , vari2 = factor or
         # vari1 = factor , vari2 = numeric
-      }else if((input$vari2%in%"none"&&
-                (class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer"))||
-               (!input$vari2%in%"none"&&
-                (class(get.data.set()[,input$vari1])%in%"factor"|
-                 class(get.data.set()[,input$vari1])%in%"character")&&
-                (class(get.data.set()[,input$vari2])%in%"integer"|
-                 class(get.data.set()[,input$vari2])%in%"numeric"))||
-               (!input$vari2%in%"none"&&
-                (class(get.data.set()[,input$vari1])%in%"integer"|
-                 class(get.data.set()[,input$vari1])%in%"numeric")&&
-                (class(get.data.set()[,input$vari2])%in%"character"|
-                 class(get.data.set()[,input$vari2])%in%"factor"))){
-        ret = selectInput(inputId = "select_additions",
-                          label = NULL,
-                          choices = c('Customise Plot Appearance',
-                                      'Axes and Labels',
-                                      'Identify Points',
-                                      'Add Inference Information'),
-                          selected = input$select_additions,
-                          selectize = F)
+      } else if ((input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer")) ||
+        (!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "factor" |
+            class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "integer" |
+            class(get.data.set()[, input$vari2]) %in% "numeric")) ||
+        (!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "integer" |
+            class(get.data.set()[, input$vari1]) %in% "numeric") &&
+          (class(get.data.set()[, input$vari2]) %in% "character" |
+            class(get.data.set()[, input$vari2]) %in% "factor"))) {
+        ret <- selectInput(
+          inputId = "select_additions",
+          label = NULL,
+          choices = c(
+            "Customise Plot Appearance",
+            "Axes and Labels",
+            "Identify Points",
+            "Add Inference Information"
+          ),
+          selected = input$select_additions,
+          selectize = F
+        )
 
-        if(large.sample){
-          ret = selectInput(inputId = "select_additions",
-                            label = NULL,
-                            choices = c('Customise Plot Appearance',
-                                        'Axes and Labels',
-                                        'Add Inference Information'),
-                            selected = input$select_additions,
-                            selectize = F)
+        if (large.sample) {
+          ret <- selectInput(
+            inputId = "select_additions",
+            label = NULL,
+            choices = c(
+              "Customise Plot Appearance",
+              "Axes and Labels",
+              "Add Inference Information"
+            ),
+            selected = input$select_additions,
+            selectize = F
+          )
         }
 
         # vari1 = numeric , vari2 = numeric
-      }else if(!input$vari2%in%"none"&&
-               ((class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer")&&
-                (class(get.data.set()[,input$vari2])%in%"numeric"|
-                 class(get.data.set()[,input$vari2])%in%"integer"))){
-        ret = selectInput(inputId = "select_additions",
-                          label = NULL,
-                          choices = c('Customise Plot Appearance',
-                                      'Trend Lines and Curves',
-                                      'Axes and Labels',
-                                      'Identify Points',
-                                      'Add Inference Information'),
-                          selected = input$select_additions,
-                          selectize = F)
+      } else if (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer") &&
+          (class(get.data.set()[, input$vari2]) %in% "numeric" |
+            class(get.data.set()[, input$vari2]) %in% "integer"))) {
+        ret <- selectInput(
+          inputId = "select_additions",
+          label = NULL,
+          choices = c(
+            "Customise Plot Appearance",
+            "Trend Lines and Curves",
+            "Axes and Labels",
+            "Identify Points",
+            "Add Inference Information"
+          ),
+          selected = input$select_additions,
+          selectize = F
+        )
 
-        if(large.sample){
-          ret = selectInput(inputId = "select_additions",
-                            label = NULL,
-                            choices = c('Customise Plot Appearance',
-                                        'Trend Lines and Curves',
-                                        'Axes and Labels',
-                                        'Add Inference Information'),
-                            selected = input$select_additions,
-                            selectize = F)
+        if (large.sample) {
+          ret <- selectInput(
+            inputId = "select_additions",
+            label = NULL,
+            choices = c(
+              "Customise Plot Appearance",
+              "Trend Lines and Curves",
+              "Axes and Labels",
+              "Add Inference Information"
+            ),
+            selected = input$select_additions,
+            selectize = F
+          )
         }
       }
+    }
   })
   list(ret)
 })
@@ -5622,192 +6211,209 @@ output$select_additions_panel = renderUI({
 
 # function for creating html and svg files
 
-create.html = function() {
+create.html <- function() {
   if (!is.null(vis.par())) {
-    dafr = get.data.set()
-    if(!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
-       !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])){
-      temp = vis.par()
-      temp$trend.parallel = graphical.par$trend.parallel
-      temp.x = temp$x
-      temp$x=temp$y
-      temp$y=temp.x
-      temp.varnames.x = temp$varnames$x
-      temp$varnames$x = temp$varnames$y
-      temp$varnames$y = temp.varnames.x
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+    dafr <- get.data.set()
+    if (!is.null(plot.par$x) && is.numeric(vis.data()[[plot.par$x]]) &&
+      !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])) {
+      temp <- vis.par()
+      temp$trend.parallel <- graphical.par$trend.parallel
+      temp.x <- temp$x
+      temp$x <- temp$y
+      temp$y <- temp.x
+      temp.varnames.x <- temp$varnames$x
+      temp$varnames$x <- temp$varnames$y
+      temp$varnames$y <- temp.varnames.x
+      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-      }else{
-        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+      } else {
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, temp
+        ))
       }
-    }else{
-      if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-         tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-        tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+    } else {
+      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+          "true") {
+        tryCatch({
+          plot.ret.para$parameters <- do.call(
+            iNZightPlots:::iNZightPlot, vis.par()
+          )
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-      }else{
-        plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+      } else {
+        plot.ret.para$parameters <- try(do.call(
+          iNZightPlots:::iNZightPlot, vis.par()
+        ))
       }
 
       ## add to fix interactive dotplot bug ..
-      result = plot.ret.para$parameters
-      if(is.null(attributes(result)$varnames$y))
-        attributes(result)$varnames$y = " "
+      result <- plot.ret.para$parameters
+      if (is.null(attributes(result)$varnames$y)) {
+        attributes(result)$varnames$y <- " "
+      }
       return(result)
-
     }
   }
 }
 
 
 # save main plot;
-output$saveplot = downloadHandler(
+output$saveplot <- downloadHandler(
   filename = function() {
     paste("Plot",
-          switch(input$saveplottype,
-                 "jpg" = "jpg",
-                 "png" = "png",
-                 "pdf" = "pdf",
-                 "svg" = "svg"),
-          sep = ".")
-    #    if(input$saveplottype == "interactive html")
-    #      paste("Plot.html")
-    #    else
-    #      paste("Plot", input$saveplottype, sep = ".")
+      switch(input$saveplottype,
+        "jpg" = "jpg",
+        "png" = "png",
+        "pdf" = "pdf",
+        "svg" = "svg"
+      ),
+      sep = "."
+    )
   },
-
   content = function(file) {
-
-    if(input$saveplottype %in% c("jpg", "png", "pdf")) {
-
-      if(input$saveplottype == "jpg")
+    if (input$saveplottype %in% c("jpg", "png", "pdf")) {
+      if (input$saveplottype == "jpg") {
         jpeg(file)
-      else if(input$saveplottype == "png")
+      } else if (input$saveplottype == "png") {
         png(file)
-      else if(input$saveplottype == "pdf")
+      } else if (input$saveplottype == "pdf") {
         pdf(file, useDingbats = FALSE, onefile = F)
+      }
 
       if (!is.null(vis.par())) {
-        dafr = get.data.set()
-        if(!is.null(plot.par$x) && !is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]) &&
-           !is.null(plot.par$y) && !is.null(input$vari2) && is.numeric(vis.data()[[plot.par$y]])){
-          temp = vis.par()
-          temp$trend.parallel = graphical.par$trend.parallel
-          temp.x = temp$x
-          temp$x=temp$y
-          temp$y=temp.x
-          temp.varnames.x = temp$varnames$x
-          temp$varnames$x = temp$varnames$y
-          temp$varnames$y = temp.varnames.x
-          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,temp)
+        dafr <- get.data.set()
+        if (!is.null(plot.par$x) && !is.null(input$vari1) &&
+          is.numeric(vis.data()[[plot.par$x]]) &&
+          !is.null(plot.par$y) && !is.null(input$vari2) &&
+          is.numeric(vis.data()[[plot.par$y]])) {
+          temp <- vis.par()
+          temp$trend.parallel <- graphical.par$trend.parallel
+          temp.x <- temp$x
+          temp$x <- temp$y
+          temp$y <- temp.x
+          temp.varnames.x <- temp$varnames$x
+          temp$varnames$x <- temp$varnames$y
+          temp$varnames$y <- temp.varnames.x
+          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+              "true") {
+            tryCatch({
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, temp
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
-          }else{
-            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,temp))
+          } else {
+            plot.ret.para$parameters <- try(do.call(
+              iNZightPlots:::iNZightPlot, temp
+            ))
           }
-        }else{
-          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+        } else {
+          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+              "true") {
+            tryCatch({
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, vis.par()
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
-          }else{
-            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+          } else {
+            plot.ret.para$parameters <- try(do.call(
+              iNZightPlots:::iNZightPlot, vis.par()
+            ))
           }
         }
       }
       dev.off()
-    }
-
-    else if(input$saveplottype == "svg") {
-      local.dir = exportSVG.function(create.html)
-      src = normalizePath(local.dir)
-      owd = setwd(tempdir())
+    } else if (input$saveplottype == "svg") {
+      local.dir <- exportSVG.function(create.html)
+      src <- normalizePath(local.dir)
+      owd <- setwd(tempdir())
       on.exit(setwd(owd))
       file.copy(src, "inzightplot.svg")
       file.copy("inzightplot.svg", file)
     }
-  })
+  }
+)
 
 
 
 
-exportSVG <- function(x, file, ...)
-  UseMethod('exportSVG')
+exportSVG <- function(x, file, ...) {
+  UseMethod("exportSVG")
+}
 
 #' @describeIn exportSVG method for functions
 #' @param width the width of the plot device
 #' @param height the height of the plot device
-exportSVG.function <- function(x, file = 'inzightplot.svg',
+exportSVG.function <- function(x, file = "inzightplot.svg",
                                width = dev.size()[1],
                                height = dev.size()[2], ...) {
-
-  #get current directory
+  # get current directory
   curdir <- getwd()
 
-  #set directory to temp directory
+  # set directory to temp directory
   tdir <- tempdir()
   setwd(tdir)
 
-  #create pdf graphics device into here:
-  pdf('tempfile.pdf', width = width, height = height, onefile = TRUE)
+  # create pdf graphics device into here:
+  pdf("tempfile.pdf", width = width, height = height, onefile = TRUE)
 
-  #do exporting:
+  # do exporting:
   obj <- x()
   exportSVG(obj, file)
 
-  #turn off device:
+  # turn off device:
   dev.off()
 
-  #remove pdf:
-  file.remove('tempfile.pdf')
+  # remove pdf:
+  file.remove("tempfile.pdf")
 
-  #reset back to original directory:
+  # reset back to original directory:
   setwd(curdir)
-
 }
 
 
-exportSVG.inzplotoutput <- function(x, file = 'inzightplot.svg', ...) {
-
-  #suggest gridSVG:
-  if(!requireNamespace("gridSVG", quietly = TRUE)) {
+exportSVG.inzplotoutput <- function(x, file = "inzightplot.svg", ...) {
+  # suggest gridSVG:
+  if (!requireNamespace("gridSVG", quietly = TRUE)) {
     stop(
       paste("Required packages aren't installed",
-            "Use 'install.packages('iNZightPlots', depends = TRUE)' to install them.",
-            sep = "\n"
+        "Use 'install.packages('iNZightPlots', depends = TRUE)' to install them.",
+        sep = "\n"
       )
     )
   }
 
   curdir <- getwd()
-  #work in a temp directory
+  # work in a temp directory
   setwd(tempdir())
 
   gridSVG::grid.export(file)
 
-  #open in browser?
+  # open in browser?
   browseURL(file.path(file))
 
-  #return:
+  # return:
   setwd(curdir)
 }
 
@@ -5817,35 +6423,39 @@ exportSVG.inzplotoutput <- function(x, file = 'inzightplot.svg', ...) {
 
 
 # save interactive plot
-output$save_interactive_plot_beta2 = downloadHandler(
+output$save_interactive_plot_beta2 <- downloadHandler(
   filename = "Plot.html",
   content = function(file) {
-    local.dir = iNZightPlots::exportHTML(create.html,
-                                         data = data_html_beta2(),
-                                         extra.vars = extra.vars_html_beta2(),
-                                         width = 10, height = 6)
+    local.dir <- iNZightPlots::exportHTML(create.html,
+      data = data_html_beta2(),
+      extra.vars = extra.vars_html_beta2(),
+      width = 10, height = 6
+    )
 
-    src = normalizePath(local.dir)
-    owd = setwd(tempdir())
+    src <- normalizePath(local.dir)
+    owd <- setwd(tempdir())
     on.exit(setwd(owd))
     file.copy(src, "index.html")
     file.copy("index.html", file)
-  })
+  }
+)
 
-output$save_interactive_plot = downloadHandler(
+output$save_interactive_plot <- downloadHandler(
   filename = "Plot.html",
   content = function(file) {
-    local.dir = iNZightPlots::exportHTML(create.html,
-                                         data = data_html(),
-                                         extra.vars = extra.vars_html(),
-                                         width = 10, height = 6)
+    local.dir <- iNZightPlots::exportHTML(create.html,
+      data = data_html(),
+      extra.vars = extra.vars_html(),
+      width = 10, height = 6
+    )
 
-    src = normalizePath(local.dir)
-    owd = setwd(tempdir())
+    src <- normalizePath(local.dir)
+    owd <- setwd(tempdir())
     on.exit(setwd(owd))
     file.copy(src, "index.html")
     file.copy("index.html", file)
-  })
+  }
+)
 
 
 
@@ -5856,22 +6466,32 @@ output$save_interactive_plot = downloadHandler(
 
 
 ## the selection panel for the interactive plot tabpanel
-output$interactive.plot.select = renderUI({
+output$interactive.plot.select <- renderUI({
   get.data.set()
   isolate({
-    ret = fixedRow(column(width = 2,
-                          uiOutput("extra_vars_confirm")),
-
-                   column(width = 3,
-                          uiOutput("extra_vars_check_panel")),
-
-                   column(width = 4,
-                          conditionalPanel("input.extra_vars_check",
-                                           uiOutput("extra.vars.html"))),
-
-                   column(width = 3,
-                          downloadButton(outputId = "save_interactive_plot",
-                                         label = "Download Plot"))
+    ret <- fixedRow(
+      column(
+        width = 2,
+        uiOutput("extra_vars_confirm")
+      ),
+      column(
+        width = 3,
+        uiOutput("extra_vars_check_panel")
+      ),
+      column(
+        width = 4,
+        conditionalPanel(
+          "input.extra_vars_check",
+          uiOutput("extra.vars.html")
+        )
+      ),
+      column(
+        width = 3,
+        downloadButton(
+          outputId = "save_interactive_plot",
+          label = "Download Plot"
+        )
+      )
     )
     ret
   })
@@ -5879,26 +6499,39 @@ output$interactive.plot.select = renderUI({
 
 
 
-output$interactive.plot.select.beta2 = renderUI({
+output$interactive.plot.select.beta2 <- renderUI({
   get.data.set()
   isolate({
-    ret = fixedRow(column(width = 3,
-                          downloadButton(outputId = "save_interactive_plot_beta2",
-                                         label = "Download Plot")),
-
-                   column(width = 2,
-                          actionButton("produce_interactive_plot",
-                                       "Produce Plot",
-                                       style="color: #fff; background-color: #337ab7; border-color: #2e6da4")),
-
-                   column(width = 3,
-                          conditionalPanel("input.vari2 != 'none'",
-                                           uiOutput("extra_vars_check_panel_beta2"))),
-
-
-                   column(width = 4,
-                          conditionalPanel("input.extra_vars_check_beta2",
-                                           uiOutput("extra.vars.html.beta2"))))
+    ret <- fixedRow(
+      column(
+        width = 3,
+        downloadButton(
+          outputId = "save_interactive_plot_beta2",
+          label = "Download Plot"
+        )
+      ),
+      column(
+        width = 2,
+        actionButton("produce_interactive_plot",
+          "Produce Plot",
+          style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+        )
+      ),
+      column(
+        width = 3,
+        conditionalPanel(
+          "input.vari2 != 'none'",
+          uiOutput("extra_vars_check_panel_beta2")
+        )
+      ),
+      column(
+        width = 4,
+        conditionalPanel(
+          "input.extra_vars_check_beta2",
+          uiOutput("extra.vars.html.beta2")
+        )
+      )
+    )
     ret
   })
 })
@@ -5906,48 +6539,36 @@ output$interactive.plot.select.beta2 = renderUI({
 
 ## the check box for selecting extra variables
 
-
-#output$extra_vars_check_panel = renderUI({
-#  get.data.set()
-#  input$vari2
-#  isolate({
-#    if(!is.null(input$vari2) && input$vari2 != "none")
-#      ret = checkboxInput("extra_vars_check",
-#                          strong("Select additional variables:"),
-#                          value = input$extra_vars_check)
-#    else
-#      ret = NULL
-#
-#    ret
-#  })
-#})
-
-output$extra_vars_check_panel = renderUI({
+output$extra_vars_check_panel <- renderUI({
   get.data.set()
   input$vari1
   input$vari2
   isolate({
-    if((!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
-        !is.null(input$vari2) && input$vari2 == "none") |
-       (!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
-        !is.null(input$vari2) && input$vari2 != "none" && !is.numeric(vis.data()[[plot.par$y]])))
-      ret = NULL
-    else
-      ret = checkboxInput("extra_vars_check",
-                          strong("Select additional variables:"),
-                          value = input$extra_vars_check)
+    if ((!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
+      !is.null(input$vari2) && input$vari2 == "none") |
+      (!is.null(input$vari1) && !is.numeric(vis.data()[[plot.par$x]]) &&
+        !is.null(input$vari2) && input$vari2 != "none" &&
+        !is.numeric(vis.data()[[plot.par$y]]))) {
+      ret <- NULL
+    } else {
+      ret <- checkboxInput("extra_vars_check",
+        strong("Select additional variables:"),
+        value = input$extra_vars_check
+      )
+    }
 
     ret
   })
 })
 
-output$extra_vars_check_panel_beta2 = renderUI({
+output$extra_vars_check_panel_beta2 <- renderUI({
   get.data.set()
   #  input$vari2
   isolate({
-    ret = checkboxInput("extra_vars_check_beta2",
-                        strong("Select additional variables:"),
-                        value = input$extra_vars_check_beta2)
+    ret <- checkboxInput("extra_vars_check_beta2",
+      strong("Select additional variables:"),
+      value = input$extra_vars_check_beta2
+    )
   })
 })
 
@@ -5955,8 +6576,9 @@ output$extra_vars_check_panel_beta2 = renderUI({
 observe({
   input$vari2
   isolate({
-    if(!is.null(input$vari2) && input$vari2 == "none")
+    if (!is.null(input$vari2) && input$vari2 == "none") {
       updateCheckboxInput(session, "extra_vars_check", value = FALSE)
+    }
   })
 })
 
@@ -5964,8 +6586,9 @@ observe({
 observe({
   input$vari2
   isolate({
-    if(!is.null(input$vari2) && input$vari2 == "none")
+    if (!is.null(input$vari2) && input$vari2 == "none") {
       updateCheckboxInput(session, "extra_vars_check_beta2", value = FALSE)
+    }
   })
 })
 
@@ -5973,77 +6596,48 @@ observe({
 
 ## select additional variables to export in dynamic plot
 
-#output$extra.vars.html = renderUI({
-#  get.data.set()
-#  input$extra_vars_check
-#  input$vari2
-#  isolate({
-#    if(!is.null(input$extra_vars_check) &&
-#       input$extra_vars_check &&
-#       !is.null(input$vari2) &&
-#       input$vari2 %in% colnames(vis.data())) {
-#      ch = colnames(vis.data())
-#      ch = ch[-which(ch %in% input$vari1)]
-#      ch = ch[-which(ch %in% input$vari2)]
-#
-#      extra.vars.html.panel = selectInput(inputId = "export.extra.vars.html",
-#                                          #label = strong("Select additional variables to export"),
-#                                          label = NULL,
-#                                          choices = ch,
-#                                          multiple = TRUE,
-#                                          selected = input$export.extra.vars.html,
-#                                          size = 2,
-#                                          selectize = FALSE)
-#    }
-#    else
-#      extra.vars.html.panel = NULL
-#
-#    extra.vars.html.panel
-#  })
-#})
-
-
-
-output$extra.vars.html = renderUI({
+output$extra.vars.html <- renderUI({
   get.data.set()
-  #input$extra_vars_check
-  #input$vari2
+  # input$extra_vars_check
+  # input$vari2
   isolate({
-    ch = colnames(vis.data())
-    ch = ch[-which(ch %in% input$vari1)]
-    if(!is.null(input$vari2) && input$vari2 != 'none')
-      ch = ch[-which(ch %in% input$vari2)]
+    ch <- colnames(vis.data())
+    ch <- ch[-which(ch %in% input$vari1)]
+    if (!is.null(input$vari2) && input$vari2 != "none") {
+      ch <- ch[-which(ch %in% input$vari2)]
+    }
 
-    selectInput(inputId = "export.extra.vars.html",
-                #label = strong("Select additional variables to export"),
-                label = NULL,
-                choices = ch,
-                multiple = TRUE,
-                selected = input$export.extra.vars.html,
-                size = 3,
-                selectize = FALSE)
+    selectInput(
+      inputId = "export.extra.vars.html",
+      label = NULL,
+      choices = ch,
+      multiple = TRUE,
+      selected = input$export.extra.vars.html,
+      size = 3,
+      selectize = FALSE
+    )
   })
 })
 
 
 
-output$extra.vars.html.beta2 = renderUI({
+output$extra.vars.html.beta2 <- renderUI({
   get.data.set()
-  #input$extra_vars_check
-  #input$vari2
-  isolate({
-    ch = colnames(vis.data())
-    ch = ch[-which(ch %in% input$vari1)]
-    ch = ch[-which(ch %in% input$vari2)]
 
-    selectInput(inputId = "export.extra.vars.html.beta2",
-                #label = strong("Select additional variables to export"),
-                label = NULL,
-                choices = ch,
-                multiple = TRUE,
-                selected = input$export.extra.vars.html.beta2,
-                size = 3,
-                selectize = FALSE)
+  isolate({
+    ch <- colnames(vis.data())
+    ch <- ch[-which(ch %in% input$vari1)]
+    ch <- ch[-which(ch %in% input$vari2)]
+
+    selectInput(
+      inputId = "export.extra.vars.html.beta2",
+      label = NULL,
+      choices = ch,
+      multiple = TRUE,
+      selected = input$export.extra.vars.html.beta2,
+      size = 3,
+      selectize = FALSE
+    )
   })
 })
 
@@ -6054,13 +6648,16 @@ observe({
   input$vari2
   input$extra_vars_check
   isolate({
-    ch = colnames(vis.data())
-    ch = ch[-which(ch %in% input$vari1)]
-    if(!is.null(input$vari2) &&
-       input$vari2 %in% colnames(vis.data())){
-      ch = ch[-which(ch %in% input$vari2)]
+    ch <- colnames(vis.data())
+    ch <- ch[-which(ch %in% input$vari1)]
+    if (!is.null(input$vari2) &&
+      input$vari2 %in% colnames(vis.data())) {
+      ch <- ch[-which(ch %in% input$vari2)]
     }
-    updateSelectInput(session, "export.extra.vars.html", choices = ch, selected = NULL)
+    updateSelectInput(session, "export.extra.vars.html",
+      choices = ch,
+      selected = NULL
+    )
   })
 })
 
@@ -6070,13 +6667,15 @@ observe({
   input$vari2
   input$extra_vars_check_beta2
   isolate({
-    ch = colnames(vis.data())
-    ch = ch[-which(ch %in% input$vari1)]
-    if(!is.null(input$vari2) &&
-       input$vari2 %in% colnames(vis.data())){
-      ch = ch[-which(ch %in% input$vari2)]
+    ch <- colnames(vis.data())
+    ch <- ch[-which(ch %in% input$vari1)]
+    if (!is.null(input$vari2) &&
+      input$vari2 %in% colnames(vis.data())) {
+      ch <- ch[-which(ch %in% input$vari2)]
     }
-    updateSelectInput(session, "export.extra.vars.html.beta2", choices = ch, selected = NULL)
+    updateSelectInput(session, "export.extra.vars.html.beta2",
+      choices = ch, selected = NULL
+    )
   })
 })
 
@@ -6084,177 +6683,134 @@ observe({
 
 
 ## the confirm button for selecting extra variables
-output$extra_vars_confirm = renderUI({
+output$extra_vars_confirm <- renderUI({
   get.data.set()
-  #  input$extra_vars_check
-  #  input$export.extra.vars.html
+
   input$vari1
   input$vari2
   isolate({
-    if(nrow(vis.data()) > 200  &&
-       any(!is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]),
-           !is.null(input$vari2) && input$vari2 != "none" && is.numeric(vis.data()[[plot.par$y]])))
-      ret = list(actionButton("extra_vars_confirm_button",
-                              "Produce Plot",
-                              style="color: #424242; background-color: #E9E9E9; border-color: #E9E9E9"),
-                 helpText("Large samples: click to produce interactive plot"))
-    else
-      ret = NULL
+    if (nrow(vis.data()) > 200 &&
+      any(
+        !is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]),
+        !is.null(input$vari2) && input$vari2 != "none" &&
+          is.numeric(vis.data()[[plot.par$y]])
+      )) {
+      ret <- list(
+        actionButton("extra_vars_confirm_button",
+          "Produce Plot",
+          style = "color: #424242; background-color: #E9E9E9; border-color: #E9E9E9"
+        ),
+        helpText("Large samples: click to produce interactive plot")
+      )
+    } else {
+      ret <- NULL
+    }
     ret
   })
 })
 
 
-data_html = reactive({
-  if(!is.null(input$vari2) &&
-     input$vari2 %in% colnames(vis.data())) {
-
-    if(!is.null(input$extra_vars_check) &&
-       input$extra_vars_check) {
-
-      if(!is.null(input$export.extra.vars.html) &&
-         all(input$export.extra.vars.html %in% colnames(vis.data())))
+data_html <- reactive({
+  if (!is.null(input$vari2) &&
+    input$vari2 %in% colnames(vis.data())) {
+    if (!is.null(input$extra_vars_check) &&
+      input$extra_vars_check) {
+      if (!is.null(input$export.extra.vars.html) &&
+        all(input$export.extra.vars.html %in% colnames(vis.data()))) {
         return(get.data.set())
-
-      else
+      } else {
         return(NULL)
-    }
-
-    else
+      }
+    } else {
       return(NULL)
-  }
-
-  else
+    }
+  } else {
     return(NULL)
+  }
 })
 
 
-data_html_beta2 = reactive({
-  if(!is.null(input$vari2) &&
-     input$vari2 %in% colnames(vis.data())) {
-
-    if(!is.null(input$extra_vars_check_beta2) &&
-       input$extra_vars_check_beta2) {
-
-      if(!is.null(input$export.extra.vars.html.beta2) &&
-         all(input$export.extra.vars.html.beta2 %in% colnames(vis.data())))
+data_html_beta2 <- reactive({
+  if (!is.null(input$vari2) &&
+    input$vari2 %in% colnames(vis.data())) {
+    if (!is.null(input$extra_vars_check_beta2) &&
+      input$extra_vars_check_beta2) {
+      if (!is.null(input$export.extra.vars.html.beta2) &&
+        all(input$export.extra.vars.html.beta2 %in% colnames(vis.data()))) {
         return(get.data.set())
-
-      else
+      } else {
         return(NULL)
-    }
-
-    else
+      }
+    } else {
       return(NULL)
-  }
-
-  else
+    }
+  } else {
     return(NULL)
+  }
 })
 
-extra.vars_html = reactive({
-  if(!is.null(input$vari2) &&
-     input$vari2 %in% colnames(vis.data())) {
-
-    if(!is.null(input$extra_vars_check) &&
-       input$extra_vars_check) {
-
-      if(!is.null(input$export.extra.vars.html) &&
-         all(input$export.extra.vars.html %in% colnames(vis.data())))
+extra.vars_html <- reactive({
+  if (!is.null(input$vari2) &&
+    input$vari2 %in% colnames(vis.data())) {
+    if (!is.null(input$extra_vars_check) &&
+      input$extra_vars_check) {
+      if (!is.null(input$export.extra.vars.html) &&
+        all(input$export.extra.vars.html %in% colnames(vis.data()))) {
         return(input$export.extra.vars.html)
-
-      else
+      } else {
         return(NULL)
-    }
-
-    else
+      }
+    } else {
       return(NULL)
-  }
-
-  else
+    }
+  } else {
     return(NULL)
+  }
 })
 
 
-extra.vars_html_beta2 = reactive({
-  if(!is.null(input$vari2) &&
-     input$vari2 %in% colnames(vis.data())) {
-
-    if(!is.null(input$extra_vars_check_beta2) &&
-       input$extra_vars_check_beta2) {
-
-      if(!is.null(input$export.extra.vars.html.beta2) &&
-         all(input$export.extra.vars.html.beta2 %in% colnames(vis.data())))
+extra.vars_html_beta2 <- reactive({
+  if (!is.null(input$vari2) &&
+    input$vari2 %in% colnames(vis.data())) {
+    if (!is.null(input$extra_vars_check_beta2) &&
+      input$extra_vars_check_beta2) {
+      if (!is.null(input$export.extra.vars.html.beta2) &&
+        all(input$export.extra.vars.html.beta2 %in% colnames(vis.data()))) {
         return(input$export.extra.vars.html.beta2)
-
-      else
+      } else {
         return(NULL)
-    }
-
-    else
+      }
+    } else {
       return(NULL)
-  }
-
-  else
+    }
+  } else {
     return(NULL)
+  }
 })
 
 
 observe({
   input$produce_interactive_plot
   isolate({
-    if(!is.null(input$produce_interactive_plot) && input$produce_interactive_plot > 0) {
-      output$interactive.plot.beta2 = renderUI({
-        dafr = get.data.set()
-        # vis.par()
-        # input$vari1
-        # input$vari2
-        # input$extra_vars_check
-        # input$extra_vars_confirm_button
-        # input$subs1
-        # input$subs2
-        isolate({
-          #         if((!is.null(input$subs1) &&
-          #              input$subs1 %in% colnames(vis.data())) ||
-          #             (!is.null(input$subs2) &&
-          #              input$subs2 %in% colnames(vis.data()))) {
-          #            h4("iNZight doesn't handle interactive panel plots ... yet!
-          #               Please remove the subset variable(s)")
-          #          } else {
-          #            if(!is.null(input$select.plot.type) &&
-          #               input$select.plot.type == "grid-density plot") {
-          #              h4("iNZight doesn't handle interactive grid-density plots ... yet!
-          #                 Please select other plot types")
-          #            }else if(!is.null(input$select.plot.type) &&
-          #                    (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-          #                    !is.null(input$color_by_select) &&
-          #                    input$color_by_select != " ") {
-          #              h4("iNZight doesn't handle interactive coloured hex bins plots ... yet!
-          #                 Please select other plot types")
-          #            } else {
-          #              if(((!is.null(input$vari1) && !is.numeric(dafr[, input$vari1])) ||
-          #                  (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(dafr[, input$vari2]))) &&
-          #                 !is.null(input$export.extra.vars.html.beta2) &&
-          #                 all(input$export.extra.vars.html.beta2 %in% colnames(vis.data()))) {
-          #                h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-          #              }
-          #              else {
-          local.dir = iNZightPlots::exportHTML(create.html,
-                                               data = data_html_beta2(),
-                                               extra.vars = extra.vars_html_beta2(),
-                                               width = 10, height = 6)
+    if (!is.null(input$produce_interactive_plot) && input$produce_interactive_plot > 0) {
+      output$interactive.plot.beta2 <- renderUI({
+        dafr <- get.data.set()
 
-          local.dir = unclass(local.dir)
-          temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+        isolate({
+          local.dir <- iNZightPlots::exportHTML(create.html,
+            data = data_html_beta2(),
+            extra.vars = extra.vars_html_beta2(),
+            width = 10, height = 6
+          )
+
+          local.dir <- unclass(local.dir)
+          temp.dir <- substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
           addResourcePath("path", temp.dir)
           tags$iframe(
             seamless = "seamless",
             src = "path/index.html",
             height = 600, width = 1200
           )
-          #              }
-          #            }
-          #}
         })
       })
     }
@@ -6262,124 +6818,69 @@ observe({
 })
 
 ## the display the interactive plot tabpanel
-output$interactive.plot = renderUI({
-
-  if(nrow(vis.data()) <= 200  ||
-     !any(!is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]),
-          !is.null(input$vari2) && input$vari2 != "none" && is.numeric(vis.data()[[plot.par$y]])) || !is.null(plot.par$design)) {
-    dafr = get.data.set()
+output$interactive.plot <- renderUI({
+  if (nrow(vis.data()) <= 200 ||
+    !any(
+      !is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]),
+      !is.null(input$vari2) && input$vari2 != "none" && is.numeric(vis.data()[[plot.par$y]])
+    ) || !is.null(plot.par$design)) {
+    dafr <- get.data.set()
     vis.par()
     input$vari1
     input$vari2
-    # input$extra_vars_check
     input$export.extra.vars.html
-    # input$extra_vars_confirm_button
     input$subs1
     input$subs2
     isolate({
-      #      if((!is.null(input$subs1) &&
-      #          input$subs1 %in% colnames(vis.data())) ||
-      #         (!is.null(input$subs2) &&
-      #          input$subs2 %in% colnames(vis.data()))) {
-      #        h4("iNZight doesn't handle interactive panel plots ... yet!
-      #           Please remove the subset variable(s)")
-      ##      }
-      #      else {
-      #        if(!is.null(input$select.plot.type) &&
-      #           input$select.plot.type == "grid-density plot") {
-      #          h4("iNZight doesn't handle interactive grid-density plots ... yet!
-      #             Please select other plot types")
-      #        }
-      #        else if(!is.null(input$select.plot.type) &&
-      #                (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-      #                !is.null(input$color_by_select) &&
-      #                input$color_by_select != " ") {
-      #          h4("iNZight doesn't handle interactive coloured hex bins plots ... yet!
-      #             Please select other plot types")
-      #        }
-      #        else {
-      #          if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-      #              (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-      #             !is.null(input$export.extra.vars.html) &&
-      #             all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-      #            h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-      #          }
-      #          else {
-      local.dir = iNZightPlots::exportHTML(create.html,
-                                           data = data_html(),
-                                           extra.vars = extra.vars_html(),
-                                           width = 10, height = 6)
+      local.dir <- iNZightPlots::exportHTML(create.html,
+        data = data_html(),
+        extra.vars = extra.vars_html(),
+        width = 10, height = 6
+      )
 
-      local.dir = unclass(local.dir)
-      temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+      local.dir <- unclass(local.dir)
+      temp.dir <- substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
       addResourcePath("path", temp.dir)
-      tags$div(tags$a(href = "path/index.html",
-                      "Open in a new window",
-                      target="_blank"),
-               tags$iframe(
-                 seamless = "seamless",
-                 src = "path/index.html",
-                 height = 600, width = 1200
-               ))
-
-      #         }
-      #        }
-      #        }
+      tags$div(
+        tags$a(
+          href = "path/index.html",
+          "Open in a new window",
+          target = "_blank"
+        ),
+        tags$iframe(
+          seamless = "seamless",
+          src = "path/index.html",
+          height = 600, width = 1200
+        )
+      )
     })
-  }
-
-  else {
-    dafr = get.data.set()
+  } else {
+    dafr <- get.data.set()
     input$extra_vars_confirm_button
-    isolate({
-      # if((!is.null(input$subs1) &&
-      #      input$subs1 %in% colnames(vis.data())) ||
-      #     (!is.null(input$subs2) &&
-      #      input$subs2 %in% colnames(vis.data()))) {
-      #    h4("iNZight doesn't handle interactive panel plots ... yet!
-      #       Please remove the subset variable(s)")
-      #  }
-      #  else {
-      #    if(!is.null(input$select.plot.type) &&
-      #       input$select.plot.type == "grid-density plot") {
-      #      h4("iNZight doesn't handle interactive grid-density plots ... yet!
-      #         Please select other plot types")
-      #    }
-      #    else if(!is.null(input$select.plot.type) &&
-      #            (input$select.plot.type == "hexbin plot-size" || input$select.plot.type == "hexbin plot-alpha") &&
-      #            !is.null(input$color_by_select) &&
-      #            input$color_by_select != " ") {
-      #      h4("iNZight doesn't handle interactive coloured hex bins plots ... yet!
-      #     Please select other plot types")
-      #    }
-      #    else {
-      #      if(((!is.null(input$vari1) && !is.numeric(plot.par$x)) ||
-      #          (!is.null(input$vari2) && input$vari2 != "none" && !is.numeric(plot.par$y))) &&
-      #         !is.null(input$export.extra.vars.html) &&
-      #         all(input$export.extra.vars.html %in% colnames(vis.data()))) {
-      #        h4("iNZight only handles extra variables for scatter interactive plots ... for now! ")
-      #      }
-      #      else if(!is.null(input$extra_vars_confirm_button) && input$extra_vars_confirm_button > 0) {
-      local.dir = iNZightPlots::exportHTML(create.html,
-                                           data = data_html(),
-                                           extra.vars = extra.vars_html(),
-                                           width = 10, height = 6)
 
-      local.dir = unclass(local.dir)
-      temp.dir = substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
+    isolate({
+      local.dir <- iNZightPlots::exportHTML(create.html,
+        data = data_html(),
+        extra.vars = extra.vars_html(),
+        width = 10, height = 6
+      )
+
+      local.dir <- unclass(local.dir)
+      temp.dir <- substr(unclass(local.dir), 1, nchar(unclass(local.dir)) - 11)
       addResourcePath("path", temp.dir)
 
-      tags$div(tags$a(href = "path/index.html",
-                      "Open in a new window",
-                      target="_blank"),
-               tags$iframe(
-                 seamless = "seamless",
-                 src = "path/index.html",
-                 height = 600, width = 1200
-               ))
-      #       }
-      #   }
-      #  }
+      tags$div(
+        tags$a(
+          href = "path/index.html",
+          "Open in a new window",
+          target = "_blank"
+        ),
+        tags$iframe(
+          seamless = "seamless",
+          src = "path/index.html",
+          height = 600, width = 1200
+        )
+      )
     })
   }
 })
@@ -6388,30 +6889,32 @@ output$interactive.plot = renderUI({
 
 # add fitted values and residuals
 # add trends and curves
-output$add.fitted.residuals.panel = renderUI({
+output$add.fitted.residuals.panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
   if (!is.null(plot.par$x)) {
-    xvar = vis.data()[[plot.par$x]]
-    yvar = if(!is.null(plot.par$y)) vis.data()[[plot.par$y]] else NULL
+    xvar <- vis.data()[[plot.par$x]]
+    yvar <- if (!is.null(plot.par$y)) vis.data()[[plot.par$y]] else NULL
     if (is.null(plot.par$g1) &&
-        is.null(plot.par$g2) &&
-        !is.null(plot.par$y) &&
-        (iNZightTools::is_num(xvar) | iNZightTools::is_num(yvar)) &&
-        (!is.null(graphical.par$trend) | (graphical.par$smooth > 0 && !is.null(graphical.par$smooth)) |
-         !iNZightTools::is_num(xvar) | !iNZightTools::is_num(yvar))){
-
-
-
-
-      ret = list(add.fitted.values.button = actionButton("store_fitted_values",
-                                                         "Store fitted values",
-                                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-                 br(),
-                 br(),
-                 add.residuals.button = actionButton("store_residuals",
-                                                     "Store residuals",
-                                                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+      is.null(plot.par$g2) &&
+      !is.null(plot.par$y) &&
+      (iNZightTools::is_num(xvar) | iNZightTools::is_num(yvar)) &&
+      (!is.null(graphical.par$trend) |
+        (graphical.par$smooth > 0 && !is.null(graphical.par$smooth)) |
+        !iNZightTools::is_num(xvar) | !iNZightTools::is_num(yvar))
+    ) {
+      ret <- list(
+        add.fitted.values.button = actionButton("store_fitted_values",
+          "Store fitted values",
+          style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+        ),
+        br(),
+        br(),
+        add.residuals.button = actionButton("store_residuals",
+          "Store residuals",
+          style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
+        )
+      )
     }
   }
   ret
@@ -6420,184 +6923,283 @@ output$add.fitted.residuals.panel = renderUI({
 
 observeEvent(input$store_fitted_values, {
   if (!is.null(plot.par$x)) {
-    if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
-       iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
+    if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+      !is.null(plot.par$x) &&
+      iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
-
-        conditionalPanel("input.check_linear",
-                         fixedRow(column(2, h5("Linear:")),
-                                  column(6, textInput(inputId = "add_linear_fitted_values",
-                                                      value = paste(input$vari1, ".predict.linear", sep = ""),
-                                                      label=NULL)))),
-        conditionalPanel("input.check_quadratic",
-                         fixedRow(column(2, h5("Quadratic:")),
-                                  column(6, textInput(inputId="add_quadratic_fitted_values",
-                                                      value = paste(input$vari1, ".predict.quadratic", sep = ""),
-                                                      label=NULL)))),
-        conditionalPanel("input.check_cubic",
-                         fixedRow(column(2, h5("Cubic:")),
-                                  column(6, textInput(inputId="add_cubic_fitted_values",
-                                                      value = paste(input$vari1, ".predict.cubic", sep = ""),
-                                                      label=NULL)))),
-        conditionalPanel("input.check_smoother",
-                         fixedRow(column(2, h5("Smoother:")),
-                                  column(6, textInput(inputId="add_smoother_fitted_values",
-                                                      value = paste(input$vari1, ".predict.smoother", sep = ""),
-                                                      label=NULL)))),
-
+        conditionalPanel(
+          "input.check_linear",
+          fixedRow(
+            column(2, h5("Linear:")),
+            column(6, textInput(
+              inputId = "add_linear_fitted_values",
+              value = paste(input$vari1, ".predict.linear", sep = ""),
+              label = NULL
+            ))
+          )
+        ),
+        conditionalPanel(
+          "input.check_quadratic",
+          fixedRow(
+            column(2, h5("Quadratic:")),
+            column(6, textInput(
+              inputId = "add_quadratic_fitted_values",
+              value = paste(input$vari1, ".predict.quadratic", sep = ""),
+              label = NULL
+            ))
+          )
+        ),
+        conditionalPanel(
+          "input.check_cubic",
+          fixedRow(
+            column(2, h5("Cubic:")),
+            column(6, textInput(
+              inputId = "add_cubic_fitted_values",
+              value = paste(input$vari1, ".predict.cubic", sep = ""),
+              label = NULL
+            ))
+          )
+        ),
+        conditionalPanel(
+          "input.check_smoother",
+          fixedRow(
+            column(2, h5("Smoother:")),
+            column(6, textInput(
+              inputId = "add_smoother_fitted_values",
+              value = paste(input$vari1, ".predict.smoother", sep = ""),
+              label = NULL
+            ))
+          )
+        ),
         actionButton("store_fitted_values_ok", "OK"),
         textOutput("add_fitted_values_status"),
         title = "Store fitted values"
-
       ))
     } else {
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
-        fixedRow(column(6, textInput(inputId = "add_numcat_fitted_values",
-                                     value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".predict", sep = ""),
-                                     label=NULL))),
+        fixedRow(column(6, textInput(
+          inputId = "add_numcat_fitted_values",
+          value = paste(
+            ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+              input$vari1, input$vari2
+            ),
+            ".predict",
+            sep = ""
+          ),
+          label = NULL
+        ))),
         actionButton("store_fitted_values_ok", "OK"),
         textOutput("add_fitted_values_status"),
         title = "Store fitted values"
-
       ))
     }
   }
 })
 
 
-output$add_fitted_values_status = renderText({
-  if(!is.null(input$store_fitted_values_ok) &&
-     input$store_fitted_values_ok > 0)
+output$add_fitted_values_status <- renderText({
+  if (!is.null(input$store_fitted_values_ok) &&
+    input$store_fitted_values_ok > 0) {
     "Add succesful"
-  else
+  } else {
     NULL
+  }
 })
 
 
 observeEvent(input$store_residuals, {
-  if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
-     iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
+  if (iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
+    iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
     showModal(modalDialog(
       h5(strong("Specify names for the new variables")),
-
-      conditionalPanel("input.check_linear",
-                       fixedRow(column(2, h5("Linear:")),
-                                column(6, textInput(inputId="add_linear_residuals",
-                                                    value = paste(input$vari1, ".residuals.linear", sep = ""),
-                                                    label=NULL)))),
-      conditionalPanel("input.check_quadratic",
-                       fixedRow(column(2, h5("Quadratic:")),
-                                column(6, textInput(inputId="add_quadratic_residuals",
-                                                    value = paste(input$vari1, ".residuals.quadratic", sep = ""),
-                                                    label=NULL)))),
-      conditionalPanel("input.check_cubic",
-                       fixedRow(column(2, h5("Cubic:")),
-                                column(6, textInput(inputId="add_cubic_residuals",
-                                                    value = paste(input$vari1, ".residuals.cubic", sep = ""),
-                                                    label=NULL)))),
-      conditionalPanel("input.check_smoother",
-                       fixedRow(column(2, h5("Smoother:")),
-                                column(6, textInput(inputId="add_smoother_residuals",
-                                                    value = paste(input$vari1, ".residuals.smoother", sep = ""),
-                                                    label=NULL)))),
+      conditionalPanel(
+        "input.check_linear",
+        fixedRow(
+          column(2, h5("Linear:")),
+          column(6, textInput(
+            inputId = "add_linear_residuals",
+            value = paste(input$vari1, ".residuals.linear", sep = ""),
+            label = NULL
+          ))
+        )
+      ),
+      conditionalPanel(
+        "input.check_quadratic",
+        fixedRow(
+          column(2, h5("Quadratic:")),
+          column(6, textInput(
+            inputId = "add_quadratic_residuals",
+            value = paste(input$vari1, ".residuals.quadratic", sep = ""),
+            label = NULL
+          ))
+        )
+      ),
+      conditionalPanel(
+        "input.check_cubic",
+        fixedRow(
+          column(2, h5("Cubic:")),
+          column(6, textInput(
+            inputId = "add_cubic_residuals",
+            value = paste(input$vari1, ".residuals.cubic", sep = ""),
+            label = NULL
+          ))
+        )
+      ),
+      conditionalPanel(
+        "input.check_smoother",
+        fixedRow(
+          column(2, h5("Smoother:")),
+          column(6, textInput(
+            inputId = "add_smoother_residuals",
+            value = paste(input$vari1, ".residuals.smoother", sep = ""),
+            label = NULL
+          ))
+        )
+      ),
       actionButton("store_resisuals_ok", "OK"),
       textOutput("add_residuals_status"),
       title = "Store residuals"
-
     ))
   } else {
     showModal(modalDialog(
       h5(strong("Specify names for the new variables")),
-      fixedRow(column(6, textInput(inputId = "add_numcat_residuals",
-                                   value = paste(ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), input$vari1, input$vari2), ".residuals", sep = ""),
-                                   label=NULL))),
+      fixedRow(column(6, textInput(
+        inputId = "add_numcat_residuals",
+        value = paste(
+          ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+            input$vari1, input$vari2
+          ),
+          ".residuals",
+          sep = ""
+        ),
+        label = NULL
+      ))),
       actionButton("store_resisuals_ok", "OK"),
       textOutput("add_residuals_status"),
       title = "Store residuals"
-
     ))
   }
 })
 
 
-output$add_residuals_status = renderText({
-  if(!is.null(input$store_resisuals_ok) &&
-     input$store_resisuals_ok > 0)
+output$add_residuals_status <- renderText({
+  if (!is.null(input$store_resisuals_ok) &&
+    input$store_resisuals_ok > 0) {
     "Add succesful"
-  else
+  } else {
     NULL
+  }
 })
 
 observe({
   input$store_resisuals_ok
   isolate({
-    if(!is.null(input$store_resisuals_ok) &&
-       input$store_resisuals_ok > 0) {
-      temp1 = input$vari1
-      temp2 = input$vari2
-      temp = get.data.set()
-      if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
-         iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
-        linear_trend = FALSE
-        quadratic_trend = FALSE
-        cubic_trend = FALSE
-        smoother_trend = FALSE
-        if("linear" %in% graphical.par$trend) {
-          linear_trend = TRUE
-          fit.linear = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude))
-          resi.linear = data.frame(residuals(fit.linear), stringsAsFactors = TRUE)
-          colnames(resi.linear) = input$add_linear_residuals
-          temp = cbind(temp, resi.linear)
+    if (!is.null(input$store_resisuals_ok) &&
+      input$store_resisuals_ok > 0) {
+      temp1 <- input$vari1
+      temp2 <- input$vari2
+      temp <- get.data.set()
+      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+        !is.null(plot.par$x) &&
+        iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
+        !is.null(plot.par$y)) {
+        linear_trend <- FALSE
+        quadratic_trend <- FALSE
+        cubic_trend <- FALSE
+        smoother_trend <- FALSE
+        if ("linear" %in% graphical.par$trend) {
+          linear_trend <- TRUE
+          fit.linear <- with(
+            vis.par(),
+            lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              na.action = na.exclude
+            )
+          )
+          resi.linear <- data.frame(residuals(fit.linear), stringsAsFactors = TRUE)
+          colnames(resi.linear) <- input$add_linear_residuals
+          temp <- cbind(temp, resi.linear)
         }
-        if("quadratic" %in% graphical.par$trend) {
-          quadratic_trend = TRUE
-          fit.quadratic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2), na.action = na.exclude))
-          resi.quadratic = data.frame(residuals(fit.quadratic), stringsAsFactors = TRUE)
-          colnames(resi.quadratic) = input$add_quadratic_residuals
-          temp = cbind(temp, resi.quadratic)
+        if ("quadratic" %in% graphical.par$trend) {
+          quadratic_trend <- TRUE
+          fit.quadratic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2),
+              na.action = na.exclude
+            )
+          )
+          resi.quadratic <- data.frame(residuals(fit.quadratic), stringsAsFactors = TRUE)
+          colnames(resi.quadratic) <- input$add_quadratic_residuals
+          temp <- cbind(temp, resi.quadratic)
         }
-        if("cubic" %in% graphical.par$trend) {
-          cubic_trend = TRUE
-          fit.cubic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3), na.action = na.exclude))
-          resi.cubic = data.frame(residuals(fit.cubic), stringsAsFactors = TRUE)
-          colnames(resi.cubic) = input$add_cubic_residuals
-          temp = cbind(temp, resi.cubic)
+        if ("cubic" %in% graphical.par$trend) {
+          cubic_trend <- TRUE
+          fit.cubic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
+              na.action = na.exclude
+            )
+          )
+          resi.cubic <- data.frame(residuals(fit.cubic),
+            stringsAsFactors = TRUE
+          )
+          colnames(resi.cubic) <- input$add_cubic_residuals
+          temp <- cbind(temp, resi.cubic)
         }
-        if(graphical.par$smooth > 0) {
-          temp3 = graphical.par$smooth
-          smoother_trend = TRUE
-          fit.smooth = with(vis.par(), loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], span = graphical.par$smooth,
-                                             family = "gaussian", degree = 1, na.action = "na.exclude"))
-          resi.smooth = data.frame(residuals(fit.smooth), stringsAsFactors = TRUE)
-          colnames(resi.smooth) = input$add_smoother_residuals
-          temp = cbind(temp, resi.smooth)
-
+        if (graphical.par$smooth > 0) {
+          temp3 <- graphical.par$smooth
+          smoother_trend <- TRUE
+          fit.smooth <- with(
+            vis.par(),
+            loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              span = graphical.par$smooth,
+              family = "gaussian", degree = 1, na.action = "na.exclude"
+            )
+          )
+          resi.smooth <- data.frame(residuals(fit.smooth),
+            stringsAsFactors = TRUE
+          )
+          colnames(resi.smooth) <- input$add_smoother_residuals
+          temp <- cbind(temp, resi.smooth)
         }
-        if(linear_trend)
+        if (linear_trend) {
           updateCheckboxInput(session, "check_linear", value = T)
-        if(quadratic_trend)
+        }
+        if (quadratic_trend) {
           updateCheckboxInput(session, "check_quadratic", value = T)
-        if(cubic_trend)
+        }
+        if (cubic_trend) {
           updateCheckboxInput(session, "check_cubic", value = T)
-        if(smoother_trend) {
-          updateCheckboxInput(session, "check_smoother",value = T)
+        }
+        if (smoother_trend) {
+          updateCheckboxInput(session, "check_smoother", value = T)
           updateSliderInput(session, "smoother.smooth", value = temp3)
-
         }
       } else {
-        if (iNZightTools::is_num(vis.data()[[plot.par$y]])){
-          fit = lm(formula = vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]], na.action = na.exclude)
+        if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
+            na.action = na.exclude
+          )
         } else {
-          fit <- lm(formula = vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude)
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+            na.action = na.exclude
+          )
         }
-        resi.numcat = data.frame(residuals(fit), stringsAsFactors = TRUE)
-        colnames(resi.numcat) = input$add_numcat_residuals
-        temp = cbind(temp, resi.numcat)
+        resi.numcat <- data.frame(residuals(fit), stringsAsFactors = TRUE)
+        colnames(resi.numcat) <- input$add_numcat_residuals
+        temp <- cbind(temp, resi.numcat)
       }
-      updatePanel$datachanged = updatePanel$datachanged + 1
-      values$data.set = temp
+      updatePanel$datachanged <- updatePanel$datachanged + 1
+      values$data.set <- temp
       updateCheckboxInput(session, "vari1", value = temp1)
       updateCheckboxInput(session, "vari2", value = temp2)
     }
@@ -6607,76 +7209,146 @@ observe({
 observe({
   input$store_fitted_values_ok
   isolate({
-    if(!is.null(input$store_fitted_values_ok) &&
-       input$store_fitted_values_ok > 0) {
-      temp1 = input$vari1
-      temp2 = input$vari2
-      temp = get.data.set()
-      if(iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
-         iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
-        linear_trend = FALSE
-        quadratic_trend = FALSE
-        cubic_trend = FALSE
-        smoother_trend = FALSE
-        if("linear" %in% graphical.par$trend) {
-          linear_trend = TRUE
-          fit.linear = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude))
-          pred.linear = data.frame(predict(fit.linear, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
-                                   stringsAsFactors = TRUE)
-          colnames(pred.linear) = input$add_linear_fitted_values
-          temp = cbind(temp, pred.linear)
+    if (!is.null(input$store_fitted_values_ok) &&
+      input$store_fitted_values_ok > 0) {
+      temp1 <- input$vari1
+      temp2 <- input$vari2
+      temp <- get.data.set()
+      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+        !is.null(plot.par$x) &&
+        iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
+        !is.null(plot.par$y)) {
+        linear_trend <- FALSE
+        quadratic_trend <- FALSE
+        cubic_trend <- FALSE
+        smoother_trend <- FALSE
+        if ("linear" %in% graphical.par$trend) {
+          linear_trend <- TRUE
+          fit.linear <- with(
+            vis.par(),
+            lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              na.action = na.exclude
+            )
+          )
+          pred.linear <- data.frame(
+            predict(fit.linear,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
+            stringsAsFactors = TRUE
+          )
+          colnames(pred.linear) <- input$add_linear_fitted_values
+          temp <- cbind(temp, pred.linear)
         }
-        if("quadratic" %in% graphical.par$trend) {
-          quadratic_trend = TRUE
-          fit.quadratic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2), na.action = na.exclude))
-          pred.quadratic = data.frame(predict(fit.quadratic, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
-                                      stringsAsFactors = TRUE)
-          colnames(pred.quadratic) = input$add_quadratic_fitted_values
-          temp = cbind(temp, pred.quadratic)
+        if ("quadratic" %in% graphical.par$trend) {
+          quadratic_trend <- TRUE
+          fit.quadratic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2),
+              na.action = na.exclude
+            )
+          )
+          pred.quadratic <- data.frame(
+            predict(fit.quadratic,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
+            stringsAsFactors = TRUE
+          )
+          colnames(pred.quadratic) <- input$add_quadratic_fitted_values
+          temp <- cbind(temp, pred.quadratic)
         }
-        if("cubic" %in% graphical.par$trend) {
-          cubic_trend = TRUE
-          fit.cubic = with(vis.par(), lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] + I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3), na.action = na.exclude))
-          pred.cubic = data.frame(predict(fit.cubic, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
-                                  stringsAsFactors = TRUE)
-          colnames(pred.cubic) = input$add_cubic_fitted_values
-          temp = cbind(temp, pred.cubic)
+        if ("cubic" %in% graphical.par$trend) {
+          cubic_trend <- TRUE
+          fit.cubic <- with(
+            vis.par(),
+            lm(
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+                I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
+              na.action = na.exclude
+            )
+          )
+          pred.cubic <- data.frame(
+            predict(fit.cubic,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
+            stringsAsFactors = TRUE
+          )
+          colnames(pred.cubic) <- input$add_cubic_fitted_values
+          temp <- cbind(temp, pred.cubic)
         }
-        if(graphical.par$smooth > 0) {
-          temp3 = graphical.par$smooth
-          smoother_trend = TRUE
-          fit.smooth = with(vis.par(), loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], span = graphical.par$smooth,
-                                             family = "gaussian", degree = 1, na.action = "na.exclude"))
-          pred.smooth = data.frame(predict(fit.smooth, newdata = data.frame(x = vis.data()[[plot.par$y]], stringsAsFactors = TRUE)),
-                                   stringsAsFactors = TRUE)
-          colnames(pred.smooth) = input$add_smoother_fitted_values
-          temp = cbind(temp, pred.smooth)
-
+        if (graphical.par$smooth > 0) {
+          temp3 <- graphical.par$smooth
+          smoother_trend <- TRUE
+          fit.smooth <- with(
+            vis.par(),
+            loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+              span = graphical.par$smooth,
+              family = "gaussian", degree = 1, na.action = "na.exclude"
+            )
+          )
+          pred.smooth <- data.frame(
+            predict(fit.smooth,
+              newdata = data.frame(
+                x = vis.data()[[plot.par$y]],
+                stringsAsFactors = TRUE
+              )
+            ),
+            stringsAsFactors = TRUE
+          )
+          colnames(pred.smooth) <- input$add_smoother_fitted_values
+          temp <- cbind(temp, pred.smooth)
         }
-        if(linear_trend)
+        if (linear_trend) {
           updateCheckboxInput(session, "check_linear", value = T)
-        if(quadratic_trend)
+        }
+        if (quadratic_trend) {
           updateCheckboxInput(session, "check_quadratic", value = T)
-        if(cubic_trend)
+        }
+        if (cubic_trend) {
           updateCheckboxInput(session, "check_cubic", value = T)
-        if(smoother_trend) {
-          updateCheckboxInput(session, "check_smoother",value = T)
+        }
+        if (smoother_trend) {
+          updateCheckboxInput(session, "check_smoother", value = T)
           updateSliderInput(session, "smoother.smooth", value = temp3)
         }
       } else {
-        if (iNZightTools::is_num(vis.data()[[plot.par$y]])){
-          fit = lm(formula = vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]], na.action = na.exclude)
+        if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
+            na.action = na.exclude
+          )
         } else {
-          fit = lm(formula = vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]], na.action = na.exclude)
+          fit <- lm(
+            formula =
+              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+            na.action = na.exclude
+          )
         }
-        pred.numcat = data.frame(predict(fit, newdata = data.frame(x = ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]), vis.data()[[plot.par$y]], vis.data()[[plot.par$x]]),
-                                                                   stringsAsFactors = TRUE)),
-                                 stringsAsFactors = TRUE)
-        colnames(pred.numcat) = input$add_numcat_fitted_values
-        temp = cbind(temp, pred.numcat)
+        pred.numcat <- data.frame(
+          predict(fit, newdata = data.frame(
+            x = ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+              vis.data()[[plot.par$y]], vis.data()[[plot.par$x]]
+            ),
+            stringsAsFactors = TRUE
+          )),
+          stringsAsFactors = TRUE
+        )
+        colnames(pred.numcat) <- input$add_numcat_fitted_values
+        temp <- cbind(temp, pred.numcat)
       }
-      updatePanel$datachanged = updatePanel$datachanged + 1
-      values$data.set = temp
+      updatePanel$datachanged <- updatePanel$datachanged + 1
+      values$data.set <- temp
       updateCheckboxInput(session, "vari1", value = temp1)
       updateCheckboxInput(session, "vari2", value = temp2)
     }
@@ -6706,14 +7378,14 @@ observe({
 observe({
   input$go.to.new
   if (!is.null(input$go.to.new) && input$go.to.new > 0) {
-    if(!is.null(input$sub1_level_mini) && input$sub1_level_mini != 0) {
-      updateSliderInput(session,"sub1_level_mini", value=0)
+    if (!is.null(input$sub1_level_mini) && input$sub1_level_mini != 0) {
+      updateSliderInput(session, "sub1_level_mini", value = 0)
     }
-    if(!is.null(input$sub2_level_mini) && input$sub2_level_mini != 0) {
-      updateSliderInput(session,"sub2_level_mini", value=0)
+    if (!is.null(input$sub2_level_mini) && input$sub2_level_mini != 0) {
+      updateSliderInput(session, "sub2_level_mini", value = 0)
     }
-    if((is.null(input$sub1_level_mini) || input$sub1_level_mini == 0) &&
-       (is.null(input$sub2_level_mini) || input$sub2_level_mini == 0)) {
+    if ((is.null(input$sub1_level_mini) || input$sub1_level_mini == 0) &&
+      (is.null(input$sub2_level_mini) || input$sub2_level_mini == 0)) {
       isolate({
         output$visualize.panel <- renderUI({
           get.data.set()
@@ -6723,261 +7395,314 @@ observe({
         })
       })
     }
-
   }
 })
 
-output$old_add_inference = renderUI({
+output$old_add_inference <- renderUI({
   get.data.set()
   input$vari1
   input$vari2
-  ret = NULL
+  ret <- NULL
   isolate({
-    dafr = get.data.set()
-    add_inference.check = checkboxInput("add.inference",
-                                        label="Add inference",
-                                        value=input$add.inference)
-    mean_median.radio = radioButtons("inference_parameter1",
-                                     label="Parameter",
-                                     choices=c("Mean","Median"),
-                                     selected=input$inference_parameter1,
-                                     inline=T)
-    normal_bootstrap.radio = radioButtons("inference_type1",
-                                          label="Type of inference",
-                                          choices=c("Normal","Bootstrap"),
-                                          selected=input$inference_type1,
-                                          inline=T)
-    confidence.interval.check = checkboxInput("confidence_interval1",
-                                              label="Confidence interval",
-                                              value=input$confidence_interval1)
-    comparison.interval.check = checkboxInput("comparison_interval1",
-                                              label="Comparison interval",
-                                              value=input$comparison_interval1)
-    year12_bootstrap.radio = radioButtons("inference_type2",
-                                          label="Type of inference",
-                                          choices=c("Year 12","Bootstrap"),
-                                          selected=input$inference_type2,
-                                          inline=T)
-    intervals = NULL
-    graphical.par$inference.par = NULL
-    graphical.par$bs.inference = F
-    if((!is.null(input$vari1)&&
-        !is.null(input$vari2))&&
-       (input$vari1%in%colnames(get.data.set())&&
-        (input$vari2%in%colnames(get.data.set())||
-         input$vari2%in%'none'))){
-      if((!is.null(input$confidence_interval1)&&
-          input$confidence_interval1)||
-         (!is.null(input$comparison_interval1)&&
-          input$comparison_interval1)){
-        if(!is.null(input$confidence_interval1)&&
-           input$confidence_interval1){
-          intervals = c(intervals,"conf")
+    dafr <- get.data.set()
+    add_inference.check <- checkboxInput("add.inference",
+      label = "Add inference",
+      value = input$add.inference
+    )
+    mean_median.radio <- radioButtons("inference_parameter1",
+      label = "Parameter",
+      choices = c("Mean", "Median"),
+      selected = input$inference_parameter1,
+      inline = T
+    )
+    normal_bootstrap.radio <- radioButtons("inference_type1",
+      label = "Type of inference",
+      choices = c("Normal", "Bootstrap"),
+      selected = input$inference_type1,
+      inline = T
+    )
+    confidence.interval.check <- checkboxInput("confidence_interval1",
+      label = "Confidence interval",
+      value = input$confidence_interval1
+    )
+    comparison.interval.check <- checkboxInput("comparison_interval1",
+      label = "Comparison interval",
+      value = input$comparison_interval1
+    )
+    year12_bootstrap.radio <- radioButtons("inference_type2",
+      label = "Type of inference",
+      choices = c("Year 12", "Bootstrap"),
+      selected = input$inference_type2,
+      inline = T
+    )
+    intervals <- NULL
+    graphical.par$inference.par <- NULL
+    graphical.par$bs.inference <- F
+    if ((!is.null(input$vari1) &&
+      !is.null(input$vari2)) &&
+      (input$vari1 %in% colnames(get.data.set()) &&
+        (input$vari2 %in% colnames(get.data.set()) ||
+          input$vari2 %in% "none"))) {
+      if ((!is.null(input$confidence_interval1) &&
+        input$confidence_interval1) ||
+        (!is.null(input$comparison_interval1) &&
+          input$comparison_interval1)) {
+        if (!is.null(input$confidence_interval1) &&
+          input$confidence_interval1) {
+          intervals <- c(intervals, "conf")
         }
-        if(!is.null(input$comparison_interval1)&&
-           input$comparison_interval1){
-          intervals = c(intervals,"comp")
+        if (!is.null(input$comparison_interval1) &&
+          input$comparison_interval1) {
+          intervals <- c(intervals, "comp")
         }
-        if(!is.null(input$inference_parameter1)&&
-           input$inference_parameter1%in%"Mean"){
-          graphical.par$inference.par = "mean"
-        }else if(!is.null(input$inference_parameter1)&&
-                 input$inference_parameter1%in%"Median"){
-          graphical.par$inference.par = "median"
+        if (!is.null(input$inference_parameter1) &&
+          input$inference_parameter1 %in% "Mean") {
+          graphical.par$inference.par <- "mean"
+        } else if (!is.null(input$inference_parameter1) &&
+          input$inference_parameter1 %in% "Median") {
+          graphical.par$inference.par <- "median"
         }
-        if((!is.null(input$inference_type1)&&
-            input$inference_type1%in%"Bootstrap")||
-           (!is.null(input$inference_type2)&&
-            input$inference_type2%in%"Bootstrap")){
-          graphical.par$bs.inference = T
-        }else{
-          graphical.par$bs.inference = F
+        if ((!is.null(input$inference_type1) &&
+          input$inference_type1 %in% "Bootstrap") ||
+          (!is.null(input$inference_type2) &&
+            input$inference_type2 %in% "Bootstrap")) {
+          graphical.par$bs.inference <- T
+        } else {
+          graphical.par$bs.inference <- F
         }
       }
-      graphical.par$inference.type = intervals
+      graphical.par$inference.type <- intervals
       # vari1 = numeric; vari2 = numeric
-      if(!input$vari2%in%"none"&&
-         (class(dafr[,input$vari1])%in%"numeric"|
-          class(dafr[,input$vari1])%in%"integer")&&
-         (class(dafr[,input$vari2])%in%"numeric"|
-          class(dafr[,input$vari2])%in%"integer")){
-        ret = list(conditionalPanel("input.toggle_inference",
-                                    conditionalPanel("input.check_linear||
-                                                     input.check_quadratic||
-                                                     input.check_cubic||
-                                                     input.check_smoother",
-                                                     add_inference.check)))
+      if (!input$vari2 %in% "none" &&
+        (class(dafr[, input$vari1]) %in% "numeric" |
+          class(dafr[, input$vari1]) %in% "integer") &&
+        (class(dafr[, input$vari2]) %in% "numeric" |
+          class(dafr[, input$vari2]) %in% "integer")) {
+        ret <- list(conditionalPanel(
+          "input.toggle_inference",
+          conditionalPanel(
+            "input.check_linear||
+             input.check_quadratic||
+             input.check_cubic||
+             input.check_smoother",
+            add_inference.check
+          )
+        ))
         # vari1 = numeric; vari2 = factor or
         # vari1 = factor; vari2 = numeric
-      }else if(!input$vari2%in%"none"&&
-               (((class(dafr[,input$vari1])%in%"numeric"|
-                  class(dafr[,input$vari1])%in%"integer")&&
-                 (class(dafr[,input$vari2])%in%"factor"|
-                  class(dafr[,input$vari2])%in%"character"))||
-                ((class(dafr[,input$vari1])%in%"factor"|
-                  class(dafr[,input$vari1])%in%"character")&&
-                 (class(dafr[,input$vari2])%in%"numeric"|
-                  class(dafr[,input$vari2])%in%"integer")))){
-        ret = list(conditionalPanel("input.toggle_inference",
-                                    mean_median.radio,
-                                    conditionalPanel("input.inference_parameter1=='Mean'",
-                                                     normal_bootstrap.radio),
-                                    conditionalPanel("input.inference_parameter1=='Median'",
-                                                     year12_bootstrap.radio),
-                                    conditionalPanel("input.inference_parameter1=='Mean'||
-                                                     (input.inference_parameter1=='Median'&&
-                                                     input.inference_type2=='Bootstrap')",
-                                                     h5("Type of interval"),
-                                                     confidence.interval.check,
-                                                     comparison.interval.check))
-        )
+      } else if (!input$vari2 %in% "none" &&
+        (((class(dafr[, input$vari1]) %in% "numeric" |
+          class(dafr[, input$vari1]) %in% "integer") &&
+          (class(dafr[, input$vari2]) %in% "factor" |
+            class(dafr[, input$vari2]) %in% "character")) ||
+          ((class(dafr[, input$vari1]) %in% "factor" |
+            class(dafr[, input$vari1]) %in% "character") &&
+            (class(dafr[, input$vari2]) %in% "numeric" |
+              class(dafr[, input$vari2]) %in% "integer")))) {
+        ret <- list(conditionalPanel(
+          "input.toggle_inference",
+          mean_median.radio,
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'",
+            normal_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Median'",
+            year12_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'||
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
+            h5("Type of interval"),
+            confidence.interval.check,
+            comparison.interval.check
+          )
+        ))
         # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
-      }else if((!input$vari2%in%"none"&&
-                ((class(dafr[,input$vari1])%in%"factor"|
-                  class(dafr[,input$vari1])%in%"character")&&
-                 (class(dafr[,input$vari2])%in%"factor"|
-                  class(dafr[,input$vari2])%in%"character")))||
-               (input$vari2%in%"none"&&
-                (class(dafr[,input$vari1])%in%"factor"|
-                 class(dafr[,input$vari1])%in%"character"))){
-        ret = list(conditionalPanel("input.toggle_inference",
-                                    h5("Parameter"),helpText("Proportions"),
-                                    normal_bootstrap.radio,
-                                    h5("Type of interval"),
-                                    confidence.interval.check,
-                                    conditionalPanel("input.inference_type1=='Normal'",
-                                                     comparison.interval.check)))
+      } else if ((!input$vari2 %in% "none" &&
+        ((class(dafr[, input$vari1]) %in% "factor" |
+          class(dafr[, input$vari1]) %in% "character") &&
+          (class(dafr[, input$vari2]) %in% "factor" |
+            class(dafr[, input$vari2]) %in% "character"))) ||
+        (input$vari2 %in% "none" &&
+          (class(dafr[, input$vari1]) %in% "factor" |
+            class(dafr[, input$vari1]) %in% "character"))) {
+        ret <- list(conditionalPanel(
+          "input.toggle_inference",
+          h5("Parameter"), helpText("Proportions"),
+          normal_bootstrap.radio,
+          h5("Type of interval"),
+          confidence.interval.check,
+          conditionalPanel(
+            "input.inference_type1=='Normal'",
+            comparison.interval.check
+          )
+        ))
         # var1 = numeric; vari2 = none
-      }else if((input$vari2%in%"none"&&
-                (class(dafr[,input$vari1])%in%"numeric"|
-                 class(dafr[,input$vari1])%in%"integer"))){
-        ret = list(conditionalPanel("input.toggle_inference",
-                                    mean_median.radio,
-                                    conditionalPanel("input.inference_parameter1=='Mean'",
-                                                     normal_bootstrap.radio),
-                                    conditionalPanel("input.inference_parameter1=='Median'",
-                                                     year12_bootstrap.radio),
-                                    conditionalPanel("input.inference_parameter1=='Mean'||
-                                                     (input.inference_parameter1=='Median'&&
-                                                     input.inference_type2=='Bootstrap')",
-                                                     h5("Type of interval"),
-                                                     confidence.interval.check)))
+      } else if ((input$vari2 %in% "none" &&
+        (class(dafr[, input$vari1]) %in% "numeric" |
+          class(dafr[, input$vari1]) %in% "integer"))) {
+        ret <- list(conditionalPanel(
+          "input.toggle_inference",
+          mean_median.radio,
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'",
+            normal_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Median'",
+            year12_bootstrap.radio
+          ),
+          conditionalPanel(
+            "input.inference_parameter1=='Mean'||
+             (input.inference_parameter1=='Median'&&
+              input.inference_type2=='Bootstrap')",
+            h5("Type of interval"),
+            confidence.interval.check
+          )
+        ))
       }
     }
   })
   ret
 })
 
-output$old_advanced_options_panel = renderUI({
+output$old_advanced_options_panel <- renderUI({
   get.data.set()
-  ret = NULL
+  ret <- NULL
   isolate({
-    temp = list()
-    temp$x = get.data.set()[,input$vari1]
-    if(input$vari2%in%'none'){
-      temp$y = NULL
-    }else{
-      temp$y = get.data.set()[,input$vari2]
+    temp <- list()
+    temp$x <- get.data.set()[, input$vari1]
+    if (input$vari2 %in% "none") {
+      temp$y <- NULL
+    } else {
+      temp$y <- get.data.set()[, input$vari2]
     }
-    temp$plot = F
-    temp = try(do.call(iNZightPlots:::iNZightPlot,temp))
+    temp$plot <- F
+    temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
     ##################################################################
     #    large.sample = T
-    large.sample = search.name(temp,"largesample")[[1]]
-    if(is.null(large.sample)){
-      large.sample=F
+    large.sample <- search.name(temp, "largesample")[[1]]
+    if (is.null(large.sample)) {
+      large.sample <- F
     }
     ##################################################################
-    if((!is.null(input$vari1)&&
-        !is.null(input$vari2))&&
-       (input$vari1%in%colnames(get.data.set())&&
-        (input$vari2%in%"none"|
-         input$vari2%in%colnames(get.data.set()))))
+    if ((!is.null(input$vari1) &&
+      !is.null(input$vari2)) &&
+      (input$vari1 %in% colnames(get.data.set()) &&
+        (input$vari2 %in% "none" |
+          input$vari2 %in% colnames(get.data.set())))) {
       # vari = factor, vari = none
-      if(input$vari2%in%"none"&&
-         (class(get.data.set()[,input$vari1])%in%"factor"|
-          class(get.data.set()[,input$vari1])%in%"character")){
-        ret = selectInput(inputId = "advanced_options",
-                          label = "Options",
-                          choices = c('Code more variables',
-                                      'Change plot appearance',
-                                      'Customize labels',
-                                      'Adjust number of Bars'),
-                          selected = 'Change plot appearance')
+      if (input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character")) {
+        ret <- selectInput(
+          inputId = "advanced_options",
+          label = "Options",
+          choices = c(
+            "Code more variables",
+            "Change plot appearance",
+            "Customize labels",
+            "Adjust number of Bars"
+          ),
+          selected = "Change plot appearance"
+        )
         # vari1 = factor, vari2 = factor
-      }else if(!input$vari2%in%"none"&&
-               ((class(get.data.set()[,input$vari1])%in%"factor"|
-                 class(get.data.set()[,input$vari1])%in%"character")&&
-                (class(get.data.set()[,input$vari2])%in%"factor"|
-                 class(get.data.set()[,input$vari2])%in%"character"))){
-        ret = selectInput(inputId = "advanced_options",
-                          label = "Options",
-                          choices = c('Change plot appearance',
-                                      'Customize labels',
-                                      'Adjust number of Bars'),
-                          selected = 'Change plot appearance')
+      } else if (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "factor" |
+          class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "factor" |
+            class(get.data.set()[, input$vari2]) %in% "character"))) {
+        ret <- selectInput(
+          inputId = "advanced_options",
+          label = "Options",
+          choices = c(
+            "Change plot appearance",
+            "Customize labels",
+            "Adjust number of Bars"
+          ),
+          selected = "Change plot appearance"
+        )
         # vari1 = numeric , vari2 = none or
         # vari1 = numeric , vari2 = factor or
         # vari1 = factor , vari2 = numeric
-      }else if((input$vari2%in%"none"&&
-                (class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer"))||
-               (!input$vari2%in%"none"&&
-                (class(get.data.set()[,input$vari1])%in%"factor"|
-                 class(get.data.set()[,input$vari1])%in%"character")&&
-                (class(get.data.set()[,input$vari2])%in%"integer"|
-                 class(get.data.set()[,input$vari2])%in%"numeric"))||
-               (!input$vari2%in%"none"&&
-                (class(get.data.set()[,input$vari1])%in%"integer"|
-                 class(get.data.set()[,input$vari1])%in%"numeric")&&
-                (class(get.data.set()[,input$vari2])%in%"character"|
-                 class(get.data.set()[,input$vari2])%in%"factor"))){
-        ret = selectInput(inputId = "advanced_options",
-                          label = "Options",
-                          choices = c('Code more variables',
-                                      'Change plot appearance',
-                                      'Identify points',
-                                      'Customize labels',
-                                      'Adjust axis limits'),
-                          selected = 'Change plot appearance')
-        if(large.sample){
-          ret = selectInput(inputId = "advanced_options",
-                            label = "Options",
-                            choices = c('Change plot appearance',
-                                        'Customize labels',
-                                        'Adjust axis limits'),
-                            selected = 'Change plot appearance')
+      } else if ((input$vari2 %in% "none" &&
+        (class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer")) ||
+        (!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "factor" |
+            class(get.data.set()[, input$vari1]) %in% "character") &&
+          (class(get.data.set()[, input$vari2]) %in% "integer" |
+            class(get.data.set()[, input$vari2]) %in% "numeric")) ||
+        (!input$vari2 %in% "none" &&
+          (class(get.data.set()[, input$vari1]) %in% "integer" |
+            class(get.data.set()[, input$vari1]) %in% "numeric") &&
+          (class(get.data.set()[, input$vari2]) %in% "character" |
+            class(get.data.set()[, input$vari2]) %in% "factor"))) {
+        ret <- selectInput(
+          inputId = "advanced_options",
+          label = "Options",
+          choices = c(
+            "Code more variables",
+            "Change plot appearance",
+            "Identify points",
+            "Customize labels",
+            "Adjust axis limits"
+          ),
+          selected = "Change plot appearance"
+        )
+        if (large.sample) {
+          ret <- selectInput(
+            inputId = "advanced_options",
+            label = "Options",
+            choices = c(
+              "Change plot appearance",
+              "Customize labels",
+              "Adjust axis limits"
+            ),
+            selected = "Change plot appearance"
+          )
         }
         # vari1 = numeric , vari2 = numeric
-      }else if(!input$vari2%in%"none"&&
-               ((class(get.data.set()[,input$vari1])%in%"numeric"|
-                 class(get.data.set()[,input$vari1])%in%"integer")&&
-                (class(get.data.set()[,input$vari2])%in%"numeric"|
-                 class(get.data.set()[,input$vari2])%in%"integer"))){
-        ret = selectInput(inputId = "advanced_options",
-                          label = "Options",
-                          choices = c('Code more variables',
-                                      'Add trend curves',
-                                      'Add x=y line',
-                                      'Add a jitter',
-                                      'Add rugs',
-                                      'Join points by line',
-                                      'Change plot appearance',
-                                      'Identify points',
-                                      'Customize labels',
-                                      'Adjust axis limits'),
-                          selected = 'Change plot appearance')
-        if(large.sample){
-          ret = selectInput(inputId = "advanced_options",
-                            label = "Options",
-                            choices = c('Add trend curves',
-                                        'Add x=y line',
-                                        'Change plot appearance',
-                                        'Customize labels',
-                                        'Adjust axis limits'),
-                            selected = 'Change plot appearance')
+      } else if (!input$vari2 %in% "none" &&
+        ((class(get.data.set()[, input$vari1]) %in% "numeric" |
+          class(get.data.set()[, input$vari1]) %in% "integer") &&
+          (class(get.data.set()[, input$vari2]) %in% "numeric" |
+            class(get.data.set()[, input$vari2]) %in% "integer"))) {
+        ret <- selectInput(
+          inputId = "advanced_options",
+          label = "Options",
+          choices = c(
+            "Code more variables",
+            "Add trend curves",
+            "Add x=y line",
+            "Add a jitter",
+            "Add rugs",
+            "Join points by line",
+            "Change plot appearance",
+            "Identify points",
+            "Customize labels",
+            "Adjust axis limits"
+          ),
+          selected = "Change plot appearance"
+        )
+        if (large.sample) {
+          ret <- selectInput(
+            inputId = "advanced_options",
+            label = "Options",
+            choices = c(
+              "Add trend curves",
+              "Add x=y line",
+              "Change plot appearance",
+              "Customize labels",
+              "Adjust axis limits"
+            ),
+            selected = "Change plot appearance"
+          )
         }
       }
+    }
   })
   list(ret)
 })
@@ -6986,42 +7711,40 @@ output$old_advanced_options_panel = renderUI({
 
 ## switch variables selected
 observeEvent(input$switch1, {
-  if(!is.null(input$vari2) && input$vari2 != "none") {
-
-    var1.old = input$vari1
-    var2.old = input$vari2
+  if (!is.null(input$vari2) && input$vari2 != "none") {
+    var1.old <- input$vari1
+    var2.old <- input$vari2
 
     updateSelectInput(session, "vari1", selected = var2.old)
 
-    ch  = colnames(vis.data())
-    #      if(!is.null(input$vari1) && input$vari1 %in% ch){
-    ch  = ch[-which(ch %in% var2.old)]
-    #      }
-    ch = c("none", ch)
+    ch <- colnames(vis.data())
+    ch <- ch[-which(ch %in% var2.old)]
+    ch <- c("none", ch)
 
-    updateSelectInput(session,"vari2", choices = ch, selected = var1.old)
+    updateSelectInput(session, "vari2", choices = ch, selected = var1.old)
   }
 })
 
 observeEvent(input$switch2, {
-  if((!is.null(input$vari2) && input$vari2 != "none") ||
-      (!is.null(input$subs1) && input$subs1 != "none")) {
-    var2.old = input$vari2
-    var3.old = input$subs1
+  if ((!is.null(input$vari2) && input$vari2 != "none") ||
+    (!is.null(input$subs1) && input$subs1 != "none")) {
+    var2.old <- input$vari2
+    var3.old <- input$subs1
 
     updateSelectInput(session, "vari2", selected = var3.old)
 
-    ch  = colnames(vis.data())
-    ch  = ch[-which(ch %in% input$vari1)]
-    if(!is.null(var3.old) && var3.old != "none")
-      ch  = ch[-which(ch %in% var3.old)]
+    ch <- colnames(vis.data())
+    ch <- ch[-which(ch %in% input$vari1)]
+    if (!is.null(var3.old) && var3.old != "none") {
+      ch <- ch[-which(ch %in% var3.old)]
+    }
     updateSelectInput(session, "subs1", choices = ch, selected = var2.old)
   }
 })
 
 observeEvent(input$switch3, {
-  var3.old = input$subs1
-  var4.old = input$subs2
+  var3.old <- input$subs1
+  var4.old <- input$subs2
 
   updateSelectInput(session, "subs1", selected = var4.old)
   updateSelectInput(session, "subs2", selected = var3.old)
@@ -7035,9 +7758,9 @@ observe({
   input$hideSidebar
   input$hideSidebar2
   if ((!is.null(input$hideSidebar) && input$hideSidebar > 0) ||
-      (!is.null(input$hideSidebar2) && input$hideSidebar2 > 0)) {
+    (!is.null(input$hideSidebar2) && input$hideSidebar2 > 0)) {
     isolate({
-      graphical.par$showsidebar = FALSE
+      graphical.par$showsidebar <- FALSE
     })
   }
 })
@@ -7050,21 +7773,22 @@ observe({
   input$showSidebar3
   input$showSidebar4
   if ((!is.null(input$showSidebar) && input$showSidebar > 0) ||
-      (!is.null(input$showSidebar2) && input$showSidebar2 > 0) ||
-      (!is.null(input$showSidebar3) && input$showSidebar3 > 0) ||
-      (!is.null(input$showSidebar4) && input$showSidebar4 > 0)) {
+    (!is.null(input$showSidebar2) && input$showSidebar2 > 0) ||
+    (!is.null(input$showSidebar3) && input$showSidebar3 > 0) ||
+    (!is.null(input$showSidebar4) && input$showSidebar4 > 0)) {
     isolate({
-      graphical.par$showsidebar = TRUE
+      graphical.par$showsidebar <- TRUE
     })
   }
 })
 
 
 output$showsidebar <- reactive({
-  if (graphical.par$showsidebar)
+  if (graphical.par$showsidebar) {
     1
-  else
+  } else {
     0
+  }
 })
 outputOptions(output, "showsidebar", suspendWhenHidden = FALSE)
 
@@ -7104,72 +7828,74 @@ observeEvent(input$showSidebar4, {
 ## refresh the plot after click the "refresh" button
 observe({
   input$refreshplot
-  #  if (!is.null(input$hideSidebar) && input$hideSidebar > 0) {
   isolate({
-    output$visualize.plot = renderPlot({
+    output$visualize.plot <- renderPlot({
       isolate({
         # some of the graphical parameters need
         # to be reminded what there default
         # values are
-        if(is.null(graphical.par$cex.dotpt)){
-          graphical.par$cex.dotpt  = 0.5
+        if (is.null(graphical.par$cex.dotpt)) {
+          graphical.par$cex.dotpt <- 0.5
         }
-        if(is.null(graphical.par$alpha)){
-          graphical.par$alpha  = 1
+        if (is.null(graphical.par$alpha)) {
+          graphical.par$alpha <- 1
         }
-        if(is.null(graphical.par$scatter.grid.bins)){
-          graphical.par$scatter.grid.bins  = 50
+        if (is.null(graphical.par$scatter.grid.bins)) {
+          graphical.par$scatter.grid.bins <- 50
         }
       })
 
       # plot it
       if (!is.null(vis.par())) {
-        dafr = get.data.set()
-        if(is.numeric(vis.data()[[plot.par$x]]) &&
-           !is.null(plot.par$y) &&
-           is.numeric(vis.data()[[plot.par$y]]) &&
-           !is.null(plot.par$x)){
-          temp = vis.par()
+        dafr <- get.data.set()
+        if (is.numeric(vis.data()[[plot.par$x]]) &&
+          !is.null(plot.par$y) &&
+          is.numeric(vis.data()[[plot.par$y]]) &&
+          !is.null(plot.par$x)) {
+          temp <- vis.par()
 
-          temp$trend.parallel = graphical.par$trend.parallel
-          temp.x = temp$x
-          temp$x=temp$y
-          temp$y=temp.x
-          temp.varnames.x = temp$varnames$x
-          temp$varnames$x = temp$varnames$y
-          temp$varnames$y = temp.varnames.x
+          temp$trend.parallel <- graphical.par$trend.parallel
+          temp.x <- temp$x
+          temp$x <- temp$y
+          temp$y <- temp.x
+          temp.varnames.x <- temp$varnames$x
+          temp$varnames$x <- temp$varnames$y
+          temp$varnames$y <- temp.varnames.x
 
-          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-
-            tryCatch({plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot, temp)
-            }, warning = function(w) {
-              print(w)
-            }, error = function(e) {
-              print(e)
-            }, finally = {})
-          }else{
-            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot, temp))
-          }
-        }else{
-          if(!is.null(parseQueryString(session$clientData$url_search)$debug)&&
-             tolower(parseQueryString(session$clientData$url_search)$debug)%in%"true"){
-
+          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
             tryCatch({
-              plot.ret.para$parameters = do.call(iNZightPlots:::iNZightPlot,vis.par())
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, temp)
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
-          }else{
-            plot.ret.para$parameters = try(do.call(iNZightPlots:::iNZightPlot,vis.par()))
+          } else {
+            plot.ret.para$parameters <- try(do.call(
+              iNZightPlots:::iNZightPlot, temp))
+          }
+        } else {
+          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
+            tryCatch({
+              plot.ret.para$parameters <- do.call(
+                iNZightPlots:::iNZightPlot, vis.par())
+            }, warning = function(w) {
+              print(w)
+            }, error = function(e) {
+              print(e)
+            }, finally = {})
+          } else {
+            plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
           }
         }
       }
     })
   })
-  #  }
 })
 
 
@@ -7181,20 +7907,21 @@ observe({
 observe({
   input$get_code_plot
   isolate({
-    if(input$get_code_plot > 0 && !is.null(input$get_code_plot)){
-      if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))){
-        tryCatch({code = paste0(attr(plot.ret.para$parameters, "code"), collapse = "\n\n")
+    if (input$get_code_plot > 0 && !is.null(input$get_code_plot)) {
+      if (grepl("^gg_", attr(plot.ret.para$parameters, "plottype"))) {
+        tryCatch({
+          code <- paste0(attr(plot.ret.para$parameters, "code"), collapse = "\n\n")
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
-        code = gsub("data_name", code.save$name, code)
-        code.save$variable = c(code.save$variable, list(c("\n", code, "\n")))
+        code <- gsub("data_name", code.save$name, code)
+        code.save$variable <- c(code.save$variable, list(c("\n", code, "\n")))
       }
     }
   })
 })
 
 
-source("panels/C1_Visualize/vit.R", local=T)
+source("panels/C1_Visualize/vit.R", local = T)

@@ -14,7 +14,8 @@ about.panel.ui <- function(lite.version, lite.update) {
   ##  (rougly) centred.
   fixedPage(
     column(
-      style = "font-size: 20px; line-height: 1.4; max-width: 40em; margin-bottom: 6em;",
+      style = "font-size: 20px; line-height: 1.4; max-width: 40em;
+      margin-bottom: 6em;",
       width = 12, offset = 0,
       img(src = "/inzight_lite_logo_web.svg", height = 80),
       br(), br(),
@@ -27,15 +28,20 @@ about.panel.ui <- function(lite.version, lite.update) {
       ##  "lite.update".
       if (lite.version != "" || lite.update != "") {
         p_args <- list()
-        if (lite.version != "") { 
-          ver = ifelse(is.null(session$userData$LITE_VERSION), "", session$userData$LITE_VERSION)
+        if (lite.version != "") {
+          ver <- ifelse(is.null(session$userData$LITE_VERSION), "",
+            session$userData$LITE_VERSION
+          )
           p_args <- c(
-            p_args, 
+            p_args,
             list(
-              paste0("iNZight Lite Version: "), 
-              em(lite.version), 
-              if (!is.null(session$userData$LITE_VERSION)) 
-                paste0("(configured for ", ver, ")") else NULL,
+              paste0("iNZight Lite Version: "),
+              em(lite.version),
+              if (!is.null(session$userData$LITE_VERSION)) {
+                paste0("(configured for ", ver, ")")
+              } else {
+                NULL
+              },
               br()
             )
           )
@@ -44,7 +50,10 @@ about.panel.ui <- function(lite.version, lite.update) {
           p_args <- c(p_args, list("Last updated: ", em(lite.update)))
         }
 
-        change_log <- list(br(), actionLink(inputId = "change_log_link", label = "CHANGELOG"))
+        change_log <- list(
+          br(),
+          actionLink(inputId = "change_log_link", label = "CHANGELOG")
+        )
         p_args <- c(
           p_args,
           change_log,
@@ -86,12 +95,15 @@ about.panel.ui <- function(lite.version, lite.update) {
                 </div>
                 <div>
                   <!-- Copyright Statement -->
-                  Copyright 2015-{as.integer(format(Sys.Date(), "%Y"))} iNZight | All Rights Reserved
+                  Copyright 2015-{as.integer(format(Sys.Date(), "%Y"))}
+                  iNZight | All Rights Reserved
                 </div>
 		          </div>
 
               <div class="footer-sponsor-group">
-                <div class="footer-sponsor-label">Active development supported by</div>
+                <div class="footer-sponsor-label">
+                  Active development supported by
+                </div>
                 <!-- Links to sponsors -->
                 <div class="footer-sponsors">
                   <a href = "https://stat.auckland.ac.nz">

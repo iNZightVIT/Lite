@@ -10,7 +10,7 @@ Time series analysis is useful, as it allows one to detect patterns from the pas
 
 To use the Time Series module in iNZight Lite, one must first choose a dataset with a well-defined "time" column. iNZight Lite can currently only handle datasets with a monthly/yearly time format (additional format capabilities will be added on throughout 2015).
 
-The module is divided up into two distinct vertical *panels*:
+The module is divided up into two distinct vertical _panels_:
 
 - Panel 1: User Input (Left)
 - Panel 2: Statistical Output (Right)
@@ -22,7 +22,7 @@ This panel consists of a collection of user **inputs**:
 
 1. **Time Information**: You must either choose a time variable from a list of all the variables (or column names) from the selected dataset, or define one manually. If you time variable is not in the format the iNZight Lite recognises, then you must supply the time information manually (see https://www.stat.auckland.ac.nz/~wild/iNZight/faq.php#time-series).
 
-2. **Seasonal Pattern**: You must choose how you would like the seasonal pattern to be defined. It is standard to use the multiplicative scale here. For more detailed information on what seasonal patterns mean, please refer to the *Time series decomposition* section of https://www.otexts.org/fpp/6/1.
+2. **Seasonal Pattern**: You must choose how you would like the seasonal pattern to be defined. It is standard to use the multiplicative scale here. For more detailed information on what seasonal patterns mean, please refer to the _Time series decomposition_ section of https://www.otexts.org/fpp/6/1.
 
 3. **Series Variables**: Finally, you need to select variables to plot over time. If multiple variables are selected, the output panel automatically displays a multiple-series plot. Otherwise, a single-series plot will be displayed.
 
@@ -46,4 +46,3 @@ This panel consists of a collection of tabs that display statistical output, eit
 6. **Summary** displays a statistical summary (typically a confidence interval) of the chosen variable.
 
 <br>
-

@@ -1,6 +1,6 @@
-###-----------------------------------------------------###
+### -----------------------------------------------------###
 ###  User Interface for the "Multivariate" Module  ###
-###-----------------------------------------------------###
+### -----------------------------------------------------###
 ###
 ###
 ###  The UI is divided into two parts:
@@ -12,51 +12,56 @@
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
-###----------------###
+### ----------------###
 ###  Sidebar Panel ###
-###----------------###
+### ----------------###
 
 
-multivariate.sidebarPanel <- function(){
-  sidebarPanelUI = list(
+multivariate.sidebarPanel <- function() {
+  sidebarPanelUI <- list(
     useShinyalert(),
     useShinyjs(),
     fluidRow(
-      column(12,
-             selectInput("multivarate.method", label = h5(strong("Method:")), choices =  c(
-               "Pairs Plot"                          = "pairs",
-               "Correlation Pairs  Plot"             = "pairs_corr",
-               "Parallel Coordinates"                = "pcp",
-               "Principal Components Analysis"       = "pca",
-               "Multidimensional Scaling"            = "mds"# ,
-               # "Non-Metric Multidimensional Scaling" = "nmds"
-             ), selected = "pairs_corr",
-             selectize = FALSE),
-             uiOutput("multivarate.widgets")
+      column(
+        12,
+        selectInput("multivarate.method",
+          label = h5(strong("Method:")), choices = c(
+            "Pairs Plot"                          = "pairs",
+            "Correlation Pairs  Plot"             = "pairs_corr",
+            "Parallel Coordinates"                = "pcp",
+            "Principal Components Analysis"       = "pca",
+            "Multidimensional Scaling"            = "mds" # ,
+            # "Non-Metric Multidimensional Scaling" = "nmds"
+          ), selected = "pairs_corr",
+          selectize = FALSE
+        ),
+        uiOutput("multivarate.widgets")
+      )
     )
-  ))## end of list
+  ) ## end of list
 }
 
 ### now, we set up the main panel
-multivariate.mainPanel = function(){
-  mainPanelUI = list(
+multivariate.mainPanel <- function() {
+  mainPanelUI <- list(
     uiOutput("multivarate.ui.main")
-  )## end of mainPanelUI
+  ) ## end of mainPanelUI
 }
 
-###-------------------###
+### -------------------###
 ###  Multivariate UI  ###
-###-------------------###
+### -------------------###
 
 ###  We combine the 2 sidebarPanel() and 2 mainPanel() functions to
 ###  complete the UI for the Mixed Model module.
 
-multivariate.panel.ui = function(data.set) {
-  fluidPage(  
+multivariate.panel.ui <- function(data.set) {
+  fluidPage(
     if (is.null(data.set)) {
       fluidRow(
         includeMarkdown(
-          "panels/F7_Multivariate/4_Multivariate-panel-null.md")
+          "panels/F7_Multivariate/4_Multivariate-panel-null.md"
+        )
       )
     } else {
       fluidRow(
@@ -66,8 +71,3 @@ multivariate.panel.ui = function(data.set) {
     }
   )
 }
-
-
-
-
-

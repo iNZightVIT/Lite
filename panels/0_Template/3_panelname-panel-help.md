@@ -13,7 +13,6 @@ Enter description here
 
 <br>
 
-
 If you have any queries or suggestions, please e-mail Author (<author@mail.com>).
 
 <em><p align = "right"> Last Updated: Month Day, Year </p></em>
