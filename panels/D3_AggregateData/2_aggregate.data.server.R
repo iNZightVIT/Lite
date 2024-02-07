@@ -67,8 +67,9 @@ observe({
 
       if (length(vars) > 0 &
         length(methods) > 0 & !is.null(get.data.set())) {
-        temp <- iNZightTools::aggregateData(get.data.set(),
-          vars = unique(vars),
+        temp <- iNZightTools::aggregate_data(
+          get.data.set(),
+          group_vars = unique(vars),
           summaries = methods
         )
         if (!is.null(temp)) {

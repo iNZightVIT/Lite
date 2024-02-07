@@ -82,7 +82,7 @@ observe({
       }
     }
     if (!is.null(vars)) {
-      temp <- iNZightTools::sortVars(get.data.set(), vars, sort.type)
+      temp <- iNZightTools::sort_vars(get.data.set(), vars, sort.type)
       if (!is.null(temp)) {
         ## save code
         code.save$dataname <- paste(code.save$name, "sorted", sep = ".")

@@ -107,7 +107,7 @@ observe({
         if (!is.null(input$convert_datestimes_newname) &&
           !grepl("^\\s*$", input$convert_datestimes_newname)) {
           name <- input$convert_datestimes_newname
-
+          # TODO:
           data <- tryCatch(
             data.frame(
               Converted = iNZightTools::convert_to_datetime(
@@ -161,7 +161,7 @@ observe({
         if (!is.null(input$convert_datestimes_newname) &&
           !grepl("^\\s*$", input$convert_datestimes_newname)) {
           name <- input$convert_datestimes_newname
-
+          # TODO: 
           data <- iNZightTools::convert_to_datetime(
             get.data.set(), factorname, convname, name
           )
