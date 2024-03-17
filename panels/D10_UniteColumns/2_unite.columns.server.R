@@ -33,7 +33,6 @@ observe({
         input$name_unite_columns
       )
       sep <- input$sep_unite_columns
-      # TODO:
       temp <- iNZightTools::combine_vars(
         data = get.data.set(),
         vars = col,
@@ -77,7 +76,6 @@ observe({
         input$name_unite_columns
       )
       sep <- input$sep_unite_columns
-      # TODO: 
       temp <- iNZightTools::combine_vars(
         data = get.data.set(),
         vars = col,

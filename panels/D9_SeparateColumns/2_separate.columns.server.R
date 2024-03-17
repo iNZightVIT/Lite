@@ -188,7 +188,7 @@ observe({
             
             output$previewseparatecolumns.table <- renderDT(
               {
-                NULL
+                temp
               },
               options = list(
                 lengthMenu = c(5, 30, 50), pageLength = 5,
@@ -250,7 +250,7 @@ observe({
 
 output$separatecolumns.table <- renderDT(
   {
-    values$data.sample
+    values$data.restore[1:5, ]
   },
   options = list(
     lengthMenu = c(5, 30, 50), pageLength = 5,
