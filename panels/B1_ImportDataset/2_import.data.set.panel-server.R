@@ -422,11 +422,24 @@ observeEvent(input$confirm_import, {
     values$data.type <- preview_data$ext
     updatePanel$doit <- updatePanel$doit + 1
     values$data.restore <<- get.data.set()
-    temp.name <- make.names(tools::file_path_sans_ext(input$files[1, "name"]))
-
-    if (length(temp.name) > 1) {
-      temp.name <- temp.name[1:(length(temp.name) - 1)]
+    
+    # url import
+    if (input$URLtext != "") {
+      temp.name = strsplit(input$URLtext, "/")[[1]]
+      temp.name = temp.name[length(temp.name)]
+      # remove ext
+      temp.name = gsub("[.][^.]+$", "", temp.name)
+      # sub all punct to underscore
+      temp.name = gsub("[[:punct:]]", "_", temp.name)
+      temp.name = tolower(temp.name)
+    } else {
+      temp.name <- make.names(tools::file_path_sans_ext(input$files[1, "name"]))
+      
+      if (length(temp.name) > 1) {
+        temp.name <- temp.name[1:(length(temp.name) - 1)]
+      }
     }
+
     values$data.name <- temp.name
 
     # setting success status to show "Import sucessful" text
