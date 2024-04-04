@@ -38,18 +38,7 @@ about.panel.ui <- function(lite.version, lite.update) {
             list(
               paste0("iNZight Lite Version: "),
               em(lite.version),
-              if (!is.null(session$clientData$hostname)) {
-                if (session$clientData$hostname == "lite-staging.inzight.nz") {
-                  em("(development build, may be unstable)")
-                } else if (session$clientData$hostname == "lite-prod.inzight.nz") {
-                  em("(back-up build, limited resources)")
-                } else {
-                  NULL
-                }
-              } else {
-                NULL
-              },
-              session$clientData$hostname,
+              session$userData$BUILD_INFO,
               if (!is.null(session$userData$LITE_VERSION)) {
                 paste0("(configured for ", ver, ")")
               } else {
