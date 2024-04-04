@@ -10,6 +10,7 @@
 ###  * Note: This file is to be sourced locally within "server.R" *
 
 about.panel.ui <- function(lite.version, lite.update) {
+  print("Host: ", session$clientData$hostname)
   ##  We manually set the page width to be 10 columns so that it looks
   ##  (rougly) centred.
   fixedPage(
@@ -37,11 +38,17 @@ about.panel.ui <- function(lite.version, lite.update) {
             list(
               paste0("iNZight Lite Version: "),
               em(lite.version),
-              switch(session$clientData$hostname,
-                "lite-staging.inzight.nz" = "<em>(development build, may be unstable)</em>",
-                "lite-prod.inzight.nz" = "<em>(back-up build, limited resources)</em>",
-                ""
-              ),
+              if (!is.null(session$clientData$hostname)) {
+                if (session$clientData$hostname == "lite-staging.inzight.nz") {
+                  em("(development build, may be unstable)")
+                } else if (session$clientData$hostname == "lite-prod.inzight.nz") {
+                  em("(back-up build, limited resources)")
+                } else {
+                  NULL
+                }
+              } else {
+                NULL
+              },
               if (!is.null(session$userData$LITE_VERSION)) {
                 paste0("(configured for ", ver, ")")
               } else {
