@@ -58,8 +58,8 @@ shinyServer(function(input, output, session) {
   })
 
   session$userData$BUILD_INFO <- ""
-  if (!is.null(session$clientData$hostname)) {
-    session$userData$BUILD_INFO <- switch(session$clientData$hostname,
+  if (!is.null(session$clientData$url_hostname)) {
+    session$userData$BUILD_INFO <- switch(session$clientData$url_hostname,
       "lite-staging.inzight.nz" = " [Development build]",
       "lite-prod.inzight.nz" = " [Back-up build]",
       ""
