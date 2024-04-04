@@ -37,6 +37,7 @@ about.panel.ui <- function(lite.version, lite.update) {
             list(
               paste0("iNZight Lite Version: "),
               em(lite.version),
+              session$userData$BUILD_INFO,
               if (!is.null(session$userData$LITE_VERSION)) {
                 paste0("(configured for ", ver, ")")
               } else {

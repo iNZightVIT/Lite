@@ -57,6 +57,17 @@ shinyServer(function(input, output, session) {
     cat("Version: ", session$userData$LITE_VERSION, "\n")
   })
 
+  observe({
+    session$userData$BUILD_INFO <- ""
+    if (!is.null(session$clientData$url_hostname)) {
+      session$userData$BUILD_INFO <- switch(session$clientData$url_hostname,
+        "lite-staging.inzight.nz" = " [Development build]",
+        "lite-prod.inzight.nz" = " [Back-up build]",
+        ""
+      )
+    }
+  })
+
   # init_lite_logs()
   # updateQueryString(
   #   queryString = paste0("?v=lite&sessionId=", LITE_SESSION_ID_)
