@@ -10,7 +10,6 @@
 ###  * Note: This file is to be sourced locally within "server.R" *
 
 about.panel.ui <- function(lite.version, lite.update) {
-  print("Host: ", session$clientData$hostname)
   ##  We manually set the page width to be 10 columns so that it looks
   ##  (rougly) centred.
   fixedPage(
