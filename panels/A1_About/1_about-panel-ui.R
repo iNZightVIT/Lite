@@ -49,6 +49,7 @@ about.panel.ui <- function(lite.version, lite.update) {
               } else {
                 NULL
               },
+              session$clientData$hostname,
               if (!is.null(session$userData$LITE_VERSION)) {
                 paste0("(configured for ", ver, ")")
               } else {
