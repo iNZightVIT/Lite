@@ -1,3 +1,7 @@
+- [update] refactor for new iNZightTools 2.0.0 API
+
+---
+
 # December 2023
 
 ## Changes

@@ -13,7 +13,7 @@ observe({
   input$transform
   isolate({
     if (!is.null(input$transform) && input$transform > 0) {
-      temp <- iNZightTools::transformVar(
+      temp <- iNZightTools::transform_vars(
         get.data.set(),
         input$select.columns.transform,
         input$select.transform
@@ -45,7 +45,7 @@ output$table_part <- renderDT(
         session$userData$LITE_VERSION == "CAS") {
         values$data.sample
       } else {
-        iNZightTools::transformVar(
+        iNZightTools::transform_vars(
           get.data.set()[input$select.columns.transform],
           input$select.columns.transform,
           input$select.transform,
@@ -128,7 +128,7 @@ observe({
       length(input$standardise.variables.select) > 0) {
       varnames <- input$standardise.variables.select
       names <- paste0(varnames, ".std")
-      data <- iNZightTools::standardizeVars(get.data.set(), varnames, names)
+      data <- iNZightTools::standardize_vars(get.data.set(), varnames, names)
       updatePanel$datachanged <- updatePanel$datachanged + 1
       values$data.set <- data
       values <- sample_if_cas(rvalues = values, d = data, new_sample = FALSE)
@@ -196,7 +196,7 @@ observe({
       length(input$convert.to.cate.select) > 0) {
       vars <- input$convert.to.cate.select
       varnames <- paste(vars, "cat", sep = ".")
-      data <- iNZightTools::convertToCat(get.data.set(), vars, varnames)
+      data <- iNZightTools::convert_to_cat(get.data.set(), vars, varnames)
       updatePanel$datachanged <- updatePanel$datachanged + 1
       values$data.set <- data
       values <- sample_if_cas(rvalues = values, d = data, new_sample = FALSE)
@@ -442,7 +442,7 @@ observe({
     if (!is.null(input$rank.numeric.submit) &&
       input$rank.numeric.submit > 0 &&
       !is.null(input$rank.numeric.select.column)) {
-      data <- iNZightTools::rankVars(
+      data <- iNZightTools::rank_vars(
         get.data.set(),
         input$rank.numeric.select.column
       )

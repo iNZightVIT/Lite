@@ -101,14 +101,14 @@ observeEvent(input$import_to_join, {
 
 observe({
   input$preview_join_button
-  isolate({
+  # isolate({
     join_method <- "left_join"
     left_col <- ""
     right_col <- ""
     left_name <- "Orig"
     right_name <- "New"
     d1 <- tryCatch(
-      joinData(),
+      join_data(),
       error = function(e) {
         if (e$message ==
           "`by` required, because the data sources have no common variables") {
@@ -123,12 +123,14 @@ observe({
     if (!is.null(mergejoin$data.to.join)) {
       if (!is.null(input$select_join_methods) &&
         length(input$select_join_methods) > 0) {
+        browser()
+        
         join_method <- switch(input$select_join_methods,
-          "Inner Join" = "inner_join",
-          "Left Join" = "left_join",
-          "Full Join" = "full_join",
-          "Semi Join" = "semi_join",
-          "Anti Join" = "anti_join"
+          "Inner Join" = "inner",
+          "Left Join" = "left",
+          "Full Join" = "full",
+          "Semi Join" = "semi",
+          "Anti Join" = "anti"
         )
       }
       if (!is.null(input$dup_original) && length(input$dup_original) > 0) {
@@ -154,9 +156,16 @@ observe({
       if (orig_type == new_type | orig_type == "character" &
         new_type == "factor" | orig_type == "factor" &
         new_type == "character") {
-        temp.join <- iNZightTools::joindata(
-          data, newdata, left_col, right_col, join_method,
-          left_name, right_name
+            # TODO:
+        
+        temp.join <- iNZightTools::join_data(
+          data_l = data, 
+          data_r = newdata, 
+          left_col, 
+        #   right_col, 
+          how = join_method,
+          suffix_l = left_name, 
+          suffix_r = right_name
         )
 
         data.set <- as.data.frame(temp.join)
@@ -185,21 +194,21 @@ observe({
         })
       }
     }
-  })
+  # })
 })
 
 
 
 observe({
   input$join_data_button
-  isolate({
+  # isolate({
     join_method <- "left_join"
     left_col <- ""
     right_col <- ""
     left_name <- "Orig"
     right_name <- "New"
     d1 <- tryCatch(
-      joinData(),
+      join_data(),
       error = function(e) {
         if (e$message ==
           "`by` required, because the data sources have no common variables") {
@@ -214,12 +223,13 @@ observe({
     if (!is.null(mergejoin$data.to.join)) {
       if (!is.null(input$select_join_methods) &&
         length(input$select_join_methods) > 0) {
+        browser()
         join_method <- switch(input$select_join_methods,
-          "Inner Join" = "inner_join",
-          "Left Join" = "left_join",
-          "Full Join" = "full_join",
-          "Semi Join" = "semi_join",
-          "Anti Join" = "anti_join"
+          "Inner Join" = "inner",
+          "Left Join" = "left",
+          "Full Join" = "full",
+          "Semi Join" = "semi",
+          "Anti Join" = "anti"
         )
       }
       if (!is.null(input$dup_original) && length(input$dup_original) > 0) {
@@ -245,9 +255,20 @@ observe({
       if (orig_type == new_type | orig_type == "character" &
         new_type == "factor" | orig_type == "factor" &
         new_type == "character") {
-        temp.join <- iNZightTools::joindata(
-          data, newdata, left_col,
-          right_col, join_method, left_name, right_name
+        # temp.join <- iNZightTools::joindata(
+        #   data, newdata, left_col,
+        #   right_col, join_method, left_name, right_name
+        # )
+        # TODO:
+        
+        temp.join <- iNZightTools::join_data(
+          data_l = data, 
+          data_r = newdata, 
+          left_col, 
+        #   right_col, 
+          how = join_method,
+          suffix_l = left_name, 
+          suffix_r = right_name
         )
         output$previewimport.table <- renderDT(
           {
@@ -288,7 +309,7 @@ observe({
         })
       }
     }
-  })
+  # })
 })
 
 
@@ -367,7 +388,7 @@ observe({
           }
         }
       }
-      temp.append <- iNZightTools::appendrows(data, newdata, date)
+      temp.append <- iNZightTools::append_rows(data, newdata, date)
 
       data.set <- as.data.frame(temp.append)
 
@@ -416,7 +437,7 @@ observe({
           }
         }
       }
-      temp.append <- iNZightTools::appendrows(data, newdata, date)
+      temp.append <- iNZightTools::append_rows(data, newdata, date)
       mergejoin$data.to.append <- NULL
       output$previewappend.table <- renderDT(
         {

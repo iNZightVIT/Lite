@@ -20,9 +20,9 @@ output$convert_datestimes_panel <- renderUI({
         label = "Select the order format of your data",
         choices = c(
           "",
-          "year month date",
-          "year month date Hour Minute Second",
-          "year month date Hour Minute Second pm/am",
+          "year month day",
+          "year month day Hour Minute Second",
+          "year month day Hour Minute Second pm/am",
           "day month year",
           "day month year Hour Minute Second",
           "day month year Hour Minute Second pm/am",
@@ -47,7 +47,6 @@ output$convert_datestimes_panel <- renderUI({
   })
   ret
 })
-
 
 observe({
   input$convert_datestimes_selectvars
@@ -107,7 +106,6 @@ observe({
         if (!is.null(input$convert_datestimes_newname) &&
           !grepl("^\\s*$", input$convert_datestimes_newname)) {
           name <- input$convert_datestimes_newname
-
           data <- tryCatch(
             data.frame(
               Converted = iNZightTools::convert_to_datetime(
@@ -161,7 +159,6 @@ observe({
         if (!is.null(input$convert_datestimes_newname) &&
           !grepl("^\\s*$", input$convert_datestimes_newname)) {
           name <- input$convert_datestimes_newname
-
           data <- iNZightTools::convert_to_datetime(
             get.data.set(), factorname, convname, name
           )

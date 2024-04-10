@@ -52,8 +52,8 @@ observe({
               text =
                 paste0("input$variablenames", i)
             )))) {
-            namelist[i] <- input[[indexes1[i]]]
-            names(namelist)[i] <- colnames(get.data.set())[idxmch[i]]
+            namelist[i] <- colnames(get.data.set())[idxmch[i]]
+            names(namelist)[i] <- input[[indexes1[i]]]
           }
         }
         changed <- sapply(seq_along(namelist), function(i) {
@@ -61,7 +61,7 @@ observe({
         })
         namelist <- namelist[changed]
         if (!is.null(namelist)) {
-          temp <- iNZightTools::renameVars(get.data.set(), namelist)
+          temp <- iNZightTools::rename_vars(get.data.set(), namelist)
         }
         if (!is.null(temp)) {
           updatePanel$datachanged <- updatePanel$datachanged + 1

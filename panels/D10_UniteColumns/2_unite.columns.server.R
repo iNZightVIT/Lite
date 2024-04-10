@@ -33,7 +33,12 @@ observe({
         input$name_unite_columns
       )
       sep <- input$sep_unite_columns
-      temp <- iNZightTools::unite(get.data.set(), name, col, sep)
+      temp <- iNZightTools::combine_vars(
+        data = get.data.set(),
+        vars = col,
+        sep = sep,
+        name = name
+      )
 
       data.set <- as.data.frame(temp)
       sample.num <- ifelse(nrow(data.set) > 2000, 500,
@@ -63,6 +68,7 @@ observe({
   isolate({
     name <- ""
     sep <- "_"
+    
     if (!is.null(input$select_unite_columns) &&
       length(input$select_unite_columns) > 1) {
       col <- input$select_unite_columns
@@ -70,7 +76,12 @@ observe({
         input$name_unite_columns
       )
       sep <- input$sep_unite_columns
-      temp <- iNZightTools::unite(get.data.set(), name, col, sep)
+      temp <- iNZightTools::combine_vars(
+        data = get.data.set(),
+        vars = col,
+        sep = sep,
+        name = name
+      )
       output$previewunitecolumns.table <- renderDT(
         {
           NULL

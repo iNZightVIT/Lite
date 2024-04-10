@@ -38,7 +38,7 @@ observe({
       if (input$select_filter %in% "levels of categorical variable") {
         if (!is.null(input$select_categorical1) &&
           !input$select_categorical1 %in% "") {
-          temp <- iNZightTools::filterLevels(
+          temp <- iNZightTools::filter_cat(
             get.data.set(),
             var = input$select_categorical1,
             levels = input$levels1
@@ -84,7 +84,7 @@ observe({
           all(is.convertable.numeric(input$numeric_input1))) {
           indexes.keep <- 1:nrow(get.data.set())
 
-          temp <- iNZightTools::filterNumeric(
+          temp <- iNZightTools::filter_num(
             get.data.set(),
             var = input$select_numeric1,
             op = input$select_operation1,
@@ -114,7 +114,7 @@ observe({
             fixed = T
           )[[1]])
           indices <- indices[which(indices %in% (1:nrow(get.data.set())))]
-          temp <- iNZightTools::filterRows(get.data.set(), indices)
+          temp <- iNZightTools::remove_rows(get.data.set(), indices)
           if (!is.null(temp)) {
             ## save code
             code.save$dataname <- paste(code.save$name, "filtered", sep = ".")
@@ -137,7 +137,7 @@ observe({
           ((
             as.numeric(input$numeric_input2) * as.numeric(input$numeric_input3)
           ) <= nrow(get.data.set()))) {
-          temp <- iNZightTools::filterRandom(
+          temp <- iNZightTools::random_sample(
             get.data.set(),
             n = as.numeric(input$numeric_input3),
             sample_size = as.numeric(input$numeric_input2)

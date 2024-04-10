@@ -47,8 +47,9 @@ observe({
       # replace it with an underscore "_" if found
       new_var <- make_names(input$create.variables.name)
 
-      temp <- iNZightTools::createNewVar(get.data.set(),
-        new_var = new_var,
+      temp <- iNZightTools::create_vars(
+        get.data.set(),
+        vars = new_var,
         get.create.variables.expression.text()
       )
       if (!is.null(temp)) {
