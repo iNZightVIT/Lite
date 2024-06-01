@@ -11,14 +11,14 @@
 message("Starting iNZight Lite Server...")
 
 suppressPackageStartupMessages(library(iNZightPlots))
-suppressPackageStartupMessages(library(iNZightTS))
+suppressPackageStartupMessages(library(iNZightTSLegacy))
 suppressPackageStartupMessages(library(iNZightMR))
 suppressPackageStartupMessages(library(markdown))
 suppressPackageStartupMessages(library(GGally))
 suppressPackageStartupMessages(library(iNZightRegression))
 suppressPackageStartupMessages(library(RJSONIO))
 suppressPackageStartupMessages(library(survey))
-suppressPackageStartupMessages(library(iNZightMaps))
+# suppressPackageStartupMessages(library(iNZightMaps))
 suppressPackageStartupMessages(library(colorspace))
 suppressPackageStartupMessages(library(readxl))
 suppressPackageStartupMessages(library(sas7bdat))
@@ -476,8 +476,8 @@ shinyServer(function(input, output, session) {
   ## ----------------------##
   if (!(!is.null(session$userData$LITE_VERSION) &&
     session$userData$LITE_VERSION == "CAS")) {
-    source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
-    source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
+    source("panels/F2_TimeSeriesLegacy/1_timeseries-panel-ui.R", local = TRUE)
+    source("panels/F2_TimeSeriesLegacy/2_timeseries-panel-server.R", local = TRUE)
   }
 
   #   Advanced --> Model Fitting
@@ -498,11 +498,11 @@ shinyServer(function(input, output, session) {
   ## ---------------##
   ##  Maps Module  ##
   ## ---------------##
-  if (!(!is.null(session$userData$LITE_VERSION) &&
-    session$userData$LITE_VERSION == "CAS")) {
-    source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
-    source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
-  }
+  # if (!(!is.null(session$userData$LITE_VERSION) &&
+  #   session$userData$LITE_VERSION == "CAS")) {
+  #   source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
+  #   source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
+  # }
 
   #   Advanced --> Design of Experiment
 
@@ -607,8 +607,8 @@ shinyServer(function(input, output, session) {
     )
     advance_tabs <- list(
       quick = tabPanel("Quick explore", uiOutput("quick.explore")),
-      time_series = tabPanel("Time Series",
-        value = "timeSeries",
+      time_series = tabPanel("Time Series (Legacy)",
+        # value = "timeSeries",
         uiOutput("timeseries.panel")
       ),
       model = tabPanel("Model Fitting",

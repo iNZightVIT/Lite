@@ -23,7 +23,7 @@ ts.help <- function() {
   help.display(
     title = "Time Series Module",
     id = "Time_Series",
-    file = "panels/F2_TimeSeries/3_timeseries-panel-help.md"
+    file = "panels/F2_TimeSeriesLegacy/3_timeseries-panel-help.md"
   )
 }
 
@@ -89,7 +89,7 @@ ts.sidebarPanel <- function(data.set) {
       p("*How many observations per period?"),
       fixedRow(
         column(6, numericInput("TS.timeStartPeriod",
-          label = "Start date : ", value = 1
+                               label = "Start date : ", value = 1
         )),
         column(6, div(
           style = "margin-top: 4px;",
@@ -118,7 +118,7 @@ ts.sidebarPanel <- function(data.set) {
         ),
       inline = T
     ),
-
+    
     ##  A slider bar for smoothing parameter.
     sliderInput(
       inputId = "slidersmoothing",
@@ -136,7 +136,7 @@ ts.sidebarPanel <- function(data.set) {
     ##  on the y-axis. "rev()" is used so that a non-time variable is
     ##  selected (since time is on the x-axis), since the time
     ##  variable is often the first element of "colnames(data)".
-
+    
     fixedRow(
       column(width = 6, uiOutput("time.plot.select")),
       column(
@@ -148,7 +148,7 @@ ts.sidebarPanel <- function(data.set) {
         )
       )
     ),
-
+    
     ##  Section 4: Select Labels
     ##
     ##  We give the user the option of providing her own set of x- and
@@ -209,7 +209,7 @@ ts.mainPanel <- function() {
   ##    -  Section 3: Multiple Series Plots
   ##
   ##  Note the use of "br()" (= line break) for vertical spacing.
-
+  
   mainPanelUI <- list(
     uiOutput("ts.main.ui")
   )
@@ -230,7 +230,7 @@ timeseries.panel.ui <- function(data.set) {
     if (is.null(data.set)) {
       fluidRow(
         includeMarkdown(
-          "panels/F2_TimeSeries/4_timeseries-panel-null.md"
+          "panels/F2_TimeSeriesLegacy/4_timeseries-panel-null.md"
         )
       )
     } else {

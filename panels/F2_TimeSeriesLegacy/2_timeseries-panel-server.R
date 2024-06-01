@@ -98,9 +98,9 @@ observe({
         shinyjs::enable("TS.timeFreqNum")
       } else {
         updateNumericInput(session,
-          inputId = "TS.timeFreqNum",
-          label = "",
-          value = freqOpts[[input$TS.period]][[input$TS.timeFreqList]]
+                           inputId = "TS.timeFreqNum",
+                           label = "",
+                           value = freqOpts[[input$TS.period]][[input$TS.timeFreqList]]
         )
         shinyjs::disable("TS.timeFreqNum")
       }
@@ -112,7 +112,7 @@ observe({
 ## create sliderInput
 output$time.range.var <- renderUI({
   if ((date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) && !is.null(ts.para$tsObj$tsObj)) {
+       input$time_info == 2) && !is.null(ts.para$tsObj$tsObj)) {
     xr <- range(time(ts.para$tsObj$tsObj))
     xby <- 1 / ts.para$tsObj$freq
     xx <- seq(xr[1], xr[2], by = xby)
@@ -140,7 +140,7 @@ output$time.range.var <- renderUI({
         )
       ),
       checkboxInput("check_lim_fit",
-        label = "Use above limits for fitting model", value = TRUE
+                    label = "Use above limits for fitting model", value = TRUE
       ),
       conditionalPanel(
         condition = "input.check_lim_fit == false",
@@ -186,10 +186,10 @@ observe({
             which(xx == (xx[xd == input$adjust_limit_from] + 2)):length(xd)
           ]
           updateSliderTextInput(session,
-            inputId = "adjust_limit_until",
-            label = "until...",
-            choices = lim1,
-            selected = input$adjust_limit_until
+                                inputId = "adjust_limit_until",
+                                label = "until...",
+                                choices = lim1,
+                                selected = input$adjust_limit_until
           )
           if (input$adjust_limit_from == xd[
             which(xx == (xx[xd == input$adjust_limit_until] - 2))
@@ -226,10 +226,10 @@ observe({
             which(xx == (xx[xd == input$mod_limit_from] + 2)):length(xd)
           ]
           updateSliderTextInput(session,
-            inputId = "mod_limit_until",
-            label = "until...",
-            choices = lim1,
-            selected = input$mod_limit_until
+                                inputId = "mod_limit_until",
+                                label = "until...",
+                                choices = lim1,
+                                selected = input$mod_limit_until
           )
           if (input$mod_limit_from == xd[
             which(xx == (xx[xd == input$mod_limit_until] - 2))
@@ -266,10 +266,10 @@ observe({
           xd <- as.character(ts.para$tsObj$data[[timeVar]])
           lim2 <- xd[1:which(xx == (xx[xd == input$adjust_limit_until] - 2))]
           updateSliderTextInput(session,
-            inputId = "adjust_limit_from",
-            label = "Display data from...",
-            choices = lim2,
-            selected = input$adjust_limit_from
+                                inputId = "adjust_limit_from",
+                                label = "Display data from...",
+                                choices = lim2,
+                                selected = input$adjust_limit_from
           )
           if (input$adjust_limit_until == xd[
             which(xx == (xx[xd == input$adjust_limit_from] + 2))
@@ -315,10 +315,10 @@ observe({
           xd <- as.character(ts.para$tsObj$data[[timeVar]])
           lim2 <- xd[1:which(xx == (xx[xd == input$mod_limit_until] - 2))]
           updateSliderTextInput(session,
-            inputId = "mod_limit_from",
-            label = "Fit model to data from ... ",
-            choices = lim2,
-            selected = input$mod_limit_from
+                                inputId = "mod_limit_from",
+                                label = "Fit model to data from ... ",
+                                choices = lim2,
+                                selected = input$mod_limit_from
           )
           if (input$mod_limit_until == xd[
             which(xx == (xx[xd == input$mod_limit_from] + 2))
@@ -395,14 +395,14 @@ observe({
   get.data.set()
   ## create tsObj
   if ((!is.null(input$time_info) &&
-    input$time_info == 1 && !is.null(input$select_timevars)) ||
-    (!is.null(input$time_info) && input$time_info == 2 &&
-      !is.null(input$TS.period) && !is.null(input$TS.timeFreqNum) &&
-      !is.na(input$TS.timeFreqNum))) {
+       input$time_info == 1 && !is.null(input$select_timevars)) ||
+      (!is.null(input$time_info) && input$time_info == 2 &&
+       !is.null(input$TS.period) && !is.null(input$TS.timeFreqNum) &&
+       !is.na(input$TS.timeFreqNum))) {
     temp <- get.data.set()
     if (input$time_info == 1) {
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         if (!input$select_timevars %in% "time") {
           colnames(temp)[
             which(colnames(temp) %in% input$select_timevars)
@@ -410,10 +410,10 @@ observe({
         }
         tryCatch(
           {
-            ts.para$tsObj <- iNZightTS(temp,
-              var = variable.names(),
-              time.col =
-                which(colnames(temp) == "time")
+            ts.para$tsObj <- iNZightTSLegacy::iNZightTS(temp,
+                                       var = variable.names(),
+                                       time.col =
+                                         which(colnames(temp) == "time")
             )
           },
           warning = function(w) {
@@ -427,10 +427,10 @@ observe({
     } else {
       tryCatch(
         {
-          ts.para$tsObj <- iNZightTS(temp,
-            var = variable.names(),
-            start = c(input$TS.timeStartPeriod, input$TS.timeStartSeason),
-            freq = input$TS.timeFreqNum
+          ts.para$tsObj <- iNZightTSLegacy::iNZightTS(temp,
+                                     var = variable.names(),
+                                     start = c(input$TS.timeStartPeriod, input$TS.timeStartSeason),
+                                     freq = input$TS.timeFreqNum
           )
         },
         warning = function(w) {
@@ -441,14 +441,14 @@ observe({
         }
       )
     }
-
+    
     ## modlim and xlim
     if (!is.null(input$adjust_limit_from) &&
-      !is.null(input$adjust_limit_until) &&
-      length(input$adjust_limit_until) > 0 &&
-      length(input$adjust_limit_from) > 0 &&
-      !is.null(input$mod_limit_from) && !is.null(input$mod_limit_until) &&
-      length(input$mod_limit_until) > 0 && length(input$mod_limit_from) > 0) {
+        !is.null(input$adjust_limit_until) &&
+        length(input$adjust_limit_until) > 0 &&
+        length(input$adjust_limit_from) > 0 &&
+        !is.null(input$mod_limit_from) && !is.null(input$mod_limit_until) &&
+        length(input$mod_limit_until) > 0 && length(input$mod_limit_from) > 0) {
       xr <- range(time(ts.para$tsObj$tsObj))
       xby <- 1 / ts.para$tsObj$freq
       xx <- seq(xr[1], xr[2], by = xby)
@@ -466,7 +466,7 @@ observe({
           print(e)
         }
       )
-
+      
       if (input$check_lim_fit == TRUE) {
         ts.para$mod.lim <- ts.para$xlim
       } else if (input$check_lim_fit == FALSE) {
@@ -488,8 +488,8 @@ output$ts.main.ui <- renderUI({
   ret <- NULL
   isolate({
     if (!is.null(input$select_variables) &&
-      length(input$select_variables) == 1 &&
-      input$time_plot_info1 == 1) {
+        length(input$select_variables) == 1 &&
+        input$time_plot_info1 == 1) {
       ret <- list(
         tabsetPanel(
           type = "pills", # Try type = "tabs" is you wish...
@@ -536,8 +536,8 @@ output$ts.main.ui <- renderUI({
         )
       )
     } else if (!is.null(input$select_variables) &&
-      length(input$select_variables) == 1 &&
-      input$time_plot_info1 == 2) {
+               length(input$select_variables) == 1 &&
+               input$time_plot_info1 == 2) {
       ret <- list(
         tabsetPanel(
           type = "pills",
@@ -581,8 +581,8 @@ output$ts.main.ui <- renderUI({
         )
       )
     } else if (!is.null(input$select_variables) &&
-      length(input$select_variables) == 1 &&
-      input$time_plot_info1 == 3) {
+               length(input$select_variables) == 1 &&
+               input$time_plot_info1 == 3) {
       ret <- list(
         tabsetPanel(
           type = "pills",
@@ -625,8 +625,8 @@ output$ts.main.ui <- renderUI({
         )
       )
     } else if (!is.null(input$select_variables) &&
-      length(input$select_variables) == 1 &&
-      input$time_plot_info1 == 4) {
+               length(input$select_variables) == 1 &&
+               input$time_plot_info1 == 4) {
       ret <- list(
         tabsetPanel(
           type = "pills",
@@ -668,8 +668,8 @@ output$ts.main.ui <- renderUI({
         )
       )
     } else if (!is.null(input$select_variables) &&
-      length(input$select_variables) == 1 &&
-      input$time_plot_info1 == 5) {
+               length(input$select_variables) == 1 &&
+               input$time_plot_info1 == 5) {
       ret <- list(
         tabsetPanel(
           type = "pills",
@@ -729,8 +729,8 @@ output$ts.main.ui <- renderUI({
         )
       )
     } else if (!is.null(input$select_variables) &&
-      length(input$select_variables) > 1 &&
-      input$time_plot_info == 2) {
+               length(input$select_variables) > 1 &&
+               input$time_plot_info == 2) {
       ret <- list(
         tabsetPanel(
           type = "pills", # Try type = "tabs" if you wish...
@@ -774,8 +774,8 @@ output$ts.main.ui <- renderUI({
         )
       )
     } else if (!is.null(input$select_variables) &&
-      length(input$select_variables) > 1 &&
-      input$time_plot_info == 1) {
+               length(input$select_variables) > 1 &&
+               input$time_plot_info == 1) {
       ret <- list(
         tabsetPanel(
           type = "pills", # Try type = "tabs" if you wish...
@@ -844,11 +844,11 @@ date_check <- function(dafr, time.vars) {
   subdata <- dafr[, time.vars]
   ##  If any of the time series structures return an NA,
   ##  return TRUE. Else, return FALSE.
-  # function iNZightTS:::get.ts.structure is not stable
+  # function iNZightTSLegacy:::get.ts.structure is not stable
   # it throws an error if a normal factor variable is
   # passed in.
   tryCatch({
-    if (any(is.na(suppressWarnings(iNZightTS:::get.ts.structure(subdata))))) {
+    if (any(is.na(suppressWarnings(iNZightTSLegacy:::get.ts.structure(subdata))))) {
       return(FALSE)
     } else {
       return(TRUE)
@@ -894,18 +894,18 @@ variable.names <- reactive({
 ###  Time Series Plot
 output$timeseries_plot <- renderPlot({
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
         g <- plot(ts.para$tsObj,
-          ## start = start),
-          xlab = input$provide_xlab,
-          ylab = input$provide_ylab,
-          multiplicative = as.logical(season_select_ts$re),
-          t = 100 * input$slidersmoothing,
-          smoother = input$timeseries_smoother,
-          model.lim = ts.para$mod.lim,
-          xlim = ts.para$xlim
+                  ## start = start),
+                  xlab = input$provide_xlab,
+                  ylab = input$provide_ylab,
+                  multiplicative = as.logical(season_select_ts$re),
+                  t = 100 * input$slidersmoothing,
+                  smoother = input$timeseries_smoother,
+                  model.lim = ts.para$mod.lim,
+                  xlim = ts.para$xlim
         )
         dev.off()
         g
@@ -922,8 +922,8 @@ output$timeseries_plot <- renderPlot({
   } else {
     plot.new()
     text(0.5, 0.5,
-      "No time variable found.\nPlease generate a time variable.",
-      cex = 2
+         "No time variable found.\nPlease generate a time variable.",
+         cex = 2
     )
   }
 })
@@ -933,12 +933,12 @@ output$timeseries_plot <- renderPlot({
 output$saveTimeplot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-      switch(input$saveTimeplottype,
-        "jpg" = "jpg",
-        "png" = "png",
-        "pdf" = "pdf"
-      ),
-      sep = "."
+          switch(input$saveTimeplottype,
+                 "jpg" = "jpg",
+                 "png" = "png",
+                 "pdf" = "pdf"
+          ),
+          sep = "."
     )
   },
   content = function(file) {
@@ -950,9 +950,9 @@ output$saveTimeplot <- downloadHandler(
       } else if (input$saveTimeplottype == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
-
+      
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
             plot(
@@ -974,8 +974,8 @@ output$saveTimeplot <- downloadHandler(
       } else {
         plot.new()
         text(0.5, 0.5,
-          "No time variable found.\nPlease generate a time variable.",
-          cex = 2
+             "No time variable found.\nPlease generate a time variable.",
+             cex = 2
         )
       }
       dev.off()
@@ -1002,7 +1002,7 @@ output$plotly_tsmain <- renderPlotly({
   input$mod_limit_until
   isolate({
     if (date_check(get.data.set(), input$select_timevars) ||
-      input$time_info == 2) {
+        input$time_info == 2) {
       pdf(NULL)
       suppressWarnings(tryCatch(
         {
@@ -1031,7 +1031,7 @@ output$plotly_tsmain <- renderPlotly({
 # open in new window
 output$plotly_tsmainnw <- renderUI({
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     curdir <- getwd()
     on.exit(setwd(curdir))
     # set to temp directory
@@ -1078,7 +1078,7 @@ output$plotly_tsmainnw <- renderUI({
 output$seasonal_plot <- renderPlot({
   #     input$selector
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
         g <- seasonplot(
@@ -1100,8 +1100,8 @@ output$seasonal_plot <- renderPlot({
   } else {
     plot.new()
     text(0.5, 0.5,
-      "No time variable found.\nPlease generate a time variable.",
-      cex = 2
+         "No time variable found.\nPlease generate a time variable.",
+         cex = 2
     )
   }
 })
@@ -1111,12 +1111,12 @@ output$seasonal_plot <- renderPlot({
 output$saveSeasonalplot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-      switch(input$saveSeasonalplottype,
-        "jpg" = "jpg",
-        "png" = "png",
-        "pdf" = "pdf"
-      ),
-      sep = "."
+          switch(input$saveSeasonalplottype,
+                 "jpg" = "jpg",
+                 "png" = "png",
+                 "pdf" = "pdf"
+          ),
+          sep = "."
     )
   },
   content = function(file) {
@@ -1128,9 +1128,9 @@ output$saveSeasonalplot <- downloadHandler(
       } else if (input$saveSeasonalplottype == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
-
+      
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
             seasonplot(
@@ -1150,8 +1150,8 @@ output$saveSeasonalplot <- downloadHandler(
       } else {
         plot.new()
         text(0.5, 0.5,
-          "No time variable found.\nPlease generate a time variable.",
-          cex = 2
+             "No time variable found.\nPlease generate a time variable.",
+             cex = 2
         )
       }
       dev.off()
@@ -1170,11 +1170,11 @@ output$saveSeasonalplot <- downloadHandler(
 output$decomposed_plot <- renderPlot({
   #     input$selector
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
         g <- plot(
-          iNZightTS::decompose(
+          iNZightTSLegacy::decompose(
             ts.para$tsObj,
             multiplicative = as.logical(season_select_ts$re),
             t = 100 * input$slidersmoothing,
@@ -1195,8 +1195,8 @@ output$decomposed_plot <- renderPlot({
   } else {
     plot.new()
     text(0.5, 0.5,
-      "No time variable found.\nPlease generate a time variable.",
-      cex = 2
+         "No time variable found.\nPlease generate a time variable.",
+         cex = 2
     )
   }
 })
@@ -1207,12 +1207,12 @@ output$decomposed_plot <- renderPlot({
 output$saveDecomposedplot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-      switch(input$saveDecomposedplottype,
-        "jpg" = "jpg",
-        "png" = "png",
-        "pdf" = "pdf"
-      ),
-      sep = "."
+          switch(input$saveDecomposedplottype,
+                 "jpg" = "jpg",
+                 "png" = "png",
+                 "pdf" = "pdf"
+          ),
+          sep = "."
     )
   },
   content = function(file) {
@@ -1224,13 +1224,13 @@ output$saveDecomposedplot <- downloadHandler(
       } else if (input$saveDecomposedplottype == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
-
+      
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
             plot(
-              iNZightTS::decompose(
+              iNZightTSLegacy::decompose(
                 ts.para$tsObj,
                 multiplicative = as.logical(season_select_ts$re),
                 t = 100 * input$slidersmoothing,
@@ -1249,8 +1249,8 @@ output$saveDecomposedplot <- downloadHandler(
       } else {
         plot.new()
         text(0.5, 0.5,
-          "No time variable found.\nPlease generate a time variable.",
-          cex = 2
+             "No time variable found.\nPlease generate a time variable.",
+             cex = 2
         )
       }
       dev.off()
@@ -1264,11 +1264,11 @@ output$saveDecomposedplot <- downloadHandler(
 output$trSeasonal_plot <- renderPlot({
   #     input$selector
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
         g <- plot(
-          iNZightTS::decompose(
+          iNZightTSLegacy::decompose(
             ts.para$tsObj,
             multiplicative = as.logical(season_select_ts$re),
             t = 100 * input$slidersmoothing,
@@ -1290,8 +1290,8 @@ output$trSeasonal_plot <- renderPlot({
   } else {
     plot.new()
     text(0.5, 0.5,
-      "No time variable found.\nPlease generate a time variable.",
-      cex = 2
+         "No time variable found.\nPlease generate a time variable.",
+         cex = 2
     )
   }
 })
@@ -1301,12 +1301,12 @@ output$trSeasonal_plot <- renderPlot({
 output$saveRecomposedplot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-      switch(input$saveRecomposedplottype,
-        "jpg" = "jpg",
-        "png" = "png",
-        "pdf" = "pdf"
-      ),
-      sep = "."
+          switch(input$saveRecomposedplottype,
+                 "jpg" = "jpg",
+                 "png" = "png",
+                 "pdf" = "pdf"
+          ),
+          sep = "."
     )
   },
   content = function(file) {
@@ -1318,13 +1318,13 @@ output$saveRecomposedplot <- downloadHandler(
       } else if (input$saveRecomposedplottype == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
-
+      
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
             plot(
-              iNZightTS::decompose(
+              iNZightTSLegacy::decompose(
                 ts.para$tsObj,
                 multiplicative = as.logical(season_select_ts$re),
                 t = 100 * input$slidersmoothing,
@@ -1344,8 +1344,8 @@ output$saveRecomposedplot <- downloadHandler(
       } else {
         plot.new()
         text(0.5, 0.5,
-          "No time variable found.\nPlease generate a time variable.",
-          cex = 2
+             "No time variable found.\nPlease generate a time variable.",
+             cex = 2
         )
       }
       dev.off()
@@ -1363,7 +1363,7 @@ output$saveRecomposedplot <- downloadHandler(
 output$forecast_plot <- renderPlot({
   #     input$selector
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
         pl <- try(plot(
@@ -1379,7 +1379,7 @@ output$forecast_plot <- renderPlot({
           return()
         }
         dev.off()
-        ts.para$forecasts <- iNZightTS::pred(pl)
+        ts.para$forecasts <- iNZightTSLegacy::pred(pl)
         pl
       },
       error = function(e) {
@@ -1390,8 +1390,8 @@ output$forecast_plot <- renderPlot({
   } else {
     plot.new()
     text(0.5, 0.5,
-      "No time variable found.\nPlease generate a time variable.",
-      cex = 2
+         "No time variable found.\nPlease generate a time variable.",
+         cex = 2
     )
   }
 })
@@ -1415,7 +1415,7 @@ output$plotly_tsforecast <- renderPlotly({
   input$mod_limit_until
   isolate({
     if (date_check(get.data.set(), input$select_timevars) ||
-      input$time_info == 2) {
+        input$time_info == 2) {
       pdf(NULL)
       suppressWarnings(tryCatch(
         {
@@ -1443,7 +1443,7 @@ output$plotly_tsforecast <- renderPlotly({
 ## open in new window
 output$plotly_tsforecastnw <- renderUI({
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     curdir <- getwd()
     on.exit(setwd(curdir))
     # set to temp directory
@@ -1489,12 +1489,12 @@ output$plotly_tsforecastnw <- renderUI({
 output$saveForecastplot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-      switch(input$saveForecastplottype,
-        "jpg" = "jpg",
-        "png" = "png",
-        "pdf" = "pdf"
-      ),
-      sep = "."
+          switch(input$saveForecastplottype,
+                 "jpg" = "jpg",
+                 "png" = "png",
+                 "pdf" = "pdf"
+          ),
+          sep = "."
     )
   },
   content = function(file) {
@@ -1506,9 +1506,9 @@ output$saveForecastplot <- downloadHandler(
       } else if (input$saveForecastplottype == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
-
+      
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         temp <- get.data.set()
         if (!input$select_timevars %in% "time") {
           colnames(temp)[
@@ -1535,8 +1535,8 @@ output$saveForecastplot <- downloadHandler(
       } else {
         plot.new()
         text(0.5, 0.5,
-          "No time variable found.\nPlease generate a time variable.",
-          cex = 2
+             "No time variable found.\nPlease generate a time variable.",
+             cex = 2
         )
       }
       dev.off()
@@ -1550,7 +1550,7 @@ output$saveForecastplot <- downloadHandler(
 
 output$forecast_summary <- renderPrint({
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch({
       ts.para$forecasts
     }, warning = function(w) {
@@ -1571,7 +1571,7 @@ output$forecast_summary <- renderPrint({
 output$multiple_single_plot <- renderPlot({
   #     input$selctor
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
         plot(
@@ -1593,8 +1593,8 @@ output$multiple_single_plot <- renderPlot({
   } else {
     plot.new()
     text(0.5, 0.5,
-      "No time variable found.\nPlease generate a time variable.",
-      cex = 2
+         "No time variable found.\nPlease generate a time variable.",
+         cex = 2
     )
   }
 })
@@ -1602,12 +1602,12 @@ output$multiple_single_plot <- renderPlot({
 output$saveSingleplot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-      switch(input$saveSingleplottype,
-        "jpg" = "jpg",
-        "png" = "png",
-        "pdf" = "pdf"
-      ),
-      sep = "."
+          switch(input$saveSingleplottype,
+                 "jpg" = "jpg",
+                 "png" = "png",
+                 "pdf" = "pdf"
+          ),
+          sep = "."
     )
   },
   content = function(file) {
@@ -1619,9 +1619,9 @@ output$saveSingleplot <- downloadHandler(
       } else if (input$saveSingleplottype == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
-
+      
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
             plot(
@@ -1643,8 +1643,8 @@ output$saveSingleplot <- downloadHandler(
       } else {
         plot.new()
         text(0.5, 0.5,
-          "No time variable found.\nPlease generate a time variable.",
-          cex = 2
+             "No time variable found.\nPlease generate a time variable.",
+             cex = 2
         )
       }
       dev.off()
@@ -1656,7 +1656,7 @@ output$saveSingleplot <- downloadHandler(
 output$multipleSeries_single_layout <- renderUI({
   #     input$selctor
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     columns <- length(input$multi_series_vars)
     if (columns <= 6) {
       plotOutput("multiple_single_plot", height = "500px")
@@ -1670,7 +1670,7 @@ output$multipleSeries_single_layout <- renderUI({
 output$multiple_multi_plot <- renderPlot({
   #     input$selector
   if (date_check(get.data.set(), input$select_timevars) ||
-    input$time_info == 2) {
+      input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
         plot(
@@ -1693,8 +1693,8 @@ output$multiple_multi_plot <- renderPlot({
   } else {
     plot.new()
     text(0.5, 0.5,
-      "No time variable found.\nPlease generate a time variable.",
-      cex = 2
+         "No time variable found.\nPlease generate a time variable.",
+         cex = 2
     )
   }
 })
@@ -1703,12 +1703,12 @@ output$multiple_multi_plot <- renderPlot({
 output$saveMultiplot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-      switch(input$saveMultiplottype,
-        "jpg" = "jpg",
-        "png" = "png",
-        "pdf" = "pdf"
-      ),
-      sep = "."
+          switch(input$saveMultiplottype,
+                 "jpg" = "jpg",
+                 "png" = "png",
+                 "pdf" = "pdf"
+          ),
+          sep = "."
     )
   },
   content = function(file) {
@@ -1720,9 +1720,9 @@ output$saveMultiplot <- downloadHandler(
       } else if (input$saveMultiplottype == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
-
+      
       if (date_check(get.data.set(), input$select_timevars) ||
-        input$time_info == 2) {
+          input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
             plot(
@@ -1745,8 +1745,8 @@ output$saveMultiplot <- downloadHandler(
       } else {
         plot.new()
         text(0.5, 0.5,
-          "No time variable found.\nPlease generate a time variable.",
-          cex = 2
+             "No time variable found.\nPlease generate a time variable.",
+             cex = 2
         )
       }
       dev.off()
@@ -1773,20 +1773,20 @@ output$time.select <- renderUI({
   } else {
     sel <- colnames(get.data.set())[1]
   }
-
+  
   get.vars <- parseQueryString(session$clientData$url_search)
   if (!is.null(get.vars$url)) {
     temp <- session$clientData$url_search
     get.vars$url <- sub(".*?url=(.*?)&.*", "\\1", temp)
   }
   if (length(get.vars) > 0 &&
-    (any(names(get.vars) %in% "url") ||
-      any(names(get.vars) %in% "example")) &&
-    (any(names(get.vars) %in% "time") &&
-      !get.vars$time %in% "")) {
+      (any(names(get.vars) %in% "url") ||
+       any(names(get.vars) %in% "example")) &&
+      (any(names(get.vars) %in% "time") &&
+       !get.vars$time %in% "")) {
     sel <- get.vars$time
   }
-
+  
   selectInput(
     inputId = "select_timevars",
     label = "Select time variable: ",
@@ -1798,17 +1798,17 @@ output$time.select <- renderUI({
 
 output$time.plot.select <- renderUI({
   sel <- get.numeric.column.names(get.data.set())[1]
-
+  
   get.vars <- parseQueryString(session$clientData$url_search)
   if (!is.null(get.vars$url)) {
     temp <- session$clientData$url_search
     get.vars$url <- sub(".*?url=(.*?)&.*", "\\1", temp)
   }
   if (length(get.vars) > 0 &&
-    (any(names(get.vars) %in% "url") ||
-      any(names(get.vars) %in% "example")) &&
-    (any(names(get.vars) %in% "seriesVars") &&
-      !get.vars$seriesVars %in% "")) {
+      (any(names(get.vars) %in% "url") ||
+       any(names(get.vars) %in% "example")) &&
+      (any(names(get.vars) %in% "seriesVars") &&
+       !get.vars$seriesVars %in% "")) {
     sel <- strsplit(get.vars$seriesVars, ",")[[1]]
   }
   list(
