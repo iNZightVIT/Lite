@@ -411,9 +411,9 @@ observe({
         tryCatch(
           {
             ts.para$tsObj <- iNZightTSLegacy::iNZightTS(temp,
-                                       var = variable.names(),
-                                       time.col =
-                                         which(colnames(temp) == "time")
+                                                        var = variable.names(),
+                                                        time.col =
+                                                          which(colnames(temp) == "time")
             )
           },
           warning = function(w) {
@@ -428,9 +428,9 @@ observe({
       tryCatch(
         {
           ts.para$tsObj <- iNZightTSLegacy::iNZightTS(temp,
-                                     var = variable.names(),
-                                     start = c(input$TS.timeStartPeriod, input$TS.timeStartSeason),
-                                     freq = input$TS.timeFreqNum
+                                                      var = variable.names(),
+                                                      start = c(input$TS.timeStartPeriod, input$TS.timeStartSeason),
+                                                      freq = input$TS.timeFreqNum
           )
         },
         warning = function(w) {
@@ -915,7 +915,7 @@ output$timeseries_plot <- renderPlot({
       #          print(w)
       #        },
       error = function(e) {
-        cat("Handled error in timseries plot\n")
+        cat("Handled error in timseries plot1\n")
         print(e)
       }, finally = {}
     ))
@@ -967,7 +967,7 @@ output$saveTimeplot <- downloadHandler(
             )
           },
           error = function(e) {
-            cat("Handled error in timseries plot\n")
+            cat("Handled error in timseries plot2\n")
             print(e)
           }, finally = {}
         ))
@@ -1021,7 +1021,7 @@ output$plotly_tsmain <- renderPlotly({
           g
         },
         error = function(e) {
-          cat("Handled error in timseries plot\n")
+          cat("Handled error in timseries plot3\n")
         }, finally = {}
       ))
     }
@@ -1053,7 +1053,7 @@ output$plotly_tsmainnw <- renderUI({
         )
       },
       error = function(e) {
-        cat("Handled error in timseries plot\n")
+        cat("Handled error in timseries plot4\n")
         print(e)
       }, finally = {}
     ))
@@ -1081,7 +1081,7 @@ output$seasonal_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
-        g <- seasonplot(
+        g <- iNZightTSLegacy::seasonplot(
           ts.para$tsObj,
           ylab = input$provide_ylab,
           xlab = input$provide_xlab,
@@ -1133,7 +1133,7 @@ output$saveSeasonalplot <- downloadHandler(
           input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
-            seasonplot(
+            iNZightTSLegacy::seasonplot(
               ts.para$tsObj,
               ylab = input$provide_ylab,
               xlab = input$provide_xlab,

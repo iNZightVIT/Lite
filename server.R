@@ -609,6 +609,7 @@ shinyServer(function(input, output, session) {
       quick = tabPanel("Quick explore", uiOutput("quick.explore")),
       time_series = tabPanel("Time Series (Legacy)",
         # value = "timeSeries",
+        # uiOutput("timeseries.legacy.panel")
         uiOutput("timeseries.panel")
       ),
       model = tabPanel("Model Fitting",
