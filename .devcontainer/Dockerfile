@@ -9,11 +9,12 @@ RUN install2.r --error --skipinstalled \
 ARG GITHUB_PAT
 ENV GITHUB_PAT ${GITHUB_PAT}
 # write GITHUB_PAT to .Renviron
+# 'iNZightVIT/iNZightTS@2.0.0', \
 RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
 RUN R -e "remotes::install_github(\
     c('tmelliott/surveyspec@0.1.1', \
       'iNZightVIT/iNZightTools@dev', \
-      'iNZightVIT/iNZightTS@1.5.10', \
+      'iNZightVIT/iNZightTS@legacy', \
       'iNZightVIT/iNZightRegression@1.3.3', \
       'iNZightVIT/iNZightMR@2.2.7', \
       'iNZightVIT/iNZightPlots@2.14.4', \
