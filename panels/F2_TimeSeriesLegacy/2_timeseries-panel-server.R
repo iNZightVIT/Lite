@@ -11,7 +11,7 @@
 ###  * Note: This is to be sourced within "server.R" *
 
 # initialize gui
-output$timeseries.panel <- renderUI({
+output$timeseries.legacy.panel <- renderUI({
   timeseries.panel.ui(get.data.set())
 })
 
