@@ -13,27 +13,28 @@ ENV GITHUB_PAT ${GITHUB_PAT}
 RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
 RUN R -e "remotes::install_github(\
     c('tmelliott/surveyspec@0.1.1', \
-      'iNZightVIT/iNZightTools@dev', \
-      'iNZightVIT/iNZightTS@legacy', \
-      'iNZightVIT/iNZightRegression@1.3.3', \
-      'iNZightVIT/iNZightMR@2.2.7', \
-      'iNZightVIT/iNZightPlots@2.14.4', \
-      'iNZightVIT/iNZightMaps@2.3.1' \
+    'iNZightVIT/iNZightTools@dev', \
+    'iNZightVIT/iNZightTS@2.0.0', \
+    'iNZightVIT/iNZightTS@legacy', \
+    'iNZightVIT/iNZightRegression@1.3.3', \
+    'iNZightVIT/iNZightMR@2.2.7', \
+    'iNZightVIT/iNZightPlots@2.14.4', \
+    'iNZightVIT/iNZightMaps@2.3.1' \
     ), \
     upgrade = 'never', \
     repos = c('https://cloud.r-project.org'), \
     dependencies = TRUE \
-  )"
+    )"
 RUN rm .Renviron
 COPY . /srv/shiny-server
 RUN cp /srv/shiny-server/VARS.default /srv/shiny-server/VARS \
-  && sed -i "s/^\(lite.update=\).*/\1$(date '+%d %B %Y')/g" /srv/shiny-server/VARS
+    && sed -i "s/^\(lite.update=\).*/\1$(date '+%d %B %Y')/g" /srv/shiny-server/VARS
 RUN chown -R shiny:shiny /srv/shiny-server
 
 RUN echo "options(\
-  shiny.host = '0.0.0.0',\
-  shiny.autoload.r = FALSE \
-)" >> /usr/local/lib/R/etc/Rprofile.site
+    shiny.host = '0.0.0.0',\
+    shiny.autoload.r = FALSE \
+    )" >> /usr/local/lib/R/etc/Rprofile.site
 
 
 
