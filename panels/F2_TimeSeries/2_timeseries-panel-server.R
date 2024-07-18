@@ -50,9 +50,9 @@ create_ts_object = function() {
   temp = get.data.set()
   ts_rvals$available_vars = colnames(temp)
   
-  ri <- ti <- which(colnames(temp) == input$select_timevars)
+  ri <- ti <- which(colnames(temp) == input$tsui_select_timevars)
   # key_col <- ifelse(is.null(ts_rvals$sel_key), NULL, which(colnames(temp) == ts_rvals$sel_key))
-  key_col <- which(colnames(temp) == input$select_keys)
+  key_col <- which(colnames(temp) == input$tsui_select_keys)
   if (length(key_col)) {
     ki <- ts_rvals$available_vars[key_col]
     ri <- c(ri, ki)
@@ -80,12 +80,12 @@ create_ts_object = function() {
     ts_rvals$sel_key = tsibble::key_vars(ts_rvals$obj)
   } else {
     ts_rvals$obj = t
-    ts_rvals$sel_key = input$select_keys
+    ts_rvals$sel_key = input$tsui_select_keys
   }
   
   # ts_rvals$sel_index = index_var(ts_rvals$obj)
-  ts_rvals$sel_time = input$select_timevars
-  ts_rvals$sel_var = input$select_variables # measured_vars(t)
+  ts_rvals$sel_time = input$tsui_select_timevars
+  ts_rvals$sel_var = input$tsui_select_variables # measured_vars(t)
 }
 
 # initialize gui
@@ -106,7 +106,7 @@ ts_rvals$available_vars = NULL
 
 
 output$timeseries.panel <- renderUI({
-  timeseries.panel.ui(get.data.set())
+  TS.panel.ui(get.data.set())
 })
 
 getTime <- function(data, index = TRUE) {
@@ -140,24 +140,24 @@ freqOpts <- list(
 # init ts object
 observe({
   get.data.set()
-  input$select_timevars
-  input$select_keys
-  input$select_variables
+  input$tsui_select_timevars
+  input$tsui_select_keys
+  input$tsui_select_variables
   
   # print(input$select_timevars)
   # print(input$select_keys)
   # print(input$select_variables)
  
   if (
-      !is.null(input$select_timevars) &&
-      !is.null(input$select_variables) &&
+      !is.null(input$tsui_select_timevars) &&
+      !is.null(input$tsui_select_variables) &&
       # first ui render, the first measure var might be the same as time var
-      !(input$select_timevars %in% input$select_variables)
+      !(input$tsui_select_timevars %in% input$tsui_select_variables)
     ) {
       create_ts_object()
       print("-----")
       print(ts_rvals$sel_time)
-      print(ts_rvals$sel_key )
+      print(ts_rvals$sel_key)
       print(ts_rvals$sel_var)
       print("-----\n")
   } else {
@@ -165,19 +165,20 @@ observe({
   }
 })
 
-output$timeseries_plot <- renderPlot({
+output$tsui_ts_plot <- renderPlot({
   check = list(
     ts_rvals$obj,
     ts_rvals$sel_var,
-    input$choose_season,
-    input$time_plot_info,
-    input$slidersmoothing,
-    input$timeseries_smoother,
-    input$timeseries_seasonally_adjusted,
-    input$slidersmoothing,
-    input$adjust_limit_from,
-    input$adjust_limit_until
+    input$tsui_choose_season,
+    input$tsui_time_plot_info,
+    input$tsui_smoothing,
+    input$tsui_smoother,
+    input$tsui_seasonally_adjusted,
+    input$tsui_smoothing,
+    input$tsui_adjust_limit_from,
+    input$tsui_adjust_limit_until
   )
+  # browser()
   if (is.null(ts_rvals$obj)) {
     plot.new()
     text(
@@ -206,11 +207,11 @@ output$timeseries_plot <- renderPlot({
             pull() %>% as.Date()
         }
       }
-      plot_range <- as_range(c(input$adjust_limit_from, input$adjust_limit_until))
+      plot_range <- as_range(c(input$tsui_adjust_limit_from, input$tsui_adjust_limit_until))
       if (tsibble::n_keys(ts_p) > 1) { #  && svalue(key_filter) != "(Show all)"
         key_i <- which(colnames(ts_p) == ts_rvals$sel_key) - # key_filter$get_index() -
           (tsibble::n_keys(ts_p) < 20) +
-          (input$time_plot_info == "Decomposition")
+          (input$tsui_time_plot_info == "Decomposition")
         ts_p <- tsibble::key_data(ts_p)[key_i, ] |>
           dplyr::left_join(ts_p, by = tsibble::key_vars(ts_p), multiple = "all") |>
           tsibble::as_tsibble(index = !!tsibble::index(ts_p), key = NULL) |>
@@ -220,9 +221,9 @@ output$timeseries_plot <- renderPlot({
       if (length(ts_rvals$sel_key) && which(colnames(ts_p) == ts_rvals$sel_key) != 1L) {
         key_to_hl <- which(colnames(ts_p) == ts_rvals$sel_key) - 1L
       }
-      
-      smooth_value = ifelse(input$timeseries_smoother, input$slidersmoothing, 0)
-      if(input$time_plot_info == "default") {
+      # browser()
+      smooth_value = ifelse(input$tsui_smoother, input$tsui_smoothing, 0)
+      if(input$tsui_time_plot_info == "default") {
         plot(
           x = ts_p,
           var = ts_rvals$sel_var,
@@ -230,41 +231,43 @@ output$timeseries_plot <- renderPlot({
           emphasise = key_to_hl,
           t = smooth_value,
           xlim = plot_range,
-          mult_fit = input$choose_season == "multi",
-          seasonal_adjustment = input$timeseries_seasonally_adjusted
+          mult_fit = input$tsui_choose_season == "multi",
+          seasonal_adjustment = input$tsui_seasonally_adjusted
         )
-      } else if(input$time_plot_info == "decomposed") {
+      } else if(input$tsui_time_plot_info == "decomposed") {
         plot(
-          decomp(
+          iNZightTS::decomp(
             x = ts_p,
             var = ts_rvals$sel_var,
             t = smooth_value,
             model_range = plot_range,
-            mult_fit = input$choose_season == "multi"
+            mult_fit = input$tsui_choose_season == "multi"
           )
         )
-      } else if(input$time_plot_info == "seasonal") {
-        seasonplot(
+      } else if(input$tsui_time_plot_info == "seasonal") {
+        iNZightTS::seasonplot(
           x = ts_p,
           var = ts_rvals$sel_var,
           t = smooth_value,
           model_range = plot_range,
-          mult_fit = input$choose_season == "multi"
+          mult_fit = input$tsui_choose_season == "multi"
         )
-      } else if(input$time_plot_info == "forecast") {
-        forecasts = predict(
+      } else if(input$tsui_time_plot_info == "forecast") {
+        # forecasts = iNZightTS:::predict.inz_ts(
+        # forecasts = predict(
+        forecasts = iNZightTS:::predict.inz_ts(
           object = ts_p,
           var = ts_rvals$sel_var,
           model_range = plot_range,
-          mult_fit = input$choose_season == "multi"
+          mult_fit = input$tsui_choose_season == "multi"
         )
-        plot(x = forecasts, t_range = plot_range)
+        iNZightTS:::plot.inz_frct(x = forecasts, t_range = plot_range)
       } else {
         plot.new()
         text(
           0.5, 
           0.5,
-          paste("Plot type '", input$time_plot_info, "' not suppored"),
+          paste("Plot type '", input$tsui_time_plot_info, "' not suppored"),
           cex = 2
         )
       }
@@ -286,11 +289,11 @@ output$timeseries_plot <- renderPlot({
 })
 
 ## main UI
-output$ts.main.ui <- renderUI({
+output$tsui_main <- renderUI({
   get.data.set()
-  input$select_variables
-  # input$time_plot_info1
-  input$time_plot_info
+  input$tsui_select_variables
+  # input$tsui_time_plot_info1
+  input$tsui_time_plot_info
   ret <- NULL
   isolate({
     ret <- list(
@@ -307,7 +310,7 @@ output$ts.main.ui <- renderUI({
             strong("single"),
             "series."
           ),
-          plotOutput("timeseries_plot"),
+          plotOutput("tsui_ts_plot"),
           br(),
           fixedRow(
             column(
@@ -317,14 +320,14 @@ output$ts.main.ui <- renderUI({
             column(
               width = 3,
               downloadButton(
-                outputId = "saveTimeplot",
+                outputId = "tsui_save_plot",
                 label = "Download Plot"
               )
             ),
             column(
               width = 3,
               radioButtons(
-                inputId = "saveTimeplottype",
+                inputId = "tsui_save_plot_type",
                 label = strong("Select the file type"),
                 choices = list("jpg", "png", "pdf"), inline = TRUE
               )
@@ -343,7 +346,7 @@ output$ts.main.ui <- renderUI({
   })
 })
 
-output$time.select <- renderUI({
+output$tsui_time_select <- renderUI({
   sel <- ""
   if ("time" %in% colnames(get.data.set())) {
     sel <- "time"
@@ -370,7 +373,7 @@ output$time.select <- renderUI({
     div(
       style = "padding: 0px 0px; margin-top:-1.5em",
       selectInput(
-        inputId = "select_timevars",
+        inputId = "tsui_select_timevars",
         label = "",
         choices = colnames(get.data.set()),
         selected = sel,
@@ -381,7 +384,7 @@ output$time.select <- renderUI({
 
 })
 
-output$key.select <- renderUI({
+output$tsui_key_select <- renderUI({
   ts_rvals$obj
   # sel <- get.numeric.column.names(get.data.set())[1]
   
@@ -406,7 +409,7 @@ output$key.select <- renderUI({
     div(
       style = "padding: 0px 0px; margin-top:-1.5em",
       selectInput(
-        inputId = "select_keys",
+        inputId = "tsui_select_keys",
         label = "",
         choices = colnames(get.data.set()),
         selected = ts_rvals$sel_key,
@@ -418,8 +421,8 @@ output$key.select <- renderUI({
   )
 })
 # time.plot.select
-output$time.plot.select <- renderUI({
-  input$choose_var_type
+output$tsui_time_plot_select <- renderUI({
+  input$tsui_choose_var_type
   temp = get.data.set()
   available_vars = colnames(temp)
 
@@ -449,20 +452,20 @@ output$time.plot.select <- renderUI({
   # }
   sel = NULL
   choices = c()
-  if (input$choose_var_type == "num") {
+  if (input$tsui_choose_var_type == "num") {
     if (length(num_vars) > 0) {
       sel = num_vars[1]
       choices = num_vars
       ts_rvals$num_vars = num_vars
     }
-    shinyjs::enable(id = "choose_season")
+    shinyjs::enable(id = "tsui_choose_season")
   } else {
     if (length(cat_vars) > 0) {
       sel = cat_vars[1]
       choices = cat_vars
       ts_rvals$cat_vars = cat_vars
     }
-    shinyjs::disable(id = "choose_season")
+    shinyjs::disable(id = "tsui_choose_season")
   }
   ts_rvals$sel_var = sel
   
@@ -470,7 +473,7 @@ output$time.plot.select <- renderUI({
     div(
       style = "padding: 0px 0px; margin-top:-1.5em",
       selectInput(
-        inputId = "select_variables",
+        inputId = "tsui_select_variables",
         label = "",
         choices = choices,
         selected = sel,
@@ -483,7 +486,7 @@ output$time.plot.select <- renderUI({
 })
 
 # create sliderInput
-output$time.range.var <- renderUI({
+output$tsui_range_var <- renderUI({
   if(!is.null(ts_rvals$obj)) {
     idx = sort(unique(ts_rvals$obj[[tsibble::index(ts_rvals$obj)]]))
     list(
@@ -492,7 +495,7 @@ output$time.range.var <- renderUI({
         column(
           width = 6,
           sliderTextInput(
-            inputId = "adjust_limit_from",
+            inputId = "tsui_adjust_limit_from",
             label = "",
             choices = idx,
             selected = idx[1]
@@ -501,7 +504,7 @@ output$time.range.var <- renderUI({
         column(
           width = 6,
           sliderTextInput(
-            inputId = "adjust_limit_until",
+            inputId = "tsui_adjust_limit_until",
             label = "",
             choices = idx,
             selected = idx[length(idx)]
@@ -512,20 +515,20 @@ output$time.range.var <- renderUI({
   }
 })
 
-output$time_plot_info = renderUI({
-  input$choose_var_type
-  if(!is.null(ts_rvals$obj) && input$choose_var_type %in% c("num", "cat")) {
+output$tsui_time_plot_info = renderUI({
+  input$tsui_choose_var_type
+  if(!is.null(ts_rvals$obj) && input$tsui_choose_var_type %in% c("num", "cat")) {
     choices = c(
       "Default" = "default",
       "Decomposed" = "decomposed",
       "Seasonal" = "seasonal",
       "Forecast" = "forecast"
     )
-    if(input$choose_var_type == "cat") {
+    if(input$tsui_choose_var_type == "cat") {
       choices = choices[1]
     }
     radioButtons(
-      inputId = "time_plot_info", label = "",
+      inputId = "tsui_time_plot_info", label = "",
       choices = choices,
       selected = "default",
       inline = T
@@ -533,10 +536,10 @@ output$time_plot_info = renderUI({
   }
 })
 
-output$saveTimeplot <- downloadHandler(
+output$tsui_save_plot <- downloadHandler(
   filename = function() {
     paste("TimeSeriesPlot",
-          switch(input$saveTimeplottype,
+          switch(input$tsui_save_plot_type,
                  "jpg" = "jpg",
                  "png" = "png",
                  "pdf" = "pdf"
@@ -545,12 +548,12 @@ output$saveTimeplot <- downloadHandler(
     )
   },
   content = function(file) {
-    if (input$saveTimeplottype %in% c("jpg", "png", "pdf")) {
-      if (input$saveTimeplottype == "jpg") {
+    if (input$tsui_save_plot_type %in% c("jpg", "png", "pdf")) {
+      if (input$tsui_save_plot_type == "jpg") {
         jpeg(file)
-      } else if (input$saveTimeplottype == "png") {
+      } else if (input$tsui_save_plot_type == "png") {
         png(file)
-      } else if (input$saveTimeplottype == "pdf") {
+      } else if (input$tsui_save_plot_type == "pdf") {
         pdf(file, useDingbats = FALSE)
       }
       

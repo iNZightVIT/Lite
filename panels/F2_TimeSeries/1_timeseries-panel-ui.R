@@ -8,7 +8,7 @@ ts.help <- function() {
 
 
 
-ts.sidebarPanel <- function(data.set) {
+TS.sidebarPanel <- function(data.set) {
   if (is.null(data.set)) {
     stop("Please select a data set!")
   }
@@ -17,13 +17,13 @@ ts.sidebarPanel <- function(data.set) {
     hr(),
     
     h5(strong("Time Information: ")),
-    uiOutput("time.select"),
-    uiOutput("key.select"),
+    uiOutput("tsui_time_select"),
+    uiOutput("tsui_key_select"),
     hr(),
     
     h5(strong("Choose variables:")),
     radioButtons(
-      inputId = "choose_var_type",
+      inputId = "tsui_choose_var_type",
       label = "",
       choices =
         c(
@@ -33,9 +33,9 @@ ts.sidebarPanel <- function(data.set) {
       selected = "num",
       inline = T
     ),
-    uiOutput("time.plot.select"),
+    uiOutput("tsui_time_plot_select"),
     radioButtons(
-      inputId = "choose_season",
+      inputId = "tsui_choose_season",
       label = "",
       choices =
         c(
@@ -48,25 +48,14 @@ ts.sidebarPanel <- function(data.set) {
     hr(),
     
     h5(strong("Plot type:")),
-    # radioButtons(
-    #   inputId = "time_plot_info", label = "",
-    #   choices = c(
-    #     "Default" = "default",
-    #     "Decomposed" = "decomposed",
-    #     "Seasonal" = "seasonal",
-    #     "Forecast" = "forecast"
-    #   ),
-    #   selected = "default",
-    #   inline = T
-    # ),
-    uiOutput("time_plot_info"),
+    uiOutput("tsui_time_plot_info"),
     hr(),
     
     h5(strong("Plot settings:")),
-    checkboxInput("timeseries_smoother", label = "Show smoother"),
-    checkboxInput("timeseries_seasonally_adjusted", label = "Seasonally adjust series"),
+    checkboxInput("tsui_smoother", label = "Show smoother"),
+    checkboxInput("tsui_seasonally_adjusted", label = "Seasonally adjust series"),
     sliderInput(
-      inputId = "slidersmoothing",
+      inputId = "tsui_smoothing",
       label = "Smoothness:",
       min = 0,
       max = 100,
@@ -75,7 +64,7 @@ ts.sidebarPanel <- function(data.set) {
     ),
     hr(),
     h5(strong("Range settings:")),
-    uiOutput("time.range.var")
+    uiOutput("tsui_range_var")
   )
 }
 
@@ -86,7 +75,7 @@ ts.sidebarPanel <- function(data.set) {
 ### --------------###
 ###
 ###  We now set up the main panel with "ts.mainpanel()":
-ts.mainPanel <- function() {
+TS.mainPanel <- function() {
   ##  We set up the main panel UI. The code is organised in 3 sections:
   ##
   ##    -  Section 1: Data Validation
@@ -96,7 +85,7 @@ ts.mainPanel <- function() {
   ##  Note the use of "br()" (= line break) for vertical spacing.
   
   mainPanelUI <- list(
-    uiOutput("ts.main.ui")
+    uiOutput("tsui_main")
   )
 }
 
@@ -109,7 +98,7 @@ ts.mainPanel <- function() {
 ###  We combine the ts.sidebarPanel() and ts.mainPanel() functions to
 ###  complete the UI for the Time Series module.
 
-timeseries.panel.ui <- function(data.set) {
+TS.panel.ui <- function(data.set) {
   fluidPage(
     shinyjs::useShinyjs(),
     if (is.null(data.set)) {
@@ -120,8 +109,8 @@ timeseries.panel.ui <- function(data.set) {
       )
     } else {
       fluidRow(
-        column(3, ts.sidebarPanel(data.set)),
-        column(9, ts.mainPanel())
+        column(3, TS.sidebarPanel(data.set)),
+        column(9, TS.mainPanel())
       )
     }
   )
