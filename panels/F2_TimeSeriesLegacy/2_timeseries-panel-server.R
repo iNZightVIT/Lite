@@ -897,7 +897,7 @@ output$timeseries_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
-        g <- plot(ts.para$tsObj,
+        g <- iNZightTSLegacy:::plot.iNZightTS(ts.para$tsObj,
                   ## start = start),
                   xlab = input$provide_xlab,
                   ylab = input$provide_ylab,
@@ -955,7 +955,7 @@ output$saveTimeplot <- downloadHandler(
           input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
-            plot(
+            iNZightTSLegacy:::plot.iNZightTS(
               ts.para$tsObj,
               xlab = input$provide_xlab,
               ylab = input$provide_ylab,
@@ -1006,7 +1006,7 @@ output$plotly_tsmain <- renderPlotly({
       pdf(NULL)
       suppressWarnings(tryCatch(
         {
-          plot(
+          iNZightTSLegacy:::plot.iNZightTS(
             ts.para$tsObj,
             ## start = start),
             xlab = input$provide_xlab,
@@ -1041,7 +1041,7 @@ output$plotly_tsmainnw <- renderUI({
     on.exit(dev.off(cdev), add = TRUE)
     suppressWarnings(tryCatch(
       {
-        plot(
+        iNZightTSLegacy:::plot.iNZightTS(
           ts.para$tsObj,
           xlab = input$provide_xlab,
           ylab = input$provide_ylab,
@@ -1173,7 +1173,7 @@ output$decomposed_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
-        g <- plot(
+        g <- iNZightTSLegacy:::plot.inzdecomp(
           iNZightTSLegacy::decompose(
             ts.para$tsObj,
             multiplicative = as.logical(season_select_ts$re),
@@ -1229,7 +1229,7 @@ output$saveDecomposedplot <- downloadHandler(
           input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
-            plot(
+            iNZightTSLegacy:::plot.inzdecomp(
               iNZightTSLegacy::decompose(
                 ts.para$tsObj,
                 multiplicative = as.logical(season_select_ts$re),
@@ -1267,7 +1267,7 @@ output$trSeasonal_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
-        g <- plot(
+        g <- iNZightTSLegacy:::plot.inzdecomp(
           iNZightTSLegacy::decompose(
             ts.para$tsObj,
             multiplicative = as.logical(season_select_ts$re),
@@ -1323,7 +1323,7 @@ output$saveRecomposedplot <- downloadHandler(
           input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
-            plot(
+            iNZightTSLegacy:::plot.inzdecomp(
               iNZightTSLegacy::decompose(
                 ts.para$tsObj,
                 multiplicative = as.logical(season_select_ts$re),
@@ -1366,14 +1366,15 @@ output$forecast_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
-        pl <- try(plot(
-          ts.para$tsObj,
-          multiplicative = as.logical(season_select_ts$re),
-          xlab = input$provide_xlab,
-          ylab = input$provide_ylab,
-          forecast = ts.para$tsObj$freq * 2,
-          model.lim = ts.para$mod.lim,
-          xlim = ts.para$xlim
+        pl <- try(
+          iNZightTSLegacy:::plot.iNZightTS(
+            ts.para$tsObj,
+            multiplicative = as.logical(season_select_ts$re),
+            xlab = input$provide_xlab,
+            ylab = input$provide_ylab,
+            forecast = ts.para$tsObj$freq * 2,
+            model.lim = ts.para$mod.lim,
+            xlim = ts.para$xlim
         ), silent = TRUE)
         if (inherits(pl, "try-error")) {
           return()
@@ -1419,7 +1420,7 @@ output$plotly_tsforecast <- renderPlotly({
       pdf(NULL)
       suppressWarnings(tryCatch(
         {
-          plot(
+          iNZightTSLegacy:::plot.iNZightTS(
             ts.para$tsObj,
             multiplicative = as.logical(season_select_ts$re),
             xlab = input$provide_xlab,
@@ -1453,7 +1454,7 @@ output$plotly_tsforecastnw <- renderUI({
     on.exit(dev.off(cdev), add = TRUE)
     suppressWarnings(tryCatch(
       {
-        plot(
+        iNZightTSLegacy:::plot.iNZightTS(
           ts.para$tsObj,
           multiplicative = as.logical(season_select_ts$re),
           xlab = input$provide_xlab,
@@ -1517,7 +1518,7 @@ output$saveForecastplot <- downloadHandler(
         }
         suppressWarnings(tryCatch(
           {
-            plot(
+            iNZightTSLegacy:::plot.iNZightTS(
               ts.para$tsObj,
               multiplicative = as.logical(season_select_ts$re),
               xlab = input$provide_xlab,
@@ -1574,7 +1575,7 @@ output$multiple_single_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
-        plot(
+        iNZightTSLegacy:::plot.iNZightTS(
           ts.para$tsObj,
           multiplicative = as.logical(season_select_ts$re),
           t = 100 * input$slidersmoothing,
@@ -1624,7 +1625,7 @@ output$saveSingleplot <- downloadHandler(
           input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
-            plot(
+            iNZightTSLegacy:::plot.iNZightTS(
               ts.para$tsObj,
               multiplicative = as.logical(season_select_ts$re),
               t = 100 * input$slidersmoothing,
@@ -1673,7 +1674,7 @@ output$multiple_multi_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
-        plot(
+        iNZightTSLegacy:::plot.iNZightTS(
           ts.para$tsObj,
           multiplicative = as.logical(season_select_ts$re),
           t = 100 * input$slidersmoothing,
@@ -1725,7 +1726,7 @@ output$saveMultiplot <- downloadHandler(
           input$time_info == 2) {
         suppressWarnings(tryCatch(
           {
-            plot(
+            iNZightTSLegacy:::plot.iNZightTS(
               ts.para$tsObj,
               multiplicative = as.logical(season_select_ts$re),
               t = 100 * input$slidersmoothing,
