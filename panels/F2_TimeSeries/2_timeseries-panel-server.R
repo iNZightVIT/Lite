@@ -193,7 +193,7 @@ output$tsui_ts_plot <- renderPlot({
       text(0.5, 0.5, "No variables selected.", cex = 2)
   } else if(all(!sapply(check, is.null))){ #  
     
-    
+
     t = try({
       ts_p = ts_rvals$obj
       
@@ -221,10 +221,9 @@ output$tsui_ts_plot <- renderPlot({
       if (length(ts_rvals$sel_key) && which(colnames(ts_p) == ts_rvals$sel_key) != 1L) {
         key_to_hl <- which(colnames(ts_p) == ts_rvals$sel_key) - 1L
       }
-      # browser()
       smooth_value = ifelse(input$tsui_smoother, input$tsui_smoothing, 0)
       if(input$tsui_time_plot_info == "default") {
-        plot(
+        iNZightTS:::plot.inz_ts(
           x = ts_p,
           var = ts_rvals$sel_var,
           # emphasise = ts_rvals$sel_key,
@@ -235,7 +234,7 @@ output$tsui_ts_plot <- renderPlot({
           seasonal_adjustment = input$tsui_seasonally_adjusted
         )
       } else if(input$tsui_time_plot_info == "decomposed") {
-        plot(
+        iNZightTS:::plot.inz_dcmp(
           iNZightTS::decomp(
             x = ts_p,
             var = ts_rvals$sel_var,

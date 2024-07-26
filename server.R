@@ -12,7 +12,7 @@ message("Starting iNZight Lite Server...")
 
 suppressPackageStartupMessages(library(iNZightPlots))
 # suppressPackageStartupMessages(library(iNZightTSLegacy))
-suppressPackageStartupMessages(library(iNZightTS))
+# suppressPackageStartupMessages(library(iNZightTS))
 suppressPackageStartupMessages(library(iNZightMR))
 suppressPackageStartupMessages(library(markdown))
 suppressPackageStartupMessages(library(GGally))
