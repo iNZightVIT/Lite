@@ -15,7 +15,7 @@ pkgs <-
         # "Matrix@1.6-5",
         "tmelliott/surveyspec@0.1.1",
         "iNZightVIT/iNZightTools@2.0.1",
-        "iNZightVIT/iNZightTS@hotfix/2.0.1",
+        "iNZightVIT/iNZightTS@2.0.0",
         "iNZightVIT/iNZightTS@legacy",
         "iNZightVIT/iNZightRegression@1.3.3",
         "iNZightVIT/iNZightMR@2.2.7",
