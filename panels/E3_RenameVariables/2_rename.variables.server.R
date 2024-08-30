@@ -53,7 +53,7 @@ observe({
                 paste0("input$variablenames", i)
             )))) {
             namelist[i] <- colnames(get.data.set())[idxmch[i]]
-            names(namelist)[i] <- input[[indexes1[i]]]
+            names(namelist)[i] <- make_names(input[[indexes1[i]]])
           }
         }
         changed <- sapply(seq_along(namelist), function(i) {

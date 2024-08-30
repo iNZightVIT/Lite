@@ -13,7 +13,7 @@ output$convert_datestimes_panel <- renderUI({
         size = 7
       ),
       textInput("convert_datestimes_newname",
-        label = "Name for the new variable", value = ""
+        label = "New variable name", value = ""
       ),
       selectInput(
         inputId = "convert_datestimes_selectorder",
@@ -109,7 +109,7 @@ observe({
           data <- tryCatch(
             data.frame(
               Converted = iNZightTools::convert_to_datetime(
-                get.data.set(), factorname, convname, name
+                get.data.set(), factorname, convname, make_names(name)
               )[[name]],
               stringsAsFactors = TRUE
             ),
@@ -160,7 +160,7 @@ observe({
           !grepl("^\\s*$", input$convert_datestimes_newname)) {
           name <- input$convert_datestimes_newname
           data <- iNZightTools::convert_to_datetime(
-            get.data.set(), factorname, convname, name
+            get.data.set(), factorname, convname, make_names(name)
           )
           updatePanel$datachanged <- updatePanel$datachanged + 1
           values$data.set <- data

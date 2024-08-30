@@ -84,7 +84,7 @@ observe({
             levels <- as.character(input$select.reorder.item)
             temp <- iNZightTools::reorder_levels(
               get.data.set(), var, levels,
-              name = name
+              name = make_names(name)
             )
             updatePanel$datachanged <- updatePanel$datachanged + 1
             values$data.set <- temp
@@ -105,7 +105,7 @@ observe({
         } else {
           data <- iNZightTools::reorder_levels(
             get.data.set(), var,
-            freq = TRUE, name = name
+            auto = "freq", name = make_names(name)
           )
           updatePanel$datachanged <- updatePanel$datachanged + 1
           values$data.set <- data
