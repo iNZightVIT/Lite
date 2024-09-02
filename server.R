@@ -18,7 +18,7 @@ suppressPackageStartupMessages(library(GGally))
 suppressPackageStartupMessages(library(iNZightRegression))
 suppressPackageStartupMessages(library(RJSONIO))
 suppressPackageStartupMessages(library(survey))
-suppressPackageStartupMessages(library(iNZightMaps))
+# suppressPackageStartupMessages(library(iNZightMaps))
 suppressPackageStartupMessages(library(colorspace))
 suppressPackageStartupMessages(library(readxl))
 suppressPackageStartupMessages(library(sas7bdat))
@@ -498,11 +498,11 @@ shinyServer(function(input, output, session) {
   ## ---------------##
   ##  Maps Module  ##
   ## ---------------##
-  if (!(!is.null(session$userData$LITE_VERSION) &&
-    session$userData$LITE_VERSION == "CAS")) {
-    source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
-    source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
-  }
+  # if (!(!is.null(session$userData$LITE_VERSION) &&
+  #   session$userData$LITE_VERSION == "CAS")) {
+  #   source("panels/F4_Maps//1_maps.panel-ui.R", local = TRUE)
+  #   source("panels/F4_Maps//2_maps.panel-server.R", local = TRUE)
+  # }
 
   #   Advanced --> Design of Experiment
 
@@ -615,7 +615,7 @@ shinyServer(function(input, output, session) {
         value = "regression",
         uiOutput("modelfitting.panel")
       ),
-      maps = tabPanel("Maps", uiOutput("newmaps.panel")),
+      # maps = tabPanel("Maps", uiOutput("newmaps.panel")),
       design_exp = tabPanel(
         "Design of Experiments",
         uiOutput("mixedmodel.panel")
