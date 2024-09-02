@@ -9,7 +9,7 @@ convert.to.categorical.sidebar <- function() {
       selectize = FALSE
     ),
     textInput("convert_to_name",
-      label = "Type name for the new variable",
+      label = "New variable name",
       value = ""
     ),
     actionButton("convert_to_categorical_button", "Update data",

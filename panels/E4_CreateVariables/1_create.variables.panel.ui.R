@@ -122,7 +122,7 @@ get.create.variables.panel <- function(data.set) {
         ), br(),
         div(fixedRow(
           column(width = 4, textInput("create.variables.name",
-            label = "Variable name",
+            label = "New variable name",
             value = "new.name"
           )),
           column(width = 1, "="),
