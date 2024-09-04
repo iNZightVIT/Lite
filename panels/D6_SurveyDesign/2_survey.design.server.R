@@ -62,9 +62,6 @@ createSurveyObject <- function(reload = FALSE) {
   currentDesign$info$design
 }
 
-
-
-
 svalue_or_null <- function(x) {
   if (x == " ") {
     return(NULL)
