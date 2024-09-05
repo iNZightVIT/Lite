@@ -674,14 +674,7 @@ output$visualize.summary <- renderPrint({
       }
     }
     
-    .dataset <- get.data.set()
     if (!is.null(design_params$design$dataDesign)) {
-      # update data if its been changed
-      if (!identical(design_params$design$dataDesign$data, .dataset)) {
-        setDesign(
-          design_params$design$dataDesign$spec
-        )
-      }
       curSet$data <- NULL
       curSet$design <- as.name(".design")
       .design <- createSurveyObject()
@@ -689,6 +682,7 @@ output$visualize.summary <- renderPrint({
       # curSet$design <<- as.name(designname)
       # assign(designname, curMod$createSurveyObject(), envir = env)
     }
+    .dataset <- get.data.set()
     
     if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
       tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {

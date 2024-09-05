@@ -564,3 +564,19 @@ output$estimate.pop.size <- renderUI({
     }
   })
 })
+
+
+# update survey object when the global data set changes
+observe({
+  get.data.set()
+  
+  isolate({
+    if (!is.null(design_params$design$dataDesign)) {
+      if (!identical(design_params$design$dataDesign$data, get.data.set())) {
+        setDesign(
+          design_params$design$dataDesign$spec
+        )
+      }
+    }
+  })
+})
