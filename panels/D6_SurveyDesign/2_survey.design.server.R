@@ -557,6 +557,7 @@ observeEvent(input$svy.design.spec, {
 output$estimate.pop.size <- renderUI({
   input$wtVar
   isolate({
+    
     if (!is.null(input$wtVar) && length(input$wtVar) > 0 &&
       input$wtVar != " ") {
       size <- round(sum(get.data.set()[[input$wtVar]]))
@@ -573,7 +574,7 @@ observe({
   isolate({
     if (!is.null(design_params$design$dataDesign)) {
       if (!identical(design_params$design$dataDesign$data, get.data.set())) {
-        setDesign(
+        plot.par$design = setDesign(
           design_params$design$dataDesign$spec
         )
       }
