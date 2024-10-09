@@ -166,7 +166,7 @@ observe({
 observe({
   input$select_categorical1
   isolate({
-    if (!is.null(input$select_categorical1)) {
+    if (!is.null(input$select_categorical1) && nchar(input$select_categorical1) > 0) {
       if (is.null(levels(get.data.set()[, which(colnames(get.data.set()) %in%
         input$select_categorical1)]))) {
         updateSelectInput(

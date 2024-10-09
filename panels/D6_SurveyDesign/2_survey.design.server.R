@@ -62,9 +62,6 @@ createSurveyObject <- function(reload = FALSE) {
   currentDesign$info$design
 }
 
-
-
-
 svalue_or_null <- function(x) {
   if (x == " ") {
     return(NULL)
@@ -560,10 +557,27 @@ observeEvent(input$svy.design.spec, {
 output$estimate.pop.size <- renderUI({
   input$wtVar
   isolate({
+    
     if (!is.null(input$wtVar) && length(input$wtVar) > 0 &&
       input$wtVar != " ") {
       size <- round(sum(get.data.set()[[input$wtVar]]))
       h5(paste0("Estimated population size: ", size))
+    }
+  })
+})
+
+
+# update survey object when the global data set changes
+observe({
+  get.data.set()
+  
+  isolate({
+    if (!is.null(design_params$design$dataDesign)) {
+      if (!identical(design_params$design$dataDesign$data, get.data.set())) {
+        plot.par$design = setDesign(
+          design_params$design$dataDesign$spec
+        )
+      }
     }
   })
 })

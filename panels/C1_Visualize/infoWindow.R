@@ -673,7 +673,7 @@ output$visualize.summary <- renderPrint({
         vartypes$y <- iNZightTools::vartype(vis.data()[[curSet$y]])
       }
     }
-
+    
     if (!is.null(design_params$design$dataDesign)) {
       curSet$data <- NULL
       curSet$design <- as.name(".design")
@@ -683,6 +683,7 @@ output$visualize.summary <- renderPrint({
       # assign(designname, curMod$createSurveyObject(), envir = env)
     }
     .dataset <- get.data.set()
+    
     if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
       tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
       tryCatch({
