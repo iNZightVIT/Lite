@@ -11,7 +11,8 @@
 message("Starting iNZight Lite Server...")
 
 suppressPackageStartupMessages(library(iNZightPlots))
-suppressPackageStartupMessages(library(iNZightTS))
+# suppressPackageStartupMessages(library(iNZightTSLegacy))
+# suppressPackageStartupMessages(library(iNZightTS))
 suppressPackageStartupMessages(library(iNZightMR))
 suppressPackageStartupMessages(library(markdown))
 suppressPackageStartupMessages(library(GGally))
@@ -476,6 +477,8 @@ shinyServer(function(input, output, session) {
   ## ----------------------##
   if (!(!is.null(session$userData$LITE_VERSION) &&
     session$userData$LITE_VERSION == "CAS")) {
+    source("panels/F2_TimeSeriesLegacy/1_timeseries-panel-ui.R", local = TRUE)
+    source("panels/F2_TimeSeriesLegacy/2_timeseries-panel-server.R", local = TRUE)
     source("panels/F2_TimeSeries/1_timeseries-panel-ui.R", local = TRUE)
     source("panels/F2_TimeSeries/2_timeseries-panel-server.R", local = TRUE)
   }
@@ -608,8 +611,12 @@ shinyServer(function(input, output, session) {
     advance_tabs <- list(
       quick = tabPanel("Quick explore", uiOutput("quick.explore")),
       time_series = tabPanel("Time Series",
-        value = "timeSeries",
-        uiOutput("timeseries.panel")
+         # value = "timeSeries",
+         uiOutput("timeseries.panel")
+      ),
+      time_series = tabPanel("Time Series (Legacy)",
+        # value = "timeSeries",
+        uiOutput("timeseries.legacy.panel")
       ),
       model = tabPanel("Model Fitting",
         value = "regression",
