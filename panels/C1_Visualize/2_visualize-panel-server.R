@@ -458,6 +458,10 @@ determine.class <- function(input) {
   input.class
 }
 
+observeEvent(graphical.par$trend, {
+  cat("graphical.par$trend changed to ", graphical.par$trend, "\n")
+})
+
 ##  Input Handling
 #' Tests whether the input of a variable is valid.
 #'
@@ -614,10 +618,11 @@ vis.par <- reactive({
     vis.par <- modifyList(reactiveValuesToList(graphical.par), vis.par,
       keep.null = TRUE
     )
-  } else {
-    NULL
+    return(vis.par)
   }
+  NULL
 })
+
 
 ##  We write some UI outputs for variable selection and subsetting:
 ##
@@ -1185,8 +1190,10 @@ output$visualize.plot <- renderPlot({
   # plot it
   if (!is.null(vis.par())) {
     dafr <- get.data.set()
+    cat("plotting ...\n")
     if (is.numeric(vis.data()[[plot.par$x]]) &
       is.numeric(vis.data()[[plot.par$y]])) {
+      cat("Plotting with vis par trend =", vis.par()$trend, "\n")
       temp <- vis.par()
       temp$trend.parallel <- graphical.par$trend.parallel
       temp.x <- temp$x
@@ -1260,6 +1267,7 @@ output$mini.plot <- renderPlot({
     }
   })
   # plot it
+  cat("mini plot ...\n")
   if (!is.null(vis.par())) {
     dafr <- get.data.set()
     if (is.numeric(vis.data()[[plot.par$x]]) &
@@ -1318,6 +1326,7 @@ observe({
     (!is.null(input$go.to.new) && input$go.to.new > 0) ||
     (!is.null(input$go.to.old) && input$go.to.old > 0)) {
     isolate({
+      message("RESETTING GRAPHICS\n")
       updateCheckboxInput(session, "show_boxplot_title", value = T)
       updateCheckboxInput(session, "show_mean_title", value = F)
       updateSelectInput(session, "fill.color", selected = "")
@@ -1418,6 +1427,7 @@ observe({
       graphical.par$rugs <- ""
       updateCheckboxInput(session, "check.rugs.x", value = F)
       updateCheckboxInput(session, "check.rugs.y", value = F)
+      cat("resetting trend - A\n")
       graphical.par$trend <- NULL
       ##  Others
       graphical.par$cex <- 1
@@ -2021,6 +2031,7 @@ output$plot.appearance.panel <- renderUI({
   plot.par$design
 
   isolate({
+    message("Re-renddering plot appearance panel\n")
     if (!is.null(plot.ret.para$parameters)) {
       varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE <- attr(plot.ret.para$parameters, "plottype")
@@ -2332,13 +2343,22 @@ output$plot.appearance.panel <- renderUI({
       graphical.par$cex.dotpt <- 0.5
     }
 
+    valueOrDefault <- function(value, default) {
+      if (is.null(value) || is.na(value)) {
+        return(default)
+      } else {
+        return(value)
+      }
+    }
+
     adjust.size.scale.object <- fixedRow(
       column(3, h5("Overall size scale:")),
       column(6, sliderInput("adjust.size.scale",
         label = NULL,
         min = 0.5,
         max = 2,
-        value = 1, step = .05, ticks = FALSE
+        value = valueOrDefault(graphical.par$cex, 1),
+        step = .05, ticks = FALSE
       ))
     )
 
@@ -4174,6 +4194,7 @@ observe({
 output$trend.curve.panel <- renderUI({
   get.data.set()
   isolate({
+    cat("Rending trend UI ... \n", file = "mydebug.txt", append = TRUE)
     #    title.add.trend.curve = h5("Add trend curves")
     trend.curves.title <- h5(strong("Trend Curves"))
     smoother.title <- h5(strong("Smoother"))
@@ -4387,9 +4408,11 @@ observe({
   input$color.linear
   input$type.linear
   isolate({
+    cat("Observing linear trend: check_linear =", input$check_linear, "\n")
     if (!is.null(input$check_linear)) {
       if (input$check_linear) {
         if (length(which(graphical.par$trend %in% "linear")) == 0) {
+          cat("linear - set 1\n")
           graphical.par$trend <- c(graphical.par$trend, "linear")
         }
         graphical.par$col.trend[["linear"]] <- input$color.linear
@@ -4403,10 +4426,12 @@ observe({
         )
       } else {
         if (length(which(graphical.par$trend %in% "linear")) > 0) {
+          cat("linear - set 2\n")
           graphical.par$trend <- graphical.par$trend[
             -which(graphical.par$trend %in% "linear")
           ]
           if (length(graphical.par$trend) == 0) {
+            cat("resetting trend - B\n")
             graphical.par$trend <- NULL
           }
         }
@@ -4424,6 +4449,7 @@ observe({
     if (!is.null(input$check_quadratic)) {
       if (input$check_quadratic) {
         if (length(which(graphical.par$trend %in% "quadratic")) == 0) {
+          cat("quadratic - set 1\n")
           graphical.par$trend <- c(graphical.par$trend, "quadratic")
         }
         graphical.par$col.trend[["quadratic"]] <- input$color.quadratic
@@ -4437,10 +4463,12 @@ observe({
         )
       } else {
         if (length(which(graphical.par$trend %in% "quadratic")) > 0) {
+          cat("quadratic - set 2\n")
           graphical.par$trend <- graphical.par$trend[
             -which(graphical.par$trend %in% "quadratic")
           ]
           if (length(graphical.par$trend) == 0) {
+            cat("resetting trend - C\n")
             graphical.par$trend <- NULL
           }
         }
@@ -4458,6 +4486,7 @@ observe({
     if (!is.null(input$check_cubic)) {
       if (input$check_cubic) {
         if (length(which(graphical.par$trend %in% "cubic")) == 0) {
+          cat("cubic - set 1\n")
           graphical.par$trend <- c(graphical.par$trend, "cubic")
         }
         graphical.par$col.trend[["cubic"]] <- input$color.cubic
@@ -4471,10 +4500,12 @@ observe({
         )
       } else {
         if (length(which(graphical.par$trend %in% "cubic")) > 0) {
+          cat("cubic - set 2\n")
           graphical.par$trend <- graphical.par$trend[
             -which(graphical.par$trend %in% "cubic")
           ]
           if (length(graphical.par$trend) == 0) {
+            cat("resetting trend - D\n")
             graphical.par$trend <- NULL
           }
         }
@@ -6089,7 +6120,6 @@ output$select_additions_panel <- renderUI({
       (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% "none" |
           input$vari2 %in% colnames(get.data.set())))) {
-
       # vari = factor, vari = none
       if (input$vari2 %in% "none" &&
         (class(get.data.set()[, input$vari1]) %in% "factor" |
@@ -7109,6 +7139,7 @@ observe({
         quadratic_trend <- FALSE
         cubic_trend <- FALSE
         smoother_trend <- FALSE
+        cat("Residuals - graphical.par$trend =", graphical.par$trend, "\n")
         if ("linear" %in% graphical.par$trend) {
           linear_trend <- TRUE
           fit.linear <- with(
@@ -7167,7 +7198,9 @@ observe({
           colnames(resi.smooth) <- input$add_smoother_residuals
           temp <- cbind(temp, resi.smooth)
         }
+        # TODO: what's doing on here??
         if (linear_trend) {
+          cat("BOOM\n")
           updateCheckboxInput(session, "check_linear", value = T)
         }
         if (quadratic_trend) {
@@ -7309,6 +7342,7 @@ observe({
           temp <- cbind(temp, pred.smooth)
         }
         if (linear_trend) {
+          cat("BOOM2")
           updateCheckboxInput(session, "check_linear", value = T)
         }
         if (quadratic_trend) {
@@ -7864,10 +7898,11 @@ observe({
 
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-            "true") {
+              "true") {
             tryCatch({
               plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, temp)
+                iNZightPlots:::iNZightPlot, temp
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
@@ -7875,15 +7910,17 @@ observe({
             }, finally = {})
           } else {
             plot.ret.para$parameters <- try(do.call(
-              iNZightPlots:::iNZightPlot, temp))
+              iNZightPlots:::iNZightPlot, temp
+            ))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-            "true") {
+              "true") {
             tryCatch({
               plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, vis.par())
+                iNZightPlots:::iNZightPlot, vis.par()
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {

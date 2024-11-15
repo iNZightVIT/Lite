@@ -21,6 +21,7 @@ output$inference_test <- renderUI({
   input$type.inference.select
   design_params$design
   isolate({
+    cat("Triggered... inf test UI render\n")
     if (!is.null(plot.par$x)) {
       xvar <- vis.data()[[plot.par$x]]
       yvar <- if (!is.null(plot.par$y)) vis.data()[[plot.par$y]] else NULL
@@ -125,11 +126,20 @@ output$inference_test <- renderUI({
         }
       }
       if (INFTYPE == "regression") {
+        cat("+++REgression+++", "\n")
+        cat(input$check_linear, "\n")
+        cat(input$inf.trend.linear, "\n")
         ret <- list(
           column(12, checkboxInput("inf.trend.linear",
             label = "linear",
-            value = ifelse((!is.null(input$check_linear) && length(input$check_linear) > 0), input$check_linear,
-              ifelse((!is.null(input$inf.trend.linear) && length(input$inf.trend.linear) > 0), input$inf.trend.linear, FALSE)
+            value = ifelse(
+              (!is.null(input$check_linear) && length(input$check_linear) > 0), input$check_linear,
+              ifelse(
+                (!is.null(input$inf.trend.linear) &&
+                  length(input$inf.trend.linear) > 0),
+                input$inf.trend.linear,
+                FALSE
+              )
             )
           )),
           column(12, checkboxInput("inf.trend.quadratic",
@@ -173,10 +183,13 @@ output$inference_epi <- renderUI({
   }
 })
 
+## being set to FALSE somewhere ...
 observe({
+  cat("seting check_linear value to inf.trend.linear (", input$inf.trend.linear, ")\n")
   updateCheckboxInput(session, inputId = "check_linear", label = "linear", value = input$inf.trend.linear)
 })
 observe({
+  cat("seting inf.trend.linear to check_linear (", input$check_linear, ")\n")
   updateCheckboxInput(session, inputId = "inf.trend.linear", label = "linear", value = input$check_linear)
 })
 
@@ -197,19 +210,24 @@ observe({
 observe({
   input$inf.trend.linear
   isolate({
+    cat("Input trend linear =", input$inf.trend.linear, "\n")
     #    graphical.par$bs.inference = F
     #    graphical.par$inference.type = NULL
     if (is.null(input$check_linear) && !is.null(input$inf.trend.linear)) {
       if (input$inf.trend.linear) {
         if (length(which(graphical.par$trend %in% "linear")) == 0) {
+          cat("INFO - linear - set 1\n")
           graphical.par$trend <- c(graphical.par$trend, "linear")
         }
         graphical.par$col.trend[["linear"]] <- "blue"
         graphical.par$lty.trend[["linear"]] <- 1
       } else {
+        cat("INFO STUFF: ", graphical.par$trend, "\n")
         if (length(which(graphical.par$trend %in% "linear")) > 0) {
+          cat("INFO - linear - set 2\n")
           graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "linear")]
           if (length(graphical.par$trend) == 0) {
+            cat("INFO - linear - reset\n")
             graphical.par$trend <- NULL
           }
         }
@@ -226,14 +244,17 @@ observe({
     if (is.null(input$check_quadratic) && !is.null(input$inf.trend.quadratic)) {
       if (input$inf.trend.quadratic) {
         if (length(which(graphical.par$trend %in% "quadratic")) == 0) {
+          cat("INFO - quadratic - set 1\n")
           graphical.par$trend <- c(graphical.par$trend, "quadratic")
         }
         graphical.par$col.trend[["quadratic"]] <- "red"
         graphical.par$lty.trend[["quadratic"]] <- 1
       } else {
         if (length(which(graphical.par$trend %in% "quadratic")) > 0) {
+          cat("INFO - quadratic - set 2\n")
           graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "quadratic")]
           if (length(graphical.par$trend) == 0) {
+            cat("INFO - quadratic - reset\n")
             graphical.par$trend <- NULL
           }
         }
@@ -251,14 +272,17 @@ observe({
     if (is.null(input$check_cubic) && !is.null(input$inf.trend.cubic)) {
       if (input$inf.trend.cubic) {
         if (length(which(graphical.par$trend %in% "cubic")) == 0) {
+          cat("INFO - cubic - set 1\n")
           graphical.par$trend <- c(graphical.par$trend, "cubic")
         }
         graphical.par$col.trend[["cubic"]] <- "green4"
         graphical.par$lty.trend[["cubic"]] <- 1
       } else {
         if (length(which(graphical.par$trend %in% "cubic")) > 0) {
+          cat("INFO - cubic - set 2\n")
           graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "cubic")]
           if (length(graphical.par$trend) == 0) {
+            cat("INFO - cubic - reset\n")
             graphical.par$trend <- NULL
           }
         }
