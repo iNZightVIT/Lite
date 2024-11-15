@@ -24,8 +24,26 @@
 mixedModel.sidebarPanel <- function() {
   sidebarPanelUI <- list(
     useShinyalert(),
+    withMathJax(),
+    tags$script("
+        var initMathJax = function() {
+            if (window.MathJax) {
+                MathJax.Hub.Queue(['Typeset', MathJax.Hub, '.sweetalert']);
+            }
+        };
+    "),
+    tags$style("
+        .math-content {
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .math-formula {
+            text-align: center;
+            margin: 20px 0;
+        }
+    "),
     ## select fitted models
-
     fluidRow(
       column(6, selectInput("model_select",
         label = "Select Fitted Model",
