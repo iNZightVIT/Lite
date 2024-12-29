@@ -1,4 +1,12 @@
+# January 2025
+
 - [update] refactor for new iNZightTools 2.0.0 API
+- [update] new Time Series module used updated iNZightTS 2.0 - old version remains available as 'Legacy'
+- [update] UI changes (help text) to Design of Experiments module
+- [fix] spaces in user supplied variable names are handled ap[p]ropriately (replaced with underscores)
+- [fix] survey objected updated when data changes
+- [fix] various UI fixes/updates
+- [deprecated] Maps module deprecated following changes to dependent packages
 
 ---
 
