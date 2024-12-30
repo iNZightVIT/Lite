@@ -80,7 +80,7 @@ output$inference_test <- renderUI({
           value = ci_width(),
           min = 10,
           max = 99,
-          icon = list(NULL, "%")
+          # icon = list(NULL, "%")
         )
       })
 

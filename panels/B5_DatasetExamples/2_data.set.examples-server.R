@@ -246,6 +246,8 @@ observe({
         plot.par$design <- NULL
         design_params$design <- NULL
       }
+      
+      updateTabsetPanel(session, "selector", "visualize")
     })
   }
 })
