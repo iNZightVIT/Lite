@@ -268,6 +268,7 @@ graphical.par <- reactiveValues(
   bar.lwd = 1,
   bar.col = "black", # colour for borders of bars in bar plot
   bar.fill = colors()[81], # colour for inside of bars in bar plot
+  bar.relative.width = TRUE,
   ##  Line
   lwd = 1,
   lty = 1,
@@ -1378,6 +1379,9 @@ observe({
 
       updateCheckboxInput(session, "colour.palette.reverse", value = F)
       graphical.par$reverse.palette <- FALSE
+
+      updateCheckboxInput(session, "bar.relative.width", valuse = T)
+      graphical.par$bar.relative.width <- TRUE
 
       updateCheckboxInput(session, "point_size_title", value = F)
       updateCheckboxInput(session, "point_colour_title", value = F)
@@ -3481,6 +3485,16 @@ observe({
   })
 })
 
+# set bar width relative on/off
+observe({
+  input$bar.relative.width
+  isolate({
+    if (!is.null(input$bar.relative.width)) {
+      graphical.par$bar.relative.width <- input$bar.relative.width
+    }
+  })
+})
+
 # select colour ranks or not
 observe({
   input$colour.use.ranks
@@ -3771,6 +3785,7 @@ output$code.variables.panel <- renderUI({
   isolate({
     select.colour.palette.object <- NULL
     colour.palette.reverse.object <- NULL
+    bar.relative.width.object <- NULL
 
     # vari1 = factor, vari2 = factor
     if (!input$vari2 %in% "none" &&
@@ -3788,16 +3803,25 @@ output$code.variables.panel <- renderUI({
         ))
       )
       colour.palette.reverse.object <- fixedRow(
-        column(3),
+        # column(3),
         column(6, checkboxInput(
           inputId = "colour.palette.reverse", label = "Reverse palette",
           value = FALSE
         ))
       )
+      # checkbox to turn relative width on/off
+      bar.relative.width.object <- fixedRow(
+        column(12, checkboxInput(
+          inputId = "bar.relative.width",
+          label = "Bar widths proportional to group size",
+          value = TRUE
+        ))
+      )
 
       ret <- list(
         select.colour.palette.object,
-        colour.palette.reverse.object
+        colour.palette.reverse.object,
+        bar.relative.width.object
       )
 
       if (length(input$select.plot.type) != 0 &&
@@ -6089,7 +6113,6 @@ output$select_additions_panel <- renderUI({
       (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% "none" |
           input$vari2 %in% colnames(get.data.set())))) {
-
       # vari = factor, vari = none
       if (input$vari2 %in% "none" &&
         (class(get.data.set()[, input$vari1]) %in% "factor" |
@@ -7864,10 +7887,11 @@ observe({
 
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-            "true") {
+              "true") {
             tryCatch({
               plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, temp)
+                iNZightPlots:::iNZightPlot, temp
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
@@ -7875,15 +7899,17 @@ observe({
             }, finally = {})
           } else {
             plot.ret.para$parameters <- try(do.call(
-              iNZightPlots:::iNZightPlot, temp))
+              iNZightPlots:::iNZightPlot, temp
+            ))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-            "true") {
+              "true") {
             tryCatch({
               plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, vis.par())
+                iNZightPlots:::iNZightPlot, vis.par()
+              )
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
