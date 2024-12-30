@@ -25,8 +25,6 @@ vis.data <- reactive({
 # convert old vis.par() to a new format so its compatible with 
 # iNZightPlots:::inzplot (iNZightPlots@2.15.0)
 new_vis_par = function(vis_par) {
-  print("..")
-  # browser()
   # ignore if x or y is a vector
   if (length(vis_par$x) > 1 || length(vis_par$y) > 1) {
     return(vis_par)
@@ -1197,7 +1195,6 @@ observe({
 })
 
 output$visualize.plot <- renderPlot({
-  print("zxc1")
   isolate({
     # some of the graphical parameters need
     # to be reminded what there default
@@ -1226,7 +1223,6 @@ output$visualize.plot <- renderPlot({
       temp$varnames$x <- temp$varnames$y
       temp$varnames$y <- temp.varnames.x
       
-      # browser()
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
@@ -1280,7 +1276,6 @@ output$visualize.plot <- renderPlot({
 
 
 output$mini.plot <- renderPlot({
-  print("miniplot")
   isolate({
     # some of the graphical parameters need
     # to be reminded what their default
@@ -1998,7 +1993,6 @@ output$plot.appearance.panel.title <- renderUI({
   input$vari2
   plot.par$design
   isolate({
-    print("plot.appearance.panel.title")
     if (!is.null(plot.ret.para$parameters)) {
       varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE <- attr(plot.ret.para$parameters, "plottype")
@@ -2064,7 +2058,6 @@ output$plot.appearance.panel <- renderUI({
   plot.par$design
 
   isolate({
-    print("plot.appearance.panel")
     if (!is.null(plot.ret.para$parameters)) {
       varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE <- attr(plot.ret.para$parameters, "plottype")
@@ -3072,7 +3065,6 @@ output$plot.appearance.panel <- renderUI({
 observe({
   input$select.plot.type
   if (!is.null(input$vari1) & !is.null(input$vari2)) {
-    print("input$select.plot.type")
     isolate({
       if (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% colnames(get.data.set()) ||
@@ -7909,8 +7901,6 @@ observe({
   input$refreshplot
   isolate({
     output$visualize.plot <- renderPlot({
-      # browser()
-      # print("zxc2")
       isolate({
         # some of the graphical parameters need
         # to be reminded what there default
@@ -7928,7 +7918,6 @@ observe({
 
       # plot it
       if (!is.null(vis.par())) {
-        # print("zxc3")
         dafr <- get.data.set()
         if (is.numeric(vis.data()[[plot.par$x]]) &&
           !is.null(plot.par$y) &&
