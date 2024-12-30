@@ -3,8 +3,10 @@
 - [update] refactor for new iNZightTools 2.0.0 API
 - [update] new Time Series module used updated iNZightTS 2.0 - old version remains available as 'Legacy'
 - [update] UI changes (help text) to Design of Experiments module
-- [fix] spaces in user supplied variable names are handled ap[p]ropriately (replaced with underscores)
+- [change] 'Store residuals' and 'Store fitted values' no longer produce a pop-up, and instead create the variable immediately (without asking user to provide a name)
+- [fix] spaces in user supplied variable names are handled appropriately (replaced with underscores)
 - [fix] survey objected updated when data changes
+- [fix] Example dataset redirects to Visualize after clicking 'Select set'
 - [fix] various UI fixes/updates
 - [deprecated] Maps module deprecated following changes to dependent packages
 
