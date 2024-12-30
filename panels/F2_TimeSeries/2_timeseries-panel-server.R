@@ -407,7 +407,7 @@ output$tsui_key_select <- renderUI({
   # available_keys = colnames(get.data.set())
   # available_keys = available_keys[-which(available_keys == ts_rvals$obj)]
   list(
-    h5("Key:"),
+    h5("Key (CTRL+click to select multiple, or deselect) :"),
     div(
       style = "padding: 0px 0px; margin-top:-1.5em",
       selectInput(

@@ -295,6 +295,7 @@ graphical.par <- reactiveValues(
   bar.lwd = 1,
   bar.col = "black", # colour for borders of bars in bar plot
   bar.fill = colors()[81], # colour for inside of bars in bar plot
+  bar.relative.width = TRUE,
   ##  Line
   lwd = 1,
   lty = 1,
@@ -1347,11 +1348,7 @@ output$mini.plot <- renderPlot({
 ##  Reset variable selection and graphical parameters.
 observe({
   input$reset.graphics
-  input$go.to.new
-  input$go.to.old
-  if ((!is.null(input$reset.graphics) && input$reset.graphics > 0) ||
-    (!is.null(input$go.to.new) && input$go.to.new > 0) ||
-    (!is.null(input$go.to.old) && input$go.to.old > 0)) {
+  if (!is.null(input$reset.graphics) && input$reset.graphics > 0) {
     isolate({
       updateCheckboxInput(session, "show_boxplot_title", value = T)
       updateCheckboxInput(session, "show_mean_title", value = F)
@@ -1413,6 +1410,9 @@ observe({
 
       updateCheckboxInput(session, "colour.palette.reverse", value = F)
       graphical.par$reverse.palette <- FALSE
+
+      updateCheckboxInput(session, "bar.relative.width", valuse = T)
+      graphical.par$bar.relative.width <- TRUE
 
       updateCheckboxInput(session, "point_size_title", value = F)
       updateCheckboxInput(session, "point_colour_title", value = F)
@@ -3530,6 +3530,16 @@ observe({
   })
 })
 
+# set bar width relative on/off
+observe({
+  input$bar.relative.width
+  isolate({
+    if (!is.null(input$bar.relative.width)) {
+      graphical.par$bar.relative.width <- input$bar.relative.width
+    }
+  })
+})
+
 # select colour ranks or not
 observe({
   input$colour.use.ranks
@@ -3820,6 +3830,7 @@ output$code.variables.panel <- renderUI({
   isolate({
     select.colour.palette.object <- NULL
     colour.palette.reverse.object <- NULL
+    bar.relative.width.object <- NULL
 
     # vari1 = factor, vari2 = factor
     if (!input$vari2 %in% "none" &&
@@ -3837,16 +3848,25 @@ output$code.variables.panel <- renderUI({
         ))
       )
       colour.palette.reverse.object <- fixedRow(
-        column(3),
+        # column(3),
         column(6, checkboxInput(
           inputId = "colour.palette.reverse", label = "Reverse palette",
           value = FALSE
         ))
       )
+      # checkbox to turn relative width on/off
+      bar.relative.width.object <- fixedRow(
+        column(12, checkboxInput(
+          inputId = "bar.relative.width",
+          label = "Bar widths proportional to group size",
+          value = TRUE
+        ))
+      )
 
       ret <- list(
         select.colour.palette.object,
-        colour.palette.reverse.object
+        colour.palette.reverse.object,
+        bar.relative.width.object
       )
 
       if (length(input$select.plot.type) != 0 &&
@@ -6151,7 +6171,6 @@ output$select_additions_panel <- renderUI({
       (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% "none" |
           input$vari2 %in% colnames(get.data.set())))) {
-
       # vari = factor, vari = none
       if (input$vari2 %in% "none" &&
         (class(get.data.set()[, input$vari1]) %in% "factor" |
@@ -6992,6 +7011,7 @@ output$add.fitted.residuals.panel <- renderUI({
 
 
 observeEvent(input$store_fitted_values, {
+  existing_colnames = colnames(vis.data())
   if (!is.null(plot.par$x)) {
     if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
       !is.null(plot.par$x) &&
@@ -7004,7 +7024,10 @@ observeEvent(input$store_fitted_values, {
             column(2, h5("Linear:")),
             column(6, textInput(
               inputId = "add_linear_fitted_values",
-              value = paste(input$vari1, ".predict.linear", sep = ""),
+              value = iNZightTools::make_names(
+                new = paste(input$vari1, ".predict.linear", sep = ""),
+                existing = existing_colnames
+              ),
               label = NULL
             ))
           )
@@ -7015,7 +7038,10 @@ observeEvent(input$store_fitted_values, {
             column(2, h5("Quadratic:")),
             column(6, textInput(
               inputId = "add_quadratic_fitted_values",
-              value = paste(input$vari1, ".predict.quadratic", sep = ""),
+              value = iNZightTools::make_names(
+                new = paste(input$vari1, ".predict.quadratic", sep = ""),
+                existing = existing_colnames
+              ),
               label = NULL
             ))
           )
@@ -7026,7 +7052,10 @@ observeEvent(input$store_fitted_values, {
             column(2, h5("Cubic:")),
             column(6, textInput(
               inputId = "add_cubic_fitted_values",
-              value = paste(input$vari1, ".predict.cubic", sep = ""),
+              value = iNZightTools::make_names(
+                new = paste(input$vari1, ".predict.cubic", sep = ""),
+                existing = existing_colnames
+              ),
               label = NULL
             ))
           )
@@ -7037,7 +7066,10 @@ observeEvent(input$store_fitted_values, {
             column(2, h5("Smoother:")),
             column(6, textInput(
               inputId = "add_smoother_fitted_values",
-              value = paste(input$vari1, ".predict.smoother", sep = ""),
+              value = iNZightTools::make_names(
+                new = paste(input$vari1, ".predict.smoother", sep = ""),
+                existing = existing_colnames
+              ),
               label = NULL
             ))
           )
@@ -7047,17 +7079,18 @@ observeEvent(input$store_fitted_values, {
         title = "Store fitted values"
       ))
     } else {
+      tmp_value = paste(
+        ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+               input$vari1, input$vari2
+        ),
+        ".predict",
+        sep = ""
+      )
       showModal(modalDialog(
         h5(strong("Specify names for the new variables")),
         fixedRow(column(6, textInput(
           inputId = "add_numcat_fitted_values",
-          value = paste(
-            ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
-              input$vari1, input$vari2
-            ),
-            ".predict",
-            sep = ""
-          ),
+          value = iNZightTools::make_names(new = tmp_value, existing = existing_colnames),
           label = NULL
         ))),
         actionButton("store_fitted_values_ok", "OK"),
@@ -7080,6 +7113,7 @@ output$add_fitted_values_status <- renderText({
 
 
 observeEvent(input$store_residuals, {
+  existing_colnames = colnames(vis.data())
   if (iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
     iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
     showModal(modalDialog(
@@ -7090,7 +7124,10 @@ observeEvent(input$store_residuals, {
           column(2, h5("Linear:")),
           column(6, textInput(
             inputId = "add_linear_residuals",
-            value = paste(input$vari1, ".residuals.linear", sep = ""),
+            value = iNZightTools::make_names(
+              new = paste(input$vari1, ".residuals.linear", sep = ""),
+              existing = existing_colnames
+            ),
             label = NULL
           ))
         )
@@ -7101,7 +7138,10 @@ observeEvent(input$store_residuals, {
           column(2, h5("Quadratic:")),
           column(6, textInput(
             inputId = "add_quadratic_residuals",
-            value = paste(input$vari1, ".residuals.quadratic", sep = ""),
+            value = iNZightTools::make_names(
+              new = paste(input$vari1, ".residuals.quadratic", sep = ""), 
+              existing = existing_colnames
+            ),
             label = NULL
           ))
         )
@@ -7112,7 +7152,10 @@ observeEvent(input$store_residuals, {
           column(2, h5("Cubic:")),
           column(6, textInput(
             inputId = "add_cubic_residuals",
-            value = paste(input$vari1, ".residuals.cubic", sep = ""),
+            value = iNZightTools::make_names(
+              new = paste(input$vari1, ".residuals.cubic", sep = ""), 
+              existing = existing_colnames
+            ),
             label = NULL
           ))
         )
@@ -7123,7 +7166,10 @@ observeEvent(input$store_residuals, {
           column(2, h5("Smoother:")),
           column(6, textInput(
             inputId = "add_smoother_residuals",
-            value = paste(input$vari1, ".residuals.smoother", sep = ""),
+            value = iNZightTools::make_names(
+              new = paste(input$vari1, ".residuals.smoother", sep = ""), 
+              existing = existing_colnames
+            ),
             label = NULL
           ))
         )
@@ -7133,17 +7179,18 @@ observeEvent(input$store_residuals, {
       title = "Store residuals"
     ))
   } else {
+    tmp_value = paste(
+      ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+             input$vari1, input$vari2
+      ),
+      ".residuals",
+      sep = ""
+    )
     showModal(modalDialog(
       h5(strong("Specify names for the new variables")),
       fixedRow(column(6, textInput(
         inputId = "add_numcat_residuals",
-        value = paste(
-          ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
-            input$vari1, input$vari2
-          ),
-          ".residuals",
-          sep = ""
-        ),
+        value = iNZightTools::make_names(new = tmp_value, existing = existing_colnames),
         label = NULL
       ))),
       actionButton("store_resisuals_ok", "OK"),
@@ -7426,360 +7473,6 @@ observe({
 })
 
 
-
-
-########################## revert to old button has been removed ###################
-observe({
-  input$go.to.old
-  if (!is.null(input$go.to.old) && input$go.to.old > 0) {
-    isolate({
-      output$visualize.panel <- renderUI({
-        get.data.set()
-        isolate({
-          old.visualize.panel.ui(get.data.set())
-        })
-      })
-    })
-  }
-})
-
-
-
-observe({
-  input$go.to.new
-  if (!is.null(input$go.to.new) && input$go.to.new > 0) {
-    if (!is.null(input$sub1_level_mini) && input$sub1_level_mini != 0) {
-      updateSliderInput(session, "sub1_level_mini", value = 0)
-    }
-    if (!is.null(input$sub2_level_mini) && input$sub2_level_mini != 0) {
-      updateSliderInput(session, "sub2_level_mini", value = 0)
-    }
-    if ((is.null(input$sub1_level_mini) || input$sub1_level_mini == 0) &&
-      (is.null(input$sub2_level_mini) || input$sub2_level_mini == 0)) {
-      isolate({
-        output$visualize.panel <- renderUI({
-          get.data.set()
-          isolate({
-            visualize.panel.ui(get.data.set())
-          })
-        })
-      })
-    }
-  }
-})
-
-output$old_add_inference <- renderUI({
-  get.data.set()
-  input$vari1
-  input$vari2
-  ret <- NULL
-  isolate({
-    dafr <- get.data.set()
-    add_inference.check <- checkboxInput("add.inference",
-      label = "Add inference",
-      value = input$add.inference
-    )
-    mean_median.radio <- radioButtons("inference_parameter1",
-      label = "Parameter",
-      choices = c("Mean", "Median"),
-      selected = input$inference_parameter1,
-      inline = T
-    )
-    normal_bootstrap.radio <- radioButtons("inference_type1",
-      label = "Type of inference",
-      choices = c("Normal", "Bootstrap"),
-      selected = input$inference_type1,
-      inline = T
-    )
-    confidence.interval.check <- checkboxInput("confidence_interval1",
-      label = "Confidence interval",
-      value = input$confidence_interval1
-    )
-    comparison.interval.check <- checkboxInput("comparison_interval1",
-      label = "Comparison interval",
-      value = input$comparison_interval1
-    )
-    year12_bootstrap.radio <- radioButtons("inference_type2",
-      label = "Type of inference",
-      choices = c("Year 12", "Bootstrap"),
-      selected = input$inference_type2,
-      inline = T
-    )
-    intervals <- NULL
-    graphical.par$inference.par <- NULL
-    graphical.par$bs.inference <- F
-    if ((!is.null(input$vari1) &&
-      !is.null(input$vari2)) &&
-      (input$vari1 %in% colnames(get.data.set()) &&
-        (input$vari2 %in% colnames(get.data.set()) ||
-          input$vari2 %in% "none"))) {
-      if ((!is.null(input$confidence_interval1) &&
-        input$confidence_interval1) ||
-        (!is.null(input$comparison_interval1) &&
-          input$comparison_interval1)) {
-        if (!is.null(input$confidence_interval1) &&
-          input$confidence_interval1) {
-          intervals <- c(intervals, "conf")
-        }
-        if (!is.null(input$comparison_interval1) &&
-          input$comparison_interval1) {
-          intervals <- c(intervals, "comp")
-        }
-        if (!is.null(input$inference_parameter1) &&
-          input$inference_parameter1 %in% "Mean") {
-          graphical.par$inference.par <- "mean"
-        } else if (!is.null(input$inference_parameter1) &&
-          input$inference_parameter1 %in% "Median") {
-          graphical.par$inference.par <- "median"
-        }
-        if ((!is.null(input$inference_type1) &&
-          input$inference_type1 %in% "Bootstrap") ||
-          (!is.null(input$inference_type2) &&
-            input$inference_type2 %in% "Bootstrap")) {
-          graphical.par$bs.inference <- T
-        } else {
-          graphical.par$bs.inference <- F
-        }
-      }
-      graphical.par$inference.type <- intervals
-      # vari1 = numeric; vari2 = numeric
-      if (!input$vari2 %in% "none" &&
-        (class(dafr[, input$vari1]) %in% "numeric" |
-          class(dafr[, input$vari1]) %in% "integer") &&
-        (class(dafr[, input$vari2]) %in% "numeric" |
-          class(dafr[, input$vari2]) %in% "integer")) {
-        ret <- list(conditionalPanel(
-          "input.toggle_inference",
-          conditionalPanel(
-            "input.check_linear||
-             input.check_quadratic||
-             input.check_cubic||
-             input.check_smoother",
-            add_inference.check
-          )
-        ))
-        # vari1 = numeric; vari2 = factor or
-        # vari1 = factor; vari2 = numeric
-      } else if (!input$vari2 %in% "none" &&
-        (((class(dafr[, input$vari1]) %in% "numeric" |
-          class(dafr[, input$vari1]) %in% "integer") &&
-          (class(dafr[, input$vari2]) %in% "factor" |
-            class(dafr[, input$vari2]) %in% "character")) ||
-          ((class(dafr[, input$vari1]) %in% "factor" |
-            class(dafr[, input$vari1]) %in% "character") &&
-            (class(dafr[, input$vari2]) %in% "numeric" |
-              class(dafr[, input$vari2]) %in% "integer")))) {
-        ret <- list(conditionalPanel(
-          "input.toggle_inference",
-          mean_median.radio,
-          conditionalPanel(
-            "input.inference_parameter1=='Mean'",
-            normal_bootstrap.radio
-          ),
-          conditionalPanel(
-            "input.inference_parameter1=='Median'",
-            year12_bootstrap.radio
-          ),
-          conditionalPanel(
-            "input.inference_parameter1=='Mean'||
-             (input.inference_parameter1=='Median'&&
-              input.inference_type2=='Bootstrap')",
-            h5("Type of interval"),
-            confidence.interval.check,
-            comparison.interval.check
-          )
-        ))
-        # vari1 = factor; vari2 = factor or vari1 = factor; vari2 = none
-      } else if ((!input$vari2 %in% "none" &&
-        ((class(dafr[, input$vari1]) %in% "factor" |
-          class(dafr[, input$vari1]) %in% "character") &&
-          (class(dafr[, input$vari2]) %in% "factor" |
-            class(dafr[, input$vari2]) %in% "character"))) ||
-        (input$vari2 %in% "none" &&
-          (class(dafr[, input$vari1]) %in% "factor" |
-            class(dafr[, input$vari1]) %in% "character"))) {
-        ret <- list(conditionalPanel(
-          "input.toggle_inference",
-          h5("Parameter"), helpText("Proportions"),
-          normal_bootstrap.radio,
-          h5("Type of interval"),
-          confidence.interval.check,
-          conditionalPanel(
-            "input.inference_type1=='Normal'",
-            comparison.interval.check
-          )
-        ))
-        # var1 = numeric; vari2 = none
-      } else if ((input$vari2 %in% "none" &&
-        (class(dafr[, input$vari1]) %in% "numeric" |
-          class(dafr[, input$vari1]) %in% "integer"))) {
-        ret <- list(conditionalPanel(
-          "input.toggle_inference",
-          mean_median.radio,
-          conditionalPanel(
-            "input.inference_parameter1=='Mean'",
-            normal_bootstrap.radio
-          ),
-          conditionalPanel(
-            "input.inference_parameter1=='Median'",
-            year12_bootstrap.radio
-          ),
-          conditionalPanel(
-            "input.inference_parameter1=='Mean'||
-             (input.inference_parameter1=='Median'&&
-              input.inference_type2=='Bootstrap')",
-            h5("Type of interval"),
-            confidence.interval.check
-          )
-        ))
-      }
-    }
-  })
-  ret
-})
-
-output$old_advanced_options_panel <- renderUI({
-  get.data.set()
-  ret <- NULL
-  isolate({
-    temp <- list()
-    temp$x <- get.data.set()[, input$vari1]
-    if (input$vari2 %in% "none") {
-      temp$y <- NULL
-    } else {
-      temp$y <- get.data.set()[, input$vari2]
-    }
-    temp$plot <- F
-    # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-    temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-    ##################################################################
-    #    large.sample = T
-    large.sample <- search.name(temp, "largesample")[[1]]
-    if (is.null(large.sample)) {
-      large.sample <- F
-    }
-    ##################################################################
-    if ((!is.null(input$vari1) &&
-      !is.null(input$vari2)) &&
-      (input$vari1 %in% colnames(get.data.set()) &&
-        (input$vari2 %in% "none" |
-          input$vari2 %in% colnames(get.data.set())))) {
-      # vari = factor, vari = none
-      if (input$vari2 %in% "none" &&
-        (class(get.data.set()[, input$vari1]) %in% "factor" |
-          class(get.data.set()[, input$vari1]) %in% "character")) {
-        ret <- selectInput(
-          inputId = "advanced_options",
-          label = "Options",
-          choices = c(
-            "Code more variables",
-            "Change plot appearance",
-            "Customize labels",
-            "Adjust number of Bars"
-          ),
-          selected = "Change plot appearance"
-        )
-        # vari1 = factor, vari2 = factor
-      } else if (!input$vari2 %in% "none" &&
-        ((class(get.data.set()[, input$vari1]) %in% "factor" |
-          class(get.data.set()[, input$vari1]) %in% "character") &&
-          (class(get.data.set()[, input$vari2]) %in% "factor" |
-            class(get.data.set()[, input$vari2]) %in% "character"))) {
-        ret <- selectInput(
-          inputId = "advanced_options",
-          label = "Options",
-          choices = c(
-            "Change plot appearance",
-            "Customize labels",
-            "Adjust number of Bars"
-          ),
-          selected = "Change plot appearance"
-        )
-        # vari1 = numeric , vari2 = none or
-        # vari1 = numeric , vari2 = factor or
-        # vari1 = factor , vari2 = numeric
-      } else if ((input$vari2 %in% "none" &&
-        (class(get.data.set()[, input$vari1]) %in% "numeric" |
-          class(get.data.set()[, input$vari1]) %in% "integer")) ||
-        (!input$vari2 %in% "none" &&
-          (class(get.data.set()[, input$vari1]) %in% "factor" |
-            class(get.data.set()[, input$vari1]) %in% "character") &&
-          (class(get.data.set()[, input$vari2]) %in% "integer" |
-            class(get.data.set()[, input$vari2]) %in% "numeric")) ||
-        (!input$vari2 %in% "none" &&
-          (class(get.data.set()[, input$vari1]) %in% "integer" |
-            class(get.data.set()[, input$vari1]) %in% "numeric") &&
-          (class(get.data.set()[, input$vari2]) %in% "character" |
-            class(get.data.set()[, input$vari2]) %in% "factor"))) {
-        ret <- selectInput(
-          inputId = "advanced_options",
-          label = "Options",
-          choices = c(
-            "Code more variables",
-            "Change plot appearance",
-            "Identify points",
-            "Customize labels",
-            "Adjust axis limits"
-          ),
-          selected = "Change plot appearance"
-        )
-        if (large.sample) {
-          ret <- selectInput(
-            inputId = "advanced_options",
-            label = "Options",
-            choices = c(
-              "Change plot appearance",
-              "Customize labels",
-              "Adjust axis limits"
-            ),
-            selected = "Change plot appearance"
-          )
-        }
-        # vari1 = numeric , vari2 = numeric
-      } else if (!input$vari2 %in% "none" &&
-        ((class(get.data.set()[, input$vari1]) %in% "numeric" |
-          class(get.data.set()[, input$vari1]) %in% "integer") &&
-          (class(get.data.set()[, input$vari2]) %in% "numeric" |
-            class(get.data.set()[, input$vari2]) %in% "integer"))) {
-        ret <- selectInput(
-          inputId = "advanced_options",
-          label = "Options",
-          choices = c(
-            "Code more variables",
-            "Add trend curves",
-            "Add x=y line",
-            "Add a jitter",
-            "Add rugs",
-            "Join points by line",
-            "Change plot appearance",
-            "Identify points",
-            "Customize labels",
-            "Adjust axis limits"
-          ),
-          selected = "Change plot appearance"
-        )
-        if (large.sample) {
-          ret <- selectInput(
-            inputId = "advanced_options",
-            label = "Options",
-            choices = c(
-              "Add trend curves",
-              "Add x=y line",
-              "Change plot appearance",
-              "Customize labels",
-              "Adjust axis limits"
-            ),
-            selected = "Change plot appearance"
-          )
-        }
-      }
-    }
-  })
-  list(ret)
-})
-########################## revert to old button has been removed ###################
-
-
 ## switch variables selected
 observeEvent(input$switch1, {
   if (!is.null(input$vari2) && input$vari2 != "none") {
@@ -7935,10 +7628,8 @@ observe({
 
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-            "true") {
+              "true") {
             tryCatch({
-              # plot.ret.para$parameters <- do.call(
-              #   iNZightPlots:::iNZightPlot, temp)
               plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
             }, warning = function(w) {
               print(w)
@@ -7946,17 +7637,13 @@ observe({
               print(e)
             }, finally = {})
           } else {
-            # plot.ret.para$parameters <- try(do.call(
-            #   iNZightPlots:::iNZightPlot, temp))
             plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-            "true") {
+              "true") {
             tryCatch({
-              # plot.ret.para$parameters <- do.call(
-              #   iNZightPlots:::iNZightPlot, vis.par())
               plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
             }, warning = function(w) {
               print(w)
