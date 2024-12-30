@@ -22,6 +22,35 @@ vis.data <- reactive({
 ##                       ##
 ###########################
 
+# convert old vis.par() to a new format so its compatible with 
+# iNZightPlots:::inzplot (iNZightPlots@2.15.0)
+new_vis_par = function(vis_par) {
+  print("..")
+  # browser()
+  # ignore if x or y is a vector
+  if (length(vis_par$x) > 1 || length(vis_par$y) > 1) {
+    return(vis_par)
+  }
+  
+  # make formula
+  f = trim(paste(vis_par$y, "~", vis_par$x))
+  # # subsets
+  # if (!is.null(vis_par$g1)) {
+  #   g = vis_par$g1
+  #   if(!is.null(vis_par$g2)) {
+  #     g = paste(g, vis_par$g2, sep = " + ")
+  #   }
+  #   f = paste(f, g, sep = " | ")
+  # }
+  f = as.formula(f)
+  
+  # inzplot takes formla as "x"
+  vis_par$x = f
+  # remove y
+  vis_par$y = NULL
+  return(vis_par)
+}
+
 source("panels/C1_Visualize//infoWindow.R", local = TRUE)
 
 
@@ -1168,6 +1197,7 @@ observe({
 })
 
 output$visualize.plot <- renderPlot({
+  print("zxc1")
   isolate({
     # some of the graphical parameters need
     # to be reminded what there default
@@ -1195,12 +1225,14 @@ output$visualize.plot <- renderPlot({
       temp.varnames.x <- temp$varnames$x
       temp$varnames$x <- temp$varnames$y
       temp$varnames$y <- temp.varnames.x
-
+      
+      # browser()
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1208,7 +1240,8 @@ output$visualize.plot <- renderPlot({
         }, finally = {})
       } else {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1220,9 +1253,10 @@ output$visualize.plot <- renderPlot({
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(
-            iNZightPlots:::iNZightPlot, vis.par()
-          )
+          # plot.ret.para$parameters <- do.call(
+          #   iNZightPlots:::iNZightPlot, vis.par()
+          # )
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1230,9 +1264,10 @@ output$visualize.plot <- renderPlot({
         }, finally = {})
       } else {
         tryCatch({
-          plot.ret.para$parameters <- do.call(
-            iNZightPlots:::iNZightPlot, vis.par()
-          )
+          # plot.ret.para$parameters <- do.call(
+          #   iNZightPlots:::iNZightPlot, vis.par()
+          # )
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1245,6 +1280,7 @@ output$visualize.plot <- renderPlot({
 
 
 output$mini.plot <- renderPlot({
+  print("miniplot")
   isolate({
     # some of the graphical parameters need
     # to be reminded what their default
@@ -1276,34 +1312,38 @@ output$mini.plot <- renderPlot({
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       } else {
-        plot.ret.para$parameters <- try(do.call(
-          iNZightPlots:::iNZightPlot, temp
-        ))
+        # plot.ret.para$parameters <- try(do.call(
+        #   iNZightPlots:::iNZightPlot, temp
+        # ))
+        plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
       }
     } else {
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(
-            iNZightPlots:::iNZightPlot, vis.par()
-          )
+          # plot.ret.para$parameters <- do.call(
+          #   iNZightPlots:::iNZightPlot, vis.par()
+          # )
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       } else {
-        plot.ret.para$parameters <- try(do.call(
-          iNZightPlots:::iNZightPlot, vis.par()
-        ))
+        # plot.ret.para$parameters <- try(do.call(
+        #   iNZightPlots:::iNZightPlot, vis.par()
+        # ))
+        plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
       }
     }
   }
@@ -1958,6 +1998,7 @@ output$plot.appearance.panel.title <- renderUI({
   input$vari2
   plot.par$design
   isolate({
+    print("plot.appearance.panel.title")
     if (!is.null(plot.ret.para$parameters)) {
       varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE <- attr(plot.ret.para$parameters, "plottype")
@@ -1987,6 +2028,8 @@ output$plot.appearance.panel.title <- renderUI({
       }
       temp$plot <- F
       tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+
       large.sample <- search.name(tester, "largesample")[[1]]
       if (is.null(large.sample)) {
         large.sample <- F
@@ -2021,6 +2064,7 @@ output$plot.appearance.panel <- renderUI({
   plot.par$design
 
   isolate({
+    print("plot.appearance.panel")
     if (!is.null(plot.ret.para$parameters)) {
       varnames <- unlist(attr(plot.ret.para$parameters, "varnames"))
       TYPE <- attr(plot.ret.para$parameters, "plottype")
@@ -2465,6 +2509,7 @@ output$plot.appearance.panel <- renderUI({
       }
       temp$plot <- F
       tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
 
       large.sample <- search.name(tester, "largesample")[[1]]
       if (is.null(large.sample)) {
@@ -3027,6 +3072,7 @@ output$plot.appearance.panel <- renderUI({
 observe({
   input$select.plot.type
   if (!is.null(input$vari1) & !is.null(input$vari2)) {
+    print("input$select.plot.type")
     isolate({
       if (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% colnames(get.data.set()) ||
@@ -3039,8 +3085,15 @@ observe({
           temp$y <- get.data.set()[, input$vari2]
         }
         temp$plot <- F
+        # TODO: 
+        # str(temp)
+        # List of 2
+        # $ x   : Factor w/ 4 levels "job","other",..: 4 3 3 4 4 3 3 4 3 2 ...
+        # $ plot: logi FALSE
+        
         tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-
+        # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        
         large.sample <- search.name(tester, "largesample")[[1]]
         if (is.null(large.sample)) {
           large.sample <- F
@@ -3174,7 +3227,9 @@ output$plotly_inter <- renderPlotly({
       length(input$select.plot.type) > 0) {
       temp$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
       pdf(NULL)
-      do.call(iNZightPlots:::iNZightPlot, temp)
+      # do.call(iNZightPlots:::iNZightPlot, temp)
+      do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+      
       g <- plotly::ggplotly()
       dev.off()
       g
@@ -3204,7 +3259,9 @@ output$plotly_nw <- renderUI({
       pdf(NULL)
       cdev <- dev.cur()
       on.exit(dev.off(cdev), add = TRUE)
-      do.call(iNZightPlots:::iNZightPlot, temp)
+      # do.call(iNZightPlots:::iNZightPlot, temp)
+      do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+      
       htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
       dev.off()
       addResourcePath("path", normalizePath(tdir))
@@ -4052,7 +4109,9 @@ output$code.variables.panel <- renderUI({
           temp$y <- get.data.set()[, input$vari2]
         }
         temp$plot <- F
-        temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        
         ##################################################################
         #    large.sample = T
         large.sample <- search.name(temp, "largesample")[[1]]
@@ -4608,7 +4667,9 @@ output$add.jitter.panel <- renderUI({
         temp$y <- get.data.set()[, input$vari2]
       }
       temp$plot <- F
-      temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      
       ##################################################################
       #    large.sample = T
       large.sample <- search.name(temp, "largesample")[[1]]
@@ -4682,7 +4743,9 @@ output$add.rugs.panel <- renderUI({
         temp$y <- get.data.set()[, input$vari2]
       }
       temp$plot <- F
-      temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      
       ##################################################################
       #    large.sample = T
       large.sample <- search.name(temp, "largesample")[[1]]
@@ -4759,7 +4822,9 @@ output$join.points.panel <- renderUI({
         temp$y <- get.data.set()[, input$vari2]
       }
       temp$plot <- F
-      temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+      temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      
       ##################################################################
       #    large.sample = T
       large.sample <- search.name(temp, "largesample")[[1]]
@@ -4832,6 +4897,8 @@ output$adjust.axis.panel <- renderUI({
         }
         temp$plot <- F
         tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        
         ###################################################################
         #      large.sample = T
         large.sample <- search.name(tester, "largesample")[[1]]
@@ -5988,7 +6055,9 @@ observe({
         }
         temp$locate.extreme <- plot.par$locate.extreme
         temp$plot <- F
-        temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+        temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        
         extreme.ids <- search.name(temp, "extreme.ids")[[1]]
         plot.par.stored$locate.id <- unique(c(
           plot.par.stored$locate.id,
@@ -6075,8 +6144,9 @@ output$select_additions_panel <- renderUI({
       temp$y <- get.data.set()[, input$vari2]
     }
     temp$plot <- F
-    temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-
+    # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+    temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+    
     ##################################################################
     #    large.sample = T
     large.sample <- search.name(temp, "largesample")[[1]]
@@ -6228,34 +6298,38 @@ create.html <- function() {
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       } else {
-        plot.ret.para$parameters <- try(do.call(
-          iNZightPlots:::iNZightPlot, temp
-        ))
+        # plot.ret.para$parameters <- try(do.call(
+        #   iNZightPlots:::iNZightPlot, temp
+        # ))
+        plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
       }
     } else {
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
         tryCatch({
-          plot.ret.para$parameters <- do.call(
-            iNZightPlots:::iNZightPlot, vis.par()
-          )
+          # plot.ret.para$parameters <- do.call(
+          #   iNZightPlots:::iNZightPlot, vis.par()
+          # )
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
           print(e)
         }, finally = {})
       } else {
-        plot.ret.para$parameters <- try(do.call(
-          iNZightPlots:::iNZightPlot, vis.par()
-        ))
+        # plot.ret.para$parameters <- try(do.call(
+        #   iNZightPlots:::iNZightPlot, vis.par()
+        # ))
+        plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
       }
 
       ## add to fix interactive dotplot bug ..
@@ -6310,36 +6384,40 @@ output$saveplot <- downloadHandler(
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
               "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, temp
-              )
+              # plot.ret.para$parameters <- do.call(
+              #   iNZightPlots:::iNZightPlot, temp
+              # )
+              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(
-              iNZightPlots:::iNZightPlot, temp
-            ))
+            # plot.ret.para$parameters <- try(do.call(
+            #   iNZightPlots:::iNZightPlot, temp
+            # ))
+            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
               "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, vis.par()
-              )
+              # plot.ret.para$parameters <- do.call(
+              #   iNZightPlots:::iNZightPlot, vis.par()
+              # )
+              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(
-              iNZightPlots:::iNZightPlot, vis.par()
-            ))
+            # plot.ret.para$parameters <- try(do.call(
+            #   iNZightPlots:::iNZightPlot, vis.par()
+            # ))
+            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
           }
         }
       }
@@ -7580,7 +7658,8 @@ output$old_advanced_options_panel <- renderUI({
       temp$y <- get.data.set()[, input$vari2]
     }
     temp$plot <- F
-    temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+    # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
+    temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
     ##################################################################
     #    large.sample = T
     large.sample <- search.name(temp, "largesample")[[1]]
@@ -7830,6 +7909,8 @@ observe({
   input$refreshplot
   isolate({
     output$visualize.plot <- renderPlot({
+      # browser()
+      # print("zxc2")
       isolate({
         # some of the graphical parameters need
         # to be reminded what there default
@@ -7847,6 +7928,7 @@ observe({
 
       # plot it
       if (!is.null(vis.par())) {
+        # print("zxc3")
         dafr <- get.data.set()
         if (is.numeric(vis.data()[[plot.par$x]]) &&
           !is.null(plot.par$y) &&
@@ -7866,31 +7948,35 @@ observe({
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
             "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, temp)
+              # plot.ret.para$parameters <- do.call(
+              #   iNZightPlots:::iNZightPlot, temp)
+              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(
-              iNZightPlots:::iNZightPlot, temp))
+            # plot.ret.para$parameters <- try(do.call(
+            #   iNZightPlots:::iNZightPlot, temp))
+            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
             "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(
-                iNZightPlots:::iNZightPlot, vis.par())
+              # plot.ret.para$parameters <- do.call(
+              #   iNZightPlots:::iNZightPlot, vis.par())
+              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
+            # plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
+            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
           }
         }
       }
