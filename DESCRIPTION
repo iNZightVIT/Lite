@@ -41,6 +41,7 @@ Imports:
     shinydashboard,
     shinyjs,
     shinylogs,
+    shinyStorePlus,
     shinyWidgets,
     survey,
     surveyspec,

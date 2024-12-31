@@ -73,14 +73,34 @@ output$inference_test <- renderUI({
       }
 
       # UI for "Additional Options: Confidence level (%):"
-      output$ci_width <- renderUI({
-        numericInputIcon(
-          inputId = "ci.width",
-          label = div(h5(strong("Additional Options")), "Confidence level (%):"),
-          value = ci_width(),
-          min = 10,
-          max = 99,
-          # icon = list(NULL, "%")
+      output$inference_opts <- renderUI({
+        fixedRow(
+          column(
+            4,
+            numericInput(
+              inputId = "ci.width",
+              label = "Confidence level (%):",
+              value = ci_width(),
+              min = 10,
+              max = 99
+            )
+          ),
+          column(
+            3,
+            numericInput("global.sig.level.inf",
+              label = "Signifcant figures",
+              value = graphical.par$signif
+            )
+          ),
+          column(2, numericInput("global.round.pct.inf",
+            label = "Round %s",
+            value = graphical.par$round_percent
+          )),
+          column(2, numericInput("global.p.val",
+            label = "Min P-value",
+            value = graphical.par$min_pval,
+            min = 0, max = 0.05, step = 0.0001
+          ))
         )
       })
 
@@ -357,6 +377,9 @@ output$visualize.inference <- renderPrint({
     input$ci.width
     design_params$design
     input$inf_epi_out
+    graphical.par$signif
+    graphical.par$round_percent
+    graphical.par$min_pval
     isolate({
       ## Design or data?
       is_survey <- !is.null(design_params$design$dataDesign)
@@ -364,7 +387,7 @@ output$visualize.inference <- renderPrint({
         reactiveValuesToList(graphical.par),
         keep.null = TRUE
       )
-      curSet <- modifyList(reactiveValuesToList(plot.par),
+      curSet <- modifyList(curSet,
         reactiveValuesToList(inf.def.par),
         keep.null = TRUE
       )
@@ -603,13 +626,13 @@ output$visualize.inference <- renderPrint({
       }
 
       .dataset <- get.data.set()
-
       tryCatch({
-        suppressWarnings(inf.print <- eval(construct_call(curSet, design_params$design,
+        inf_call <- construct_call(curSet, design_params$design,
           vartypes,
           data = quote(.dataset),
           what = "inference"
-        )))
+        )
+        suppressWarnings(inf.print <- eval(inf_call))
 
         if (input$hypTest == "Chi-square test" && !is.null(input$hypTest)) {
           exp_match <- any(grepl("since some expected counts <", inf.print, fixed = TRUE))
@@ -705,4 +728,38 @@ output$visualize.summary <- renderPrint({
       ))))
     }
   }
+})
+
+observeEvent(input$global.sig.level.inf, {
+  updateNumericInput(session,
+    inputId = "global.sig.level",
+    value = input$global.sig.level.inf
+  )
+  graphical.par$signif <- input$global.sig.level.inf
+})
+# other way around
+observeEvent(input$global.sig.level, {
+  updateNumericInput(session,
+    inputId = "global.sig.level.inf",
+    value = input$global.sig.level
+  )
+})
+
+# same for rounding
+observeEvent(input$global.round.pct.inf, {
+  updateNumericInput(session,
+    inputId = "global.round.pct",
+    value = input$global.round.pct.inf
+  )
+  graphical.par$round_percent <- input$global.round.pct.inf
+})
+observeEvent(input$global.round.pct, {
+  updateNumericInput(session,
+    inputId = "global.round.pct.inf",
+    value = input$global.round.pct
+  )
+})
+
+observeEvent(input$global.p.val, {
+  graphical.par$min_pval <- input$global.p.val
 })

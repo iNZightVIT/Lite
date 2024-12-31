@@ -6,6 +6,7 @@
 - **Time Series module** has been refactored to connect with our updated `iNZightTS` 2.0, which has new and improved graphics and funcionality. The old version remains available via _'Time Series - Legacy'_.
 - **Experimental design module** : help text added to improve usability.
 - **Bar plots** have a new option (under Add to Plot) to toggle whether or not the bars are sized by the group size (the historical default is for this to be on).
+- **Summary** and **Inference** add options to control significant figures, percentage rounding, and p-value minimums.
 
 ## Bug fixes
 
