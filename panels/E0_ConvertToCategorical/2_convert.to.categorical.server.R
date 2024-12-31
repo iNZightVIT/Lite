@@ -20,7 +20,7 @@ observe({
       !grepl("^\\s*$", input$convert_to_name)) {
       orgVar <- input$select.to.convert
       name <- gsub("\\n+", "", input$convert_to_name, perl = TRUE)
-      temp <- iNZightTools::convertToCat(get.data.set(), orgVar, name)
+      temp <- iNZightTools::convert_to_cat(get.data.set(), orgVar, make_names(name))
       updatePanel$datachanged <- updatePanel$datachanged + 1
       values$data.set <- temp
       values <- sample_if_cas(rvalues = values, d = temp, new_sample = FALSE)

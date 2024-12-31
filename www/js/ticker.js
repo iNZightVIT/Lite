@@ -16,6 +16,8 @@ $(function () {
         )
           return;
 
+        if (value.target && value.target !== window.origin) return;
+
         // create a div with class item
         $(".ticker").append(
           "<div class='ticker-item ticker-" +

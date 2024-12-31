@@ -5,7 +5,7 @@ observe({
     isolate({
       if (length(which(colnames(get.data.set()) %in%
         input$select.remove.column)) > 0) {
-        temp <- iNZightTools::deleteVars(
+        temp <- iNZightTools::delete_vars(
           get.data.set(),
           input$select.remove.column
         )

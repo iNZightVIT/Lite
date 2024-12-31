@@ -5,7 +5,13 @@ observe({
   isolate({
     if (!is.null(input$stack_vars) && input$stack_vars > 0 &&
       !is.null(input$stack_vars_column)) {
-      temp <- iNZightTools::stackVars(get.data.set(), input$stack_vars_column)
+      temp <- iNZightTools::reshape_data(
+        data = get.data.set(), 
+        data_to = "long", 
+        cols = input$stack_vars_column, 
+        names_to = "stack.variable", 
+        values_to = "stack.value"
+      )
       if (!is.null(temp)) {
         ## save code
         code.save$dataname <- paste(code.save$name, "stacked", sep = ".")

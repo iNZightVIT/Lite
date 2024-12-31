@@ -82,9 +82,9 @@ observe({
           if (!is.null(input$select.reorder.item) &&
             length(input$select.reorder.item) == length(rm.na.name)) {
             levels <- as.character(input$select.reorder.item)
-            temp <- iNZightTools::reorderLevels(
+            temp <- iNZightTools::reorder_levels(
               get.data.set(), var, levels,
-              name = name
+              name = make_names(name)
             )
             updatePanel$datachanged <- updatePanel$datachanged + 1
             values$data.set <- temp
@@ -103,9 +103,9 @@ observe({
             )
           }
         } else {
-          data <- iNZightTools::reorderLevels(
+          data <- iNZightTools::reorder_levels(
             get.data.set(), var,
-            freq = TRUE, name = name
+            auto = "freq", name = make_names(name)
           )
           updatePanel$datachanged <- updatePanel$datachanged + 1
           values$data.set <- data
@@ -253,7 +253,7 @@ observe({
           !grepl("^\\s*$", input$collapse_level_newname)) {
           name <- input$collapse_variable_newname
           lvlname <- input$collapse_level_newname
-          temp <- iNZightTools::collapseLevels(
+          temp <- iNZightTools::collapse_cat(
             get.data.set(), var, lvls, lvlname, name
           )
           updatePanel$datachanged <- updatePanel$datachanged + 1
@@ -349,9 +349,10 @@ observe({
         })
         new.levels <- new.levels[changed]
         if (!is.null(new.levels)) {
-          temp <- iNZightTools::renameLevels(get.data.set(),
-            var = input$select.rename.column,
-            to_be_renamed = new.levels
+          temp <- iNZightTools::rename_levels(
+            get.data.set(),
+            input$select.rename.column,
+            new.levels
           )
         }
         if (!is.null(temp)) {

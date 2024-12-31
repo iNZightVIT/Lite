@@ -168,7 +168,7 @@ pkgname <- reactive({
 })
 
 observe({
-  if (!is.null(input$change_set)) {
+  if (!is.null(input$change_set) && input$change_set > 0) {
     isolate({
       if (!is.null(input[[input$data_select]]) && input$change_set > 0) {
         new.data <- NULL
@@ -246,6 +246,8 @@ observe({
         plot.par$design <- NULL
         design_params$design <- NULL
       }
+
+      updateTabsetPanel(session, "selector", "visualize")
     })
   }
 })

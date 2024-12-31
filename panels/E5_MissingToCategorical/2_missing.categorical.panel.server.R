@@ -36,7 +36,7 @@ observe({
   input$missing.categorical.submit
   isolate({
     if (!is.null(input$missing.categorical.submit) && input$missing.categorical.submit > 0) {
-      temp <- iNZightTools::missingToCat(get.data.set(), vars = input$missing.categorical.column.select)
+      temp <- iNZightTools::missing_to_cat(get.data.set(), vars = input$missing.categorical.column.select)
       if (!is.null(temp)) {
         updatePanel$datachanged <- updatePanel$datachanged + 1
         values$data.set <- temp

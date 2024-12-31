@@ -9,7 +9,84 @@
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
-
+HELP_TEXT_CSS = "color: blue; background: none; border: none; text-decoration: underline; padding: 0; padding-bottom: 5px;"
+lsd_formula = function(is_eff) {
+  eff_constant = ifelse(
+    is_eff,
+    "<li><strong>e</strong>: <strong>Eff</strong>iciency of the design</li>",
+    ""
+  )
+  formula = ifelse(
+    is_eff,
+    '\\[LSD = t \\times \\sqrt{\\frac{2 \\times ResMS}{reps \\times e}}\\]',
+    '\\[LSD = t \\times \\sqrt{\\frac{2 \\times ResMS}{reps}}\\]'
+  )
+  return(paste0(
+    '<div class="math-content">',
+    '<div class="math-formula">',
+    '\\[LSD = t \\times \\sqrt{\\frac{2 \\times ResMS}{reps}}\\]',
+    '</div>',
+    'Where:',
+    '<ul>',
+    '<li><strong>t</strong>: t-distribution with degrees of freedom <strong>df</strong> and significance level <strong>alpha</strong> (α)</li>',
+    '<li><strong>ResMS</strong>: Residual Mean Square</li>',
+    '<li><strong>reps</strong>: Number of replications</li>',
+    eff_constant,
+    '</ul>',
+    '</div>'
+  ))
+}
+tsr_formula = function(is_eff) {
+  eff_constant = ifelse(
+    is_eff,
+    "<li><strong>e</strong>: <strong>Eff</strong>iciency of the design</li>",
+    ""
+  )
+  formula = ifelse(
+    is_eff,
+    '\\[TSR = q \\times \\sqrt{\\frac{ResMS}{reps \\times e}}\\]',
+    '\\[TSR = q \\times \\sqrt{\\frac{ResMS}{reps}}\\]'
+  )
+  return(paste0(
+    '<div class="math-content">',
+    '<div class="math-formula">',
+    formula,
+    '</div>',
+    'Where:',
+    '<ul>',
+    '<li><strong>q</strong>: Critical value from Tukey\'s studentized range distribution, with ',
+    'significance level <strong>alpha</strong> (α), ',
+    'number of <strong>means</strong> and ',
+    'residual degrees of freedom <strong>df</strong>.',
+    '</li>',
+    '<li><strong>ResMS</strong>: Residual Mean Square</li>',
+    '<li><strong>reps</strong>: Number of replications</li>',
+    eff_constant,
+    '</ul>',
+    '</div>'
+  ))
+}
+show_ct_help = function(is_eff, is_lsd) {
+  alert_title = ifelse(
+    is_lsd,
+    "Least Significant Difference (LSD)",
+    "Tukey’s Studentised Range (TSR)"
+  )
+  if(is_lsd) {
+    formula = lsd_formula(is_eff = is_eff)
+  } else {
+    formula = tsr_formula(is_eff = is_eff)
+  }
+  shinyalert(
+    title = alert_title,
+    text = formula,
+    html = TRUE,
+    size = "m",
+    callbackR = function() {
+      runjs("initMathJax();")
+    }
+  )
+}
 
 ## initialize gui
 output$mixedmodel.panel <- renderUI({
@@ -558,13 +635,9 @@ observe({
   })
 })
 
-
-
-
 ### ------- ----------###
 ###       LSD        ###
 ### ------------------###
-
 output$Doe.smy <- renderUI({
   if (length(model_Vals$aov) > 0 &&
     (!is.null(model_Vals$aov[[input$model_select]]) &&
@@ -573,6 +646,7 @@ output$Doe.smy <- renderUI({
       "No blocking or complete blocks") {
       list(
         helpText("Computing LSD"),
+        actionButton("lsd.complete.help", label = "HELP", style = HELP_TEXT_CSS),
         fixedRow(
           column(2, textInput("Doe.lsd.df", label = "df")),
           column(2, textInput("Doe.lsd.rms", label = "ResMS")),
@@ -586,6 +660,7 @@ output$Doe.smy <- renderUI({
         ))),
         uiOutput("Doe.lsd.res"),
         helpText("Computing TSR"),
+        actionButton("tsr.complete.help", label = "HELP", style = HELP_TEXT_CSS),
         fixedRow(
           column(2, textInput("Doe.tsr.df", label = "df")),
           column(2, textInput("Doe.tsr.rms", label = "ResMS")),
@@ -604,6 +679,7 @@ output$Doe.smy <- renderUI({
       "balanced incomplete blocks") {
       list(
         helpText("Computing LSD"),
+        actionButton("lsd.incomplete.help", label = "HELP", style = HELP_TEXT_CSS),
         fixedRow(
           column(2, textInput("Doe.lsd.df", label = "df")),
           column(2, textInput("Doe.lsd.rms", label = "ResMS")),
@@ -618,6 +694,7 @@ output$Doe.smy <- renderUI({
         ))),
         uiOutput("Doe.lsd.res"),
         helpText("Computing TSR"),
+        actionButton("tsr.incomplete.help", label = "HELP", style = HELP_TEXT_CSS),
         fixedRow(
           column(2, textInput("Doe.tsr.df", label = "df")),
           column(2, textInput("Doe.tsr.rms", label = "ResMS")),
@@ -917,3 +994,34 @@ output$saveDoe.int.plot <- downloadHandler(
     }
   }
 )
+
+### ------- ----------------------###
+###           Help popup          ###
+### ------------------------------###
+observeEvent(input$tsr.complete.help, {
+  show_ct_help(
+    is_eff = FALSE,
+    is_lsd = FALSE
+  )
+})
+
+observeEvent(input$lsd.complete.help, {
+  show_ct_help(
+    is_eff = FALSE,
+    is_lsd = TRUE
+  )
+})
+
+observeEvent(input$tsr.incomplete.help, {
+  show_ct_help(
+    is_eff = TRUE,
+    is_lsd = FALSE
+  )
+})
+
+observeEvent(input$lsd.incomplete.help, {
+  show_ct_help(
+    is_eff = TRUE,
+    is_lsd = TRUE
+  )
+})

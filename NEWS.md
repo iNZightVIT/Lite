@@ -1,3 +1,26 @@
+# January 2025
+
+## UI Changes
+
+- _'Store residuals'_ and _'Store fitted values'_ no longer produce a pop-up, and instead create the variable immediately (without asking user to provide a name).
+- **Time Series module** has been refactored to connect with our updated `iNZightTS` 2.0, which has new and improved graphics and funcionality. The old version remains available via _'Time Series - Legacy'_.
+- **Experimental design module** : help text added to improve usability.
+- **Bar plots** have a new option (under Add to Plot) to toggle whether or not the bars are sized by the group size (the historical default is for this to be on).
+
+## Bug fixes
+
+- Spaces in user supplied variable names are handled appropriately (replaced with underscores), which should prevent disconnect issues.
+- Survey objected updated when data changes, so e.g., newly created variables will show up in the outputs.
+- Example dataset redirects to Visualize after clicking 'Select set'.
+- Various other UI fixes and minor improvements.
+
+## Other
+
+- Refactor data wrangling methods for new `iNZightTools` 2.0.0 API.
+- Maps module has been removed following major changes/restructuring to dependent packages that we are unable to resolve at this time. Please get in touch if you used this module or would like to help us fix it.
+
+---
+
 # December 2023
 
 ## Changes

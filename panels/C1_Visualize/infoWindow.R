@@ -80,7 +80,7 @@ output$inference_test <- renderUI({
           value = ci_width(),
           min = 10,
           max = 99,
-          icon = list(NULL, "%")
+          # icon = list(NULL, "%")
         )
       })
 
@@ -194,29 +194,30 @@ observe({
   updateCheckboxInput(session, inputId = "inf.trend.cubic", label = "cubic", value = input$check_cubic)
 })
 
-observe({
-  input$inf.trend.linear
-  isolate({
-    #    graphical.par$bs.inference = F
-    #    graphical.par$inference.type = NULL
-    if (is.null(input$check_linear) && !is.null(input$inf.trend.linear)) {
-      if (input$inf.trend.linear) {
-        if (length(which(graphical.par$trend %in% "linear")) == 0) {
-          graphical.par$trend <- c(graphical.par$trend, "linear")
-        }
-        graphical.par$col.trend[["linear"]] <- "blue"
-        graphical.par$lty.trend[["linear"]] <- 1
-      } else {
-        if (length(which(graphical.par$trend %in% "linear")) > 0) {
-          graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "linear")]
-          if (length(graphical.par$trend) == 0) {
-            graphical.par$trend <- NULL
-          }
+observeEvent(input$inf.trend.linear, {
+  #    graphical.par$bs.inference = F
+  #    graphical.par$inference.type = NULL
+  # cat("\n---update inf.trend.linear ---\n")
+  # cat("input$inf.trend.linear: ", input$inf.trend.linear, "\n")
+  # cat("graphical.par$trend: ", graphical.par$trend, "\n")
+  if (is.null(input$check_linear) && !is.null(input$inf.trend.linear)) {
+    if (input$inf.trend.linear) {
+      if (length(which(graphical.par$trend %in% "linear")) == 0) {
+        graphical.par$trend <- c(graphical.par$trend, "linear")
+      }
+      graphical.par$col.trend[["linear"]] <- "blue"
+      graphical.par$lty.trend[["linear"]] <- 1
+    } else {
+      if (length(which(graphical.par$trend %in% "linear")) > 0) {
+        graphical.par$trend <- graphical.par$trend[-which(graphical.par$trend %in% "linear")]
+        if (length(graphical.par$trend) == 0) {
+          graphical.par$trend <- NULL
         }
       }
     }
-  })
+  }
 })
+
 
 
 observe({
@@ -550,6 +551,7 @@ output$visualize.inference <- renderPrint({
       if (!is.null(plot.par$x) && iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
         !is.null(plot.par$y) && iNZightTools::is_num(vis.data()[[plot.par$y]])) {
         chosen <- c(input$inf.trend.linear, input$inf.trend.quadratic, input$inf.trend.cubic)
+        # cat("chosen: ", chosen, "\n")
         curSet$trend <- if (any(chosen)) c("linear", "quadratic", "cubic")[chosen] else NULL
       }
 
@@ -683,6 +685,7 @@ output$visualize.summary <- renderPrint({
       # assign(designname, curMod$createSurveyObject(), envir = env)
     }
     .dataset <- get.data.set()
+
     if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
       tolower(parseQueryString(session$clientData$url_search)$debug) %in% "true") {
       tryCatch({
