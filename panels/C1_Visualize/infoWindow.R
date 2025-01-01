@@ -89,14 +89,11 @@ output$inference_test <- renderUI({
             3,
             numericInput("global.sig.level.inf",
               label = "Signifcant figures",
-              value = graphical.par$signif
+              value = graphical.par$signif,
+              min = 1, step = 1
             )
           ),
-          column(2, numericInput("global.round.pct.inf",
-            label = "Round %s",
-            value = graphical.par$round_percent
-          )),
-          column(2, numericInput("global.p.val",
+          column(3, numericInput("global.p.val",
             label = "Min P-value",
             value = graphical.par$min_pval,
             min = 0, max = 0.05, step = 0.0001

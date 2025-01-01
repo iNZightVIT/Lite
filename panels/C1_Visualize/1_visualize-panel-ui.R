@@ -267,14 +267,16 @@ vis.mainPanel <- function() {
             2,
             numericInput("global.sig.level",
               label = "Signifcant figures",
-              value = graphical.par$signif
+              value = graphical.par$signif,
+              min = 1, step = 1
             )
           ),
           column(
             2,
             numericInput("global.round.pct",
               label = "Round percentages",
-              value = graphical.par$round_percent
+              value = graphical.par$round_percent,
+              min = 0, step = 1
             )
           )
         )
