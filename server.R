@@ -610,11 +610,13 @@ shinyServer(function(input, output, session) {
     )
     advance_tabs <- list(
       quick = tabPanel("Quick explore", uiOutput("quick.explore")),
-      time_series = tabPanel("Time Series",
-         # value = "timeSeries",
-         uiOutput("timeseries.panel")
+      time_series = tabPanel(
+        "Time Series",
+        # value = "timeSeries",
+        uiOutput("timeseries.panel")
       ),
-      time_series = tabPanel("Time Series (Legacy)",
+      time_series = tabPanel(
+        "Time Series (Legacy)",
         # value = "timeSeries",
         uiOutput("timeseries.legacy.panel")
       ),
@@ -686,4 +688,11 @@ shinyServer(function(input, output, session) {
       }
     }
   })
+
+  # setupStorage(
+  #   appId = "inzightlite",
+  #   inputs = FALSE,
+  #   dyn.inputs = "global.sig.level",
+  #   session = session
+  # )
 })

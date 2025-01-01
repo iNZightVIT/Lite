@@ -18,11 +18,13 @@ cursor: not-allowed !important;
 border-color: #aaa !important;
 }"
 
+# library(shinyStorePlus)
 
 shinyUI(
   fluidPage(
     shinyjs::useShinyjs(),
     shinyjs::inlineCSS(css),
+    # initStore("browser"),
     ##  Set Tabpanel font to be size 16.
     tags$head(
       shinyjs::useShinyjs(),
