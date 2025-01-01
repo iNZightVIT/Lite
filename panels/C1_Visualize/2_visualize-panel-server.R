@@ -441,7 +441,10 @@ graphical.par <- reactiveValues(
         cols[-k] <- iNZightPlots:::shade(cols[-k], 0.7)
         cols
       }
-    )
+    ),
+  signif = 4,
+  round_percent = 2,
+  min_pval = 0.0001
 )
 
 ##  Data handling
@@ -7457,6 +7460,14 @@ observe({
       }
     }
   })
+})
+
+
+observeEvent(input$global.sig.level, {
+  graphical.par$signif <- input$global.sig.level
+})
+observeEvent(input$global.round.pct, {
+  graphical.par$round_percent <- input$global.round.pct
 })
 
 
