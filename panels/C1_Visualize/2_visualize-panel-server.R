@@ -7469,5 +7469,14 @@ observeEvent(input$global.round.pct, {
   graphical.par$round_percent <- input$global.round.pct
 })
 
+observeEvent(input$plot_selector, {
+  if (!is.null(input$plot_selector) && input$plot_selector == "Summary") {
+    updateNumericInput(session,
+      "global.sig.level",
+      value = graphical.par$signif
+    )
+  }
+})
+
 
 source("panels/C1_Visualize/vit.R", local = T)

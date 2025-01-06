@@ -727,6 +727,14 @@ output$visualize.summary <- renderPrint({
   }
 })
 
+gloablSigLevel <- reactive(input$global.sig.level.inf)
+observeEvent(input$global.sig.level.inf, {
+  graphical.par$signif <- input$global.sig.level.inf
+  # updateNumericInput(session,
+  #   inputId = "global.sig.level",
+  #   value = graphical.par$signif
+  # )
+})
 
 # observeEvent(input$global.sig.level.inf, {
 #   graphical.par$signif <- input$global.sig.level.inf
