@@ -97,7 +97,8 @@ output$inference_test <- renderUI({
             label = "Min P-value",
             value = graphical.par$min_pval,
             min = 0, max = 0.05, step = 0.0001
-          ))
+          )),
+          column(12, h5("Warning: clicking the inputs rapidly may cause the app to crash."))
         )
       })
 
@@ -730,20 +731,9 @@ output$visualize.summary <- renderPrint({
 gloablSigLevel <- reactive(input$global.sig.level.inf)
 observeEvent(input$global.sig.level.inf, {
   graphical.par$signif <- input$global.sig.level.inf
-  # updateNumericInput(session,
-  #   inputId = "global.sig.level",
-  #   value = graphical.par$signif
-  # )
 })
 
-# observeEvent(input$global.sig.level.inf, {
-#   graphical.par$signif <- input$global.sig.level.inf
-#   updateNumericInput(session,
-#     inputId = "global.sig.level",
-#     value = graphical.par$signif
-#   )
-# })
 
-# observeEvent(input$global.p.val, {
-#   graphical.par$min_pval <- input$global.p.val
-# })
+observeEvent(input$global.p.val, {
+  graphical.par$min_pval <- input$global.p.val
+})
