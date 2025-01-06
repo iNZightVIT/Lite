@@ -272,9 +272,9 @@ vis.mainPanel <- function() {
             )
           ),
           column(
-            2,
+            3,
             numericInput("global.round.pct",
-              label = "Round percentages",
+              label = "Round percentages (decimal places)",
               value = graphical.par$round_percent,
               min = 0, step = 1
             )
