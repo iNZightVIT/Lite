@@ -728,31 +728,14 @@ output$visualize.summary <- renderPrint({
 })
 
 
-observeEvent(input$global.sig.level.inf, {
-  shinyjs::disable("global.sig.level.inf")
-  graphical.par$signif <- input$global.sig.level.inf
-  updateNumericInput(session,
-    inputId = "global.sig.level",
-    value = graphical.par$signif
-  )
-  Sys.sleep(0.1)
-  shinyjs::enable("global.sig.level.inf")
-})
-
-observeEvent(input$global.sig.level, {
-  shinyjs::disable("global.sig.level")
-  graphical.par$signif <- input$global.sig.level.inf
-  updateNumericInput(session,
-    inputId = "global.sig.level.inf",
-    value = graphical.par$signif
-  )
-  Sys.sleep(0.1)
-  shinyjs::enable("global.sig.level")
-})
-
-# observeEvent(graphical.par$signif, {
+# observeEvent(input$global.sig.level.inf, {
+#   graphical.par$signif <- input$global.sig.level.inf
+#   updateNumericInput(session,
+#     inputId = "global.sig.level",
+#     value = graphical.par$signif
+#   )
 # })
 
-observeEvent(input$global.p.val, {
-  graphical.par$min_pval <- input$global.p.val
-})
+# observeEvent(input$global.p.val, {
+#   graphical.par$min_pval <- input$global.p.val
+# })

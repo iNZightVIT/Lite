@@ -7462,7 +7462,6 @@ observe({
   })
 })
 
-
 observeEvent(input$global.sig.level, {
   graphical.par$signif <- input$global.sig.level
 })
