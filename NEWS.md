@@ -22,6 +22,7 @@
 
 ## Patch 2024.01.01
 
+- clarify wording in 'round %'
 - fix bug where double-clicking sig fig up/down would cause an infinite loop
 
 ---
