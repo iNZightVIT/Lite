@@ -728,58 +728,29 @@ output$visualize.summary <- renderPrint({
 })
 
 
-blockSF <- FALSE
 observeEvent(input$global.sig.level.inf, {
-  if (blockSF) {
-    return()
-  }
-  blockSF <<- TRUE
+  shinyjs::disable("global.sig.level.inf")
+  graphical.par$signif <- input$global.sig.level.inf
   updateNumericInput(session,
     inputId = "global.sig.level",
-    value = input$global.sig.level.inf
+    value = graphical.par$signif
   )
-  graphical.par$signif <- input$global.sig.level.inf
-  blockSF <<- FALSE
-})
-# other way around
-observeEvent(input$global.sig.level, {
-  if (blockSF) {
-    return()
-  }
-  blockSF <<- TRUE
-  updateNumericInput(session,
-    inputId = "global.sig.level.inf",
-    value = input$global.sig.level
-  )
-  graphical.par$signif <- input$global.sig.level.inf
-  blockSF <<- FALSE
+  Sys.sleep(0.1)
+  shinyjs::enable("global.sig.level.inf")
 })
 
-# same for rounding
-# blockRounding <- FALSE
-# observeEvent(input$global.round.pct.inf, {
-#   if (blockRounding) {
-#     return()
-#   }
-#   blockRounding <<- TRUE
-#   updateNumericInput(session,
-#     inputId = "global.round.pct",
-#     value = input$global.round.pct.inf
-#   )
-#   graphical.par$round_percent <- input$global.round.pct.inf
-#   blockRounding <<- FALSE
-# })
-# observeEvent(input$global.round.pct, {
-#   if (blockRounding) {
-#     return()
-#   }
-#   blockRounding <<- TRUE
-#   updateNumericInput(session,
-#     inputId = "global.round.pct.inf",
-#     value = input$global.round.pct
-#   )
-#   graphical.par$round_percent <- input$global.round.pct.inf
-#   blockRounding <<- FALSE
+observeEvent(input$global.sig.level, {
+  shinyjs::disable("global.sig.level")
+  graphical.par$signif <- input$global.sig.level.inf
+  updateNumericInput(session,
+    inputId = "global.sig.level.inf",
+    value = graphical.par$signif
+  )
+  Sys.sleep(0.1)
+  shinyjs::enable("global.sig.level")
+})
+
+# observeEvent(graphical.par$signif, {
 # })
 
 observeEvent(input$global.p.val, {
