@@ -88,7 +88,7 @@ output$inference_test <- renderUI({
           column(
             3,
             numericInput("global.sig.level.inf",
-              label = "Signifcant figures",
+              label = "Round (max signifcant figures)",
               value = graphical.par$signif,
               min = 1, step = 1
             )
