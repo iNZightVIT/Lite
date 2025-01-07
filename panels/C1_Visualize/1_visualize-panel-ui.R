@@ -266,7 +266,7 @@ vis.mainPanel <- function() {
           column(
             3,
             numericInput("global.sig.level",
-              label = "Round values (max signifcant figures)",
+              label = "Round values (signifcant figures)",
               value = graphical.par$signif,
               min = 1, step = 1
             )
@@ -274,7 +274,7 @@ vis.mainPanel <- function() {
           column(
             3,
             numericInput("global.round.pct",
-              label = "Round percentages (max decimal places)",
+              label = "Round percentages (decimal places)",
               value = graphical.par$round_percent,
               min = 0, step = 1
             )
