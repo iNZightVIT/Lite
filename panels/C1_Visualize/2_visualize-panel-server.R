@@ -3759,7 +3759,7 @@ observe({
         plot.par$main <- NULL
       }
       if (!is.null(input$x_axis_text) &&
-        !input$x_axis_text %in% "") {
+        input$x_axis_text != "") {
         plot.par$xlab <- input$x_axis_text
       } else {
         plot.par$xlab <- NULL

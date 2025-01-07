@@ -24,6 +24,7 @@
 
 - clarify wording in 'round %'
 - fix bug where double-clicking sig fig up/down would cause an infinite loop
+- fix bug where xlab/ylab passed as NULL would hide the axis labels (instead of using the default)
 
 ---
 
