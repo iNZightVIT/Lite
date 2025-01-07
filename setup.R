@@ -19,7 +19,7 @@ pkgs <-
         "iNZightVIT/iNZightTS@legacy",
         "iNZightVIT/iNZightRegression@1.3.3",
         "iNZightVIT/iNZightMR@2.2.7",
-        # specific version:
+        # specific version...
         "iNZightVIT/iNZightPlots@v2.14",
         "cran/maptools",
         "cran/rgeos",
