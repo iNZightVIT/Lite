@@ -88,7 +88,7 @@ output$inference_test <- renderUI({
           column(
             3,
             numericInput("global.sig.level.inf",
-              label = "Signifcant figures",
+              label = "Round (signifcant figures)",
               value = graphical.par$signif,
               min = 1, step = 1
             )
@@ -97,7 +97,8 @@ output$inference_test <- renderUI({
             label = "Min P-value",
             value = graphical.par$min_pval,
             min = 0, max = 0.05, step = 0.0001
-          ))
+          )),
+          column(12, h5("Warning: clicking the inputs rapidly may cause the app to crash."))
         )
       })
 
@@ -727,35 +728,11 @@ output$visualize.summary <- renderPrint({
   }
 })
 
+gloablSigLevel <- reactive(input$global.sig.level.inf)
 observeEvent(input$global.sig.level.inf, {
-  updateNumericInput(session,
-    inputId = "global.sig.level",
-    value = input$global.sig.level.inf
-  )
   graphical.par$signif <- input$global.sig.level.inf
 })
-# other way around
-observeEvent(input$global.sig.level, {
-  updateNumericInput(session,
-    inputId = "global.sig.level.inf",
-    value = input$global.sig.level
-  )
-})
 
-# same for rounding
-observeEvent(input$global.round.pct.inf, {
-  updateNumericInput(session,
-    inputId = "global.round.pct",
-    value = input$global.round.pct.inf
-  )
-  graphical.par$round_percent <- input$global.round.pct.inf
-})
-observeEvent(input$global.round.pct, {
-  updateNumericInput(session,
-    inputId = "global.round.pct.inf",
-    value = input$global.round.pct
-  )
-})
 
 observeEvent(input$global.p.val, {
   graphical.par$min_pval <- input$global.p.val

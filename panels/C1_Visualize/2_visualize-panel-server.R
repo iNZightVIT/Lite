@@ -3759,7 +3759,7 @@ observe({
         plot.par$main <- NULL
       }
       if (!is.null(input$x_axis_text) &&
-        !input$x_axis_text %in% "") {
+        input$x_axis_text != "") {
         plot.par$xlab <- input$x_axis_text
       } else {
         plot.par$xlab <- NULL
@@ -7462,12 +7462,20 @@ observe({
   })
 })
 
-
 observeEvent(input$global.sig.level, {
   graphical.par$signif <- input$global.sig.level
 })
 observeEvent(input$global.round.pct, {
   graphical.par$round_percent <- input$global.round.pct
+})
+
+observeEvent(input$plot_selector, {
+  if (!is.null(input$plot_selector) && input$plot_selector == "Summary") {
+    updateNumericInput(session,
+      "global.sig.level",
+      value = graphical.par$signif
+    )
+  }
 })
 
 
