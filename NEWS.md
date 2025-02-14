@@ -1,3 +1,9 @@
+# February 2025
+
+## Fixes
+
+- typos in summary/inference panels
+
 # January 2025
 
 ## UI Changes
