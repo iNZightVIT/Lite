@@ -3,6 +3,7 @@
 ## Fixes
 
 - typos in summary/inference panels
+- fix issue where x/y axis labels could be flipped
 
 # January 2025
 
