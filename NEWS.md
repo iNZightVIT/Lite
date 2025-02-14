@@ -20,6 +20,12 @@
 - Refactor data wrangling methods for new `iNZightTools` 2.0.0 API.
 - Maps module has been removed following major changes/restructuring to dependent packages that we are unable to resolve at this time. Please get in touch if you used this module or would like to help us fix it.
 
+## Patch 2024.01.01
+
+- clarify wording in 'round %'
+- fix bug where double-clicking sig fig up/down would cause an infinite loop
+- fix bug where xlab/ylab passed as NULL would hide the axis labels (instead of using the default)
+
 ---
 
 # December 2023
