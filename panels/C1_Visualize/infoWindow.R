@@ -728,43 +728,11 @@ output$visualize.summary <- renderPrint({
   }
 })
 
-<<<<<<< HEAD
-observeEvent(input$global.sig.level.inf, {
-  updateNumericInput(session,
-    inputId = "global.sig.level",
-    value = input$global.sig.level.inf
-  )
-  graphical.par$signif <- input$global.sig.level.inf
-})
-# other way around
-observeEvent(input$global.sig.level, {
-  updateNumericInput(session,
-    inputId = "global.sig.level.inf",
-    value = input$global.sig.level
-  )
-})
-
-# same for rounding
-observeEvent(input$global.round.pct.inf, {
-  updateNumericInput(session,
-    inputId = "global.round.pct",
-    value = input$global.round.pct.inf
-  )
-  graphical.par$round_percent <- input$global.round.pct.inf
-})
-observeEvent(input$global.round.pct, {
-  updateNumericInput(session,
-    inputId = "global.round.pct.inf",
-    value = input$global.round.pct
-  )
-})
-=======
 gloablSigLevel <- reactive(input$global.sig.level.inf)
 observeEvent(input$global.sig.level.inf, {
   graphical.par$signif <- input$global.sig.level.inf
 })
 
->>>>>>> master
 
 observeEvent(input$global.p.val, {
   graphical.par$min_pval <- input$global.p.val
