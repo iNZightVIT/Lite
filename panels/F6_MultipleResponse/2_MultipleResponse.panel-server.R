@@ -23,6 +23,9 @@ mr.par <- reactiveValues(
   combp = NULL
 )
 
+mr.base <- reactiveValues(
+  new_df = NULL
+)
 
 isBinary <- function(x) {
   ## NAs are ignored as they are handled by MR
@@ -47,6 +50,74 @@ getVars <- function(data) {
   which(apply(data, 2, function(x) isBinary(x)))
 }
 
+multiresponse_col = function(df, col, delim) {
+  rand_colname = function(df) {
+    while(TRUE) {
+      tmp_colname = paste(sample(c(0:9, letters), 16, replace = TRUE), collapse = "")
+      if(!(tmp_colname %in% colnames(df))) {
+        return(tmp_colname)
+      }
+    }
+  }
+  # separate delimited column to multiple columns,
+  # i.e., x,y to columns y and x with "yes" and "no" in it
+  tmp_colname = rand_colname(df)
+
+  df %>%
+    mutate(!!sym(tmp_colname) := row_number()) %>%
+    separate_rows(col, sep = delim) %>%
+    mutate(value = "yes") %>%
+    pivot_wider(
+      names_from = all_of(col), 
+      values_from = value, 
+      values_fill = "no", 
+      names_repair = "unique"
+    ) %>%
+    select(-!!sym(tmp_colname))
+}
+
+observe({
+  input$mr.multiple.select.var
+  input$mr.multiple.delim.text
+
+  isolate({
+    if(
+      !is.null(input$mr.multiple.select.var) &&
+      !is.null(input$mr.multiple.delim.text)
+    ) {
+      # browser()
+      if(nchar(input$mr.multiple.select.var) > 0) {
+        output$mr.multiple.result <- renderText({
+          tryCatch({
+            if (length(unique(get.data.set()[,input$mr.multiple.select.var])) > 100) {
+              return(glue::glue("column '{input$mr.multiple.select.var}' too many levels"))
+            }
+            
+            old_cols = colnames(get.data.set())
+            new_df = multiresponse_col(
+              df = get.data.set(),
+              col = input$mr.multiple.select.var,
+              delim = input$mr.multiple.delim.text
+            )
+            new_cols = colnames(new_df)
+            
+            new_multi_cols = new_cols[!(new_cols %in% old_cols)]
+            if(length(new_multi_cols) == 0) {
+              return("No conversions made")
+            }
+            mr.base$new_df = new_df
+            
+            new_cols_collapsed = paste0(new_multi_cols, collapse = ", ")
+            return(glue::glue("Created new columns {new_cols_collapsed}"))
+          }, error = function(e) {
+            return("Failed to convert variable")
+          })
+        })
+      }
+    }
+  })
+})
+
 ################
 ## left panel ##
 ################
@@ -65,6 +136,8 @@ output$mr.var <- renderUI({
     } else {
       list(
         h5(strong("Multiple Response")),
+        h5("Convert variable to multiple response"),
+        actionButton("convert.multi.btn", "Convert", style = "margin-bottom: 15px;"),
         selectInput("mr.select.var",
           label = "Select related variables: ",
           choices = vars[binaryVar],
@@ -454,3 +527,52 @@ updatePlot <- function() {
   }
   iNZightMR::barplotMR(mro)
 }
+
+
+## convert multiple columns
+createMultiModal <- function() {
+  # browser()
+  binaryVar <- getVars(get.data.set())
+  vars <- names(get.data.set())
+  # if(is.null(binaryVar) || is.null(vars)) {
+  #   return()
+  # }
+  modalDialog(
+    title = "Convert variable to multiple response",
+    selectInput("mr.multiple.select.var",
+                label = "Select variable: ",
+                choices = c("", vars[!(vars %in% names(binaryVar))]),
+                selected = NULL,
+                multiple = F,
+                selectize = F,
+                # size = 18
+    ),
+    textInput( 
+      "mr.multiple.delim.text", 
+      "Delimiter",
+      value = ",",
+      placeholder = "delimiter"
+    ),
+    div(
+      # style = "height:300px; overflow-y:scroll;",
+      verbatimTextOutput("mr.multiple.result", placeholder = F)
+    ),
+    
+    footer = tagList(
+      modalButton("Exit"),
+      actionButton("convert.multi.confirm.btn", "Confirm")
+    )
+  )
+}
+observeEvent(input$convert.multi.btn, {
+  showModal(createMultiModal())
+})
+
+observeEvent(input$convert.multi.confirm.btn, {
+  if(!is.null(mr.base$new_df)) {
+    values$data.set = mr.base$new_df
+    
+    mr.base$new_df = NULL
+    output$mr.multiple.result = renderText({""})
+  }
+})
