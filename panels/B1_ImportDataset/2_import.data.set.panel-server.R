@@ -2,7 +2,8 @@ options(shiny.maxRequestSize = 5 * 1024^2)
 
 
 import_reactives <- reactiveValues(
-  success = NULL
+  success = NULL,
+  message = NULL
 )
 
 observe({
@@ -498,6 +499,22 @@ observeEvent(input$import_set, {
     input_url <- trimws(input_url)
 
     isolate({
+      if(grepl("docs\\.google\\.com/spreadsheets", input_url)) {
+        print("t")
+        if(grepl("usp=sharing", input_url)) {
+          print("t2")
+          import_reactives$success <- FALSE
+          import_reactives$message <- paste(
+            "Incorrect Google Sheets URL detected\n",
+            "Please use an export link instead:",
+            "1. Files > Publish to web",
+            "2. File type pick .csv or .xlsx",
+            "3. Publish",
+            sep="\n"
+          )
+          return()
+        }
+      }
       if (!is.null(input$files) && file.exists(input$files[1, "datapath"])) {
         unlink(input$files[1, "datapath"])
       }
@@ -609,7 +626,9 @@ output$message.success <- renderText({
       import_reactives$success <- F
       "Import was successful"
     } else if (isFALSE(import_reactives$success)) {
-      "Import failed, check URL"
+      display_msg = import_reactives$message
+      import_reactives$message = NULL
+      ifelse(is.null(import_reactives$message), display_msg, "Import was successful")
     }
   })
 })
