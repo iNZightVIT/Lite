@@ -1,5 +1,9 @@
 # February 2025
 
+## Changes
+
+- Display instructions to correctly import a Google Sheet when pasting in an invalid URL
+
 ## Fixes
 
 - typos in summary/inference panels
