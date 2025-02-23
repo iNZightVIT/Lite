@@ -88,13 +88,13 @@ output$inference_test <- renderUI({
           column(
             3,
             numericInput("global.sig.level.inf",
-              label = "Round (signifcant figures)",
+              label = "Round (significant figures)",
               value = graphical.par$signif,
               min = 1, step = 1
             )
           ),
           column(3, numericInput("global.p.val",
-            label = "Min P-value",
+            label = "Min p-value",
             value = graphical.par$min_pval,
             min = 0, max = 0.05, step = 0.0001
           )),

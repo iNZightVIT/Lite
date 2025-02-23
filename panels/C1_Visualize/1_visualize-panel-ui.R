@@ -266,7 +266,7 @@ vis.mainPanel <- function() {
           column(
             3,
             numericInput("global.sig.level",
-              label = "Round values (signifcant figures)",
+              label = "Round values (significant figures)",
               value = graphical.par$signif,
               min = 1, step = 1
             )

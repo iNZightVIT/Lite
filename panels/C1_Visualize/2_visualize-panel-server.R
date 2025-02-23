@@ -7479,4 +7479,12 @@ observeEvent(input$plot_selector, {
 })
 
 
+observeEvent(input$global.sig.level, {
+  graphical.par$signif <- input$global.sig.level
+})
+observeEvent(input$global.round.pct, {
+  graphical.par$round_percent <- input$global.round.pct
+})
+
+
 source("panels/C1_Visualize/vit.R", local = T)

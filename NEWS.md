@@ -1,3 +1,14 @@
+# February 2025
+
+## Changes
+
+- Display instructions to correctly import a Google Sheet when pasting in an invalid URL
+
+## Fixes
+
+- typos in summary/inference panels
+- fix issue where x/y axis labels could be flipped
+
 # January 2025
 
 ## UI Changes
