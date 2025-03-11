@@ -1,3 +1,9 @@
+# Unreleased
+
+## Fixes
+
+- Fix bug where 'locate points' would fail if text labels were chosen
+
 # February 2025
 
 ## Changes
