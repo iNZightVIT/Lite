@@ -1184,7 +1184,7 @@ output$decomposed_plot <- renderPlot({
           ylab = input$provide_ylab,
           xlim = ts.para$xlim
         )
-        dev.off()
+        #dev.off()
         g
       },
       error = function(e) {
