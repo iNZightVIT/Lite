@@ -8,8 +8,6 @@
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
-
-
 ## initialize gui
 output$multiple.response <- renderUI({
   MultipleResponse.panel.ui(get.data.set())
@@ -95,48 +93,58 @@ multiresponse_check = function(df, col, delim) {
 }
 
 multiresponse_col = function(df, col, delim) {
-  # browser()
   # separate delimited column to multiple columns,
   # i.e., x,y to columns y and x with "yes" and "no" in it
   tmp_colname = rand_colname(df)
   
   # make the NA's in col to mr.multiple.missing.col
-  # default is "none
+  # default is "missing"
   if (is.factor(df[,col])) {
     original_level = levels(df[, col])
-    df = df %>% mutate(
+    df = df %>% 
+      mutate(
         !!sym(col) := ifelse(
         is.na(!!sym(col)), 
         input$mr.multiple.missing.col, 
         as.character(!!sym(col))
       )
-    )
-    df[, col] = as.factor(df[, col])
-    levels(df[, col]) = c(original_level, input$mr.multiple.missing.col)
+      ) %>% 
+      mutate(!!sym(col) := factor(
+        !!sym(col), levels = c(original_level, input$mr.multiple.missing.col))
+      ) %>%
+      as_tibble()
+    # levels(df[, col]) = c(original_level, input$mr.multiple.missing.col)
   } else {
     df = df %>% mutate(!!sym(col) := ifelse(is.na(!!sym(col)), input$mr.multiple.missing.col, !!sym(col)))
   }
   
-  # convert response with less than 'mr.multiple.min.obs.group' values,
-  # to "other", default is 5
+  # convert separate delim-separated response and create extra rows,
+  # one for each unique response
+  df = df %>% tidyr::separate_rows(col, sep = delim)
+  # find groups which has less than `input$mr.multiple.min.obs.group` groups
+  # and name them `input$mr.multiple.min.obs.group.name`
   min_groups = df %>% 
-    group_by(!!sym(col)) %>% 
-    tally() %>% 
-    filter(n < input$mr.multiple.min.obs.group) %>% pull(!!sym(col))
-  df = df %>% 
-    mutate(!!sym(col) := case_when(
-      !!sym(col) %in% min_groups ~ input$mr.multiple.min.obs.group.name, 
-      TRUE ~ !!sym(col)
-    ))
+    filter(!!sym(col) != input$mr.multiple.missing.col) %>%
+    group_by(!!sym(col)) %>% tally() %>% 
+    filter(n < as.integer(input$mr.multiple.min.obs.group)) %>%
+    pull(!!sym(col))
+  if (length(min_groups) > 0) {
+    df = df %>%
+      mutate(!!sym(col) := case_when(
+        !!sym(col) %in% min_groups ~ input$mr.multiple.min.obs.group.name,
+        TRUE ~ !!sym(col)
+      ))
+  }
   
+  # create individual columns for each response
   df %>%
     mutate(!!sym(tmp_colname) := row_number()) %>%
-    tidyr::separate_rows(col, sep = delim) %>%
+    # tidyr::separate_rows(col, sep = delim) %>%
     mutate(value = "yes") %>%
     tidyr::pivot_wider(
-      names_from = all_of(col), 
-      values_from = value, 
-      values_fill = "no", 
+      names_from = all_of(col),
+      values_from = value,
+      values_fill = "no",
       names_repair = "unique"
     ) %>%
     select(-!!sym(tmp_colname))
@@ -156,7 +164,6 @@ observe({
       !is.null(input$mr.multiple.min.obs.group) &&
       !is.null(input$mr.multiple.min.obs.group.name)
     ) {
-      # browser()
       if(nchar(input$mr.multiple.select.var) > 0) {
         output$mr.multiple.result <- renderText({
           tryCatch({
@@ -640,7 +647,7 @@ create_multi_modal <- function() {
     textInput( 
       "mr.multiple.missing.col", 
       "Missing value column name",
-      value = "none",
+      value = "missing",
       placeholder = "column name"
     ),
     textInput(
