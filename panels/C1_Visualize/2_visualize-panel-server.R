@@ -3759,7 +3759,7 @@ observe({
         plot.par$main <- NULL
       }
       if (!is.null(input$x_axis_text) &&
-        !input$x_axis_text %in% "") {
+        input$x_axis_text != "") {
         plot.par$xlab <- input$x_axis_text
       } else {
         plot.par$xlab <- NULL
@@ -5468,11 +5468,10 @@ observe({
       (input$label.select %in% colnames(get.data.set()) ||
         input$label.select %in% "id")) {
       if (input$label_observation_check) {
-        if (input$label.select %in% "id") {
-          plot.par$locate <- 1:nrow(get.data.set())
-        } else {
-          plot.par$locate <- get.data.set()[, input$label.select]
-        }
+        plot.par$locate <- ifelse(input$label.select == "id",
+          "id",
+          as.name(input$label.select)
+        )
       } else {
         plot.par$locate <- NULL
       }
@@ -7460,6 +7459,22 @@ observe({
       }
     }
   })
+})
+
+observeEvent(input$global.sig.level, {
+  graphical.par$signif <- input$global.sig.level
+})
+observeEvent(input$global.round.pct, {
+  graphical.par$round_percent <- input$global.round.pct
+})
+
+observeEvent(input$plot_selector, {
+  if (!is.null(input$plot_selector) && input$plot_selector == "Summary") {
+    updateNumericInput(session,
+      "global.sig.level",
+      value = graphical.par$signif
+    )
+  }
 })
 
 

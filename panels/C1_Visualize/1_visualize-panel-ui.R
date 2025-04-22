@@ -264,17 +264,17 @@ vis.mainPanel <- function() {
         helpText("Formatting options"),
         fixedRow(
           column(
-            2,
+            3,
             numericInput("global.sig.level",
-              label = "Signifcant figures",
+              label = "Round values (significant figures)",
               value = graphical.par$signif,
               min = 1, step = 1
             )
           ),
           column(
-            2,
+            3,
             numericInput("global.round.pct",
-              label = "Round percentages",
+              label = "Round percentages (decimal places)",
               value = graphical.par$round_percent,
               min = 0, step = 1
             )

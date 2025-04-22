@@ -1,3 +1,20 @@
+# Unreleased
+
+## Fixes
+
+- Fix bug where 'locate points' would fail if text labels were chosen
+
+# February 2025
+
+## Changes
+
+- Display instructions to correctly import a Google Sheet when pasting in an invalid URL
+
+## Fixes
+
+- typos in summary/inference panels
+- fix issue where x/y axis labels could be flipped
+
 # January 2025
 
 ## UI Changes
@@ -19,6 +36,12 @@
 
 - Refactor data wrangling methods for new `iNZightTools` 2.0.0 API.
 - Maps module has been removed following major changes/restructuring to dependent packages that we are unable to resolve at this time. Please get in touch if you used this module or would like to help us fix it.
+
+## Patch 2024.01.01
+
+- clarify wording in 'round %'
+- fix bug where double-clicking sig fig up/down would cause an infinite loop
+- fix bug where xlab/ylab passed as NULL would hide the axis labels (instead of using the default)
 
 ---
 
