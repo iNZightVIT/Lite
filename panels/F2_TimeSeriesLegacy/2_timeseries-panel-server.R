@@ -1089,7 +1089,7 @@ output$seasonal_plot <- renderPlot({
           t = 100 * input$slidersmoothing,
           model.lim = ts.para$mod.lim
         )
-        dev.off()
+        # dev.off()
         g
       },
       error = function(e) {
@@ -1173,6 +1173,7 @@ output$decomposed_plot <- renderPlot({
       input$time_info == 2) {
     suppressWarnings(tryCatch(
       {
+        
         g <- iNZightTSLegacy:::plot.inzdecomp(
           iNZightTSLegacy::decompose(
             ts.para$tsObj,
@@ -1184,7 +1185,7 @@ output$decomposed_plot <- renderPlot({
           ylab = input$provide_ylab,
           xlim = ts.para$xlim
         )
-        #dev.off()
+        # dev.off()
         g
       },
       error = function(e) {
@@ -1279,7 +1280,7 @@ output$trSeasonal_plot <- renderPlot({
           xlim = ts.para$xlim,
           recompose.progress = c(1, nrow(get.data.set()))
         )
-        dev.off()
+        # dev.off()
         g
       },
       error = function(e) {
