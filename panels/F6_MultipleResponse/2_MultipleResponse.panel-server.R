@@ -96,7 +96,6 @@ multiresponse_col = function(df, col, delim) {
   # separate delimited column to multiple columns,
   # i.e., x,y to columns y and x with "yes" and "no" in it
   tmp_colname = rand_colname(df)
-  
   # make the NA's in col to mr.multiple.missing.col
   # default is "missing"
   if (is.factor(df[,col])) {
@@ -120,7 +119,9 @@ multiresponse_col = function(df, col, delim) {
   
   # convert separate delim-separated response and create extra rows,
   # one for each unique response
-  df = df %>% tidyr::separate_rows(col, sep = delim)
+  # df = df %>% tidyr::separate_rows(col, sep = delim)
+  df = df %>% tidyr::separate_longer_delim(col, delim = delim)
+  
   # find groups which has less than `input$mr.multiple.min.obs.group` groups
   # and name them `input$mr.multiple.min.obs.group.name`
   min_groups = df %>% 
@@ -143,6 +144,10 @@ multiresponse_col = function(df, col, delim) {
     mutate(value = "yes") %>%
     tidyr::pivot_wider(
       names_from = all_of(col),
+      names_prefix = paste0(col, input$mr.multiple.group.name.sep),
+      # names_sep not working?
+      # names_prefix = col,
+      # names_sep = input$mr.multiple.group.name.sep,
       values_from = value,
       values_fill = "no",
       names_repair = "unique"
@@ -156,6 +161,7 @@ observe({
   input$mr.multiple.missing.col
   input$mr.multiple.min.obs.group
   input$mr.multiple.min.obs.group.name
+  input$mr.multiple.group.name.sep
   isolate({
     if(
       !is.null(input$mr.multiple.select.var) &&
@@ -566,7 +572,6 @@ setMRobj <- function() {
 
     return(NULL)
   }
-
   responseVars <- binaryVar[responseID]
 
   frm <- as.formula(paste(
@@ -578,6 +583,12 @@ setMRobj <- function() {
     data = get.data.set(),
     Labels = substrsplit
   )
+  
+  # remove leading punct in labels
+  mr.par$mrObject$Labels$Commonstr = gsub("^[^a-zA-Z0-9]+", "", mr.par$mrObject$Labels$Commonstr)
+  # remove trailing punct labels
+  mr.par$mrObject$Labels$Commonstr = gsub("[^a-zA-Z0-9]+$", "",  mr.par$mrObject$Labels$Commonstr)
+  
   if (mr.par$mrObject$Labels$Commonstr != mr.par$objName && mr.par$guessName) {
     if (!(mr.par$objName == "response" &&
       mr.par$mrObject$Labels$Commonstr == "")) {
@@ -661,6 +672,12 @@ create_multi_modal <- function() {
       "Minimum group name",
       value = "other",
       placeholder = "group name"
+    ),
+    textInput(
+      "mr.multiple.group.name.sep", 
+      "Group name separator",
+      value = "_",
+      placeholder = "separator"
     ),
     div(
       verbatimTextOutput("mr.multiple.result", placeholder = F),
