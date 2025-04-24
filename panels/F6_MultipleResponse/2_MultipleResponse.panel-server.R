@@ -120,7 +120,9 @@ multiresponse_col = function(df, col, delim) {
   # convert separate delim-separated response and create extra rows,
   # one for each unique response
   # df = df %>% tidyr::separate_rows(col, sep = delim)
-  df = df %>% tidyr::separate_longer_delim(col, delim = delim)
+  tmp_rn_col = rand_colname(df)
+  df = df %>% mutate(!!sym(tmp_rn_col) := row_number()) %>% 
+    tidyr::separate_longer_delim(col, delim = delim)
   
   # find groups which has less than `input$mr.multiple.min.obs.group` groups
   # and name them `input$mr.multiple.min.obs.group.name`
@@ -138,21 +140,24 @@ multiresponse_col = function(df, col, delim) {
   }
   
   # create individual columns for each response
-  df %>%
-    mutate(!!sym(tmp_colname) := row_number()) %>%
-    # tidyr::separate_rows(col, sep = delim) %>%
-    mutate(value = "yes") %>%
+  tmp_value_col = rand_colname(df)
+  # all column names except for the target column
+  og_cols = og_cols = colnames(df)[colnames(df) != col]
+  df %>% 
+    distinct() %>% # duplicated rows dont make sense here?
+    mutate(!!sym(tmp_value_col) := "yes") %>%
     tidyr::pivot_wider(
-      names_from = all_of(col),
+      id_cols = og_cols,
+      names_from = col,
       names_prefix = paste0(col, input$mr.multiple.group.name.sep),
       # names_sep not working?
       # names_prefix = col,
       # names_sep = input$mr.multiple.group.name.sep,
-      values_from = value,
+      values_from = !!sym(tmp_value_col),
       values_fill = "no",
       names_repair = "unique"
     ) %>%
-    select(-!!sym(tmp_colname))
+    select(-!!sym(tmp_rn_col))
 }
 
 observe({
