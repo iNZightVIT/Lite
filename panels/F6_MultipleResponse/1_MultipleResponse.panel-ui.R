@@ -15,7 +15,33 @@
 ### ----------------###
 ###  Sidebar Panel ###
 ### ----------------###
-
+# sidebarPanelUI <- list(
+#   useShinyalert(),
+#   useShinyjs(),
+#   fluidRow(
+#     column(
+#       12,
+#       bslib::navset_pill(
+#         id = "mr_tabs",
+#         bslib::nav_panel("Binary", 
+#                          uiOutput("mr.var")
+#         ),
+#         bslib::nav_panel("Multiple", 
+#                          uiOutput("mr.var.multiple")
+#         )
+#       )
+#     )
+#   ),
+#   fluidRow(
+#     column(
+#       12,
+#       uiOutput("mr.type"),
+#       uiOutput("mr.sub1"),
+#       uiOutput("mr.sub2"),
+#       uiOutput("mr.box")
+#     )
+#   )
+# ) 
 
 MultipleResponse.sidebarPanel <- function() {
   sidebarPanelUI <- list(
