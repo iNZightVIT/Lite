@@ -1,3 +1,14 @@
+# 2025.04
+
+## New features
+
+- Added new funcionality to the Multiple Response module that allows comma-separated values to be split into multi response yes/no variables.
+
+## Fixes
+
+- Fix bug where 'locate points' would fail if text labels were chosen
+- Fix 'Expand Table' (missing library)
+
 # February 2025
 
 ## Changes

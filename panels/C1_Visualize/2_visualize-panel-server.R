@@ -5468,11 +5468,10 @@ observe({
       (input$label.select %in% colnames(get.data.set()) ||
         input$label.select %in% "id")) {
       if (input$label_observation_check) {
-        if (input$label.select %in% "id") {
-          plot.par$locate <- 1:nrow(get.data.set())
-        } else {
-          plot.par$locate <- get.data.set()[, input$label.select]
-        }
+        plot.par$locate <- ifelse(input$label.select == "id",
+          "id",
+          as.name(input$label.select)
+        )
       } else {
         plot.par$locate <- NULL
       }
