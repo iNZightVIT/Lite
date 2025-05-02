@@ -414,10 +414,13 @@ observe({
         ## import data
         x1 <- readLines(input[[paste0("PS", v, "data")]][1, "datapath"], n = 1)
         file_has_header <- suppressWarnings(is.na(as.numeric(x1)))
-        df <- read.csv(input[[paste0("PS", v, "data")]][1, "datapath"],
-          header = file_has_header, stringsAsFactors = TRUE
-        )
-        if (nrow(df) != 2) {
+        df <- readr::read_csv(
+          file = input[[paste0("PS", v, "data")]][1, "datapath"],
+          col_names = file_has_header,
+          col_types = readr::cols(readr::col_factor(NULL)) # means stringsAsFactors = TRUE
+        ) %>% as.data.frame()
+
+        if (ncol(df) != 2) {
           shinyalert("File needs to have 2 columns: one for variable names, and one for frequencies.",
             type = "error"
           )
