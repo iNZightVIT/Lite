@@ -1,6 +1,7 @@
 # Unreleased changes
 
 - Fix bug when uploading file in 'Post stratify'
+- Disable variable switch button on 'Inference' tab
 
 # 2025.04
 

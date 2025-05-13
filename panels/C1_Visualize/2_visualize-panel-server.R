@@ -7486,4 +7486,16 @@ observeEvent(input$global.round.pct, {
 })
 
 
+observeEvent(input$plot_selector, {
+  toggle_fn = ifelse(
+    input$plot_selector == "Inference",
+    shinyjs::hide,
+    shinyjs::show
+  )
+  ids_to_hide = c("switch1", "switch2", "switch3")
+  for(eid in ids_to_hide) {
+    toggle_fn(id = eid)
+  }
+})
+
 source("panels/C1_Visualize/vit.R", local = T)
