@@ -1,0 +1,86 @@
+name: "Publish Docker image to AWS ECR and deploy to ECS"
+
+on: push
+
+env:
+  AWS_REGION: ap-southeast-2
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+  CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::868136143489:role/GitHubAssumeRole
+          role-session-name: GitHub-to-AWS
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set image tag from branch name
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          if [[ "$BRANCH_NAME" == "master" ]]; then
+            echo "TAGNAME=latest" >> $GITHUB_ENV
+          else
+            CLEAN_TAG=${BRANCH_NAME//\//_}
+            echo "TAGNAME=$CLEAN_TAG" >> $GITHUB_ENV
+          fi
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image to ECR
+        run: |
+          ECR_URI=$(aws ecr describe-repositories \
+            --repository-names ${{ env.ECR_REPOSITORY }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'repositories[0].repositoryUri' \
+            --output text)
+
+          echo "Using ECR URI: $ECR_URI"
+          echo "Using tag: $TAGNAME"
+          docker build --no-cache -t ${{ env.ECR_REPOSITORY }}:$TAGNAME .
+          docker tag ${{ env.ECR_REPOSITORY }}:$TAGNAME $ECR_URI:$TAGNAME
+          docker push $ECR_URI:$TAGNAME
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+            
+      - name: Delete all untagged images from ECR
+        run: |
+          UNTAGGED_DIGESTS=$(aws ecr list-images \
+            --repository-name ${{ env.ECR_REPOSITORY }} \
+            --region ${{ env.AWS_REGION }} \
+            --filter tagStatus=UNTAGGED \
+            --query 'imageIds[*].imageDigest' \
+            --output text)
+      
+          if [ -z "$UNTAGGED_DIGESTS" ]; then
+            echo "No untagged images to delete."
+          else
+            for digest in $UNTAGGED_DIGESTS; do
+              echo "Deleting untagged image with digest: $digest"
+              aws ecr batch-delete-image \
+                --repository-name ${{ env.ECR_REPOSITORY }} \
+                --region ${{ env.AWS_REGION }} \
+                --image-ids imageDigest=$digest
+            done
+          fi
