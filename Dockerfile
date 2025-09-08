@@ -3,11 +3,10 @@ RUN rm -rf /srv/shiny-server/index.html /srv/shiny-server/sample-apps
 RUN apt-get update && apt-get install -y \
     cmake \
     libpoppler-cpp-dev
-    ARG GITHUB_PAT
-    ENV GITHUB_PAT ${GITHUB_PAT}
-    # write GITHUB_PAT to .Renviron
-    # 'iNZightVIT/iNZightTS@2.0.0', \
-    RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
+
+ARG GITHUB_PAT
+ENV GITHUB_PAT=${GITHUB_PAT}
+RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
 
 COPY setup.R /srv/shiny-server
 RUN Rscript /srv/shiny-server/setup.R

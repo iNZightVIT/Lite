@@ -59,7 +59,7 @@ shinyUI(
         })();")),
     tags$head(tags$script(src = "js/testNumeric.js")),
     tags$head(tags$script(src = "js/google-analytics.js")),
-    tags$head(tags$script(src = "js/user-info.js")),
+    # tags$head(tags$script(src = "js/user-info.js")),
     # tags$head(tags$script(src = "js/download-logs.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).
     theme = "bootstrap.css",
