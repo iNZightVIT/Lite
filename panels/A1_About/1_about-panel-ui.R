@@ -48,7 +48,7 @@ about.panel.ui <- function(lite.version, lite.update) {
           )
         }
         if (lite.update != "") {
-          p_args <- c(p_args, list("Last updated: ", em(lite.update)))
+          p_args <- c(p_args, list("Last updated: ", em(lite.update), "(UTC)"))
         }
 
         change_log <- list(
