@@ -3196,7 +3196,6 @@ output$plotly_nw <- renderUI({
   input$vari2
   input$subs1
   input$subs2
-
   isolate({
     temp <- vis.par()
     if (!is.null(input$select.plot.type) &&
@@ -7487,13 +7486,13 @@ observeEvent(input$global.round.pct, {
 
 
 observeEvent(input$plot_selector, {
-  toggle_fn = ifelse(
+  toggle_fn <- ifelse(
     input$plot_selector == "Inference",
     shinyjs::hide,
     shinyjs::show
   )
-  ids_to_hide = c("switch1", "switch2", "switch3")
-  for(eid in ids_to_hide) {
+  ids_to_hide <- c("switch1", "switch2", "switch3")
+  for (eid in ids_to_hide) {
     toggle_fn(id = eid)
   }
 })
