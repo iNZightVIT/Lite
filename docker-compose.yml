@@ -1,0 +1,19 @@
+version: "3"
+services:
+  lite1:
+    image: scienceis/uoa-inzight-lite:dev
+    ports:
+      - "3838"
+  lite2:
+    image: scienceis/uoa-inzight-lite:dev
+    ports:
+      - "3838"
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8002:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - lite1
+      - lite2
