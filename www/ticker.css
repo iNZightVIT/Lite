@@ -6,6 +6,11 @@
   padding: 8px 3em;
 }
 
+.ticker-item a {
+  color: white;
+  text-decoration: underline;
+}
+
 .ticker-info {
   background: #165083;
 }
