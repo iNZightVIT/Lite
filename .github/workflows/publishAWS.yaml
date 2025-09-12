@@ -2,6 +2,8 @@ name: "Publish Docker image to AWS ECR and deploy to ECS"
 
 on:
   push:
+    branches:
+      - dev
   schedule:
     - cron: "20 22,4 * * *"
 
