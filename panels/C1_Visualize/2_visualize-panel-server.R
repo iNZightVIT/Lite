@@ -468,7 +468,10 @@ graphical.par <- reactiveValues(
         cols[-k] <- iNZightPlots:::shade(cols[-k], 0.7)
         cols
       }
-    )
+    ),
+  signif = 4,
+  round_percent = 2,
+  min_pval = 0.0001
 )
 
 ##  Data handling
@@ -639,6 +642,11 @@ vis.par <- reactive({
     # set ci_width in par for plots
     vis.par$ci.width <- ci_width() / 100
 
+    # cat("\n\n===== looking at parameters ---- \n")
+    # cat("vis.par: \n")
+    # print(vis.par$trend)
+    # cat("\ngraphical.par: \n")
+    # print(graphical.par$trend)
     vis.par <- modifyList(reactiveValuesToList(graphical.par), vis.par,
       keep.null = TRUE
     )
@@ -1346,8 +1354,7 @@ output$mini.plot <- renderPlot({
 })
 
 ##  Reset variable selection and graphical parameters.
-observe({
-  input$reset.graphics
+observeEvent(input$reset.graphics, {
   if (!is.null(input$reset.graphics) && input$reset.graphics > 0) {
     isolate({
       updateCheckboxInput(session, "show_boxplot_title", value = T)
@@ -3236,7 +3243,6 @@ output$plotly_nw <- renderUI({
   input$vari2
   input$subs1
   input$subs2
-
   isolate({
     temp <- vis.par()
     if (!is.null(input$select.plot.type) &&
@@ -3801,7 +3807,7 @@ observe({
         plot.par$main <- NULL
       }
       if (!is.null(input$x_axis_text) &&
-        !input$x_axis_text %in% "") {
+        input$x_axis_text != "") {
         plot.par$xlab <- input$x_axis_text
       } else {
         plot.par$xlab <- NULL
@@ -4248,6 +4254,7 @@ output$trend.curve.panel <- renderUI({
     #    title.add.trend.curve = h5("Add trend curves")
     trend.curves.title <- h5(strong("Trend Curves"))
     smoother.title <- h5(strong("Smoother"))
+
     check.linear.object <- checkboxInput("check_linear",
       label = "linear",
       value = ifelse(
@@ -4458,6 +4465,9 @@ observe({
   input$color.linear
   input$type.linear
   isolate({
+    # cat("\n---------------\n")
+    # cat("Doing some linear trend stuff ...\n")
+    # cat("input$check_linear: ", input$check_linear, "\n")
     if (!is.null(input$check_linear)) {
       if (input$check_linear) {
         if (length(which(graphical.par$trend %in% "linear")) == 0) {
@@ -5516,11 +5526,10 @@ observe({
       (input$label.select %in% colnames(get.data.set()) ||
         input$label.select %in% "id")) {
       if (input$label_observation_check) {
-        if (input$label.select %in% "id") {
-          plot.par$locate <- 1:nrow(get.data.set())
-        } else {
-          plot.par$locate <- get.data.set()[, input$label.select]
-        }
+        plot.par$locate <- ifelse(input$label.select == "id",
+          "id",
+          as.name(input$label.select)
+        )
       } else {
         plot.par$locate <- NULL
       }
@@ -7009,98 +7018,159 @@ output$add.fitted.residuals.panel <- renderUI({
   ret
 })
 
-
 observeEvent(input$store_fitted_values, {
-  existing_colnames = colnames(vis.data())
-  if (!is.null(plot.par$x)) {
-    if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
-      !is.null(plot.par$x) &&
-      iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
-      showModal(modalDialog(
-        h5(strong("Specify names for the new variables")),
-        conditionalPanel(
-          "input.check_linear",
-          fixedRow(
-            column(2, h5("Linear:")),
-            column(6, textInput(
-              inputId = "add_linear_fitted_values",
-              value = iNZightTools::make_names(
-                new = paste(input$vari1, ".predict.linear", sep = ""),
-                existing = existing_colnames
-              ),
-              label = NULL
-            ))
-          )
-        ),
-        conditionalPanel(
-          "input.check_quadratic",
-          fixedRow(
-            column(2, h5("Quadratic:")),
-            column(6, textInput(
-              inputId = "add_quadratic_fitted_values",
-              value = iNZightTools::make_names(
-                new = paste(input$vari1, ".predict.quadratic", sep = ""),
-                existing = existing_colnames
-              ),
-              label = NULL
-            ))
-          )
-        ),
-        conditionalPanel(
-          "input.check_cubic",
-          fixedRow(
-            column(2, h5("Cubic:")),
-            column(6, textInput(
-              inputId = "add_cubic_fitted_values",
-              value = iNZightTools::make_names(
-                new = paste(input$vari1, ".predict.cubic", sep = ""),
-                existing = existing_colnames
-              ),
-              label = NULL
-            ))
-          )
-        ),
-        conditionalPanel(
-          "input.check_smoother",
-          fixedRow(
-            column(2, h5("Smoother:")),
-            column(6, textInput(
-              inputId = "add_smoother_fitted_values",
-              value = iNZightTools::make_names(
-                new = paste(input$vari1, ".predict.smoother", sep = ""),
-                existing = existing_colnames
-              ),
-              label = NULL
-            ))
-          )
-        ),
-        actionButton("store_fitted_values_ok", "OK"),
-        textOutput("add_fitted_values_status"),
-        title = "Store fitted values"
-      ))
-    } else {
-      tmp_value = paste(
-        ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
-               input$vari1, input$vari2
-        ),
-        ".predict",
-        sep = ""
+  temp1 <- input$vari1
+  temp2 <- input$vari2
+  temp <- get.data.set()
+  existing_colnames <- colnames(temp)
+  if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+    !is.null(plot.par$x) &&
+    iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
+    !is.null(plot.par$y)) {
+    linear_trend <- FALSE
+    quadratic_trend <- FALSE
+    cubic_trend <- FALSE
+    smoother_trend <- FALSE
+    if ("linear" %in% graphical.par$trend) {
+      linear_trend <- TRUE
+      fit.linear <- with(
+        vis.par(),
+        lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+          na.action = na.exclude
+        )
       )
-      showModal(modalDialog(
-        h5(strong("Specify names for the new variables")),
-        fixedRow(column(6, textInput(
-          inputId = "add_numcat_fitted_values",
-          value = iNZightTools::make_names(new = tmp_value, existing = existing_colnames),
-          label = NULL
-        ))),
-        actionButton("store_fitted_values_ok", "OK"),
-        textOutput("add_fitted_values_status"),
-        title = "Store fitted values"
-      ))
-    }
-  }
-})
+      pred.linear <- data.frame(
+        predict(fit.linear,
+          newdata = data.frame(
+            x = vis.data()[[plot.par$y]],
+            stringsAsFactors = TRUE
+          )
+        ),
+        stringsAsFactors = TRUE
+      )
 
+      colnames(pred.linear) <- iNZightTools::make_names(
+        new = sprintf("%s.predict.by.%s.linear", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, pred.linear)
+    }
+    if ("quadratic" %in% graphical.par$trend) {
+      quadratic_trend <- TRUE
+      fit.quadratic <- with(
+        vis.par(),
+        lm(
+          vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+            I(vis.data()[[plot.par$y]]^2),
+          na.action = na.exclude
+        )
+      )
+      pred.quadratic <- data.frame(
+        predict(fit.quadratic,
+          newdata = data.frame(
+            x = vis.data()[[plot.par$y]],
+            stringsAsFactors = TRUE
+          )
+        ),
+        stringsAsFactors = TRUE
+      )
+      colnames(pred.quadratic) <- iNZightTools::make_names(
+        new = sprintf("%s.predict.by.%s.quadratic", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, pred.quadratic)
+    }
+    if ("cubic" %in% graphical.par$trend) {
+      cubic_trend <- TRUE
+      fit.cubic <- with(
+        vis.par(),
+        lm(
+          vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+            I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
+          na.action = na.exclude
+        )
+      )
+      pred.cubic <- data.frame(
+        predict(fit.cubic,
+          newdata = data.frame(
+            x = vis.data()[[plot.par$y]],
+            stringsAsFactors = TRUE
+          )
+        ),
+        stringsAsFactors = TRUE
+      )
+      colnames(pred.cubic) <- iNZightTools::make_names(
+        new = sprintf("%s.predict.by.%s.cubic", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, pred.cubic)
+    }
+    if (graphical.par$smooth > 0) {
+      temp3 <- graphical.par$smooth
+      smoother_trend <- TRUE
+      fit.smooth <- with(
+        vis.par(),
+        loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+          span = graphical.par$smooth,
+          family = "gaussian", degree = 1, na.action = "na.exclude"
+        )
+      )
+      pred.smooth <- data.frame(
+        predict(fit.smooth,
+          newdata = data.frame(
+            x = vis.data()[[plot.par$y]],
+            stringsAsFactors = TRUE
+          )
+        ),
+        stringsAsFactors = TRUE
+      )
+      colnames(pred.smooth) <- iNZightTools::make_names(
+        new = sprintf("%s.predict.by.%s.smoother", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, pred.smooth)
+    }
+  } else {
+    if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
+      fit <- lm(
+        formula =
+          vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
+        na.action = na.exclude
+      )
+    } else {
+      fit <- lm(
+        formula =
+          vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+        na.action = na.exclude
+      )
+    }
+    pred.numcat <- data.frame(
+      predict(fit, newdata = data.frame(
+        x = ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+          vis.data()[[plot.par$y]], vis.data()[[plot.par$x]]
+        ),
+        stringsAsFactors = TRUE
+      )),
+      stringsAsFactors = TRUE
+    )
+    # colnames(pred.numcat) <- input$add_numcat_fitted_values
+    colnames(pred.numcat) <- iNZightTools::make_names(
+      new = sprintf(
+        "%s.predict.by.%s",
+        ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+          input$vari1, input$vari2
+        ),
+        ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+          input$vari2, input$vari1
+        )
+      ),
+      existing = existing_colnames
+    )
+    temp <- cbind(temp, pred.numcat)
+  }
+  updatePanel$datachanged <- updatePanel$datachanged + 1
+  values$data.set <- temp
+})
 
 output$add_fitted_values_status <- renderText({
   if (!is.null(input$store_fitted_values_ok) &&
@@ -7113,365 +7183,135 @@ output$add_fitted_values_status <- renderText({
 
 
 observeEvent(input$store_residuals, {
-  existing_colnames = colnames(vis.data())
-  if (iNZightTools::is_num(vis.data()[[plot.par$x]]) && !is.null(plot.par$x) &&
-    iNZightTools::is_num(vis.data()[[plot.par$y]]) && !is.null(plot.par$y)) {
-    showModal(modalDialog(
-      h5(strong("Specify names for the new variables")),
-      conditionalPanel(
-        "input.check_linear",
-        fixedRow(
-          column(2, h5("Linear:")),
-          column(6, textInput(
-            inputId = "add_linear_residuals",
-            value = iNZightTools::make_names(
-              new = paste(input$vari1, ".residuals.linear", sep = ""),
-              existing = existing_colnames
-            ),
-            label = NULL
-          ))
+  existing_colnames <- colnames(vis.data())
+  temp1 <- input$vari1
+  temp2 <- input$vari2
+  temp <- get.data.set()
+  if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
+    !is.null(plot.par$x) &&
+    iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
+    !is.null(plot.par$y)) {
+    linear_trend <- FALSE
+    quadratic_trend <- FALSE
+    cubic_trend <- FALSE
+    smoother_trend <- FALSE
+    if ("linear" %in% graphical.par$trend) {
+      linear_trend <- TRUE
+      fit.linear <- with(
+        vis.par(),
+        lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+          na.action = na.exclude
         )
-      ),
-      conditionalPanel(
-        "input.check_quadratic",
-        fixedRow(
-          column(2, h5("Quadratic:")),
-          column(6, textInput(
-            inputId = "add_quadratic_residuals",
-            value = iNZightTools::make_names(
-              new = paste(input$vari1, ".residuals.quadratic", sep = ""), 
-              existing = existing_colnames
-            ),
-            label = NULL
-          ))
+      )
+      resi.linear <- data.frame(residuals(fit.linear), stringsAsFactors = TRUE)
+      colnames(resi.linear) <- iNZightTools::make_names(
+        new = sprintf("%s.residuals.by.%s.linear", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, resi.linear)
+    }
+    if ("quadratic" %in% graphical.par$trend) {
+      quadratic_trend <- TRUE
+      fit.quadratic <- with(
+        vis.par(),
+        lm(
+          vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+            I(vis.data()[[plot.par$y]]^2),
+          na.action = na.exclude
         )
-      ),
-      conditionalPanel(
-        "input.check_cubic",
-        fixedRow(
-          column(2, h5("Cubic:")),
-          column(6, textInput(
-            inputId = "add_cubic_residuals",
-            value = iNZightTools::make_names(
-              new = paste(input$vari1, ".residuals.cubic", sep = ""), 
-              existing = existing_colnames
-            ),
-            label = NULL
-          ))
+      )
+      resi.quadratic <- data.frame(residuals(fit.quadratic), stringsAsFactors = TRUE)
+      colnames(resi.quadratic) <- iNZightTools::make_names(
+        new = sprintf("%s.residuals.by.%s.quadratic", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, resi.quadratic)
+    }
+    if ("cubic" %in% graphical.par$trend) {
+      cubic_trend <- TRUE
+      fit.cubic <- with(
+        vis.par(),
+        lm(
+          vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
+            I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
+          na.action = na.exclude
         )
-      ),
-      conditionalPanel(
-        "input.check_smoother",
-        fixedRow(
-          column(2, h5("Smoother:")),
-          column(6, textInput(
-            inputId = "add_smoother_residuals",
-            value = iNZightTools::make_names(
-              new = paste(input$vari1, ".residuals.smoother", sep = ""), 
-              existing = existing_colnames
-            ),
-            label = NULL
-          ))
+      )
+      resi.cubic <- data.frame(residuals(fit.cubic),
+        stringsAsFactors = TRUE
+      )
+      colnames(resi.cubic) <- iNZightTools::make_names(
+        new = sprintf("%s.residuals.by.%s.cubic", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, resi.cubic)
+    }
+    if (graphical.par$smooth > 0) {
+      temp3 <- graphical.par$smooth
+      smoother_trend <- TRUE
+      fit.smooth <- with(
+        vis.par(),
+        loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+          span = graphical.par$smooth,
+          family = "gaussian", degree = 1, na.action = "na.exclude"
         )
-      ),
-      actionButton("store_resisuals_ok", "OK"),
-      textOutput("add_residuals_status"),
-      title = "Store residuals"
-    ))
+      )
+      resi.smooth <- data.frame(residuals(fit.smooth),
+        stringsAsFactors = TRUE
+      )
+      colnames(resi.smooth) <- iNZightTools::make_names(
+        new = sprintf("%s.residuals.by.%s.smoother", input$vari1, input$vari2),
+        existing = existing_colnames
+      )
+      temp <- cbind(temp, resi.smooth)
+    }
+    # if (linear_trend) {
+    #   updateCheckboxInput(session, "check_linear", value = T)
+    # }
+    # if (quadratic_trend) {
+    #   updateCheckboxInput(session, "check_quadratic", value = T)
+    # }
+    # if (cubic_trend) {
+    #   updateCheckboxInput(session, "check_cubic", value = T)
+    # }
+    # if (smoother_trend) {
+    #   updateCheckboxInput(session, "check_smoother", value = T)
+    #   updateSliderInput(session, "smoother.smooth", value = temp3)
+    # }
   } else {
-    tmp_value = paste(
-      ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
-             input$vari1, input$vari2
+    if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
+      fit <- lm(
+        formula =
+          vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
+        na.action = na.exclude
+      )
+    } else {
+      fit <- lm(
+        formula =
+          vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
+        na.action = na.exclude
+      )
+    }
+    resi.numcat <- data.frame(residuals(fit), stringsAsFactors = TRUE)
+    colnames(resi.numcat) <- iNZightTools::make_names(
+      new = sprintf(
+        "%s.residuals.by.%s",
+        ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+          input$vari1, input$vari2
+        ),
+        ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
+          input$vari2, input$vari1
+        )
       ),
-      ".residuals",
-      sep = ""
+      existing = existing_colnames
     )
-    showModal(modalDialog(
-      h5(strong("Specify names for the new variables")),
-      fixedRow(column(6, textInput(
-        inputId = "add_numcat_residuals",
-        value = iNZightTools::make_names(new = tmp_value, existing = existing_colnames),
-        label = NULL
-      ))),
-      actionButton("store_resisuals_ok", "OK"),
-      textOutput("add_residuals_status"),
-      title = "Store residuals"
-    ))
+    temp <- cbind(temp, resi.numcat)
   }
+  updatePanel$datachanged <- updatePanel$datachanged + 1
+  values$data.set <- temp
+  updateCheckboxInput(session, "vari1", value = temp1)
+  updateCheckboxInput(session, "vari2", value = temp2)
 })
-
-
-output$add_residuals_status <- renderText({
-  if (!is.null(input$store_resisuals_ok) &&
-    input$store_resisuals_ok > 0) {
-    "Add succesful"
-  } else {
-    NULL
-  }
-})
-
-observe({
-  input$store_resisuals_ok
-  isolate({
-    if (!is.null(input$store_resisuals_ok) &&
-      input$store_resisuals_ok > 0) {
-      temp1 <- input$vari1
-      temp2 <- input$vari2
-      temp <- get.data.set()
-      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
-        !is.null(plot.par$x) &&
-        iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
-        !is.null(plot.par$y)) {
-        linear_trend <- FALSE
-        quadratic_trend <- FALSE
-        cubic_trend <- FALSE
-        smoother_trend <- FALSE
-        if ("linear" %in% graphical.par$trend) {
-          linear_trend <- TRUE
-          fit.linear <- with(
-            vis.par(),
-            lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-              na.action = na.exclude
-            )
-          )
-          resi.linear <- data.frame(residuals(fit.linear), stringsAsFactors = TRUE)
-          colnames(resi.linear) <- input$add_linear_residuals
-          temp <- cbind(temp, resi.linear)
-        }
-        if ("quadratic" %in% graphical.par$trend) {
-          quadratic_trend <- TRUE
-          fit.quadratic <- with(
-            vis.par(),
-            lm(
-              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
-                I(vis.data()[[plot.par$y]]^2),
-              na.action = na.exclude
-            )
-          )
-          resi.quadratic <- data.frame(residuals(fit.quadratic), stringsAsFactors = TRUE)
-          colnames(resi.quadratic) <- input$add_quadratic_residuals
-          temp <- cbind(temp, resi.quadratic)
-        }
-        if ("cubic" %in% graphical.par$trend) {
-          cubic_trend <- TRUE
-          fit.cubic <- with(
-            vis.par(),
-            lm(
-              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
-                I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
-              na.action = na.exclude
-            )
-          )
-          resi.cubic <- data.frame(residuals(fit.cubic),
-            stringsAsFactors = TRUE
-          )
-          colnames(resi.cubic) <- input$add_cubic_residuals
-          temp <- cbind(temp, resi.cubic)
-        }
-        if (graphical.par$smooth > 0) {
-          temp3 <- graphical.par$smooth
-          smoother_trend <- TRUE
-          fit.smooth <- with(
-            vis.par(),
-            loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-              span = graphical.par$smooth,
-              family = "gaussian", degree = 1, na.action = "na.exclude"
-            )
-          )
-          resi.smooth <- data.frame(residuals(fit.smooth),
-            stringsAsFactors = TRUE
-          )
-          colnames(resi.smooth) <- input$add_smoother_residuals
-          temp <- cbind(temp, resi.smooth)
-        }
-        if (linear_trend) {
-          updateCheckboxInput(session, "check_linear", value = T)
-        }
-        if (quadratic_trend) {
-          updateCheckboxInput(session, "check_quadratic", value = T)
-        }
-        if (cubic_trend) {
-          updateCheckboxInput(session, "check_cubic", value = T)
-        }
-        if (smoother_trend) {
-          updateCheckboxInput(session, "check_smoother", value = T)
-          updateSliderInput(session, "smoother.smooth", value = temp3)
-        }
-      } else {
-        if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
-          fit <- lm(
-            formula =
-              vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
-            na.action = na.exclude
-          )
-        } else {
-          fit <- lm(
-            formula =
-              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-            na.action = na.exclude
-          )
-        }
-        resi.numcat <- data.frame(residuals(fit), stringsAsFactors = TRUE)
-        colnames(resi.numcat) <- input$add_numcat_residuals
-        temp <- cbind(temp, resi.numcat)
-      }
-      updatePanel$datachanged <- updatePanel$datachanged + 1
-      values$data.set <- temp
-      updateCheckboxInput(session, "vari1", value = temp1)
-      updateCheckboxInput(session, "vari2", value = temp2)
-    }
-  })
-})
-
-observe({
-  input$store_fitted_values_ok
-  isolate({
-    if (!is.null(input$store_fitted_values_ok) &&
-      input$store_fitted_values_ok > 0) {
-      temp1 <- input$vari1
-      temp2 <- input$vari2
-      temp <- get.data.set()
-      if (iNZightTools::is_num(vis.data()[[plot.par$x]]) &&
-        !is.null(plot.par$x) &&
-        iNZightTools::is_num(vis.data()[[plot.par$y]]) &&
-        !is.null(plot.par$y)) {
-        linear_trend <- FALSE
-        quadratic_trend <- FALSE
-        cubic_trend <- FALSE
-        smoother_trend <- FALSE
-        if ("linear" %in% graphical.par$trend) {
-          linear_trend <- TRUE
-          fit.linear <- with(
-            vis.par(),
-            lm(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-              na.action = na.exclude
-            )
-          )
-          pred.linear <- data.frame(
-            predict(fit.linear,
-              newdata = data.frame(
-                x = vis.data()[[plot.par$y]],
-                stringsAsFactors = TRUE
-              )
-            ),
-            stringsAsFactors = TRUE
-          )
-          colnames(pred.linear) <- input$add_linear_fitted_values
-          temp <- cbind(temp, pred.linear)
-        }
-        if ("quadratic" %in% graphical.par$trend) {
-          quadratic_trend <- TRUE
-          fit.quadratic <- with(
-            vis.par(),
-            lm(
-              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
-                I(vis.data()[[plot.par$y]]^2),
-              na.action = na.exclude
-            )
-          )
-          pred.quadratic <- data.frame(
-            predict(fit.quadratic,
-              newdata = data.frame(
-                x = vis.data()[[plot.par$y]],
-                stringsAsFactors = TRUE
-              )
-            ),
-            stringsAsFactors = TRUE
-          )
-          colnames(pred.quadratic) <- input$add_quadratic_fitted_values
-          temp <- cbind(temp, pred.quadratic)
-        }
-        if ("cubic" %in% graphical.par$trend) {
-          cubic_trend <- TRUE
-          fit.cubic <- with(
-            vis.par(),
-            lm(
-              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]] +
-                I(vis.data()[[plot.par$y]]^2) + I(vis.data()[[plot.par$y]]^3),
-              na.action = na.exclude
-            )
-          )
-          pred.cubic <- data.frame(
-            predict(fit.cubic,
-              newdata = data.frame(
-                x = vis.data()[[plot.par$y]],
-                stringsAsFactors = TRUE
-              )
-            ),
-            stringsAsFactors = TRUE
-          )
-          colnames(pred.cubic) <- input$add_cubic_fitted_values
-          temp <- cbind(temp, pred.cubic)
-        }
-        if (graphical.par$smooth > 0) {
-          temp3 <- graphical.par$smooth
-          smoother_trend <- TRUE
-          fit.smooth <- with(
-            vis.par(),
-            loess(vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-              span = graphical.par$smooth,
-              family = "gaussian", degree = 1, na.action = "na.exclude"
-            )
-          )
-          pred.smooth <- data.frame(
-            predict(fit.smooth,
-              newdata = data.frame(
-                x = vis.data()[[plot.par$y]],
-                stringsAsFactors = TRUE
-              )
-            ),
-            stringsAsFactors = TRUE
-          )
-          colnames(pred.smooth) <- input$add_smoother_fitted_values
-          temp <- cbind(temp, pred.smooth)
-        }
-        if (linear_trend) {
-          updateCheckboxInput(session, "check_linear", value = T)
-        }
-        if (quadratic_trend) {
-          updateCheckboxInput(session, "check_quadratic", value = T)
-        }
-        if (cubic_trend) {
-          updateCheckboxInput(session, "check_cubic", value = T)
-        }
-        if (smoother_trend) {
-          updateCheckboxInput(session, "check_smoother", value = T)
-          updateSliderInput(session, "smoother.smooth", value = temp3)
-        }
-      } else {
-        if (iNZightTools::is_num(vis.data()[[plot.par$y]])) {
-          fit <- lm(
-            formula =
-              vis.data()[[plot.par$y]] ~ vis.data()[[plot.par$x]],
-            na.action = na.exclude
-          )
-        } else {
-          fit <- lm(
-            formula =
-              vis.data()[[plot.par$x]] ~ vis.data()[[plot.par$y]],
-            na.action = na.exclude
-          )
-        }
-        pred.numcat <- data.frame(
-          predict(fit, newdata = data.frame(
-            x = ifelse(iNZightTools::is_num(vis.data()[[plot.par$x]]),
-              vis.data()[[plot.par$y]], vis.data()[[plot.par$x]]
-            ),
-            stringsAsFactors = TRUE
-          )),
-          stringsAsFactors = TRUE
-        )
-        colnames(pred.numcat) <- input$add_numcat_fitted_values
-        temp <- cbind(temp, pred.numcat)
-      }
-      updatePanel$datachanged <- updatePanel$datachanged + 1
-      values$data.set <- temp
-      updateCheckboxInput(session, "vari1", value = temp1)
-      updateCheckboxInput(session, "vari2", value = temp2)
-    }
-  })
-})
-
 
 ## switch variables selected
 observeEvent(input$switch1, {
@@ -7685,5 +7525,41 @@ observe({
   })
 })
 
+observeEvent(input$global.sig.level, {
+  graphical.par$signif <- input$global.sig.level
+})
+observeEvent(input$global.round.pct, {
+  graphical.par$round_percent <- input$global.round.pct
+})
+
+observeEvent(input$plot_selector, {
+  if (!is.null(input$plot_selector) && input$plot_selector == "Summary") {
+    updateNumericInput(session,
+      "global.sig.level",
+      value = graphical.par$signif
+    )
+  }
+})
+
+
+observeEvent(input$global.sig.level, {
+  graphical.par$signif <- input$global.sig.level
+})
+observeEvent(input$global.round.pct, {
+  graphical.par$round_percent <- input$global.round.pct
+})
+
+
+observeEvent(input$plot_selector, {
+  toggle_fn <- ifelse(
+    input$plot_selector == "Inference",
+    shinyjs::hide,
+    shinyjs::show
+  )
+  ids_to_hide <- c("switch1", "switch2", "switch3")
+  for (eid in ids_to_hide) {
+    toggle_fn(id = eid)
+  }
+})
 
 source("panels/C1_Visualize/vit.R", local = T)

@@ -157,11 +157,6 @@ observe({
       !(input$tsui_select_timevars %in% input$tsui_select_variables)
     ) {
       create_ts_object()
-      print("-----")
-      print(ts_rvals$sel_time)
-      print(ts_rvals$sel_key)
-      print(ts_rvals$sel_var)
-      print("-----\n")
   } else {
     ts_rvals$obj = NULL
   }

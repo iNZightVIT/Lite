@@ -8,8 +8,6 @@
 ###
 ###  * Note: This is to be sourced within "server.R" *
 
-
-
 ## initialize gui
 output$multiple.response <- renderUI({
   MultipleResponse.panel.ui(get.data.set())
@@ -23,6 +21,22 @@ mr.par <- reactiveValues(
   combp = NULL
 )
 
+mr.base <- reactiveValues(
+  new_df = NULL
+)
+
+# generate random colname that don't exist in df
+rand_colname = function(df, prefix = NULL) {
+  while(TRUE) {
+    tmp_colname = paste(sample(c(0:9, letters), 16, replace = TRUE), collapse = "")
+    if(!is.null(prefix)) {
+      tmp_colname = glue::glue("{prefix}_{tmp_colname}")
+    }
+    if(!(tmp_colname %in% colnames(df))) {
+      return(tmp_colname)
+    }
+  }
+}
 
 isBinary <- function(x) {
   ## NAs are ignored as they are handled by MR
@@ -47,6 +61,167 @@ getVars <- function(data) {
   which(apply(data, 2, function(x) isBinary(x)))
 }
 
+multiresponse_check = function(df, col, delim) {
+  num_levels = length(unique(df[, col]))
+  all_level_names = unique(df[, col])
+  
+  if (num_levels > 50) {
+    msg = "This varaible contains more then 100 levels"
+    if(num_levels > 50 && num_levels <= 100) {
+      msg = "This variable contains more than 50 levels, are you sure you want to proceed?"
+      shinyjs::show("proceedDiv")
+    }
+    return(msg)
+  }
+  conflict_names = intersect(all_level_names, colnames(df))
+  if (length(conflict_names) > 0) {
+    return(
+      glue::glue("value(s) '{paste(conflict_names, ',')}' in column '{col}' already exists as a column.")
+    )
+  }
+  if (input$mr.multiple.missing.col %in% colnames(df)) {
+    return(
+      glue::glue("column '{input$mr.multiple.missing.col}' already exists, choose another name.")
+    )
+  }
+  if (input$mr.multiple.min.obs.group.name %in% colnames(df)) {
+    return(
+      glue::glue("'{input$mr.multiple.min.obs.group.name}' already exists in the {col} column, choose another name.")
+    )
+  }
+  return(NULL)
+}
+
+multiresponse_col = function(df, col, delim) {
+  # separate delimited column to multiple columns,
+  # i.e., x,y to columns y and x with "yes" and "no" in it
+  tmp_colname = rand_colname(df)
+  # make the NA's in col to mr.multiple.missing.col
+  # default is "missing"
+  if (is.factor(df[,col])) {
+    original_level = levels(df[, col])
+    df = df %>% 
+      mutate(
+        !!sym(col) := ifelse(
+        is.na(!!sym(col)), 
+        input$mr.multiple.missing.col, 
+        as.character(!!sym(col))
+      )
+      ) %>% 
+      mutate(!!sym(col) := factor(
+        !!sym(col), levels = c(original_level, input$mr.multiple.missing.col))
+      ) %>%
+      as_tibble()
+    # levels(df[, col]) = c(original_level, input$mr.multiple.missing.col)
+  } else {
+    df = df %>% mutate(!!sym(col) := ifelse(is.na(!!sym(col)), input$mr.multiple.missing.col, !!sym(col)))
+  }
+  
+  # convert separate delim-separated response and create extra rows,
+  # one for each unique response
+  # df = df %>% tidyr::separate_rows(col, sep = delim)
+  tmp_rn_col = rand_colname(df)
+  df = df %>% mutate(!!sym(tmp_rn_col) := row_number()) %>% 
+    tidyr::separate_longer_delim(col, delim = delim)
+  
+  # find groups which has less than `input$mr.multiple.min.obs.group` groups
+  # and name them `input$mr.multiple.min.obs.group.name`
+  min_groups = df %>% 
+    filter(!!sym(col) != input$mr.multiple.missing.col) %>%
+    group_by(!!sym(col)) %>% tally() %>% 
+    filter(n < as.integer(input$mr.multiple.min.obs.group)) %>%
+    pull(!!sym(col))
+  if (length(min_groups) > 0) {
+    df = df %>%
+      mutate(!!sym(col) := case_when(
+        !!sym(col) %in% min_groups ~ input$mr.multiple.min.obs.group.name,
+        TRUE ~ !!sym(col)
+      ))
+  }
+  
+  # create individual columns for each response
+  tmp_value_col = rand_colname(df)
+  # all column names except for the target column
+  og_cols = og_cols = colnames(df)[colnames(df) != col]
+  df %>% 
+    distinct() %>% # duplicated rows dont make sense here?
+    mutate(!!sym(tmp_value_col) := "yes") %>%
+    tidyr::pivot_wider(
+      id_cols = og_cols,
+      names_from = col,
+      names_prefix = paste0(col, input$mr.multiple.group.name.sep),
+      # names_sep not working?
+      # names_prefix = col,
+      # names_sep = input$mr.multiple.group.name.sep,
+      values_from = !!sym(tmp_value_col),
+      values_fill = "no",
+      names_repair = "unique"
+    ) %>%
+    select(-!!sym(tmp_rn_col))
+}
+
+observe({
+  input$mr.multiple.select.var
+  input$mr.multiple.delim.text
+  input$mr.multiple.missing.col
+  input$mr.multiple.min.obs.group
+  input$mr.multiple.min.obs.group.name
+  input$mr.multiple.group.name.sep
+  isolate({
+    if(
+      !is.null(input$mr.multiple.select.var) &&
+      !is.null(input$mr.multiple.delim.text) &&
+      !is.null(input$mr.multiple.missing.col) &&
+      !is.null(input$mr.multiple.min.obs.group) &&
+      !is.null(input$mr.multiple.min.obs.group.name)
+    ) {
+      if(nchar(input$mr.multiple.select.var) > 0) {
+        output$mr.multiple.result <- renderText({
+          tryCatch({
+            disable("convert.multi.confirm.btn")
+            msg = multiresponse_check(
+              df = get.data.set(),
+              col = input$mr.multiple.select.var,
+              delim = input$mr.multiple.delim.text
+            )
+            if(is.null(msg)) {
+              enable("convert.multi.confirm.btn")
+            }
+            return(msg)
+          }, error = function(e) {
+            return(glue::glue("Failed to process data"))
+          })
+        })
+      }
+    }
+  })
+})
+
+observeEvent(input$convert.multi.confirm.btn, {
+  tryCatch({
+    # old_cols = colnames(get.data.set())
+    
+    new_df = multiresponse_col(
+      df = get.data.set(),
+      col = input$mr.multiple.select.var,
+      delim = input$mr.multiple.delim.text
+    )
+    # if (is.null(new_df)) {
+    #   return("")
+    # }
+    # new_cols = colnames(new_df)
+    # 
+    # new_multi_cols = new_cols[!(new_cols %in% old_cols)]
+    # if(length(new_multi_cols) == 0) {
+    #   return("No conversions made")
+    # }
+    mr.base$new_df = new_df
+    removeModal()
+  }, error = function(e) {
+    showModal(create_failed_multi_modal(msg = glue::glue("Failed to process data. Reload the data and try again."))) # \n{e$message}
+  })
+})
+
 ################
 ## left panel ##
 ################
@@ -65,6 +240,8 @@ output$mr.var <- renderUI({
     } else {
       list(
         h5(strong("Multiple Response")),
+        h5("Convert variable to multiple response"),
+        actionButton("convert.multi.btn", "Convert", style = "margin-bottom: 15px;"),
         selectInput("mr.select.var",
           label = "Select related variables: ",
           choices = vars[binaryVar],
@@ -400,7 +577,6 @@ setMRobj <- function() {
 
     return(NULL)
   }
-
   responseVars <- binaryVar[responseID]
 
   frm <- as.formula(paste(
@@ -412,6 +588,12 @@ setMRobj <- function() {
     data = get.data.set(),
     Labels = substrsplit
   )
+  
+  # remove leading punct in labels
+  mr.par$mrObject$Labels$Commonstr = gsub("^[^a-zA-Z0-9]+", "", mr.par$mrObject$Labels$Commonstr)
+  # remove trailing punct labels
+  mr.par$mrObject$Labels$Commonstr = gsub("[^a-zA-Z0-9]+$", "",  mr.par$mrObject$Labels$Commonstr)
+  
   if (mr.par$mrObject$Labels$Commonstr != mr.par$objName && mr.par$guessName) {
     if (!(mr.par$objName == "response" &&
       mr.par$mrObject$Labels$Commonstr == "")) {
@@ -454,3 +636,102 @@ updatePlot <- function() {
   }
   iNZightMR::barplotMR(mro)
 }
+
+## convert multiple columns
+create_multi_modal <- function() {
+  binaryVar <- getVars(get.data.set())
+  vars <- names(get.data.set())
+  # if(is.null(binaryVar) || is.null(vars)) {
+  #   return()
+  # }
+  modalDialog(
+    title = "Convert variable to multiple response",
+    selectInput("mr.multiple.select.var",
+                label = "Select variable: ",
+                choices = c("", vars[!(vars %in% names(binaryVar))]),
+                selected = NULL,
+                multiple = F,
+                selectize = F,
+                # size = 18
+    ),
+    textInput( 
+      "mr.multiple.delim.text", 
+      "Delimiter",
+      value = ",",
+      placeholder = "delimiter"
+    ),
+    textInput( 
+      "mr.multiple.missing.col", 
+      "Missing value column name",
+      value = "missing",
+      placeholder = "column name"
+    ),
+    textInput(
+      "mr.multiple.min.obs.group", 
+      "Minimum number of observations in each group",
+      value = 5,
+      placeholder = "minimum number"
+    ),
+    textInput(
+      "mr.multiple.min.obs.group.name", 
+      "Minimum group name",
+      value = "other",
+      placeholder = "group name"
+    ),
+    textInput(
+      "mr.multiple.group.name.sep", 
+      "Group name separator",
+      value = "_",
+      placeholder = "separator"
+    ),
+    div(
+      verbatimTextOutput("mr.multiple.result", placeholder = F),
+      div(
+        id = "proceedDiv",
+        style = "display: none;",
+        actionButton("multi.proceed.button", "Proceed")
+      )
+    ),
+    
+    footer = tagList(
+      modalButton("Exit"),
+      actionButton("convert.multi.confirm.btn", "Confirm", disabled = TRUE)
+    )
+  )
+}
+
+create_failed_multi_modal = function(msg) {
+  modalDialog(
+    title = "Error",
+    div(
+      style = "color: red;",
+      icon("exclamation-triangle"),
+      msg
+    ),
+    easyClose = TRUE,
+    footer = modalButton("OK")
+  )
+}
+
+observeEvent(input$convert.multi.btn, {
+  showModal(create_multi_modal())
+})
+
+observeEvent(input$multi.proceed.button, {
+  enable("convert.multi.confirm.btn")
+})
+
+observeEvent(input$convert.multi.confirm.btn, {
+  if(!is.null(mr.base$new_df)) {
+    values$data.set = mr.base$new_df
+    
+    mr.base$new_df = NULL
+    output$mr.multiple.result = renderText({""})
+  }
+})
+
+observeEvent(input$high.level.yes, {
+  print("got yes")
+  level_check$confirmed = TRUE
+  removeModal()
+})

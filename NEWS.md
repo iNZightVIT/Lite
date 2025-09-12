@@ -1,3 +1,30 @@
+# Unreleased changes
+
+- Fix bug when uploading file in 'Post stratify'
+- Disable variable switch button on 'Inference' tab
+
+# 2025.04
+
+## New features
+
+- Added new funcionality to the Multiple Response module that allows comma-separated values to be split into multi response yes/no variables.
+
+## Fixes
+
+- Fix bug where 'locate points' would fail if text labels were chosen
+- Fix 'Expand Table' (missing library)
+
+# February 2025
+
+## Changes
+
+- Display instructions to correctly import a Google Sheet when pasting in an invalid URL
+
+## Fixes
+
+- typos in summary/inference panels
+- fix issue where x/y axis labels could be flipped
+
 # January 2025
 
 ## UI Changes
@@ -6,6 +33,7 @@
 - **Time Series module** has been refactored to connect with our updated `iNZightTS` 2.0, which has new and improved graphics and funcionality. The old version remains available via _'Time Series - Legacy'_.
 - **Experimental design module** : help text added to improve usability.
 - **Bar plots** have a new option (under Add to Plot) to toggle whether or not the bars are sized by the group size (the historical default is for this to be on).
+- **Summary** and **Inference** add options to control significant figures, percentage rounding, and p-value minimums.
 
 ## Bug fixes
 
@@ -18,6 +46,12 @@
 
 - Refactor data wrangling methods for new `iNZightTools` 2.0.0 API.
 - Maps module has been removed following major changes/restructuring to dependent packages that we are unable to resolve at this time. Please get in touch if you used this module or would like to help us fix it.
+
+## Patch 2024.01.01
+
+- clarify wording in 'round %'
+- fix bug where double-clicking sig fig up/down would cause an infinite loop
+- fix bug where xlab/ylab passed as NULL would hide the axis labels (instead of using the default)
 
 ---
 

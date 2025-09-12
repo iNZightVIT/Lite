@@ -18,11 +18,13 @@ cursor: not-allowed !important;
 border-color: #aaa !important;
 }"
 
+# library(shinyStorePlus)
 
 shinyUI(
   fluidPage(
     shinyjs::useShinyjs(),
     shinyjs::inlineCSS(css),
+    # initStore("browser"),
     ##  Set Tabpanel font to be size 16.
     tags$head(
       shinyjs::useShinyjs(),
@@ -57,7 +59,7 @@ shinyUI(
         })();")),
     tags$head(tags$script(src = "js/testNumeric.js")),
     tags$head(tags$script(src = "js/google-analytics.js")),
-    tags$head(tags$script(src = "js/user-info.js")),
+    # tags$head(tags$script(src = "js/user-info.js")),
     # tags$head(tags$script(src = "js/download-logs.js")),
     ##  Load the "Lumen" Theme (from http://bootswatch.com).
     theme = "bootstrap.css",

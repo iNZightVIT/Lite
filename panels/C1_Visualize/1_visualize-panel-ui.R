@@ -260,7 +260,26 @@ vis.mainPanel <- function() {
           column(10, hr())
         ),
         helpText("Statistical Summary for the data."),
-        verbatimTextOutput("visualize.summary")
+        verbatimTextOutput("visualize.summary"),
+        helpText("Formatting options"),
+        fixedRow(
+          column(
+            3,
+            numericInput("global.sig.level",
+              label = "Round values (significant figures)",
+              value = graphical.par$signif,
+              min = 1, step = 1
+            )
+          ),
+          column(
+            3,
+            numericInput("global.round.pct",
+              label = "Round percentages (decimal places)",
+              value = graphical.par$round_percent,
+              min = 0, step = 1
+            )
+          )
+        )
       ),
       ##  Inference Panel
       tabPanel(
@@ -278,8 +297,8 @@ vis.mainPanel <- function() {
         fixedRow(
           column(3, uiOutput("inference_type")),
           column(3, uiOutput("inference_test")),
-          column(2, uiOutput("inference_out")),
-          column(3, uiOutput("ci_width")),
+          column(6, uiOutput("inference_out")),
+          column(9, uiOutput("inference_opts")),
           column(3, uiOutput("inference_epi"))
         ),
         br(),

@@ -3,6 +3,8 @@ data/Surveys/*.svydesign
 rsconnect
 .vscode
 
+tmp
+
 panels/**/*.html
 
 # renv files
