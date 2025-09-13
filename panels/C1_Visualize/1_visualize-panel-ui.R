@@ -107,6 +107,7 @@ vis.sidebarPanel <- function() {
       tabPanel(
         title = "Add To Plot",
         id = "add.to.plot",
+        class = "plausible-event-name=Plot+Panel",
         fixedRow(
           column(9, hr()),
           column(3, conditionalPanel(
@@ -249,6 +250,7 @@ vis.mainPanel <- function() {
       ##  Summary Panel
       tabPanel(
         title = "Summary",
+        class = "plausible-event-name=Summary+Panel",
         fixedRow(
           column(2, conditionalPanel(
             condition = "output.showsidebar == 0",
@@ -284,6 +286,7 @@ vis.mainPanel <- function() {
       ##  Inference Panel
       tabPanel(
         title = "Inference",
+        class = "plausible-event-name=Inference+Panel",
         fixedRow(
           column(2, conditionalPanel(
             condition = "output.showsidebar == 0",
@@ -330,6 +333,7 @@ vis.mainPanel <- function() {
       ),
       tabPanel(
         title = "VIT",
+        class = "plausible-event-name=VIT+Panel",
         radioButtons(
           "vit-type", "VIT Test",
           c("Bootstrap" = "bootstrap", "Randomisation Test" = "random")
