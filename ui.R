@@ -35,6 +35,10 @@ shinyUI(
         type = "text/css"
       ),
       tags$script(src = "js/ticker.js"),
+      tags$script(
+        domain = "lite.dev.docker.stat.auckland.ac.nz",
+        src = "https://inzight-analytics.up.railway.app/js/script.js"
+      ),
       tags$link(href = "ticker.css", rel = "stylesheet", type = "text/css"),
       tags$style(HTML("
       body > .container-fluid {
