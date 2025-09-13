@@ -42,8 +42,9 @@ $(function () {
     // $("#dlLogButton").attr("href", log.download_path);
 
     // track disconnect in matomo, if enabled
-    // if (_paq) {
-    //   _paq.push(["trackEvent", "session", "disconnect"]);
-    // }
+    if (window.plausible) {
+      plausible("Disconnect");
+      console.log(plausible);
+    }
   });
 });

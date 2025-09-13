@@ -67,8 +67,8 @@ about.panel.ui <- function(lite.version, lite.update) {
       },
       ##  We include the markdown document that contains the
       ##  text for the "About" module.
-      includeMarkdown("panels/A1_About/4_about-panel-text.md")
-      # actionButton("disconnect", "Disconnect the app")
+      includeMarkdown("panels/A1_About/4_about-panel-text.md"),
+      actionButton("disconnect", "Disconnect the app")
     ),
 
     ##  Next, we add a helpful footer.
