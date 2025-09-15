@@ -247,6 +247,10 @@ observe({
         design_params$design <- NULL
       }
 
+      session$sendCustomMessage("plausible",
+        message = list(event = "load_example_data", data = values$data.name)
+      )
+
       updateTabsetPanel(session, "selector", "visualize")
     })
   }

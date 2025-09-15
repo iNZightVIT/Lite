@@ -18,4 +18,10 @@ $(function () {
       if (e.name === "plot_selector") plausible("Plot selector: " + e.value);
     }
   });
+
+  if (Shiny) {
+    Shiny.addCustomMessageHandler("plausible", function (message) {
+      plausible(message.event, message.data ?? "");
+    });
+  }
 });
