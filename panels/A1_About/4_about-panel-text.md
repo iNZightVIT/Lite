@@ -7,13 +7,15 @@ This new system uses a completely different AWS toolkit, so while we expect Lite
 ### Update plan
 
 - ~~build new architecture~~
-- Test caching and stickiness is no longer causing connectivity issues after updates
+- ~~Test caching and stickiness is no longer causing connectivity issues after updates~~
 - Test scaling performance - **if you have a class that uses iNZight, we would be happy to schedule a test of the new deployment's scaling capabilities**.
 - Make necessary tweaks to autoscaling configuration
 - Deploy a new production version of iNZight Lite. _This will have a new home / URL, so existing material will still point to the current/old version of Lite while we roll out the new system_.
 - Once we are seeing good performance and uptake of the new system, we will issue a timeline for deprecating the old one. This will simply involve a redirect of the old URL to iNZight Lite's new home.
 
 ### Feedback and concerns
+
+To help us configure the new deployment, please take a moment to complete the feedback form: https://forms.gle/RGC3eT2HKNsm8VL89. You're more than welcome to fill this out any time you notice a difference, as this will help us gauge if any changes are having the desired effect.
 
 If you have any feedback (either about the new system or Lite in general), or have any concerns about how the changes might affect you, please reach out to us.
 
