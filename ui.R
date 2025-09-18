@@ -35,6 +35,8 @@ shinyUI(
         type = "text/css"
       ),
       tags$script(src = "js/ticker.js"),
+      tags$script(src = "js/linkToForm.js"),
+      tags$link(href = "linkToForm.css", rel = "stylesheet", type = "text/css"),
       tags$script(
         domain = "lite.dev.docker.stat.auckland.ac.nz",
         src = "https://inzight-analytics.up.railway.app/js/script.js"
