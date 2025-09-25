@@ -43,6 +43,7 @@ about.panel.ui <- function(lite.version, lite.update) {
               } else {
                 NULL
               },
+              paste0("[", Sys.getenv("LITE_INSTANCE"), "]"),
               br()
             )
           )

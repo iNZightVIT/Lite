@@ -53,11 +53,11 @@ for i in $(seq 1 $INSTANCES); do
     PORT=$((BASE_PORT + i))
     cat >> /etc/supervisor/conf.d/supervisord.conf << SHINY_EOF
 [program:shiny-${i}]
-command=/usr/local/bin/R -e "shiny::runApp('/srv/shiny-server', port=${PORT})"
+command=/usr/local/bin/R -e "Sys.setenv(LITE_INSTANCE = ${i}); shiny::runApp('/srv/shiny-server', port=${PORT})"
 autostart=true
 autorestart=true
-stdout_logfile=/var/log/supervisor/shiny-${i}.log
-stderr_logfile=/var/log/supervisor/shiny-${i}_error.log
+stdout_logfile=/dev/stdout
+stderr_logfile=/dev/stderr
 user=shiny
 environment=HOME="/home/shiny",USER="shiny"
 priority=200
