@@ -1,0 +1,36 @@
+name: "Publish Docker image"
+on: push
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER_2 }}
+          password: ${{ secrets.DOCKER_SECRET_2 }}
+
+      - name: Set env TAGNAME
+        if: github.ref == 'refs/heads/master'
+        run: echo "TAGNAME=latest" >> $GITHUB_ENV
+
+      - name: Set env TAGNAME
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: echo "TAGNAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Remove slashes from TAGNAME
+        run: echo "TAGNAME=${TAGNAME//\//_}" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          pull: true
+          push: true
+          tags: scienceis/uoa-inzight-lite:${{ env.TAGNAME }}
+          build-args: |
+            GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

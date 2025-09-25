@@ -1,19 +1,22 @@
-version: "3"
+version: "3.8"
+
 services:
-  lite1:
-    image: scienceis/uoa-inzight-lite:dev
+  shiny-app:
+    build:
+      context: .
+      args:
+        GITHUB_PAT: ${GITHUB_PAT}
+        SHINY_INSTANCES: 10
     ports:
-      - "3838"
-  lite2:
-    image: scienceis/uoa-inzight-lite:dev
-    ports:
-      - "3838"
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "8002:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - lite1
-      - lite2
+      - "80:80"
+    environment:
+      - SHINY_INSTANCES=10
+    restart: unless-stopped
+    mem_limit: 4g
+    cpus: "2.0"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
