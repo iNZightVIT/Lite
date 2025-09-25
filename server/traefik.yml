@@ -1,0 +1,23 @@
+# Static configuration
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+api:
+  dashboard: false
+
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  file:
+    directory: /etc/traefik
+    watch: true
+
+log:
+  level: INFO
+  # filePath: /var/log/traefik/traefik.log
+
+accessLog:
+  # filePath: /var/log/traefik/access.log
