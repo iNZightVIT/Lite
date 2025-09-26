@@ -57,7 +57,7 @@ RUN chown -R shiny:shiny /srv/shiny-server \
     && chown -R shiny:shiny /var/log/supervisor
 
 # Expose port 80
-EXPOSE 80
+EXPOSE 3838
 
 # Generate configs and start supervisor
 ENTRYPOINT ["/bin/bash", "-c", "/usr/local/bin/generate-configs.sh && exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
