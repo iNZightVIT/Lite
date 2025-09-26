@@ -11,7 +11,12 @@ entryPoints:
     address: ":3838"
     transport:
       respondingTimeouts:
-        idleTimeout: 750
+        readTimeout: 900s # 15 minutes
+        writeTimeout: 900s # 15 minutes
+        idleTimeout: 900s # 15 minutes
+      lifeCycle:
+        requestAcceptGraceTimeout: 900s
+        graceTimeOut: 10s
 
 providers:
   file:
@@ -24,3 +29,11 @@ log:
 
 accessLog:
   # filePath: /var/log/traefik/access.log
+
+serversTransport:
+  insecureSkipVerify: true
+  maxIdleConnsPerHost: 10
+  forwardingTimeouts:
+    dialTimeout: 30s
+    responseHeaderTimeout: 900s # 15 minutes
+    idleConnTimeout: 900s # 15 minutes
