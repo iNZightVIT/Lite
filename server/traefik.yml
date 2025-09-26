@@ -9,6 +9,9 @@ api:
 entryPoints:
   web:
     address: ":3838"
+    transport:
+      respondingTimeouts:
+        idleTimeout: 750
 
 providers:
   file:
