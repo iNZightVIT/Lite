@@ -21,10 +21,8 @@ http:
       loadBalancer:
         sticky:
           cookie:
-            name: shiny_session
+            name: INZLITESESSION
             secure: false
-            httpOnly: true
-            sameSite: lax
         servers:
 EOF
 
