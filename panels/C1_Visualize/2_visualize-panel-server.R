@@ -6922,6 +6922,8 @@ output$interactive.plot <- renderUI({
       !is.null(input$vari1) && is.numeric(vis.data()[[plot.par$x]]),
       !is.null(input$vari2) && input$vari2 != "none" && is.numeric(vis.data()[[plot.par$y]])
     ) || !is.null(plot.par$design)) {
+    shinyjs::hide("extra_vars_confirm_button")
+    
     dafr <- get.data.set()
     vis.par()
     input$vari1
@@ -6953,6 +6955,8 @@ output$interactive.plot <- renderUI({
       )
     })
   } else {
+    shinyjs::show("extra_vars_confirm_button")
+    
     dafr <- get.data.set()
     input$extra_vars_confirm_button
 
