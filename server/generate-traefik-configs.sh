@@ -89,4 +89,4 @@ EOF
 done
 
 echo "Configuration generated successfully!"
-echo "Traefik will use cookie-based sticky sessions with cookie name: shiny_session"
+echo "Traefik will use cookie-based sticky sessions with cookie name: INZLITESESSION"

@@ -10,10 +10,8 @@ services:
     ports:
       - "3838:3838"
     environment:
-      - SHINY_INSTANCES=10
+      - SHINY_INSTANCES=4
     restart: unless-stopped
-    mem_limit: 4g
-    cpus: "2.0"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
