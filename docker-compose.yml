@@ -10,7 +10,7 @@ services:
     ports:
       - "3838:3838"
     environment:
-      - SHINY_INSTANCES=4
+      - SHINY_INSTANCES=10
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]

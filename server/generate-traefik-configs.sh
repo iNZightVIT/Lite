@@ -23,6 +23,8 @@ http:
           cookie:
             name: INZLITESESSION
             secure: false
+            httpOnly: true
+            sameSite: lax
         servers:
 EOF
 
@@ -72,7 +74,7 @@ for i in $(seq 1 $INSTANCES); do
     PORT=$((BASE_PORT + i))
     cat >> /etc/supervisor/conf.d/supervisord.conf << EOF
 [program:shiny-${i}]
-command=/usr/local/bin/R -e "shiny::runApp('/srv/shiny-server', port=${PORT})"
+command=/usr/local/bin/R --slave -e "source('/srv/shiny-server/register_resources.R'); shiny::runApp('/srv/shiny-server', port=${PORT}, host='127.0.0.1')"
 autostart=true
 autorestart=true
 stdout_logfile=/dev/stdout
@@ -80,10 +82,12 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 user=shiny
-environment=HOME="/home/shiny",USER="shiny",LITE_INSTANCE="${i}"
+environment=HOME="/home/shiny",USER="shiny",LITE_INSTANCE="${i}",R_LIBS_USER="/usr/local/lib/R/site-library"
 priority=200
 stopasgroup=true
 killasgroup=true
+startsecs=10
+startretries=3
 
 EOF
 done

@@ -3,6 +3,12 @@ FROM rocker/shiny-verse:4.2
 # Number of Shiny instances (build argument)
 ARG SHINY_INSTANCES=10
 
+# STOP the shiny server
+# TODO: use a different image instead
+RUN systemctl disable shiny-server 2>/dev/null || true
+RUN rm -f /etc/init.d/shiny-server
+RUN rm -f /usr/bin/shiny-server
+
 # Install required packages
 RUN apt-get update && apt-get install -y \
     supervisor \
@@ -38,18 +44,13 @@ COPY . /srv/shiny-server
 RUN cp /srv/shiny-server/VARS.default /srv/shiny-server/VARS \
     && sed -i "s/^\(lite.update=\).*/\1$(TZ='Pacific/Auckland' date '+%d %B %Y %-I:%M:%S%p')/g" /srv/shiny-server/VARS
 
+RUN mv /srv/shiny-server/server/register_resources.R /srv/shiny-server
+
 # Set R options for Shiny (binding to localhost)
-RUN echo "options(\
-shiny.host = '127.0.0.1',\
-shiny.autoload.r = FALSE \
-)" >> /usr/local/lib/R/etc/Rprofile.site
-
-# Copy configuration files
-COPY server/traefik.yml /etc/traefik/traefik.yml
-COPY server/generate-traefik-configs.sh /usr/local/bin/generate-configs.sh
-
-# Make generation script executable
-RUN chmod +x /usr/local/bin/generate-configs.sh
+# RUN echo "options(\
+# shiny.host = '127.0.0.1',\
+# shiny.autoload.r = FALSE \
+# )" >> /usr/local/lib/R/etc/Rprofile.site
 
 # Set permissions
 RUN chown -R shiny:shiny /srv/shiny-server \
@@ -58,6 +59,11 @@ RUN chown -R shiny:shiny /srv/shiny-server \
 
 # Expose port 80
 EXPOSE 3838
+
+# Copy configuration files
+COPY server/traefik.yml /etc/traefik/traefik.yml
+COPY server/generate-traefik-configs.sh /usr/local/bin/generate-configs.sh
+RUN chmod +x /usr/local/bin/generate-configs.sh
 
 # Generate configs and start supervisor
 ENTRYPOINT ["/bin/bash", "-c", "/usr/local/bin/generate-configs.sh && exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
