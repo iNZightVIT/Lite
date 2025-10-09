@@ -22,16 +22,20 @@ vis.data <- reactive({
 ##                       ##
 ###########################
 
-# convert old vis.par() to a new format so its compatible with 
+# convert old vis.par() to a new format so its compatible with
 # iNZightPlots:::inzplot (iNZightPlots@2.15.0)
-new_vis_par = function(vis_par) {
+new_vis_par <- function(vis_par) {
   # ignore if x or y is a vector
   if (length(vis_par$x) > 1 || length(vis_par$y) > 1) {
     return(vis_par)
   }
-  
+
   # make formula
-  f = trim(paste(vis_par$y, "~", vis_par$x))
+  f <- if (is.null(vis_par$y)) {
+    trim(paste("~", vis_par$x))
+  } else {
+    trim(paste(vis_par$x, "~", vis_par$y))
+  }
   # # subsets
   # if (!is.null(vis_par$g1)) {
   #   g = vis_par$g1
@@ -40,12 +44,15 @@ new_vis_par = function(vis_par) {
   #   }
   #   f = paste(f, g, sep = " | ")
   # }
-  f = as.formula(f)
-  
+  f <- as.formula(f)
+
   # inzplot takes formla as "x"
-  vis_par$x = f
+  vis_par$x <- f
   # remove y
-  vis_par$y = NULL
+  vis_par$y <- NULL
+
+  print(vis_par$x)
+
   return(vis_par)
 }
 
@@ -1225,13 +1232,13 @@ output$visualize.plot <- renderPlot({
       is.numeric(vis.data()[[plot.par$y]])) {
       temp <- vis.par()
       temp$trend.parallel <- graphical.par$trend.parallel
-      temp.x <- temp$x
-      temp$x <- temp$y
-      temp$y <- temp.x
-      temp.varnames.x <- temp$varnames$x
-      temp$varnames$x <- temp$varnames$y
-      temp$varnames$y <- temp.varnames.x
-      
+      # temp.x <- temp$x
+      # temp$x <- temp$y
+      # temp$y <- temp.x
+      # temp.varnames.x <- temp$varnames$x
+      # temp$varnames$x <- temp$varnames$y
+      # temp$varnames$y <- temp.varnames.x
+
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
@@ -1306,12 +1313,12 @@ output$mini.plot <- renderPlot({
       is.numeric(vis.data()[[plot.par$y]])) {
       temp <- vis.par()
       temp$trend.parallel <- graphical.par$trend.parallel
-      temp.x <- temp$x
-      temp$x <- temp$y
-      temp$y <- temp.x
-      temp.varnames.x <- temp$varnames$x
-      temp$varnames$x <- temp$varnames$y
-      temp$varnames$y <- temp.varnames.x
+      # temp.x <- temp$x
+      # temp$x <- temp$y
+      # temp$y <- temp.x
+      # temp.varnames.x <- temp$varnames$x
+      # temp$varnames$x <- temp$varnames$y
+      # temp$varnames$y <- temp.varnames.x
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
@@ -3084,15 +3091,15 @@ observe({
           temp$y <- get.data.set()[, input$vari2]
         }
         temp$plot <- F
-        # TODO: 
+        # TODO:
         # str(temp)
         # List of 2
         # $ x   : Factor w/ 4 levels "job","other",..: 4 3 3 4 4 3 3 4 3 2 ...
         # $ plot: logi FALSE
-        
+
         tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
         # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-        
+
         large.sample <- search.name(tester, "largesample")[[1]]
         if (is.null(large.sample)) {
           large.sample <- F
@@ -3228,7 +3235,7 @@ output$plotly_inter <- renderPlotly({
       pdf(NULL)
       # do.call(iNZightPlots:::iNZightPlot, temp)
       do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
-      
+
       g <- plotly::ggplotly()
       dev.off()
       g
@@ -3259,7 +3266,7 @@ output$plotly_nw <- renderUI({
       on.exit(dev.off(cdev), add = TRUE)
       # do.call(iNZightPlots:::iNZightPlot, temp)
       do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
-      
+
       htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
       dev.off()
       addResourcePath("path", normalizePath(tdir))
@@ -4129,7 +4136,7 @@ output$code.variables.panel <- renderUI({
         temp$plot <- F
         # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
         temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-        
+
         ##################################################################
         #    large.sample = T
         large.sample <- search.name(temp, "largesample")[[1]]
@@ -4691,7 +4698,7 @@ output$add.jitter.panel <- renderUI({
       temp$plot <- F
       # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
       temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-      
+
       ##################################################################
       #    large.sample = T
       large.sample <- search.name(temp, "largesample")[[1]]
@@ -4767,7 +4774,7 @@ output$add.rugs.panel <- renderUI({
       temp$plot <- F
       # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
       temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-      
+
       ##################################################################
       #    large.sample = T
       large.sample <- search.name(temp, "largesample")[[1]]
@@ -4846,7 +4853,7 @@ output$join.points.panel <- renderUI({
       temp$plot <- F
       # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
       temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-      
+
       ##################################################################
       #    large.sample = T
       large.sample <- search.name(temp, "largesample")[[1]]
@@ -4920,7 +4927,7 @@ output$adjust.axis.panel <- renderUI({
         temp$plot <- F
         tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
         # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-        
+
         ###################################################################
         #      large.sample = T
         large.sample <- search.name(tester, "largesample")[[1]]
@@ -6078,7 +6085,7 @@ observe({
         temp$plot <- F
         # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
         temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-        
+
         extreme.ids <- search.name(temp, "extreme.ids")[[1]]
         plot.par.stored$locate.id <- unique(c(
           plot.par.stored$locate.id,
@@ -6167,7 +6174,7 @@ output$select_additions_panel <- renderUI({
     temp$plot <- F
     # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
     temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
-    
+
     ##################################################################
     #    large.sample = T
     large.sample <- search.name(temp, "largesample")[[1]]

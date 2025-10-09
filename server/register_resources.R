@@ -2,7 +2,7 @@
 library(shiny)
 
 # Pre-register all htmlwidget resources
-.pkgs <- c("crosstalk", "htmlwidgets", "DT", "plotly", "leaflet")
+.pkgs <- c("shinyWidgets", "crosstalk", "htmlwidgets", "DT", "plotly", "leaflet")
 for (pkg in .pkgs) {
     if (requireNamespace(pkg, quietly = TRUE)) {
         www_dir <- system.file("www", package = pkg)

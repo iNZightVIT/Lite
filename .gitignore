@@ -2,6 +2,8 @@ VARS
 data/Surveys/*.svydesign
 rsconnect
 .vscode
+*.log.gz
+*.log
 
 tmp
 
