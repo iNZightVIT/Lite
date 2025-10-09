@@ -1,7 +1,7 @@
 FROM rocker/shiny-verse:4.2
 
 # Number of Shiny instances (build argument)
-ARG SHINY_INSTANCES=10
+ARG SHINY_INSTANCES=1
 
 # STOP the shiny server
 # TODO: use a different image instead
