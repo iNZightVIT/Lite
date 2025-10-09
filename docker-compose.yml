@@ -1,16 +1,14 @@
-version: "3.8"
-
 services:
   shiny-app:
     build:
       context: .
       args:
         GITHUB_PAT: ${GITHUB_PAT}
-        SHINY_INSTANCES: 1
+        SHINY_INSTANCES: 3
     ports:
       - "3838:3838"
     environment:
-      - SHINY_INSTANCES=1
+      - SHINY_INSTANCES=3
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]

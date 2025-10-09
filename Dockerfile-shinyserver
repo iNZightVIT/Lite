@@ -1,0 +1,76 @@
+FROM rocker/shiny-verse:4.2
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    supervisor \
+    cmake \
+    libpoppler-cpp-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Traefik
+RUN curl -L https://github.com/traefik/traefik/releases/download/v3.0.0/traefik_v3.0.0_linux_amd64.tar.gz \
+    -o /tmp/traefik.tar.gz \
+    && tar -xzf /tmp/traefik.tar.gz -C /usr/local/bin \
+    && rm /tmp/traefik.tar.gz \
+    && chmod +x /usr/local/bin/traefik
+
+# Setup GitHub PAT for R package installation
+ARG GITHUB_PAT
+ENV GITHUB_PAT=${GITHUB_PAT}
+
+RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
+
+# Copy and run setup script
+COPY setup.R /srv/shiny-server
+RUN Rscript /srv/shiny-server/setup.R
+RUN rm .Renviron
+
+# STOP the shiny server
+# TODO: use a different image instead
+# RUN systemctl disable shiny-server 2>/dev/null || true
+# RUN rm -f /etc/init.d/shiny-server
+# RUN rm -f /usr/bin/shiny-server
+
+# Copy application files
+RUN rm -rf /srv/shiny-server/* && mkdir -p /src/shiny-server/Lite
+COPY . /srv/shiny-server/Lite
+RUN cp /srv/shiny-server/Lite/VARS.default /srv/shiny-server/Lite/VARS \
+    && sed -i "s/^\(lite.update=\).*/\1$(TZ='Pacific/Auckland' date '+%d %B %Y %-I:%M:%S%p')/g" /srv/shiny-server/Lite/VARS
+
+# RUN mv /srv/shiny-server/server/register_resources.R /srv/shiny-server
+
+# Set R options for Shiny (binding to localhost)
+# RUN echo "options(\
+# shiny.host = '127.0.0.1',\
+# shiny.autoload.r = FALSE \
+# )" >> /usr/local/lib/R/etc/Rprofile.site
+
+RUN cp -R /srv/shiny-server/Lite /srv/shiny-server/Lite1
+RUN cp -R /srv/shiny-server/Lite /srv/shiny-server/Lite2
+
+# Set permissions
+RUN chown -R shiny:shiny /srv/shiny-server
+    # && mkdir -p /var/log/supervisor /var/run/supervisor /var/log/traefik \
+    # && chown -R shiny:shiny /var/log/supervisor
+
+# move template pages into place
+RUN rm -rf /etc/shiny-server \
+    && mv /srv/shiny-server/Lite/shiny-server /etc/
+
+# RUN systemctl restart shiny-server
+
+# Expose port 80
+EXPOSE 3838
+
+# Number of Shiny instances (build argument)
+ARG SHINY_INSTANCES=1
+ENV SHINY_INSTANCES=${SHINY_INSTANCES}
+
+# Copy configuration files
+# COPY server/traefik.yml /etc/traefik/traefik.yml
+# COPY server/generate-traefik-configs.sh /usr/local/bin/generate-configs.sh
+# RUN chmod +x /usr/local/bin/generate-configs.sh
+
+# Generate configs and start supervisor
+# ENTRYPOINT ["/bin/bash", "-c", "/usr/local/bin/generate-configs.sh && exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]

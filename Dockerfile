@@ -1,17 +1,17 @@
-FROM rocker/shiny-verse:4.2
+FROM rocker/r-ver:4.2
 
-# STOP the shiny server
-# TODO: use a different image instead
-RUN systemctl disable shiny-server 2>/dev/null || true
-RUN rm -f /etc/init.d/shiny-server
-RUN rm -f /usr/bin/shiny-server
-
-# Install required packages
-RUN apt-get update && apt-get install -y \
-    supervisor \
-    cmake \
-    libpoppler-cpp-dev \
-    curl \
+# install shiny
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libcurl4-gnutls-dev \
+        libcairo2-dev \
+        libxt-dev \
+        libssl-dev \
+        libssh2-1-dev \
+        supervisor \
+        cmake \
+        libpoppler-cpp-dev \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Traefik
@@ -21,40 +21,20 @@ RUN curl -L https://github.com/traefik/traefik/releases/download/v3.0.0/traefik_
     && rm /tmp/traefik.tar.gz \
     && chmod +x /usr/local/bin/traefik
 
-# Remove default Shiny Server content
-RUN rm -rf /srv/shiny-server/index.html /srv/shiny-server/sample-apps
-
-# Setup GitHub PAT for R package installation
-ARG GITHUB_PAT
-ENV GITHUB_PAT=${GITHUB_PAT}
-
 RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
-
-# Copy and run setup script
-COPY setup.R /srv/shiny-server
-RUN Rscript /srv/shiny-server/setup.R
+COPY setup.R .
+RUN Rscript setup.R
 RUN rm .Renviron
 
-# Copy application files
-COPY . /srv/shiny-server
-RUN cp /srv/shiny-server/VARS.default /srv/shiny-server/VARS \
-    && sed -i "s/^\(lite.update=\).*/\1$(TZ='Pacific/Auckland' date '+%d %B %Y %-I:%M:%S%p')/g" /srv/shiny-server/VARS
+# copy files to app dir and set vars
+COPY . /app
+RUN cp /app/VARS.default /app/VARS \
+    && sed -i "s/^\(lite.update=\).*/\1$(TZ='Pacific/Auckland' date '+%d %B %Y %-I:%M:%S%p')/g" /app/VARS
 
-# RUN mv /srv/shiny-server/server/register_resources.R /srv/shiny-server
-
-# Set R options for Shiny (binding to localhost)
-# RUN echo "options(\
-# shiny.host = '127.0.0.1',\
-# shiny.autoload.r = FALSE \
-# )" >> /usr/local/lib/R/etc/Rprofile.site
-
-# Set permissions
-RUN chown -R shiny:shiny /srv/shiny-server \
+RUN useradd shiny
+RUN chown -R shiny:shiny /app \
     && mkdir -p /var/log/supervisor /var/run/supervisor /var/log/traefik \
     && chown -R shiny:shiny /var/log/supervisor
-
-# Expose port 80
-EXPOSE 3838
 
 # Number of Shiny instances (build argument)
 ARG SHINY_INSTANCES=1
@@ -64,6 +44,8 @@ ENV SHINY_INSTANCES=${SHINY_INSTANCES}
 COPY server/traefik.yml /etc/traefik/traefik.yml
 COPY server/generate-traefik-configs.sh /usr/local/bin/generate-configs.sh
 RUN chmod +x /usr/local/bin/generate-configs.sh
+
+EXPOSE 3838
 
 # Generate configs and start supervisor
 ENTRYPOINT ["/bin/bash", "-c", "/usr/local/bin/generate-configs.sh && exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
