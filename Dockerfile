@@ -44,7 +44,7 @@ COPY . /srv/shiny-server
 RUN cp /srv/shiny-server/VARS.default /srv/shiny-server/VARS \
     && sed -i "s/^\(lite.update=\).*/\1$(TZ='Pacific/Auckland' date '+%d %B %Y %-I:%M:%S%p')/g" /srv/shiny-server/VARS
 
-RUN mv /srv/shiny-server/server/register_resources.R /srv/shiny-server
+# RUN mv /srv/shiny-server/server/register_resources.R /srv/shiny-server
 
 # Set R options for Shiny (binding to localhost)
 # RUN echo "options(\

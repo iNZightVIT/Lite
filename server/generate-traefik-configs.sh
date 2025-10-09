@@ -74,7 +74,7 @@ for i in $(seq 1 $INSTANCES); do
     PORT=$((BASE_PORT + i))
     cat >> /etc/supervisor/conf.d/supervisord.conf << EOF
 [program:shiny-${i}]
-command=/usr/local/bin/R --slave -e "source('/srv/shiny-server/register_resources.R'); shiny::runApp('/srv/shiny-server', port=${PORT}, host='127.0.0.1')"
+command=/usr/local/bin/R --slave -e "shiny::runApp('/srv/shiny-server', port=${PORT}, host='127.0.0.1')"
 autostart=true
 autorestart=true
 stdout_logfile=/dev/stdout
