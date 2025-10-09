@@ -6,11 +6,11 @@ services:
       context: .
       args:
         GITHUB_PAT: ${GITHUB_PAT}
-        SHINY_INSTANCES: 10
+        SHINY_INSTANCES: 1
     ports:
       - "3838:3838"
     environment:
-      - SHINY_INSTANCES=10
+      - SHINY_INSTANCES=1
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]

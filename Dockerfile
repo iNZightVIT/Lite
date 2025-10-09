@@ -1,8 +1,5 @@
 FROM rocker/shiny-verse:4.2
 
-# Number of Shiny instances (build argument)
-ARG SHINY_INSTANCES=1
-
 # STOP the shiny server
 # TODO: use a different image instead
 RUN systemctl disable shiny-server 2>/dev/null || true
@@ -30,7 +27,6 @@ RUN rm -rf /srv/shiny-server/index.html /srv/shiny-server/sample-apps
 # Setup GitHub PAT for R package installation
 ARG GITHUB_PAT
 ENV GITHUB_PAT=${GITHUB_PAT}
-ENV SHINY_INSTANCES=${SHINY_INSTANCES}
 
 RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
 
@@ -59,6 +55,10 @@ RUN chown -R shiny:shiny /srv/shiny-server \
 
 # Expose port 80
 EXPOSE 3838
+
+# Number of Shiny instances (build argument)
+ARG SHINY_INSTANCES=1
+ENV SHINY_INSTANCES=${SHINY_INSTANCES}
 
 # Copy configuration files
 COPY server/traefik.yml /etc/traefik/traefik.yml
