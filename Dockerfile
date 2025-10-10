@@ -37,7 +37,7 @@ RUN chown -R shiny:shiny /app \
     && chown -R shiny:shiny /var/log/supervisor
 
 # Number of Shiny instances (build argument)
-ARG SHINY_INSTANCES=1
+ARG SHINY_INSTANCES=3
 ENV SHINY_INSTANCES=${SHINY_INSTANCES}
 
 # Copy configuration files
