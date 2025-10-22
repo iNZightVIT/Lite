@@ -37,21 +37,27 @@ new_vis_par <- function(vis_par) {
     trim(paste(vis_par$x, "~", vis_par$y))
   }
   # # subsets
-  # if (!is.null(vis_par$g1)) {
-  #   g = vis_par$g1
-  #   if(!is.null(vis_par$g2)) {
-  #     g = paste(g, vis_par$g2, sep = " + ")
-  #   }
-  #   f = paste(f, g, sep = " | ")
-  # }
+  if (!is.null(vis_par$g1)) {
+    g <- vis_par$g1
+    if (!is.null(vis_par$g2)) {
+      g <- paste(g, vis_par$g2, sep = " + ")
+    }
+    f <- paste(f, g, sep = " | ")
+  }
   f <- as.formula(f)
 
   # inzplot takes formla as "x"
   vis_par$x <- f
   # remove y
   vis_par$y <- NULL
+  vis_par$g1 <- NULL
+  vis_par$g2 <- NULL
 
-  print(vis_par$x)
+  # drop varnames (they are in formula)
+  vis_par$varnames$x <- NULL
+  vis_par$varnames$y <- NULL
+  vis_par$varnames$g1 <- NULL
+  vis_par$varnames$g2 <- NULL
 
   return(vis_par)
 }
@@ -1226,8 +1232,12 @@ output$visualize.plot <- renderPlot({
     }
   })
   # plot it
+  dafr <- get.data.set()
+  print("CURRENT PARS")
+  temp <- vis.par()
+  print(str(temp))
+
   if (!is.null(vis.par())) {
-    dafr <- get.data.set()
     if (is.numeric(vis.data()[[plot.par$x]]) &
       is.numeric(vis.data()[[plot.par$y]])) {
       temp <- vis.par()
