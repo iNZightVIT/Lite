@@ -383,7 +383,7 @@ observe({
 
 output$text_combine <- renderPrint({
   if (length(input$select.combine.columns) > 0) {
-    temp <- iNZightTools::combineCatVars(
+    temp <- iNZightTools::combine_vars(
       get.data.set(), input$select.combine.columns
     )
     print(table(temp[, ncol(temp)]))
@@ -396,7 +396,7 @@ observe({
   input$combine
   isolate({
     if (!is.null(input$combine) && input$combine > 0) {
-      temp <- iNZightTools::combineCatVars(
+      temp <- iNZightTools::combine_vars(
         get.data.set(), input$select.combine.columns
       )
       if (!is.null(temp)) {

@@ -2,6 +2,7 @@
 
 - Fix bug when uploading file in 'Post stratify'
 - Disable variable switch button on 'Inference' tab
+- Fix bug preventing collapse cat vars from working.
 
 # 2025.04
 
