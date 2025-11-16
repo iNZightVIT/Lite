@@ -45,20 +45,17 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Docker image to ECR
-        env:
-          ecrRepository: ${{ secrets.ECR_REPOSITORY }}
-          awsRegion: ${{ secrets.AWS_REGION }}
         run: |
           ECR_URI=$(aws ecr describe-repositories \
-            --repository-names $ecrRepository \
-            --region $awsRegion \
+            --repository-names ${{ secrets.ECR_REPOSITORY }} \
+            --region ${{ secrets.AWS_REGION }} \
             --query 'repositories[0].repositoryUri' \
             --output text)
 
           echo "Using ECR URI: $ECR_URI"
           echo "Using tag: $TAGNAME"
-          docker build --no-cache -t $ecrRepository:$TAGNAME .
-          docker tag $ecrRepository:$TAGNAME $ECR_URI:$TAGNAME
+          docker build --no-cache -t ${{ secrets.ECR_REPOSITORY }}:$TAGNAME .
+          docker tag ${{ secrets.ECR_REPOSITORY }}:$TAGNAME $ECR_URI:$TAGNAME
           docker push $ECR_URI:$TAGNAME
 
       - name: Deploy to ECS
