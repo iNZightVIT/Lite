@@ -7,13 +7,6 @@ on:
   schedule:
     - cron: "20 22,4 * * *"
 
-env:
-  AWS_REGION: ap-southeast-2
-  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
-  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
-  CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
-
 permissions:
   id-token: write
   contents: read
@@ -35,7 +28,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::868136143489:role/GitHubAssumeRole
           role-session-name: GitHub-to-AWS
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Set image tag from branch name
         run: |
@@ -54,30 +47,30 @@ jobs:
       - name: Build and push Docker image to ECR
         run: |
           ECR_URI=$(aws ecr describe-repositories \
-            --repository-names ${{ env.ECR_REPOSITORY }} \
-            --region ${{ env.AWS_REGION }} \
+            --repository-names ${{ secrets.ECR_REPOSITORY }} \
+            --region ${{ secrets.AWS_REGION }} \
             --query 'repositories[0].repositoryUri' \
             --output text)
 
           echo "Using ECR URI: $ECR_URI"
           echo "Using tag: $TAGNAME"
-          docker build --no-cache -t ${{ env.ECR_REPOSITORY }}:$TAGNAME .
-          docker tag ${{ env.ECR_REPOSITORY }}:$TAGNAME $ECR_URI:$TAGNAME
+          docker build --no-cache -t ${{ secrets.ECR_REPOSITORY }}:$TAGNAME .
+          docker tag ${{ secrets.ECR_REPOSITORY }}:$TAGNAME $ECR_URI:$TAGNAME
           docker push $ECR_URI:$TAGNAME
 
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.ECS_SERVICE }} \
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --service ${{ secrets.ECS_SERVICE }} \
             --force-new-deployment \
-            --region ${{ env.AWS_REGION }}
+            --region ${{ secrets.AWS_REGION }}
 
       - name: Delete all untagged images from ECR
         run: |
           UNTAGGED_DIGESTS=$(aws ecr list-images \
-            --repository-name ${{ env.ECR_REPOSITORY }} \
-            --region ${{ env.AWS_REGION }} \
+            --repository-name ${{ secrets.ECR_REPOSITORY }} \
+            --region ${{ secrets.AWS_REGION }} \
             --filter tagStatus=UNTAGGED \
             --query 'imageIds[*].imageDigest' \
             --output text)
@@ -88,8 +81,8 @@ jobs:
             for digest in $UNTAGGED_DIGESTS; do
               echo "Deleting untagged image with digest: $digest"
               aws ecr batch-delete-image \
-                --repository-name ${{ env.ECR_REPOSITORY }} \
-                --region ${{ env.AWS_REGION }} \
+                --repository-name ${{ secrets.ECR_REPOSITORY }} \
+                --region ${{ secrets.AWS_REGION }} \
                 --image-ids imageDigest=$digest
             done
           fi
