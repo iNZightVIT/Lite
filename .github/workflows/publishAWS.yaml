@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
-    environment: main
+    environment: "main action"
 
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,16 +22,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Validate AWS secrets
-        run: |
-          if [ -z "$AWS_REGION" ]; then
-            echo "::error::AWS_REGION secret is not set in the 'main' environment. Please ensure the secret is configured."
-            exit 1
-          fi
-          echo "AWS_REGION is configured"
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
