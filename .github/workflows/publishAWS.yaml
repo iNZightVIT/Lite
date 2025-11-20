@@ -33,7 +33,7 @@ jobs:
       - name: Set image tag
         run: |
           BRANCH="${GITHUB_REF#refs/heads/}"
-          if [[ "$BRANCH" == "master" ]]; then
+          if [[ "$BRANCH" == "main" ]]; then
             echo "TAGNAME=latest" >> $GITHUB_ENV
           else
             CLEAN_TAG=${BRANCH//\//_}
