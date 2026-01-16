@@ -24,7 +24,6 @@ Imports:
     colorspace,
     DT,
     GGally,
-    iNZightMaps,
     iNZightMR,
     iNZightPlots,
     iNZightRegression,
