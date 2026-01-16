@@ -11,7 +11,7 @@
 
 about.panel.ui <- function(lite.version, lite.update) {
   ##  We manually set the page width to be 10 columns so that it looks
-  ##  (rougly) centred.
+  ##  (roughly) centred.
   fixedPage(
     column(
       style = "font-size: 20px; line-height: 1.4; max-width: 40em;
@@ -43,7 +43,7 @@ about.panel.ui <- function(lite.version, lite.update) {
               } else {
                 NULL
               },
-              paste0("[", Sys.getenv("LITE_INSTANCE"), "]"),
+              # paste0("[", Sys.getenv("LITE_INSTANCE"), "]"),
               br()
             )
           )
@@ -68,8 +68,8 @@ about.panel.ui <- function(lite.version, lite.update) {
       },
       ##  We include the markdown document that contains the
       ##  text for the "About" module.
-      includeMarkdown("panels/A1_About/4_about-panel-text.md"),
-      actionButton("disconnect", "Disconnect the app")
+      includeMarkdown("panels/A1_About/4_about-panel-text.md")
+      # actionButton("disconnect", "Disconnect the app")
     ),
 
     ##  Next, we add a helpful footer.

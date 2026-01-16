@@ -4,15 +4,7 @@ on:
   push:
     branches:
       - dev
-  schedule:
-    - cron: "20 22,4 * * *"
-
-env:
-  AWS_REGION: ap-southeast-2
-  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
-  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
-  CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+      - main
 
 permissions:
   id-token: write
@@ -26,26 +18,34 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
 
+    env:
+      # Set environment variables from secrets based on branch (main or dev)
+      AWS_ROLE: ${{ github.ref == 'refs/heads/main' && secrets.AWS_ROLE__main || secrets.AWS_ROLE__dev }}
+      AWS_REGION: ${{ github.ref == 'refs/heads/main' && secrets.AWS_REGION__main || secrets.AWS_REGION__dev }}
+      ECR_REPOSITORY: ${{ github.ref == 'refs/heads/main' && secrets.ECR_REPOSITORY__main || secrets.ECR_REPOSITORY__dev }}
+      ECS_CLUSTER: ${{ github.ref == 'refs/heads/main' && secrets.ECS_CLUSTER__main || secrets.ECS_CLUSTER__dev }}
+      ECS_SERVICE: ${{ github.ref == 'refs/heads/main' && secrets.ECS_SERVICE__main || secrets.ECS_SERVICE__dev }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set image tag
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "TAGNAME=latest" >> $GITHUB_ENV
+          else
+            CLEAN_TAG=${BRANCH//\//_}
+            echo "TAGNAME=$CLEAN_TAG" >> $GITHUB_ENV
+          fi
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::868136143489:role/GitHubAssumeRole
+          role-to-assume: ${{ env.AWS_ROLE }}
           role-session-name: GitHub-to-AWS
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Set image tag from branch name
-        run: |
-          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-          if [[ "$BRANCH_NAME" == "master" ]]; then
-            echo "TAGNAME=latest" >> $GITHUB_ENV
-          else
-            CLEAN_TAG=${BRANCH_NAME//\//_}
-            echo "TAGNAME=$CLEAN_TAG" >> $GITHUB_ENV
-          fi
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -54,30 +54,30 @@ jobs:
       - name: Build and push Docker image to ECR
         run: |
           ECR_URI=$(aws ecr describe-repositories \
-            --repository-names ${{ env.ECR_REPOSITORY }} \
-            --region ${{ env.AWS_REGION }} \
+            --repository-names $ECR_REPOSITORY \
+            --region $AWS_REGION \
             --query 'repositories[0].repositoryUri' \
             --output text)
 
           echo "Using ECR URI: $ECR_URI"
           echo "Using tag: $TAGNAME"
-          docker build --no-cache -t ${{ env.ECR_REPOSITORY }}:$TAGNAME .
-          docker tag ${{ env.ECR_REPOSITORY }}:$TAGNAME $ECR_URI:$TAGNAME
+          docker build --no-cache -t $ECR_REPOSITORY:$TAGNAME .
+          docker tag $ECR_REPOSITORY:$TAGNAME $ECR_URI:$TAGNAME
           docker push $ECR_URI:$TAGNAME
 
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.ECS_SERVICE }} \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
             --force-new-deployment \
-            --region ${{ env.AWS_REGION }}
+            --region $AWS_REGION
 
       - name: Delete all untagged images from ECR
         run: |
           UNTAGGED_DIGESTS=$(aws ecr list-images \
-            --repository-name ${{ env.ECR_REPOSITORY }} \
-            --region ${{ env.AWS_REGION }} \
+            --repository-name $ECR_REPOSITORY \
+            --region $AWS_REGION \
             --filter tagStatus=UNTAGGED \
             --query 'imageIds[*].imageDigest' \
             --output text)
@@ -88,8 +88,8 @@ jobs:
             for digest in $UNTAGGED_DIGESTS; do
               echo "Deleting untagged image with digest: $digest"
               aws ecr batch-delete-image \
-                --repository-name ${{ env.ECR_REPOSITORY }} \
-                --region ${{ env.AWS_REGION }} \
+                --repository-name $ECR_REPOSITORY \
+                --region $AWS_REGION \
                 --image-ids imageDigest=$digest
             done
           fi
