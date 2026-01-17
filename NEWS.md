@@ -1,8 +1,42 @@
-# Unreleased changes
+# 2026.01
+
+The biggest change is the update to our deployment system, and moving to https://lite.inzight.nz, which should finally resolve connectivity issues experienced by users. This means we'll be able to push updates to Lite more frequently, so please let us know if you encounter any issues.
+
+## New features
+
+- Added new funcionality to the Multiple Response module that allows comma-separated values to be split into multi response yes/no variables.
+
+## UI Changes
+
+- _'Store residuals'_ and _'Store fitted values'_ no longer produce a pop-up, and instead create the variable immediately (without asking user to provide a name).
+- **Time Series module** has been refactored to connect with our updated `iNZightTS` 2.0, which has new and improved graphics and funcionality. The old version remains available via _'Time Series - Legacy'_.
+- **Experimental design module** : help text added to improve usability.
+- **Bar plots** have a new option (under Add to Plot) to toggle whether or not the bars are sized by the group size (the historical default is for this to be on).
+- **Summary** and **Inference** add options to control significant figures, percentage rounding, and p-value minimums.
+- Display instructions to correctly import a Google Sheet when pasting in an invalid URL
+
+## Changes
+
+- Refactor data wrangling methods for new `iNZightTools` 2.0.0 API.
+- Maps module has been removed following major changes/restructuring to dependent packages that we are unable to resolve at this time. Please get in touch if you used this module or would like to help us fix it.
+
+## Fixes:
 
 - Fix bug when uploading file in 'Post stratify'
 - Disable variable switch button on 'Inference' tab
 - Fix bug preventing collapse cat vars from working.
+- Fix invalid y-axis limits in seasonal effects plot.
+- Fix bug where 'locate points' would fail if text labels were chosen
+- Fix 'Expand Table' (missing library)
+- Fix typos in summary/inference panels
+- Fix issue where x/y axis labels could be flipped
+- Spaces in user supplied variable names are handled appropriately (replaced with underscores), which should prevent disconnect issues.
+- Survey objected updated when data changes, so e.g., newly created variables will show up in the outputs.
+- Example dataset redirects to Visualize after clicking 'Select set'.
+- Clarify wording in 'round %'
+- Fix bug where double-clicking sig fig up/down would cause an infinite loop
+- Fix bug where xlab/ylab passed as NULL would hide the axis labels (instead of using the default)
+- Various other UI fixes and minor improvements.
 
 # 2025.04
 
