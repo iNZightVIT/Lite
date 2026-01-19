@@ -199,7 +199,9 @@ vis.mainPanel <- function() {
               column(10, hr())
             ),
             helpText("Plots for visualizing data."),
-            plotOutput("visualize.plot"),
+            div(style = "height: 600px;", 
+                plotOutput("visualize.plot", height = "100%", width = "100%"),
+            ),
             br(),
             fixedRow(
               column(
