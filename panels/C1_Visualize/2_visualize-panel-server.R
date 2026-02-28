@@ -51,7 +51,7 @@ new_vis_par <- function(vis_par) {
   # remove y
   vis_par$y <- NULL
 
-  print(vis_par$x)
+#   print(vis_par$x)
 
   return(vis_par)
 }
@@ -1210,6 +1210,24 @@ observe({
   }
 })
 
+plot_dimensions = reactive({
+  list(
+    height = if (is.null(input$visualize_plot_height)) 60 else input$visualize_plot_height,
+    width = if (is.null(input$visualize_plot_width)) 100 else input$visualize_plot_width
+  )
+})
+
+plot_dimensions_debounced = shiny::debounce(plot_dimensions, millis = 250)
+
+output$visualize.plot.container = renderUI({
+  dims <- plot_dimensions_debounced()
+  plotOutput(
+    "visualize.plot",
+    height = paste0(dims$height, "vh"),
+    width = paste0(dims$width, "%")
+  )
+})
+
 output$visualize.plot <- renderPlot({
   isolate({
     # some of the graphical parameters need
@@ -1238,7 +1256,7 @@ output$visualize.plot <- renderPlot({
       # temp.varnames.x <- temp$varnames$x
       # temp$varnames$x <- temp$varnames$y
       # temp$varnames$y <- temp.varnames.x
-
+    
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
@@ -5196,7 +5214,7 @@ output$adjust.number.bars.panel <- renderUI({
           (class(get.data.set()[, input$vari2]) %in% "factor" |
             class(get.data.set()[, input$vari2]) %in% "character")))) {
       plot.par$zoombar <- NULL
-
+    
       if ((!is.null(input$vari1) &&
         !is.null(input$vari2)) &&
         (input$vari1 %in% colnames(get.data.set()) &&
@@ -7455,7 +7473,7 @@ observe({
           graphical.par$scatter.grid.bins <- 50
         }
       })
-
+      
       # plot it
       if (!is.null(vis.par())) {
         dafr <- get.data.set()

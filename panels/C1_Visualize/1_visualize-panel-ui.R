@@ -199,10 +199,36 @@ vis.mainPanel <- function() {
               column(10, hr())
             ),
             helpText("Plots for visualizing data."),
+            fixedRow(
+              column(
+                width = 6,
+                sliderInput(
+                  inputId = "visualize_plot_height",
+                  # uses vh as height
+                  label = "Plot height:",
+                  min = 30,
+                  max = 100,
+                  value = 60,
+                  step = 1
+                )
+              ),
+              column(
+                width = 6,
+                sliderInput(
+                  inputId = "visualize_plot_width",
+                  # uses % as width
+                  label = "Plot width:",
+                  min = 30,
+                  max = 100,
+                  value = 100,
+                  step = 1
+                )
+              )
+            ),
             # div(style = "height: 600px;", 
             #     plotOutput("visualize.plot", height = "100%", width = "100%"),
             # ),
-            plotOutput("visualize.plot", height = "80vh"),
+            uiOutput("visualize.plot.container"),
             br(),
             fixedRow(
               column(
