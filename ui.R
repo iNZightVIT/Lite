@@ -35,13 +35,6 @@ shinyUI(
         type = "text/css"
       ),
       tags$script(src = "js/ticker.js"),
-      tags$script(src = "js/linkToForm.js"),
-      tags$link(href = "linkToForm.css", rel = "stylesheet", type = "text/css"),
-      tags$script(
-        domain = "lite.dev.docker.stat.auckland.ac.nz",
-        src = "https://inzight-analytics.up.railway.app/js/script.js"
-      ),
-      tags$script(src = "js/user-info.js"),
       tags$link(href = "ticker.css", rel = "stylesheet", type = "text/css"),
       tags$style(HTML("
       body > .container-fluid {
@@ -65,6 +58,17 @@ shinyUI(
           }
         })();")),
     tags$head(tags$script(src = "js/testNumeric.js")),
+    tags$head({
+      # Read version from DESCRIPTION file
+      desc <- read.dcf("DESCRIPTION")
+      version <- desc[, "Version"][[1]]
+      # Escape for JavaScript: backslashes first, then single quotes
+      version_escaped <- gsub("\\\\", "\\\\\\\\", version)
+      version_escaped <- gsub("'", "\\\\'", version_escaped)
+      tags$script(HTML(paste0(
+        "window.INZIGHT_LITE_VERSION = '", version_escaped, "';"
+      )))
+    }),
     tags$head(tags$script(src = "js/google-analytics.js")),
     # tags$head(tags$script(src = "js/user-info.js")),
     # tags$head(tags$script(src = "js/download-logs.js")),
