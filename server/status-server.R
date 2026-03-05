@@ -42,6 +42,104 @@ parse_loadavg <- function() {
   )
 }
 
+count_connections <- function() {
+  tryCatch(
+    {
+      instances <- as.integer(Sys.getenv("SHINY_INSTANCES", "3"))
+      base_port <- 3000L
+
+      # Read all TCP connections (both IPv4 and IPv6)
+      read_tcp <- function(path) {
+        lines <- readLines(path, warn = FALSE)[-1]
+        if (length(lines) == 0L) return(list())
+        strsplit(trimws(lines), "\\s+")
+      }
+      all_conns <- c(read_tcp("/proc/net/tcp"), read_tcp("/proc/net/tcp6"))
+
+      # External connections: ESTABLISHED on port 3838 (0EFE) — actual clients
+      external <- sum(vapply(all_conns, function(p) {
+        grepl(":0EFE$", p[2]) && p[4] == "01"
+      }, logical(1)))
+
+      # Per-instance: ESTABLISHED connections to each Shiny backend port
+      per_instance <- list()
+      for (i in seq_len(instances)) {
+        port_hex <- toupper(sprintf("%04X", base_port + i))
+        n <- sum(vapply(all_conns, function(p) {
+          grepl(paste0(":", port_hex, "$"), p[2]) && p[4] == "01"
+        }, logical(1)))
+        per_instance[[paste0("instance_", i)]] <- n
+      }
+
+      c(list(total = external), per_instance)
+    },
+    error = function(e) list(total = "unavailable")
+  )
+}
+
+scrape_traefik_metrics <- function() {
+  tryCatch(
+    {
+      raw <- system2("curl", c("-sf", "--max-time", "2",
+        "http://127.0.0.1:8080/metrics"),
+        stdout = TRUE, stderr = FALSE)
+      if (length(raw) == 0L) return(list(error = "unavailable"))
+
+      # Parse Prometheus text format: metric_name{labels} value
+      parse_metric <- function(lines, name) {
+        pattern <- paste0("^", name, "(\\{[^}]+\\})?\\s+")
+        matched <- grep(pattern, lines, value = TRUE)
+        if (length(matched) == 0L) return(NULL)
+        lapply(matched, function(line) {
+          # Extract labels
+          labels <- list()
+          label_match <- regmatches(line, regexpr("\\{[^}]+\\}", line))
+          if (length(label_match) == 1L) {
+            pairs <- strsplit(gsub("[{}]", "", label_match), ",")[[1]]
+            for (pair in pairs) {
+              kv <- strsplit(pair, "=")[[1]]
+              if (length(kv) == 2L) {
+                labels[[kv[1]]] <- gsub('"', '', kv[2])
+              }
+            }
+          }
+          # Extract value
+          val <- as.numeric(sub(".*\\s+", "", line))
+          list(labels = labels, value = val)
+        })
+      }
+
+      # Per-service request totals
+      req_metrics <- parse_metric(raw, "traefik_service_requests_total")
+      services <- list()
+      for (m in req_metrics) {
+        svc <- m$labels$service %||% "unknown"
+        code <- m$labels$code %||% "unknown"
+        if (is.null(services[[svc]])) services[[svc]] <- list()
+        services[[svc]][[paste0("http_", code)]] <-
+          (services[[svc]][[paste0("http_", code)]] %||% 0) + m$value
+      }
+
+      # Open connections (global, by entrypoint)
+      conn_metrics <- parse_metric(raw, "traefik_open_connections")
+      open_conns <- list()
+      for (m in conn_metrics) {
+        ep <- m$labels$entrypoint %||% "unknown"
+        open_conns[[ep]] <- m$value
+      }
+
+      list(
+        open_connections = open_conns,
+        requests_by_service = services
+      )
+    },
+    error = function(e) list(error = conditionMessage(e))
+  )
+}
+
+# Null-coalescing operator
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 count_shiny_processes <- function() {
   instances <- as.integer(Sys.getenv("SHINY_INSTANCES", "3"))
   base_port <- 3000L
@@ -59,12 +157,16 @@ count_shiny_processes <- function() {
 }
 
 build_status <- function() {
+  # Count connections BEFORE health checks to avoid inflating the count
+  conns <- count_connections()
   list(
     task_id = task_id,
     uptime_seconds = round(as.numeric(difftime(Sys.time(), BOOT_TIME, units = "secs"))),
     cpu = parse_loadavg(),
     memory = parse_meminfo(),
     shiny = count_shiny_processes(),
+    connections = conns,
+    services = scrape_traefik_metrics(),
     timestamp = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
   )
 }

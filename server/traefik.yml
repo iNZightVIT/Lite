@@ -5,8 +5,11 @@ global:
 
 api:
   dashboard: false
+  insecure: true
 
 entryPoints:
+  traefik:
+    address: "127.0.0.1:8080"
   web:
     address: ":3838"
     transport:
@@ -20,6 +23,12 @@ providers:
   file:
     directory: /etc/traefik
     watch: true
+
+metrics:
+  prometheus:
+    entryPoint: traefik
+    addServicesLabels: true
+    addEntryPointsLabels: true
 
 log:
   level: INFO
