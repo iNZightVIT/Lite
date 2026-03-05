@@ -1,3 +1,7 @@
+# 2026.01.1
+
+- Add internal status endpoint (`/__status`) for monitoring container health and performance.
+
 # 2026.01
 
 The biggest change is the update to our deployment system, and moving to https://lite.inzight.nz, which should finally resolve connectivity issues experienced by users. This means we'll be able to push updates to Lite more frequently, so please let us know if you encounter any issues.
@@ -125,7 +129,6 @@ The biggest change is the update to our deployment system, and moving to https:/
 - The 'remove dataset' option in the File menu has been removed, as it is no longer needed.
 
 - Use `iNZightTools::smart_read` when importing from URL
-
   - Allow users to specify comment symbol when importing text files
 
 - Slight redesign of the logo using the same font family and weigt for 'lite', and fix alignment in header
@@ -163,7 +166,6 @@ _Switch from semantic to date versioning system_
 - Allow users to specify sheet/data name when importing data.
 
 - Added data import related information to `values`:
-
   - `data.type`
   - `data.available.dnames`
   - `data.current.dname`
