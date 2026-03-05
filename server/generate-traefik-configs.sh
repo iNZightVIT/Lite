@@ -10,13 +10,24 @@ echo "Generating configuration for $INSTANCES Shiny instances with Traefik..."
 cat > /etc/traefik/dynamic.yml << EOF
 http:
   routers:
+    status-router:
+      rule: "PathPrefix(\`/__status\`)"
+      service: status-service
+      entryPoints:
+        - web
+      priority: 100
     shiny-router:
       rule: "PathPrefix(\`/\`)"
       service: shiny-service
       entryPoints:
         - web
+      priority: 1
 
   services:
+    status-service:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:3099"
     shiny-service:
       loadBalancer:
         sticky:
@@ -91,6 +102,24 @@ startretries=3
 
 EOF
 done
+
+# Append status server to supervisor config
+cat >> /etc/supervisor/conf.d/supervisord.conf << EOF
+[program:status-server]
+command=/usr/local/bin/R --slave -e "source('/app/server/status-server.R')"
+autostart=true
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+user=shiny
+environment=HOME="/home/shiny",USER="shiny",SHINY_INSTANCES="${INSTANCES}",R_LIBS_USER="/usr/local/lib/R/site-library"
+priority=150
+startsecs=5
+startretries=3
+
+EOF
 
 echo "Configuration generated successfully!"
 echo "Traefik will use cookie-based sticky sessions with cookie name: INZLITESESSION"
