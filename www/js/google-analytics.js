@@ -75,7 +75,7 @@ if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
   document.head.appendChild(script);
 
   function sendHeartbeat() {
-    gtag("event", "user_engagement", {
+    gtag("event", "hb", {
       engagement_time_msec: HEARTBEAT_INTERVAL_MS,
     });
     lastHeartbeatTime = Date.now();
@@ -99,7 +99,7 @@ if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
     if (document.hidden) {
       stopHeartbeat();
       var elapsed = lastHeartbeatTime > 0 ? Date.now() - lastHeartbeatTime : 1;
-      gtag("event", "user_engagement", {
+      gtag("event", "hb", {
         engagement_time_msec: elapsed,
         transport_type: "beacon",
       });
