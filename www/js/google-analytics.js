@@ -1,3 +1,4 @@
+// === Universal Analytics (legacy) ===
 (function (i, s, o, g, r, a, m) {
   i["GoogleAnalyticsObject"] = r;
   (i[r] =
@@ -20,28 +21,91 @@
 
 ga("create", "UA-82492807-2", "auto");
 
-// Send version as an event parameter
-// This doesn't require pre-configuration in Google Analytics admin panel
-// The version will be available as an event parameter you can use in reports
 if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
-  // Send pageview with version in the path (works immediately for Universal Analytics)
   ga("send", "pageview", {
-    page: window.location.pathname + "?v=" + encodeURIComponent(window.INZIGHT_LITE_VERSION)
+    page:
+      window.location.pathname +
+      "?v=" +
+      encodeURIComponent(window.INZIGHT_LITE_VERSION),
   });
-  // Also send as a custom event with version as event parameter (Universal Analytics)
   ga("send", "event", {
     eventCategory: "Version",
     eventAction: "Page Load",
-    eventLabel: window.INZIGHT_LITE_VERSION
+    eventLabel: window.INZIGHT_LITE_VERSION,
   });
-
-  // Send version to GA4 if gtag is available (for GA4 dashboard)
-  if (typeof gtag !== "undefined") {
-    gtag("event", "page_view", {
-      app_version: window.INZIGHT_LITE_VERSION,
-      version: window.INZIGHT_LITE_VERSION
-    });
-  }
 } else {
   ga("send", "pageview");
 }
+
+// === GA4 with heartbeat for real-time user tracking ===
+(function () {
+  var GA4_ID = "G-0HN36ZDTGV";
+  var HEARTBEAT_INTERVAL_MS = 60000;
+  var heartbeatTimer = null;
+  var lastHeartbeatTime = 0;
+
+  // Set up dataLayer queue before gtag.js loads
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    window.dataLayer.push(arguments);
+  }
+  window.gtag = gtag;
+
+  // Load gtag.js
+  var script = document.createElement("script");
+  script.async = true;
+  script.src = "https://www.googletagmanager.com/gtag/js?id=" + GA4_ID;
+  script.onerror = function () {
+    // gtag.js blocked (ad blocker, network error, etc.) — fail silently
+  };
+  script.onload = function () {
+    gtag("js", new Date());
+    gtag("config", GA4_ID, { send_page_view: false });
+
+    // Send initial page view with version
+    var pageParams = { page_path: window.location.pathname };
+    if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
+      pageParams.app_version = window.INZIGHT_LITE_VERSION;
+    }
+    gtag("event", "page_view", pageParams);
+
+    lastHeartbeatTime = Date.now();
+    startHeartbeat();
+  };
+  document.head.appendChild(script);
+
+  function sendHeartbeat() {
+    gtag("event", "user_engagement", {
+      engagement_time_msec: HEARTBEAT_INTERVAL_MS,
+    });
+    lastHeartbeatTime = Date.now();
+  }
+
+  function startHeartbeat() {
+    if (heartbeatTimer) return;
+    heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
+  }
+
+  function stopHeartbeat() {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
+  }
+
+  // Pause heartbeat when tab is hidden, resume when visible.
+  // On hide, send a final beacon with actual elapsed engagement time.
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      stopHeartbeat();
+      var elapsed = lastHeartbeatTime > 0 ? Date.now() - lastHeartbeatTime : 1;
+      gtag("event", "user_engagement", {
+        engagement_time_msec: elapsed,
+        transport_type: "beacon",
+      });
+    } else {
+      lastHeartbeatTime = Date.now();
+      startHeartbeat();
+    }
+  });
+})();
