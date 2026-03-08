@@ -43,6 +43,7 @@ if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
   var HEARTBEAT_INTERVAL_MS = 20000; // 20 seconds
   var heartbeatTimer = null;
   var lastHeartbeatTime = 0;
+  var sessionStartTime = Date.now();
 
   // Set up dataLayer queue before gtag.js loads
   window.dataLayer = window.dataLayer || [];
@@ -50,6 +51,31 @@ if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
     window.dataLayer.push(arguments);
   }
   window.gtag = gtag;
+
+  // Track page load performance
+  if (window.performance && window.performance.timing) {
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        var perf = window.performance.timing;
+        var pageLoadTime = perf.loadEventEnd - perf.navigationStart;
+        var domContentLoaded = perf.domContentLoadedEventEnd - perf.navigationStart;
+
+        // Store for later use in events
+        window._gaPageLoadTime = pageLoadTime;
+        window._gaDOMContentLoaded = domContentLoaded;
+      }, 0);
+    });
+  }
+
+  // Track JavaScript errors
+  window.addEventListener("error", function (e) {
+    if (window.gtag && typeof window.gtag === "function") {
+      gtag("event", "exception", {
+        description: e.message + " at " + (e.filename || "") + ":" + (e.lineno || ""),
+        fatal: false,
+      });
+    }
+  });
 
   // Load gtag.js
   var script = document.createElement("script");
@@ -60,14 +86,28 @@ if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
   };
   script.onload = function () {
     gtag("js", new Date());
-    gtag("config", GA4_ID, { send_page_view: false });
 
-    // Send initial page view with version
-    var pageParams = { page_path: window.location.pathname };
+    // Set user properties for the session (will be included in all events including heartbeats)
     if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
-      pageParams.app_version = window.INZIGHT_LITE_VERSION;
+      gtag("set", { app_version: window.INZIGHT_LITE_VERSION });
     }
-    gtag("event", "page_view", pageParams);
+
+    var configParams = { send_page_view: false };
+    gtag("config", GA4_ID, configParams);
+
+    // Send initial page view with additional metadata
+    var pageViewParams = {
+      page_path: window.location.pathname,
+      session_start_time: sessionStartTime,
+    };
+
+    // Include performance metrics if available
+    if (window._gaPageLoadTime) {
+      pageViewParams.page_load_time_ms = window._gaPageLoadTime;
+      pageViewParams.dom_content_loaded_ms = window._gaDOMContentLoaded;
+    }
+
+    gtag("event", "page_view", pageViewParams);
 
     lastHeartbeatTime = Date.now();
     startHeartbeat();
@@ -106,6 +146,28 @@ if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
     } else {
       lastHeartbeatTime = Date.now();
       startHeartbeat();
+    }
+  });
+
+  // Track page unload to capture final session metrics
+  window.addEventListener("beforeunload", function () {
+    if (window.gtag && typeof window.gtag === "function") {
+      var sessionDuration = Date.now() - sessionStartTime;
+      gtag("event", "session_end", {
+        session_duration_ms: sessionDuration,
+        transport_type: "beacon",
+      });
+    }
+  });
+
+  // Also track when page is being unloaded (more reliable than beforeunload)
+  window.addEventListener("pagehide", function () {
+    if (window.gtag && typeof window.gtag === "function") {
+      var sessionDuration = Date.now() - sessionStartTime;
+      gtag("event", "session_end", {
+        session_duration_ms: sessionDuration,
+        transport_type: "beacon",
+      });
     }
   });
 })();
