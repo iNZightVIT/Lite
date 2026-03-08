@@ -1,3 +1,7 @@
+# 2026.01.3
+
+- Prevent non-fatal tab error during app startup
+
 # 2026.01.1
 
 - Add internal status endpoint (`/__status`) for monitoring container health and performance.
