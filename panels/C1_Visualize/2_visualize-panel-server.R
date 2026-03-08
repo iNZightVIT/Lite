@@ -3326,6 +3326,8 @@ observe({
   input$sub2_level
   input$subs2
   isolate({
+    # guard: don't manipulate tabs before the UI has rendered
+    if (is.null(input$plot_selector)) return()
     tryCatch(
       {
         if (!is.null(input$select.plot.type) &&
