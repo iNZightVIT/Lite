@@ -40,7 +40,7 @@ if (typeof window.INZIGHT_LITE_VERSION !== "undefined") {
 // === GA4 with heartbeat for real-time user tracking ===
 (function () {
   var GA4_ID = "G-0HN36ZDTGV";
-  var HEARTBEAT_INTERVAL_MS = 20000;
+  var HEARTBEAT_INTERVAL_MS = 20000; // 20 seconds
   var heartbeatTimer = null;
   var lastHeartbeatTime = 0;
 
