@@ -5,6 +5,8 @@ const path = require("path");
 const PORT = process.env.PORT || 8787;
 const INGEST_TOKEN = process.env.INGEST_TOKEN;
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "status.db");
+// Only tasks that reported in this window count as "active" (summary + task list)
+const ACTIVE_WINDOW_MINUTES = Math.max(1, parseInt(process.env.ACTIVE_WINDOW_MINUTES, 10) || 2);
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -134,7 +136,7 @@ app.post("/ingest", (req, res) => {
 
 // GET /api/summary
 app.get("/api/summary", (req, res) => {
-  const cutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString();
   const rows = db
     .prepare(
       `SELECT task_id, connections_total, reported_at
@@ -144,11 +146,14 @@ app.get("/api/summary", (req, res) => {
     )
     .all(cutoff);
 
+  const byTask = new Map();
+  for (const r of rows) {
+    if (!byTask.has(r.task_id)) {
+      byTask.set(r.task_id, r.connections_total ?? 0);
+    }
+  }
   const tasks = new Set(rows.map((r) => r.task_id));
-  const totalConnections = rows.reduce(
-    (sum, r) => sum + (r.connections_total ?? 0),
-    0
-  );
+  const totalConnections = Array.from(byTask.values()).reduce((sum, n) => sum + n, 0);
   const latest = rows[0]?.reported_at || null;
 
   res.json({
@@ -160,7 +165,7 @@ app.get("/api/summary", (req, res) => {
 
 // GET /api/tasks
 app.get("/api/tasks", (req, res) => {
-  const cutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString();
   const rows = db
     .prepare(
       `SELECT task_id, reported_at, uptime_seconds, connections_total,

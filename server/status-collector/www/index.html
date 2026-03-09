@@ -74,7 +74,7 @@
         document.getElementById('total-connections').textContent = summary.total_connections ?? '–';
         const tbody = document.getElementById('tasks-body');
         tbody.innerHTML = tasks.length === 0
-          ? '<tr><td colspan="7">No tasks reported in the last 5 minutes</td></tr>'
+          ? '<tr><td colspan="7">No tasks reported recently</td></tr>'
           : tasks.map(t => `
             <tr>
               <td><code>${t.task_id}</code></td>

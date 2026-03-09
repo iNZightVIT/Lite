@@ -121,7 +121,9 @@ startretries=3
 
 EOF
 
-# Append status reporter (exits immediately if STATUS_REPORT_URL/STATUS_REPORT_TOKEN unset)
+# Append status reporter (escape % for supervisor config parser)
+STATUS_REPORT_URL_ESC=${STATUS_REPORT_URL//%/%%}
+STATUS_REPORT_TOKEN_ESC=${STATUS_REPORT_TOKEN//%/%%}
 cat >> /etc/supervisor/conf.d/supervisord.conf << REPORTER
 [program:status-reporter]
 command=/app/server/status-reporter.sh
@@ -132,7 +134,7 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 user=shiny
-environment=HOME="/home/shiny",USER="shiny",SHINY_INSTANCES="${INSTANCES}",STATUS_REPORT_URL="${STATUS_REPORT_URL}",STATUS_REPORT_TOKEN="${STATUS_REPORT_TOKEN}",R_LIBS_USER="/usr/local/lib/R/site-library"
+environment=HOME="/home/shiny",USER="shiny",SHINY_INSTANCES="${INSTANCES}",STATUS_REPORT_URL="${STATUS_REPORT_URL_ESC}",STATUS_REPORT_TOKEN="${STATUS_REPORT_TOKEN_ESC}",R_LIBS_USER="/usr/local/lib/R/site-library"
 priority=50
 startsecs=2
 startretries=3

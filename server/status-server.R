@@ -56,9 +56,19 @@ count_connections <- function() {
       }
       all_conns <- c(read_tcp("/proc/net/tcp"), read_tcp("/proc/net/tcp6"))
 
-      # External connections: ESTABLISHED on port 3838 (0EFE) — actual clients
+      # Exclude internal remotes: loopback (127.x) and private ranges (10.x, 172.16–31.x, 169.254.x)
+      # /proc/net/tcp stores IPv4 as 8 hex chars, little-endian: AABBCCDD -> bytes DD CC BB AA -> octets (7:8)(5:6)(3:4)(1:2)
+      is_internal_remote <- function(rem_hex) {
+        if (is.na(rem_hex) || nchar(rem_hex) != 8) return(FALSE)
+        o1 <- strtoi(substr(rem_hex, 7, 8), 16L)
+        o2 <- strtoi(substr(rem_hex, 5, 6), 16L)
+        (o1 == 127) || (o1 == 10) || (o1 == 172 && o2 >= 16 && o2 <= 31) || (o1 == 169 && o2 == 254)
+      }
       external <- sum(vapply(all_conns, function(p) {
-        grepl(":0EFE$", p[2]) && p[4] == "01"
+        if (length(p) < 4) return(FALSE)
+        if (!grepl(":0EFE$", p[2]) || p[4] != "01") return(FALSE)
+        rem <- strsplit(p[3], ":", fixed = TRUE)[[1]][1]
+        !is_internal_remote(rem)
       }, logical(1)))
 
       # Per-instance: ESTABLISHED connections to each Shiny backend port
@@ -120,12 +130,12 @@ scrape_traefik_metrics <- function() {
           (services[[svc]][[paste0("http_", code)]] %||% 0) + m$value
       }
 
-      # Open connections (global, by entrypoint)
+      # Open connections (global, by entrypoint; sum if multiple protocols per entrypoint)
       conn_metrics <- parse_metric(raw, "traefik_open_connections")
       open_conns <- list()
       for (m in conn_metrics) {
         ep <- m$labels$entrypoint %||% "unknown"
-        open_conns[[ep]] <- m$value
+        open_conns[[ep]] <- (open_conns[[ep]] %||% 0) + m$value
       }
 
       list(
@@ -157,16 +167,23 @@ count_shiny_processes <- function() {
 }
 
 build_status <- function() {
-  # Count connections BEFORE health checks to avoid inflating the count
+  traefik <- scrape_traefik_metrics()
   conns <- count_connections()
+  # Prefer Traefik's open-connection count for entrypoint "web" (app port 3838) when available
+  total <- if (is.numeric(traefik$open_connections$web)) {
+    as.integer(traefik$open_connections$web)
+  } else {
+    conns$total
+  }
+  connections <- c(list(total = total), conns[names(conns) != "total"])
   list(
     task_id = task_id,
     uptime_seconds = round(as.numeric(difftime(Sys.time(), BOOT_TIME, units = "secs"))),
     cpu = parse_loadavg(),
     memory = parse_meminfo(),
     shiny = count_shiny_processes(),
-    connections = conns,
-    services = scrape_traefik_metrics(),
+    connections = connections,
+    services = traefik,
     timestamp = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
   )
 }
