@@ -8,8 +8,5 @@ services:
       - INGEST_TOKEN=${INGEST_TOKEN:-}
       - DB_PATH=/data/status.db
     volumes:
-      - status-data:/data
+      - ./data:/data
     restart: unless-stopped
-
-volumes:
-  status-data:
