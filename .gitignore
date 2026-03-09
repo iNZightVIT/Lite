@@ -156,3 +156,7 @@ $RECYCLE.BIN/
 # From Lite 2
 .env
 .env.local
+
+# Status collector (Node.js)
+server/status-collector/node_modules
+server/status-collector/data/

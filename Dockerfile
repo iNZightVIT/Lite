@@ -33,6 +33,7 @@ RUN cp /app/VARS.default /app/VARS \
 
 RUN useradd shiny
 RUN chown -R shiny:shiny /app \
+    && chmod +x /app/server/status-reporter.sh \
     && mkdir -p /var/log/supervisor /var/run/supervisor /var/log/traefik \
     && chown -R shiny:shiny /var/log/supervisor
 

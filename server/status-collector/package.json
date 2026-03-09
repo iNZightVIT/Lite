@@ -1,0 +1,13 @@
+{
+  "name": "inzight-status-collector",
+  "version": "1.0.0",
+  "description": "Central status aggregation and dashboard for iNZight Lite ECS tasks",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.6.0",
+    "express": "^4.21.0"
+  }
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iNZight Lite Status Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 1.5rem; background: #1a1a2e; color: #eee; }
+    h1 { margin-top: 0; font-size: 1.5rem; }
+    .summary { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .card { background: #16213e; padding: 1rem 1.5rem; border-radius: 8px; min-width: 140px; }
+    .card .label { font-size: 0.85rem; color: #94a3b8; }
+    .card .value { font-size: 1.75rem; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; background: #16213e; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 0.75rem 1rem; text-align: left; }
+    th { background: #0f3460; font-size: 0.85rem; color: #94a3b8; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+    .updated { font-size: 0.8rem; color: #64748b; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>iNZight Lite Status Dashboard</h1>
+  <div class="summary">
+    <div class="card">
+      <div class="label">Tasks</div>
+      <div class="value" id="task-count">–</div>
+    </div>
+    <div class="card">
+      <div class="label">Total connections</div>
+      <div class="value" id="total-connections">–</div>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Task ID</th>
+        <th>Last seen</th>
+        <th>Uptime</th>
+        <th>Connections</th>
+        <th>Memory %</th>
+        <th>Load (1m)</th>
+        <th>Shiny</th>
+      </tr>
+    </thead>
+    <tbody id="tasks-body"></tbody>
+  </table>
+  <div class="updated" id="updated"></div>
+
+  <script>
+    function fmtTime(s) {
+      if (s == null) return '–';
+      try {
+        const d = new Date(s);
+        return d.toLocaleString();
+      } catch (e) { return s; }
+    }
+    function fmtUptime(sec) {
+      if (sec == null) return '–';
+      const m = Math.floor(sec / 60), h = Math.floor(m / 60);
+      if (h) return h + 'h ' + (m % 60) + 'm';
+      if (m) return m + 'm';
+      return sec + 's';
+    }
+    function fmtNum(n) { return n != null ? String(n) : '–'; }
+
+    async function load() {
+      try {
+        const [summary, tasks] = await Promise.all([
+          fetch('/api/summary').then(r => r.json()),
+          fetch('/api/tasks').then(r => r.json())
+        ]);
+        document.getElementById('task-count').textContent = summary.task_count ?? '–';
+        document.getElementById('total-connections').textContent = summary.total_connections ?? '–';
+        const tbody = document.getElementById('tasks-body');
+        tbody.innerHTML = tasks.length === 0
+          ? '<tr><td colspan="7">No tasks reported in the last 5 minutes</td></tr>'
+          : tasks.map(t => `
+            <tr>
+              <td><code>${t.task_id}</code></td>
+              <td>${fmtTime(t.last_seen)}</td>
+              <td>${fmtUptime(t.uptime_seconds)}</td>
+              <td>${fmtNum(t.connections_total)}</td>
+              <td>${fmtNum(t.memory_percent_used)}%</td>
+              <td>${fmtNum(t.load_1m)}</td>
+              <td>${fmtNum(t.shiny_running)}/${fmtNum(t.shiny_configured)}</td>
+            </tr>
+          `).join('');
+        document.getElementById('updated').textContent =
+          'Last updated: ' + new Date().toLocaleString() + (summary.reported_at ? ' (latest report: ' + fmtTime(summary.reported_at) + ')' : '');
+      } catch (e) {
+        document.getElementById('tasks-body').innerHTML =
+          '<tr><td colspan="7">Error loading data: ' + String(e) + '</td></tr>';
+      }
+    }
+
+    load();
+    setInterval(load, 30000);
+  </script>
+</body>
+</html>

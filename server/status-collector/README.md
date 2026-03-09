@@ -1,0 +1,37 @@
+# iNZight Lite Status Collector
+
+Central aggregation service and dashboard for iNZight Lite ECS task status. Each ECS task reports its status every minute; this service stores the data and serves a dashboard.
+
+## Deploy on VPS (Docker Compose)
+
+```bash
+cd server/status-collector
+cp .env.example .env
+# Edit .env and set INGEST_TOKEN to a secure random string
+docker compose up -d
+```
+
+Expose port 8787 (e.g. via nginx/Caddy reverse proxy with HTTPS).
+
+## Configure ECS Tasks
+
+Set these environment variables in your ECS task definition:
+
+- `STATUS_REPORT_URL` — base URL of this collector (e.g. `https://status.example.com`)
+- `STATUS_REPORT_TOKEN` — same value as `INGEST_TOKEN` on the collector
+
+Use Secrets Manager or SSM Parameter Store for the token. Add GitHub secret `STATUS_REPORT_TOKEN` if you inject it during deployment.
+
+## API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/ingest` | POST | Accept status JSON (requires `Authorization: Bearer <token>`) |
+| `/api/summary` | GET | Task count, total connections, latest report time |
+| `/api/tasks` | GET | Per-task breakdown (last 5 minutes) |
+| `/api/history` | GET | Time-series (`?hours=6`), for charts |
+| `/` | GET | Dashboard (static HTML) |
+
+## Data Retention
+
+Reports older than 7 days are deleted automatically.

@@ -1,0 +1,15 @@
+services:
+  status-collector:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      - PORT=8787
+      - INGEST_TOKEN=${INGEST_TOKEN:-}
+      - DB_PATH=/data/status.db
+    volumes:
+      - status-data:/data
+    restart: unless-stopped
+
+volumes:
+  status-data:

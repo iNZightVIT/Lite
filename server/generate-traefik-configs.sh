@@ -121,5 +121,23 @@ startretries=3
 
 EOF
 
+# Append status reporter (exits immediately if STATUS_REPORT_URL/STATUS_REPORT_TOKEN unset)
+cat >> /etc/supervisor/conf.d/supervisord.conf << REPORTER
+[program:status-reporter]
+command=/app/server/status-reporter.sh
+autostart=true
+autorestart=unexpected
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+user=shiny
+environment=HOME="/home/shiny",USER="shiny",SHINY_INSTANCES="${INSTANCES}",STATUS_REPORT_URL="${STATUS_REPORT_URL}",STATUS_REPORT_TOKEN="${STATUS_REPORT_TOKEN}",R_LIBS_USER="/usr/local/lib/R/site-library"
+priority=50
+startsecs=2
+startretries=3
+
+REPORTER
+
 echo "Configuration generated successfully!"
 echo "Traefik will use cookie-based sticky sessions with cookie name: INZLITESESSION"
