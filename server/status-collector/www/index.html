@@ -55,6 +55,21 @@
         return d.toLocaleString();
       } catch (e) { return s; }
     }
+    function fmtAgo(s) {
+      if (s == null) return '–';
+      try {
+        const d = new Date(s);
+        const sec = Math.floor((Date.now() - d) / 1000);
+        if (sec < 0) return 'just now';
+        if (sec < 60) return sec + (sec === 1 ? ' second' : ' seconds') + ' ago';
+        const min = Math.floor(sec / 60);
+        if (min < 60) return min + (min === 1 ? ' minute' : ' minutes') + ' ago';
+        const hr = Math.floor(min / 60);
+        if (hr < 24) return hr + (hr === 1 ? ' hour' : ' hours') + ' ago';
+        const day = Math.floor(hr / 24);
+        return day + (day === 1 ? ' day' : ' days') + ' ago';
+      } catch (e) { return s; }
+    }
     function fmtUptime(sec) {
       if (sec == null) return '–';
       const m = Math.floor(sec / 60), h = Math.floor(m / 60);
@@ -78,7 +93,7 @@
           : tasks.map(t => `
             <tr>
               <td><code>${t.task_id}</code></td>
-              <td>${fmtTime(t.last_seen)}</td>
+              <td title="${fmtTime(t.last_seen)}">${fmtAgo(t.last_seen)}</td>
               <td>${fmtUptime(t.uptime_seconds)}</td>
               <td>${fmtNum(t.connections_total)}</td>
               <td>${fmtNum(t.memory_percent_used)}%</td>

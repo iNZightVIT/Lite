@@ -198,7 +198,7 @@ app.get("/api/tasks", (req, res) => {
       shiny_configured: t.shiny_configured,
       shiny_running: t.shiny_running,
     }))
-    .sort((a, b) => (b.last_seen || "").localeCompare(a.last_seen || ""));
+    .sort((a, b) => new Date(b.last_seen || 0) - new Date(a.last_seen || 0)); // newest first
 
   res.json(tasks);
 });
