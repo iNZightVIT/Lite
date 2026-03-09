@@ -7,6 +7,8 @@ const INGEST_TOKEN = process.env.INGEST_TOKEN;
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "status.db");
 // Only tasks that reported in this window count as "active" (summary + task list)
 const ACTIVE_WINDOW_MINUTES = Math.max(1, parseInt(process.env.ACTIVE_WINDOW_MINUTES, 10) || 2);
+// Dashboard task list: hide tasks not seen within this many minutes; sort by last seen
+const DASHBOARD_VISIBLE_MINUTES = Math.max(1, parseInt(process.env.DASHBOARD_VISIBLE_MINUTES, 10) || 5);
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -163,9 +165,9 @@ app.get("/api/summary", (req, res) => {
   });
 });
 
-// GET /api/tasks
+// GET /api/tasks — only tasks seen within DASHBOARD_VISIBLE_MINUTES, sorted by last_seen desc
 app.get("/api/tasks", (req, res) => {
-  const cutoff = new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - DASHBOARD_VISIBLE_MINUTES * 60 * 1000).toISOString();
   const rows = db
     .prepare(
       `SELECT task_id, reported_at, uptime_seconds, connections_total,
@@ -184,8 +186,8 @@ app.get("/api/tasks", (req, res) => {
     }
   }
 
-  res.json(
-    Array.from(byTask.values()).map((t) => ({
+  const tasks = Array.from(byTask.values())
+    .map((t) => ({
       task_id: t.task_id,
       last_seen: t.reported_at,
       uptime_seconds: t.uptime_seconds,
@@ -196,7 +198,9 @@ app.get("/api/tasks", (req, res) => {
       shiny_configured: t.shiny_configured,
       shiny_running: t.shiny_running,
     }))
-  );
+    .sort((a, b) => (b.last_seen || "").localeCompare(a.last_seen || ""));
+
+  res.json(tasks);
 });
 
 // GET /api/history — time-series for charts (bucketed by minute)
