@@ -41,6 +41,12 @@ RUN chown -R shiny:shiny /app \
 ARG SHINY_INSTANCES=2
 ENV SHINY_INSTANCES=${SHINY_INSTANCES}
 
+# Status reporter (optional; passed at build from GitHub secrets)
+ARG STATUS_REPORT_TOKEN
+ARG STATUS_REPORT_URL
+ENV STATUS_REPORT_TOKEN=${STATUS_REPORT_TOKEN}
+ENV STATUS_REPORT_URL=${STATUS_REPORT_URL}
+
 # Copy configuration files
 COPY server/traefik.yml /etc/traefik/traefik.yml
 COPY server/generate-traefik-configs.sh /usr/local/bin/generate-configs.sh

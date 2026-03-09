@@ -25,6 +25,9 @@ jobs:
       ECR_REPOSITORY: ${{ github.ref == 'refs/heads/main' && secrets.ECR_REPOSITORY__main || secrets.ECR_REPOSITORY__dev }}
       ECS_CLUSTER: ${{ github.ref == 'refs/heads/main' && secrets.ECS_CLUSTER__main || secrets.ECS_CLUSTER__dev }}
       ECS_SERVICE: ${{ github.ref == 'refs/heads/main' && secrets.ECS_SERVICE__main || secrets.ECS_SERVICE__dev }}
+      # Status collector: STATUS_REPORT_TOKEN and STATUS_REPORT_URL (same for main/dev)
+      STATUS_REPORT_TOKEN: ${{ secrets.STATUS_REPORT_TOKEN }}
+      STATUS_REPORT_URL: ${{ secrets.STATUS_REPORT_URL }}
 
     steps:
       - name: Checkout repository
@@ -61,7 +64,10 @@ jobs:
 
           echo "Using ECR URI: $ECR_URI"
           echo "Using tag: $TAGNAME"
-          docker build --no-cache -t $ECR_REPOSITORY:$TAGNAME .
+          docker build --no-cache \
+            --build-arg STATUS_REPORT_TOKEN="$STATUS_REPORT_TOKEN" \
+            --build-arg STATUS_REPORT_URL="$STATUS_REPORT_URL" \
+            -t $ECR_REPOSITORY:$TAGNAME .
           docker tag $ECR_REPOSITORY:$TAGNAME $ECR_URI:$TAGNAME
           docker push $ECR_URI:$TAGNAME
 
