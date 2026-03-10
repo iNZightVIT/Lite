@@ -78,6 +78,42 @@ shinyServer(function(input, output, session) {
 
   session$allowReconnect(TRUE)
 
+  ## --- Session tracking (fire-and-forget to local status-server) ---
+  lite_instance <- as.integer(Sys.getenv("LITE_INSTANCE", "0"))
+  session_tracking_id <- substr(session$token, 1, 12)
+
+  report_session <- function(event, reason = NULL) {
+    body <- jsonlite::toJSON(list(
+      event = event,
+      session_id = session_tracking_id,
+      instance = lite_instance,
+      reason = reason,
+      timestamp = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
+    ), auto_unbox = TRUE)
+    tryCatch(
+      system2("curl", c(
+        "-sf", "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-d", shQuote(body),
+        "--max-time", "1",
+        "http://127.0.0.1:3099/session"
+      ), wait = FALSE),
+      error = function(e) {}
+    )
+  }
+
+  report_session("start")
+
+  ping_observer <- observe({
+    invalidateLater(30000, session)
+    report_session("ping")
+  })
+
+  onSessionEnded(function() {
+    ping_observer$destroy()
+    report_session("end", reason = "closed")
+  })
+
   ## Specify all the reactive values
   values <- reactiveValues()
   values$data.name <- NULL

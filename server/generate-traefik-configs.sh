@@ -93,7 +93,7 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 user=shiny
-environment=HOME="/home/shiny",USER="shiny",LITE_INSTANCE="${i}",R_LIBS_USER="/usr/local/lib/R/site-library"
+environment=HOME="/home/shiny",USER="shiny",LITE_INSTANCE="${i}",SHINY_INSTANCES="${INSTANCES}",R_LIBS_USER="/usr/local/lib/R/site-library"
 priority=200
 stopasgroup=true
 killasgroup=true
@@ -103,10 +103,12 @@ startretries=3
 EOF
 done
 
-# Append status server to supervisor config
+# Append status server to supervisor config (Node.js — replaces status-server.R + status-reporter.sh)
+STATUS_REPORT_URL_ESC=${STATUS_REPORT_URL//%/%%}
+STATUS_REPORT_TOKEN_ESC=${STATUS_REPORT_TOKEN//%/%%}
 cat >> /etc/supervisor/conf.d/supervisord.conf << EOF
 [program:status-server]
-command=/usr/local/bin/R --slave -e "source('/app/server/status-server.R')"
+command=/usr/bin/node /app/server/status-server.js
 autostart=true
 autorestart=true
 stdout_logfile=/dev/stdout
@@ -114,32 +116,12 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 user=shiny
-environment=HOME="/home/shiny",USER="shiny",SHINY_INSTANCES="${INSTANCES}",R_LIBS_USER="/usr/local/lib/R/site-library"
+environment=HOME="/home/shiny",USER="shiny",SHINY_INSTANCES="${INSTANCES}",STATUS_REPORT_URL="${STATUS_REPORT_URL_ESC}",STATUS_REPORT_TOKEN="${STATUS_REPORT_TOKEN_ESC}"
 priority=150
-startsecs=5
-startretries=3
-
-EOF
-
-# Append status reporter (escape % for supervisor config parser)
-STATUS_REPORT_URL_ESC=${STATUS_REPORT_URL//%/%%}
-STATUS_REPORT_TOKEN_ESC=${STATUS_REPORT_TOKEN//%/%%}
-cat >> /etc/supervisor/conf.d/supervisord.conf << REPORTER
-[program:status-reporter]
-command=/app/server/status-reporter.sh
-autostart=true
-autorestart=unexpected
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-user=shiny
-environment=HOME="/home/shiny",USER="shiny",SHINY_INSTANCES="${INSTANCES}",STATUS_REPORT_URL="${STATUS_REPORT_URL_ESC}",STATUS_REPORT_TOKEN="${STATUS_REPORT_TOKEN_ESC}",R_LIBS_USER="/usr/local/lib/R/site-library"
-priority=50
 startsecs=2
 startretries=3
 
-REPORTER
+EOF
 
 echo "Configuration generated successfully!"
 echo "Traefik will use cookie-based sticky sessions with cookie name: INZLITESESSION"

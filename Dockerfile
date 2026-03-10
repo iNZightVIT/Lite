@@ -12,6 +12,15 @@ RUN apt-get update \
         cmake \
         libpoppler-cpp-dev \
         curl \
+        ca-certificates \
+        gnupg \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+       | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" \
+       > /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Traefik
@@ -33,7 +42,6 @@ RUN cp /app/VARS.default /app/VARS \
 
 RUN useradd shiny
 RUN chown -R shiny:shiny /app \
-    && chmod +x /app/server/status-reporter.sh \
     && mkdir -p /var/log/supervisor /var/run/supervisor /var/log/traefik \
     && chown -R shiny:shiny /var/log/supervisor
 
