@@ -82,14 +82,16 @@ shinyServer(function(input, output, session) {
   lite_instance <- as.integer(Sys.getenv("LITE_INSTANCE", "0"))
   session_tracking_id <- substr(session$token, 1, 12)
 
-  report_session <- function(event, reason = NULL) {
-    body <- jsonlite::toJSON(list(
+  report_session <- function(event, reason = NULL, hostname = NULL) {
+    body <- list(
       event = event,
       session_id = session_tracking_id,
       instance = lite_instance,
       reason = reason,
       timestamp = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
-    ), auto_unbox = TRUE)
+    )
+    if (!is.null(hostname)) body$hostname <- hostname
+    body <- jsonlite::toJSON(body, auto_unbox = TRUE)
     tryCatch(
       system2("curl", c(
         "-sf", "-X", "POST",
@@ -102,7 +104,7 @@ shinyServer(function(input, output, session) {
     )
   }
 
-  report_session("start")
+  report_session("start", hostname = session$clientData$url_hostname)
 
   ping_observer <- observe({
     invalidateLater(30000, session)

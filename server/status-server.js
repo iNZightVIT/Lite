@@ -17,6 +17,9 @@ const STATUS_REPORT_TOKEN = process.env.STATUS_REPORT_TOKEN || '';
 // --- Boot-time constants ---
 const BOOT_TIME = Date.now();
 
+// Public hostname from first user session (Host header); undefined until then
+let observedPublicHostname = null;
+
 const version = (() => {
   try {
     const desc = fs.readFileSync('/app/DESCRIPTION', 'utf8');
@@ -144,6 +147,9 @@ function handleSessionEvent(body) {
   if (!['start', 'ping', 'end'].includes(event)) return;
 
   if (event === 'start') {
+    if (typeof body.hostname === 'string' && body.hostname.trim().length > 0) {
+      observedPublicHostname = body.hostname.trim();
+    }
     if (sessions.size >= MAX_SESSIONS) {
       console.warn(`[status-server] session store full (${sessions.size}), rejecting new session`);
       return;
@@ -199,7 +205,7 @@ function buildStatus() {
   return {
     task_id: taskId,
     version,
-    hostname: hostName,
+    hostname: observedPublicHostname ?? null,
     uptime_seconds: Math.round((Date.now() - BOOT_TIME) / 1000),
     cpu: {
       percent: getCpuPercent(),
