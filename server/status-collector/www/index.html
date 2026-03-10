@@ -12,10 +12,20 @@
     .card { background: #16213e; padding: 1rem 1.5rem; border-radius: 8px; min-width: 140px; }
     .card .label { font-size: 0.85rem; color: #94a3b8; }
     .card .value { font-size: 1.75rem; font-weight: 600; }
+    .chart-container {
+      background: #16213e; border-radius: 8px; padding: 1rem;
+      margin-bottom: 1.5rem; position: relative;
+    }
+    .chart-container h2 { margin: 0 0 0.5rem; font-size: 1rem; color: #94a3b8; }
+    .chart-legend { display: flex; gap: 1.5rem; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem; }
+    .chart-legend span { display: flex; align-items: center; gap: 4px; }
+    .chart-legend .swatch { width: 12px; height: 3px; border-radius: 1px; }
+    canvas#history-chart { width: 100%; height: 200px; display: block; }
     table { width: 100%; border-collapse: collapse; background: #16213e; border-radius: 8px; overflow: hidden; }
     th, td { padding: 0.75rem 1rem; text-align: left; }
     th { background: #0f3460; font-size: 0.85rem; color: #94a3b8; }
     tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+    .spark { vertical-align: middle; }
     .updated { font-size: 0.8rem; color: #64748b; margin-top: 1rem; }
   </style>
 </head>
@@ -24,13 +34,23 @@
   <div class="summary">
     <div class="card">
       <div class="label">Tasks</div>
-      <div class="value" id="task-count">–</div>
+      <div class="value" id="task-count">&ndash;</div>
     </div>
     <div class="card">
       <div class="label">Total connections</div>
-      <div class="value" id="total-connections">–</div>
+      <div class="value" id="total-connections">&ndash;</div>
     </div>
   </div>
+
+  <div class="chart-container">
+    <h2>History</h2>
+    <div class="chart-legend">
+      <span><span class="swatch" style="background:#38bdf8"></span> Connections (left)</span>
+      <span><span class="swatch" style="background:#fb923c"></span> Instances (right)</span>
+    </div>
+    <canvas id="history-chart" height="200"></canvas>
+  </div>
+
   <table>
     <thead>
       <tr>
@@ -39,7 +59,7 @@
         <th>Uptime</th>
         <th>Connections</th>
         <th>Memory %</th>
-        <th>Load (1m)</th>
+        <th>CPU</th>
         <th>Shiny</th>
       </tr>
     </thead>
@@ -49,60 +69,188 @@
 
   <script>
     function fmtTime(s) {
-      if (s == null) return '–';
-      try {
-        const d = new Date(s);
-        return d.toLocaleString();
-      } catch (e) { return s; }
+      if (s == null) return '\u2013';
+      try { return new Date(s).toLocaleString(); } catch (e) { return s; }
     }
     function fmtAgo(s) {
-      if (s == null) return '–';
+      if (s == null) return '\u2013';
       try {
-        const d = new Date(s);
-        const sec = Math.floor((Date.now() - d) / 1000);
+        const sec = Math.floor((Date.now() - new Date(s)) / 1000);
         if (sec < 0) return 'just now';
-        if (sec < 60) return sec + (sec === 1 ? ' second' : ' seconds') + ' ago';
+        if (sec < 60) return sec + 's ago';
         const min = Math.floor(sec / 60);
-        if (min < 60) return min + (min === 1 ? ' minute' : ' minutes') + ' ago';
+        if (min < 60) return min + 'm ago';
         const hr = Math.floor(min / 60);
-        if (hr < 24) return hr + (hr === 1 ? ' hour' : ' hours') + ' ago';
-        const day = Math.floor(hr / 24);
-        return day + (day === 1 ? ' day' : ' days') + ' ago';
+        if (hr < 24) return hr + 'h ago';
+        return Math.floor(hr / 24) + 'd ago';
       } catch (e) { return s; }
     }
     function fmtUptime(sec) {
-      if (sec == null) return '–';
+      if (sec == null) return '\u2013';
       const m = Math.floor(sec / 60), h = Math.floor(m / 60);
       if (h) return h + 'h ' + (m % 60) + 'm';
       if (m) return m + 'm';
       return sec + 's';
     }
-    function fmtNum(n) { return n != null ? String(n) : '–'; }
+    function fmtNum(n) { return n != null ? String(n) : '\u2013'; }
+
+    // --- Sparkline SVG generator ---
+    function sparkline(values, color, w, h) {
+      if (!values || values.length === 0) return '';
+      const nums = values.map(v => v ?? 0);
+      const max = Math.max(...nums, 1);
+      const min = Math.min(...nums, 0);
+      const range = max - min || 1;
+      const step = w / Math.max(nums.length - 1, 1);
+      const points = nums.map((v, i) =>
+        `${(i * step).toFixed(1)},${(h - ((v - min) / range) * (h - 2) - 1).toFixed(1)}`
+      ).join(' ');
+      const last = nums[nums.length - 1];
+      const label = color === '#38bdf8' ? `${last.toFixed(1)}%` : last.toFixed(2);
+      return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+        `<polyline fill="none" stroke="${color}" stroke-width="1.5" points="${points}"/>` +
+        `</svg> <span style="font-size:0.75rem;color:${color}">${label}</span>`;
+    }
+
+    // --- History chart (Canvas) ---
+    function drawChart(history) {
+      const canvas = document.getElementById('history-chart');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      const W = rect.width, H = rect.height;
+      const pad = { top: 10, right: 50, bottom: 30, left: 50 };
+      const cw = W - pad.left - pad.right;
+      const ch = H - pad.top - pad.bottom;
+
+      ctx.clearRect(0, 0, W, H);
+
+      if (!history || history.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No history data', W / 2, H / 2);
+        return;
+      }
+
+      const conns = history.map(p => p.total_connections ?? 0);
+      const tasks = history.map(p => p.task_count ?? 0);
+      const maxC = Math.max(...conns, 1);
+      const maxT = Math.max(...tasks, 1);
+      const n = history.length;
+
+      function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
+      function yC(v) { return pad.top + ch - (v / maxC) * ch; }
+      function yT(v) { return pad.top + ch - (v / maxT) * ch; }
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const gy = pad.top + (ch / 4) * i;
+        ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(pad.left + cw, gy); ctx.stroke();
+      }
+
+      // Connections line (left y-axis)
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const px = x(i), py = yC(conns[i]);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Fill under connections
+      ctx.fillStyle = 'rgba(56,189,248,0.08)';
+      ctx.beginPath();
+      ctx.moveTo(x(0), yC(conns[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yC(conns[i]));
+      ctx.lineTo(x(n - 1), pad.top + ch);
+      ctx.lineTo(x(0), pad.top + ch);
+      ctx.closePath();
+      ctx.fill();
+
+      // Instances line (right y-axis)
+      ctx.strokeStyle = '#fb923c';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const px = x(i), py = yT(tasks[i]);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Left y-axis labels (connections)
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'right';
+      for (let i = 0; i <= 4; i++) {
+        const v = Math.round(maxC * (4 - i) / 4);
+        ctx.fillText(v, pad.left - 6, pad.top + (ch / 4) * i + 4);
+      }
+
+      // Right y-axis labels (instances)
+      ctx.fillStyle = '#fb923c';
+      ctx.textAlign = 'left';
+      for (let i = 0; i <= 4; i++) {
+        const v = Math.round(maxT * (4 - i) / 4);
+        ctx.fillText(v, pad.left + cw + 6, pad.top + (ch / 4) * i + 4);
+      }
+
+      // X-axis time labels
+      ctx.fillStyle = '#64748b';
+      ctx.textAlign = 'center';
+      ctx.font = '10px system-ui';
+      const labelCount = Math.min(n, Math.floor(cw / 70));
+      const step = Math.max(1, Math.floor(n / labelCount));
+      for (let i = 0; i < n; i += step) {
+        const ts = history[i].timestamp;
+        const label = ts ? ts.slice(11, 16) : ''; // HH:MM
+        ctx.fillText(label, x(i), pad.top + ch + 18);
+      }
+    }
 
     async function load() {
       try {
-        const [summary, tasks] = await Promise.all([
+        const [summary, tasks, histData] = await Promise.all([
           fetch('/api/summary').then(r => r.json()),
-          fetch('/api/tasks').then(r => r.json())
+          fetch('/api/tasks').then(r => r.json()),
+          fetch('/api/history?hours=6').then(r => r.json())
         ]);
-        document.getElementById('task-count').textContent = summary.task_count ?? '–';
-        document.getElementById('total-connections').textContent = summary.total_connections ?? '–';
+
+        document.getElementById('task-count').textContent = summary.task_count ?? '\u2013';
+        document.getElementById('total-connections').textContent = summary.total_connections ?? '\u2013';
+
+        drawChart(histData.history);
+        document.getElementById('history-chart')._lastHistory = histData.history;
+
         const tbody = document.getElementById('tasks-body');
         tbody.innerHTML = tasks.length === 0
           ? '<tr><td colspan="7">No tasks reported recently</td></tr>'
-          : tasks.map(t => `
-            <tr>
-              <td><code>${t.task_id}</code></td>
-              <td title="${fmtTime(t.last_seen)}">${fmtAgo(t.last_seen)}</td>
-              <td>${fmtUptime(t.uptime_seconds)}</td>
-              <td>${fmtNum(t.connections_total)}</td>
-              <td>${fmtNum(t.memory_percent_used)}%</td>
-              <td>${fmtNum(t.load_1m)}</td>
-              <td>${fmtNum(t.shiny_running)}/${fmtNum(t.shiny_configured)}</td>
-            </tr>
-          `).join('');
+          : tasks.map(t => {
+              const memVals = (t.history || []).map(h => h.mem);
+              const cpuVals = (t.history || []).map(h => h.cpu);
+              return `
+              <tr>
+                <td><code>${t.task_id}</code></td>
+                <td title="${fmtTime(t.last_seen)}">${fmtAgo(t.last_seen)}</td>
+                <td>${fmtUptime(t.uptime_seconds)}</td>
+                <td>${fmtNum(t.connections_total)}</td>
+                <td>${sparkline(memVals, '#38bdf8', 60, 20)}</td>
+                <td>${sparkline(cpuVals, '#fb923c', 60, 20)}</td>
+                <td>${fmtNum(t.shiny_running)}/${fmtNum(t.shiny_configured)}</td>
+              </tr>`;
+            }).join('');
+
         document.getElementById('updated').textContent =
-          'Last updated: ' + new Date().toLocaleString() + (summary.reported_at ? ' (latest report: ' + fmtTime(summary.reported_at) + ')' : '');
+          'Last updated: ' + new Date().toLocaleString() +
+          (summary.reported_at ? ' (latest report: ' + fmtTime(summary.reported_at) + ')' : '');
       } catch (e) {
         document.getElementById('tasks-body').innerHTML =
           '<tr><td colspan="7">Error loading data: ' + String(e) + '</td></tr>';
@@ -111,6 +259,10 @@
 
     load();
     setInterval(load, 30000);
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('history-chart');
+      if (canvas._lastHistory) drawChart(canvas._lastHistory);
+    });
   </script>
 </body>
 </html>

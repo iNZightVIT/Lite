@@ -61,7 +61,17 @@ function trimOldRows() {
 
 function parsePayload(body) {
   const conns = body.connections;
-  const total = conns && typeof conns.total === "number" ? conns.total : null;
+  // Sum per-instance connections (instance_1, instance_2, ...) rather than using
+  // the Traefik-sourced total, as instance counts are more accurate.
+  let total = null;
+  if (conns && typeof conns === "object") {
+    const instanceKeys = Object.keys(conns).filter((k) => k.startsWith("instance_"));
+    if (instanceKeys.length > 0) {
+      total = instanceKeys.reduce((sum, k) => sum + (typeof conns[k] === "number" ? conns[k] : 0), 0);
+    } else if (typeof conns.total === "number") {
+      total = conns.total; // fallback
+    }
+  }
   const mem = body.memory;
   const usedMb = mem && typeof mem.used_mb === "number" ? mem.used_mb : null;
   const pctUsed =
@@ -137,7 +147,7 @@ app.post("/ingest", (req, res) => {
 });
 
 // GET /api/summary
-app.get("/api/summary", (req, res) => {
+app.get("/api/summary", (_req, res) => {
   const cutoff = new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString();
   const rows = db
     .prepare(
@@ -166,7 +176,8 @@ app.get("/api/summary", (req, res) => {
 });
 
 // GET /api/tasks — only tasks seen within DASHBOARD_VISIBLE_MINUTES, sorted by last_seen desc
-app.get("/api/tasks", (req, res) => {
+// Includes recent CPU/memory history for sparkline graphs
+app.get("/api/tasks", (_req, res) => {
   const cutoff = new Date(Date.now() - DASHBOARD_VISIBLE_MINUTES * 60 * 1000).toISOString();
   const rows = db
     .prepare(
@@ -175,19 +186,26 @@ app.get("/api/tasks", (req, res) => {
               shiny_configured, shiny_running
        FROM status_reports
        WHERE reported_at >= ?
-       ORDER BY task_id, reported_at DESC`
+       ORDER BY task_id, reported_at ASC`
     )
     .all(cutoff);
 
   const byTask = new Map();
   for (const r of rows) {
     if (!byTask.has(r.task_id)) {
-      byTask.set(r.task_id, { ...r });
+      byTask.set(r.task_id, { latest: r, history: [] });
     }
+    const entry = byTask.get(r.task_id);
+    entry.latest = r; // last row (ASC order) is the most recent
+    entry.history.push({
+      t: r.reported_at,
+      cpu: r.load_1m,
+      mem: r.memory_percent_used,
+    });
   }
 
   const tasks = Array.from(byTask.values())
-    .map((t) => ({
+    .map(({ latest: t, history }) => ({
       task_id: t.task_id,
       last_seen: t.reported_at,
       uptime_seconds: t.uptime_seconds,
@@ -197,6 +215,7 @@ app.get("/api/tasks", (req, res) => {
       load_1m: t.load_1m,
       shiny_configured: t.shiny_configured,
       shiny_running: t.shiny_running,
+      history,
     }))
     .sort((a, b) => new Date(b.last_seen || 0) - new Date(a.last_seen || 0)); // newest first
 
