@@ -47,11 +47,16 @@ db.exec(`
 
 // --- Schema migration for existing DBs ---
 // Add new columns if they don't exist. Old columns (connections_total, load_1m)
-// are intentionally retained in migrated DBs to preserve historical data,
-// but are no longer written to or read from.
+// are retained in migrated DBs for historical data. When reading, use
+// connections_total as fallback for active_sessions so old rows contribute.
 const existingCols = new Set(
   db.prepare("PRAGMA table_info(status_reports)").all().map((c) => c.name)
 );
+
+const sessionCol =
+  existingCols.has("connections_total")
+    ? "COALESCE(active_sessions, connections_total)"
+    : "active_sessions";
 
 const migrations = [
   ["active_sessions", "INTEGER"],
@@ -192,7 +197,7 @@ app.get("/api/summary", (_req, res) => {
   const cutoff = new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString();
   const rows = db
     .prepare(
-      `SELECT task_id, active_sessions, reported_at
+      `SELECT task_id, ${sessionCol} AS active_sessions, reported_at
        FROM status_reports
        WHERE reported_at >= ?
        ORDER BY reported_at DESC`
@@ -225,7 +230,7 @@ app.get("/api/tasks", (_req, res) => {
   // Get latest report per task for current state
   const latestRows = db
     .prepare(
-      `SELECT task_id, reported_at, uptime_seconds, active_sessions,
+      `SELECT task_id, reported_at, uptime_seconds, ${sessionCol} AS active_sessions,
               cpu_percent, memory_used_mb, memory_percent_used,
               shiny_configured, shiny_running, version, hostname
        FROM status_reports
@@ -250,7 +255,7 @@ app.get("/api/tasks", (_req, res) => {
     const placeholders = taskIds.map(() => "?").join(",");
     const historyRows = db
       .prepare(
-        `SELECT task_id, reported_at, cpu_percent, memory_percent_used, active_sessions
+        `SELECT task_id, reported_at, cpu_percent, memory_percent_used, ${sessionCol} AS active_sessions
          FROM status_reports
          WHERE task_id IN (${placeholders}) AND reported_at >= ?
          ORDER BY task_id, reported_at ASC`
@@ -307,7 +312,7 @@ app.get("/api/history", (req, res) => {
 
   const rows = db
     .prepare(
-      `SELECT reported_at, task_id, active_sessions
+      `SELECT reported_at, task_id, ${sessionCol} AS active_sessions
        FROM status_reports
        WHERE reported_at >= ?
        ORDER BY reported_at ASC`
