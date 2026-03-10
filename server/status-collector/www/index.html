@@ -16,7 +16,16 @@
       background: #16213e; border-radius: 8px; padding: 1rem;
       margin-bottom: 1.5rem; position: relative;
     }
-    .chart-container h2 { margin: 0 0 0.5rem; font-size: 1rem; color: #94a3b8; }
+    .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .chart-header h2 { margin: 0; font-size: 1rem; color: #94a3b8; }
+    .range-selector { display: flex; gap: 4px; }
+    .range-btn {
+      background: transparent; border: 1px solid #334155; color: #94a3b8;
+      padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    .range-btn:hover { border-color: #64748b; color: #e2e8f0; }
+    .range-btn.active { background: #334155; color: #e2e8f0; border-color: #64748b; }
     .chart-legend { display: flex; gap: 1.5rem; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem; }
     .chart-legend span { display: flex; align-items: center; gap: 4px; }
     .chart-legend .swatch { width: 12px; height: 3px; border-radius: 1px; }
@@ -26,26 +35,40 @@
     th { background: #0f3460; font-size: 0.85rem; color: #94a3b8; }
     tr:nth-child(even) { background: rgba(255,255,255,0.03); }
     .spark { vertical-align: middle; }
+    .health-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .health-green { background: #22c55e; }
+    .health-yellow { background: #eab308; }
+    .health-red { background: #ef4444; }
     .updated { font-size: 0.8rem; color: #64748b; margin-top: 1rem; }
+    .version-tag { font-size: 0.75rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 3px; }
+    .hostname { font-size: 0.8rem; color: #64748b; }
   </style>
 </head>
 <body>
   <h1>iNZight Lite Status Dashboard</h1>
   <div class="summary">
     <div class="card">
-      <div class="label">Tasks</div>
+      <div class="label">Instances</div>
       <div class="value" id="task-count">&ndash;</div>
     </div>
     <div class="card">
-      <div class="label">Total connections</div>
-      <div class="value" id="total-connections">&ndash;</div>
+      <div class="label">Sessions</div>
+      <div class="value" id="active-sessions">&ndash;</div>
     </div>
   </div>
 
   <div class="chart-container">
-    <h2>History</h2>
+    <div class="chart-header">
+      <h2>History</h2>
+      <div class="range-selector">
+        <button class="range-btn active" data-range="1h">1h</button>
+        <button class="range-btn" data-range="6h">6h</button>
+        <button class="range-btn" data-range="1d">1d</button>
+        <button class="range-btn" data-range="7d">7d</button>
+      </div>
+    </div>
     <div class="chart-legend">
-      <span><span class="swatch" style="background:#38bdf8"></span> Connections (left)</span>
+      <span><span class="swatch" style="background:#38bdf8"></span> Sessions (left)</span>
       <span><span class="swatch" style="background:#fb923c"></span> Instances (right)</span>
     </div>
     <canvas id="history-chart" height="200"></canvas>
@@ -55,12 +78,12 @@
     <thead>
       <tr>
         <th>Task ID</th>
-        <th>Last seen</th>
-        <th>Uptime</th>
-        <th>Connections</th>
+        <th>Version</th>
+        <th>Hostname</th>
+        <th>Sessions</th>
+        <th>Health</th>
         <th>Memory %</th>
-        <th>CPU</th>
-        <th>Shiny</th>
+        <th>CPU %</th>
       </tr>
     </thead>
     <tbody id="tasks-body"></tbody>
@@ -68,14 +91,22 @@
   <div class="updated" id="updated"></div>
 
   <script>
+    let currentRange = '1h';
+
+    function escapeHtml(str) {
+      if (str == null) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
     function fmtTime(s) {
       if (s == null) return '\u2013';
-      try { return new Date(s).toLocaleString(); } catch (e) { return s; }
+      try { return new Date(s).toLocaleString(); } catch (e) { return '\u2013'; }
     }
     function fmtAgo(s) {
       if (s == null) return '\u2013';
       try {
-        const sec = Math.floor((Date.now() - new Date(s)) / 1000);
+        const d = new Date(s);
+        if (isNaN(d.getTime())) return '\u2013';
+        const sec = Math.floor((Date.now() - d.getTime()) / 1000);
         if (sec < 0) return 'just now';
         if (sec < 60) return sec + 's ago';
         const min = Math.floor(sec / 60);
@@ -83,7 +114,7 @@
         const hr = Math.floor(min / 60);
         if (hr < 24) return hr + 'h ago';
         return Math.floor(hr / 24) + 'd ago';
-      } catch (e) { return s; }
+      } catch (e) { return '\u2013'; }
     }
     function fmtUptime(sec) {
       if (sec == null) return '\u2013';
@@ -93,6 +124,15 @@
       return sec + 's';
     }
     function fmtNum(n) { return n != null ? String(n) : '\u2013'; }
+
+    function healthDot(lastSeen) {
+      if (!lastSeen) return '<span class="health-dot health-red"></span>';
+      const sec = (Date.now() - new Date(lastSeen)) / 1000;
+      const ago = escapeHtml(fmtAgo(lastSeen));
+      if (sec < 90) return `<span class="health-dot health-green" title="${ago}"></span>`;
+      if (sec < 180) return `<span class="health-dot health-yellow" title="${ago}"></span>`;
+      return `<span class="health-dot health-red" title="${ago}"></span>`;
+    }
 
     // --- Sparkline SVG generator ---
     function sparkline(values, color, w, h) {
@@ -106,14 +146,27 @@
         `${(i * step).toFixed(1)},${(h - ((v - min) / range) * (h - 2) - 1).toFixed(1)}`
       ).join(' ');
       const last = nums[nums.length - 1];
-      const label = color === '#38bdf8' ? `${last.toFixed(1)}%` : last.toFixed(2);
       return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
         `<polyline fill="none" stroke="${color}" stroke-width="1.5" points="${points}"/>` +
-        `</svg> <span style="font-size:0.75rem;color:${color}">${label}</span>`;
+        `</svg> <span style="font-size:0.75rem;color:${color}">${last.toFixed(1)}%</span>`;
+    }
+
+    // --- "X ago" label for chart x-axis ---
+    function agoLabel(isoTimestamp, rangeKey) {
+      const diffMs = Date.now() - new Date(isoTimestamp).getTime();
+      const diffMin = Math.round(diffMs / 60000);
+      const diffHr = diffMs / 3600000;
+      if (diffMin <= 0) return 'now';
+      if (rangeKey === '1h') return diffMin + 'm';
+      if (rangeKey === '6h') return diffMin < 60 ? diffMin + 'm' : Math.round(diffHr) + 'h';
+      if (rangeKey === '1d') return Math.round(diffHr) + 'h';
+      // 7d
+      const diffD = diffHr / 24;
+      return diffD >= 1 ? Math.round(diffD) + 'd' : Math.round(diffHr) + 'h';
     }
 
     // --- History chart (Canvas) ---
-    function drawChart(history) {
+    function drawChart(history, rangeKey) {
       const canvas = document.getElementById('history-chart');
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
@@ -136,14 +189,14 @@
         return;
       }
 
-      const conns = history.map(p => p.total_connections ?? 0);
+      const sessions = history.map(p => p.active_sessions ?? 0);
       const tasks = history.map(p => p.task_count ?? 0);
-      const maxC = Math.max(...conns, 1);
+      const maxS = Math.max(...sessions, 1);
       const maxT = Math.max(...tasks, 1);
       const n = history.length;
 
       function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
-      function yC(v) { return pad.top + ch - (v / maxC) * ch; }
+      function yS(v) { return pad.top + ch - (v / maxS) * ch; }
       function yT(v) { return pad.top + ch - (v / maxT) * ch; }
 
       // Grid lines
@@ -154,21 +207,21 @@
         ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(pad.left + cw, gy); ctx.stroke();
       }
 
-      // Connections line (left y-axis)
+      // Sessions line (left y-axis)
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2;
       ctx.beginPath();
       for (let i = 0; i < n; i++) {
-        const px = x(i), py = yC(conns[i]);
+        const px = x(i), py = yS(sessions[i]);
         i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
       }
       ctx.stroke();
 
-      // Fill under connections
+      // Fill under sessions
       ctx.fillStyle = 'rgba(56,189,248,0.08)';
       ctx.beginPath();
-      ctx.moveTo(x(0), yC(conns[0]));
-      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yC(conns[i]));
+      ctx.moveTo(x(0), yS(sessions[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yS(sessions[i]));
       ctx.lineTo(x(n - 1), pad.top + ch);
       ctx.lineTo(x(0), pad.top + ch);
       ctx.closePath();
@@ -186,12 +239,12 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Left y-axis labels (connections)
+      // Left y-axis labels (sessions)
       ctx.fillStyle = '#38bdf8';
       ctx.font = '11px system-ui';
       ctx.textAlign = 'right';
       for (let i = 0; i <= 4; i++) {
-        const v = Math.round(maxC * (4 - i) / 4);
+        const v = Math.round(maxS * (4 - i) / 4);
         ctx.fillText(v, pad.left - 6, pad.top + (ch / 4) * i + 4);
       }
 
@@ -203,32 +256,44 @@
         ctx.fillText(v, pad.left + cw + 6, pad.top + (ch / 4) * i + 4);
       }
 
-      // X-axis time labels
+      // X-axis "ago" labels
       ctx.fillStyle = '#64748b';
       ctx.textAlign = 'center';
       ctx.font = '10px system-ui';
       const labelCount = Math.min(n, Math.floor(cw / 70));
       const step = Math.max(1, Math.floor(n / labelCount));
       for (let i = 0; i < n; i += step) {
-        const ts = history[i].timestamp;
-        const label = ts ? ts.slice(11, 16) : ''; // HH:MM
+        const label = agoLabel(history[i].timestamp, rangeKey);
         ctx.fillText(label, x(i), pad.top + ch + 18);
+      }
+      // Always label rightmost point as "now"
+      if (n > 1) {
+        ctx.fillText('now', x(n - 1), pad.top + ch + 18);
+      }
+    }
+
+    async function loadHistory(rangeKey) {
+      try {
+        const data = await fetch('/api/history?range=' + rangeKey).then(r => r.json());
+        drawChart(data.history, rangeKey);
+        document.getElementById('history-chart')._lastHistory = data.history;
+        document.getElementById('history-chart')._lastRange = rangeKey;
+      } catch (e) {
+        console.error('Failed to load history:', e);
       }
     }
 
     async function load() {
       try {
-        const [summary, tasks, histData] = await Promise.all([
+        const [summary, tasks] = await Promise.all([
           fetch('/api/summary').then(r => r.json()),
           fetch('/api/tasks').then(r => r.json()),
-          fetch('/api/history?hours=6').then(r => r.json())
         ]);
 
         document.getElementById('task-count').textContent = summary.task_count ?? '\u2013';
-        document.getElementById('total-connections').textContent = summary.total_connections ?? '\u2013';
+        document.getElementById('active-sessions').textContent = summary.active_sessions ?? '\u2013';
 
-        drawChart(histData.history);
-        document.getElementById('history-chart')._lastHistory = histData.history;
+        await loadHistory(currentRange);
 
         const tbody = document.getElementById('tasks-body');
         tbody.innerHTML = tasks.length === 0
@@ -238,13 +303,13 @@
               const cpuVals = (t.history || []).map(h => h.cpu);
               return `
               <tr>
-                <td><code>${t.task_id}</code></td>
-                <td title="${fmtTime(t.last_seen)}">${fmtAgo(t.last_seen)}</td>
-                <td>${fmtUptime(t.uptime_seconds)}</td>
-                <td>${fmtNum(t.connections_total)}</td>
+                <td><code>${escapeHtml(t.task_id)}</code></td>
+                <td>${t.version ? '<span class="version-tag">' + escapeHtml(t.version) + '</span>' : '\u2013'}</td>
+                <td><span class="hostname">${escapeHtml(t.hostname) || '\u2013'}</span></td>
+                <td>${fmtNum(t.active_sessions)}</td>
+                <td>${healthDot(t.last_seen)}</td>
                 <td>${sparkline(memVals, '#38bdf8', 60, 20)}</td>
                 <td>${sparkline(cpuVals, '#fb923c', 60, 20)}</td>
-                <td>${fmtNum(t.shiny_running)}/${fmtNum(t.shiny_configured)}</td>
               </tr>`;
             }).join('');
 
@@ -257,11 +322,21 @@
       }
     }
 
+    // Range selector
+    document.querySelectorAll('.range-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelector('.range-btn.active').classList.remove('active');
+        btn.classList.add('active');
+        currentRange = btn.dataset.range;
+        loadHistory(currentRange);
+      });
+    });
+
     load();
     setInterval(load, 30000);
     window.addEventListener('resize', () => {
       const canvas = document.getElementById('history-chart');
-      if (canvas._lastHistory) drawChart(canvas._lastHistory);
+      if (canvas._lastHistory) drawChart(canvas._lastHistory, canvas._lastRange || currentRange);
     });
   </script>
 </body>
