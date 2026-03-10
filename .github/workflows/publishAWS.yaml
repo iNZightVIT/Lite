@@ -25,9 +25,8 @@ jobs:
       ECR_REPOSITORY: ${{ github.ref == 'refs/heads/main' && secrets.ECR_REPOSITORY__main || secrets.ECR_REPOSITORY__dev }}
       ECS_CLUSTER: ${{ github.ref == 'refs/heads/main' && secrets.ECS_CLUSTER__main || secrets.ECS_CLUSTER__dev }}
       ECS_SERVICE: ${{ github.ref == 'refs/heads/main' && secrets.ECS_SERVICE__main || secrets.ECS_SERVICE__dev }}
-      # Status collector: only on main
-      STATUS_REPORT_TOKEN: ${{ github.ref == 'refs/heads/main' && secrets.STATUS_REPORT_TOKEN || '' }}
-      STATUS_REPORT_URL: ${{ github.ref == 'refs/heads/main' && secrets.STATUS_REPORT_URL || '' }}
+      STATUS_REPORT_TOKEN: ${{ secrets.STATUS_REPORT_TOKEN }}
+      STATUS_REPORT_URL: ${{ secrets.STATUS_REPORT_URL }}
 
     steps:
       - name: Checkout repository
