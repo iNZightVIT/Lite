@@ -104,11 +104,11 @@ shinyServer(function(input, output, session) {
     )
   }
 
-  report_session("start", hostname = session$clientData$url_hostname)
+  report_session("start")
 
   ping_observer <- observe({
     invalidateLater(30000, session)
-    report_session("ping")
+    report_session("ping", hostname = session$clientData$url_hostname)
   })
 
   onSessionEnded(function() {
