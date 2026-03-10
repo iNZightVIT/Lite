@@ -221,7 +221,7 @@ app.get("/api/summary", (_req, res) => {
   });
 });
 
-// GET /api/tasks — only tasks seen within DASHBOARD_VISIBLE_MINUTES, sorted by last_seen desc
+// GET /api/tasks — only tasks seen within DASHBOARD_VISIBLE_MINUTES, sorted by uptime (longest first)
 // Includes recent history for sparkline graphs (SPARKLINE_MINUTES window)
 app.get("/api/tasks", (_req, res) => {
   const cutoff = new Date(Date.now() - DASHBOARD_VISIBLE_MINUTES * 60 * 1000).toISOString();
@@ -291,7 +291,7 @@ app.get("/api/tasks", (_req, res) => {
       hostname: t.hostname,
       history: history || [],
     }))
-    .sort((a, b) => new Date(b.last_seen || 0) - new Date(a.last_seen || 0));
+    .sort((a, b) => (b.uptime_seconds ?? 0) - (a.uptime_seconds ?? 0));
 
   res.json(tasks);
 });
