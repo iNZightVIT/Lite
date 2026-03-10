@@ -328,22 +328,29 @@ app.get("/api/history", (req, res) => {
     const key = new Date(bucketedMs).toISOString();
 
     if (!byTime.has(key)) {
-      byTime.set(key, { timestamp: key, taskLatest: new Map() });
+      byTime.set(key, { timestamp: key, taskLatest: new Map(), taskIds: new Set() });
     }
-    // Rows are sorted ASC, so later entries overwrite — giving latest per task
-    byTime.get(key).taskLatest.set(r.task_id, r.active_sessions ?? 0);
+    const entry = byTime.get(key);
+    entry.taskLatest.set(r.task_id, r.active_sessions ?? 0);
+    entry.taskIds.add(r.task_id);
   }
 
-  const points = Array.from(byTime.values())
-    .map((v) => {
-      const sessionValues = Array.from(v.taskLatest.values());
-      return {
-        timestamp: v.timestamp,
-        task_count: v.taskLatest.size,
-        active_sessions: sessionValues.reduce((sum, n) => sum + n, 0),
-      };
-    })
-    .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const buckets = Array.from(byTime.values()).sort((a, b) =>
+    a.timestamp.localeCompare(b.timestamp)
+  );
+  const PERSIST_BUCKETS = 2; // Task counts if it reported in this or prev 2 buckets
+  const points = buckets.map((v, i) => {
+    const sessionValues = Array.from(v.taskLatest.values());
+    const seenTasks = new Set();
+    for (let j = Math.max(0, i - PERSIST_BUCKETS); j <= i; j++) {
+      buckets[j].taskIds.forEach((id) => seenTasks.add(id));
+    }
+    return {
+      timestamp: v.timestamp,
+      task_count: seenTasks.size,
+      active_sessions: sessionValues.reduce((sum, n) => sum + n, 0),
+    };
+  });
 
   res.json({ range, history: points });
 });
