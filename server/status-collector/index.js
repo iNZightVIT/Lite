@@ -95,9 +95,25 @@ function parsePayload(body) {
   const cpuPercent =
     cpu && typeof cpu.percent === "number" ? cpu.percent : null;
 
+  // New format: sessions.active. Old format: connections.total or sum of connections.instance_N
+  let activeSessions = null;
   const sess = body.sessions;
-  const activeSessions =
-    sess && typeof sess.active === "number" ? sess.active : null;
+  if (sess && typeof sess.active === "number") {
+    activeSessions = sess.active;
+  } else {
+    const conns = body.connections;
+    if (conns && typeof conns === "object") {
+      const instanceKeys = Object.keys(conns).filter((k) => k.startsWith("instance_"));
+      if (instanceKeys.length > 0) {
+        activeSessions = instanceKeys.reduce(
+          (sum, k) => sum + (typeof conns[k] === "number" ? conns[k] : 0),
+          0
+        );
+      } else if (typeof conns.total === "number") {
+        activeSessions = conns.total;
+      }
+    }
+  }
 
   const shiny = body.shiny;
   const cfg =
