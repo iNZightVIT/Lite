@@ -165,6 +165,25 @@
       return diffD >= 1 ? Math.round(diffD) + 'd' : Math.round(diffHr) + 'h';
     }
 
+    // --- Pretty axis: returns { max, ticks } for nice round labels (1, 2, 5 sequence) ---
+    function prettyAxis(maxVal, preferredTicks = 5) {
+      if (maxVal <= 0) return { max: 1, ticks: [0, 1] };
+      const roughStep = maxVal / Math.max(preferredTicks - 1, 1);
+      const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+      const nice = [1, 2, 5, 10];
+      let step = nice[nice.length - 1] * magnitude;
+      let prettyMax = Math.ceil(maxVal / step) * step;
+      let ticks = [];
+      for (const s of nice) {
+        step = s * magnitude;
+        prettyMax = Math.ceil(maxVal / step) * step;
+        ticks = [];
+        for (let v = 0; v <= prettyMax + step * 0.001; v += step) ticks.push(v);
+        if (ticks.length <= 8 && ticks.length >= 2) break;
+      }
+      return { max: prettyMax, ticks };
+    }
+
     // --- History chart (Canvas) ---
     function drawChart(history, rangeKey) {
       const canvas = document.getElementById('history-chart');
@@ -191,21 +210,14 @@
 
       const sessions = history.map(p => p.active_sessions ?? 0);
       const tasks = history.map(p => p.task_count ?? 0);
-      const maxS = Math.max(...sessions, 1);
-      const maxT = Math.max(...tasks, 1);
+      const axisS = prettyAxis(Math.max(...sessions, 1));
+      const axisT = prettyAxis(Math.max(...tasks, 1));
+      const maxS = axisS.max, maxT = axisT.max;
       const n = history.length;
 
       function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
       function yS(v) { return pad.top + ch - (v / maxS) * ch; }
       function yT(v) { return pad.top + ch - (v / maxT) * ch; }
-
-      // Grid lines
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 4; i++) {
-        const gy = pad.top + (ch / 4) * i;
-        ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(pad.left + cw, gy); ctx.stroke();
-      }
 
       // Sessions line (left y-axis)
       ctx.strokeStyle = '#38bdf8';
@@ -239,21 +251,21 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Left y-axis labels (sessions)
+      // Left y-axis labels (sessions) – pretty ticks, no grid
       ctx.fillStyle = '#38bdf8';
       ctx.font = '11px system-ui';
       ctx.textAlign = 'right';
-      for (let i = 0; i <= 4; i++) {
-        const v = Math.round(maxS * (4 - i) / 4);
-        ctx.fillText(v, pad.left - 6, pad.top + (ch / 4) * i + 4);
+      for (const v of axisS.ticks) {
+        const y = pad.top + ch - (v / maxS) * ch;
+        ctx.fillText(Math.round(v), pad.left - 6, y + 4);
       }
 
       // Right y-axis labels (instances)
       ctx.fillStyle = '#fb923c';
       ctx.textAlign = 'left';
-      for (let i = 0; i <= 4; i++) {
-        const v = Math.round(maxT * (4 - i) / 4);
-        ctx.fillText(v, pad.left + cw + 6, pad.top + (ch / 4) * i + 4);
+      for (const v of axisT.ticks) {
+        const y = pad.top + ch - (v / maxT) * ch;
+        ctx.fillText(Math.round(v), pad.left + cw + 6, y + 4);
       }
 
       // X-axis "ago" labels
