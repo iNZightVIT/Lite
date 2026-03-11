@@ -11,7 +11,7 @@ const ACTIVE_WINDOW_MINUTES = Math.max(1, parseInt(process.env.ACTIVE_WINDOW_MIN
 const DASHBOARD_VISIBLE_MINUTES = Math.max(1, parseInt(process.env.DASHBOARD_VISIBLE_MINUTES, 10) || 5);
 // Sparkline history window for task table (minutes)
 const SPARKLINE_MINUTES = 30;
-const HOSTNAME_LOOKBACK_DAYS = 7;
+const HOSTNAME_LOOKBACK_HOURS = 48;
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -463,7 +463,7 @@ app.get("/api/history", (req, res) => {
 // GET /api/hostnames — available hostnames for filter controls
 app.get("/api/hostnames", (_req, res) => {
   const cutoff = new Date(
-    Date.now() - HOSTNAME_LOOKBACK_DAYS * 24 * 60 * 60 * 1000
+    Date.now() - HOSTNAME_LOOKBACK_HOURS * 60 * 60 * 1000
   ).toISOString();
   const rows = db
     .prepare(

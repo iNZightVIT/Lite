@@ -96,7 +96,27 @@
     .hostname { font-size: 0.8rem; color: #64748b; }
     @media (max-width: 768px) {
       body { padding: 1rem; }
-      .page-header { align-items: flex-start; }
+      .page-header {
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+      .page-header h1 {
+        margin-bottom: 0.25rem;
+      }
+      .page-header .host-filter {
+        justify-self: end;
+      }
+      .page-header .host-filter-btn {
+        min-width: 180px;
+      }
+      .page-header .host-filter-menu {
+        min-width: 0;
+        width: min(260px, calc(100vw - 2rem));
+        max-width: calc(100vw - 2rem);
+        right: 0;
+        left: auto;
+      }
       .chart-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
       .range-selector { flex-wrap: wrap; }
       .table-wrap { overflow: visible; }
