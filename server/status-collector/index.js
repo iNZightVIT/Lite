@@ -11,6 +11,7 @@ const ACTIVE_WINDOW_MINUTES = Math.max(1, parseInt(process.env.ACTIVE_WINDOW_MIN
 const DASHBOARD_VISIBLE_MINUTES = Math.max(1, parseInt(process.env.DASHBOARD_VISIBLE_MINUTES, 10) || 5);
 // Sparkline history window for task table (minutes)
 const SPARKLINE_MINUTES = 30;
+const HOSTNAME_LOOKBACK_DAYS = 7;
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -63,6 +64,10 @@ const migrations = [
   ["cpu_percent", "REAL"],
   ["version", "TEXT"],
   ["hostname", "TEXT"],
+  ["request_in_total", "REAL"],
+  ["request_out_total", "REAL"],
+  ["request_in_interval", "REAL"],
+  ["request_out_interval", "REAL"],
 ];
 for (const [col, type] of migrations) {
   if (!existingCols.has(col)) {
@@ -74,8 +79,10 @@ const insertStmt = db.prepare(`
   INSERT INTO status_reports (
     task_id, reported_at, uptime_seconds, active_sessions,
     cpu_percent, memory_used_mb, memory_percent_used,
-    shiny_configured, shiny_running, version, hostname, raw_json
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    shiny_configured, shiny_running, version, hostname,
+    request_in_total, request_out_total, request_in_interval, request_out_interval,
+    raw_json
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 const RETENTION_DAYS = 7;
@@ -126,6 +133,32 @@ function parsePayload(body) {
   const run =
     shiny && typeof shiny.running === "number" ? shiny.running : null;
 
+  const reqs = body.requests && typeof body.requests === "object" ? body.requests : {};
+  const requestInTotal =
+    typeof reqs.in_total === "number"
+      ? reqs.in_total
+      : typeof body.request_in_total === "number"
+      ? body.request_in_total
+      : null;
+  const requestOutTotal =
+    typeof reqs.out_total === "number"
+      ? reqs.out_total
+      : typeof body.request_out_total === "number"
+      ? body.request_out_total
+      : null;
+  const requestInInterval =
+    typeof reqs.in_interval === "number"
+      ? reqs.in_interval
+      : typeof body.request_in_interval === "number"
+      ? body.request_in_interval
+      : null;
+  const requestOutInterval =
+    typeof reqs.out_interval === "number"
+      ? reqs.out_interval
+      : typeof body.request_out_interval === "number"
+      ? body.request_out_interval
+      : null;
+
   return {
     task_id: body.task_id || "unknown",
     reported_at: body.timestamp || new Date().toISOString(),
@@ -138,7 +171,32 @@ function parsePayload(body) {
     shiny_running: run,
     version: typeof body.version === "string" ? body.version : null,
     hostname: typeof body.hostname === "string" ? body.hostname : null,
+    request_in_total: requestInTotal,
+    request_out_total: requestOutTotal,
+    request_in_interval: requestInInterval,
+    request_out_interval: requestOutInterval,
     raw_json: JSON.stringify(body),
+  };
+}
+
+function parseHostnames(queryHostnames) {
+  if (!queryHostnames) return [];
+  const raw = Array.isArray(queryHostnames)
+    ? queryHostnames
+    : String(queryHostnames).split(",");
+  return raw
+    .map((h) => String(h).trim())
+    .filter((h) => h.length > 0);
+}
+
+function buildHostnameWhere(hostnames) {
+  if (!hostnames || hostnames.length === 0) {
+    return { sql: "", params: [] };
+  }
+  const placeholders = hostnames.map(() => "?").join(",");
+  return {
+    sql: ` AND hostname IN (${placeholders})`,
+    params: hostnames,
   };
 }
 
@@ -180,6 +238,10 @@ app.post("/ingest", (req, res) => {
       row.shiny_running,
       row.version,
       row.hostname,
+      row.request_in_total,
+      row.request_out_total,
+      row.request_in_interval,
+      row.request_out_interval,
       row.raw_json
     );
     trimOldRows();
@@ -193,22 +255,29 @@ app.post("/ingest", (req, res) => {
 });
 
 // GET /api/summary
-app.get("/api/summary", (_req, res) => {
+app.get("/api/summary", (req, res) => {
   const cutoff = new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString();
+  const hostnames = parseHostnames(req.query.hostnames);
+  const hostFilter = buildHostnameWhere(hostnames);
   const rows = db
     .prepare(
       `SELECT task_id, ${sessionCol} AS active_sessions, reported_at
+              , request_in_interval, request_out_interval
        FROM status_reports
-       WHERE reported_at >= ?
+       WHERE reported_at >= ?${hostFilter.sql}
        ORDER BY reported_at DESC`
     )
-    .all(cutoff);
+    .all(cutoff, ...hostFilter.params);
 
   // Take the most recent report per task
   const byTask = new Map();
+  let requestInTotal = 0;
+  let requestOutTotal = 0;
   for (const r of rows) {
     if (!byTask.has(r.task_id)) {
       byTask.set(r.task_id, r.active_sessions ?? 0);
+      requestInTotal += r.request_in_interval ?? 0;
+      requestOutTotal += r.request_out_interval ?? 0;
     }
   }
   const totalSessions = Array.from(byTask.values()).reduce((sum, n) => sum + n, 0);
@@ -217,27 +286,32 @@ app.get("/api/summary", (_req, res) => {
   res.json({
     task_count: byTask.size,
     active_sessions: totalSessions,
+    request_in_total: Math.max(0, Math.round(requestInTotal)),
+    request_out_total: Math.max(0, Math.round(requestOutTotal)),
     reported_at: latest,
   });
 });
 
 // GET /api/tasks — only tasks seen within DASHBOARD_VISIBLE_MINUTES, sorted by uptime (longest first)
 // Includes recent history for sparkline graphs (SPARKLINE_MINUTES window)
-app.get("/api/tasks", (_req, res) => {
+app.get("/api/tasks", (req, res) => {
   const cutoff = new Date(Date.now() - DASHBOARD_VISIBLE_MINUTES * 60 * 1000).toISOString();
   const sparklineCutoff = new Date(Date.now() - SPARKLINE_MINUTES * 60 * 1000).toISOString();
+  const hostnames = parseHostnames(req.query.hostnames);
+  const hostFilter = buildHostnameWhere(hostnames);
 
   // Get latest report per task for current state
   const latestRows = db
     .prepare(
       `SELECT task_id, reported_at, uptime_seconds, ${sessionCol} AS active_sessions,
               cpu_percent, memory_used_mb, memory_percent_used,
-              shiny_configured, shiny_running, version, hostname
+              shiny_configured, shiny_running, version, hostname,
+              request_in_interval, request_out_interval
        FROM status_reports
-       WHERE reported_at >= ?
+       WHERE reported_at >= ?${hostFilter.sql}
        ORDER BY task_id, reported_at ASC`
     )
-    .all(cutoff);
+    .all(cutoff, ...hostFilter.params);
 
   // Build set of visible tasks and their latest data
   const byTask = new Map();
@@ -257,10 +331,10 @@ app.get("/api/tasks", (_req, res) => {
       .prepare(
         `SELECT task_id, reported_at, cpu_percent, memory_percent_used, ${sessionCol} AS active_sessions
          FROM status_reports
-         WHERE task_id IN (${placeholders}) AND reported_at >= ?
+         WHERE task_id IN (${placeholders}) AND reported_at >= ?${hostFilter.sql}
          ORDER BY task_id, reported_at ASC`
       )
-      .all(...taskIds, sparklineCutoff);
+      .all(...taskIds, sparklineCutoff, ...hostFilter.params);
 
     for (const r of historyRows) {
       const entry = byTask.get(r.task_id);
@@ -289,6 +363,8 @@ app.get("/api/tasks", (_req, res) => {
       shiny_running: t.shiny_running,
       version: t.version,
       hostname: t.hostname,
+      request_in_interval: t.request_in_interval,
+      request_out_interval: t.request_out_interval,
       history: history || [],
     }))
     .sort((a, b) => (b.uptime_seconds ?? 0) - (a.uptime_seconds ?? 0));
@@ -309,17 +385,21 @@ app.get("/api/history", (req, res) => {
   const range = RANGE_CONFIG[req.query.range] ? req.query.range : "1h";
   const { ms, bucketMinutes } = RANGE_CONFIG[range];
   const cutoff = new Date(Date.now() - ms).toISOString();
+  const hostnames = parseHostnames(req.query.hostnames);
+  const hostFilter = buildHostnameWhere(hostnames);
 
   const rows = db
     .prepare(
-      `SELECT reported_at, task_id, ${sessionCol} AS active_sessions
+      `SELECT reported_at, task_id, ${sessionCol} AS active_sessions, request_in_interval, request_out_interval
        FROM status_reports
-       WHERE reported_at >= ?
+       WHERE reported_at >= ?${hostFilter.sql}
        ORDER BY reported_at ASC`
     )
-    .all(cutoff);
+    .all(cutoff, ...hostFilter.params);
 
-  // Bucket by time intervals, using latest report per task per bucket
+  // Bucket by time intervals.
+  // For sessions/task_count: use latest report per task per bucket with short persistence.
+  // For requests: sum per-interval request counters in each bucket.
   const bucketMs = bucketMinutes * 60 * 1000;
   const byTime = new Map();
   for (const r of rows) {
@@ -328,17 +408,25 @@ app.get("/api/history", (req, res) => {
     const key = new Date(bucketedMs).toISOString();
 
     if (!byTime.has(key)) {
-      byTime.set(key, { timestamp: key, taskLatest: new Map(), taskIds: new Set() });
+      byTime.set(key, {
+        timestamp: key,
+        taskLatest: new Map(),
+        taskIds: new Set(),
+        request_in: 0,
+        request_out: 0,
+      });
     }
     const entry = byTime.get(key);
     entry.taskLatest.set(r.task_id, r.active_sessions ?? 0);
     entry.taskIds.add(r.task_id);
+    entry.request_in += Math.max(0, r.request_in_interval ?? 0);
+    entry.request_out += Math.max(0, r.request_out_interval ?? 0);
   }
 
   const buckets = Array.from(byTime.values()).sort((a, b) =>
     a.timestamp.localeCompare(b.timestamp)
   );
-  const PERSIST_BUCKETS = 2; // Task counts if it reported in this or prev 2 buckets
+  const PERSIST_BUCKETS = 2;
   const points = buckets.map((v, i) => {
     const sessionValues = Array.from(v.taskLatest.values());
     const seenTasks = new Set();
@@ -349,10 +437,30 @@ app.get("/api/history", (req, res) => {
       timestamp: v.timestamp,
       task_count: seenTasks.size,
       active_sessions: sessionValues.reduce((sum, n) => sum + n, 0),
+      request_in: Math.round(v.request_in),
+      request_out: Math.round(v.request_out),
     };
   });
 
   res.json({ range, history: points });
+});
+
+// GET /api/hostnames — available hostnames for filter controls
+app.get("/api/hostnames", (_req, res) => {
+  const cutoff = new Date(
+    Date.now() - HOSTNAME_LOOKBACK_DAYS * 24 * 60 * 60 * 1000
+  ).toISOString();
+  const rows = db
+    .prepare(
+      `SELECT DISTINCT hostname
+       FROM status_reports
+       WHERE reported_at >= ?
+         AND hostname IS NOT NULL
+         AND TRIM(hostname) <> ''
+       ORDER BY hostname ASC`
+    )
+    .all(cutoff);
+  res.json({ hostnames: rows.map((r) => r.hostname) });
 });
 
 // Serve static dashboard

@@ -13,12 +13,24 @@ const REPORT_INTERVAL_MS = 30_000;
 const STALE_THRESHOLD_MS = 120_000; // 2 minutes
 const STATUS_REPORT_URL = process.env.STATUS_REPORT_URL || "";
 const STATUS_REPORT_TOKEN = process.env.STATUS_REPORT_TOKEN || "";
+const TRAEFIK_METRICS_URL = process.env.TRAEFIK_METRICS_URL || "http://127.0.0.1:8080/metrics";
 
 // --- Boot-time constants ---
 const BOOT_TIME = Date.now();
 
 // Public hostname from first user session (Host header); undefined until then
 let observedPublicHostname = null;
+let requestMetrics = {
+  in_total: null,
+  out_total: null,
+  in_interval: 0,
+  out_interval: 0,
+  updated_at: null,
+};
+let previousRequestTotals = {
+  in_total: null,
+  out_total: null,
+};
 
 const version = (() => {
   try {
@@ -203,6 +215,91 @@ function getActiveSessions() {
   return count;
 }
 
+function parsePrometheusLabels(labelsRaw) {
+  const labels = {};
+  const re = /(\w+)="([^"]*)"/g;
+  let m;
+  while ((m = re.exec(labelsRaw)) !== null) {
+    labels[m[1]] = m[2];
+  }
+  return labels;
+}
+
+function sumPrometheusCounter(metricsText, metricName, matcher) {
+  const escaped = metricName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const lineRegex = new RegExp(`^${escaped}\\{([^}]*)\\}\\s+([0-9.eE+-]+)$`, "gm");
+  let sum = 0;
+  let found = false;
+  let match;
+  while ((match = lineRegex.exec(metricsText)) !== null) {
+    const labels = parsePrometheusLabels(match[1]);
+    if (!matcher(labels)) continue;
+    const value = Number(match[2]);
+    if (!Number.isFinite(value)) continue;
+    sum += value;
+    found = true;
+  }
+  return found ? sum : null;
+}
+
+function getTraefikRequestTotals(metricsText) {
+  const inTotal = sumPrometheusCounter(
+    metricsText,
+    "traefik_entrypoint_requests_total",
+    (labels) => labels.entrypoint === "web",
+  );
+
+  let outTotal = sumPrometheusCounter(
+    metricsText,
+    "traefik_service_requests_total",
+    (labels) => labels.service === "shiny-service@file",
+  );
+  if (outTotal == null) {
+    outTotal = sumPrometheusCounter(
+      metricsText,
+      "traefik_router_requests_total",
+      (labels) => labels.router === "shiny-router@file",
+    );
+  }
+
+  return { in_total: inTotal, out_total: outTotal };
+}
+
+async function updateRequestMetrics() {
+  requestMetrics.in_interval = 0;
+  requestMetrics.out_interval = 0;
+  try {
+    const resp = await fetch(TRAEFIK_METRICS_URL, {
+      signal: AbortSignal.timeout(2_000),
+    });
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+    const metricsText = await resp.text();
+    const totals = getTraefikRequestTotals(metricsText);
+
+    if (totals.in_total != null) {
+      const prev = previousRequestTotals.in_total;
+      const delta = prev == null ? 0 : totals.in_total - prev;
+      requestMetrics.in_total = Math.round(totals.in_total);
+      requestMetrics.in_interval = delta >= 0 ? Math.round(delta) : 0;
+      previousRequestTotals.in_total = totals.in_total;
+    }
+
+    if (totals.out_total != null) {
+      const prev = previousRequestTotals.out_total;
+      const delta = prev == null ? 0 : totals.out_total - prev;
+      requestMetrics.out_total = Math.round(totals.out_total);
+      requestMetrics.out_interval = delta >= 0 ? Math.round(delta) : 0;
+      previousRequestTotals.out_total = totals.out_total;
+    }
+
+    requestMetrics.updated_at = new Date().toISOString();
+  } catch (err) {
+    console.warn(`[status-server] traefik metrics scrape failed: ${err.message}`);
+  }
+}
+
 function removeEndedSessions() {
   for (const [id, s] of sessions) {
     if (s.ended) sessions.delete(id);
@@ -225,6 +322,13 @@ function buildStatus() {
     shiny: countShinyProcesses(),
     sessions: {
       active: getActiveSessions(),
+    },
+    requests: {
+      in_total: requestMetrics.in_total,
+      out_total: requestMetrics.out_total,
+      in_interval: requestMetrics.in_interval,
+      out_interval: requestMetrics.out_interval,
+      updated_at: requestMetrics.updated_at,
     },
     timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, "+0000"),
   };
@@ -289,6 +393,7 @@ if (STATUS_REPORT_URL && STATUS_REPORT_TOKEN) {
 
   setInterval(async () => {
     reapStaleSessions();
+    await updateRequestMetrics();
 
     try {
       const status = buildStatus();
@@ -321,5 +426,8 @@ if (STATUS_REPORT_URL && STATUS_REPORT_TOKEN) {
     "[status-server] reporter disabled (STATUS_REPORT_URL or STATUS_REPORT_TOKEN not set)",
   );
   // Still reap stale sessions even without reporting
-  setInterval(reapStaleSessions, REPORT_INTERVAL_MS);
+  setInterval(async () => {
+    reapStaleSessions();
+    await updateRequestMetrics();
+  }, REPORT_INTERVAL_MS);
 }
