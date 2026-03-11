@@ -30,6 +30,7 @@
     .chart-legend span { display: flex; align-items: center; gap: 4px; }
     .chart-legend .swatch { width: 12px; height: 3px; border-radius: 1px; }
     canvas#history-chart { width: 100%; height: 200px; display: block; }
+    .table-wrap { width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; background: #16213e; border-radius: 8px; overflow: hidden; }
     th, td { padding: 0.75rem 1rem; text-align: left; }
     th { background: #0f3460; font-size: 0.85rem; color: #94a3b8; }
@@ -42,6 +43,47 @@
     .updated { font-size: 0.8rem; color: #64748b; margin-top: 1rem; }
     .version-tag { font-size: 0.75rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 3px; }
     .hostname { font-size: 0.8rem; color: #64748b; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .chart-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .range-selector { flex-wrap: wrap; }
+      .table-wrap { overflow: visible; }
+      table, thead, tbody, tr, td { display: block; width: 100%; }
+      thead { display: none; }
+      table { background: transparent; border-radius: 0; }
+      tbody { display: grid; gap: 0.75rem; }
+      tr {
+        background: #16213e;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        padding: 0.35rem 0.75rem;
+      }
+      tr:nth-child(even) { background: #16213e; }
+      td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        text-align: right;
+      }
+      td:last-child { border-bottom: 0; }
+      td::before {
+        content: attr(data-label);
+        color: #94a3b8;
+        font-size: 0.8rem;
+        text-align: left;
+        white-space: nowrap;
+      }
+      td code {
+        overflow-wrap: anywhere;
+        max-width: 70%;
+      }
+      td[data-label="Health"] .health-dot { margin-left: auto; }
+      td[data-label="Memory %"] .spark,
+      td[data-label="CPU %"] .spark { flex-shrink: 0; }
+    }
   </style>
 </head>
 <body>
@@ -74,20 +116,22 @@
     <canvas id="history-chart" height="200"></canvas>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Task ID</th>
-        <th>Version</th>
-        <th>Hostname</th>
-        <th>Sessions</th>
-        <th>Health</th>
-        <th>Memory %</th>
-        <th>CPU %</th>
-      </tr>
-    </thead>
-    <tbody id="tasks-body"></tbody>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Task ID</th>
+          <th>Version</th>
+          <th>Hostname</th>
+          <th>Sessions</th>
+          <th>Health</th>
+          <th>Memory %</th>
+          <th>CPU %</th>
+        </tr>
+      </thead>
+      <tbody id="tasks-body"></tbody>
+    </table>
+  </div>
   <div class="updated" id="updated"></div>
 
   <script>
@@ -309,19 +353,19 @@
 
         const tbody = document.getElementById('tasks-body');
         tbody.innerHTML = tasks.length === 0
-          ? '<tr><td colspan="7">No tasks reported recently</td></tr>'
+          ? '<tr><td colspan="7" data-label="Status">No tasks reported recently</td></tr>'
           : tasks.map(t => {
               const memVals = (t.history || []).map(h => h.mem);
               const cpuVals = (t.history || []).map(h => h.cpu);
               return `
               <tr>
-                <td><code>${escapeHtml(t.task_id)}</code></td>
-                <td>${t.version ? '<span class="version-tag">' + escapeHtml(t.version) + '</span>' : '\u2013'}</td>
-                <td><span class="hostname">${escapeHtml(t.hostname) || '\u2013'}</span></td>
-                <td>${fmtNum(t.active_sessions)}</td>
-                <td>${healthDot(t.last_seen)}</td>
-                <td>${sparkline(memVals, '#38bdf8', 60, 20)}</td>
-                <td>${sparkline(cpuVals, '#fb923c', 60, 20)}</td>
+                <td data-label="Task ID"><code>${escapeHtml(t.task_id)}</code></td>
+                <td data-label="Version">${t.version ? '<span class="version-tag">' + escapeHtml(t.version) + '</span>' : '\u2013'}</td>
+                <td data-label="Hostname"><span class="hostname">${escapeHtml(t.hostname) || '\u2013'}</span></td>
+                <td data-label="Sessions">${fmtNum(t.active_sessions)}</td>
+                <td data-label="Health">${healthDot(t.last_seen)}</td>
+                <td data-label="Memory %">${sparkline(memVals, '#38bdf8', 60, 20)}</td>
+                <td data-label="CPU %">${sparkline(cpuVals, '#fb923c', 60, 20)}</td>
               </tr>`;
             }).join('');
 
@@ -330,7 +374,7 @@
           (summary.reported_at ? ' (latest report: ' + fmtTime(summary.reported_at) + ')' : '');
       } catch (e) {
         document.getElementById('tasks-body').innerHTML =
-          '<tr><td colspan="7">Error loading data: ' + String(e) + '</td></tr>';
+          '<tr><td colspan="7" data-label="Error">Error loading data: ' + String(e) + '</td></tr>';
       }
     }
 
