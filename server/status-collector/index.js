@@ -271,13 +271,17 @@ app.get("/api/summary", (req, res) => {
 
   // Take the most recent report per task
   const byTask = new Map();
-  let requestInTotal = 0;
-  let requestOutTotal = 0;
+  let requestTotal = 0;
   for (const r of rows) {
     if (!byTask.has(r.task_id)) {
       byTask.set(r.task_id, r.active_sessions ?? 0);
-      requestInTotal += r.request_in_interval ?? 0;
-      requestOutTotal += r.request_out_interval ?? 0;
+      const reqVal =
+        typeof r.request_in_interval === "number"
+          ? r.request_in_interval
+          : typeof r.request_out_interval === "number"
+          ? r.request_out_interval
+          : 0;
+      requestTotal += Math.max(0, reqVal);
     }
   }
   const totalSessions = Array.from(byTask.values()).reduce((sum, n) => sum + n, 0);
@@ -286,8 +290,10 @@ app.get("/api/summary", (req, res) => {
   res.json({
     task_count: byTask.size,
     active_sessions: totalSessions,
-    request_in_total: Math.max(0, Math.round(requestInTotal)),
-    request_out_total: Math.max(0, Math.round(requestOutTotal)),
+    request_total: Math.max(0, Math.round(requestTotal)),
+    // Backward compatibility for older frontend clients.
+    request_in_total: Math.max(0, Math.round(requestTotal)),
+    request_out_total: Math.max(0, Math.round(requestTotal)),
     reported_at: latest,
   });
 });
@@ -399,7 +405,8 @@ app.get("/api/history", (req, res) => {
 
   // Bucket by time intervals.
   // For sessions/task_count: use latest report per task per bucket with short persistence.
-  // For requests: sum per-interval request counters in each bucket.
+  // For requests: smooth latest buckets similarly by carrying forward
+  // per-task request values from recent buckets.
   const bucketMs = bucketMinutes * 60 * 1000;
   const byTime = new Map();
   for (const r of rows) {
@@ -411,16 +418,20 @@ app.get("/api/history", (req, res) => {
       byTime.set(key, {
         timestamp: key,
         taskLatest: new Map(),
+        taskRequestLatest: new Map(),
         taskIds: new Set(),
-        request_in: 0,
-        request_out: 0,
       });
     }
     const entry = byTime.get(key);
     entry.taskLatest.set(r.task_id, r.active_sessions ?? 0);
     entry.taskIds.add(r.task_id);
-    entry.request_in += Math.max(0, r.request_in_interval ?? 0);
-    entry.request_out += Math.max(0, r.request_out_interval ?? 0);
+    const reqVal =
+      typeof r.request_in_interval === "number"
+        ? r.request_in_interval
+        : typeof r.request_out_interval === "number"
+        ? r.request_out_interval
+        : 0;
+    entry.taskRequestLatest.set(r.task_id, Math.max(0, reqVal));
   }
 
   const buckets = Array.from(byTime.values()).sort((a, b) =>
@@ -429,7 +440,9 @@ app.get("/api/history", (req, res) => {
   const PERSIST_BUCKETS = 2;
   const points = buckets.map((v, i) => {
     const mergedSessionsByTask = new Map(v.taskLatest);
+    const mergedRequestByTask = new Map(v.taskRequestLatest);
     let usedCarryForward = false;
+    let usedRequestCarryForward = false;
 
     // Smooth incomplete latest buckets by carrying task session values
     // from recent buckets (same persistence horizon as task_count).
@@ -440,9 +453,16 @@ app.get("/api/history", (req, res) => {
           usedCarryForward = true;
         }
       }
+      for (const [taskId, reqVal] of buckets[j].taskRequestLatest.entries()) {
+        if (!mergedRequestByTask.has(taskId)) {
+          mergedRequestByTask.set(taskId, reqVal);
+          usedRequestCarryForward = true;
+        }
+      }
     }
 
     const sessionValues = Array.from(mergedSessionsByTask.values());
+    const requestValues = Array.from(mergedRequestByTask.values());
     const seenTasks = new Set();
     for (let j = Math.max(0, i - PERSIST_BUCKETS); j <= i; j++) {
       buckets[j].taskIds.forEach((id) => seenTasks.add(id));
@@ -451,9 +471,12 @@ app.get("/api/history", (req, res) => {
       timestamp: v.timestamp,
       task_count: seenTasks.size,
       active_sessions: sessionValues.reduce((sum, n) => sum + n, 0),
-      request_in: Math.round(v.request_in),
-      request_out: Math.round(v.request_out),
+      request_total: Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
+      // Backward compatibility for older frontend clients.
+      request_in: Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
+      request_out: Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
       activity_estimated: usedCarryForward,
+      request_estimated: usedRequestCarryForward,
     };
   });
 

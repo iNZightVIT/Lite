@@ -176,12 +176,8 @@
       <div class="value" id="active-sessions">&ndash;</div>
     </div>
     <div class="card">
-      <div class="label">Request In (interval)</div>
-      <div class="value" id="request-in-total">&ndash;</div>
-    </div>
-    <div class="card">
-      <div class="label">Request Out (interval)</div>
-      <div class="value" id="request-out-total">&ndash;</div>
+      <div class="label">Requests (interval)</div>
+      <div class="value" id="request-total">&ndash;</div>
     </div>
   </div>
 
@@ -209,8 +205,7 @@
       <h2>Request History (per interval)</h2>
     </div>
     <div class="chart-legend">
-      <span><span class="swatch" style="background:#38bdf8"></span> Request In</span>
-      <span><span class="swatch" style="background:#fb923c"></span> Request Out</span>
+      <span><span class="swatch" style="background:#38bdf8"></span> Total Requests</span>
     </div>
     <canvas id="request-chart" height="200"></canvas>
   </div>
@@ -560,9 +555,8 @@
         return;
       }
 
-      const inVals = history.map(p => p.request_in ?? 0);
-      const outVals = history.map(p => p.request_out ?? 0);
-      const axisReq = prettyAxis(Math.max(...inVals, ...outVals, 1));
+      const reqVals = history.map(p => p.request_total ?? p.request_in ?? 0);
+      const axisReq = prettyAxis(Math.max(...reqVals, 1));
       const maxReq = axisReq.max;
       const n = history.length;
 
@@ -573,30 +567,29 @@
       ctx.lineWidth = 2;
       ctx.beginPath();
       for (let i = 0; i < n; i++) {
-        const px = x(i), py = yReq(inVals[i]);
+        const px = x(i), py = yReq(reqVals[i]);
         i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
       }
       ctx.stroke();
+      if (n > 1 && history[n - 1].request_estimated) {
+        ctx.save();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x(n - 2), yReq(reqVals[n - 2]));
+        ctx.lineTo(x(n - 1), yReq(reqVals[n - 1]));
+        ctx.stroke();
+        ctx.restore();
+      }
 
       ctx.fillStyle = 'rgba(56,189,248,0.08)';
       ctx.beginPath();
-      ctx.moveTo(x(0), yReq(inVals[0]));
-      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yReq(inVals[i]));
+      ctx.moveTo(x(0), yReq(reqVals[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yReq(reqVals[i]));
       ctx.lineTo(x(n - 1), pad.top + ch);
       ctx.lineTo(x(0), pad.top + ch);
       ctx.closePath();
       ctx.fill();
-
-      ctx.strokeStyle = '#fb923c';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 3]);
-      ctx.beginPath();
-      for (let i = 0; i < n; i++) {
-        const px = x(i), py = yReq(outVals[i]);
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-      ctx.setLineDash([]);
 
       ctx.fillStyle = '#38bdf8';
       ctx.font = '11px system-ui';
@@ -606,7 +599,6 @@
         ctx.fillText(Math.round(v), pad.left - 6, y + 4);
       }
 
-      ctx.fillStyle = '#fb923c';
       ctx.textAlign = 'left';
       for (const v of axisReq.ticks) {
         const y = pad.top + ch - (v / maxReq) * ch;
@@ -632,8 +624,7 @@
       const historyData = await fetch(historyQuery()).then(r => r.json());
       document.getElementById('task-count').textContent = summary.task_count ?? '\u2013';
       document.getElementById('active-sessions').textContent = summary.active_sessions ?? '\u2013';
-      document.getElementById('request-in-total').textContent = summary.request_in_total ?? '\u2013';
-      document.getElementById('request-out-total').textContent = summary.request_out_total ?? '\u2013';
+      document.getElementById('request-total').textContent = summary.request_total ?? summary.request_in_total ?? '\u2013';
       drawActivityChart(historyData.history, currentRange);
       drawRequestChart(historyData.history, currentRange);
       document.getElementById('activity-chart')._lastHistory = historyData.history;
