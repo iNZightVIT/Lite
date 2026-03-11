@@ -440,6 +440,17 @@
         i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
       }
       ctx.stroke();
+      if (n > 1 && history[n - 1].activity_estimated) {
+        // Draw a subtle dotted tail to indicate latest value is estimated.
+        ctx.save();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x(n - 2), yS(sessions[n - 2]));
+        ctx.lineTo(x(n - 1), yS(sessions[n - 1]));
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // Fill under sessions
       ctx.fillStyle = 'rgba(56,189,248,0.08)';
@@ -462,6 +473,16 @@
       }
       ctx.stroke();
       ctx.setLineDash([]);
+      if (n > 1 && history[n - 1].activity_estimated) {
+        ctx.save();
+        ctx.strokeStyle = '#fb923c';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x(n - 2), yI(instances[n - 2]));
+        ctx.lineTo(x(n - 1), yI(instances[n - 1]));
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // Left y-axis labels (sessions)
       ctx.fillStyle = '#38bdf8';

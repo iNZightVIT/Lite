@@ -428,7 +428,21 @@ app.get("/api/history", (req, res) => {
   );
   const PERSIST_BUCKETS = 2;
   const points = buckets.map((v, i) => {
-    const sessionValues = Array.from(v.taskLatest.values());
+    const mergedSessionsByTask = new Map(v.taskLatest);
+    let usedCarryForward = false;
+
+    // Smooth incomplete latest buckets by carrying task session values
+    // from recent buckets (same persistence horizon as task_count).
+    for (let j = Math.max(0, i - PERSIST_BUCKETS); j < i; j++) {
+      for (const [taskId, sess] of buckets[j].taskLatest.entries()) {
+        if (!mergedSessionsByTask.has(taskId)) {
+          mergedSessionsByTask.set(taskId, sess);
+          usedCarryForward = true;
+        }
+      }
+    }
+
+    const sessionValues = Array.from(mergedSessionsByTask.values());
     const seenTasks = new Set();
     for (let j = Math.max(0, i - PERSIST_BUCKETS); j <= i; j++) {
       buckets[j].taskIds.forEach((id) => seenTasks.add(id));
@@ -439,6 +453,7 @@ app.get("/api/history", (req, res) => {
       active_sessions: sessionValues.reduce((sum, n) => sum + n, 0),
       request_in: Math.round(v.request_in),
       request_out: Math.round(v.request_out),
+      activity_estimated: usedCarryForward,
     };
   });
 
