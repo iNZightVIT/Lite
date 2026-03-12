@@ -390,6 +390,7 @@ const RANGE_CONFIG = {
 app.get("/api/history", (req, res) => {
   const range = RANGE_CONFIG[req.query.range] ? req.query.range : "1h";
   const { ms, bucketMinutes } = RANGE_CONFIG[range];
+  const useBucketStats = range !== "1h";
   const nowMs = Date.now();
   const cutoffMs = nowMs - ms;
   const cutoff = new Date(cutoffMs).toISOString();
@@ -411,8 +412,11 @@ app.get("/api/history", (req, res) => {
   // per-task request values from recent buckets.
   const bucketMs = bucketMinutes * 60 * 1000;
   const byTime = new Map();
+  const PERSIST_BUCKETS = 2;
+  const TASK_DECAY_MS = (PERSIST_BUCKETS + 1) * bucketMs;
   const currentSessionsByTask = new Map();
   const currentRequestsByTask = new Map();
+  const taskLastSeenAt = new Map();
   let currentSessionsTotal = 0;
   let currentRequestsTotal = 0;
 
@@ -482,6 +486,18 @@ app.get("/api/history", (req, res) => {
     const normalizedReqVal = Math.max(0, reqVal);
     entry.taskRequestLatest.set(r.task_id, normalizedReqVal);
 
+    // Drop stale tasks from rolling aggregates so long windows don't
+    // accumulate old task IDs and inflate series values.
+    for (const [taskId, lastSeenMs] of taskLastSeenAt.entries()) {
+      if (ts - lastSeenMs > TASK_DECAY_MS) {
+        currentSessionsTotal -= currentSessionsByTask.get(taskId) ?? 0;
+        currentRequestsTotal -= currentRequestsByTask.get(taskId) ?? 0;
+        currentSessionsByTask.delete(taskId);
+        currentRequestsByTask.delete(taskId);
+        taskLastSeenAt.delete(taskId);
+      }
+    }
+
     const prevSess = currentSessionsByTask.get(r.task_id);
     const nextSess = r.active_sessions ?? 0;
     if (prevSess == null) {
@@ -500,6 +516,7 @@ app.get("/api/history", (req, res) => {
       currentRequestsByTask.set(r.task_id, normalizedReqVal);
       currentRequestsTotal += normalizedReqVal - prevReq;
     }
+    taskLastSeenAt.set(r.task_id, ts);
 
     recordBucketSample(
       entry,
@@ -538,7 +555,6 @@ app.get("/api/history", (req, res) => {
   const buckets = Array.from(byTime.values()).sort((a, b) =>
     a.timestamp.localeCompare(b.timestamp)
   );
-  const PERSIST_BUCKETS = 2;
   const points = buckets.map((v, i) => {
     const mergedSessionsByTask = new Map(v.taskLatest);
     const mergedRequestByTask = new Map(v.taskRequestLatest);
@@ -568,49 +584,43 @@ app.get("/api/history", (req, res) => {
     for (let j = Math.max(0, i - PERSIST_BUCKETS); j <= i; j++) {
       buckets[j].taskIds.forEach((id) => seenTasks.add(id));
     }
+    const fallbackTaskCount = seenTasks.size;
+    const fallbackSessions = sessionValues.reduce((sum, n) => sum + n, 0);
+    const fallbackRequests = Math.round(requestValues.reduce((sum, n) => sum + n, 0));
+
+    const taskCountValue =
+      useBucketStats && v.tasks_count > 0
+        ? Math.round(v.tasks_sum / v.tasks_count)
+        : fallbackTaskCount;
+    const sessionsValue =
+      useBucketStats && v.sessions_count > 0
+        ? Math.round(v.sessions_sum / v.sessions_count)
+        : fallbackSessions;
+    const requestsValue =
+      useBucketStats && v.requests_count > 0
+        ? Math.round(v.requests_sum / v.requests_count)
+        : fallbackRequests;
+
     return {
       timestamp: v.timestamp,
-      task_count:
-        v.tasks_count > 0
-          ? Math.round(v.tasks_sum / v.tasks_count)
-          : seenTasks.size,
+      task_count: taskCountValue,
       task_count_min:
-        v.tasks_count > 0 ? Math.round(v.tasks_min ?? 0) : seenTasks.size,
+        useBucketStats && v.tasks_count > 0 ? Math.round(v.tasks_min ?? taskCountValue) : taskCountValue,
       task_count_max:
-        v.tasks_count > 0 ? Math.round(v.tasks_max ?? 0) : seenTasks.size,
-      active_sessions:
-        v.sessions_count > 0
-          ? Math.round(v.sessions_sum / v.sessions_count)
-          : sessionValues.reduce((sum, n) => sum + n, 0),
+        useBucketStats && v.tasks_count > 0 ? Math.round(v.tasks_max ?? taskCountValue) : taskCountValue,
+      active_sessions: sessionsValue,
       active_sessions_min:
-        v.sessions_count > 0
-          ? Math.round(v.sessions_min ?? 0)
-          : sessionValues.reduce((sum, n) => sum + n, 0),
+        useBucketStats && v.sessions_count > 0 ? Math.round(v.sessions_min ?? sessionsValue) : sessionsValue,
       active_sessions_max:
-        v.sessions_count > 0
-          ? Math.round(v.sessions_max ?? 0)
-          : sessionValues.reduce((sum, n) => sum + n, 0),
-      request_total:
-        v.requests_count > 0
-          ? Math.round(v.requests_sum / v.requests_count)
-          : Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
+        useBucketStats && v.sessions_count > 0 ? Math.round(v.sessions_max ?? sessionsValue) : sessionsValue,
+      request_total: requestsValue,
       request_total_min:
-        v.requests_count > 0
-          ? Math.round(v.requests_min ?? 0)
-          : Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
+        useBucketStats && v.requests_count > 0 ? Math.round(v.requests_min ?? requestsValue) : requestsValue,
       request_total_max:
-        v.requests_count > 0
-          ? Math.round(v.requests_max ?? 0)
-          : Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
+        useBucketStats && v.requests_count > 0 ? Math.round(v.requests_max ?? requestsValue) : requestsValue,
       // Backward compatibility for older frontend clients.
-      request_in:
-        v.requests_count > 0
-          ? Math.round(v.requests_sum / v.requests_count)
-          : Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
-      request_out:
-        v.requests_count > 0
-          ? Math.round(v.requests_sum / v.requests_count)
-          : Math.round(requestValues.reduce((sum, n) => sum + n, 0)),
+      request_in: requestsValue,
+      request_out: requestsValue,
       activity_estimated: usedCarryForward,
       request_estimated: usedRequestCarryForward,
     };
