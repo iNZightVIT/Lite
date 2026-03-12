@@ -44,27 +44,6 @@ status.bar.metric <- function(label, value, percent) {
   )
 }
 
-status.indicator.preview <- function(dot_color, label, subtext = NULL) {
-  div(
-    class = "well",
-    style = "margin-bottom: 0.75em; min-height: 92px;",
-    div(
-      tags$span(
-        style = paste0(
-          "display:inline-block;width:8px;height:8px;border-radius:50%;",
-          "margin-right:6px;vertical-align:middle;background:",
-          dot_color,
-          ";"
-        )
-      ),
-      tags$span(style = "font-weight: 600;", label)
-    ),
-    if (!is.null(subtext)) {
-      div(style = "font-size: 0.85em; color: #666; margin-left: 14px;", subtext)
-    }
-  )
-}
-
 status.panel.ui <- function(instance_rows, summary_rows, crowding_banner) {
   fixedPage(
     fluidRow(
@@ -79,18 +58,6 @@ status.panel.ui <- function(instance_rows, summary_rows, crowding_banner) {
     ),
     fluidRow(
       column(width = 12, crowding_banner)
-    ),
-    fluidRow(
-      column(
-        width = 12,
-        h4("Header indicator preview (temporary)"),
-        p(style = "color: #666; margin-top: -0.2em;", "Quick side-by-side preview of navbar status states.")
-      )
-    ),
-    fluidRow(
-      column(width = 4, status.indicator.preview("#22c55e", "Operating normal")),
-      column(width = 4, status.indicator.preview("#f97316", "High demand")),
-      column(width = 4, status.indicator.preview("#ef4444", "Unstable load", "Reconnect suggested"))
     ),
     fluidRow(
       column(width = 6, instance_rows),

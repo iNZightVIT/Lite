@@ -229,9 +229,7 @@ build_crowding_assessment <- function(local_status, tasks) {
   )
 }
 
-output$status.panel <- renderUI({
-  invalidateLater(15000, session)
-
+get_status_snapshot <- function() {
   local_status <- safe_fetch_json("http://127.0.0.1:3099/__status")
 
   collector_base <- Sys.getenv("STATUS_REPORT_URL", "")
@@ -244,10 +242,38 @@ output$status.panel <- renderUI({
   }
 
   crowding <- build_crowding_assessment(local_status, tasks)
+
+  list(
+    local_status = local_status,
+    summary = summary,
+    crowding = crowding
+  )
+}
+
+status_snapshot <- reactiveVal(NULL)
+
+observe({
+  invalidateLater(15000, session)
+
+  snapshot <- get_status_snapshot()
+  status_snapshot(snapshot)
+
   session$sendCustomMessage("status_nav_indicator", list(
-    level = crowding$level,
-    text = crowding$short_text
+    level = snapshot$crowding$level,
+    text = snapshot$crowding$short_text
   ))
+})
+
+output$status.panel <- renderUI({
+  snapshot <- status_snapshot()
+  if (is.null(snapshot)) {
+    snapshot <- get_status_snapshot()
+    status_snapshot(snapshot)
+  }
+
+  local_status <- snapshot$local_status
+  summary <- snapshot$summary
+  crowding <- snapshot$crowding
 
   instance_rows <- tagList(
     status.metric("Uptime", fmt_uptime(local_status$uptime_seconds)),
