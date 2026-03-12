@@ -43,35 +43,47 @@ pick_first <- function(...) {
 
 as_num <- function(x) suppressWarnings(as.numeric(x))
 
-build_crowding_banner <- function(local_status, tasks) {
+build_crowding_assessment <- function(local_status, tasks) {
   local_task_id <- local_status$task_id
   local_sessions <- as_num(local_status$sessions$active)
 
   if (is.null(local_task_id) || !nzchar(local_task_id)) {
-    return(div(
-      class = "alert alert-info",
-      style = "margin-top: 0.5em;",
-      strong("Crowding check unavailable."),
-      " Local task ID is not available yet."
+    return(list(
+      level = "info",
+      short_text = "waiting for task info",
+      banner = div(
+        class = "alert alert-info",
+        style = "margin-top: 0.5em;",
+        strong("Crowding check unavailable."),
+        " Local task ID is not available yet."
+      )
     ))
   }
 
   if (is.null(tasks) || length(tasks) == 0) {
-    return(div(
-      class = "alert alert-info",
-      style = "margin-top: 0.5em;",
-      strong("Crowding check unavailable."),
-      " Waiting for cluster task stats from the collector."
+    return(list(
+      level = "info",
+      short_text = "waiting for cluster stats",
+      banner = div(
+        class = "alert alert-info",
+        style = "margin-top: 0.5em;",
+        strong("Crowding check unavailable."),
+        " Waiting for cluster task stats from the collector."
+      )
     ))
   }
 
   task_df <- tryCatch(as.data.frame(tasks), error = function(e) NULL)
   if (is.null(task_df) || nrow(task_df) == 0 || !("task_id" %in% names(task_df))) {
-    return(div(
-      class = "alert alert-info",
-      style = "margin-top: 0.5em;",
-      strong("Crowding check unavailable."),
-      " Collector task data format is not ready."
+    return(list(
+      level = "info",
+      short_text = "cluster stats unavailable",
+      banner = div(
+        class = "alert alert-info",
+        style = "margin-top: 0.5em;",
+        strong("Crowding check unavailable."),
+        " Collector task data format is not ready."
+      )
     ))
   }
 
@@ -82,21 +94,29 @@ build_crowding_banner <- function(local_status, tasks) {
   task_df$active_sessions <- as_num(task_df$active_sessions)
   task_df <- task_df[!is.na(task_df$active_sessions), , drop = FALSE]
   if (nrow(task_df) == 0) {
-    return(div(
-      class = "alert alert-info",
-      style = "margin-top: 0.5em;",
-      strong("Crowding check unavailable."),
-      " No active session counts are available yet."
+    return(list(
+      level = "info",
+      short_text = "no connection counts yet",
+      banner = div(
+        class = "alert alert-info",
+        style = "margin-top: 0.5em;",
+        strong("Crowding check unavailable."),
+        " No active session counts are available yet."
+      )
     ))
   }
 
   local_row <- task_df[task_df$task_id == local_task_id, , drop = FALSE]
   if (nrow(local_row) == 0) {
-    return(div(
-      class = "alert alert-info",
-      style = "margin-top: 0.5em;",
-      strong("Crowding check unavailable."),
-      " This instance is not present in the latest cluster report yet."
+    return(list(
+      level = "info",
+      short_text = "instance not in latest report",
+      banner = div(
+        class = "alert alert-info",
+        style = "margin-top: 0.5em;",
+        strong("Crowding check unavailable."),
+        " This instance is not present in the latest cluster report yet."
+      )
     ))
   }
 
@@ -118,19 +138,52 @@ build_crowding_banner <- function(local_status, tasks) {
   crowded_mask <- all_sessions >= crowded_cutoff &
     (all_sessions - min_sessions) >= crowded_gap_cutoff
   crowded_count <- sum(crowded_mask)
+  most_loaded <- max_sessions
+  relative_to_median <- ifelse(median_sessions > 0, local_sessions / median_sessions, NA_real_)
 
   is_crowded <- total_instances > 1 &&
     crowded_count > 0 &&
     local_sessions >= crowded_cutoff &&
     (local_sessions - min_sessions) >= crowded_gap_cutoff
 
+  if (is_crowded && (local_sessions >= median_sessions + 20 || (!is.na(relative_to_median) && relative_to_median >= 2.5))) {
+    return(list(
+      level = "danger",
+      short_text = "high load, reconnect suggested",
+      banner = div(
+        class = "alert alert-danger",
+        style = "margin-top: 0.5em;",
+        strong("This instance is heavily crowded."),
+        sprintf(
+          " You are at %s connections.",
+          local_sessions
+        ),
+        sprintf(
+          " %s/%s instances are in the crowded band.",
+          crowded_count,
+          total_instances
+        ),
+        sprintf(
+          " Lowest instance: %s connections; median: %s; highest: %s.",
+          min_sessions,
+          round(median_sessions, 1),
+          most_loaded
+        ),
+        " Reconnect is strongly recommended."
+      )
+    ))
+  }
+
   if (is_crowded) {
-    return(div(
+    return(list(
+      level = "warning",
+      short_text = "busy instance, reconnect suggested",
+      banner = div(
       class = "alert alert-warning",
       style = "margin-top: 0.5em;",
       strong("This instance looks crowded."),
       sprintf(
-        " You are at %s active sessions.",
+          " You are at %s connections.",
         local_sessions
       ),
       sprintf(
@@ -140,25 +193,30 @@ build_crowding_banner <- function(local_status, tasks) {
         total_instances
       ),
       sprintf(
-        " Lowest instance has %s sessions; median is %s.",
+          " Lowest instance has %s connections; median is %s.",
         min_sessions,
         round(median_sessions, 1)
       ),
       " Reconnect may move you to a less busy instance."
+      )
     ))
   }
 
-  div(
-    class = "alert alert-success",
-    style = "margin-top: 0.5em;",
-    strong("This instance is not unusually crowded."),
-    sprintf(
-      " Current sessions: %s (range across instances: %s to %s).",
-      local_sessions,
-      min_sessions,
-      max_sessions
-    ),
-    " You can still reconnect if performance is poor."
+  list(
+    level = "ok",
+    short_text = "load is balanced",
+    banner = div(
+      class = "alert alert-success",
+      style = "margin-top: 0.5em;",
+      strong("This instance is not unusually crowded."),
+      sprintf(
+        " Current connections: %s (range across instances: %s to %s).",
+        local_sessions,
+        min_sessions,
+        max_sessions
+      ),
+      " You can still reconnect if performance is poor."
+    )
   )
 }
 
@@ -176,15 +234,25 @@ output$status.panel <- renderUI({
     tasks <- safe_fetch_json(paste0(collector_base, "/api/tasks"))
   }
 
+  crowding <- build_crowding_assessment(local_status, tasks)
+  session$sendCustomMessage("status_nav_indicator", list(
+    level = crowding$level,
+    text = crowding$short_text
+  ))
+
   instance_rows <- tagList(
-    status.metric("Hostname", pick_first(local_status$hostname, session$clientData$url_hostname, "\u2013")),
-    status.metric("Task ID", pick_first(local_status$task_id, "\u2013")),
-    status.metric("Version", pick_first(local_status$version, values$lite.version, "\u2013")),
     status.metric("Uptime", fmt_uptime(local_status$uptime_seconds)),
-    status.metric("Active sessions (this instance)", pick_first(local_status$sessions$active, "\u2013")),
-    status.metric("CPU (%)", pick_first(local_status$cpu$percent, "\u2013")),
-    status.metric("Memory used (%)", pick_first(local_status$memory$percent_used, "\u2013")),
-    status.metric("Status timestamp", fmt_status_time(local_status$timestamp))
+    status.metric("Connections to this task", pick_first(local_status$sessions$active, "\u2013")),
+    status.bar.metric(
+      "CPU",
+      paste0(pick_first(local_status$cpu$percent, "\u2013"), "%"),
+      pick_first(local_status$cpu$percent, 0)
+    ),
+    status.bar.metric(
+      "Memory",
+      paste0(pick_first(local_status$memory$percent_used, "\u2013"), "%"),
+      pick_first(local_status$memory$percent_used, 0)
+    )
   )
 
   summary_rows <- if (is.null(summary)) {
@@ -196,13 +264,10 @@ output$status.panel <- renderUI({
     tagList(
       h3("General Stats"),
       status.metric("Instances", pick_first(summary$task_count, "\u2013")),
-      status.metric("Active sessions (all instances)", pick_first(summary$active_sessions, "\u2013")),
-      status.metric("Requests (latest interval)", pick_first(summary$request_total, "\u2013")),
+      status.metric("Connections (all instances)", pick_first(summary$active_sessions, "\u2013")),
       status.metric("Latest report", fmt_status_time(summary$reported_at))
     )
   }
 
-  crowding_banner <- build_crowding_banner(local_status, tasks)
-
-  status.panel.ui(instance_rows, summary_rows, collector_base, crowding_banner)
+  status.panel.ui(instance_rows, summary_rows, crowding$banner)
 })

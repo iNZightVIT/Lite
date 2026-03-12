@@ -440,8 +440,14 @@
       const instances = history.map(p => p.task_count ?? 0);
       const instancesMin = history.map(p => p.task_count_min ?? p.task_count ?? 0);
       const instancesMax = history.map(p => p.task_count_max ?? p.task_count ?? 0);
-      const axisSessions = prettyAxis(Math.max(...sessions, 1));
-      const axisInstances = prettyAxis(Math.max(...instances, 1));
+      const sessionsCeiling = rangeKey !== '1h'
+        ? Math.max(...sessionsMax, ...sessions, 1)
+        : Math.max(...sessions, 1);
+      const instancesCeiling = rangeKey !== '1h'
+        ? Math.max(...instancesMax, ...instances, 1)
+        : Math.max(...instances, 1);
+      const axisSessions = prettyAxis(sessionsCeiling);
+      const axisInstances = prettyAxis(instancesCeiling);
       const maxSessions = axisSessions.max;
       const maxInstances = axisInstances.max;
       const n = history.length;
@@ -582,7 +588,10 @@
       const reqVals = history.map(p => p.request_total ?? p.request_in ?? 0);
       const reqMin = history.map(p => p.request_total_min ?? p.request_total ?? p.request_in ?? 0);
       const reqMax = history.map(p => p.request_total_max ?? p.request_total ?? p.request_in ?? 0);
-      const axisReq = prettyAxis(Math.max(...reqVals, 1));
+      const reqCeiling = rangeKey !== '1h'
+        ? Math.max(...reqMax, ...reqVals, 1)
+        : Math.max(...reqVals, 1);
+      const axisReq = prettyAxis(reqCeiling);
       const maxReq = axisReq.max;
       const n = history.length;
 

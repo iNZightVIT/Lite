@@ -13,7 +13,38 @@ status.metric <- function(label, value) {
   )
 }
 
-status.panel.ui <- function(instance_rows, summary_rows, collector_url, crowding_banner) {
+status.bar.metric <- function(label, value, percent) {
+  pct <- suppressWarnings(as.numeric(percent))
+  if (is.na(pct)) pct <- 0
+  pct <- max(0, min(100, pct))
+
+  bar_class <- if (pct >= 85) {
+    "progress-bar-danger"
+  } else if (pct >= 65) {
+    "progress-bar-warning"
+  } else {
+    "progress-bar-success"
+  }
+
+  div(
+    class = "well",
+    style = "margin-bottom: 0.75em;",
+    div(style = "font-size: 0.9em; color: #666;", label),
+    div(class = "progress", style = "margin: 0.35em 0 0.2em 0;",
+      div(
+        class = paste("progress-bar", bar_class),
+        role = "progressbar",
+        style = paste0("width: ", round(pct), "%;"),
+        `aria-valuenow` = round(pct),
+        `aria-valuemin` = "0",
+        `aria-valuemax` = "100"
+      )
+    ),
+    div(style = "font-size: 1.1em; font-weight: 600;", value)
+  )
+}
+
+status.panel.ui <- function(instance_rows, summary_rows, crowding_banner) {
   fixedPage(
     fluidRow(
       column(
@@ -43,19 +74,7 @@ status.panel.ui <- function(instance_rows, summary_rows, collector_url, crowding
             onclick = "performReconnect(); return false;",
             "Force reconnect to new instance"
           )
-        ),
-        if (!is.null(collector_url) && nzchar(collector_url)) {
-          p(
-            style = "margin-top: 0.75em; color: #666;",
-            "Cluster summary source: ",
-            code(collector_url)
-          )
-        } else {
-          p(
-            style = "margin-top: 0.75em; color: #666;",
-            "Cluster summary unavailable (STATUS_REPORT_URL not configured)."
-          )
-        }
+        )
       )
     )
   )
