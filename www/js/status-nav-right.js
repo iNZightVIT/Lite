@@ -30,16 +30,29 @@ function renderStatusIndicator(level, text) {
   );
   if (!statusLink) return;
 
-  var color = "#9ca3af";
-  if (level === "ok") color = "#22c55e";
-  if (level === "warning") color = "#f59e0b";
-  if (level === "danger") color = "#ef4444";
+  var color = "#22c55e";
+  var label = "Operating normal";
+  var subText = "";
 
-  var note = text ? "<small style='margin-left:6px;opacity:.85;'>" + text + "</small>" : "";
+  if (level === "warning") {
+    color = "#f97316";
+    label = "High demand";
+  } else if (level === "danger") {
+    color = "#ef4444";
+    label = "Unstable load";
+    subText = "Reconnect suggested";
+  } else if (level === "info") {
+    color = "#9ca3af";
+    label = "Checking";
+  }
+
+  var note = subText
+    ? "<small style='display:block;line-height:1.05;margin-left:14px;opacity:.85;'>" + subText + "</small>"
+    : "";
   statusLink.innerHTML =
     "<span style='display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:" +
     color +
-    ";vertical-align:middle;'></span>Status" +
+    ";vertical-align:middle;'></span>" + label +
     note;
 }
 

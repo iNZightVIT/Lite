@@ -140,6 +140,7 @@ build_crowding_assessment <- function(local_status, tasks) {
   crowded_count <- sum(crowded_mask)
   most_loaded <- max_sessions
   relative_to_median <- ifelse(median_sessions > 0, local_sessions / median_sessions, NA_real_)
+  is_high_usage = local_sessions >= 40
 
   is_crowded <- total_instances > 1 &&
     crowded_count > 0 &&
@@ -174,30 +175,38 @@ build_crowding_assessment <- function(local_status, tasks) {
     ))
   }
 
-  if (is_crowded) {
+  if (is_crowded || is_high_usage) {
     return(list(
       level = "warning",
-      short_text = "busy instance, reconnect suggested",
+      short_text = "high demand",
       banner = div(
       class = "alert alert-warning",
       style = "margin-top: 0.5em;",
-      strong("This instance looks crowded."),
+      strong(if (is_crowded) "This instance looks crowded." else "This instance is seeing high demand."),
       sprintf(
           " You are at %s connections.",
         local_sessions
       ),
-      sprintf(
-        " Crowded threshold is %.1f; %s/%s instances are currently above it.",
-        crowded_cutoff,
-        crowded_count,
-        total_instances
-      ),
-      sprintf(
+      if (is_crowded) {
+        sprintf(
+          " Crowded threshold is %.1f; %s/%s instances are currently above it.",
+          crowded_cutoff,
+          crowded_count,
+          total_instances
+        )
+      } else {
+        sprintf(
+          " High-demand threshold is 40 connections on this instance."
+        )
+      },
+      if (is_crowded) {
+        sprintf(
           " Lowest instance has %s connections; median is %s.",
-        min_sessions,
-        round(median_sessions, 1)
-      ),
-      " Reconnect may move you to a less busy instance."
+          min_sessions,
+          round(median_sessions, 1)
+        )
+      },
+      " Consider reconnecting if performance feels slow."
       )
     ))
   }
