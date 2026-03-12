@@ -30,6 +30,8 @@ shinyUI(
       shinyjs::useShinyjs(),
       tags$script(src = "vit.js"),
       tags$script(src = "js/disconnect.js"),
+      tags$script(src = "js/reconnect.js"),
+      tags$script(src = "js/status-nav-right.js"),
       tags$link(
         href = "disconnectedModal.css", rel = "stylesheet",
         type = "text/css"

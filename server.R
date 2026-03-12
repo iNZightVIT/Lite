@@ -602,6 +602,12 @@ shinyServer(function(input, output, session) {
   source("panels/G1_Code//1_code.panel-ui.R", local = TRUE)
   source("panels/G1_Code//2_code.panel-server.R", local = TRUE)
 
+  ## ----------------##
+  ##  Status Module  ##
+  ## ----------------##
+  source("panels/H1_Status/1_status.panel-ui.R", local = TRUE)
+  source("panels/H1_Status/2_status.panel-server.R", local = TRUE)
+
   generate_tabs <- function(version = NULL) {
     import_tabs <- list(
       import = tabPanel("Import Dataset", uiOutput("load.data.panel")),
@@ -687,6 +693,10 @@ shinyServer(function(input, output, session) {
       value = "rhistory",
       uiOutput("code.panel")
     )
+    status_tab <- tabPanel("Status",
+      value = "status",
+      uiOutput("status.panel")
+    )
 
     if (!is.null(session$userData$LITE_VERSION) &&
       session$userData$LITE_VERSION == "CAS") {
@@ -713,7 +723,8 @@ shinyServer(function(input, output, session) {
       row_ops_tabs,
       manipulate_tabs,
       advance_tabs,
-      history_tabs
+      history_tabs,
+      status_tab
     )
   }
 
