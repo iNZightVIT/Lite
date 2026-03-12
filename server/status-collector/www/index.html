@@ -435,7 +435,11 @@
       }
 
       const sessions = history.map(p => p.active_sessions ?? 0);
+      const sessionsMin = history.map(p => p.active_sessions_min ?? p.active_sessions ?? 0);
+      const sessionsMax = history.map(p => p.active_sessions_max ?? p.active_sessions ?? 0);
       const instances = history.map(p => p.task_count ?? 0);
+      const instancesMin = history.map(p => p.task_count_min ?? p.task_count ?? 0);
+      const instancesMax = history.map(p => p.task_count_max ?? p.task_count ?? 0);
       const axisSessions = prettyAxis(Math.max(...sessions, 1));
       const axisInstances = prettyAxis(Math.max(...instances, 1));
       const maxSessions = axisSessions.max;
@@ -445,6 +449,24 @@
       function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
       function yS(v) { return pad.top + ch - (v / maxSessions) * ch; }
       function yI(v) { return pad.top + ch - (v / maxInstances) * ch; }
+
+      // Sessions ribbon (min-max)
+      ctx.fillStyle = 'rgba(56,189,248,0.14)';
+      ctx.beginPath();
+      ctx.moveTo(x(0), yS(sessionsMax[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yS(sessionsMax[i]));
+      for (let i = n - 1; i >= 0; i--) ctx.lineTo(x(i), yS(sessionsMin[i]));
+      ctx.closePath();
+      ctx.fill();
+
+      // Instances ribbon (min-max)
+      ctx.fillStyle = 'rgba(251,146,60,0.12)';
+      ctx.beginPath();
+      ctx.moveTo(x(0), yI(instancesMax[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yI(instancesMax[i]));
+      for (let i = n - 1; i >= 0; i--) ctx.lineTo(x(i), yI(instancesMin[i]));
+      ctx.closePath();
+      ctx.fill();
 
       // Sessions line
       ctx.strokeStyle = '#38bdf8';
@@ -556,12 +578,23 @@
       }
 
       const reqVals = history.map(p => p.request_total ?? p.request_in ?? 0);
+      const reqMin = history.map(p => p.request_total_min ?? p.request_total ?? p.request_in ?? 0);
+      const reqMax = history.map(p => p.request_total_max ?? p.request_total ?? p.request_in ?? 0);
       const axisReq = prettyAxis(Math.max(...reqVals, 1));
       const maxReq = axisReq.max;
       const n = history.length;
 
       function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
       function yReq(v) { return pad.top + ch - (v / maxReq) * ch; }
+
+      // Request ribbon (min-max)
+      ctx.fillStyle = 'rgba(56,189,248,0.14)';
+      ctx.beginPath();
+      ctx.moveTo(x(0), yReq(reqMax[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yReq(reqMax[i]));
+      for (let i = n - 1; i >= 0; i--) ctx.lineTo(x(i), yReq(reqMin[i]));
+      ctx.closePath();
+      ctx.fill();
 
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2;
