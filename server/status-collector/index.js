@@ -12,6 +12,11 @@ const DASHBOARD_VISIBLE_MINUTES = Math.max(1, parseInt(process.env.DASHBOARD_VIS
 // Sparkline history window for task table (minutes)
 const SPARKLINE_MINUTES = 30;
 const HOSTNAME_LOOKBACK_HOURS = 48;
+const REQUEST_INTERVAL_MS = Math.max(
+  1000,
+  parseInt(process.env.REQUEST_INTERVAL_MS, 10) || 30000
+);
+const REQUESTS_PER_MINUTE_FACTOR = 60000 / REQUEST_INTERVAL_MS;
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -281,7 +286,8 @@ app.get("/api/summary", (req, res) => {
           : typeof r.request_out_interval === "number"
           ? r.request_out_interval
           : 0;
-      requestTotal += Math.max(0, reqVal);
+      const reqPerMinute = Math.max(0, reqVal) * REQUESTS_PER_MINUTE_FACTOR;
+      requestTotal += reqPerMinute;
     }
   }
   const totalSessions = Array.from(byTask.values()).reduce((sum, n) => sum + n, 0);
@@ -483,7 +489,7 @@ app.get("/api/history", (req, res) => {
         : typeof r.request_out_interval === "number"
         ? r.request_out_interval
         : 0;
-    const normalizedReqVal = Math.max(0, reqVal);
+    const normalizedReqVal = Math.max(0, reqVal) * REQUESTS_PER_MINUTE_FACTOR;
     entry.taskRequestLatest.set(r.task_id, normalizedReqVal);
 
     // Drop stale tasks from rolling aggregates so long windows don't

@@ -7,10 +7,14 @@ function moveStatusTabToRight() {
   var statusItem = statusLink.closest("li");
   if (!statusItem) return;
 
-  var collapse = statusItem.closest(".navbar-collapse") || document.querySelector(".navbar-collapse");
+  var collapse =
+    statusItem.closest(".navbar-collapse") ||
+    document.querySelector(".navbar-collapse");
   if (!collapse) return;
 
-  var rightList = collapse.querySelector("ul.nav.navbar-nav.navbar-right.status-nav-right");
+  var rightList = collapse.querySelector(
+    "ul.nav.navbar-nav.navbar-right.status-nav-right",
+  );
   if (!rightList) {
     rightList = document.createElement("ul");
     rightList.className = "nav navbar-nav navbar-right status-nav-right";
@@ -47,12 +51,15 @@ function renderStatusIndicator(level, text) {
   }
 
   var note = subText
-    ? "<small style='display:block;line-height:1.05;margin-left:14px;opacity:.85;'>" + subText + "</small>"
+    ? "<small style='display:block;line-height:1.05;margin-left:14px;opacity:.85;'>" +
+      subText +
+      "</small>"
     : "";
   statusLink.innerHTML =
     "<span style='display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:" +
     color +
-    ";vertical-align:middle;'></span>" + label +
+    ";vertical-align:middle;'></span>" +
+    label +
     note;
 }
 

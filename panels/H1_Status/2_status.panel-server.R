@@ -2,7 +2,13 @@
 ###  Server Functions for the "Status" Module  ###
 ### --------------------------------------------###
 
+# Use a short timeout so a slow or stuck status-server/collector does not block
+# the Shiny process (which is single-threaded per instance and would lock all
+# sessions on that instance). R's default timeout is 60s.
 safe_fetch_json <- function(url) {
+  old_timeout <- getOption("timeout", 60)
+  on.exit(options(timeout = old_timeout), add = TRUE)
+  options(timeout = 5)
   tryCatch(
     {
       payload <- readLines(url, warn = FALSE)
@@ -252,7 +258,13 @@ get_status_snapshot <- function() {
 
 status_snapshot <- reactiveVal(NULL)
 
+# Only poll when the Status tab is visible to avoid per-session load on the
+# instance (local status-server and collector). When the tab is not selected,
+# the nav indicator keeps the last known state.
 observe({
+  if (!identical(input$selector, "status")) {
+    return()
+  }
   invalidateLater(15000, session)
 
   snapshot <- get_status_snapshot()
@@ -269,6 +281,10 @@ output$status.panel <- renderUI({
   if (is.null(snapshot)) {
     snapshot <- get_status_snapshot()
     status_snapshot(snapshot)
+    session$sendCustomMessage("status_nav_indicator", list(
+      level = snapshot$crowding$level,
+      text = snapshot$crowding$short_text
+    ))
   }
 
   local_status <- snapshot$local_status

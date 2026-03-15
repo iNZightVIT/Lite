@@ -134,7 +134,12 @@ function getLoadAvg() {
   }
 }
 
-// --- Shiny instance health checks ---
+// --- Shiny instance health checks (cached to avoid blocking /__status) ---
+// Running curl synchronously per instance blocked the event loop and could
+// make /__status take up to N seconds (N = SHINY_INSTANCES), causing Shiny
+// sessions that call __status to block and the whole instance to appear stuck.
+let cachedShinyHealth = { configured: SHINY_INSTANCES, running: 0 };
+
 function countShinyProcesses() {
   const { execSync } = require("child_process");
   let running = 0;
@@ -152,6 +157,14 @@ function countShinyProcesses() {
     }
   }
   return { configured: SHINY_INSTANCES, running };
+}
+
+function refreshShinyHealthCache() {
+  try {
+    cachedShinyHealth = countShinyProcesses();
+  } catch (e) {
+    // keep previous cache on error
+  }
 }
 
 // --- Session store ---
@@ -319,7 +332,7 @@ function buildStatus() {
       ...load,
     },
     memory: getMemory(),
-    shiny: countShinyProcesses(),
+    shiny: cachedShinyHealth,
     sessions: {
       active: getActiveSessions(),
     },
@@ -393,6 +406,7 @@ if (STATUS_REPORT_URL && STATUS_REPORT_TOKEN) {
 
   setInterval(async () => {
     reapStaleSessions();
+    refreshShinyHealthCache();
     await updateRequestMetrics();
 
     try {
@@ -425,9 +439,13 @@ if (STATUS_REPORT_URL && STATUS_REPORT_TOKEN) {
   console.log(
     "[status-server] reporter disabled (STATUS_REPORT_URL or STATUS_REPORT_TOKEN not set)",
   );
-  // Still reap stale sessions even without reporting
+  // Still reap stale sessions and refresh Shiny health cache
   setInterval(async () => {
     reapStaleSessions();
+    refreshShinyHealthCache();
     await updateRequestMetrics();
   }, REPORT_INTERVAL_MS);
 }
+
+// Populate cache at startup so first /__status is fast
+refreshShinyHealthCache();

@@ -7,6 +7,9 @@ BASE_PORT=3000
 echo "Generating configuration for $INSTANCES Shiny instances with Traefik..."
 
 # Generate Traefik dynamic configuration
+# serversTransport sets backend timeouts so Traefik does not wait forever if a
+# Shiny instance is stuck (e.g. blocked on status fetch). Without this, timeouts
+# cause the site to "never load" for users.
 cat > /etc/traefik/dynamic.yml << EOF
 http:
   routers:
@@ -26,10 +29,12 @@ http:
   services:
     status-service:
       loadBalancer:
+        serversTransport: status-transport
         servers:
           - url: "http://127.0.0.1:3099"
     shiny-service:
       loadBalancer:
+        serversTransport: shiny-transport
         sticky:
           cookie:
             name: INZLITESESSION
@@ -46,6 +51,20 @@ for i in $(seq 1 $INSTANCES); do
           - url: "http://127.0.0.1:${PORT}"
 EOF
 done
+
+# Backend timeouts: avoid indefinite wait when Shiny or status-server is stuck
+cat >> /etc/traefik/dynamic.yml << EOF
+
+  serversTransports:
+    status-transport:
+      forwardingTimeouts:
+        dialTimeout: "5s"
+        responseHeaderTimeout: "15s"
+    shiny-transport:
+      forwardingTimeouts:
+        dialTimeout: "10s"
+        responseHeaderTimeout: "90s"
+EOF
 
 # Generate supervisor config
 cat > /etc/supervisor/conf.d/supervisord.conf << EOF
