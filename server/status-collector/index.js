@@ -73,6 +73,8 @@ const migrations = [
   ["request_out_total", "REAL"],
   ["request_in_interval", "REAL"],
   ["request_out_interval", "REAL"],
+  ["request_in_duration_avg_sec", "REAL"],
+  ["request_out_duration_avg_sec", "REAL"],
 ];
 for (const [col, type] of migrations) {
   if (!existingCols.has(col)) {
@@ -86,8 +88,9 @@ const insertStmt = db.prepare(`
     cpu_percent, memory_used_mb, memory_percent_used,
     shiny_configured, shiny_running, version, hostname,
     request_in_total, request_out_total, request_in_interval, request_out_interval,
+    request_in_duration_avg_sec, request_out_duration_avg_sec,
     raw_json
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 const RETENTION_DAYS = 7;
@@ -163,6 +166,14 @@ function parsePayload(body) {
       : typeof body.request_out_interval === "number"
       ? body.request_out_interval
       : null;
+  const requestInDurationAvgSec =
+    typeof reqs.in_duration_avg_sec === "number" && Number.isFinite(reqs.in_duration_avg_sec)
+      ? reqs.in_duration_avg_sec
+      : null;
+  const requestOutDurationAvgSec =
+    typeof reqs.out_duration_avg_sec === "number" && Number.isFinite(reqs.out_duration_avg_sec)
+      ? reqs.out_duration_avg_sec
+      : null;
 
   return {
     task_id: body.task_id || "unknown",
@@ -180,6 +191,8 @@ function parsePayload(body) {
     request_out_total: requestOutTotal,
     request_in_interval: requestInInterval,
     request_out_interval: requestOutInterval,
+    request_in_duration_avg_sec: requestInDurationAvgSec,
+    request_out_duration_avg_sec: requestOutDurationAvgSec,
     raw_json: JSON.stringify(body),
   };
 }
@@ -247,6 +260,8 @@ app.post("/ingest", (req, res) => {
       row.request_out_total,
       row.request_in_interval,
       row.request_out_interval,
+      row.request_in_duration_avg_sec,
+      row.request_out_duration_avg_sec,
       row.raw_json
     );
     trimOldRows();
@@ -405,7 +420,8 @@ app.get("/api/history", (req, res) => {
 
   const rows = db
     .prepare(
-      `SELECT reported_at, task_id, ${sessionCol} AS active_sessions, request_in_interval, request_out_interval
+      `SELECT reported_at, task_id, ${sessionCol} AS active_sessions, request_in_interval, request_out_interval,
+              request_in_duration_avg_sec, request_out_duration_avg_sec
        FROM status_reports
        WHERE reported_at >= ?${hostFilter.sql}
        ORDER BY reported_at ASC`
@@ -478,11 +494,20 @@ app.get("/api/history", (req, res) => {
         tasks_max: null,
         tasks_sum: 0,
         tasks_count: 0,
+        duration_sum: 0,
+        duration_count: 0,
       });
     }
     const entry = byTime.get(key);
     entry.taskLatest.set(r.task_id, r.active_sessions ?? 0);
     entry.taskIds.add(r.task_id);
+    const durIn = typeof r.request_in_duration_avg_sec === "number" ? r.request_in_duration_avg_sec : null;
+    const durOut = typeof r.request_out_duration_avg_sec === "number" ? r.request_out_duration_avg_sec : null;
+    const dur = durIn != null && durOut != null ? (durIn + durOut) / 2 : durIn ?? durOut;
+    if (dur != null && Number.isFinite(dur)) {
+      entry.duration_sum += dur;
+      entry.duration_count += 1;
+    }
     const reqVal =
       typeof r.request_in_interval === "number"
         ? r.request_in_interval
@@ -524,11 +549,14 @@ app.get("/api/history", (req, res) => {
     }
     taskLastSeenAt.set(r.task_id, ts);
 
+    // Use distinct task count in this bucket (entry.taskIds.size), not the rolling
+    // global set size, so aggregated views show "instances in this period" not inflated counts.
+    const taskCountInBucket = entry.taskIds.size;
     recordBucketSample(
       entry,
       currentSessionsTotal,
       currentRequestsTotal,
-      currentSessionsByTask.size
+      taskCountInBucket
     );
   }
 
@@ -554,6 +582,8 @@ app.get("/api/history", (req, res) => {
         tasks_max: null,
         tasks_sum: 0,
         tasks_count: 0,
+        duration_sum: 0,
+        duration_count: 0,
       });
     }
   }
@@ -594,9 +624,11 @@ app.get("/api/history", (req, res) => {
     const fallbackSessions = sessionValues.reduce((sum, n) => sum + n, 0);
     const fallbackRequests = Math.round(requestValues.reduce((sum, n) => sum + n, 0));
 
+    // Aggregated view: use max distinct instances in the bucket (peak per period).
+    // Min/max ribbon shows range; center line = max so we see "peak instances per hour".
     const taskCountValue =
       useBucketStats && v.tasks_count > 0
-        ? Math.round(v.tasks_sum / v.tasks_count)
+        ? Math.round(v.tasks_max ?? v.tasks_sum / v.tasks_count)
         : fallbackTaskCount;
     const sessionsValue =
       useBucketStats && v.sessions_count > 0
@@ -606,6 +638,9 @@ app.get("/api/history", (req, res) => {
       useBucketStats && v.requests_count > 0
         ? Math.round(v.requests_sum / v.requests_count)
         : fallbackRequests;
+
+    const durationAvgSec =
+      v.duration_count > 0 ? Math.round((v.duration_sum / v.duration_count) * 1000) / 1000 : null;
 
     return {
       timestamp: v.timestamp,
@@ -627,6 +662,7 @@ app.get("/api/history", (req, res) => {
       // Backward compatibility for older frontend clients.
       request_in: requestsValue,
       request_out: requestsValue,
+      duration_avg_sec: durationAvgSec,
       activity_estimated: usedCarryForward,
       request_estimated: usedRequestCarryForward,
     };

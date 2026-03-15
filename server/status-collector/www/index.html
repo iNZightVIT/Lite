@@ -205,7 +205,8 @@
       <h2>Request History (per minute)</h2>
     </div>
     <div class="chart-legend">
-      <span><span class="swatch" style="background:#38bdf8"></span> Total Requests</span>
+      <span><span class="swatch" style="background:#38bdf8"></span> Requests / min (left)</span>
+      <span><span class="swatch" style="background:#a78bfa"></span> Avg duration s (right)</span>
     </div>
     <canvas id="request-chart" height="200"></canvas>
   </div>
@@ -593,10 +594,17 @@
         : Math.max(...reqVals, 1);
       const axisReq = prettyAxis(reqCeiling);
       const maxReq = axisReq.max;
+
+      const durVals = history.map(p => (p.duration_avg_sec != null && Number.isFinite(p.duration_avg_sec)) ? p.duration_avg_sec : null);
+      const durNumerics = durVals.filter(v => v != null);
+      const durCeiling = durNumerics.length > 0 ? Math.max(...durNumerics, 0.1) : 1;
+      const axisDur = prettyAxis(durCeiling, 5);
+      const maxDur = axisDur.max;
       const n = history.length;
 
       function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
       function yReq(v) { return pad.top + ch - (v / maxReq) * ch; }
+      function yDur(v) { return pad.top + ch - (v / maxDur) * ch; }
 
       if (rangeKey !== '1h') {
         // Request ribbon (min-max)
@@ -637,6 +645,24 @@
       ctx.closePath();
       ctx.fill();
 
+      // Duration line (right y-axis); only draw where we have duration data
+      const hasDuration = durNumerics.length > 0;
+      if (hasDuration) {
+        ctx.strokeStyle = '#a78bfa';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        let started = false;
+        for (let i = 0; i < n; i++) {
+          const v = durVals[i];
+          if (v == null) { started = false; continue; }
+          const px = x(i), py = yDur(v);
+          if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
       ctx.fillStyle = '#38bdf8';
       ctx.font = '11px system-ui';
       ctx.textAlign = 'right';
@@ -646,9 +672,10 @@
       }
 
       ctx.textAlign = 'left';
-      for (const v of axisReq.ticks) {
-        const y = pad.top + ch - (v / maxReq) * ch;
-        ctx.fillText(Math.round(v), pad.left + cw + 6, y + 4);
+      ctx.fillStyle = '#a78bfa';
+      for (const v of axisDur.ticks) {
+        const y = pad.top + ch - (v / maxDur) * ch;
+        ctx.fillText(v % 1 === 0 ? v + 's' : v.toFixed(2) + 's', pad.left + cw + 6, y + 4);
       }
 
       ctx.fillStyle = '#64748b';
