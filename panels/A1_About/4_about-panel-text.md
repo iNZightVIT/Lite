@@ -4,10 +4,6 @@ We have recently released a new deployment system for iNZight Lite in response t
 
 This new system uses a completely different AWS toolkit, so while we expect Lite to perform as well or better than previously, we cannot test every single feature, nor can we test a wide range of datasets. If you notice any issues, please report them to us.
 
-### Feedback and concerns
-
-To help us configure the new deployment, please take a moment to complete the feedback form: https://forms.gle/RGC3eT2HKNsm8VL89. You're more than welcome to fill this out any time you notice a difference, as this will help us gauge if any changes are having the desired effect.
-
 If you have any feedback (either about the new system or Lite in general), or have any concerns about how the changes might affect you, please reach out to us.
 
 Contact: inzightlite_support@stat.auckland.ac.nz
