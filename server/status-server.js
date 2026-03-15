@@ -25,11 +25,17 @@ let requestMetrics = {
   out_total: null,
   in_interval: 0,
   out_interval: 0,
+  in_duration_avg_sec: null,
+  out_duration_avg_sec: null,
   updated_at: null,
 };
 let previousRequestTotals = {
   in_total: null,
   out_total: null,
+  in_sum: null,
+  in_count: null,
+  out_sum: null,
+  out_count: null,
 };
 
 const version = (() => {
@@ -240,19 +246,28 @@ function parsePrometheusLabels(labelsRaw) {
 
 function sumPrometheusCounter(metricsText, metricName, matcher) {
   const escaped = metricName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const lineRegex = new RegExp(`^${escaped}\\{([^}]*)\\}\\s+([0-9.eE+-]+)$`, "gm");
+  const lineRegex = new RegExp(`^${escaped}\\{([^}]*)\\}\\s+([0-9.eE+-]+)\\s*$`, "gm");
   let sum = 0;
   let found = false;
   let match;
   while ((match = lineRegex.exec(metricsText)) !== null) {
     const labels = parsePrometheusLabels(match[1]);
     if (!matcher(labels)) continue;
-    const value = Number(match[2]);
+    const value = Number(String(match[2]).trim());
     if (!Number.isFinite(value)) continue;
     sum += value;
     found = true;
   }
   return found ? sum : null;
+}
+
+// Try several (metricName, matcher) pairs; return first non-null (for Traefik v2 vs v3).
+function sumPrometheusCounterAny(metricsText, pairs) {
+  for (const [name, matcher] of pairs) {
+    const v = sumPrometheusCounter(metricsText, name, matcher);
+    if (v != null) return v;
+  }
+  return null;
 }
 
 function getTraefikRequestTotals(metricsText) {
@@ -275,12 +290,46 @@ function getTraefikRequestTotals(metricsText) {
     );
   }
 
-  return { in_total: inTotal, out_total: outTotal };
+  // Duration: try known metric names (Traefik v2 vs v3). If still null, Traefik may not expose
+  // duration in Prometheus; inspect with: curl -s http://127.0.0.1:8080/metrics | grep -E 'duration|request'
+  const inSum = sumPrometheusCounterAny(metricsText, [
+    ["traefik_entrypoint_request_duration_seconds_sum", (l) => l.entrypoint === "web"],
+    ["http_server_request_duration_seconds_sum", () => true],
+    ["http_server_request_duration_sum", () => true],
+  ]);
+  const inCount = sumPrometheusCounterAny(metricsText, [
+    ["traefik_entrypoint_request_duration_seconds_count", (l) => l.entrypoint === "web"],
+    ["http_server_request_duration_seconds_count", () => true],
+    ["http_server_request_duration_count", () => true],
+  ]);
+  const outSum = sumPrometheusCounterAny(metricsText, [
+    ["traefik_service_request_duration_seconds_sum", (l) => l.service === "shiny-service@file"],
+    ["traefik_router_request_duration_seconds_sum", (l) => l.router === "shiny-router@file"],
+    ["http_client_request_duration_seconds_sum", () => true],
+    ["http_client_request_duration_sum", () => true],
+  ]);
+  const outCount = sumPrometheusCounterAny(metricsText, [
+    ["traefik_service_request_duration_seconds_count", (l) => l.service === "shiny-service@file"],
+    ["traefik_router_request_duration_seconds_count", (l) => l.router === "shiny-router@file"],
+    ["http_client_request_duration_seconds_count", () => true],
+    ["http_client_request_duration_count", () => true],
+  ]);
+
+  return {
+    in_total: inTotal,
+    out_total: outTotal,
+    in_sum: inSum,
+    in_count: inCount,
+    out_sum: outSum,
+    out_count: outCount,
+  };
 }
 
 async function updateRequestMetrics() {
   requestMetrics.in_interval = 0;
   requestMetrics.out_interval = 0;
+  requestMetrics.in_duration_avg_sec = null;
+  requestMetrics.out_duration_avg_sec = null;
   try {
     const resp = await fetch(TRAEFIK_METRICS_URL, {
       signal: AbortSignal.timeout(2_000),
@@ -306,6 +355,36 @@ async function updateRequestMetrics() {
       requestMetrics.out_interval = delta >= 0 ? Math.round(delta) : 0;
       previousRequestTotals.out_total = totals.out_total;
     }
+
+    if (
+      totals.in_sum != null &&
+      totals.in_count != null &&
+      previousRequestTotals.in_sum != null &&
+      previousRequestTotals.in_count != null
+    ) {
+      const dSum = totals.in_sum - previousRequestTotals.in_sum;
+      const dCount = totals.in_count - previousRequestTotals.in_count;
+      if (dCount > 0 && dSum >= 0) {
+        requestMetrics.in_duration_avg_sec = Math.round((dSum / dCount) * 1000) / 1000;
+      }
+    }
+    previousRequestTotals.in_sum = totals.in_sum;
+    previousRequestTotals.in_count = totals.in_count;
+
+    if (
+      totals.out_sum != null &&
+      totals.out_count != null &&
+      previousRequestTotals.out_sum != null &&
+      previousRequestTotals.out_count != null
+    ) {
+      const dSum = totals.out_sum - previousRequestTotals.out_sum;
+      const dCount = totals.out_count - previousRequestTotals.out_count;
+      if (dCount > 0 && dSum >= 0) {
+        requestMetrics.out_duration_avg_sec = Math.round((dSum / dCount) * 1000) / 1000;
+      }
+    }
+    previousRequestTotals.out_sum = totals.out_sum;
+    previousRequestTotals.out_count = totals.out_count;
 
     requestMetrics.updated_at = new Date().toISOString();
   } catch (err) {
@@ -341,6 +420,8 @@ function buildStatus() {
       out_total: requestMetrics.out_total,
       in_interval: requestMetrics.in_interval,
       out_interval: requestMetrics.out_interval,
+      in_duration_avg_sec: requestMetrics.in_duration_avg_sec,
+      out_duration_avg_sec: requestMetrics.out_duration_avg_sec,
       updated_at: requestMetrics.updated_at,
     },
     timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, "+0000"),

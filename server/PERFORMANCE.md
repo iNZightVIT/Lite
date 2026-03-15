@@ -36,6 +36,19 @@ After the timeout, Traefik fails the request (e.g. 504) instead of hanging.
 
 **Fix:** The observer that fetches status and reschedules only runs when `input$selector == "status"`.
 
+### 5. Request duration (latency) tracking
+
+**Added:** status-server now scrapes Traefik’s Prometheus histogram metrics (`traefik_entrypoint_request_duration_seconds_sum` / `_count` and `traefik_service_request_duration_seconds_*`) and computes the **average request duration over the last 30s** (per reporting interval). Exposed as `requests.in_duration_avg_sec` and `requests.out_duration_avg_sec` in `/__status` and in the ingest payload. Use these to spot when latency spikes (e.g. > 5–10s) and correlate with stuck sessions.
+
+**Durations stay null?** Traefik only exposes histogram `_sum`/`_count` after at least one request. You need: (1) some traffic (open the app in a browser, click around), (2) wait **two or three** 30s reporting intervals (60–90s) so a baseline is stored and the next scrape can compute an average over the interval. If still null, list what Traefik exposes: `docker exec <container> curl -s http://127.0.0.1:8080/metrics | grep -E 'duration|request'` and confirm lines like `traefik_entrypoint_request_duration_seconds_sum{...,entrypoint="web",...}` exist.
+
+## Further investigation if issues persist
+
+- **Traefik access logs:** Enable `accessLog.filePath` in `traefik.yml` and log request duration (and status code) per request to see which URLs or backends are slow.
+- **Which Shiny instance:** When users report “stuck”, check which instance they’re on (sticky cookie or load balancer logs). Correlate with that instance’s CPU/memory and request duration for that task.
+- **R event loop:** Shiny is single-threaded; any long-running reactive or `readLines`/HTTP call blocks the whole process. Profile with `profvis` or add logging around known slow paths (e.g. status fetch, heavy visualizations).
+- **Status collector:** If the dashboard or ingest is slow, check SQLite lock/contention and add indexes or batch deletes; consider request duration metrics in the collector DB for trend views.
+
 ## Remaining recommendations
 
 - **Health checks:** Traefik can use health checks to stop sending traffic to a backend that is down or repeatedly timing out. This would require a small health endpoint and Traefik service health-check configuration.
