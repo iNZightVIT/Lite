@@ -194,8 +194,8 @@
       </div>
     </div>
     <div class="chart-legend">
-      <span><span class="swatch" style="background:#38bdf8"></span> Sessions (left)</span>
-      <span><span class="swatch" style="background:#fb923c"></span> Instances (right)</span>
+      <span><span class="swatch" style="background:#38bdf8"></span> Peak sessions (left)</span>
+      <span><span class="swatch" style="background:#fb923c"></span> Peak instances (right)</span>
     </div>
     <canvas id="activity-chart" height="200"></canvas>
   </div>
@@ -436,17 +436,9 @@
       }
 
       const sessions = history.map(p => p.active_sessions ?? 0);
-      const sessionsMin = history.map(p => p.active_sessions_min ?? p.active_sessions ?? 0);
-      const sessionsMax = history.map(p => p.active_sessions_max ?? p.active_sessions ?? 0);
       const instances = history.map(p => p.task_count ?? 0);
-      const instancesMin = history.map(p => p.task_count_min ?? p.task_count ?? 0);
-      const instancesMax = history.map(p => p.task_count_max ?? p.task_count ?? 0);
-      const sessionsCeiling = rangeKey !== '1h'
-        ? Math.max(...sessionsMax, ...sessions, 1)
-        : Math.max(...sessions, 1);
-      const instancesCeiling = rangeKey !== '1h'
-        ? Math.max(...instancesMax, ...instances, 1)
-        : Math.max(...instances, 1);
+      const sessionsCeiling = Math.max(...sessions, 1);
+      const instancesCeiling = Math.max(...instances, 1);
       const axisSessions = prettyAxis(sessionsCeiling);
       const axisInstances = prettyAxis(instancesCeiling);
       const maxSessions = axisSessions.max;
@@ -457,27 +449,7 @@
       function yS(v) { return pad.top + ch - (v / maxSessions) * ch; }
       function yI(v) { return pad.top + ch - (v / maxInstances) * ch; }
 
-      if (rangeKey !== '1h') {
-        // Sessions ribbon (min-max)
-        ctx.fillStyle = 'rgba(56,189,248,0.14)';
-        ctx.beginPath();
-        ctx.moveTo(x(0), yS(sessionsMax[0]));
-        for (let i = 1; i < n; i++) ctx.lineTo(x(i), yS(sessionsMax[i]));
-        for (let i = n - 1; i >= 0; i--) ctx.lineTo(x(i), yS(sessionsMin[i]));
-        ctx.closePath();
-        ctx.fill();
-
-        // Instances ribbon (min-max)
-        ctx.fillStyle = 'rgba(251,146,60,0.12)';
-        ctx.beginPath();
-        ctx.moveTo(x(0), yI(instancesMax[0]));
-        for (let i = 1; i < n; i++) ctx.lineTo(x(i), yI(instancesMax[i]));
-        for (let i = n - 1; i >= 0; i--) ctx.lineTo(x(i), yI(instancesMin[i]));
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // Sessions line
+      // Sessions line (peak simultaneous users per interval)
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2;
       ctx.beginPath();

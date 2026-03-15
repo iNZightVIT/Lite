@@ -624,15 +624,14 @@ app.get("/api/history", (req, res) => {
     const fallbackSessions = sessionValues.reduce((sum, n) => sum + n, 0);
     const fallbackRequests = Math.round(requestValues.reduce((sum, n) => sum + n, 0));
 
-    // Aggregated view: use max distinct instances in the bucket (peak per period).
-    // Min/max ribbon shows range; center line = max so we see "peak instances per hour".
+    // Aggregated view: use peak (max) per interval — max simultaneous users and max instances.
     const taskCountValue =
       useBucketStats && v.tasks_count > 0
         ? Math.round(v.tasks_max ?? v.tasks_sum / v.tasks_count)
         : fallbackTaskCount;
     const sessionsValue =
       useBucketStats && v.sessions_count > 0
-        ? Math.round(v.sessions_sum / v.sessions_count)
+        ? Math.round(v.sessions_max ?? v.sessions_sum / v.sessions_count)
         : fallbackSessions;
     const requestsValue =
       useBucketStats && v.requests_count > 0
