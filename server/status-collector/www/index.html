@@ -80,7 +80,7 @@
     .chart-legend { display: flex; gap: 1.5rem; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem; }
     .chart-legend span { display: flex; align-items: center; gap: 4px; }
     .chart-legend .swatch { width: 12px; height: 3px; border-radius: 1px; }
-    canvas#activity-chart, canvas#request-chart { width: 100%; height: 200px; display: block; }
+    canvas#activity-chart, canvas#request-chart { width: 100%; height: 200px; display: block; cursor: crosshair; }
     .table-wrap { width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; background: #16213e; border-radius: 8px; overflow: hidden; }
     th, td { padding: 0.75rem 1rem; text-align: left; }
@@ -293,6 +293,44 @@
         `</svg> <span style="font-size:0.75rem;color:${color}">${last.toFixed(1)}%</span>`;
     }
 
+    // --- Chart hover: vertical line + tooltip ---
+    function drawChartTooltip(ctx, tipX, lines, W, H, pad, chartHeight) {
+      const lineHeight = 14;
+      const padding = 10;
+      const radius = 6;
+      ctx.font = '12px system-ui';
+      let maxW = 0;
+      for (const line of lines) {
+        const w = ctx.measureText(line).width;
+        if (w > maxW) maxW = w;
+      }
+      const boxW = maxW + padding * 2;
+      const boxH = lines.length * lineHeight + padding * 2;
+      let x = tipX - boxW / 2;
+      x = Math.max(4, Math.min(W - boxW - 4, x));
+      let y = pad.top - boxH - 10;
+      if (y < 4) y = pad.top + chartHeight + 10;
+      ctx.save();
+      ctx.strokeStyle = '#475569';
+      ctx.fillStyle = '#0f172a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(x, y, boxW, boxH, radius);
+      } else {
+        ctx.rect(x, y, boxW, boxH);
+      }
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#e2e8f0';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      lines.forEach((line, i) => {
+        ctx.fillText(line, x + padding, y + padding + i * lineHeight);
+      });
+      ctx.restore();
+    }
+
     // --- "X ago" label for chart x-axis ---
     function agoLabel(isoTimestamp, rangeKey) {
       const diffMs = Date.now() - new Date(isoTimestamp).getTime();
@@ -412,7 +450,7 @@
       });
     }
 
-    function drawActivityChart(history, rangeKey) {
+    function drawActivityChart(history, rangeKey, hoverIndex = null) {
       const canvas = document.getElementById('activity-chart');
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
@@ -533,9 +571,27 @@
       if (n > 1) {
         ctx.fillText('now', x(n - 1), pad.top + ch + 18);
       }
+
+      if (hoverIndex != null && hoverIndex >= 0 && hoverIndex < n) {
+        const xLine = x(hoverIndex);
+        ctx.strokeStyle = 'rgba(148,163,184,0.8)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xLine, pad.top);
+        ctx.lineTo(xLine, pad.top + ch);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        const pt = history[hoverIndex];
+        drawChartTooltip(ctx, xLine, [
+          agoLabel(pt.timestamp, rangeKey),
+          `Sessions: ${pt.active_sessions ?? '\u2013'}`,
+          `Instances: ${pt.task_count ?? '\u2013'}`,
+        ], W, H, pad, ch);
+      }
     }
 
-    function drawRequestChart(history, rangeKey) {
+    function drawRequestChart(history, rangeKey, hoverIndex = null) {
       const canvas = document.getElementById('request-chart');
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
@@ -662,6 +718,25 @@
       if (n > 1) {
         ctx.fillText('now', x(n - 1), pad.top + ch + 18);
       }
+
+      if (hoverIndex != null && hoverIndex >= 0 && hoverIndex < n) {
+        const xLine = x(hoverIndex);
+        ctx.strokeStyle = 'rgba(148,163,184,0.8)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xLine, pad.top);
+        ctx.lineTo(xLine, pad.top + ch);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        const pt = history[hoverIndex];
+        const durStr = pt.duration_avg_sec != null ? pt.duration_avg_sec + 's' : '\u2013';
+        drawChartTooltip(ctx, xLine, [
+          agoLabel(pt.timestamp, rangeKey),
+          `Requests: ${pt.request_total ?? pt.request_in ?? '\u2013'} / min`,
+          `Duration: ${durStr}`,
+        ], W, H, pad, ch);
+      }
     }
 
     async function loadSummaryAndHistory() {
@@ -742,6 +817,45 @@
       }
       if (requestCanvas._lastHistory) {
         drawRequestChart(requestCanvas._lastHistory, requestCanvas._lastRange || currentRange);
+      }
+    });
+
+    function chartHoverIndex(offsetX, pad, cw, n) {
+      if (n <= 0) return 0;
+      const t = (offsetX - pad.left) / cw;
+      const i = t * (n - 1);
+      return Math.round(Math.max(0, Math.min(n - 1, i)));
+    }
+
+    const pad = { top: 10, right: 50, bottom: 30, left: 50 };
+    const activityCanvas = document.getElementById('activity-chart');
+    const requestCanvas = document.getElementById('request-chart');
+
+    activityCanvas.addEventListener('mousemove', (e) => {
+      const history = activityCanvas._lastHistory;
+      if (!history || history.length === 0) return;
+      const rect = activityCanvas.getBoundingClientRect();
+      const cw = rect.width - pad.left - pad.right;
+      const index = chartHoverIndex(e.offsetX, pad, cw, history.length);
+      drawActivityChart(history, activityCanvas._lastRange || currentRange, index);
+    });
+    activityCanvas.addEventListener('mouseleave', () => {
+      if (activityCanvas._lastHistory) {
+        drawActivityChart(activityCanvas._lastHistory, activityCanvas._lastRange || currentRange, null);
+      }
+    });
+
+    requestCanvas.addEventListener('mousemove', (e) => {
+      const history = requestCanvas._lastHistory;
+      if (!history || history.length === 0) return;
+      const rect = requestCanvas.getBoundingClientRect();
+      const cw = rect.width - pad.left - pad.right;
+      const index = chartHoverIndex(e.offsetX, pad, cw, history.length);
+      drawRequestChart(history, requestCanvas._lastRange || currentRange, index);
+    });
+    requestCanvas.addEventListener('mouseleave', () => {
+      if (requestCanvas._lastHistory) {
+        drawRequestChart(requestCanvas._lastHistory, requestCanvas._lastRange || currentRange, null);
       }
     });
   </script>
