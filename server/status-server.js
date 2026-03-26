@@ -14,6 +14,12 @@ const STALE_THRESHOLD_MS = 120_000; // 2 minutes
 const STATUS_REPORT_URL = process.env.STATUS_REPORT_URL || "";
 const STATUS_REPORT_TOKEN = process.env.STATUS_REPORT_TOKEN || "";
 const TRAEFIK_METRICS_URL = process.env.TRAEFIK_METRICS_URL || "http://127.0.0.1:8080/metrics";
+const IDLE_THROTTLE_ENABLED = process.env.STATUS_IDLE_THROTTLE_ENABLED === "1";
+const parsedIdleWorkIntervals = parseInt(process.env.STATUS_IDLE_WORK_INTERVALS || "4", 10);
+const IDLE_WORK_INTERVALS =
+  Number.isFinite(parsedIdleWorkIntervals) && parsedIdleWorkIntervals >= 1
+    ? parsedIdleWorkIntervals
+    : 4;
 
 // --- Boot-time constants ---
 const BOOT_TIME = Date.now();
@@ -356,6 +362,8 @@ async function updateRequestMetrics() {
       previousRequestTotals.out_total = totals.out_total;
     }
 
+    // Average duration per request in this interval: (delta of cumulative sum) / (delta of count).
+    // Prometheus _seconds_sum is in seconds; result is seconds per request (not a total).
     if (
       totals.in_sum != null &&
       totals.in_count != null &&
@@ -365,7 +373,9 @@ async function updateRequestMetrics() {
       const dSum = totals.in_sum - previousRequestTotals.in_sum;
       const dCount = totals.in_count - previousRequestTotals.in_count;
       if (dCount > 0 && dSum >= 0) {
-        requestMetrics.in_duration_avg_sec = Math.round((dSum / dCount) * 1000) / 1000;
+        let avgSec = dSum / dCount;
+        if (avgSec > 60) avgSec = avgSec / 1000;
+        requestMetrics.in_duration_avg_sec = Math.round(avgSec * 1000) / 1000;
       }
     }
     previousRequestTotals.in_sum = totals.in_sum;
@@ -380,7 +390,9 @@ async function updateRequestMetrics() {
       const dSum = totals.out_sum - previousRequestTotals.out_sum;
       const dCount = totals.out_count - previousRequestTotals.out_count;
       if (dCount > 0 && dSum >= 0) {
-        requestMetrics.out_duration_avg_sec = Math.round((dSum / dCount) * 1000) / 1000;
+        let avgSec = dSum / dCount;
+        if (avgSec > 60) avgSec = avgSec / 1000;
+        requestMetrics.out_duration_avg_sec = Math.round(avgSec * 1000) / 1000;
       }
     }
     previousRequestTotals.out_sum = totals.out_sum;
@@ -396,6 +408,22 @@ function removeEndedSessions() {
   for (const [id, s] of sessions) {
     if (s.ended) sessions.delete(id);
   }
+}
+
+let idleSkippedIntervals = 0;
+
+function shouldRunHeavyWork(activeSessions) {
+  if (!IDLE_THROTTLE_ENABLED) return true;
+  if (activeSessions > 0) {
+    idleSkippedIntervals = 0;
+    return true;
+  }
+  if (idleSkippedIntervals < IDLE_WORK_INTERVALS - 1) {
+    idleSkippedIntervals += 1;
+    return false;
+  }
+  idleSkippedIntervals = 0;
+  return true;
 }
 
 // --- Build status JSON ---
@@ -430,7 +458,20 @@ function buildStatus() {
 
 // --- HTTP server ---
 const server = http.createServer((req, res) => {
-  if (req.method === "GET" && (req.url === "/" || req.url === "/__status")) {
+  let reqPath = req.url || "";
+  try {
+    reqPath = new URL(req.url || "/", "http://127.0.0.1").pathname;
+  } catch {
+    // fallback to raw path
+  }
+
+  if (req.method === "GET" && reqPath === "/healthz") {
+    res.writeHead(200, {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-cache",
+    });
+    res.end("ok");
+  } else if (req.method === "GET" && (reqPath === "/" || reqPath === "/__status")) {
     const status = buildStatus();
     const json = JSON.stringify(status, null, 2);
     res.writeHead(200, {
@@ -480,53 +521,73 @@ server.listen(PORT, "127.0.0.1", () => {
 // --- Combined reaper + reporter tick (every 30s) ---
 // Runs sequentially: reap stale sessions first, then report (if configured).
 // This avoids race conditions between independent timers.
-if (STATUS_REPORT_URL && STATUS_REPORT_TOKEN) {
+const reporterEnabled = Boolean(STATUS_REPORT_URL && STATUS_REPORT_TOKEN);
+if (reporterEnabled) {
   console.log(
     `[status-server] reporter enabled, posting to ${STATUS_REPORT_URL}/ingest every ${REPORT_INTERVAL_MS / 1000}s`,
   );
-
-  setInterval(async () => {
-    reapStaleSessions();
-    refreshShinyHealthCache();
-    await updateRequestMetrics();
-
-    try {
-      const status = buildStatus();
-      const payload = JSON.stringify(status);
-
-      const resp = await fetch(new URL("/ingest", STATUS_REPORT_URL), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${STATUS_REPORT_TOKEN}`,
-        },
-        body: payload,
-        signal: AbortSignal.timeout(10_000),
-      });
-
-      if (resp.ok) {
-        console.log(
-          `[status-server] report OK (${getActiveSessions()} active sessions)`,
-        );
-        removeEndedSessions();
-      } else {
-        console.error(`[status-server] report failed: HTTP ${resp.status}`);
-      }
-    } catch (err) {
-      console.error(`[status-server] report error: ${err.message}`);
-    }
-  }, REPORT_INTERVAL_MS);
 } else {
   console.log(
     "[status-server] reporter disabled (STATUS_REPORT_URL or STATUS_REPORT_TOKEN not set)",
   );
-  // Still reap stale sessions and refresh Shiny health cache
-  setInterval(async () => {
-    reapStaleSessions();
-    refreshShinyHealthCache();
-    await updateRequestMetrics();
-  }, REPORT_INTERVAL_MS);
 }
+if (IDLE_THROTTLE_ENABLED) {
+  console.log(
+    `[status-server] idle throttle enabled (heavy work every ${IDLE_WORK_INTERVALS} interval(s) while active sessions = 0)`,
+  );
+}
+
+let tickInProgress = false;
+async function runPeriodicTick() {
+  reapStaleSessions();
+  removeEndedSessions();
+  if (tickInProgress) {
+    console.warn("[status-server] previous tick still running; skipping overlap");
+    return;
+  }
+  tickInProgress = true;
+  try {
+    const activeSessions = getActiveSessions();
+    const runHeavyWork = shouldRunHeavyWork(activeSessions);
+
+    if (runHeavyWork) {
+      refreshShinyHealthCache();
+      await updateRequestMetrics();
+    }
+
+    if (reporterEnabled && runHeavyWork) {
+      try {
+        const status = buildStatus();
+        const payload = JSON.stringify(status);
+
+        const resp = await fetch(new URL("/ingest", STATUS_REPORT_URL), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${STATUS_REPORT_TOKEN}`,
+          },
+          body: payload,
+          signal: AbortSignal.timeout(10_000),
+        });
+
+        if (resp.ok) {
+          console.log(
+            `[status-server] report OK (${activeSessions} active sessions)`,
+          );
+        } else {
+          console.error(`[status-server] report failed: HTTP ${resp.status}`);
+        }
+      } catch (err) {
+        console.error(`[status-server] report error: ${err.message}`);
+      }
+    }
+  } finally {
+    tickInProgress = false;
+  }
+}
+setInterval(() => {
+  void runPeriodicTick();
+}, REPORT_INTERVAL_MS);
 
 // Populate cache at startup so first /__status is fast
 refreshShinyHealthCache();
