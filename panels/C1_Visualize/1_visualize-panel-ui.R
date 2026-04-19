@@ -135,6 +135,7 @@ vis.sidebarPanel <- function() {
           uiOutput("customize.labels.panel"),
           uiOutput("add.jitter.panel"),
           uiOutput("add.rugs.panel"),
+          uiOutput("adjust.axis.log.panel"),
           uiOutput("adjust.axis.panel"),
           uiOutput("adjust.number.bars.panel")
         ),
@@ -199,7 +200,11 @@ vis.mainPanel <- function() {
               column(10, hr())
             ),
             helpText("Plots for visualizing data."),
-            plotOutput("visualize.plot"),
+            # div(
+            #   style = "height: 800px;",
+            #   plotOutput("visualize.plot", height = "100%"),
+            # ),
+            plotOutput("visualize.plot", height = "80vh"),
             br(),
             fixedRow(
               column(
