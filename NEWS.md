@@ -1,3 +1,7 @@
+# Develop
+
+- add "log" transform to Add to Plot > Axis features
+
 # 2026.01.3
 
 - Prevent non-fatal tab error during app startup
