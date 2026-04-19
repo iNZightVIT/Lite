@@ -135,6 +135,7 @@ vis.sidebarPanel <- function() {
           uiOutput("customize.labels.panel"),
           uiOutput("add.jitter.panel"),
           uiOutput("add.rugs.panel"),
+          uiOutput("adjust.axis.log.panel"),
           uiOutput("adjust.axis.panel"),
           uiOutput("adjust.number.bars.panel")
         ),

@@ -25,6 +25,13 @@ vis.data <- reactive({
 # convert old vis.par() to a new format so its compatible with
 # iNZightPlots:::inzplot (iNZightPlots@2.15.0)
 new_vis_par <- function(vis_par) {
+  if(!is.null(input$log_axis_x) && input$log_axis_x != "none") {
+    vis_par$transform["x"] <- list(input$log_axis_x)
+  }
+  if(!is.null(input$log_axis_y) && input$log_axis_y != "none") {
+    vis_par$transform["y"] <- list(input$log_axis_y)
+  }
+  
   # ignore if x or y is a vector
   if (length(vis_par$x) > 1 || length(vis_par$y) > 1) {
     return(vis_par)
@@ -1549,12 +1556,13 @@ output$add_inference <- renderUI({
       selected = input$inference_type1,
       inline = T
     )
-
+    
     confidence.interval.check <- checkboxInput(
       "confidence_interval1",
       label = p("Confidence interval (%)"),
       value = input$confidence_interval1
     )
+    
     # prevent re-rendering the ci width plot input as disabled by default
     # when the reactive ci_with() changes
     ci_width_plot <- numericInputIcon(
@@ -1591,8 +1599,6 @@ output$add_inference <- renderUI({
       label = "Get values",
       style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
     )
-
-
 
     intervals <- NULL
     graphical.par$inference.par <- NULL
@@ -1804,6 +1810,8 @@ observe({
   input$vari2
   input$ci.width.plot
   input$add.inference
+  input$log_axis_x
+  input$log_axis_y
   isolate({
     graphical.par$inference.par <- NULL
     intervals <- NULL
@@ -3774,6 +3782,7 @@ output$customize.labels.panel <- renderUI({
         label = "Submit"
       ))
     )
+    
     if (!is.null(vis.data()) && !is.null(input$vari1) &&
       !is.null(input$vari2) &&
       input$vari1 %in% colnames(get.data.set())) {
@@ -4881,6 +4890,73 @@ observe({
     }
   })
 })
+
+# panel for logging X and Y axis
+output$adjust.axis.log.panel <- renderUI({
+  get.data.set()
+  ret <- NULL
+  input$vari1
+  input$vari2
+  
+  isolate({
+    logging_available = FALSE
+    ret <- div(h5(strong("Axis Logging")))
+    if (!input$vari1 %in% "none" && (class(vis.data()[, input$vari1]) %in% c("numeric", "integer"))) {
+      log_axis_x.dropdown <- selectInput(
+        "log_axis_x",
+        label = NULL,
+        choices = c("none", "log", "log10"),
+        selected = input$log_axis_x
+      )
+      ret = tagAppendChild(
+        ret, 
+        fixedRow(
+          column(width = 3, p("Log X-axis")),
+          column(width = 6, log_axis_x.dropdown)
+        )
+      )
+      logging_available = TRUE
+    }
+    if (!input$vari2 %in% "none" && (class(vis.data()[, input$vari2]) %in% c("numeric", "integer"))) {
+      log_axis_y.dropdown <- selectInput(
+        "log_axis_y",
+        label = NULL,
+        choices = c("none", "log", "log10"),
+        selected = input$log_axis_y
+      )
+      ret = tagAppendChild(
+        ret,
+        fixedRow(
+          column(width = 3, p("Log Y-axis")),
+          column(width = 6, log_axis_y.dropdown)
+        )
+      )
+      logging_available = TRUE
+    }
+    
+    if (!logging_available) {
+      ret = NULL
+    }
+    ret
+  })
+})
+# observe({
+#   input$log_axis_x
+#   input$log_axis_y
+#   # browser()
+#   # isolate({
+#     
+#     if(!is.null(vis.par())) {
+#       browser()
+#       if(!is.null(input$log_axis_x) && input$log_axis_x != "none") {
+#         
+#         # vis.par$transform["x"] <- list("log10")
+#         vis.par()$transform["x"] <- list(input$log_axis_x)
+#       }
+#     }
+# 
+#   # })
+# })
 
 # panel for wigets to adjust the x and y axis limits
 output$adjust.axis.panel <- renderUI({
