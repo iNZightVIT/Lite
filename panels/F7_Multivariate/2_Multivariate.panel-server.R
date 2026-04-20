@@ -469,8 +469,8 @@ output$mv.plot <- renderPlot({
   isolate({
     tryCatch({
       # mul.plot.parm()
-      zxc = mul.plot.parm()
-      if(is.null(zxc)) {
+      result = mul.plot.parm()
+      if(is.null(result)) {
         plot.new()
         text(0.5, 0.5, labels = "Error in generating plot. Possibily due to missing values in the data. Try removing missing values and try again.")
       }
