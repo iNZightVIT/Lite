@@ -232,10 +232,21 @@ output$mr.var <- renderUI({
     binaryVar <- getVars(get.data.set())
     vars <- names(get.data.set())
     if (length(binaryVar) == 0) {
+      alert_title = "No Binary Variables"
+      alert_subtitle = "Unable to find any binary variables. Code any variables as: ['yes', 'no'] or [0,1] to use this module."
       shinyalert(
-        title = "No Binary Variables",
-        text = "Unable to find any binary variables. Code any variables as: ['yes', 'no'] or [0,1] to use this module.",
+        title = alert_title,
+        text = alert_subtitle,
         type = "error"
+      )
+      div(
+        style = paste(
+          "position: fixed; inset: 0;",
+          "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+          "text-align: center; padding: 2rem; pointer-events: none;"
+        ),
+        h4(strong(alert_title)),
+        h5(alert_subtitle)
       )
     } else {
       list(
