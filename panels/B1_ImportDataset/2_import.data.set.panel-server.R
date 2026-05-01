@@ -499,10 +499,16 @@ observeEvent(input$import_set, {
     input_url <- trimws(input_url)
 
     isolate({
+      parsed_url = curl::curl_parse_url(input_url)
+      if (grepl("lite|auckland", parsed_url$host) && "params" %in% names(parsed_url)) {
+        params = parsed_url$params
+        if("url" %in% names(params)) {
+          input_url = unname(parsed_url$params["url"])
+        }
+      }
+      
       if(grepl("docs\\.google\\.com/spreadsheets", input_url)) {
-        print("t")
         if(grepl("usp=sharing", input_url)) {
-          print("t2")
           import_reactives$success <- FALSE
           import_reactives$message <- paste(
             "Incorrect Google Sheets URL detected\n",
