@@ -79,9 +79,9 @@ observe({
             input$select.reorder.column
           ]]))]
 
-          if (!is.null(input$select.reorder.item) &&
-            length(input$select.reorder.item) == length(rm.na.name)) {
-            levels <- as.character(input$select.reorder.item)
+          if (!is.null(input$sortable_reorder_item) &&
+            length(input$sortable_reorder_item) == length(rm.na.name)) {
+            levels <- as.character(input$sortable_reorder_item)
             temp <- iNZightTools::reorder_levels(
               get.data.set(), var, levels,
               name = make_names(name)
@@ -149,11 +149,10 @@ observe({
         ))
       }
     }
-    updateSelectInput(
+    sortable::update_rank_list(
       session = session,
-      inputId = "select.reorder.item",
-      selected = "",
-      choices = choices
+      css_id = "sortable_reorder_item",
+      labels = choices
     )
   }
 })
