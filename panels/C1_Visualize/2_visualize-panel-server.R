@@ -60,12 +60,6 @@ new_vis_par <- function(vis_par) {
   vis_par$g1 <- NULL
   vis_par$g2 <- NULL
 
-  # drop varnames (they are in formula)
-  vis_par$varnames$x <- NULL
-  vis_par$varnames$y <- NULL
-  vis_par$varnames$g1 <- NULL
-  vis_par$varnames$g2 <- NULL
-
   return(vis_par)
 }
 
@@ -1223,6 +1217,24 @@ observe({
   }
 })
 
+plot_dimensions = reactive({
+  list(
+    height = if (is.null(input$visualize_plot_height)) 60 else input$visualize_plot_height,
+    width = if (is.null(input$visualize_plot_width)) 100 else input$visualize_plot_width
+  )
+})
+
+plot_dimensions_debounced = shiny::debounce(plot_dimensions, millis = 250)
+
+output$visualize.plot.container = renderUI({
+  dims <- plot_dimensions_debounced()
+  plotOutput(
+    "visualize.plot",
+    height = paste0(dims$height, "vh"),
+    width = paste0(dims$width, "%")
+  )
+})
+
 output$visualize.plot <- renderPlot({
   isolate({
     # some of the graphical parameters need
@@ -1251,9 +1263,9 @@ output$visualize.plot <- renderPlot({
       is.numeric(vis.data()[[plot.par$y]])) {
       temp <- vis.par()
       temp$trend.parallel <- graphical.par$trend.parallel
+
       ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
       new_par <- new_vis_par(vis_par = temp)
-
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
@@ -5299,7 +5311,7 @@ output$adjust.number.bars.panel <- renderUI({
           (class(get.data.set()[, input$vari2]) %in% "factor" |
             class(get.data.set()[, input$vari2]) %in% "character")))) {
       plot.par$zoombar <- NULL
-
+    
       if ((!is.null(input$vari1) &&
         !is.null(input$vari2)) &&
         (input$vari1 %in% colnames(get.data.set()) &&
@@ -7550,7 +7562,7 @@ observe({
           graphical.par$scatter.grid.bins <- 50
         }
       })
-
+      
       # plot it
       if (!is.null(vis.par())) {
         dafr <- get.data.set()
