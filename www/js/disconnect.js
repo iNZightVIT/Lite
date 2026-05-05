@@ -3,6 +3,10 @@ $(function () {
   const url =
     "https://raw.githubusercontent.com/iNZightVIT/inzight-www/main/iNZight/lite/ticker.json";
   $(document).on("shiny:disconnected", function (e) {
+    if (window.__inzightReconnectInProgress) {
+      return;
+    }
+
     // let log = JSON.parse($("#shinylogs-tracking").html());
     $("body").load("disconnectedModal.html", function () {
       $.getJSON(url, function (tickerData) {
@@ -44,7 +48,6 @@ $(function () {
     // track disconnect in matomo, if enabled
     if (window.plausible) {
       plausible("Disconnect");
-      console.log(plausible);
     }
   });
 });

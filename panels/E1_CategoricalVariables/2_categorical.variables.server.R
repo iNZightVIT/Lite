@@ -79,9 +79,9 @@ observe({
             input$select.reorder.column
           ]]))]
 
-          if (!is.null(input$select.reorder.item) &&
-            length(input$select.reorder.item) == length(rm.na.name)) {
-            levels <- as.character(input$select.reorder.item)
+          if (!is.null(input$sortable_reorder_item) &&
+            length(input$sortable_reorder_item) == length(rm.na.name)) {
+            levels <- as.character(input$sortable_reorder_item)
             temp <- iNZightTools::reorder_levels(
               get.data.set(), var, levels,
               name = make_names(name)
@@ -149,11 +149,10 @@ observe({
         ))
       }
     }
-    updateSelectInput(
+    sortable::update_rank_list(
       session = session,
-      inputId = "select.reorder.item",
-      selected = "",
-      choices = choices
+      css_id = "sortable_reorder_item",
+      labels = choices
     )
   }
 })
@@ -383,7 +382,7 @@ observe({
 
 output$text_combine <- renderPrint({
   if (length(input$select.combine.columns) > 0) {
-    temp <- iNZightTools::combineCatVars(
+    temp <- iNZightTools::combine_vars(
       get.data.set(), input$select.combine.columns
     )
     print(table(temp[, ncol(temp)]))
@@ -396,7 +395,7 @@ observe({
   input$combine
   isolate({
     if (!is.null(input$combine) && input$combine > 0) {
-      temp <- iNZightTools::combineCatVars(
+      temp <- iNZightTools::combine_vars(
         get.data.set(), input$select.combine.columns
       )
       if (!is.null(temp)) {

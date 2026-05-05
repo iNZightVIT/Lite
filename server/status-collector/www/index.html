@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iNZight Lite Status Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 1.5rem; background: #1a1a2e; color: #eee; }
+    h1 { margin: 0; font-size: 1.5rem; }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .summary { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .card { background: #16213e; padding: 1rem 1.5rem; border-radius: 8px; min-width: 140px; }
+    .card .label { font-size: 0.85rem; color: #94a3b8; }
+    .card .value { font-size: 1.75rem; font-weight: 600; }
+    .chart-container {
+      background: #16213e; border-radius: 8px; padding: 1rem;
+      margin-bottom: 1.5rem; position: relative;
+    }
+    .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .chart-header h2 { margin: 0; font-size: 1rem; color: #94a3b8; }
+    .range-selector { display: flex; gap: 4px; }
+    .chart-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .range-btn {
+      background: transparent; border: 1px solid #334155; color: #94a3b8;
+      padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    .range-btn:hover { border-color: #64748b; color: #e2e8f0; }
+    .range-btn.active { background: #334155; color: #e2e8f0; border-color: #64748b; }
+    .host-filter {
+      position: relative;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+    }
+    .host-filter-btn {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      min-width: 150px;
+      text-align: left;
+    }
+    .host-filter-btn:hover { border-color: #64748b; color: #e2e8f0; }
+    .host-filter-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      z-index: 10;
+      min-width: 220px;
+      max-height: 240px;
+      overflow: auto;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 0.4rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      display: none;
+    }
+    .host-filter-menu.open { display: block; }
+    .host-option {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.4rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .host-option:hover { background: rgba(148,163,184,0.1); }
+    .host-option input { margin: 0; }
+    .chart-legend { display: flex; gap: 1.5rem; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem; }
+    .chart-legend span { display: flex; align-items: center; gap: 4px; }
+    .chart-legend .swatch { width: 12px; height: 3px; border-radius: 1px; }
+    canvas#activity-chart, canvas#request-chart { width: 100%; height: 200px; display: block; cursor: crosshair; }
+    #chart-tooltip {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      pointer-events: none;
+      font-size: 12px;
+      font-family: system-ui, sans-serif;
+      color: #e2e8f0;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 10px 12px;
+      line-height: 1.4;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background: #16213e; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 0.75rem 1rem; text-align: left; }
+    th { background: #0f3460; font-size: 0.85rem; color: #94a3b8; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+    .spark { vertical-align: middle; }
+    .health-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .health-green { background: #22c55e; }
+    .health-yellow { background: #eab308; }
+    .health-red { background: #ef4444; }
+    .updated { font-size: 0.8rem; color: #64748b; margin-top: 1rem; }
+    .version-tag { font-size: 0.75rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 3px; }
+    .hostname { font-size: 0.8rem; color: #64748b; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .page-header {
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+      .page-header h1 {
+        margin-bottom: 0.25rem;
+      }
+      .page-header .host-filter {
+        justify-self: end;
+      }
+      .page-header .host-filter-btn {
+        min-width: 180px;
+      }
+      .page-header .host-filter-menu {
+        min-width: 0;
+        width: min(260px, calc(100vw - 2rem));
+        max-width: calc(100vw - 2rem);
+        right: 0;
+        left: auto;
+      }
+      .chart-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .range-selector { flex-wrap: wrap; }
+      .table-wrap { overflow: visible; }
+      table, thead, tbody, tr, td { display: block; width: 100%; }
+      thead { display: none; }
+      table { background: transparent; border-radius: 0; }
+      tbody { display: grid; gap: 0.75rem; }
+      tr {
+        background: #16213e;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        padding: 0.35rem 0.75rem;
+      }
+      tr:nth-child(even) { background: #16213e; }
+      td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        text-align: right;
+      }
+      td:last-child { border-bottom: 0; }
+      td::before {
+        content: attr(data-label);
+        color: #94a3b8;
+        font-size: 0.8rem;
+        text-align: left;
+        white-space: nowrap;
+      }
+      td code {
+        overflow-wrap: anywhere;
+        max-width: 70%;
+      }
+      td[data-label="Health"] .health-dot { margin-left: auto; }
+      td[data-label="Memory %"] .spark,
+      td[data-label="CPU %"] .spark { flex-shrink: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>iNZight Lite Status Dashboard</h1>
+    <div class="host-filter">
+      <button type="button" id="host-filter-btn" class="host-filter-btn">All hostnames</button>
+      <div id="host-filter-menu" class="host-filter-menu"></div>
+    </div>
+  </div>
+  <div class="summary">
+    <div class="card">
+      <div class="label">Instances</div>
+      <div class="value" id="task-count">&ndash;</div>
+    </div>
+    <div class="card">
+      <div class="label">Sessions</div>
+      <div class="value" id="active-sessions">&ndash;</div>
+    </div>
+    <div class="card">
+      <div class="label">Requests / min</div>
+      <div class="value" id="request-total">&ndash;</div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-header">
+      <h2>Activity History</h2>
+      <div class="chart-controls">
+        <div class="range-selector">
+          <button class="range-btn active" data-range="1h">1h</button>
+          <button class="range-btn" data-range="6h">6h</button>
+          <button class="range-btn" data-range="1d">1d</button>
+          <button class="range-btn" data-range="7d">7d</button>
+        </div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span><span class="swatch" style="background:#38bdf8"></span> Peak sessions (left)</span>
+      <span><span class="swatch" style="background:#fb923c"></span> Peak instances (right)</span>
+    </div>
+    <canvas id="activity-chart" height="200"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-header">
+      <h2>Request History (per minute)</h2>
+    </div>
+    <div class="chart-legend">
+      <span><span class="swatch" style="background:#38bdf8"></span> Requests / min (left)</span>
+      <span><span class="swatch" style="background:#a78bfa"></span> Avg duration s (right)</span>
+    </div>
+    <canvas id="request-chart" height="200"></canvas>
+  </div>
+
+  <div id="chart-tooltip"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Task ID</th>
+          <th>Version</th>
+          <th>Hostname</th>
+          <th>Sessions</th>
+          <th>Health</th>
+          <th>Memory %</th>
+          <th>CPU %</th>
+        </tr>
+      </thead>
+      <tbody id="tasks-body"></tbody>
+    </table>
+  </div>
+  <div class="updated" id="updated"></div>
+
+  <script>
+    let currentRange = '1h';
+    let selectedHostnames = new Set();
+    let availableHostnames = [];
+    let hostFilterOpen = false;
+
+    function escapeHtml(str) {
+      if (str == null) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function fmtTime(s) {
+      if (s == null) return '\u2013';
+      try { return new Date(s).toLocaleString(); } catch (e) { return '\u2013'; }
+    }
+    function fmtAgo(s) {
+      if (s == null) return '\u2013';
+      try {
+        const d = new Date(s);
+        if (isNaN(d.getTime())) return '\u2013';
+        const sec = Math.floor((Date.now() - d.getTime()) / 1000);
+        if (sec < 0) return 'just now';
+        if (sec < 60) return sec + 's ago';
+        const min = Math.floor(sec / 60);
+        if (min < 60) return min + 'm ago';
+        const hr = Math.floor(min / 60);
+        if (hr < 24) return hr + 'h ago';
+        return Math.floor(hr / 24) + 'd ago';
+      } catch (e) { return '\u2013'; }
+    }
+    function fmtUptime(sec) {
+      if (sec == null) return '\u2013';
+      const m = Math.floor(sec / 60), h = Math.floor(m / 60);
+      if (h) return h + 'h ' + (m % 60) + 'm';
+      if (m) return m + 'm';
+      return sec + 's';
+    }
+    function fmtNum(n) { return n != null ? String(n) : '\u2013'; }
+
+    function healthDot(lastSeen) {
+      if (!lastSeen) return '<span class="health-dot health-red"></span>';
+      const sec = (Date.now() - new Date(lastSeen)) / 1000;
+      const ago = escapeHtml(fmtAgo(lastSeen));
+      if (sec < 90) return `<span class="health-dot health-green" title="${ago}"></span>`;
+      if (sec < 180) return `<span class="health-dot health-yellow" title="${ago}"></span>`;
+      return `<span class="health-dot health-red" title="${ago}"></span>`;
+    }
+
+    // --- Sparkline SVG generator ---
+    function sparkline(values, color, w, h) {
+      if (!values || values.length === 0) return '';
+      const nums = values.map(v => v ?? 0);
+      const max = Math.max(...nums, 1);
+      const min = Math.min(...nums, 0);
+      const range = max - min || 1;
+      const step = w / Math.max(nums.length - 1, 1);
+      const points = nums.map((v, i) =>
+        `${(i * step).toFixed(1)},${(h - ((v - min) / range) * (h - 2) - 1).toFixed(1)}`
+      ).join(' ');
+      const last = nums[nums.length - 1];
+      return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+        `<polyline fill="none" stroke="${color}" stroke-width="1.5" points="${points}"/>` +
+        `</svg> <span style="font-size:0.75rem;color:${color}">${last.toFixed(1)}%</span>`;
+    }
+
+    // --- Chart hover: HTML tooltip (not drawn on canvas so it isn't clipped) ---
+    function showChartTooltip(canvas, xLineCanvas, lines) {
+      const tooltip = document.getElementById('chart-tooltip');
+      if (!tooltip) return;
+      const pad = { top: 10, left: 50 };
+      tooltip.innerHTML = lines.map((line) => `<div>${escapeHtml(line)}</div>`).join('');
+      tooltip.style.display = 'block';
+      const rect = canvas.getBoundingClientRect();
+      let left = rect.left + xLineCanvas - tooltip.offsetWidth / 2;
+      const top = rect.top + pad.top - tooltip.offsetHeight - 8;
+      const margin = 8;
+      left = Math.max(margin, Math.min(window.innerWidth - tooltip.offsetWidth - margin, left));
+      const topClamped = Math.max(margin, Math.min(window.innerHeight - tooltip.offsetHeight - margin, top));
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = topClamped + 'px';
+    }
+    function hideChartTooltip() {
+      const tooltip = document.getElementById('chart-tooltip');
+      if (tooltip) tooltip.style.display = 'none';
+    }
+
+    // --- "X ago" label for chart x-axis ---
+    function agoLabel(isoTimestamp, rangeKey) {
+      const diffMs = Date.now() - new Date(isoTimestamp).getTime();
+      const diffMin = Math.round(diffMs / 60000);
+      const diffHr = diffMs / 3600000;
+      if (diffMin <= 0) return 'now';
+      if (rangeKey === '1h') return diffMin + 'm';
+      if (rangeKey === '6h') return diffMin < 60 ? diffMin + 'm' : Math.round(diffHr) + 'h';
+      if (rangeKey === '1d') return Math.round(diffHr) + 'h';
+      // 7d
+      const diffD = diffHr / 24;
+      return diffD >= 1 ? Math.round(diffD) + 'd' : Math.round(diffHr) + 'h';
+    }
+
+    // --- Pretty axis: returns { max, ticks } for nice round labels (1, 2, 5 sequence) ---
+    function prettyAxis(maxVal, preferredTicks = 5) {
+      if (maxVal <= 0) return { max: 1, ticks: [0, 1] };
+      const roughStep = maxVal / Math.max(preferredTicks - 1, 1);
+      const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+      const nice = [1, 2, 5, 10];
+      let step = nice[nice.length - 1] * magnitude;
+      let prettyMax = Math.ceil(maxVal / step) * step;
+      let ticks = [];
+      for (const s of nice) {
+        step = s * magnitude;
+        prettyMax = Math.ceil(maxVal / step) * step;
+        ticks = [];
+        for (let v = 0; v <= prettyMax + step * 0.001; v += step) ticks.push(v);
+        if (ticks.length <= 8 && ticks.length >= 2) break;
+      }
+      return { max: prettyMax, ticks };
+    }
+
+    function filteredQuery(basePath, includeRange = false) {
+      const params = new URLSearchParams();
+      if (includeRange) {
+        params.set('range', currentRange);
+      }
+      if (selectedHostnames.size > 0) {
+        params.set('hostnames', Array.from(selectedHostnames).join(','));
+      }
+      const qs = params.toString();
+      return qs ? `${basePath}?${qs}` : basePath;
+    }
+
+    function historyQuery() { return filteredQuery('/api/history', true); }
+    function summaryQuery() { return filteredQuery('/api/summary'); }
+    function tasksQuery() { return filteredQuery('/api/tasks'); }
+
+    function updateHostFilterButton() {
+      const btn = document.getElementById('host-filter-btn');
+      if (selectedHostnames.size === 0) {
+        btn.textContent = 'All hostnames';
+      } else if (selectedHostnames.size === 1) {
+        btn.textContent = Array.from(selectedHostnames)[0];
+      } else {
+        btn.textContent = `${selectedHostnames.size} hostnames selected`;
+      }
+    }
+
+    function renderHostFilterMenu() {
+      const menu = document.getElementById('host-filter-menu');
+      const selected = selectedHostnames;
+      const allChecked = selected.size === 0;
+      const hostItems = availableHostnames.map(host => {
+        const checked = selected.has(host) ? 'checked' : '';
+        return `
+          <label class="host-option">
+            <input type="checkbox" data-host="${escapeHtml(host)}" ${checked}>
+            <span>${escapeHtml(host)}</span>
+          </label>`;
+      }).join('');
+
+      menu.innerHTML = `
+        <label class="host-option">
+          <input type="checkbox" data-host="__all__" ${allChecked ? 'checked' : ''}>
+          <span>All hostnames</span>
+        </label>
+        ${hostItems}
+      `;
+
+      menu.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+        input.addEventListener('change', async (e) => {
+          const host = e.target.dataset.host;
+          if (host === '__all__') {
+            selectedHostnames.clear();
+          } else {
+            const checkedHosts = Array.from(menu.querySelectorAll('input[data-host]:not([data-host="__all__"])'))
+              .filter(i => i.checked)
+              .map(i => i.dataset.host);
+
+            if (checkedHosts.length === 0 || checkedHosts.length === availableHostnames.length) {
+              selectedHostnames.clear();
+            } else {
+              selectedHostnames = new Set(checkedHosts);
+            }
+          }
+          renderHostFilterMenu();
+          updateHostFilterButton();
+          await loadSummaryHistoryAndTasks();
+        });
+      });
+    }
+
+    function initHostFilter() {
+      const btn = document.getElementById('host-filter-btn');
+      const menu = document.getElementById('host-filter-menu');
+      btn.addEventListener('click', () => {
+        hostFilterOpen = !hostFilterOpen;
+        menu.classList.toggle('open', hostFilterOpen);
+      });
+      document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+          hostFilterOpen = false;
+          menu.classList.remove('open');
+        }
+      });
+    }
+
+    function drawActivityChart(history, rangeKey, hoverIndex = null) {
+      const canvas = document.getElementById('activity-chart');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      const W = rect.width, H = rect.height;
+      const pad = { top: 10, right: 50, bottom: 30, left: 50 };
+      const cw = W - pad.left - pad.right;
+      const ch = H - pad.top - pad.bottom;
+
+      ctx.clearRect(0, 0, W, H);
+
+      if (!history || history.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No history data', W / 2, H / 2);
+        return;
+      }
+
+      const sessions = history.map(p => p.active_sessions ?? 0);
+      const instances = history.map(p => p.task_count ?? 0);
+      const sessionsCeiling = Math.max(...sessions, 1);
+      const instancesCeiling = Math.max(...instances, 1);
+      const axisSessions = prettyAxis(sessionsCeiling);
+      const axisInstances = prettyAxis(instancesCeiling);
+      const maxSessions = axisSessions.max;
+      const maxInstances = axisInstances.max;
+      const n = history.length;
+
+      function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
+      function yS(v) { return pad.top + ch - (v / maxSessions) * ch; }
+      function yI(v) { return pad.top + ch - (v / maxInstances) * ch; }
+
+      // Sessions line (peak simultaneous users per interval)
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const px = x(i), py = yS(sessions[i]);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      if (n > 1 && history[n - 1].activity_estimated) {
+        // Draw a subtle dotted tail to indicate latest value is estimated.
+        ctx.save();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x(n - 2), yS(sessions[n - 2]));
+        ctx.lineTo(x(n - 1), yS(sessions[n - 1]));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Fill under sessions
+      ctx.fillStyle = 'rgba(56,189,248,0.08)';
+      ctx.beginPath();
+      ctx.moveTo(x(0), yS(sessions[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yS(sessions[i]));
+      ctx.lineTo(x(n - 1), pad.top + ch);
+      ctx.lineTo(x(0), pad.top + ch);
+      ctx.closePath();
+      ctx.fill();
+
+      // Instances line
+      ctx.strokeStyle = '#fb923c';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const px = x(i), py = yI(instances[i]);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (n > 1 && history[n - 1].activity_estimated) {
+        ctx.save();
+        ctx.strokeStyle = '#fb923c';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x(n - 2), yI(instances[n - 2]));
+        ctx.lineTo(x(n - 1), yI(instances[n - 1]));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Left y-axis labels (sessions)
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'right';
+      for (const v of axisSessions.ticks) {
+        const y = pad.top + ch - (v / maxSessions) * ch;
+        ctx.fillText(Math.round(v), pad.left - 6, y + 4);
+      }
+
+      // Right y-axis labels (instances)
+      ctx.fillStyle = '#fb923c';
+      ctx.textAlign = 'left';
+      for (const v of axisInstances.ticks) {
+        const y = pad.top + ch - (v / maxInstances) * ch;
+        ctx.fillText(Math.round(v), pad.left + cw + 6, y + 4);
+      }
+
+      // X-axis "ago" labels
+      ctx.fillStyle = '#64748b';
+      ctx.textAlign = 'center';
+      ctx.font = '10px system-ui';
+      const labelCount = Math.min(n, Math.floor(cw / 70));
+      const step = Math.max(1, Math.floor(n / labelCount));
+      for (let i = 0; i < n; i += step) {
+        const label = agoLabel(history[i].timestamp, rangeKey);
+        ctx.fillText(label, x(i), pad.top + ch + 18);
+      }
+      // Always label rightmost point as "now"
+      if (n > 1) {
+        ctx.fillText('now', x(n - 1), pad.top + ch + 18);
+      }
+
+      if (hoverIndex != null && hoverIndex >= 0 && hoverIndex < n) {
+        const xLine = x(hoverIndex);
+        ctx.strokeStyle = 'rgba(148,163,184,0.8)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xLine, pad.top);
+        ctx.lineTo(xLine, pad.top + ch);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    function drawRequestChart(history, rangeKey, hoverIndex = null) {
+      const canvas = document.getElementById('request-chart');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      const W = rect.width, H = rect.height;
+      const pad = { top: 10, right: 50, bottom: 30, left: 50 };
+      const cw = W - pad.left - pad.right;
+      const ch = H - pad.top - pad.bottom;
+
+      ctx.clearRect(0, 0, W, H);
+
+      if (!history || history.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No history data', W / 2, H / 2);
+        return;
+      }
+
+      const reqVals = history.map(p => p.request_total ?? p.request_in ?? 0);
+      const reqMin = history.map(p => p.request_total_min ?? p.request_total ?? p.request_in ?? 0);
+      const reqMax = history.map(p => p.request_total_max ?? p.request_total ?? p.request_in ?? 0);
+      const reqCeiling = rangeKey !== '1h'
+        ? Math.max(...reqMax, ...reqVals, 1)
+        : Math.max(...reqVals, 1);
+      const axisReq = prettyAxis(reqCeiling);
+      const maxReq = axisReq.max;
+
+      const durVals = history.map(p => (p.duration_avg_sec != null && Number.isFinite(p.duration_avg_sec)) ? p.duration_avg_sec : null);
+      const durNumerics = durVals.filter(v => v != null);
+      const durCeiling = durNumerics.length > 0 ? Math.max(...durNumerics, 0.1) : 1;
+      const axisDur = prettyAxis(durCeiling, 5);
+      const maxDur = axisDur.max;
+      const n = history.length;
+
+      function x(i) { return pad.left + (i / Math.max(n - 1, 1)) * cw; }
+      function yReq(v) { return pad.top + ch - (v / maxReq) * ch; }
+      function yDur(v) { return pad.top + ch - (v / maxDur) * ch; }
+
+      if (rangeKey !== '1h') {
+        // Request ribbon (min-max)
+        ctx.fillStyle = 'rgba(56,189,248,0.14)';
+        ctx.beginPath();
+        ctx.moveTo(x(0), yReq(reqMax[0]));
+        for (let i = 1; i < n; i++) ctx.lineTo(x(i), yReq(reqMax[i]));
+        for (let i = n - 1; i >= 0; i--) ctx.lineTo(x(i), yReq(reqMin[i]));
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const px = x(i), py = yReq(reqVals[i]);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      if (n > 1 && history[n - 1].request_estimated) {
+        ctx.save();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x(n - 2), yReq(reqVals[n - 2]));
+        ctx.lineTo(x(n - 1), yReq(reqVals[n - 1]));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.fillStyle = 'rgba(56,189,248,0.08)';
+      ctx.beginPath();
+      ctx.moveTo(x(0), yReq(reqVals[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(x(i), yReq(reqVals[i]));
+      ctx.lineTo(x(n - 1), pad.top + ch);
+      ctx.lineTo(x(0), pad.top + ch);
+      ctx.closePath();
+      ctx.fill();
+
+      // Duration line (right y-axis); only draw where we have duration data
+      const hasDuration = durNumerics.length > 0;
+      if (hasDuration) {
+        ctx.strokeStyle = '#a78bfa';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        let started = false;
+        for (let i = 0; i < n; i++) {
+          const v = durVals[i];
+          if (v == null) { started = false; continue; }
+          const px = x(i), py = yDur(v);
+          if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'right';
+      for (const v of axisReq.ticks) {
+        const y = pad.top + ch - (v / maxReq) * ch;
+        ctx.fillText(Math.round(v), pad.left - 6, y + 4);
+      }
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#a78bfa';
+      for (const v of axisDur.ticks) {
+        const y = pad.top + ch - (v / maxDur) * ch;
+        ctx.fillText(v % 1 === 0 ? v + 's' : v.toFixed(2) + 's', pad.left + cw + 6, y + 4);
+      }
+
+      ctx.fillStyle = '#64748b';
+      ctx.textAlign = 'center';
+      ctx.font = '10px system-ui';
+      const labelCount = Math.min(n, Math.floor(cw / 70));
+      const step = Math.max(1, Math.floor(n / labelCount));
+      for (let i = 0; i < n; i += step) {
+        const label = agoLabel(history[i].timestamp, rangeKey);
+        ctx.fillText(label, x(i), pad.top + ch + 18);
+      }
+      if (n > 1) {
+        ctx.fillText('now', x(n - 1), pad.top + ch + 18);
+      }
+
+      if (hoverIndex != null && hoverIndex >= 0 && hoverIndex < n) {
+        const xLine = x(hoverIndex);
+        ctx.strokeStyle = 'rgba(148,163,184,0.8)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xLine, pad.top);
+        ctx.lineTo(xLine, pad.top + ch);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    async function loadSummaryAndHistory() {
+      const summary = await fetch(summaryQuery()).then(r => r.json());
+      const historyData = await fetch(historyQuery()).then(r => r.json());
+      document.getElementById('task-count').textContent = summary.task_count ?? '\u2013';
+      document.getElementById('active-sessions').textContent = summary.active_sessions ?? '\u2013';
+      document.getElementById('request-total').textContent = summary.request_total ?? summary.request_in_total ?? '\u2013';
+      drawActivityChart(historyData.history, currentRange);
+      drawRequestChart(historyData.history, currentRange);
+      document.getElementById('activity-chart')._lastHistory = historyData.history;
+      document.getElementById('request-chart')._lastHistory = historyData.history;
+      document.getElementById('activity-chart')._lastRange = currentRange;
+      document.getElementById('request-chart')._lastRange = currentRange;
+      return summary;
+    }
+
+    async function loadSummaryHistoryAndTasks() {
+      try {
+        const [hostData, tasks] = await Promise.all([
+          fetch('/api/hostnames').then(r => r.json()),
+          fetch(tasksQuery()).then(r => r.json()),
+        ]);
+        availableHostnames = hostData.hostnames || [];
+        if (selectedHostnames.size > 0) {
+          selectedHostnames = new Set(Array.from(selectedHostnames).filter(h => availableHostnames.includes(h)));
+        }
+        renderHostFilterMenu();
+        updateHostFilterButton();
+
+        const summary = await loadSummaryAndHistory();
+
+        const tbody = document.getElementById('tasks-body');
+        tbody.innerHTML = tasks.length === 0
+          ? '<tr><td colspan="7" data-label="Status">No tasks reported recently</td></tr>'
+          : tasks.map(t => {
+              const memVals = (t.history || []).map(h => h.mem);
+              const cpuVals = (t.history || []).map(h => h.cpu);
+              return `
+              <tr>
+                <td data-label="Task ID"><code>${escapeHtml(t.task_id)}</code></td>
+                <td data-label="Version">${t.version ? '<span class="version-tag">' + escapeHtml(t.version) + '</span>' : '\u2013'}</td>
+                <td data-label="Hostname"><span class="hostname">${escapeHtml(t.hostname) || '\u2013'}</span></td>
+                <td data-label="Sessions">${fmtNum(t.active_sessions)}</td>
+                <td data-label="Health">${healthDot(t.last_seen)}</td>
+                <td data-label="Memory %">${sparkline(memVals, '#38bdf8', 60, 20)}</td>
+                <td data-label="CPU %">${sparkline(cpuVals, '#fb923c', 60, 20)}</td>
+              </tr>`;
+            }).join('');
+
+        document.getElementById('updated').textContent =
+          'Last updated: ' + new Date().toLocaleString() +
+          (summary.reported_at ? ' (latest report: ' + fmtTime(summary.reported_at) + ')' : '');
+      } catch (e) {
+        document.getElementById('tasks-body').innerHTML =
+          '<tr><td colspan="7" data-label="Error">Error loading data: ' + String(e) + '</td></tr>';
+      }
+    }
+
+    // Range selector
+    document.querySelectorAll('.range-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelector('.range-btn.active').classList.remove('active');
+        btn.classList.add('active');
+        currentRange = btn.dataset.range;
+        loadSummaryAndHistory();
+      });
+    });
+
+    initHostFilter();
+    loadSummaryHistoryAndTasks();
+    setInterval(loadSummaryHistoryAndTasks, 30000);
+    window.addEventListener('resize', () => {
+      const activityCanvas = document.getElementById('activity-chart');
+      const requestCanvas = document.getElementById('request-chart');
+      if (activityCanvas._lastHistory) {
+        drawActivityChart(activityCanvas._lastHistory, activityCanvas._lastRange || currentRange);
+      }
+      if (requestCanvas._lastHistory) {
+        drawRequestChart(requestCanvas._lastHistory, requestCanvas._lastRange || currentRange);
+      }
+    });
+
+    function chartHoverIndex(offsetX, pad, cw, n) {
+      if (n <= 0) return 0;
+      const t = (offsetX - pad.left) / cw;
+      const i = t * (n - 1);
+      return Math.round(Math.max(0, Math.min(n - 1, i)));
+    }
+
+    const pad = { top: 10, right: 50, bottom: 30, left: 50 };
+    const activityCanvas = document.getElementById('activity-chart');
+    const requestCanvas = document.getElementById('request-chart');
+
+    activityCanvas.addEventListener('mousemove', (e) => {
+      const history = activityCanvas._lastHistory;
+      const rangeKey = activityCanvas._lastRange || currentRange;
+      if (!history || history.length === 0) return;
+      const rect = activityCanvas.getBoundingClientRect();
+      const cw = rect.width - pad.left - pad.right;
+      const index = chartHoverIndex(e.offsetX, pad, cw, history.length);
+      drawActivityChart(history, rangeKey, index);
+      const n = history.length;
+      const xLineCanvas = pad.left + (index / Math.max(n - 1, 1)) * cw;
+      const pt = history[index];
+      showChartTooltip(activityCanvas, xLineCanvas, [
+        agoLabel(pt.timestamp, rangeKey),
+        'Sessions: ' + (pt.active_sessions ?? '\u2013'),
+        'Instances: ' + (pt.task_count ?? '\u2013'),
+      ]);
+    });
+    activityCanvas.addEventListener('mouseleave', () => {
+      if (activityCanvas._lastHistory) {
+        drawActivityChart(activityCanvas._lastHistory, activityCanvas._lastRange || currentRange, null);
+      }
+      hideChartTooltip();
+    });
+
+    requestCanvas.addEventListener('mousemove', (e) => {
+      const history = requestCanvas._lastHistory;
+      const rangeKey = requestCanvas._lastRange || currentRange;
+      if (!history || history.length === 0) return;
+      const rect = requestCanvas.getBoundingClientRect();
+      const cw = rect.width - pad.left - pad.right;
+      const index = chartHoverIndex(e.offsetX, pad, cw, history.length);
+      drawRequestChart(history, rangeKey, index);
+      const n = history.length;
+      const xLineCanvas = pad.left + (index / Math.max(n - 1, 1)) * cw;
+      const pt = history[index];
+      const durStr = pt.duration_avg_sec != null ? pt.duration_avg_sec + 's' : '\u2013';
+      showChartTooltip(requestCanvas, xLineCanvas, [
+        agoLabel(pt.timestamp, rangeKey),
+        'Requests: ' + (pt.request_total ?? pt.request_in ?? '\u2013') + ' / min',
+        'Duration: ' + durStr,
+      ]);
+    });
+    requestCanvas.addEventListener('mouseleave', () => {
+      if (requestCanvas._lastHistory) {
+        drawRequestChart(requestCanvas._lastHistory, requestCanvas._lastRange || currentRange, null);
+      }
+      hideChartTooltip();
+    });
+  </script>
+</body>
+</html>

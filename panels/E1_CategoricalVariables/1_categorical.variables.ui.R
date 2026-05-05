@@ -107,8 +107,12 @@ reorder.sidebar.panel <- function(data.set) {
     ),
     conditionalPanel(
       "input.recorder_sort_levels == 'manually'",
-      selectInput("select.reorder.item", "Select in new Order",
-        choices = choices2, multiple = T, selectize = T
+      sortable::rank_list(
+        text = "Drag to reorder", 
+        input_id = "sortable_reorder_item",
+        css_id = "sortable_reorder_item",
+        orientation = "vertical",
+        labels = choices2
       )
     ),
     actionButton("reorder", "Reorder",

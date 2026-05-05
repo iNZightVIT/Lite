@@ -78,6 +78,44 @@ shinyServer(function(input, output, session) {
 
   session$allowReconnect(TRUE)
 
+  ## --- Session tracking (fire-and-forget to local status-server) ---
+  lite_instance <- as.integer(Sys.getenv("LITE_INSTANCE", "0"))
+  session_tracking_id <- substr(session$token, 1, 12)
+
+  report_session <- function(event, reason = NULL, hostname = NULL) {
+    body <- list(
+      event = event,
+      session_id = session_tracking_id,
+      instance = lite_instance,
+      reason = reason,
+      timestamp = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
+    )
+    if (!is.null(hostname)) body$hostname <- hostname
+    body <- jsonlite::toJSON(body, auto_unbox = TRUE)
+    tryCatch(
+      system2("curl", c(
+        "-sf", "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-d", shQuote(body),
+        "--max-time", "1",
+        "http://127.0.0.1:3099/session"
+      ), wait = FALSE),
+      error = function(e) {}
+    )
+  }
+
+  report_session("start")
+
+  ping_observer <- observe({
+    invalidateLater(30000, session)
+    report_session("ping", hostname = session$clientData$url_hostname)
+  })
+
+  onSessionEnded(function() {
+    ping_observer$destroy()
+    report_session("end", reason = "closed")
+  })
+
   ## Specify all the reactive values
   values <- reactiveValues()
   values$data.name <- NULL
@@ -564,6 +602,12 @@ shinyServer(function(input, output, session) {
   source("panels/G1_Code//1_code.panel-ui.R", local = TRUE)
   source("panels/G1_Code//2_code.panel-server.R", local = TRUE)
 
+  ## ----------------##
+  ##  Status Module  ##
+  ## ----------------##
+  source("panels/H1_Status/1_status.panel-ui.R", local = TRUE)
+  source("panels/H1_Status/2_status.panel-server.R", local = TRUE)
+
   generate_tabs <- function(version = NULL) {
     import_tabs <- list(
       import = tabPanel("Import Dataset", uiOutput("load.data.panel")),
@@ -649,6 +693,10 @@ shinyServer(function(input, output, session) {
       value = "rhistory",
       uiOutput("code.panel")
     )
+    status_tab <- tabPanel("Status",
+      value = "status",
+      uiOutput("status.panel")
+    )
 
     if (!is.null(session$userData$LITE_VERSION) &&
       session$userData$LITE_VERSION == "CAS") {
@@ -675,7 +723,8 @@ shinyServer(function(input, output, session) {
       row_ops_tabs,
       manipulate_tabs,
       advance_tabs,
-      history_tabs
+      history_tabs,
+      status_tab
     )
   }
 

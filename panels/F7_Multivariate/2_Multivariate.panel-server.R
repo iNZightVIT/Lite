@@ -448,7 +448,10 @@ mul.plot.parm <- reactive({
   plot_exprs <- do.call(plot_fun, c(list(values$data.name), plot_args))
 
   eval_env <- rlang::env(!!rlang::sym(values$data.name) := get.data.set())
-  eval_results <- lapply(plot_exprs, eval, envir = eval_env)
+  eval_results <- try(lapply(plot_exprs, eval, envir = eval_env), silent = TRUE)
+  if (inherits(eval_results, "try-error")) {
+    return(NULL)
+  }
   plot_object <- eval_results[[length(eval_results)]]
   dev.hold()
   tryCatch(
@@ -465,7 +468,12 @@ output$mv.plot <- renderPlot({
   mrOptions$alpha
   isolate({
     tryCatch({
-      mul.plot.parm()
+      # mul.plot.parm()
+      result = mul.plot.parm()
+      if(is.null(result)) {
+        plot.new()
+        text(0.5, 0.5, labels = "Error in generating plot. Possibily due to missing values in the data. Try removing missing values and try again.")
+      }
     }, error = function(e) {
       print(e)
     }, finally = {})

@@ -12,6 +12,15 @@ RUN apt-get update \
         cmake \
         libpoppler-cpp-dev \
         curl \
+        ca-certificates \
+        gnupg \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+       | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" \
+       > /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Traefik
@@ -37,8 +46,14 @@ RUN chown -R shiny:shiny /app \
     && chown -R shiny:shiny /var/log/supervisor
 
 # Number of Shiny instances (build argument)
-ARG SHINY_INSTANCES=3
+ARG SHINY_INSTANCES=2
 ENV SHINY_INSTANCES=${SHINY_INSTANCES}
+
+# Status reporter (optional; passed at build from GitHub secrets)
+ARG STATUS_REPORT_TOKEN
+ARG STATUS_REPORT_URL
+ENV STATUS_REPORT_TOKEN=${STATUS_REPORT_TOKEN}
+ENV STATUS_REPORT_URL=${STATUS_REPORT_URL}
 
 # Copy configuration files
 COPY server/traefik.yml /etc/traefik/traefik.yml

@@ -25,6 +25,13 @@ vis.data <- reactive({
 # convert old vis.par() to a new format so its compatible with
 # iNZightPlots:::inzplot (iNZightPlots@2.15.0)
 new_vis_par <- function(vis_par) {
+  if(!is.null(input$log_axis_x) && input$log_axis_x != "none") {
+    vis_par$transform["x"] <- list(input$log_axis_x)
+  }
+  if(!is.null(input$log_axis_y) && input$log_axis_y != "none") {
+    vis_par$transform["y"] <- list(input$log_axis_y)
+  }
+  
   # ignore if x or y is a vector
   if (length(vis_par$x) > 1 || length(vis_par$y) > 1) {
     return(vis_par)
@@ -37,21 +44,21 @@ new_vis_par <- function(vis_par) {
     trim(paste(vis_par$x, "~", vis_par$y))
   }
   # # subsets
-  # if (!is.null(vis_par$g1)) {
-  #   g = vis_par$g1
-  #   if(!is.null(vis_par$g2)) {
-  #     g = paste(g, vis_par$g2, sep = " + ")
-  #   }
-  #   f = paste(f, g, sep = " | ")
-  # }
+  if (!is.null(vis_par$g1)) {
+    g <- vis_par$g1
+    if (!is.null(vis_par$g2)) {
+      g <- paste(g, vis_par$g2, sep = " + ")
+    }
+    f <- paste(f, g, sep = " | ")
+  }
   f <- as.formula(f)
 
   # inzplot takes formla as "x"
   vis_par$x <- f
   # remove y
   vis_par$y <- NULL
-
-#   print(vis_par$x)
+  vis_par$g1 <- NULL
+  vis_par$g2 <- NULL
 
   return(vis_par)
 }
@@ -1244,25 +1251,27 @@ output$visualize.plot <- renderPlot({
     }
   })
   # plot it
+  dafr <- get.data.set()
+  print("CURRENT PARS")
+  temp <- vis.par()
+  print(str(temp))
+
   if (!is.null(vis.par())) {
-    dafr <- get.data.set()
-    if (is.numeric(vis.data()[[plot.par$x]]) &
+    if (!is.null(plot.par$x) && !is.null(input$vari1) &&
+      is.numeric(vis.data()[[plot.par$x]]) &&
+      !is.null(plot.par$y) && !is.null(input$vari2) &&
       is.numeric(vis.data()[[plot.par$y]])) {
       temp <- vis.par()
       temp$trend.parallel <- graphical.par$trend.parallel
-      # temp.x <- temp$x
-      # temp$x <- temp$y
-      # temp$y <- temp.x
-      # temp.varnames.x <- temp$varnames$x
-      # temp$varnames$x <- temp$varnames$y
-      # temp$varnames$y <- temp.varnames.x
-    
+
+      ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+      new_par <- new_vis_par(vis_par = temp)
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
         tryCatch({
           # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1271,7 +1280,7 @@ output$visualize.plot <- renderPlot({
       } else {
         tryCatch({
           # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
         }, warning = function(w) {
           print(w)
         }, error = function(e) {
@@ -1327,16 +1336,14 @@ output$mini.plot <- renderPlot({
   # plot it
   if (!is.null(vis.par())) {
     dafr <- get.data.set()
-    if (is.numeric(vis.data()[[plot.par$x]]) &
+    if (!is.null(plot.par$x) && !is.null(input$vari1) &&
+      is.numeric(vis.data()[[plot.par$x]]) &&
+      !is.null(plot.par$y) && !is.null(input$vari2) &&
       is.numeric(vis.data()[[plot.par$y]])) {
       temp <- vis.par()
       temp$trend.parallel <- graphical.par$trend.parallel
-      # temp.x <- temp$x
-      # temp$x <- temp$y
-      # temp$y <- temp.x
-      # temp.varnames.x <- temp$varnames$x
-      # temp$varnames$x <- temp$varnames$y
-      # temp$varnames$y <- temp.varnames.x
+      ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+      new_par <- new_vis_par(vis_par = temp)
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
@@ -1567,12 +1574,13 @@ output$add_inference <- renderUI({
       selected = input$inference_type1,
       inline = T
     )
-
+    
     confidence.interval.check <- checkboxInput(
       "confidence_interval1",
       label = p("Confidence interval (%)"),
       value = input$confidence_interval1
     )
+    
     # prevent re-rendering the ci width plot input as disabled by default
     # when the reactive ci_with() changes
     ci_width_plot <- numericInputIcon(
@@ -1609,8 +1617,6 @@ output$add_inference <- renderUI({
       label = "Get values",
       style = "color: #fff; background-color: #337ab7; border-color: #2e6da4"
     )
-
-
 
     intervals <- NULL
     graphical.par$inference.par <- NULL
@@ -1822,6 +1828,8 @@ observe({
   input$vari2
   input$ci.width.plot
   input$add.inference
+  input$log_axis_x
+  input$log_axis_y
   isolate({
     graphical.par$inference.par <- NULL
     intervals <- NULL
@@ -3250,9 +3258,19 @@ output$plotly_inter <- renderPlotly({
     if (!is.null(input$select.plot.type) &&
       length(input$select.plot.type) > 0) {
       temp$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
+
+      # Both x and y are numeric - NOT swapping, want formula as x ~ y
+      if (!is.null(vis.par()) && !is.null(plot.par$x) && !is.null(plot.par$y) &&
+        is.numeric(vis.data()[[plot.par$x]]) && is.numeric(vis.data()[[plot.par$y]])) {
+        temp$trend.parallel <- graphical.par$trend.parallel
+        new_par <- new_vis_par(vis_par = temp)
+      } else {
+        new_par <- new_vis_par(vis_par = temp)
+      }
+
       pdf(NULL)
       # do.call(iNZightPlots:::iNZightPlot, temp)
-      do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+      do.call(iNZightPlots:::inzplot, new_par)
 
       g <- plotly::ggplotly()
       dev.off()
@@ -3274,6 +3292,15 @@ output$plotly_nw <- renderUI({
       length(input$select.plot.type) > 0) {
       temp$plottype <- plot.type.para$plotTypeValues[which(plot.type.para$plotTypes == input$select.plot.type)]
 
+      # Both x and y are numeric - NOT swapping, want formula as x ~ y
+      if (!is.null(vis.par()) && !is.null(plot.par$x) && !is.null(plot.par$y) &&
+        is.numeric(vis.data()[[plot.par$x]]) && is.numeric(vis.data()[[plot.par$y]])) {
+        temp$trend.parallel <- graphical.par$trend.parallel
+        new_par <- new_vis_par(vis_par = temp)
+      } else {
+        new_par <- new_vis_par(vis_par = temp)
+      }
+
       curdir <- getwd()
       on.exit(setwd(curdir))
       # set to temp directory
@@ -3283,7 +3310,7 @@ output$plotly_nw <- renderUI({
       cdev <- dev.cur()
       on.exit(dev.off(cdev), add = TRUE)
       # do.call(iNZightPlots:::iNZightPlot, temp)
-      do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+      do.call(iNZightPlots:::inzplot, new_par)
 
       htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
       dev.off()
@@ -3319,6 +3346,8 @@ observe({
   input$sub2_level
   input$subs2
   isolate({
+    # guard: don't manipulate tabs before the UI has rendered
+    if (is.null(input$plot_selector)) return()
     tryCatch(
       {
         if (!is.null(input$select.plot.type) &&
@@ -3792,6 +3821,7 @@ output$customize.labels.panel <- renderUI({
         label = "Submit"
       ))
     )
+    
     if (!is.null(vis.data()) && !is.null(input$vari1) &&
       !is.null(input$vari2) &&
       input$vari1 %in% colnames(get.data.set())) {
@@ -4899,6 +4929,73 @@ observe({
     }
   })
 })
+
+# panel for logging X and Y axis
+output$adjust.axis.log.panel <- renderUI({
+  get.data.set()
+  ret <- NULL
+  input$vari1
+  input$vari2
+  
+  isolate({
+    logging_available = FALSE
+    ret <- div(h5(strong("Axis Logging")))
+    if (!input$vari1 %in% "none" && (class(vis.data()[, input$vari1]) %in% c("numeric", "integer"))) {
+      log_axis_x.dropdown <- selectInput(
+        "log_axis_x",
+        label = NULL,
+        choices = c("none", "log", "log10"),
+        selected = input$log_axis_x
+      )
+      ret = tagAppendChild(
+        ret, 
+        fixedRow(
+          column(width = 3, p("Log X-axis")),
+          column(width = 6, log_axis_x.dropdown)
+        )
+      )
+      logging_available = TRUE
+    }
+    if (!input$vari2 %in% "none" && (class(vis.data()[, input$vari2]) %in% c("numeric", "integer"))) {
+      log_axis_y.dropdown <- selectInput(
+        "log_axis_y",
+        label = NULL,
+        choices = c("none", "log", "log10"),
+        selected = input$log_axis_y
+      )
+      ret = tagAppendChild(
+        ret,
+        fixedRow(
+          column(width = 3, p("Log Y-axis")),
+          column(width = 6, log_axis_y.dropdown)
+        )
+      )
+      logging_available = TRUE
+    }
+    
+    if (!logging_available) {
+      ret = NULL
+    }
+    ret
+  })
+})
+# observe({
+#   input$log_axis_x
+#   input$log_axis_y
+#   # browser()
+#   # isolate({
+#     
+#     if(!is.null(vis.par())) {
+#       browser()
+#       if(!is.null(input$log_axis_x) && input$log_axis_x != "none") {
+#         
+#         # vis.par$transform["x"] <- list("log10")
+#         vis.par()$transform["x"] <- list(input$log_axis_x)
+#       }
+#     }
+# 
+#   # })
+# })
 
 # panel for wigets to adjust the x and y axis limits
 output$adjust.axis.panel <- renderUI({
@@ -6333,12 +6430,8 @@ create.html <- function() {
       !is.null(plot.par$y) && is.numeric(vis.data()[[plot.par$y]])) {
       temp <- vis.par()
       temp$trend.parallel <- graphical.par$trend.parallel
-      temp.x <- temp$x
-      temp$x <- temp$y
-      temp$y <- temp.x
-      temp.varnames.x <- temp$varnames$x
-      temp$varnames$x <- temp$varnames$y
-      temp$varnames$y <- temp.varnames.x
+      ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+      new_par <- new_vis_par(vis_par = temp)
       if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
         tolower(parseQueryString(session$clientData$url_search)$debug) %in%
           "true") {
@@ -6419,12 +6512,8 @@ output$saveplot <- downloadHandler(
           is.numeric(vis.data()[[plot.par$y]])) {
           temp <- vis.par()
           temp$trend.parallel <- graphical.par$trend.parallel
-          temp.x <- temp$x
-          temp$x <- temp$y
-          temp$y <- temp.x
-          temp.varnames.x <- temp$varnames$x
-          temp$varnames$x <- temp$varnames$y
-          temp$varnames$y <- temp.varnames.x
+          ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+          new_par <- new_vis_par(vis_par = temp)
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
               "true") {
@@ -6432,7 +6521,7 @@ output$saveplot <- downloadHandler(
               # plot.ret.para$parameters <- do.call(
               #   iNZightPlots:::iNZightPlot, temp
               # )
-              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
@@ -6442,7 +6531,7 @@ output$saveplot <- downloadHandler(
             # plot.ret.para$parameters <- try(do.call(
             #   iNZightPlots:::iNZightPlot, temp
             # ))
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_par))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
@@ -7482,27 +7571,25 @@ observe({
           is.numeric(vis.data()[[plot.par$y]]) &&
           !is.null(plot.par$x)) {
           temp <- vis.par()
-
           temp$trend.parallel <- graphical.par$trend.parallel
-          temp.x <- temp$x
-          temp$x <- temp$y
-          temp$y <- temp.x
-          temp.varnames.x <- temp$varnames$x
-          temp$varnames$x <- temp$varnames$y
-          temp$varnames$y <- temp.varnames.x
+          ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+          new_par <- new_vis_par(vis_par = temp)
 
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
             tolower(parseQueryString(session$clientData$url_search)$debug) %in%
               "true") {
             tryCatch({
-              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
             }, warning = function(w) {
               print(w)
             }, error = function(e) {
               print(e)
             }, finally = {})
           } else {
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+            if (!exists("new_par")) {
+              new_par <- new_vis_par(vis_par = temp)
+            }
+            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_par))
           }
         } else {
           if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&

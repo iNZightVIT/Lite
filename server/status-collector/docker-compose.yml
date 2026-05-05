@@ -1,0 +1,23 @@
+services:
+  status-collector:
+    build: .
+    environment:
+      - PORT=8787
+      - INGEST_TOKEN=${INGEST_TOKEN:-}
+      - DB_PATH=/data/status.db
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.status-collector.rule=Host(`${DOMAIN:-status.localhost}`)"
+      - "traefik.http.routers.status-collector.entrypoints=websecure"
+      - "traefik.http.routers.status-collector.tls.certresolver=letsencrypt"
+      - "traefik.http.services.status-collector.loadbalancer.server.port=8787"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik}
