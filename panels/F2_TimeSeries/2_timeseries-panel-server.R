@@ -9,6 +9,7 @@
 ###
 ###
 ###  * Note: This is to be sourced within "server.R" *
+# library(feasts)
 assign("log_if", iNZightTS::log_if, envir = .GlobalEnv)
 
 guess_key_ts_object <- function() {
@@ -200,7 +201,7 @@ output$tsui_ts_plot <- renderPlot({
             x
           } else {
             distinct(ts_p, !!tsibble::index(ts_p)) %>%
-              filter(!!tsibble::index(ts_p) %in% x) %>%
+              filter(as.character(!!tsibble::index(ts_p)) %in% x) %>%
               pull() %>%
               as.Date()
           }
@@ -220,8 +221,8 @@ output$tsui_ts_plot <- renderPlot({
           key_to_hl <- which(colnames(ts_p) == ts_rvals$sel_key) - 1L
         }
         smooth_value <- ifelse(input$tsui_smoother, input$tsui_smoothing, 0)
-        cat("Plot range ..\n")
-        print(plot_range)
+        # cat("Plot range ..\n")
+        # print(plot_range)
         if (input$tsui_time_plot_info == "default") {
           iNZightTS:::plot.inz_ts(
             x = ts_p,
