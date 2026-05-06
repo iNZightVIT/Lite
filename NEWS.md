@@ -1,5 +1,10 @@
 # Develop
 
+- **Status** tab (navbar): crowding-aware instance load view, demand indicator, and reconnect flow; status polling runs only while the tab is open.
+- **Visualize** tab: sliders to adjust plot height and width (viewport-relative sizing).
+- **Categorical variables** — **Reorder levels**: drag-and-drop to set factor level order.
+- **Multivariate** module: show a clear error message when a plot fails.
+- **Multiple Response** module: clearer error messages when an operation fails.
 - add "log" transform to Add to Plot > Axis features
 
 # 2026.01.3
