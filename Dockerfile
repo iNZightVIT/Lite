@@ -55,6 +55,12 @@ ARG STATUS_REPORT_URL
 ENV STATUS_REPORT_TOKEN=${STATUS_REPORT_TOKEN}
 ENV STATUS_REPORT_URL=${STATUS_REPORT_URL}
 
+# Idle-throttle defaults for status-server periodic work while no sessions
+ARG STATUS_IDLE_THROTTLE_ENABLED=1
+ARG STATUS_IDLE_WORK_INTERVALS=4
+ENV STATUS_IDLE_THROTTLE_ENABLED=${STATUS_IDLE_THROTTLE_ENABLED}
+ENV STATUS_IDLE_WORK_INTERVALS=${STATUS_IDLE_WORK_INTERVALS}
+
 # Copy configuration files
 COPY server/traefik.yml /etc/traefik/traefik.yml
 COPY server/generate-traefik-configs.sh /usr/local/bin/generate-configs.sh

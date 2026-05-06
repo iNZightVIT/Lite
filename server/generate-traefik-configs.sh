@@ -13,6 +13,12 @@ echo "Generating configuration for $INSTANCES Shiny instances with Traefik..."
 cat > /etc/traefik/dynamic.yml << EOF
 http:
   routers:
+    health-router:
+      rule: "Path(\`/healthz\`)"
+      service: status-service
+      entryPoints:
+        - web
+      priority: 110
     status-router:
       rule: "PathPrefix(\`/__status\`)"
       service: status-service
