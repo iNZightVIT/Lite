@@ -17,6 +17,18 @@ const REQUEST_INTERVAL_MS = Math.max(
   parseInt(process.env.REQUEST_INTERVAL_MS, 10) || 30000
 );
 const REQUESTS_PER_MINUTE_FACTOR = 60000 / REQUEST_INTERVAL_MS;
+// Reports older than this are deleted on each ingest (default 7).
+const RETENTION_DAYS = Math.max(1, parseInt(process.env.RETENTION_DAYS, 10) || 7);
+// Hard cap on main database file size via PRAGMA max_page_count (0 = disabled).
+const MAX_DB_SIZE_MB = (() => {
+  const raw = process.env.MAX_DB_SIZE_MB;
+  if (raw === undefined || raw === "") return 800;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 0 ? n : 800;
+})();
+// Storing full JSON per row bloats the DB; set STORE_RAW_JSON=1 to keep it for debugging.
+const STORE_RAW_JSON =
+  process.env.STORE_RAW_JSON === "1" || process.env.STORE_RAW_JSON === "true";
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -82,6 +94,54 @@ for (const [col, type] of migrations) {
   }
 }
 
+/**
+ * Limit SQLite main file growth. Uses PRAGMA max_page_count; optional startup
+ * trim + VACUUM if the file already exceeds the cap (e.g. after upgrading).
+ */
+function applyDatabaseSizeCap(database, maxMb) {
+  if (!maxMb || maxMb <= 0) {
+    console.log("[status-collector] MAX_DB_SIZE_MB=0 — no SQLite file size cap");
+    return;
+  }
+  const pageSize = Number(database.pragma("page_size", { simple: true })) || 4096;
+  const maxPages = Math.floor((maxMb * 1024 * 1024) / pageSize);
+  let curPages = Number(database.pragma("page_count", { simple: true }));
+
+  if (curPages > maxPages) {
+    console.warn(
+      `[status-collector] status.db has ${curPages} pages (>${maxPages} for ~${maxMb}MB). ` +
+        "Deleting older reports in steps, then VACUUM (may take a few minutes)..."
+    );
+    const deleteBefore = database.prepare(`
+      DELETE FROM status_reports
+      WHERE datetime(reported_at) < datetime('now', ?)
+    `);
+    for (const days of [5, 4, 3, 2, 1]) {
+      deleteBefore.run(`-${days} days`);
+      try {
+        database.exec("VACUUM");
+      } catch (e) {
+        console.error("[status-collector] VACUUM failed:", e.message);
+        break;
+      }
+      curPages = Number(database.pragma("page_count", { simple: true }));
+      if (curPages <= maxPages) break;
+    }
+    if (curPages > maxPages) {
+      console.warn(
+        `[status-collector] Still ${curPages} pages after trim; cap may block inserts until you free disk or lower retention.`
+      );
+    }
+  }
+
+  database.pragma(`max_page_count = ${maxPages}`);
+  console.log(
+    `[status-collector] SQLite max_page_count=${maxPages} (~${maxMb}MB at ${pageSize}-byte pages)`
+  );
+}
+
+applyDatabaseSizeCap(db, MAX_DB_SIZE_MB);
+
 const insertStmt = db.prepare(`
   INSERT INTO status_reports (
     task_id, reported_at, uptime_seconds, active_sessions,
@@ -93,7 +153,6 @@ const insertStmt = db.prepare(`
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
-const RETENTION_DAYS = 7;
 const deleteOldStmt = db.prepare(`
   DELETE FROM status_reports
   WHERE datetime(reported_at) < datetime('now', ?)
@@ -102,7 +161,61 @@ const deleteOldStmt = db.prepare(`
 function trimOldRows() {
   try {
     deleteOldStmt.run(`-${RETENTION_DAYS} days`);
-  } catch (e) {}
+  } catch (e) {
+    console.error("[status-collector] trimOldRows:", e.message);
+  }
+}
+
+function isSqliteFull(err) {
+  return err && (err.code === "SQLITE_FULL" || err.code === 13);
+}
+
+/** Oldest rows first; frees pages for reuse before VACUUM. */
+const deleteOldestBatchStmt = db.prepare(`
+  DELETE FROM status_reports WHERE id IN (
+    SELECT id FROM status_reports ORDER BY reported_at ASC LIMIT 100000
+  )
+`);
+
+function runInsert(row) {
+  insertStmt.run(
+    row.task_id,
+    row.reported_at,
+    row.uptime_seconds,
+    row.active_sessions,
+    row.cpu_percent,
+    row.memory_used_mb,
+    row.memory_percent_used,
+    row.shiny_configured,
+    row.shiny_running,
+    row.version,
+    row.hostname,
+    row.request_in_total,
+    row.request_out_total,
+    row.request_in_interval,
+    row.request_out_interval,
+    row.request_in_duration_avg_sec,
+    row.request_out_duration_avg_sec,
+    row.raw_json
+  );
+}
+
+function insertRowWithRetry(row) {
+  try {
+    runInsert(row);
+    return { ok: true };
+  } catch (e) {
+    if (!isSqliteFull(e)) throw e;
+    console.warn("[status-collector] SQLITE_FULL on insert; deleting oldest 100k rows and retrying once");
+    const info = deleteOldestBatchStmt.run();
+    if (info.changes === 0) return { ok: false, error: e };
+    try {
+      runInsert(row);
+      return { ok: true };
+    } catch (e2) {
+      return { ok: false, error: e2 };
+    }
+  }
 }
 
 function parsePayload(body) {
@@ -193,7 +306,7 @@ function parsePayload(body) {
     request_out_interval: requestOutInterval,
     request_in_duration_avg_sec: requestInDurationAvgSec,
     request_out_duration_avg_sec: requestOutDurationAvgSec,
-    raw_json: JSON.stringify(body),
+    raw_json: STORE_RAW_JSON ? JSON.stringify(body) : null,
   };
 }
 
@@ -243,27 +356,14 @@ app.post("/ingest", (req, res) => {
   }
 
   const row = parsePayload(body);
+  trimOldRows();
   try {
-    insertStmt.run(
-      row.task_id,
-      row.reported_at,
-      row.uptime_seconds,
-      row.active_sessions,
-      row.cpu_percent,
-      row.memory_used_mb,
-      row.memory_percent_used,
-      row.shiny_configured,
-      row.shiny_running,
-      row.version,
-      row.hostname,
-      row.request_in_total,
-      row.request_out_total,
-      row.request_in_interval,
-      row.request_out_interval,
-      row.request_in_duration_avg_sec,
-      row.request_out_duration_avg_sec,
-      row.raw_json
-    );
+    const inserted = insertRowWithRetry(row);
+    if (!inserted.ok) {
+      console.error(inserted.error);
+      res.status(507).json({ error: "Database full or over size cap; freed rows but insert still failed" });
+      return;
+    }
     trimOldRows();
   } catch (e) {
     console.error(e);

@@ -1,6 +1,6 @@
 # iNZight Lite Status Collector
 
-Central aggregation service and dashboard for iNZight Lite ECS task status. Each ECS task reports its status every minute; this service stores the data and serves a dashboard.
+Central aggregation service and dashboard for iNZight Lite ECS task status. Each ECS task reports its status about every 30 seconds; this service stores the data and serves a dashboard.
 
 ## Deploy on VPS (Docker Compose)
 
@@ -36,6 +36,10 @@ Use Secrets Manager or SSM Parameter Store for the token. Add GitHub secret `STA
 
 Summary and task list only include instances that reported in the last **2 minutes** by default (`ACTIVE_WINDOW_MINUTES`). So when testing locally with one instance, you’ll see at most one task once older reports age out; set a higher value (e.g. 5) in production if needed.
 
-## Data Retention
+## Data retention and database size
 
-Reports older than 7 days are deleted automatically.
+- Reports older than **`RETENTION_DAYS`** (default **7**) are deleted on each successful ingest.
+- **`MAX_DB_SIZE_MB`** (default **800**) sets SQLite **`max_page_count`** so the **main** `status.db` file cannot grow past roughly that size. Set **`0`** to disable the cap. The **`-wal`** file may still use a few extra MB until checkpoint.
+- If the DB **already** exceeds the cap on startup (e.g. after lowering the limit), the collector deletes older data in steps and runs **`VACUUM`** (can take minutes), then applies the cap.
+- **`STORE_RAW_JSON`**: omit full ingest JSON per row by default (`0`). Set **`1`** only if you need raw payloads in SQLite (they bloat the DB quickly).
+

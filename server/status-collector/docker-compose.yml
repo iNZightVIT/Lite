@@ -5,6 +5,11 @@ services:
       - PORT=8787
       - INGEST_TOKEN=${INGEST_TOKEN:-}
       - DB_PATH=/data/status.db
+      # Main DB file cap (SQLite max_page_count). 0 disables. WAL may add a few MB on disk.
+      - MAX_DB_SIZE_MB=${MAX_DB_SIZE_MB:-800}
+      - RETENTION_DAYS=${RETENTION_DAYS:-7}
+      # Set to 1 to store full ingest JSON per row (large); default omits raw_json.
+      - STORE_RAW_JSON=${STORE_RAW_JSON:-0}
     volumes:
       - ./data:/data
     restart: unless-stopped
