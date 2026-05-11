@@ -497,13 +497,25 @@ observeEvent(input$import_set, {
   if (!is.null(input$URLtext) && !input$URLtext %in% "") {
     input_url <- input$URLtext
     input_url <- trimws(input_url)
-
     isolate({
       parsed_url = curl::curl_parse_url(input_url)
       if (grepl("lite|auckland", parsed_url$host) && "params" %in% names(parsed_url)) {
         params = parsed_url$params
         if("url" %in% names(params)) {
           input_url = unname(parsed_url$params["url"])
+        } else if ("example" %in% names(params)) {
+          desired_example = unname(parsed_url$params["example"])
+          avail_exp_path = sapply(get.data.dirs(get.data.dir.global()), list.files, include.dirs = T, full.names = T) %>%
+            unlist() %>% unname()
+          avail_exp_name = avail_exp_path %>% basename() %>% tools::file_path_sans_ext() 
+          
+          if (desired_example %in% avail_exp_name) {
+            input_url = avail_exp_path[avail_exp_name == desired_example][1]
+          } else {
+            import_reactives$success <- FALSE
+            import_reactives$message = glue::glue("Example '{desired_example}' is not available.\nVisit File > Dataset Examples to import it.")
+            return()
+          }
         }
       }
       
