@@ -63,8 +63,7 @@ TS.sidebarPanel <- function(data.set) {
       step = 0.1
     ),
     hr(),
-    h5(strong("Range settings:")),
-    uiOutput("tsui_range_var")
+    uiOutput("tsui_ranges")
   )
 }
 
