@@ -9,7 +9,12 @@
 ###
 ###
 ###  * Note: This is to be sourced within "server.R" *
-# library(feasts)
+
+# load `feasts` to prevent:
+# 'fabletools::autoplot Objects of class <tbl_ts> are not supported by autoplot' error
+# when calling `iNZightTS` plots
+library(feasts)
+
 assign("log_if", iNZightTS::log_if, envir = .GlobalEnv)
 
 guess_key_ts_object <- function() {
@@ -175,8 +180,13 @@ output$tsui_ts_plot <- renderPlot({
     input$tsui_smoothing,
     input$tsui_adjust_limit_from,
     input$tsui_adjust_limit_until
+    
+    # don't need to check model_limit, default plot is 
+    # `plot type: default` which dont use model_range
+    # input$tsui_adjust_model_limit_from,
+    # input$tsui_adjust_model_limit_until
   )
-  # browser()
+ 
   if (is.null(ts_rvals$obj)) {
     plot.new()
     text(
@@ -189,9 +199,7 @@ output$tsui_ts_plot <- renderPlot({
   if (is.null(ts_rvals$sel_var)) {
     plot.new()
     text(0.5, 0.5, "No variables selected.", cex = 2)
-  } else if (all(!sapply(check, is.null))) { #
-
-
+  } else if (all(!sapply(check, is.null))) {
     t <- try(
       {
         ts_p <- ts_rvals$obj
@@ -206,7 +214,16 @@ output$tsui_ts_plot <- renderPlot({
               as.Date()
           }
         }
-        plot_range <- as_range(c(input$tsui_adjust_limit_from, input$tsui_adjust_limit_until))
+        
+        plot_range = NULL
+        if (!is.null(input$tsui_adjust_limit_from) && !is.null(input$tsui_adjust_limit_until)) {
+          plot_range <- as_range(c(input$tsui_adjust_limit_from, input$tsui_adjust_limit_until))
+        }
+        model_range = NULL
+        if (!is.null(input$tsui_adjust_model_limit_from) && !is.null(input$tsui_adjust_model_limit_until)) {
+          model_range <- as_range(c(input$tsui_adjust_model_limit_from, input$tsui_adjust_model_limit_until))
+        }
+        
         if (tsibble::n_keys(ts_p) > 1) { #  && svalue(key_filter) != "(Show all)"
           key_i <- which(colnames(ts_p) == ts_rvals$sel_key) - # key_filter$get_index() -
             (tsibble::n_keys(ts_p) < 20) +
@@ -240,7 +257,7 @@ output$tsui_ts_plot <- renderPlot({
               x = ts_p,
               var = ts_rvals$sel_var,
               t = smooth_value,
-              model_range = plot_range,
+              model_range = model_range,
               mult_fit = input$tsui_choose_season == "multi"
             )
           )
@@ -249,16 +266,14 @@ output$tsui_ts_plot <- renderPlot({
             x = ts_p,
             var = ts_rvals$sel_var,
             t = smooth_value,
-            model_range = plot_range,
+            model_range = model_range,
             mult_fit = input$tsui_choose_season == "multi"
           )
         } else if (input$tsui_time_plot_info == "forecast") {
-          # forecasts = iNZightTS:::predict.inz_ts(
-          # forecasts = predict(
           forecasts <- iNZightTS:::predict.inz_ts(
             object = ts_p,
             var = ts_rvals$sel_var,
-            model_range = plot_range,
+            model_range = model_range,
             mult_fit = input$tsui_choose_season == "multi"
           )
           iNZightTS:::plot.inz_frct(x = forecasts, t_range = plot_range)
@@ -487,32 +502,65 @@ output$tsui_time_plot_select <- renderUI({
 })
 
 # create sliderInput
-output$tsui_range_var <- renderUI({
-  if (!is.null(ts_rvals$obj)) {
+output$tsui_ranges <- renderUI({
+  if (!is.null(ts_rvals$obj) && !is.null(input$tsui_time_plot_info)) {
     idx <- sort(unique(ts_rvals$obj[[tsibble::index(ts_rvals$obj)]]))
-    list(
-      h5("Plot data from/to:"),
-      fixedRow(
-        column(
-          width = 6,
-          sliderTextInput(
-            inputId = "tsui_adjust_limit_from",
-            label = "",
-            choices = idx,
-            selected = idx[1]
-          )
-        ),
-        column(
-          width = 6,
-          sliderTextInput(
-            inputId = "tsui_adjust_limit_until",
-            label = "",
-            choices = idx,
-            selected = idx[length(idx)]
+    base_ui = list(
+      h5(strong("Adjust Limits"))
+    )
+    if(input$tsui_time_plot_info %in% c("default", "forecast")) {
+      plot_range_ui = list(
+        h5("Display data from/until:"),
+        fixedRow(
+          column(
+            width = 6,
+            sliderTextInput(
+              inputId = "tsui_adjust_limit_from",
+              label = "",
+              choices = idx,
+              selected = idx[1]
+            )
+          ),
+          column(
+            width = 6,
+            sliderTextInput(
+              inputId = "tsui_adjust_limit_until",
+              label = "",
+              choices = idx,
+              selected = idx[length(idx)]
+            )
           )
         )
       )
-    )
+      base_ui = append(base_ui, plot_range_ui)
+    }
+    if(input$tsui_time_plot_info != "default") {
+      model_range_ui = list(
+        h5("Fit model to data from/until:"),
+        fixedRow(
+          column(
+            width = 6,
+            sliderTextInput(
+              inputId = "tsui_adjust_model_limit_from",
+              label = "",
+              choices = idx,
+              selected = idx[1]
+            )
+          ),
+          column(
+            width = 6,
+            sliderTextInput(
+              inputId = "tsui_adjust_model_limit_until",
+              label = "",
+              choices = idx,
+              selected = idx[length(idx)]
+            )
+          )
+        )
+      )
+      base_ui = append(base_ui, model_range_ui)
+    }
+    base_ui
   }
 })
 
