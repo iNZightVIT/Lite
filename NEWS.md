@@ -1,3 +1,9 @@
+# 2026.05.1
+
+## Fixes
+
+- Fix graphics devices not always being closed on the main and interactive plot paths, which could eventually trigger a "too many open devices" error when plotting.
+
 # 2026.01.3
 
 - Prevent non-fatal tab error during app startup
