@@ -502,11 +502,11 @@ app.post("/ingest", (req, res) => {
 
 // GET /api/health — aggregated fleet health for external monitors (e.g. Instatus)
 // Optional ?hostnames=lite.inzight.nz or comma-separated list.
-// Returns 200 when ok, 503 when not (body is always JSON).
+// Always HTTP 200 so monitors can assert on JSON "ok" (non-2xx is treated as "endpoint down").
 app.get("/api/health", (req, res) => {
   const hostnames = parseHostnames(req.query.hostnames);
   const body = buildFleetHealth(hostnames);
-  res.status(body.ok ? 200 : 503).json(body);
+  res.status(200).json(body);
 });
 
 // GET /api/summary
