@@ -1236,6 +1236,7 @@ output$visualize.plot.container = renderUI({
 })
 
 output$visualize.plot <- renderPlot({
+  with_extra_device_cleanup({
   isolate({
     # some of the graphical parameters need
     # to be reminded what there default
@@ -1315,10 +1316,12 @@ output$visualize.plot <- renderPlot({
       }
     }
   }
+  })
 })
 
 
 output$mini.plot <- renderPlot({
+  with_extra_device_cleanup({
   isolate({
     # some of the graphical parameters need
     # to be reminded what their default
@@ -1383,6 +1386,7 @@ output$mini.plot <- renderPlot({
       }
     }
   }
+  })
 })
 
 ##  Reset variable selection and graphical parameters.
@@ -3268,13 +3272,10 @@ output$plotly_inter <- renderPlotly({
         new_par <- new_vis_par(vis_par = temp)
       }
 
-      pdf(NULL)
-      # do.call(iNZightPlots:::iNZightPlot, temp)
-      do.call(iNZightPlots:::inzplot, new_par)
-
-      g <- plotly::ggplotly()
-      dev.off()
-      g
+      with_null_pdf_device({
+        do.call(iNZightPlots:::inzplot, new_par)
+        plotly::ggplotly()
+      })
     }
   })
 })
@@ -3306,14 +3307,10 @@ output$plotly_nw <- renderUI({
       # set to temp directory
       tdir <- tempdir()
       setwd(tdir)
-      pdf(NULL)
-      cdev <- dev.cur()
-      on.exit(dev.off(cdev), add = TRUE)
-      # do.call(iNZightPlots:::iNZightPlot, temp)
-      do.call(iNZightPlots:::inzplot, new_par)
-
-      htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
-      dev.off()
+      with_null_pdf_device({
+        do.call(iNZightPlots:::inzplot, new_par)
+        htmlwidgets::saveWidget(as_widget(plotly::ggplotly()), "index.html")
+      })
       addResourcePath("path", normalizePath(tdir))
       list(
         br(),
@@ -6496,14 +6493,12 @@ output$saveplot <- downloadHandler(
   },
   content = function(file) {
     if (input$saveplottype %in% c("jpg", "png", "pdf")) {
-      if (input$saveplottype == "jpg") {
-        jpeg(file)
-      } else if (input$saveplottype == "png") {
-        png(file)
-      } else if (input$saveplottype == "pdf") {
-        pdf(file, useDingbats = FALSE, onefile = F)
-      }
-
+      plot_type <- switch(input$saveplottype,
+        jpg = "jpg",
+        png = "png",
+        pdf = "pdf"
+      )
+      with_plot_file_device(file, plot_type, {
       if (!is.null(vis.par())) {
         dafr <- get.data.set()
         if (!is.null(plot.par$x) && !is.null(input$vari1) &&
@@ -6555,7 +6550,7 @@ output$saveplot <- downloadHandler(
           }
         }
       }
-      dev.off()
+      })
     } else if (input$saveplottype == "svg") {
       local.dir <- exportSVG.function(create.html)
       src <- normalizePath(local.dir)
@@ -6580,28 +6575,21 @@ exportSVG <- function(x, file, ...) {
 exportSVG.function <- function(x, file = "inzightplot.svg",
                                width = dev.size()[1],
                                height = dev.size()[2], ...) {
-  # get current directory
   curdir <- getwd()
-
-  # set directory to temp directory
   tdir <- tempdir()
   setwd(tdir)
+  on.exit(setwd(curdir), add = TRUE)
 
-  # create pdf graphics device into here:
   pdf("tempfile.pdf", width = width, height = height, onefile = TRUE)
+  on.exit({
+    dev.off()
+    if (file.exists("tempfile.pdf")) {
+      file.remove("tempfile.pdf")
+    }
+  }, add = TRUE)
 
-  # do exporting:
   obj <- x()
   exportSVG(obj, file)
-
-  # turn off device:
-  dev.off()
-
-  # remove pdf:
-  file.remove("tempfile.pdf")
-
-  # reset back to original directory:
-  setwd(curdir)
 }
 
 
@@ -7548,6 +7536,7 @@ observe({
   input$refreshplot
   isolate({
     output$visualize.plot <- renderPlot({
+      with_extra_device_cleanup({
       isolate({
         # some of the graphical parameters need
         # to be reminded what there default
@@ -7608,6 +7597,7 @@ observe({
           }
         }
       }
+      })
     })
   })
 })
