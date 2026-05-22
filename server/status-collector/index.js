@@ -12,6 +12,15 @@ const DASHBOARD_VISIBLE_MINUTES = Math.max(1, parseInt(process.env.DASHBOARD_VIS
 // Sparkline history window for task table (minutes)
 const SPARKLINE_MINUTES = 30;
 const HOSTNAME_LOOKBACK_HOURS = 48;
+// Fleet health for GET /api/health (matches dashboard healthDot in www/index.html).
+const HEALTH_DEGRADED_SEC = Math.max(
+  1,
+  parseInt(process.env.HEALTH_DEGRADED_SEC, 10) || 90
+);
+const HEALTH_STALE_SEC = Math.max(
+  HEALTH_DEGRADED_SEC + 1,
+  parseInt(process.env.HEALTH_STALE_SEC, 10) || 180
+);
 const REQUEST_INTERVAL_MS = Math.max(
   1000,
   parseInt(process.env.REQUEST_INTERVAL_MS, 10) || 30000
@@ -331,6 +340,123 @@ function buildHostnameWhere(hostnames) {
   };
 }
 
+/** Latest row per task_id within cutoff (same window as /api/tasks). */
+function getLatestTaskRows(cutoffIso, hostnames) {
+  const hostFilter = buildHostnameWhere(hostnames);
+  const latestRows = db
+    .prepare(
+      `SELECT task_id, reported_at, shiny_configured, shiny_running, hostname, version
+       FROM status_reports
+       WHERE reported_at >= ?${hostFilter.sql}
+       ORDER BY task_id, reported_at ASC`
+    )
+    .all(cutoffIso, ...hostFilter.params);
+  const byTask = new Map();
+  for (const r of latestRows) {
+    byTask.set(r.task_id, r);
+  }
+  return Array.from(byTask.values());
+}
+
+function taskLastSeenAgeSec(reportedAt) {
+  if (!reportedAt) return Infinity;
+  const ms = Date.now() - Date.parse(reportedAt);
+  return Number.isFinite(ms) ? Math.max(0, Math.round(ms / 1000)) : Infinity;
+}
+
+/** @returns {"healthy"|"degraded"|"stale"|"shiny_down"} */
+function classifyTaskHealth(task) {
+  const ageSec = taskLastSeenAgeSec(task.reported_at);
+  const cfg = task.shiny_configured;
+  const run = task.shiny_running;
+  const shinyDown =
+    typeof cfg === "number" && typeof run === "number" && run < cfg;
+  if (ageSec >= HEALTH_STALE_SEC) return "stale";
+  if (shinyDown) return "shiny_down";
+  if (ageSec >= HEALTH_DEGRADED_SEC) return "degraded";
+  return "healthy";
+}
+
+function buildFleetHealth(hostnames) {
+  const cutoff = new Date(
+    Date.now() - DASHBOARD_VISIBLE_MINUTES * 60 * 1000
+  ).toISOString();
+  const tasks = getLatestTaskRows(cutoff, hostnames);
+  let tasks_healthy = 0;
+  let tasks_degraded = 0;
+  let tasks_stale = 0;
+  let tasks_shiny_down = 0;
+  const issues = [];
+  let reported_at = null;
+  let newest_report_age_sec = null;
+
+  for (const t of tasks) {
+    const status = classifyTaskHealth(t);
+    const last_seen_age_sec = taskLastSeenAgeSec(t.reported_at);
+    const seenMs = Date.parse(t.reported_at);
+    if (
+      reported_at === null ||
+      (Number.isFinite(seenMs) && seenMs > Date.parse(reported_at))
+    ) {
+      reported_at = t.reported_at;
+      newest_report_age_sec = last_seen_age_sec;
+    }
+    if (status === "healthy") {
+      tasks_healthy += 1;
+    } else if (status === "degraded") {
+      tasks_degraded += 1;
+      issues.push({
+        task_id: t.task_id,
+        hostname: t.hostname,
+        reason: "degraded",
+        last_seen_age_sec,
+      });
+    } else if (status === "stale") {
+      tasks_stale += 1;
+      issues.push({
+        task_id: t.task_id,
+        hostname: t.hostname,
+        reason: "stale",
+        last_seen_age_sec,
+      });
+    } else if (status === "shiny_down") {
+      tasks_shiny_down += 1;
+      issues.push({
+        task_id: t.task_id,
+        hostname: t.hostname,
+        reason: "shiny_down",
+        last_seen_age_sec,
+        shiny_running: t.shiny_running,
+        shiny_configured: t.shiny_configured,
+      });
+    }
+  }
+
+  const tasks_visible = tasks.length;
+  const ok =
+    tasks_visible > 0 &&
+    tasks_stale === 0 &&
+    tasks_shiny_down === 0 &&
+    tasks_degraded === 0;
+
+  return {
+    ok,
+    tasks_visible,
+    tasks_healthy,
+    tasks_degraded,
+    tasks_stale,
+    tasks_shiny_down,
+    newest_report_age_sec,
+    reported_at,
+    thresholds: {
+      degraded_sec: HEALTH_DEGRADED_SEC,
+      stale_sec: HEALTH_STALE_SEC,
+      visible_window_minutes: DASHBOARD_VISIBLE_MINUTES,
+    },
+    issues,
+  };
+}
+
 // POST /ingest — token-protected
 app.post("/ingest", (req, res) => {
   const auth = req.headers.authorization;
@@ -372,6 +498,15 @@ app.post("/ingest", (req, res) => {
   }
 
   res.status(204).send();
+});
+
+// GET /api/health — aggregated fleet health for external monitors (e.g. Instatus)
+// Optional ?hostnames=lite.inzight.nz or comma-separated list.
+// Returns 200 when ok, 503 when not (body is always JSON).
+app.get("/api/health", (req, res) => {
+  const hostnames = parseHostnames(req.query.hostnames);
+  const body = buildFleetHealth(hostnames);
+  res.status(body.ok ? 200 : 503).json(body);
 });
 
 // GET /api/summary

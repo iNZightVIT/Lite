@@ -29,10 +29,17 @@ Use Secrets Manager or SSM Parameter Store for the token. Add GitHub secret `STA
 | Endpoint       | Method | Description                                                   |
 | -------------- | ------ | ------------------------------------------------------------- |
 | `/ingest`      | POST   | Accept status JSON (requires `Authorization: Bearer <token>`) |
+| `/api/health`  | GET    | Fleet health for monitors (`ok`, per-task issues); `?hostnames=` filter; 503 when unhealthy |
 | `/api/summary` | GET    | Task count, total connections, latest report time             |
 | `/api/tasks`   | GET    | Per-task breakdown (tasks that reported in the active window) |
-| `/api/history` | GET    | Time-series (`?hours=6`), for charts                          |
+| `/api/history` | GET    | Time-series (`?range=1h\|6h\|1d\|7d`), for charts              |
 | `/`            | GET    | Dashboard (static HTML)                                       |
+
+### `/api/health`
+
+Used by Instatus (or similar) instead of polling `/api/tasks`. Counts tasks seen within `DASHBOARD_VISIBLE_MINUTES` (default 5). Status per task matches the dashboard dots: **healthy** if last report &lt; 90s and all Shiny workers up; **degraded** if 90–180s; **stale** if ≥ 180s; **shiny_down** if `shiny_running` &lt; `shiny_configured`.
+
+`ok` is true only when there is at least one visible task and none are degraded, stale, or shiny_down. Override thresholds with `HEALTH_DEGRADED_SEC` (default 90) and `HEALTH_STALE_SEC` (default 180).
 
 Summary and task list only include instances that reported in the last **2 minutes** by default (`ACTIVE_WINDOW_MINUTES`). So when testing locally with one instance, you’ll see at most one task once older reports age out; set a higher value (e.g. 5) in production if needed.
 
