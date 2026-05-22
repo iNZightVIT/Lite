@@ -32,6 +32,11 @@ const HEALTH_MIN_HEALTHY_TASKS = Math.max(
   1,
   parseInt(process.env.HEALTH_MIN_HEALTHY_TASKS, 10) || 1
 );
+// Shiny must be down continuously this long before it fails fleet ok (deploy buffer).
+const SHINY_DOWN_FAIL_SEC = Math.max(
+  30,
+  parseInt(process.env.SHINY_DOWN_FAIL_SEC, 10) || 120
+);
 const REQUEST_INTERVAL_MS = Math.max(
   1000,
   parseInt(process.env.REQUEST_INTERVAL_MS, 10) || 30000
@@ -61,6 +66,13 @@ try {
 
 const db = new Database(DB_PATH);
 db.pragma("journal_mode = WAL");
+
+const shinyDownHistoryStmt = db.prepare(
+  `SELECT reported_at, shiny_configured, shiny_running
+   FROM status_reports
+   WHERE task_id = ? AND reported_at >= ?
+   ORDER BY reported_at ASC`
+);
 
 // --- Schema: create table with new columns for fresh installs ---
 db.exec(`
@@ -375,15 +387,54 @@ function taskLastSeenAgeSec(reportedAt) {
   return Number.isFinite(ms) ? Math.max(0, Math.round(ms / 1000)) : Infinity;
 }
 
+function isShinyDownSnapshot(row) {
+  const cfg = row.shiny_configured;
+  const run = row.shiny_running;
+  return typeof cfg === "number" && typeof run === "number" && run < cfg;
+}
+
+/**
+ * True only if the latest snapshot is shiny_down AND it has been continuous
+ * for at least SHINY_DOWN_FAIL_SEC (buffers new tasks during deploy).
+ * @returns {{ persistent: boolean, down_since: string|null, down_for_sec: number|null }}
+ */
+function shinyDownPersistence(task) {
+  if (!isShinyDownSnapshot(task)) {
+    return { persistent: false, down_since: null, down_for_sec: null };
+  }
+  const lookbackSec = Math.max(SHINY_DOWN_FAIL_SEC, HEALTH_WINDOW_MINUTES * 60);
+  const cutoff = new Date(Date.now() - lookbackSec * 1000).toISOString();
+  const rows = shinyDownHistoryStmt.all(task.task_id, cutoff);
+  let streakStart = null;
+  for (const r of rows) {
+    if (isShinyDownSnapshot(r)) {
+      if (streakStart === null) streakStart = r.reported_at;
+    } else {
+      streakStart = null;
+    }
+  }
+  if (streakStart === null) {
+    return { persistent: false, down_since: null, down_for_sec: null };
+  }
+  const downForSec = taskLastSeenAgeSec(streakStart);
+  // Age from streak start to now (not from latest report).
+  const downMs = Date.now() - Date.parse(streakStart);
+  const downForSecFromStart = Number.isFinite(downMs)
+    ? Math.max(0, Math.round(downMs / 1000))
+    : downForSec;
+  return {
+    persistent: downForSecFromStart >= SHINY_DOWN_FAIL_SEC,
+    down_since: streakStart,
+    down_for_sec: downForSecFromStart,
+  };
+}
+
 /** @returns {"healthy"|"degraded"|"stale"|"shiny_down"} */
 function classifyTaskHealth(task) {
   const ageSec = taskLastSeenAgeSec(task.reported_at);
-  const cfg = task.shiny_configured;
-  const run = task.shiny_running;
-  const shinyDown =
-    typeof cfg === "number" && typeof run === "number" && run < cfg;
   if (ageSec >= HEALTH_STALE_SEC) return "stale";
-  if (shinyDown) return "shiny_down";
+  const down = shinyDownPersistence(task);
+  if (down.persistent) return "shiny_down";
   if (ageSec >= HEALTH_DEGRADED_SEC) return "degraded";
   return "healthy";
 }
@@ -431,6 +482,7 @@ function buildFleetHealth(hostnames) {
         last_seen_age_sec,
       });
     } else if (status === "shiny_down") {
+      const down = shinyDownPersistence(t);
       tasks_shiny_down += 1;
       issues.push({
         task_id: t.task_id,
@@ -439,6 +491,7 @@ function buildFleetHealth(hostnames) {
         last_seen_age_sec,
         shiny_running: t.shiny_running,
         shiny_configured: t.shiny_configured,
+        shiny_down_for_sec: down.down_for_sec,
       });
     }
   }
@@ -469,6 +522,7 @@ function buildFleetHealth(hostnames) {
       stale_sec: HEALTH_STALE_SEC,
       health_window_minutes: HEALTH_WINDOW_MINUTES,
       min_healthy_tasks: HEALTH_MIN_HEALTHY_TASKS,
+      shiny_down_fail_sec: SHINY_DOWN_FAIL_SEC,
     },
     issues,
   };

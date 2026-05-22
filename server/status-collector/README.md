@@ -41,7 +41,7 @@ Used by Instatus (or similar) instead of polling `/api/tasks`. Only tasks that r
 
 Per-task status matches the dashboard dots: **healthy** if last report &lt; 90s and all Shiny workers up; **degraded** if 90–180s; **stale** if ≥ 180s; **shiny_down** if `shiny_running` &lt; `shiny_configured`.
 
-**`ok`** is true when `tasks_healthy` ≥ `HEALTH_MIN_HEALTHY_TASKS` (default 1) and no task has **shiny_down**. Degraded/stale counts are informational (`status` may be `degraded` while `ok` is still true). Set `HEALTH_MIN_HEALTHY_TASKS` higher if you always run at least N tasks.
+**`ok`** is true when `tasks_healthy` ≥ `HEALTH_MIN_HEALTHY_TASKS` (default 1) and no task has **shiny_down** for longer than `SHINY_DOWN_FAIL_SEC` (default 120). A new task with Shiny still starting up is not treated as down until that window elapses. Degraded/stale counts are informational (`status` may be `degraded` while `ok` is still true).
 
 For Instatus, assert **JSON path `ok` equals `true`** (response is always HTTP 200).
 
