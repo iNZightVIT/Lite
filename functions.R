@@ -33,12 +33,15 @@ with_plot_file_device <- function(file, type = c("png", "pdf", "jpg"), expr) {
 
 #' Close graphics devices opened during expr; leaves pre-existing devices (e.g. Shiny renderPlot).
 with_extra_device_cleanup <- function(expr) {
-  n_before <- length(dev.list())
-  on.exit({
-    while (length(dev.list()) > n_before) {
-      dev.off(length(dev.list()))
-    }
-  }, add = TRUE)
+  devices_before <- dev.list()
+  on.exit(
+    {
+      for (dev in setdiff(dev.list(), devices_before)) {
+        dev.off(dev)
+      }
+    },
+    add = TRUE
+  )
   force(expr)
 }
 
