@@ -12,6 +12,36 @@ read_config <- function() {
   fromJSON(lite_config)
 }
 
+#' Open pdf(NULL), run expr, always dev.off() (including on error).
+with_null_pdf_device <- function(expr) {
+  pdf(NULL)
+  on.exit(dev.off(), add = TRUE)
+  force(expr)
+}
+
+#' Open a file plot device, run expr, always dev.off() (including on error).
+with_plot_file_device <- function(file, type = c("png", "pdf", "jpg"), expr) {
+  type <- match.arg(type)
+  switch(type,
+    png = png(file),
+    pdf = pdf(file, useDingbats = FALSE, onefile = FALSE),
+    jpg = jpeg(file)
+  )
+  on.exit(dev.off(), add = TRUE)
+  force(expr)
+}
+
+#' Close graphics devices opened during expr; leaves pre-existing devices (e.g. Shiny renderPlot).
+with_extra_device_cleanup <- function(expr) {
+  n_before <- length(dev.list())
+  on.exit({
+    while (length(dev.list()) > n_before) {
+      dev.off(length(dev.list()))
+    }
+  }, add = TRUE)
+  force(expr)
+}
+
 # Modified based off:
 # https://github.com/dreamRs/shinylogs/blob/0195ac0a1f85d213c82143cfee712c9baddd1963/R/tracking.R#L134
 init_lite_logs <- function(
