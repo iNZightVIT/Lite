@@ -37,11 +37,13 @@ Use Secrets Manager or SSM Parameter Store for the token. Add GitHub secret `STA
 
 ### `/api/health`
 
-Used by Instatus (or similar) instead of polling `/api/tasks`. Counts tasks seen within `DASHBOARD_VISIBLE_MINUTES` (default 5). Status per task matches the dashboard dots: **healthy** if last report &lt; 90s and all Shiny workers up; **degraded** if 90–180s; **stale** if ≥ 180s; **shiny_down** if `shiny_running` &lt; `shiny_configured`.
+Used by Instatus (or similar) instead of polling `/api/tasks`. Only tasks that reported within `HEALTH_WINDOW_MINUTES` (default 2, same as `/api/summary`) are evaluated, so instances removed by scale-in drop out quickly instead of appearing stale for five minutes.
 
-`ok` is true only when there is at least one visible task and none are degraded, stale, or shiny_down. Override thresholds with `HEALTH_DEGRADED_SEC` (default 90) and `HEALTH_STALE_SEC` (default 180).
+Per-task status matches the dashboard dots: **healthy** if last report &lt; 90s and all Shiny workers up; **degraded** if 90–180s; **stale** if ≥ 180s; **shiny_down** if `shiny_running` &lt; `shiny_configured`.
 
-For Instatus (or similar), assert **JSON path `ok` equals `true`** — do not rely on HTTP status alone (the response is always `200` so the checker reaches the body).
+**`ok`** is true when `tasks_healthy` ≥ `HEALTH_MIN_HEALTHY_TASKS` (default 1) and no task has **shiny_down**. Degraded/stale counts are informational (`status` may be `degraded` while `ok` is still true). Set `HEALTH_MIN_HEALTHY_TASKS` higher if you always run at least N tasks.
+
+For Instatus, assert **JSON path `ok` equals `true`** (response is always HTTP 200).
 
 Summary and task list only include instances that reported in the last **2 minutes** by default (`ACTIVE_WINDOW_MINUTES`). So when testing locally with one instance, you’ll see at most one task once older reports age out; set a higher value (e.g. 5) in production if needed.
 

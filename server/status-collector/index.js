@@ -21,6 +21,17 @@ const HEALTH_STALE_SEC = Math.max(
   HEALTH_DEGRADED_SEC + 1,
   parseInt(process.env.HEALTH_STALE_SEC, 10) || 180
 );
+// Only tasks reporting within this window are judged (default: same as /api/summary).
+// Shorter than the dashboard list so scaled-in tasks drop off quickly.
+const HEALTH_WINDOW_MINUTES = Math.max(
+  1,
+  parseInt(process.env.HEALTH_WINDOW_MINUTES, 10) || ACTIVE_WINDOW_MINUTES
+);
+// Fleet ok if at least this many tasks are healthy (scale-down tolerant).
+const HEALTH_MIN_HEALTHY_TASKS = Math.max(
+  1,
+  parseInt(process.env.HEALTH_MIN_HEALTHY_TASKS, 10) || 1
+);
 const REQUEST_INTERVAL_MS = Math.max(
   1000,
   parseInt(process.env.REQUEST_INTERVAL_MS, 10) || 30000
@@ -379,7 +390,7 @@ function classifyTaskHealth(task) {
 
 function buildFleetHealth(hostnames) {
   const cutoff = new Date(
-    Date.now() - DASHBOARD_VISIBLE_MINUTES * 60 * 1000
+    Date.now() - HEALTH_WINDOW_MINUTES * 60 * 1000
   ).toISOString();
   const tasks = getLatestTaskRows(cutoff, hostnames);
   let tasks_healthy = 0;
@@ -433,14 +444,19 @@ function buildFleetHealth(hostnames) {
   }
 
   const tasks_visible = tasks.length;
+  // Scale-down tolerant: need enough healthy reporters; draining/stale ghosts
+  // are not in the active window. Degraded tasks are warnings only (see status).
   const ok =
-    tasks_visible > 0 &&
-    tasks_stale === 0 &&
-    tasks_shiny_down === 0 &&
-    tasks_degraded === 0;
+    tasks_healthy >= HEALTH_MIN_HEALTHY_TASKS && tasks_shiny_down === 0;
+  const status = !ok
+    ? "unhealthy"
+    : tasks_degraded > 0 || tasks_stale > 0
+      ? "degraded"
+      : "healthy";
 
   return {
     ok,
+    status,
     tasks_visible,
     tasks_healthy,
     tasks_degraded,
@@ -451,7 +467,8 @@ function buildFleetHealth(hostnames) {
     thresholds: {
       degraded_sec: HEALTH_DEGRADED_SEC,
       stale_sec: HEALTH_STALE_SEC,
-      visible_window_minutes: DASHBOARD_VISIBLE_MINUTES,
+      health_window_minutes: HEALTH_WINDOW_MINUTES,
+      min_healthy_tasks: HEALTH_MIN_HEALTHY_TASKS,
     },
     issues,
   };
