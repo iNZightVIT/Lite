@@ -321,8 +321,7 @@ tsui_season_label <- function(freq_label) {
     return("Season")
   }
   word <- strsplit(freq_label, " ", fixed = TRUE)[[1]][1]
-  switch(
-    word,
+  switch(word,
     "Yearly" = "Season",
     "Quarterly" = "Quarter",
     "Monthly" = "Month",
@@ -422,7 +421,7 @@ output$tsui_ts_plot <- renderPlot({
             }
         }
 
-        plot_range = NULL
+        plot_range <- NULL
         if (
           !is.null(input$tsui_adjust_limit_from) &&
             !is.null(input$tsui_adjust_limit_until)
@@ -432,7 +431,7 @@ output$tsui_ts_plot <- renderPlot({
             input$tsui_adjust_limit_until
           ))
         }
-        model_range = NULL
+        model_range <- NULL
         if (
           !is.null(input$tsui_adjust_model_limit_from) &&
             !is.null(input$tsui_adjust_model_limit_until)
@@ -747,11 +746,11 @@ output$tsui_ranges <- renderUI({
   if (!is.null(ts_rvals$obj) && !is.null(input$tsui_time_plot_info)) {
     idx <- sort(unique(ts_rvals$obj[[tsibble::index(ts_rvals$obj)]]))
     idx <- as.character(idx)
-    base_ui = list(
+    base_ui <- list(
       h5(strong("Adjust Limits"))
     )
     if (input$tsui_time_plot_info %in% c("default", "forecast")) {
-      plot_range_ui = list(
+      plot_range_ui <- list(
         h5("Display data from/until:"),
         fixedRow(
           column(
@@ -774,10 +773,10 @@ output$tsui_ranges <- renderUI({
           )
         )
       )
-      base_ui = append(base_ui, plot_range_ui)
+      base_ui <- append(base_ui, plot_range_ui)
     }
     if (input$tsui_time_plot_info != "default") {
-      model_range_ui = list(
+      model_range_ui <- list(
         h5("Fit model to data from/until:"),
         fixedRow(
           column(
@@ -800,7 +799,7 @@ output$tsui_ranges <- renderUI({
           )
         )
       )
-      base_ui = append(base_ui, model_range_ui)
+      base_ui <- append(base_ui, model_range_ui)
     }
     base_ui
   }
@@ -834,8 +833,7 @@ output$tsui_save_plot <- downloadHandler(
   filename = function() {
     paste(
       "TimeSeriesPlot",
-      switch(
-        input$tsui_save_plot_type,
+      switch(input$tsui_save_plot_type,
         "jpg" = "jpg",
         "png" = "png",
         "pdf" = "pdf"

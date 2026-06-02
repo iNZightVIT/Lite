@@ -6,7 +6,6 @@ ts.help <- function() {
   )
 }
 
-x = 1
 
 TS.sidebarPanel <- function(data.set) {
   if (is.null(data.set)) {
@@ -15,7 +14,6 @@ TS.sidebarPanel <- function(data.set) {
 
   sidebarPanelUI <- list(
     hr(),
-    
     h5(strong("Time Information: ")),
     tabsetPanel(
       id = "tsui_time_info_mode",
@@ -152,7 +150,6 @@ TS.sidebarPanel <- function(data.set) {
       )
     ),
     hr(),
-    
     h5(strong("Choose variables:")),
     radioButtons(
       inputId = "tsui_choose_var_type",
@@ -178,11 +175,9 @@ TS.sidebarPanel <- function(data.set) {
       inline = T
     ),
     hr(),
-    
     h5(strong("Plot type:")),
     uiOutput("tsui_time_plot_info"),
     hr(),
-    
     h5(strong("Plot settings:")),
     checkboxInput("tsui_smoother", label = "Show smoother"),
     checkboxInput("tsui_seasonally_adjusted", label = "Seasonally adjust series"),
@@ -200,7 +195,6 @@ TS.sidebarPanel <- function(data.set) {
 }
 
 
-
 ### --------------###
 ###  Main Panel  ###
 ### --------------###
@@ -214,12 +208,11 @@ TS.mainPanel <- function() {
   ##    -  Section 3: Multiple Series Plots
   ##
   ##  Note the use of "br()" (= line break) for vertical spacing.
-  
+
   mainPanelUI <- list(
     uiOutput("tsui_main")
   )
 }
-
 
 
 ### ------------------###
@@ -246,4 +239,3 @@ TS.panel.ui <- function(data.set) {
     }
   )
 }
-
