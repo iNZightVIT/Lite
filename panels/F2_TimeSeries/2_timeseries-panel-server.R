@@ -94,6 +94,59 @@ create_ts_object <- function() {
   # ts_rvals$sel_index = index_var(ts_rvals$obj)
   ts_rvals$sel_time <- input$tsui_select_timevars
   ts_rvals$sel_var <- input$tsui_select_variables # measured_vars(t)
+  ts_rvals$manual_time <- FALSE
+}
+
+create_manual_ts_object <- function() {
+  ts_rvals$obj <- NULL
+  temp <- get.data.set()
+  ts_rvals$available_vars <- colnames(temp)
+
+  if (
+    is.null(input$tsui_period) ||
+      input$tsui_period == "" ||
+      is.null(input$tsui_time_freq_num) ||
+      is.na(input$tsui_time_freq_num) ||
+      is.null(input$tsui_select_variables)
+  ) {
+    return()
+  }
+
+  time_freq <- input$tsui_time_freq_num
+  preset <- tsui_freq_preset(input$tsui_period, input$tsui_time_freq_list)
+  if (!is.na(preset)) {
+    time_freq <- preset
+  }
+
+  time_start <- c(
+    input$tsui_time_start_period,
+    input$tsui_time_start_season
+  )
+  if (time_start[2] > time_freq) {
+    time_start[2] <- time_freq
+  }
+
+  t <- try(
+    iNZightTS::inzightts(
+      temp,
+      var = input$tsui_select_variables,
+      start = time_start,
+      freq = time_freq
+    ),
+    silent = TRUE
+  )
+  if (inherits(t, "try-error")) {
+    message("Unable to create manual temporal object.")
+    return()
+  }
+
+  ts_rvals$obj <- t
+  ts_rvals$sel_time <- NULL
+  ts_rvals$sel_key <- NULL
+  ts_rvals$sel_var <- input$tsui_select_variables
+  ts_rvals$manual_time <- TRUE
+  ts_rvals$manual_obj <- t
+  ts_rvals$manual_sel_var <- input$tsui_select_variables
 }
 
 # initialize gui
@@ -108,33 +161,25 @@ ts_rvals$num_vars <- NULL
 ts_rvals$cat_vars <- NULL
 ts_rvals$choose_season <- NULL
 ts_rvals$available_vars <- NULL
+ts_rvals$manual_time <- FALSE
+ts_rvals$manual_obj <- NULL
+ts_rvals$manual_sel_var <- NULL
 
 # season_select_ts <- reactiveValues()
 # season_select_ts$re <- as.logical()
-
 
 output$timeseries.panel <- renderUI({
   TS.panel.ui(get.data.set())
 })
 
-getTime <- function(data, index = TRUE) {
-  ## look for time or date
-  time_re <- "([Tt][Ii][Mm][Ee])|([Dd][Aa][Tt][Ee])"
-  ind <- grep(time_re, names(data))
-  if (length(ind) == 0) ind <- 1 else ind <- ind[1]
-  if (index) {
-    return(ind)
-  }
-  return(names(data)[ind])
-}
-
-freqOpts <- list(
+# https://github.com/iNZightVIT/iNZightModules/blob/8805a05120fdd02e63d37459df7acee5403e2180/R/iNZightTSLegacy.R#L196
+freq_opts <- list(
   "Year" = c(
     "Yearly (1)" = 1,
     "Quarterly (4)" = 4,
     "Monthly (12)" = 12,
     "Weekly (52)" = 52,
-    "Daily (365/366)" = 365
+    "Daily (365/366)" = 365.25
   ),
   "Week" = c(
     "Daily (7)" = 7,
@@ -145,28 +190,183 @@ freqOpts <- list(
   )
 )
 
-# init ts object
+tsui_freq_preset <- function(period, freq_label) {
+  if (
+    is.null(period) ||
+      period == "" ||
+      is.null(freq_label) ||
+      freq_label %in% c("Custom", "")
+  ) {
+    return(NA_real_)
+  }
+  opts <- freq_opts[[period]]
+  if (is.null(opts) || !freq_label %in% names(opts)) {
+    return(NA_real_)
+  }
+  as.numeric(opts[freq_label])[1]
+}
+
+getTime <- function(data, index = TRUE) {
+  ## look for time or date
+  time_re <- "([Tt][Ii][Mm][Ee])|([Dd][Aa][Tt][Ee])"
+  ind <- grep(time_re, names(data))
+  if (length(ind) == 0) {
+    ind <- 1
+  } else {
+    ind <- ind[1]
+  }
+  if (index) {
+    return(ind)
+  }
+  return(names(data)[ind])
+}
+
+
 observe({
   get.data.set()
+  ts_rvals$manual_obj <- NULL
+  ts_rvals$manual_sel_var <- NULL
+})
+
+# init ts object (time column + keys; manual time uses submit button)
+observe({
+  get.data.set()
+  if (!identical(input$tsui_time_info_mode, "Select time variable")) {
+    return()
+  }
+
   input$tsui_select_timevars
   input$tsui_select_keys
   input$tsui_select_variables
 
-  # print(input$select_timevars)
-  # print(input$select_keys)
-  # print(input$select_variables)
-
   if (
     !is.null(input$tsui_select_timevars) &&
       !is.null(input$tsui_select_variables) &&
-      # first ui render, the first measure var might be the same as time var
       !(input$tsui_select_timevars %in% input$tsui_select_variables)
   ) {
     create_ts_object()
   } else {
     ts_rvals$obj <- NULL
+    ts_rvals$manual_time <- FALSE
   }
 })
+
+observeEvent(
+  input$tsui_time_info_mode,
+  {
+    if (identical(input$tsui_time_info_mode, "Provide time manually")) {
+      if (!is.null(ts_rvals$manual_obj)) {
+        ts_rvals$obj <- ts_rvals$manual_obj
+        ts_rvals$sel_var <- ts_rvals$manual_sel_var
+        ts_rvals$sel_time <- NULL
+        ts_rvals$sel_key <- NULL
+        ts_rvals$manual_time <- TRUE
+      } else {
+        ts_rvals$obj <- NULL
+        ts_rvals$manual_time <- FALSE
+      }
+    } else {
+      if (isTRUE(ts_rvals$manual_time) && !is.null(ts_rvals$obj)) {
+        ts_rvals$manual_obj <- ts_rvals$obj
+        ts_rvals$manual_sel_var <- ts_rvals$sel_var
+      }
+      shinyjs::enable("tsui_time_freq_num")
+    }
+  },
+  ignoreInit = TRUE
+)
+
+observeEvent(input$tsui_manual_submit, {
+  req(identical(input$tsui_time_info_mode, "Provide time manually"))
+  create_manual_ts_object()
+})
+
+observeEvent(
+  input$tsui_select_variables,
+  {
+    if (!identical(input$tsui_time_info_mode, "Provide time manually")) {
+      return()
+    }
+    if (!isTRUE(ts_rvals$manual_time)) {
+      return()
+    }
+    create_manual_ts_object()
+  },
+  ignoreInit = TRUE
+)
+
+output$tsui_manual_freq <- renderUI({
+  input$tsui_period
+  isolate({
+    choice <- c(names(freq_opts[[input$tsui_period]]), "Custom")
+    selectInput(
+      inputId = "tsui_time_freq_list",
+      label = NULL,
+      choices = choice,
+      selected = choice[1]
+    )
+  })
+})
+
+output$tsui_start_lbl1 <- renderText({
+  if (is.null(input$tsui_period) || input$tsui_period == "") {
+    "Period"
+  } else {
+    input$tsui_period
+  }
+})
+
+tsui_season_label <- function(freq_label) {
+  if (is.null(freq_label) || freq_label %in% c("Custom", "")) {
+    return("Season")
+  }
+  word <- strsplit(freq_label, " ", fixed = TRUE)[[1]][1]
+  switch(
+    word,
+    "Yearly" = "Season",
+    "Quarterly" = "Quarter",
+    "Monthly" = "Month",
+    "Weekly" = "Week",
+    "Daily" = "Day",
+    "Hourly" = "Hour",
+    "Season"
+  )
+}
+
+output$tsui_start_lbl2 <- renderText({
+  tsui_season_label(input$tsui_time_freq_list)
+})
+
+observeEvent(
+  c(input$tsui_period, input$tsui_time_freq_list),
+  {
+    if (!identical(input$tsui_time_info_mode, "Provide time manually")) {
+      return()
+    }
+    if (
+      is.null(input$tsui_time_freq_list) ||
+        is.null(input$tsui_period) ||
+        input$tsui_period == ""
+    ) {
+      return()
+    }
+    if (input$tsui_time_freq_list %in% c("Custom", "")) {
+      shinyjs::enable("tsui_time_freq_num")
+      return()
+    }
+    freq_val <- tsui_freq_preset(input$tsui_period, input$tsui_time_freq_list)
+    if (!is.na(freq_val)) {
+      updateNumericInput(
+        session,
+        inputId = "tsui_time_freq_num",
+        label = "",
+        value = as.numeric(freq_val)[1]
+      )
+      shinyjs::disable("tsui_time_freq_num")
+    }
+  },
+  ignoreInit = TRUE
+)
 
 output$tsui_ts_plot <- renderPlot({
   check <- list(
@@ -180,21 +380,22 @@ output$tsui_ts_plot <- renderPlot({
     input$tsui_smoothing,
     input$tsui_adjust_limit_from,
     input$tsui_adjust_limit_until
-    
-    # don't need to check model_limit, default plot is 
+
+    # don't need to check model_limit, default plot is
     # `plot type: default` which dont use model_range
     # input$tsui_adjust_model_limit_from,
     # input$tsui_adjust_model_limit_until
   )
- 
+
   if (is.null(ts_rvals$obj)) {
     plot.new()
-    text(
-      0.5,
-      0.5,
-      paste("Unable to create temporal object. Maybe you forgot to specify the keys?"),
-      cex = 2
-    )
+    msg <- if (identical(input$tsui_time_info_mode, "Provide time manually")) {
+      "Set time options and click Apply Settings."
+    } else {
+      "Unable to create temporal object. Maybe you forgot to specify the keys?"
+    }
+    text(0.5, 0.5, msg, cex = 2)
+    return()
   }
   if (is.null(ts_rvals$sel_var)) {
     plot.new()
@@ -206,35 +407,66 @@ output$tsui_ts_plot <- renderPlot({
 
         as_range <- function(x) {
           if (is.numeric(x)) {
-            x
-          } else {
-            distinct(ts_p, !!tsibble::index(ts_p)) %>%
-              filter(as.character(!!tsibble::index(ts_p)) %in% x) %>%
-              pull() %>%
-              as.Date()
+            return(x)
           }
+          idx_col <- tsibble::index(ts_p)
+          idx_vals <- ts_p[[idx_col]]
+          if (is.numeric(idx_vals)) {
+            return(as.numeric(x))
+          }
+          distinct(ts_p, !!idx_col) %>%
+            filter(as.character(!!sym(idx_col)) %in% as.character(x)) %>%
+            pull(!!idx_col) %>%
+            {
+              if (inherits(., "Date")) . else as.Date(.)
+            }
         }
-        
+
         plot_range = NULL
-        if (!is.null(input$tsui_adjust_limit_from) && !is.null(input$tsui_adjust_limit_until)) {
-          plot_range <- as_range(c(input$tsui_adjust_limit_from, input$tsui_adjust_limit_until))
+        if (
+          !is.null(input$tsui_adjust_limit_from) &&
+            !is.null(input$tsui_adjust_limit_until)
+        ) {
+          plot_range <- as_range(c(
+            input$tsui_adjust_limit_from,
+            input$tsui_adjust_limit_until
+          ))
         }
         model_range = NULL
-        if (!is.null(input$tsui_adjust_model_limit_from) && !is.null(input$tsui_adjust_model_limit_until)) {
-          model_range <- as_range(c(input$tsui_adjust_model_limit_from, input$tsui_adjust_model_limit_until))
+        if (
+          !is.null(input$tsui_adjust_model_limit_from) &&
+            !is.null(input$tsui_adjust_model_limit_until)
+        ) {
+          model_range <- as_range(c(
+            input$tsui_adjust_model_limit_from,
+            input$tsui_adjust_model_limit_until
+          ))
         }
-        
-        if (tsibble::n_keys(ts_p) > 1) { #  && svalue(key_filter) != "(Show all)"
-          key_i <- which(colnames(ts_p) == ts_rvals$sel_key) - # key_filter$get_index() -
+
+        if (
+          !isTRUE(ts_rvals$manual_time) &&
+            tsibble::n_keys(ts_p) > 1 &&
+            length(ts_rvals$sel_key) > 0
+        ) {
+          key_i <- which(colnames(ts_p) == ts_rvals$sel_key) -
             (tsibble::n_keys(ts_p) < 20) +
-            (input$tsui_time_plot_info == "Decomposition")
+            (input$tsui_time_plot_info == "decomposed")
           ts_p <- tsibble::key_data(ts_p)[key_i, ] |>
-            dplyr::left_join(ts_p, by = tsibble::key_vars(ts_p), multiple = "all") |>
+            dplyr::left_join(
+              ts_p,
+              by = tsibble::key_vars(ts_p),
+              multiple = "all"
+            ) |>
             tsibble::as_tsibble(index = !!tsibble::index(ts_p), key = NULL) |>
-            inzightts()
+            iNZightTS::inzightts()
         }
         key_to_hl <- NULL
-        if (length(ts_rvals$sel_key) && which(colnames(ts_p) == ts_rvals$sel_key) != 1L) {
+        if (
+          !isTRUE(ts_rvals$manual_time) &&
+            length(ts_rvals$sel_key) > 0 &&
+            ts_rvals$sel_key %in% colnames(ts_p) &&
+            which(colnames(ts_p) == ts_rvals$sel_key) != 1L
+        ) {
           key_to_hl <- which(colnames(ts_p) == ts_rvals$sel_key) - 1L
         }
         smooth_value <- ifelse(input$tsui_smoother, input$tsui_smoothing, 0)
@@ -296,7 +528,9 @@ output$tsui_ts_plot <- renderPlot({
       text(
         0.5,
         0.5,
-        paste("Unable to create temporal object. Maybe you forgot to specify the keys?"),
+        paste(
+          "Unable to create temporal object. Maybe you forgot to specify the keys?"
+        ),
         cex = 2
       )
     } else {
@@ -346,7 +580,8 @@ output$tsui_main <- renderUI({
               radioButtons(
                 inputId = "tsui_save_plot_type",
                 label = strong("Select the file type"),
-                choices = list("jpg", "png", "pdf"), inline = TRUE
+                choices = list("jpg", "png", "pdf"),
+                inline = TRUE
               )
             )
           )
@@ -376,11 +611,13 @@ output$tsui_time_select <- renderUI({
     temp <- session$clientData$url_search
     get.vars$url <- sub(".*?url=(.*?)&.*", "\\1", temp)
   }
-  if (length(get.vars) > 0 &&
-    (any(names(get.vars) %in% "url") ||
-      any(names(get.vars) %in% "example")) &&
-    (any(names(get.vars) %in% "time") &&
-      !get.vars$time %in% "")) {
+  if (
+    length(get.vars) > 0 &&
+      (any(names(get.vars) %in% "url") ||
+        any(names(get.vars) %in% "example")) &&
+      (any(names(get.vars) %in% "time") &&
+        !get.vars$time %in% "")
+  ) {
     sel <- get.vars$time
   }
   ts_rvals$sel_time <- sel
@@ -439,11 +676,15 @@ output$tsui_key_select <- renderUI({
 # time.plot.select
 output$tsui_time_plot_select <- renderUI({
   input$tsui_choose_var_type
+  input$tsui_time_info_mode
   temp <- get.data.set()
   available_vars <- colnames(temp)
 
-  # remove time and key
-  if (!is.null(ts_rvals$sel_time)) {
+  # remove time and key (manual time has no index/key columns)
+  if (
+    identical(input$tsui_time_info_mode, "Select time variable") &&
+      !is.null(ts_rvals$sel_time)
+  ) {
     available_vars <- available_vars[available_vars != ts_rvals$sel_time]
   }
   if (!is.null(ts_rvals$sel_key)) {
@@ -505,10 +746,11 @@ output$tsui_time_plot_select <- renderUI({
 output$tsui_ranges <- renderUI({
   if (!is.null(ts_rvals$obj) && !is.null(input$tsui_time_plot_info)) {
     idx <- sort(unique(ts_rvals$obj[[tsibble::index(ts_rvals$obj)]]))
+    idx <- as.character(idx)
     base_ui = list(
       h5(strong("Adjust Limits"))
     )
-    if(input$tsui_time_plot_info %in% c("default", "forecast")) {
+    if (input$tsui_time_plot_info %in% c("default", "forecast")) {
       plot_range_ui = list(
         h5("Display data from/until:"),
         fixedRow(
@@ -534,7 +776,7 @@ output$tsui_ranges <- renderUI({
       )
       base_ui = append(base_ui, plot_range_ui)
     }
-    if(input$tsui_time_plot_info != "default") {
+    if (input$tsui_time_plot_info != "default") {
       model_range_ui = list(
         h5("Fit model to data from/until:"),
         fixedRow(
@@ -566,7 +808,9 @@ output$tsui_ranges <- renderUI({
 
 output$tsui_time_plot_info <- renderUI({
   input$tsui_choose_var_type
-  if (!is.null(ts_rvals$obj) && input$tsui_choose_var_type %in% c("num", "cat")) {
+  if (
+    !is.null(ts_rvals$obj) && input$tsui_choose_var_type %in% c("num", "cat")
+  ) {
     choices <- c(
       "Default" = "default",
       "Decomposed" = "decomposed",
@@ -577,7 +821,8 @@ output$tsui_time_plot_info <- renderUI({
       choices <- choices[1]
     }
     radioButtons(
-      inputId = "tsui_time_plot_info", label = "",
+      inputId = "tsui_time_plot_info",
+      label = "",
       choices = choices,
       selected = "default",
       inline = T
@@ -587,8 +832,10 @@ output$tsui_time_plot_info <- renderUI({
 
 output$tsui_save_plot <- downloadHandler(
   filename = function() {
-    paste("TimeSeriesPlot",
-      switch(input$tsui_save_plot_type,
+    paste(
+      "TimeSeriesPlot",
+      switch(
+        input$tsui_save_plot_type,
         "jpg" = "jpg",
         "png" = "png",
         "pdf" = "pdf"
@@ -614,11 +861,14 @@ output$tsui_save_plot <- downloadHandler(
           error = function(e) {
             cat("Handled error in timseries plot\n")
             print(e)
-          }, finally = {}
+          },
+          finally = {}
         ))
       } else {
         plot.new()
-        text(0.5, 0.5,
+        text(
+          0.5,
+          0.5,
           "No time variable found.\nPlease generate a time variable.",
           cex = 2
         )
