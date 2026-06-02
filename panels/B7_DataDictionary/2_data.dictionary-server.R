@@ -291,7 +291,7 @@ observeEvent(input$change_data_dict, {
     data_dict_state$import_status <- "Import failed."
     return()
   }
-  
+
   data_dict_state$file <- datapath
   update_data_dict_mapping(session, colnames(raw))
   dict <- data_dict_read(
@@ -336,7 +336,6 @@ observeEvent(input$apply_data_dict, {
 
     data_dict_state$apply_status <- "success"
     values$data.set <- as.data.frame(temp)
-
   })
 })
 
