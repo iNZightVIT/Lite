@@ -493,12 +493,13 @@ determine.class <- function(input) {
   if (is.null(input)) {
     return(NULL)
   }
-  if (class(input) == "integer") {
+  # browser()
+  if (any(c("integer", "numeric") %in% class(input))) {
     input.class <- "numeric"
-  } else if (class(input) == "character") {
+  } else if (any(c("character", "factor") %in% class(input))) {
     input.class <- "factor"
   } else {
-    input.class <- class(input)
+    input.class <- class(input[1])
   }
   input.class
 }
@@ -656,11 +657,7 @@ vis.par <- reactive({
     # set ci_width in par for plots
     vis.par$ci.width <- ci_width() / 100
 
-    # cat("\n\n===== looking at parameters ---- \n")
-    # cat("vis.par: \n")
-    # print(vis.par$trend)
-    # cat("\ngraphical.par: \n")
-    # print(graphical.par$trend)
+    # browser()
     vis.par <- modifyList(reactiveValuesToList(graphical.par), vis.par,
       keep.null = TRUE
     )
@@ -1253,9 +1250,7 @@ output$visualize.plot <- renderPlot({
   })
   # plot it
   dafr <- get.data.set()
-  print("CURRENT PARS")
   temp <- vis.par()
-  print(str(temp))
 
   if (!is.null(vis.par())) {
     if (!is.null(plot.par$x) && !is.null(input$vari1) &&
@@ -4517,9 +4512,6 @@ observe({
   input$color.linear
   input$type.linear
   isolate({
-    # cat("\n---------------\n")
-    # cat("Doing some linear trend stuff ...\n")
-    # cat("input$check_linear: ", input$check_linear, "\n")
     if (!is.null(input$check_linear)) {
       if (input$check_linear) {
         if (length(which(graphical.par$trend %in% "linear")) == 0) {
