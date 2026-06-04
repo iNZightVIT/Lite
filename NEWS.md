@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Develop
 
 - **Status** tab (navbar): crowding-aware instance load view, demand indicator, and reconnect flow; status polling runs only while the tab is open.
@@ -9,13 +8,14 @@
 - add "log" transform to Add to Plot > Axis features
 - **Time Series** module: manual time definition
 - **File** module: parse url when importing manually, add data dict feature
-=======
+
+
 # 2026.05.1
 
 ## Fixes
 
 - Fix graphics devices not always being closed on the main and interactive plot paths, which could eventually trigger a "too many open devices" error when plotting.
->>>>>>> main
+
 
 # 2026.01.3
 
