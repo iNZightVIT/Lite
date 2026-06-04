@@ -122,6 +122,7 @@ shinyServer(function(input, output, session) {
   values$data.dir.global <- "data"
   values$data.dir.imported <- "data"
   values$data.set <- NULL
+  values$data.dict <- NULL
   values$data.type <- NULL # file type (e.g., csv, xlsx, rda ... etc)
   values$data.available.dnames <- NULL # available data/sheet names
   values$data.current.dname <- NULL # current data/sheet names
@@ -235,6 +236,10 @@ shinyServer(function(input, output, session) {
     values$data.set
   })
 
+  get.data.dict <- reactive({
+    values$data.dict
+  })
+
   get.data.set.display <- reactive({
     if (!is.null(session$userData$LITE_VERSION) &&
       session$userData$LITE_VERSION == "CAS") {
@@ -336,12 +341,17 @@ shinyServer(function(input, output, session) {
     local = TRUE
   )
 
-
   ## -----------------------------------------##
   ##  B6. "File -> Paste Dataset" Module  ##
   ## -----------------------------------------##
   source("panels/B6_PasteDataset/1_paste.data.set-ui.R", local = TRUE)
   source("panels/B6_PasteDataset/2_paste.data.set-server.R", local = TRUE)
+
+  ## -----------------------------------------##
+  ##  B7. "File -> Data Dictionary" Module  ##
+  ## -----------------------------------------##
+  source("panels/B7_DataDictionary/2_data.dictionary-ui.R", local = TRUE)
+  source("panels/B7_DataDictionary/2_data.dictionary-server.R", local = TRUE)
 
   ## ------------------------##
   ##  C1. Visualize Module  ##
@@ -614,7 +624,8 @@ shinyServer(function(input, output, session) {
       paste = tabPanel("Paste Dataset", uiOutput("paste.data.panel")),
       export = tabPanel("Export Dataset", uiOutput("save.data.panel")),
       display = tabPanel("Display Dataset", uiOutput("current.data")),
-      examples = tabPanel("Dataset Examples", uiOutput("switch.data.panel"))
+      examples = tabPanel("Dataset Examples", uiOutput("switch.data.panel")),
+      dictionary = tabPanel("Data Dictionary", uiOutput("data.dictionary.panel"))
     )
     row_ops_tabs <- list(
       filter = tabPanel("Filter Dataset", uiOutput("filter.dataset")),
