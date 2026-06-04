@@ -7,6 +7,8 @@
 - **Multivariate** module: show a clear error message when a plot fails.
 - **Multiple Response** module: clearer error messages when an operation fails.
 - add "log" transform to Add to Plot > Axis features
+- **Time Series** module: manual time definition
+- **File** module: parse url when importing manually, add data dict feature
 =======
 # 2026.05.1
 
