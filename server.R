@@ -36,9 +36,12 @@ suppressPackageStartupMessages(library(rjson))
 
 ## read in all the functions used in iNZight Lite
 source("functions.R")
+source("local-storage.R")
 
 ### We write the server function.
 shinyServer(function(input, output, session) {
+  init_local_storage(input, session)
+  
   observe({
     params <- parseQueryString(session$clientData$url_search)
     if (!is.null(params$lite_config) &&

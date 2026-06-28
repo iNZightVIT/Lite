@@ -209,7 +209,12 @@ vis.mainPanel <- function() {
                   label = "Plot height:",
                   min = 30,
                   max = 100,
-                  value = 60,
+                  value = local_storage_get_value(
+                    session,
+                    "visualize_plot_height",
+                    default = 60,
+                    transform = as.numeric
+                  ),
                   step = 1
                 )
               ),
@@ -221,7 +226,12 @@ vis.mainPanel <- function() {
                   label = "Plot width:",
                   min = 30,
                   max = 100,
-                  value = 100,
+                  value = local_storage_get_value(
+                    session,
+                    "visualize_plot_width",
+                    default = 100,
+                    transform = as.numeric
+                  ),
                   step = 1
                 )
               )

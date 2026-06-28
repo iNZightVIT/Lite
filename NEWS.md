@@ -8,7 +8,7 @@
 - add "log" transform to Add to Plot > Axis features
 - **Time Series** module: manual time definition
 - **File** module: parse url when importing manually, add data dict feature
-
+- **Local Storage** feature to store user preferences
 
 # 2026.05.1
 

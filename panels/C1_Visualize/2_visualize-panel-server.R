@@ -2155,7 +2155,12 @@ output$plot.appearance.panel <- renderUI({
         inputId = "select.bg1",
         label = NULL,
         choices = cols1,
-        selected = graphical.par$bg,
+        selected = local_storage_get_value(
+          session,
+          "select.bg1",
+          default = graphical.par$bg,
+          transform = as.character
+        ),
         selectize = F
       ))
     )
@@ -2629,7 +2634,12 @@ output$plot.appearance.panel <- renderUI({
           column(6, selectInput(
             inputId = "select.bg1", label = NULL,
             choices = cols1,
-            selected = graphical.par$bg,
+            selected = local_storage_get_value(
+              session,
+              "select.bg1",
+              default = graphical.par$bg,
+              transform = as.character
+            ),
             selectize = F
           ))
         )
