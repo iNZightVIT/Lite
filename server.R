@@ -347,12 +347,6 @@ shinyServer(function(input, output, session) {
   source("panels/B6_PasteDataset/1_paste.data.set-ui.R", local = TRUE)
   source("panels/B6_PasteDataset/2_paste.data.set-server.R", local = TRUE)
 
-  ## -----------------------------------------##
-  ##  B7. "File -> Data Dictionary" Module  ##
-  ## -----------------------------------------##
-  source("panels/B7_DataDictionary/2_data.dictionary-ui.R", local = TRUE)
-  source("panels/B7_DataDictionary/2_data.dictionary-server.R", local = TRUE)
-
   ## ------------------------##
   ##  C1. Visualize Module  ##
   ## ------------------------##
@@ -439,6 +433,12 @@ shinyServer(function(input, output, session) {
   source("panels/D12_FrequencyTables/1_frequency.tables.ui.R", local = TRUE)
   source("panels/D12_FrequencyTables/2_frequency.tables.server.R", local = TRUE)
 
+  ## -----------------------------------------##
+  ##  D13. "File -> Data Dictionary" Module   ##
+  ## -----------------------------------------##
+  source("panels/D13_DataDictionary/2_data.dictionary-ui.R", local = TRUE)
+  source("panels/D13_DataDictionary/2_data.dictionary-server.R", local = TRUE)
+  
   ## -----------------------------##
   ##  E0. Convert to Categorical ##
   ## -----------------------------##
@@ -624,8 +624,7 @@ shinyServer(function(input, output, session) {
       paste = tabPanel("Paste Dataset", uiOutput("paste.data.panel")),
       export = tabPanel("Export Dataset", uiOutput("save.data.panel")),
       display = tabPanel("Display Dataset", uiOutput("current.data")),
-      examples = tabPanel("Dataset Examples", uiOutput("switch.data.panel")),
-      dictionary = tabPanel("Data Dictionary", uiOutput("data.dictionary.panel"))
+      examples = tabPanel("Dataset Examples", uiOutput("switch.data.panel"))
     )
     row_ops_tabs <- list(
       filter = tabPanel("Filter Dataset", uiOutput("filter.dataset")),
@@ -642,7 +641,8 @@ shinyServer(function(input, output, session) {
       ),
       restore = tabPanel("Restore data", uiOutput("restore.data")),
       survey = tabPanel("Survey design", uiOutput("survey.design")),
-      frequency = tabPanel("Frequency tables", uiOutput("frequency.tables"))
+      frequency = tabPanel("Frequency tables", uiOutput("frequency.tables")),
+      dictionary = tabPanel("Data Dictionary", uiOutput("data.dictionary.panel"))
     )
     manipulate_tabs <- list(
       convert = tabPanel(
