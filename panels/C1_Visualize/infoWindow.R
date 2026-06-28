@@ -80,7 +80,12 @@ output$inference_test <- renderUI({
             numericInput(
               inputId = "ci.width",
               label = "Confidence level (%):",
-              value = ci_width(),
+              value = local_storage_get_value(
+                session,
+                "ci.width",
+                default = ci_width(),
+                transform = as.numeric
+              ),
               min = 10,
               max = 99
             )
@@ -89,13 +94,23 @@ output$inference_test <- renderUI({
             3,
             numericInput("global.sig.level.inf",
               label = "Round (significant figures)",
-              value = graphical.par$signif,
+              value = local_storage_get_value(
+                session,
+                "global.sig.level.inf",
+                default = graphical.par$signif,
+                transform = as.numeric
+              ),
               min = 1, step = 1
             )
           ),
           column(3, numericInput("global.p.val",
             label = "Min p-value",
-            value = graphical.par$min_pval,
+            value = local_storage_get_value(
+              session,
+              "global.p.val",
+              default = graphical.par$min_pval,
+              transform = as.numeric
+            ),
             min = 0, max = 0.05, step = 0.0001
           )),
           column(12, h5("Warning: clicking the inputs rapidly may cause the app to crash."))
