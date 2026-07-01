@@ -1,3 +1,14 @@
+# Local storage usage:
+# 1. Add each persisted input to LOCAL_STORAGE_INPUTS as a list with:
+#    id = the Shiny input id, default = the fallback value, update = the
+#    matching Shiny update function, and transform = a parser for stored values.
+# 2. In the corresponding UI/server file, read the restored value with
+#    local_storage_get_value(session, "input_id", default, transform) when
+#    setting the initial value/selected option.
+# 3. init_local_storage(input, session) is called from server.R and observes
+#    every entry in LOCAL_STORAGE_INPUTS.
+# Stored browser keys are prefixed as "inzight-lite:<input id>".
+
 LOCAL_STORAGE_PREFIX = "inzight-lite"
 
 LOCAL_STORAGE_INPUTS = list(
