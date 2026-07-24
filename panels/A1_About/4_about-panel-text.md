@@ -22,9 +22,9 @@ Not sure what to do? We have made a [getting started video](https://www.stat.auc
 
 **iNZight** is a simple data analysis system initially designed for high school students to help them explore data quickly and easily. It still serves this function, but other demands have seen extensive additions to its capabilities. For example, it now provides very flexible multivariate visualisation capabilities and supports maps, time series, and multivariable regression analysis.
 
-**iNZight _Lite_** is an online version of the software accessible from any modern web browser, thus making it suitable to a wider range of users including non-Windows users who cannot install the desktop software. With Lite, you can import your own dataset or explore one of the many example datasets. You can then explore the data using visualisation, transformation, and statistical analysis to find its hidden secrets.
+**iNZight _Lite_** is an online version of the software accessible from any modern web browser, thus making it suitable for a wider range of users including non-Windows users who cannot install the desktop software. With Lite, you can import your own dataset or explore one of the many example datasets. You can then explore the data using visualisation, transformation, and statistical analysis to find its hidden secrets.
 
-If you want to provide feedback please fill in the [contact form](http://inzight.nz/support/contact?v=lite).
+If you want to provide feedback, please fill in the [contact form](http://inzight.nz/support/contact?v=lite).
 
 ## The iNZight Project
 

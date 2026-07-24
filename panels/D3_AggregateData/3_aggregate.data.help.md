@@ -1,5 +1,5 @@
 <h5>Aggregate the data</h5>
-Two select boxes on the left of panel enable to select one or more categorical
+Two select boxes on the left of the panel enable you to select one or more categorical
 variables from the current dataset. The function selected in the second select
 box is applied on all numeric variables over all possible combinations of the
 selected categorical variables.

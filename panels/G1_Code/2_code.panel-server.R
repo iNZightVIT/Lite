@@ -84,7 +84,7 @@ output$r.code.history <- renderText({
     "\n",
     sep(),
     "\n",
-    "## Lite cannot access the local directory, so you have to set the working\n## directory to the folder contains data if the data are imported.\n",
+    "## Lite cannot access the local directory, so you have to set the working\n## directory to the folder that contains the data if the data are imported.\n",
     "\n",
     sep(),
     "\n",

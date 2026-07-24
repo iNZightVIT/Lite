@@ -32,7 +32,7 @@ You can also view multiple subsets easily by selecting one or two sub-setting va
 - **Map type:** iNZight Lite Maps uses Google to provide the map, of which there are several types to choose from "roadmap ", "satellite ", "terrain " and "hybrid ".
 - **Colour:** the colour of points (only if **Colour by** is empty).
 - **Point size:** the overall size of points.
-- **Transparency:** the overall transparency of points, where 0 is fully visible, to 1 is fully invisible.
+- **Transparency:** the overall transparency of points, where 0 is fully visible and 1 is fully invisible.
 - **Connect points by lines:** points will be connected by lines.
 
 **2. Regions Selected**

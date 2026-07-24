@@ -1,7 +1,7 @@
 <h4>Filter the data on some condition</h4>
 This module starts with a single drop down menu on the left and a summary of
 the data on the right in the main panel. All possible different selections are
-listed in the menu. when the selection is changed the left hand side updates
+listed in the menu. When the selection is changed the left hand side updates
 according to the selection. The different selections are listed below.
 <ul>
    <li>
@@ -24,8 +24,7 @@ according to the selection. The different selections are listed below.
          </li>
 	 <li>
             <b>randomly:</b> In two text fields the sample size can be specified
-	    and the number of samples. A message below warns if the sample can
-            not be taken. A check box can be used to sample with replacement.
+	    and the number of samples. A message below warns if the sample cannot be taken. A check box can be used to sample with replacement.
             In this case the number of samples times the sample size can be
             higher than the number of rows in the data. In any case the sample
             size must not exceed the number of rows in the data.

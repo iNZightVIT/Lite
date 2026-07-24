@@ -62,7 +62,7 @@ data_dict_mapping_inputs <- function() {
 data.dictionary.panel <- function() {
   sidebarLayout(
     sidebarPanel(
-      HTML("Please let us know if you have difficulty importing data, if you can include information about the operating system, browser and a copy of the data that would be extremely helpful. <br/> Email: inzightlite_support@stat.auckland.ac.nz<br/>"),
+      HTML("Please let us know If you have difficulty importing data. If you can include information about the operating system, browser and a copy of the data that would be extremely helpful. <br/> Email: inzightlite_support@stat.auckland.ac.nz<br/>"),
       br(), br(),
       helpText("Select a file (Size Limit: 5MB)"),
       fileInput("data_dict_file", label = "", multiple = FALSE),

@@ -1,5 +1,5 @@
 <h4>Quick explore</h4>
-This module consists of five sub modules.
+This module consists of five sub-modules.
 - **Missing values** A plot of the percentage of missing values is produced.
 - **Data Summary** Summary statistics for all single variables can be obtained.
 - **All 1 variable plot** Scroll fast through all plots of single variables.

@@ -1,6 +1,6 @@
 restore.data.sidebar <- function() {
   list(
-    helpText("The data set has been restored to the way when it was initially imported."),
+    helpText("The data set has been restored to the way it was initially imported."),
     br()
   )
 }

@@ -1,7 +1,7 @@
 <h4>Model Fitting</h4>
 This module is designed to fit regression models from the data. The controls on
 the left are divided into six sections. The Main panel on the right shows model
-summaries plots or code to produce the models.
+summary plots or code to produce the models.
 - **Select model** In the first section all models are stored. From a drop down
 menu a model can be selected, renamed with a text field next to it by typing in
 a new name and pressing the "RENAME" button. The "REMOVE" button removes a model

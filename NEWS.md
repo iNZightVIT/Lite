@@ -9,6 +9,7 @@
 - **Time Series** module: manual time definition
 - **File** module: parse url when importing manually, add data dict feature
 - **Local Storage** feature to store user preferences
+- Fix typos and grammar in user-facing UI text and help panels
 
 # 2026.05.1
 

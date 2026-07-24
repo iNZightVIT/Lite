@@ -2,7 +2,7 @@
  <ol>
   <li>Select one or more columns:<br>Using the dropdown menu at the left hand side labeled "Select Columns" select any number of columns available. The selected columns should be displayed in the middle of the screen.</li>
   <li>Select transformation type:<br>Select any (one) of the transformation types in the dropdown menu labeled "Select transformation:". After the selection, an additional number of columns is added to the presented data. </li>
-  <li>Transform columns:<br>Step one and two only presented the data and help with the selection. Until now no additional data was added. To add the additional columns to your data, press the "Transform" button. After that the additional transformed columns are added and will be available.</li>
+  <li>Transform columns:<br>Step one and two only present the data and help with the selection. Until now no additional data was added. To add the additional columns to your data, press the "Transform" button. After that the additional transformed columns are added and will be available.</li>
 </ol>
 <h4>Add Transformation</h4>
 Adds up all selected columns which are numeric.

@@ -14,5 +14,5 @@ This module forms class intervals from a numeric column.
   explanation is given on what the ranges can be and
   several text boxes appear where values can be specified.
 - **Custom labels** If this check box is checked, a number of text fields are
-  displayed. In this text fields labels for the intervals can be specified.
+  displayed. In these text fields labels for the intervals can be specified.
 - **Form Class Interval** This button adds the interval to the data set.

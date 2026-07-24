@@ -1,6 +1,6 @@
 <h4>Reorder levels of a factor variable.</h4>
 <h4>Reorder Levels</h4>
-This module enables to reorder the levels of a categorical variable. By default
+This module enables you to reorder the levels of a categorical variable. By default
 the level is ordered alphabetically. This order might not make sense in a
 hierarchical relationship among the categorical levels. <br>
 Select a column from the first dropdown menu where the order of levels should be

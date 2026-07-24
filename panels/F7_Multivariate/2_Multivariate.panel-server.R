@@ -77,7 +77,7 @@ output$multivarate.widgets <- renderUI({
     )
 
     decompose.to <- sliderInput("multivarate.compose.to",
-      label = h5("N dimensions to decompose to:"),
+      label = h5("Number of dimensions to decompose:"),
       2, n.numeric, value = mrOptions$k, step = 1
     )
 

@@ -8,7 +8,7 @@ frequency.tables.sidebar <- function() {
     ),
     br(),
     helpText(HTML(paste("This will expand the table to individual rows.",
-      "Use Dataset > Restore data to go back to revert this change.",
+      "Use Dataset > Restore data to revert this change.",
       "Note: this is a temporary workaround for small tables until we integrate frequency tables.",
       sep = "<br/><br/>"
     ))),

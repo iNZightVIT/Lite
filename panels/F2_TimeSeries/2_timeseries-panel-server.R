@@ -554,11 +554,7 @@ output$tsui_main <- renderUI({
           title = "Plot",
           helpText(
             br(),
-            "A",
-            strong("Time Plot"),
-            "for",
-            strong("single"),
-            "series."
+            "A time plot for a single series."
           ),
           plotOutput("tsui_ts_plot"),
           br(),

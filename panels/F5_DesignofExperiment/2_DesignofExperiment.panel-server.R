@@ -889,7 +889,7 @@ output$Doe.int.var <- renderUI({
     ## select second treatment factor
     sec.fac <- fluidRow(column(12, selectInput(
       inputId = "Doe.int_vari3",
-      label = "trace variable",
+      label = "Trace variable",
       choices = var_name_factor,
       selected = var_name_factor[1],
       selectize = F

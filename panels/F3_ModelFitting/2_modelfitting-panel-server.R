@@ -1497,7 +1497,7 @@ output$plots.main <- renderUI({
       if (!any(modelValues$independent.vars[[input$model.select]] %in%
         get.categorical.column.names(get.data.set())) &&
         input$visualisze_plot_selector %in% "Factor level comparison") {
-        h2("No factor variables are fit in this model.")
+        h2("No factor variables are fitted in this model.")
       } else {
         ch1 <- modelValues$independent.vars[[input$model.select]][
           which(modelValues$independent.vars[[input$model.select]] %in%

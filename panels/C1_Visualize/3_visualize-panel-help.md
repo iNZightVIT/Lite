@@ -106,7 +106,7 @@ into two sections (Inference and Advanced options).
    features to the plot. Not all features are available for all types of plots.
 
 - **Code more variables** Enables to color the plot according to a subsetting
-  column or resize the observations. If the plot become coloured, a feature in
+  column or resize the observations. If the plot becomes coloured, a feature in
   "Add trend curve" becomes active which makes it possible to fit trend curves
   according to the levels in the subsetting variable.
 
@@ -152,14 +152,13 @@ into two sections (Inference and Advanced options).
   observations with the same level are selected. A checkbox labeled "Single value"
   can be used to pick unique observations. For this the point of interest needs to
   be found by scrolling through all points on a slider or numeric input. <br>
-  **Extremes** With this feature extreme values can be selected. For scatter plot
-  this is picking extremes by the Mahalanobis distance method. How many extreme
+  **Extremes** With this feature extreme values can be selected. For a scatter plot, this is picking extremes by the Mahalanobis distance method. How many extreme
   points can be specified by adjusting a slider to the desired number in scatter
   plots and two numeric values can be used to label extremes in dotplots. Some
-  functions such as showing the stored points does not work when "Extremes" is
+  functions such as showing the stored points do not work when "Extremes" is
   selected. <br>
   **Range of values** The last method lets the user choose a range of values. A
-  column can be selected and a range from this values according to the position in
+  column can be selected and a range from these values according to the position in
   the ordered variable can be selected from a slider.
 
 - **Customize labels** Specify x and/or y axis labels and a main title for the

@@ -498,11 +498,7 @@ output$ts.main.ui <- renderUI({
             title = "Plot",
             helpText(
               br(),
-              "A",
-              strong("Time Plot"),
-              "for",
-              strong("single"),
-              "series."
+              "A time plot for a single series."
             ),
             plotOutput("timeseries_plot"),
             br(),
@@ -546,11 +542,7 @@ output$ts.main.ui <- renderUI({
             title = "Plot",
             helpText(
               br(),
-              "A",
-              strong("Decomposed Plot"),
-              "for",
-              strong("single"),
-              "series.",
+              "A decomposed plot for a single series.",
               br(),
               br()
             ),
@@ -590,11 +582,7 @@ output$ts.main.ui <- renderUI({
             title = "Plot",
             helpText(
               br(),
-              "A",
-              strong("Recomposed Plot"),
-              "for",
-              strong("single"),
-              "series.",
+              "A recomposed plot for a single series.",
               br(),
               br()
             ),
@@ -634,11 +622,7 @@ output$ts.main.ui <- renderUI({
             title = "Plot",
             helpText(
               br(),
-              "A",
-              strong("Seasonal Plot"),
-              "for",
-              strong("single"),
-              "series.",
+              "A seasonal plot for a single series.",
               br()
             ),
             plotOutput(outputId = "seasonal_plot"),
@@ -677,11 +661,7 @@ output$ts.main.ui <- renderUI({
             title = "Plot",
             helpText(
               br(),
-              "A",
-              strong("Forecast Plot"),
-              "for",
-              strong("single"),
-              "series.",
+              "A forecast plot for a single series.",
               br(),
               br()
             ),
@@ -710,11 +690,7 @@ output$ts.main.ui <- renderUI({
             ),
             helpText(
               br(),
-              "A",
-              strong("Forecast Summary"),
-              "for",
-              strong("single"),
-              "series.",
+              "A forecast summary for a single series.",
               br(),
               br()
             ),

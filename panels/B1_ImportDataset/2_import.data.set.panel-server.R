@@ -526,7 +526,7 @@ observeEvent(input$import_set, {
             "Incorrect Google Sheets URL detected\n",
             "Please use an export link instead:",
             "1. Files > Publish to web",
-            "2. File type pick .csv or .xlsx",
+            "2. Select file type: .csv or .xlsx",
             "3. Publish",
             sep="\n"
           )
