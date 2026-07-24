@@ -239,10 +239,7 @@ observe({
         )
         values$data.name <- code.save$name
         values$name.restore <- code.save$name
-        updateSelectInput(session, "subs2", selected = "none")
-        updateSelectInput(session, "subs1", selected = "none")
-        updateSelectInput(session, "vari2", selected = "none")
-        updateSelectInput(session, "vari1", selected = "none")
+        reset_plot_variable_selection()
         plot.par$design <- NULL
         design_params$design <- NULL
       }

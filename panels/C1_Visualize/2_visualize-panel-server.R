@@ -44,9 +44,11 @@ new_vis_par <- function(vis_par) {
     trim(paste(vis_par$x, "~", vis_par$y))
   }
   # # subsets
-  if (!is.null(vis_par$g1)) {
+  had_g1 <- !is.null(vis_par$g1)
+  had_g2 <- !is.null(vis_par$g2)
+  if (had_g1) {
     g <- vis_par$g1
-    if (!is.null(vis_par$g2)) {
+    if (had_g2) {
       g <- paste(g, vis_par$g2, sep = " + ")
     }
     f <- paste(f, g, sep = " | ")
@@ -59,8 +61,41 @@ new_vis_par <- function(vis_par) {
   vis_par$y <- NULL
   vis_par$g1 <- NULL
   vis_par$g2 <- NULL
+  # iNZightPlots errors if g2.level is set when the formula has no g2
+  # ("Unknown or uninitialised column: g2" / invalid 'type' (list)).
+  if (!had_g1) {
+    vis_par$g1.level <- NULL
+  }
+  if (!had_g2) {
+    vis_par$g2.level <- NULL
+  }
 
   return(vis_par)
+}
+
+# Build plot-probe args using variable *names* + data.
+# Passing column vectors breaks iNZightPlots (>=2.15): length > 1 is treated as a
+# multi-variable expression, so factor/character *values* (e.g. "parent", "Albania")
+# are eval()'d as object names.
+probe_plot_args <- function(vari1, vari2 = "none", data = get.data.set(), ...) {
+  args <- list(
+    x = as.name(vari1),
+    data = data,
+    plot = FALSE,
+    ...
+  )
+  if (!is.null(vari2) && !identical(vari2, "none")) {
+    args$y <- as.name(vari2)
+  }
+  args
+}
+
+# Probe a plot (no draw) for attributes such as largesample / extreme.ids.
+probe_plot <- function(vari1, vari2 = "none", data = get.data.set(), ...) {
+  try(
+    do.call(iNZightPlots:::iNZightPlot, probe_plot_args(vari1, vari2, data, ...)),
+    silent = TRUE
+  )
 }
 
 source("panels/C1_Visualize//infoWindow.R", local = TRUE)
@@ -247,6 +282,139 @@ plot.par <- reactiveValues(
   zoombar = NULL,
   design = NULL
 )
+
+# Clear variable-driven plot state when the dataset changes so stale names
+# (e.g. "height" from Census at School) are not evaluated against new data.
+reset_plot_variable_selection <- function() {
+  plot.par$x <- NULL
+  plot.par$y <- NULL
+  plot.par$g1 <- NULL
+  plot.par$g2 <- NULL
+  plot.par$g1.level <- 0
+  plot.par$g2.level <- 0
+  plot.par$colby <- NULL
+  plot.par$sizeby <- NULL
+  plot.par$symbolby <- NULL
+  plot.par$locate <- NULL
+  plot.par$locate.id <- NULL
+  plot.par$locate.col <- NULL
+  plot.par$locate.extreme <- NULL
+  plot.par$xlim <- NULL
+  plot.par$ylim <- NULL
+  plot.par$zoombar <- NULL
+  plot.par$varnames <- list(
+    x = NULL, y = NULL,
+    xlab = NULL, ylab = NULL,
+    g1 = NULL, g2 = NULL,
+    colby = NULL, sizeby = NULL, symbolby = NULL
+  )
+  plot.par.stored$locate.id <- NULL
+  updateSelectInput(session, "subs2", selected = "none")
+  updateSelectInput(session, "subs1", selected = "none")
+  updateSelectInput(session, "vari2", selected = "none")
+  updateSelectInput(session, "color_by_select", selected = " ")
+  updateSelectInput(session, "resize.by.select", selected = " ")
+  updateSelectInput(session, "point_symbol_by", selected = " ")
+}
+
+# TRUE when col is a real column of data (guards stale selectInput values).
+has_data_column <- function(data, col) {
+  !is.null(data) &&
+    !is.null(col) &&
+    length(col) == 1L &&
+    !identical(col, "none") &&
+    !identical(col, "") &&
+    col %in% colnames(data)
+}
+
+# Safe column extract; NULL if col is missing/stale.
+data_column <- function(col, data = get.data.set()) {
+  if (!has_data_column(data, col)) {
+    return(NULL)
+  }
+  data[[col]]
+}
+
+# Prefer a plottable default for Variable 1: first numeric column, or first
+# categorical under iNZightPlots' barplot max.levels threshold. Avoids the
+# "too many levels" placeholder plot (e.g. gapminder$Country).
+default_plot_variable <- function(data, max_levels = NULL) {
+  if (is.null(max_levels)) {
+    max_levels <- tryCatch(
+      iNZightPlots:::params("max.levels"),
+      error = function(e) 101L
+    )
+  }
+  cols <- colnames(data)
+  if (!length(cols)) {
+    return(NULL)
+  }
+  for (col in cols) {
+    x <- data[[col]]
+    if (is.numeric(x)) {
+      return(col)
+    }
+    n_lev <- length(unique(stats::na.omit(as.character(x))))
+    if (n_lev > 0L && n_lev <= max_levels) {
+      return(col)
+    }
+  }
+  cols[[1]]
+}
+
+# Build locate.id from current Identify-points inputs; never indexes missing cols.
+locate_ids_from_inputs <- function() {
+  data <- get.data.set()
+  method <- input$select_identify_method
+  if (is.null(data) || is.null(method)) {
+    return(NULL)
+  }
+
+  temp <- NULL
+  if (identical(method, "Select by value")) {
+    if (isTRUE(input$single_vs_multiple_check)) {
+      temp <- input$select.unique.value.slider
+      if (is.null(temp) || identical(temp, 0) || identical(temp, 0L)) {
+        temp <- NULL
+      }
+    } else {
+      by_vals <- data_column(input$by.value.column.select, data)
+      if (!is.null(by_vals)) {
+        temp <- which(by_vals %in% input$value.select)
+        if (!length(temp)) {
+          temp <- NULL
+        }
+      }
+    }
+  } else if (identical(method, "Range of values")) {
+    range <- input$range.values.slider
+    range_vals <- data_column(input$range.column.select, data)
+    if (!is.null(range) && !all(range %in% 0) && !is.null(range_vals)) {
+      range[which(range %in% 0)] <- 1
+      temp <- range_vals
+      names(temp) <- seq_along(temp)
+      temp <- sort(temp)
+      temp <- as.numeric(names(temp)[range[1]:range[2]])
+      temp <- which(range_vals %in% range_vals[temp])
+    }
+  }
+
+  if (!identical(method, "Extremes")) {
+    level_vals <- data_column(input$same.level.of.select, data)
+    if (isTRUE(input$same_level_of_check) && !is.null(temp) && !is.null(level_vals)) {
+      temp <- which(level_vals %in% level_vals[temp])
+    }
+    if (isTRUE(input$show.stored.check)) {
+      temp <- unique(c(plot.par.stored$locate.id, temp))
+    }
+  }
+
+  if (!length(temp)) {
+    NULL
+  } else {
+    temp
+  }
+}
 
 identified.points <- reactiveValues(values = list())
 
@@ -637,8 +805,31 @@ determine.g <- reactive({
 ## the "visualize" module:
 vis.par <- reactive({
   vis.par <- reactiveValuesToList(plot.par)
+  data <- vis.data()
+  x_name <- vis.par$varnames$x
 
-  if (!is.null(vis.par$x) && plot.par$varnames$x != "") {
+  if (
+    !is.null(vis.par$x) &&
+      !is.null(x_name) &&
+      !identical(x_name, "") &&
+      !identical(x_name, "none") &&
+      !is.null(data) &&
+      x_name %in% colnames(data)
+  ) {
+    # Drop stale optional aesthetics that are not in the current data.
+    for (aesthetic in c("y", "g1", "g2", "colby", "sizeby", "symbolby")) {
+      a_name <- vis.par$varnames[[aesthetic]]
+      if (
+        !is.null(a_name) &&
+          !identical(a_name, "") &&
+          !identical(a_name, "none") &&
+          !a_name %in% colnames(data)
+      ) {
+        vis.par[[aesthetic]] <- NULL
+        vis.par$varnames[[aesthetic]] <- NULL
+      }
+    }
+
     if (any(na.omit(vis.par$x) == "")) {
       vis.par$x[which(vis.par$x == "")] <- NA
     }
@@ -676,6 +867,7 @@ output$vari1_panel <- renderUI({
   #  input$change_var_selection
   isolate({
     sel <- input$vari1
+    cols <- colnames(vis.data())
 
     get.vars <- parseQueryString(session$clientData$url_search)
     if (!is.null(get.vars$url)) {
@@ -690,10 +882,13 @@ output$vari1_panel <- renderUI({
         !get.vars$x %in% "")) {
       sel <- get.vars$x
     }
+    if (is.null(sel) || identical(sel, "none") || !sel %in% cols) {
+      sel <- default_plot_variable(vis.data())
+    }
     selectInput(
       inputId = "vari1",
       label = NULL,
-      choices = c(colnames(vis.data())),
+      choices = cols,
       selected = sel,
       selectize = F
     )
@@ -725,50 +920,59 @@ observe({
 
 ##  Update plot.par$x.
 observe({
-  if (!is.null(input$vari1)) {
-    isolate({
-      plot.par$x <- as.name(input$vari1)
-      plot.par$varnames$x <- input$vari1
-      if (!is.null(vis.data())) {
-        ch <- colnames(vis.data())
-        if (!is.null(input$vari1) && input$vari1 %in% ch) {
-          ch <- ch[-which(colnames(vis.data()) %in% input$vari1)]
-        }
-        ch <- c("none", ch)
-        sel <- input$vari2
-        if (!is.null(sel) && !sel %in% ch) {
-          sel <- ch[1]
-        }
-        updateSelectInput(session, "vari2", choices = ch, selected = sel)
-        ch <- colnames(vis.data())
-        if (!is.null(input$vari1) && input$vari1 %in% ch) {
-          ch <- ch[-which(ch %in% input$vari1)]
-        }
-        if (!is.null(input$vari2) && input$vari2 %in% ch) {
-          ch <- ch[-which(ch %in% input$vari2)]
-        }
-        ch <- c("none", ch)
-        sel <- input$subs1
-        if (!is.null(sel) && !sel %in% ch) {
-          sel <- ch[1]
-        }
-        updateSelectInput(session, "subs1", choices = ch, selected = sel)
-        ch <- colnames(vis.data())
-        if (!is.null(input$vari1)) {
-          ch <- ch[-which(ch %in% input$vari1)]
-        }
-        if (!is.null(input$vari2) && input$vari2 %in% ch) {
-          ch <- ch[-which(ch %in% input$vari2)]
-        }
-        ch <- c("none", ch)
-        sel <- input$subs2
-        if (!is.null(sel) && !sel %in% ch) {
-          sel <- ch[1]
-        }
-        updateSelectInput(session, "subs2", choices = ch, selected = sel)
-      }
-    })
-  }
+  input$vari1
+  isolate({
+    data <- vis.data()
+    if (
+      is.null(input$vari1) ||
+        identical(input$vari1, "none") ||
+        is.null(data) ||
+        !input$vari1 %in% colnames(data)
+    ) {
+      plot.par$x <- NULL
+      plot.par$varnames$x <- NULL
+      return()
+    }
+
+    plot.par$x <- as.name(input$vari1)
+    plot.par$varnames$x <- input$vari1
+    ch <- colnames(data)
+    if (!is.null(input$vari1) && input$vari1 %in% ch) {
+      ch <- ch[-which(colnames(data) %in% input$vari1)]
+    }
+    ch <- c("none", ch)
+    sel <- input$vari2
+    if (!is.null(sel) && !sel %in% ch) {
+      sel <- ch[1]
+    }
+    updateSelectInput(session, "vari2", choices = ch, selected = sel)
+    ch <- colnames(data)
+    if (!is.null(input$vari1) && input$vari1 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari1)]
+    }
+    if (!is.null(input$vari2) && input$vari2 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari2)]
+    }
+    ch <- c("none", ch)
+    sel <- input$subs1
+    if (!is.null(sel) && !sel %in% ch) {
+      sel <- ch[1]
+    }
+    updateSelectInput(session, "subs1", choices = ch, selected = sel)
+    ch <- colnames(data)
+    if (!is.null(input$vari1) && input$vari1 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari1)]
+    }
+    if (!is.null(input$vari2) && input$vari2 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari2)]
+    }
+    ch <- c("none", ch)
+    sel <- input$subs2
+    if (!is.null(sel) && !sel %in% ch) {
+      sel <- ch[1]
+    }
+    updateSelectInput(session, "subs2", choices = ch, selected = sel)
+  })
 })
 
 
@@ -1013,42 +1217,47 @@ output$vari2_panel <- renderUI({
 observe({
   input$vari2
   isolate({
-    if (!is.null(vis.data()) && !is.null(input$vari2)) {
-      plot.par$y <- as.name(input$vari2)
-      varnames.y <- input$vari2
-      if (!is.null(varnames.y) &&
-        varnames.y %in% "none") {
-        varnames.y <- NULL
-        plot.par$y <- NULL
-      }
-      plot.par$varnames$y <- varnames.y
-      ch <- colnames(vis.data())
-      if (!is.null(input$vari1) && input$vari1 %in% ch) {
-        ch <- ch[-which(ch %in% input$vari1)]
-      }
-      if (!is.null(input$vari2) && input$vari2 %in% ch) {
-        ch <- ch[-which(ch %in% input$vari2)]
-      }
-      ch <- c("none", ch)
-      sel <- input$subs1
-      if (!is.null(sel) && !sel %in% ch) {
-        sel <- ch[1]
-      }
-      updateSelectInput(session, "subs1", choices = ch, selected = sel)
-      ch <- colnames(vis.data())
-      if (!is.null(input$vari1) && input$vari1 %in% ch) {
-        ch <- ch[-which(ch %in% input$vari1)]
-      }
-      if (!is.null(input$vari2) && input$vari2 %in% ch) {
-        ch <- ch[-which(ch %in% input$vari2)]
-      }
-      ch <- c("none", ch)
-      sel <- input$subs2
-      if (!is.null(sel) && !sel %in% ch) {
-        sel <- ch[1]
-      }
-      updateSelectInput(session, "subs2", choices = ch, selected = sel)
+    data <- vis.data()
+    if (is.null(data) || is.null(input$vari2)) {
+      plot.par$y <- NULL
+      plot.par$varnames$y <- NULL
+      return()
     }
+
+    if (identical(input$vari2, "none") || !input$vari2 %in% colnames(data)) {
+      plot.par$y <- NULL
+      plot.par$varnames$y <- NULL
+    } else {
+      plot.par$y <- as.name(input$vari2)
+      plot.par$varnames$y <- input$vari2
+    }
+
+    ch <- colnames(data)
+    if (!is.null(input$vari1) && input$vari1 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari1)]
+    }
+    if (!is.null(input$vari2) && input$vari2 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari2)]
+    }
+    ch <- c("none", ch)
+    sel <- input$subs1
+    if (!is.null(sel) && !sel %in% ch) {
+      sel <- ch[1]
+    }
+    updateSelectInput(session, "subs1", choices = ch, selected = sel)
+    ch <- colnames(data)
+    if (!is.null(input$vari1) && input$vari1 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari1)]
+    }
+    if (!is.null(input$vari2) && input$vari2 %in% ch) {
+      ch <- ch[-which(ch %in% input$vari2)]
+    }
+    ch <- c("none", ch)
+    sel <- input$subs2
+    if (!is.null(sel) && !sel %in% ch) {
+      sel <- ch[1]
+    }
+    updateSelectInput(session, "subs2", choices = ch, selected = sel)
   })
 })
 
@@ -2052,16 +2261,7 @@ output$plot.appearance.panel.title <- renderUI({
       (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% colnames(get.data.set()) |
           input$vari2 %in% "none"))) {
-      temp <- list()
-      temp$x <- get.data.set()[, input$vari1]
-      if (input$vari2 %in% "none") {
-        temp$y <- NULL
-      } else {
-        temp$y <- get.data.set()[, input$vari2]
-      }
-      temp$plot <- F
-      tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-      # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      tester <- probe_plot(input$vari1, input$vari2)
 
       large.sample <- search.name(tester, "largesample")[[1]]
       if (is.null(large.sample)) {
@@ -2537,16 +2737,7 @@ output$plot.appearance.panel <- renderUI({
       (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% colnames(get.data.set()) |
           input$vari2 %in% "none"))) {
-      temp <- list()
-      temp$x <- get.data.set()[, input$vari1]
-      if (input$vari2 %in% "none") {
-        temp$y <- NULL
-      } else {
-        temp$y <- get.data.set()[, input$vari2]
-      }
-      temp$plot <- F
-      tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-      # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      tester <- probe_plot(input$vari1, input$vari2)
 
       large.sample <- search.name(tester, "largesample")[[1]]
       if (is.null(large.sample)) {
@@ -3118,22 +3309,7 @@ observe({
       if (input$vari1 %in% colnames(get.data.set()) &&
         (input$vari2 %in% colnames(get.data.set()) ||
           input$vari2 %in% "none")) {
-        temp <- list()
-        temp$x <- get.data.set()[, input$vari1]
-        if (input$vari2 %in% "none") {
-          temp$y <- NULL
-        } else {
-          temp$y <- get.data.set()[, input$vari2]
-        }
-        temp$plot <- F
-        # TODO:
-        # str(temp)
-        # List of 2
-        # $ x   : Factor w/ 4 levels "job","other",..: 4 3 3 4 4 3 3 4 3 2 ...
-        # $ plot: logi FALSE
-
-        tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-        # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        tester <- probe_plot(input$vari1, input$vari2)
 
         large.sample <- search.name(tester, "largesample")[[1]]
         if (is.null(large.sample)) {
@@ -4176,16 +4352,7 @@ output$code.variables.panel <- renderUI({
             class(get.data.set()[, input$vari1]) %in% "integer") &&
             (class(get.data.set()[, input$vari2]) %in% "numeric" |
               class(get.data.set()[, input$vari2]) %in% "integer")))) {
-        temp <- list()
-        temp$x <- get.data.set()[, input$vari1]
-        if (input$vari2 %in% "none") {
-          temp$y <- NULL
-        } else {
-          temp$y <- get.data.set()[, input$vari2]
-        }
-        temp$plot <- F
-        # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-        temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        temp <- probe_plot(input$vari1, input$vari2)
 
         ##################################################################
         #    large.sample = T
@@ -4735,16 +4902,7 @@ output$add.jitter.panel <- renderUI({
         )
       )
 
-      temp <- list()
-      temp$x <- get.data.set()[, input$vari1]
-      if (input$vari2 %in% "none") {
-        temp$y <- NULL
-      } else {
-        temp$y <- get.data.set()[, input$vari2]
-      }
-      temp$plot <- F
-      # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-      temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      temp <- probe_plot(input$vari1, input$vari2)
 
       ##################################################################
       #    large.sample = T
@@ -4811,16 +4969,7 @@ output$add.rugs.panel <- renderUI({
         )
       )
 
-      temp <- list()
-      temp$x <- get.data.set()[, input$vari1]
-      if (input$vari2 %in% "none") {
-        temp$y <- NULL
-      } else {
-        temp$y <- get.data.set()[, input$vari2]
-      }
-      temp$plot <- F
-      # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-      temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      temp <- probe_plot(input$vari1, input$vari2)
 
       ##################################################################
       #    large.sample = T
@@ -4890,16 +5039,7 @@ output$join.points.panel <- renderUI({
         )
       )
 
-      temp <- list()
-      temp$x <- get.data.set()[, input$vari1]
-      if (input$vari2 %in% "none") {
-        temp$y <- NULL
-      } else {
-        temp$y <- get.data.set()[, input$vari2]
-      }
-      temp$plot <- F
-      # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-      temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+      temp <- probe_plot(input$vari1, input$vari2)
 
       ##################################################################
       #    large.sample = T
@@ -5030,17 +5170,14 @@ output$adjust.axis.panel <- renderUI({
           (input$vari2 %in% "none" ||
             input$vari2 %in% colnames(get.data.set())))) {
         ret <- list(h5(strong("Axis Limits")))
-        temp <- list()
-        temp$x <- vis.data()[[plot.par$x]]
-
-        if (input$vari2 %in% "none") {
+        tester <- probe_plot(input$vari1, input$vari2)
+        # Column vectors for range() only (not passed to iNZightPlot).
+        temp <- list(x = get.data.set()[, input$vari1])
+        if (identical(input$vari2, "none")) {
           temp$y <- NULL
         } else {
-          temp$y <- vis.data()[[plot.par$y]]
+          temp$y <- get.data.set()[, input$vari2]
         }
-        temp$plot <- F
-        tester <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-        # tester <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
 
         ###################################################################
         #      large.sample = T
@@ -5480,11 +5617,9 @@ output$points.identify.panel <- renderUI({
           (input$vari2 %in% "none" ||
             input$vari2 %in% colnames(get.data.set()))) {
           ch <- ""
-          if (!is.null(input$by.value.column.select)) {
-            ch <- c(
-              "none",
-              sort(get.data.set()[, input$by.value.column.select])
-            )
+          by_vals <- data_column(input$by.value.column.select)
+          if (!is.null(by_vals)) {
+            ch <- c("none", sort(unique(as.character(by_vals))))
           }
           ret[[6]] <- conditionalPanel(
             "input.select_identify_method=='Select by value'&&
@@ -5545,9 +5680,14 @@ output$points.identify.panel <- renderUI({
             )
           )
 
-          if (is.numeric(get.data.set()[, input$vari1]) &&
-            (!input$vari2 %in% "none" &&
-              is.numeric(get.data.set()[, input$vari2]))) {
+          vari1_vals <- data_column(input$vari1)
+          vari2_vals <- if (!identical(input$vari2, "none")) {
+            data_column(input$vari2)
+          } else {
+            NULL
+          }
+          if (!is.null(vari1_vals) && is.numeric(vari1_vals) &&
+            !is.null(vari2_vals) && is.numeric(vari2_vals)) {
             ret[[7]] <- conditionalPanel(
               "input.select_identify_method=='Extremes'&&
                (input.label_observation_check||input.color_points_check)",
@@ -5560,13 +5700,11 @@ output$points.identify.panel <- renderUI({
                 ticks = F
               )
             )
-          } else if ((!input$vari2 %in% "none" &&
-            ((!is.numeric(get.data.set()[, input$vari1]) &&
-              is.numeric(get.data.set()[, input$vari2])) ||
-              (is.numeric(get.data.set()[, input$vari1]) &&
-                !is.numeric(get.data.set()[, input$vari2])))) ||
-            (input$vari2 %in% "none" &&
-              is.numeric(get.data.set()[, input$vari1]))) {
+          } else if ((!is.null(vari2_vals) &&
+            ((!is.numeric(vari1_vals) && is.numeric(vari2_vals)) ||
+              (is.numeric(vari1_vals) && !is.numeric(vari2_vals)))) ||
+            (identical(input$vari2, "none") &&
+              !is.null(vari1_vals) && is.numeric(vari1_vals))) {
             ret[[7]] <- conditionalPanel(
               "input.select_identify_method == 'Extremes' &&
                (input.label_observation_check||input.color_points_check)",
@@ -5682,16 +5820,23 @@ observe({
   input$select_identify_method
   isolate({
     temp <- NULL
-    if (!is.null(input$select_identify_method)) {
+    data <- get.data.set()
+    cols <- if (!is.null(data)) colnames(data) else character(0)
+    first_col <- if (length(cols)) cols[[1]] else NULL
+
+    if (!is.null(input$select_identify_method) && !is.null(data) && length(cols)) {
       if (input$select_identify_method %in% "Select by value") {
-        if (input$single_vs_multiple_check) {
+        if (isTRUE(input$single_vs_multiple_check)) {
           temp <- input$select.unique.value.slider
-          if (temp == 0) {
+          if (is.null(temp) || temp == 0) {
             temp <- NULL
           }
-        } else {
+        } else if (
+          !is.null(input$by.value.column.select) &&
+            input$by.value.column.select %in% cols
+        ) {
           temp <- which(
-            get.data.set()[, input$by.value.column.select] %in%
+            data[, input$by.value.column.select] %in%
               input$value.select
           )
           if (length(temp) == 0) {
@@ -5700,24 +5845,34 @@ observe({
         }
       } else if (input$select_identify_method %in% "Range of values") {
         range <- input$range.values.slider
-        if (!all(range %in% 0)) {
+        if (
+          !is.null(range) &&
+            !all(range %in% 0) &&
+            !is.null(input$range.column.select) &&
+            input$range.column.select %in% cols
+        ) {
           range[which(range %in% 0)] <- 1
-          temp <- get.data.set()[, input$range.column.select]
+          temp <- data[, input$range.column.select]
           names(temp) <- 1:length(temp)
           temp <- sort(temp)
           temp <- as.numeric(names(temp)[range[1]:range[2]])
-          temp <- which(get.data.set()[, input$range.column.select] %in%
-            get.data.set()[, input$range.column.select][temp])
+          temp <- which(data[, input$range.column.select] %in%
+            data[, input$range.column.select][temp])
         } else {
           temp <- NULL
         }
       }
       if (!input$select_identify_method %in% "Extremes") {
-        if (input$same_level_of_check) {
-          temp <- which(get.data.set()[, input$same.level.of.select] %in%
-            get.data.set()[, input$same.level.of.select][temp])
+        if (
+          isTRUE(input$same_level_of_check) &&
+            !is.null(temp) &&
+            !is.null(input$same.level.of.select) &&
+            input$same.level.of.select %in% cols
+        ) {
+          temp <- which(data[, input$same.level.of.select] %in%
+            data[, input$same.level.of.select][temp])
         }
-        if (input$show.stored.check) {
+        if (isTRUE(input$show.stored.check)) {
           temp <- unique(c(plot.par.stored$locate.id, temp))
         }
       }
@@ -5727,15 +5882,19 @@ observe({
     }
     plot.par$locate.id <- temp
     plot.par$locate.extreme <- NULL
+
+    if (is.null(data) || !length(cols)) {
+      return()
+    }
+
     updateSelectInput(session,
       "by.value.column.select",
-      choices = colnames(get.data.set()),
-      selected = colnames(get.data.set())[1]
+      choices = cols,
+      selected = first_col
     )
-    ch <- ""
-    if (!is.null(input$by.value.column.select)) {
-      ch <- c("none", sort(get.data.set()[, input$by.value.column.select]))
-    }
+    # Use first_col from the *current* data — input$by.value.column.select
+    # may still hold a column name from the previous dataset.
+    ch <- c("none", sort(unique(as.character(data[[first_col]]))))
     updateSelectInput(session,
       "value.select",
       choices = ch,
@@ -5757,28 +5916,28 @@ observe({
     )
     updateSliderInput(session,
       "extremes.slider",
-      max = nrow(get.data.set()),
+      max = nrow(data),
       value = 0
     )
     updateNumericInput(session,
       "extreme.lower",
       value = 0,
-      max = nrow(get.data.set())
+      max = nrow(data)
     )
     updateNumericInput(session,
       "extreme.upper",
       value = 0,
-      max = nrow(get.data.set())
+      max = nrow(data)
     )
     updateSliderInput(session,
       "range.values.slider",
-      max = nrow(get.data.set()),
+      max = nrow(data),
       value = c(0, 0)
     )
     updateSelectInput(session,
       "range.column.select",
-      choices = colnames(get.data.set()),
-      selected = colnames(get.data.set())[1]
+      choices = cols,
+      selected = first_col
     )
   })
 })
@@ -5838,45 +5997,7 @@ observe({
 observe({
   if (!is.null(input$same_level_of_check)) {
     isolate({
-      temp <- NULL
-      if (input$select_identify_method %in% "Select by value") {
-        if (input$single_vs_multiple_check) {
-          temp <- input$select.unique.value.slider
-          if (temp == 0) {
-            temp <- NULL
-          }
-        } else {
-          temp <- which(
-            get.data.set()[, input$by.value.column.select] %in%
-              input$value.select
-          )
-          if (length(temp) == 0) {
-            temp <- NULL
-          }
-        }
-      } else if (input$select_identify_method %in% "Range of values") {
-        range <- input$range.values.slider
-        if (!all(range %in% 0)) {
-          range[which(range %in% 0)] <- 1
-          temp <- get.data.set()[, input$range.column.select]
-          names(temp) <- 1:length(temp)
-          temp <- sort(temp)
-          temp <- as.numeric(names(temp)[range[1]:range[2]])
-          temp <- which(get.data.set()[, input$range.column.select] %in%
-            get.data.set()[, input$range.column.select][temp])
-        }
-      }
-      if (input$same_level_of_check) {
-        temp <- which(get.data.set()[, input$same.level.of.select] %in%
-          get.data.set()[, input$same.level.of.select][temp])
-        if (length(temp) == 0) {
-          temp <- NULL
-        }
-      }
-      if (input$show.stored.check) {
-        temp <- unique(c(plot.par.stored$locate.id, temp))
-      }
-      plot.par$locate.id <- temp
+      plot.par$locate.id <- locate_ids_from_inputs()
     })
   }
 })
@@ -5885,45 +6006,7 @@ observe({
 observe({
   if (!is.null(input$same.level.of.select)) {
     isolate({
-      temp <- NULL
-      if (input$select_identify_method %in% "Select by value") {
-        if (input$single_vs_multiple_check) {
-          temp <- input$select.unique.value.slider
-          if (temp == 0) {
-            temp <- NULL
-          }
-        } else {
-          temp <- which(
-            get.data.set()[, input$by.value.column.select] %in%
-              input$value.select
-          )
-          if (length(temp) == 0) {
-            temp <- NULL
-          }
-        }
-      } else if (input$select_identify_method %in% "Range of values") {
-        range <- input$range.values.slider
-        if (!all(range %in% 0)) {
-          range[which(range %in% 0)] <- 1
-          temp <- get.data.set()[, input$range.column.select]
-          names(temp) <- 1:length(temp)
-          temp <- sort(temp)
-          temp <- as.numeric(names(temp)[range[1]:range[2]])
-          temp <- which(get.data.set()[, input$range.column.select] %in%
-            get.data.set()[, input$range.column.select][temp])
-        } else {
-          temp <- NULL
-        }
-      }
-      temp <- which(get.data.set()[, input$same.level.of.select] %in%
-        get.data.set()[, input$same.level.of.select][temp])
-      if (length(temp) == 0) {
-        temp <- NULL
-      }
-      if (input$show.stored.check) {
-        temp <- unique(c(plot.par.stored$locate.id, temp))
-      }
-      plot.par$locate.id <- temp
+      plot.par$locate.id <- locate_ids_from_inputs()
     })
   }
 })
@@ -5932,19 +6015,7 @@ observe({
 observe({
   if (!is.null(input$select.unique.value.slider)) {
     isolate({
-      if (!is.null(input$same.level.of.select) &&
-        input$same.level.of.select %in% colnames(get.data.set())) {
-        temp <- input$select.unique.value.slider
-        if (input$same_level_of_check) {
-          temp <- which(get.data.set()[, input$same.level.of.select] %in%
-            get.data.set()[, input$same.level.of.select][temp])
-        }
-        if (input$show.stored.check) {
-          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
-        } else {
-          plot.par$locate.id <- temp
-        }
-      }
+      plot.par$locate.id <- locate_ids_from_inputs()
       updateNumericInput(session, "specify.correct.numeric",
         value = input$select.unique.value.slider
       )
@@ -5956,19 +6027,7 @@ observe({
 observe({
   if (!is.null(input$specify.correct.numeric)) {
     isolate({
-      if (!is.null(input$same.level.of.select) &&
-        input$same.level.of.select %in% colnames(get.data.set())) {
-        temp <- input$specify.correct.numeric
-        if (input$same_level_of_check) {
-          temp <- which(get.data.set()[, input$same.level.of.select] %in%
-            get.data.set()[, input$same.level.of.select][temp])
-        }
-        if (input$show.stored.check) {
-          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
-        } else {
-          plot.par$locate.id <- temp
-        }
-      }
+      plot.par$locate.id <- locate_ids_from_inputs()
       updateNumericInput(session, "select.unique.value.slider",
         value = input$specify.correct.numeric
       )
@@ -5981,15 +6040,18 @@ observe({
   input$single_vs_multiple_check
   isolate({
     plot.par$locate.id <- NULL
+    data <- get.data.set()
+    cols <- if (!is.null(data)) colnames(data) else character(0)
+    first_col <- if (length(cols)) cols[[1]] else NULL
+    if (is.null(first_col)) {
+      return()
+    }
     updateSelectInput(session,
       "by.value.column.select",
-      choices = colnames(get.data.set()),
-      selected = colnames(get.data.set())[1]
+      choices = cols,
+      selected = first_col
     )
-    ch <- ""
-    if (!is.null(input$by.value.column.select)) {
-      ch <- c("none", sort(get.data.set()[, input$by.value.column.select]))
-    }
+    ch <- c("none", sort(unique(as.character(data[[first_col]]))))
     updateSelectInput(session,
       "value.select",
       choices = ch,
@@ -6013,10 +6075,14 @@ observe({
   if (!is.null(input$by.value.column.select)) {
     isolate({
       plot.par$locate.id <- NULL
-      if (is.numeric(get.data.set()[, input$by.value.column.select])) {
-        temp <- sort(get.data.set()[, input$by.value.column.select])
+      by_vals <- data_column(input$by.value.column.select)
+      if (is.null(by_vals)) {
+        return()
+      }
+      if (is.numeric(by_vals)) {
+        temp <- sort(by_vals)
       } else {
-        temp <- sort(levels(get.data.set()[, input$by.value.column.select]))
+        temp <- sort(unique(as.character(by_vals)))
       }
       updateSelectInput(session,
         "value.select",
@@ -6031,22 +6097,7 @@ observe({
 observe({
   if (!is.null(input$value.select)) {
     isolate({
-      if (!is.null(input$same.level.of.select) &&
-        input$same.level.of.select %in% colnames(get.data.set())) {
-        temp <- which(
-          get.data.set()[, input$by.value.column.select] %in%
-            input$value.select
-        )
-        if (input$same_level_of_check) {
-          temp <- which(get.data.set()[, input$same.level.of.select] %in%
-            get.data.set()[, input$same.level.of.select][temp])
-        }
-        if (input$show.stored.check) {
-          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
-        } else {
-          plot.par$locate.id <- temp
-        }
-      }
+      plot.par$locate.id <- locate_ids_from_inputs()
     })
   }
 })
@@ -6055,91 +6106,25 @@ observe({
 observe({
   input$show.stored.check
   isolate({
-    if (!is.null(input$select_identify_method)) {
-      if (input$select_identify_method %in% "Select by value") {
-        if (!input$single_vs_multiple_check) {
-          temp <- which(
-            get.data.set()[, input$by.value.column.select] %in%
-              input$value.select
-          )
-          if (input$same_level_of_check) {
-            temp <- which(get.data.set()[, input$same.level.of.select] %in%
-              get.data.set()[, input$same.level.of.select][temp])
-          }
-          if (input$show.stored.check) {
-            plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
-          } else {
-            plot.par$locate.id <- temp
-          }
-        } else {
-          if (input$select.unique.value.slider != 0 &&
-            input$specify.correct.numeric != 0) {
-            temp <- input$specify.correct.numeric
-            if (input$same_level_of_check) {
-              temp <- which(get.data.set()[, input$same.level.of.select] %in%
-                get.data.set()[, input$same.level.of.select][temp])
-            }
-            if (input$show.stored.check) {
-              plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
-            } else {
-              plot.par$locate.id <- temp
-            }
-          }
-        }
-      } else if (input$select_identify_method %in% "Extreme") {
-        # This needs work if the iNZight developer ever makes
-        # it possible to use locate.id and locate.extreme at
-        # the same time
-        if (input$extremes.slider != 0) {
-          if (input$show.stored.check) {
-            plot.par$locate.id <- NULL
-            plot.par$locate.extreme <- input$extremes.slider
-          } else {
-            plot.par$locate.id <- NULL
-            plot.par$locate.extreme <- input$extremes.slider
-          }
-        } else if (input$extreme.lower != 0 ||
-          input$extreme.upper != 0) {
-          if (input$show.stored.check) {
-            plot.par$locate.id <- NULL
-            plot.par$locate.extreme <- c(input$extreme.lower, input$extreme.upper)
-          } else {
-            plot.par$locate.id <- NULL
-            plot.par$locate.extreme <- c(
-              input$extreme.lower,
-              input$extreme.upper
-            )
-          }
-        }
-      } else {
-        if (any(input$range.values.slider > 0)) {
-          if (input$range.column.select %in% colnames(get.data.set())) {
-            range <- input$range.values.slider
-            range[which(range %in% 0)] <- 1
-            temp <- get.data.set()[, input$range.column.select]
-            names(temp) <- 1:length(temp)
-            temp <- sort(temp)
-            temp <- as.numeric(names(temp)[range[1]:range[2]])
-            temp <- which(get.data.set()[, input$range.column.select] %in%
-              get.data.set()[, input$range.column.select][temp])
-            if (input$same_level_of_check) {
-              temp <- which(get.data.set()[, input$same.level.of.select] %in%
-                get.data.set()[, input$same.level.of.select][temp])
-            }
-            if (input$show.stored.check) {
-              plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
-            } else {
-              plot.par$locate.id <- temp
-            }
-          }
-        } else {
-          if (input$show.stored.check) {
-            plot.par$locate.id <- plot.par.stored$locate.id
-          } else {
-            plot.par$locate.id <- NULL
-          }
-        }
+    if (is.null(input$select_identify_method)) {
+      return()
+    }
+    if (identical(input$select_identify_method, "Extremes")) {
+      # locate.extreme cannot be merged with locate.id yet
+      plot.par$locate.id <- NULL
+      if (!is.null(input$extremes.slider) && input$extremes.slider != 0) {
+        plot.par$locate.extreme <- input$extremes.slider
+      } else if (
+        (!is.null(input$extreme.lower) && input$extreme.lower != 0) ||
+          (!is.null(input$extreme.upper) && input$extreme.upper != 0)
+      ) {
+        plot.par$locate.extreme <- c(
+          if (is.null(input$extreme.lower)) 0 else input$extreme.lower,
+          if (is.null(input$extreme.upper)) 0 else input$extreme.upper
+        )
       }
+    } else {
+      plot.par$locate.id <- locate_ids_from_inputs()
     }
   })
 })
@@ -6147,34 +6132,9 @@ observe({
 # set a range of values
 observe({
   if (!is.null(input$range.values.slider) &&
-    !is.null(input$range.column.select) &&
-    input$range.column.select %in% colnames(get.data.set())) {
+    !is.null(input$range.column.select)) {
     isolate({
-      range <- input$range.values.slider
-      if (length(which(range %in% 0)) < 2) {
-        range[which(range %in% 0)] <- 1
-        temp <- get.data.set()[, input$range.column.select]
-        names(temp) <- 1:length(temp)
-        temp <- sort(temp)
-        temp <- as.numeric(names(temp)[range[1]:range[2]])
-        temp <- which(get.data.set()[, input$range.column.select] %in%
-          get.data.set()[, input$range.column.select][temp])
-        if (input$same_level_of_check) {
-          temp <- which(get.data.set()[, input$same.level.of.select] %in%
-            get.data.set()[, input$same.level.of.select][temp])
-        }
-        if (input$show.stored.check) {
-          plot.par$locate.id <- unique(c(plot.par.stored$locate.id, temp))
-        } else {
-          plot.par$locate.id <- temp
-        }
-      } else {
-        if (input$show.stored.check) {
-          plot.par$locate.id <- plot.par.stored$locate.id
-        } else {
-          plot.par$locate.id <- NULL
-        }
-      }
+      plot.par$locate.id <- locate_ids_from_inputs()
     })
   }
 })
@@ -6188,17 +6148,11 @@ observe({
       if ((is.null(plot.par$locate.id) ||
         length(plot.par$locate.id) == 0) &&
         length(plot.par$locate.extreme) > 0) {
-        temp <- list()
-        temp$x <- get.data.set()[, input$vari1]
-        if (input$vari2 %in% "none") {
-          temp$y <- NULL
-        } else {
-          temp$y <- get.data.set()[, input$vari2]
-        }
-        temp$locate.extreme <- plot.par$locate.extreme
-        temp$plot <- F
-        # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-        temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        temp <- probe_plot(
+          input$vari1,
+          input$vari2,
+          locate.extreme = plot.par$locate.extreme
+        )
 
         extreme.ids <- search.name(temp, "extreme.ids")[[1]]
         plot.par.stored$locate.id <- unique(c(
@@ -6222,51 +6176,10 @@ observe({
     if (!is.null(input$reset.obs.button) &&
       input$reset.obs.button > 0) {
       plot.par.stored$locate.id <- NULL
-      temp <- NULL
-      if (input$select_identify_method %in% "Select by value") {
-        if (input$single_vs_multiple_check) {
-          temp <- input$select.unique.value.slider
-          if (temp == 0) {
-            temp <- NULL
-          }
-        } else {
-          temp <- which(
-            get.data.set()[, input$by.value.column.select] %in%
-              input$value.select
-          )
-          if (length(temp) == 0) {
-            temp <- NULL
-          }
-        }
-      } else if (input$select_identify_method %in% "Range of values") {
-        range <- input$range.values.slider
-        if (!all(range %in% 0)) {
-          range[which(range %in% 0)] <- 1
-          temp <- get.data.set()[, input$range.column.select]
-          names(temp) <- 1:length(temp)
-          temp <- sort(temp)
-          temp <- as.numeric(names(temp)[range[1]:range[2]])
-          temp <- which(get.data.set()[, input$range.column.select] %in%
-            get.data.set()[, input$range.column.select][temp])
-        } else {
-          temp <- NULL
-        }
-      }
-      if (input$same_level_of_check) {
-        temp <- which(get.data.set()[, input$same.level.of.select] %in%
-          get.data.set()[, input$same.level.of.select][temp])
-      }
-      if (length(temp) == 0) {
-        temp <- NULL
-      }
-      if (input$show.stored.check) {
-        temp <- unique(c(plot.par.stored$locate.id, temp))
-      }
-      plot.par$locate.id <- temp
+      plot.par$locate.id <- locate_ids_from_inputs()
     }
   })
 })
-
 
 
 
@@ -6277,17 +6190,13 @@ output$select_additions_panel <- renderUI({
   input$vari2
 
   isolate({
-    temp <- list()
-
-    temp$x <- get.data.set()[, input$vari1]
-    if (input$vari2 %in% "none") {
-      temp$y <- NULL
-    } else {
-      temp$y <- get.data.set()[, input$vari2]
+    temp <- NULL
+    if (!is.null(input$vari1) &&
+      input$vari1 %in% colnames(get.data.set()) &&
+      !is.null(input$vari2) &&
+      (input$vari2 %in% "none" || input$vari2 %in% colnames(get.data.set()))) {
+      temp <- probe_plot(input$vari1, input$vari2)
     }
-    temp$plot <- F
-    # temp <- try(do.call(iNZightPlots:::iNZightPlot, temp))
-    temp <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
 
     ##################################################################
     #    large.sample = T

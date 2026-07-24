@@ -477,10 +477,7 @@ observeEvent(input$confirm_import, {
       code.save$variable <- c(code.save$variable, list(c("\n", code, "\n")))
     }
     values$name.restore <- temp.name
-    updateSelectInput(session, "subs2", selected = "none")
-    updateSelectInput(session, "subs1", selected = "none")
-    updateSelectInput(session, "vari2", selected = "none")
-    updateSelectInput(session, "vari1", selected = "none")
+    reset_plot_variable_selection()
     plot.par$design <- NULL
     design_params$design <- NULL
   }

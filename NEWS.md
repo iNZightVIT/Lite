@@ -10,6 +10,11 @@
 - **File** module: parse url when importing manually, add data dict feature
 - **Local Storage** feature to store user preferences
 - Fix typos and grammar in user-facing UI text and help panels
+- Fix Visualize plot probes that passed column vectors into iNZightPlots (could error with messages like `object 'parent' not found` after loading Census at School)
+- Clear stale Visualize variable selections when loading a new dataset (avoids errors like `object 'height' not found` after switching examples)
+- Fix Visualize plot crash when `g2.level` was passed to `inzplot` without a subset-by-2 variable (`Unknown or uninitialised column: g2`)
+- Harden Identify-points handlers against stale column names after a dataset switch
+- Default Variable 1 to the first numeric column, or first categorical within iNZightPlots' `max.levels` barplot limit (avoids "too many levels" plots on load)
 
 # 2026.05.1
 
