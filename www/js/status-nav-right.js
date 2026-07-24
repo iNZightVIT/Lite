@@ -35,7 +35,7 @@ function renderStatusIndicator(level, text) {
   if (!statusLink) return;
 
   var color = "#22c55e";
-  var label = "Operating normal";
+  var label = "Operating normally";
   var subText = "";
 
   if (level === "warning") {

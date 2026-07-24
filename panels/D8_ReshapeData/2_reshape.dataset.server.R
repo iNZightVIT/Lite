@@ -34,7 +34,7 @@ output$reshape_main_panel <- renderUI({
         ),
         selectInput(
           inputId = "select_col2",
-          label = "Select the column with the values to be put in these column",
+          label = "Select the column with the values to be put in these columns",
           choices = c("", colnames(get.data.set())),
           selectize = FALSE
         )

@@ -38,7 +38,7 @@ missing.categorical.panel <- function(data.set) {
       ),
       mainPanel(
         helpText("The table shows the distribution of missing values in
-                  the data. All possible combiantions of NA (missing) and
+                  the data. All possible combinations of NA (missing) and
                   not NA (observed) are shown. The row count of how often
                   the row combination is seen in the data is in the last
                   column of the table"),

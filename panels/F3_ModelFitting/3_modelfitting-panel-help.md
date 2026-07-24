@@ -9,9 +9,9 @@ from the list. There is no model to choose from by default. Underneath the model
 controls is a select bar which lets the user switch between the "Model" summary,
 "Plots" or the "Code History".
 <h5>Model</h5>
-- **Choose Model settings** This seetings makes it possible to select the Y
-variable from the data. Transform the Y variable by log, sqare root or raising
-it by a factor which can be specified in a text filed appearing in the same row.
+- **Choose Model settings** These settings make it possible to select the Y
+variable from the data. Transform the Y variable by log, square root or raising
+it by a factor which can be specified in a text field appearing in the same row.
 The model framework can be selected and whether the design is a complex survey
 or not.
 -**Predictor variables** The next section is for choosing predictor variables or
@@ -22,15 +22,15 @@ text field the degree of interaction is supplied), "by variable" (specific
 interaction between variables).
 - **Transform x variables** Different transformations of the x variables can be
 specified.
-- **Display Formula** The code which will produce the module is presented in
+- **Display Formula** The code which will produce the model is presented in
 this section.
 <h5>Plots</h5>
 Three different plot categories can be selected.
 - **Factor level comparison** This plot can be produced for every factor in the
-fitted model. It shows how each factor for a variable influenes the model.
-- **Graphical diagnostics** Six different plots can viewed. A plot of the
+fitted model. It shows how each factor for a variable influences the model.
+- **Graphical diagnostics** Six different plots can be viewed. A plot of the
 residuals versus the fitted values, a scale location plot, The residuals versus
-leverage, a cooks distance plot, a normall QQ-plot and a histogram of the
+leverage, a Cook's distance plot, a normal QQ-plot and a histogram of the
 residuals.
 - **Normality checks** The Normal QQ-plot is repeated here and the histogram as
 well as a histogram of sampled data and a QQ-plot including inference.

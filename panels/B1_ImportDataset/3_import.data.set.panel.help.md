@@ -11,16 +11,16 @@ first unnamed column. The type of the file is estimated from the file extension.
 
  <ul>
   <li>.csv<br>
-      A comma seperated file.
+      A comma separated file.
   </li>
   <li>.txt<br>
-      A tab seperated file.
+      A tab separated file.
   </li>
   <li>.RDA, .RData<br>
-      A R file which stores an R object as a binary file.
+      An R file which stores an R object as a binary file.
   </li>
   <li>.RDS<br>
-      A R file which stores an R object as a binary file with slightly different
+      An R file which stores an R object as a binary file with slightly different
       behaviour than the RDA file above.
   </li>
 </ul>

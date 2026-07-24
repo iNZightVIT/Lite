@@ -21,15 +21,15 @@ All columns of class type numeric are squared, such that X*X.
 <h4>Abs Transformation</h4>
 Of all numeric columns from the selected column the absolute value is returned. See the "abs" function in R for more information.
 <h4>Center Transformation</h4>
-All columns (character, factor and numeric) are centered to mean 0. Such that from column X the mean of X is subtracted from X. Character and factor values are converted to numeric such that whith the order of the factors values from 1 to the nuber of unique factors are asigned to each value in the column.
+All columns (character, factor and numeric) are centered to mean 0. Such that from column X the mean of X is subtracted from X. Character and factor values are converted to numeric such that with the order of the factors values from 1 to the number of unique factors are assigned to each value in the column.
 <h4>Standardize Transformation</h4>
 In a first step exactly the same method is performed as described in "Center Transformation" above. As an additional step the result from the first step is divided by the standard deviation of the column.
 <h4>Median Split Transformation</h4>
 All numeric selected columns are converted into a binary variable such that all values above the median are classified as "high" and all values below the median are classified as "low".
 <h4>Reverse-coding Transformation</h4>
-The selected numeric columns are revers coded such that the minimum and maximum of Column X is added and X is subtracted from this value ((min(X)+max(X))-X).
+The selected numeric columns are reverse coded such that the minimum and maximum of Column X is added and X is subtracted from this value ((min(X)+max(X))-X).
 <h4>Copy Transformation</h4>
-Copies the selected coulms so that they become duplicates in the current data set.
+Copies the selected columns so that they become duplicates in the current data set.
 <h4>Change sign Transformation</h4>
 Performs the action X*-1 such that all negative values become positive and all positive values become negative.
 <h4>Convert to categorical Transformation</h4>

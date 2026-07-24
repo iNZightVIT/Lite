@@ -27,7 +27,7 @@ multivariate.sidebarPanel <- function() {
         selectInput("multivarate.method",
           label = h5(strong("Method:")), choices = c(
             "Pairs Plot"                          = "pairs",
-            "Correlation Pairs  Plot"             = "pairs_corr",
+            "Correlation Pairs Plot"             = "pairs_corr",
             "Parallel Coordinates"                = "pcp",
             "Principal Components Analysis"       = "pca",
             "Multidimensional Scaling"            = "mds" # ,

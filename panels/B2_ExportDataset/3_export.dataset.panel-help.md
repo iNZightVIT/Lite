@@ -9,15 +9,15 @@ types are available the data can be saved in. <br>
    </li>
    <li>
       csv<br>
-      A comma seperated text file.
+      A comma separated text file.
    </li>
    <li>
       RData<br>
-      A RData binary file.
+      An RData binary file.
   </li>
   <li>
      RDS<br>
-     A RDS binary file.
+     An RDS binary file.
   </li>
 </ul>
 Note, "RData" and "RDS" file are R only. They can be loaded into R with the load

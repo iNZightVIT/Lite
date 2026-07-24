@@ -170,7 +170,7 @@ get.pair.plot.sidebar <- function(data.set) {
   }
   list(
     helpText("Select a column from the first and second
-                drop down menu to display a appropriate
+                drop down menu to display an appropriate
                 plot of the selected columns."),
     selectInput("select.column.plot1", "Select Column 1",
       choices = choices1, multiple = F, selectize = T,
@@ -212,7 +212,7 @@ get.matrix.sidebar <- function(data.set) {
   }
   list(
     helpText("Select a column from the dropdown
-                menu to display all posible pair
+                menu to display all possible pair
                 combination plots."),
     selectInput("select.matrix.plot", "Select Columns",
       choices = choices1, multiple = T, selectize = T,

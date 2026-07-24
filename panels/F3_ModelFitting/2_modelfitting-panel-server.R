@@ -1532,7 +1532,7 @@ output$plots.main <- renderUI({
                     "Residuals vs Fitted",
                     "Scale-location",
                     "Residuals vs Leverage",
-                    "Cooks Distance",
+                    "Cook's Distance",
                     "QQ-Plot",
                     "Histogram",
                     "All Plots"
@@ -1762,7 +1762,7 @@ output$plotlm6 <- renderPlot({
         plotindex <- 2
       } else if (input$plotlm6.selected %in% "Residuals vs Leverage") {
         plotindex <- 3
-      } else if (input$plotlm6.selected %in% "Cooks Distance") {
+      } else if (input$plotlm6.selected %in% "Cook's Distance") {
         plotindex <- 4
       } else if (input$plotlm6.selected %in% "QQ-Plot") {
         plotindex <- 5

@@ -66,7 +66,7 @@ multiresponse_check = function(df, col, delim) {
   all_level_names = unique(df[, col])
   
   if (num_levels > 50) {
-    msg = "This varaible contains more then 100 levels"
+    msg = "This variable contains more than 100 levels"
     if(num_levels > 50 && num_levels <= 100) {
       msg = "This variable contains more than 50 levels, are you sure you want to proceed?"
       shinyjs::show("proceedDiv")

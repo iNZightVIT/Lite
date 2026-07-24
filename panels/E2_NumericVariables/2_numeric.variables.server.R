@@ -30,7 +30,7 @@ observe({
         ))
         code.save$variable <- c(code.save$variable, list(c("\n", code, "\n")))
         values$transform.text <-
-          "The transformation of the columns was succesful!"
+          "The transformation of the columns was successful!"
       }
     }
   })

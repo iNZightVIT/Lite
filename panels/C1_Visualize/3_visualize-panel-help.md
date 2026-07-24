@@ -5,7 +5,7 @@ type of variable selected. For example, if you select two numeric variables
 (e.g. weight and height), it will display a scatterplot. On the other hand, if
 you select a numeric variable and a categorical variable (e.g. weight and
 nationality), it will display multiple box plots, depending on the number of
-categories in the categorial variable.
+categories in the categorical variable.
 
 The old module is divided up into up to three distinct vertical _panels_:
 
@@ -30,7 +30,7 @@ This panel consists of a collection of user **inputs**:
 
 **Header** Next to the header is a checkbox which makes it possible to change
 the selection method of the two main variables. If not checked, normal dropdown
-menues can be used. When checked the variables can be selected from a list with
+menus can be used. When checked the variables can be selected from a list with
 scroll bars next to them. In this view it is possible to change selection with
 the arrow keys if the widget is selected.
 
@@ -48,12 +48,12 @@ second variable depends on the type of variable chosen. The combinations are
   plot
 
 - **numeric-categorical** Any combination generates dotplots combined with
-  boxplots seperated by the categorical variable into different sets of plots.
+  boxplots separated by the categorical variable into different sets of plots.
 
 - **categorical-categorical** Bar plots which are subset by the second variable
   selected.
 
-**Subset by** gives you the option of subsetting the the variable(s) you
+**Subset by** gives you the option of subsetting the variable(s) you
 chose above. If the variable you choose to subset by is not categorical, iNZight
 Lite will automatically partition your data and define a set of categories for
 you. You also have the option of subsetting by a second variable. You can adjust
@@ -85,7 +85,7 @@ either in graphical or text form:
    for equal probabilities for the variable(s).
 
 <h5> Panel 3: Advanced Options </h5>
-This panel is only visible if the "Advanced Options" radiobuton is set on show.
+This panel is only visible if the "Advanced Options" radiobutton is set on show.
 It provides features to modify and add to the plot output. The panel is divided
 into two sections (Inference and Advanced options).
 
@@ -99,7 +99,7 @@ into two sections (Inference and Advanced options).
    (confidence or comparison). For histograms with boxplots, the boxplot will
    disappear when the inference parameter mean is selected. The boxplot shows the
    data according to the median and therefore adding the confidence interval on top
-   would lead to misleading information. For scaterplots inference of the fitted
+   would lead to misleading information. For scatterplots inference of the fitted
    trend line is displayed.
 
 2. **Advanced Options** Several categories of options can be selected to add
@@ -113,7 +113,7 @@ into two sections (Inference and Advanced options).
 - **Add trend curve** Fits trend curves to the plot (scatterplot only). Linear,
   quadratic, cubic and/or smoother can be added. The colours of the lines can be
   specified. For the smoother, whether the quantiles should be used can be
-  selected. How smoth the smother is can be adjusted and when the plot is
+  selected. How smooth the smoother is can be adjusted and when the plot is
   coloured by some subsetting variable it is possible to fit a trend for every
   subset. Those trends can be fitted in parallel or not.
 
@@ -140,17 +140,17 @@ into two sections (Inference and Advanced options).
   the interior of the points is filled or not can be selected and the transparency
   of the points can be adjusted.
 
-- **Identify points** This panel lets the user identify points of interst in the
+- **Identify points** This panel lets the user identify points of interest in the
   plot. This can be done by labeling the points and/or colouring them. The type of
   labels and the color can be changed. For labels it is possible to label by any
   column in the dataset or additionally by 'id'. The 'id' is the row number of the
   observation in the data. A third selection makes it possible to merge the
-  labeled points by observatins from a different variable with the same level.
+  labeled points by observations from a different variable with the same level.
   Furthermore three different selection methods can be used to label. <br>
   **Select by value**. This method is used to pick observations from a list of a
   selected column. The observations are ordered and if they are not unique all
   observations with the same level are selected. A checkbox labeled "Single value"
-  can be used to pick unique observations. For this the point of interst needs to
+  can be used to pick unique observations. For this the point of interest needs to
   be found by scrolling through all points on a slider or numeric input. <br>
   **Extremes** With this feature extreme values can be selected. For scatter plot
   this is picking extremes by the Mahalanobis distance method. How many extreme

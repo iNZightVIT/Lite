@@ -46,7 +46,7 @@ filter.data.sidebar <- function(data.set) {
     ),
     conditionalPanel(
       "input.select_filter=='row indices'",
-      helpText("Paste or type in a comma seperated list of index values to remove from the data."),
+      helpText("Paste or type in a comma separated list of index values to remove from the data."),
       tags$textarea(id = "row_op_indexes", rows = 8, cols = 25, ""),
       verbatimTextOutput("message2")
     ),
@@ -66,7 +66,7 @@ filter.data.sidebar <- function(data.set) {
     ),
     br(), br(),
     help.display(
-      "Filter datset", "row_op_help",
+      "Filter dataset", "row_op_help",
       "panels/D1_FilterDataset/3_filter.dataset-help.md"
     ),
     br()
@@ -78,7 +78,7 @@ filter.data.panel <- function(data.set) {
     sidebarLayout(
       sidebarPanel(
         help.display(
-          "Filter datset", "row_op_help",
+          "Filter dataset", "row_op_help",
           "panels/D1_FilterDataset/3_filter.dataset-help.md"
         )
       ),

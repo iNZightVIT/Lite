@@ -7279,7 +7279,7 @@ observeEvent(input$store_fitted_values, {
 output$add_fitted_values_status <- renderText({
   if (!is.null(input$store_fitted_values_ok) &&
     input$store_fitted_values_ok > 0) {
-    "Add succesful"
+    "Add successful"
   } else {
     NULL
   }

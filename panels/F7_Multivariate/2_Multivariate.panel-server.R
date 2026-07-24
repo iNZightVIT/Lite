@@ -198,7 +198,7 @@ observe({
 
 method.labels <- c(
   "Pairs Plot"                          = "pairs",
-  "Correlation Pairs  Plot"             = "pairs_corr",
+  "Correlation Pairs Plot"             = "pairs_corr",
   "Parallel Coordinates"                = "pcp",
   "Principal Components Analysis"       = "pca",
   "Multidimensional Scaling"            = "mds" # ,
@@ -472,7 +472,7 @@ output$mv.plot <- renderPlot({
       result = mul.plot.parm()
       if(is.null(result)) {
         plot.new()
-        text(0.5, 0.5, labels = "Error in generating plot. Possibily due to missing values in the data. Try removing missing values and try again.")
+        text(0.5, 0.5, labels = "Error in generating plot. Possibly due to missing values in the data. Try removing missing values and try again.")
       }
     }, error = function(e) {
       print(e)

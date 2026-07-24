@@ -11,7 +11,7 @@ Four different actions can be performed.
   order for reloading.
 - **Collapse levels** With this module it is possible to collapse two or more
   levels in a categorical variable into one.
-- **Rename levels** This module make it possible to rename the levels of a
+- **Rename levels** This module makes it possible to rename the levels of a
   categorical variable.
 - **Combine categorical** Several categorical columns can be combined into a new
   column.

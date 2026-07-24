@@ -655,7 +655,7 @@ output$Doe.smy <- renderUI({
         ),
         fixedRow(column(3, actionButton(
           inputId = "Doe.comp.lsd",
-          label = "Comfirm",
+          label = "Confirm",
           style = "color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"
         ))),
         uiOutput("Doe.lsd.res"),
@@ -669,7 +669,7 @@ output$Doe.smy <- renderUI({
           column(2, textInput("Doe.tsr.sig", label = "alpha")),
           column(3, actionButton(
             inputId = "Doe.comp.tsr",
-            label = "Comfirm",
+            label = "Confirm",
             style = "color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"
           ))
         ),
@@ -689,7 +689,7 @@ output$Doe.smy <- renderUI({
         ),
         fixedRow(column(3, actionButton(
           inputId = "Doe.comp.lsd",
-          label = "Comfirm",
+          label = "Confirm",
           style = "color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"
         ))),
         uiOutput("Doe.lsd.res"),
@@ -704,7 +704,7 @@ output$Doe.smy <- renderUI({
           column(2, textInput("Doe.tsr.eff", label = "eff")),
           column(3, actionButton(
             inputId = "Doe.comp.tsr",
-            label = "Comfirm",
+            label = "Confirm",
             style = "color: #fff; background-color: #337ab7; border-color: #2e6da4; margin-top: -5px; margin-bottom:10px"
           ))
         ),

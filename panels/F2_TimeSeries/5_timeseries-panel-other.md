@@ -54,7 +54,7 @@
 ###  inputId's conditional on input.series == 2
 ```
 
-- **sevSeries**: _checkboxGroupInput_ for displaying serveral-series plots. The possible choices are:
+- **sevSeries**: _checkboxGroupInput_ for displaying several-series plots. The possible choices are:
 
 1.  Single Plot,
 2.  Multiple Plots.
@@ -130,7 +130,7 @@
 ###  inputId's conditional on input.series == 2
 ```
 
-- **sevSeries**: _checkboxGroupInput_ for displaying serveral-series plots. The possible choices are:
+- **sevSeries**: _checkboxGroupInput_ for displaying several-series plots. The possible choices are:
 
 1.  Single Plot,
 2.  Multiple Plots.

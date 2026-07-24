@@ -200,7 +200,7 @@ output$message2 <- renderPrint({
   ))
   isolate({
     if (!valid) {
-      cat("Please provide a comma seperated list of indices.")
+      cat("Please provide a comma separated list of indices.")
     } else {
       cat("")
     }

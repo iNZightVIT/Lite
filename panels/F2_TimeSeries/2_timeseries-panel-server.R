@@ -513,7 +513,7 @@ output$tsui_ts_plot <- renderPlot({
           text(
             0.5,
             0.5,
-            paste("Plot type '", input$tsui_time_plot_info, "' not suppored"),
+            paste("Plot type '", input$tsui_time_plot_info, "' not supported"),
             cex = 2
           )
         }

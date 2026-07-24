@@ -108,7 +108,7 @@ survey.design.sidebar <- function() {
             selectize = F,
             size = 18
           ),
-          helpText("To select a range, click the first, then hold SHIFT while clicking the last.\n\nHold CTRL while clicking to add and remove invidividual variables.")
+          helpText("To select a range, click the first, then hold SHIFT while clicking the last.\n\nHold CTRL while clicking to add and remove individual variables.")
         ),
         conditionalPanel(
           condition = "input.repType == 'bootstrap' | input.repType == 'other'",

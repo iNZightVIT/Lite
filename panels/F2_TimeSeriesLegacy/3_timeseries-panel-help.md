@@ -20,7 +20,7 @@ The module is divided up into two distinct vertical _panels_:
 <h4> Panel 1: User Input </h4>
 This panel consists of a collection of user **inputs**:
 
-1. **Time Information**: You must either choose a time variable from a list of all the variables (or column names) from the selected dataset, or define one manually. If you time variable is not in the format the iNZight Lite recognises, then you must supply the time information manually (see https://www.stat.auckland.ac.nz/~wild/iNZight/faq.php#time-series).
+1. **Time Information**: You must either choose a time variable from a list of all the variables (or column names) from the selected dataset, or define one manually. If your time variable is not in the format the iNZight Lite recognises, then you must supply the time information manually (see https://www.stat.auckland.ac.nz/~wild/iNZight/faq.php#time-series).
 
 2. **Seasonal Pattern**: You must choose how you would like the seasonal pattern to be defined. It is standard to use the multiplicative scale here. For more detailed information on what seasonal patterns mean, please refer to the _Time series decomposition_ section of https://www.otexts.org/fpp/6/1.
 
@@ -37,9 +37,9 @@ This panel consists of a collection of tabs that display statistical output, eit
 
 2. **Seasonal** displays a seasonal plot for the chosen variable(s), and a plot of the decomposed seasonal (multiplicative or additive) effect on the right hand side.
 
-3. **Decomposed** displays a decomposed plot for the chosen variable(s).This plot displays, from top to bottom, the trend, seasonal swing, and residuals of the chosen variable.
+3. **Decomposed** displays a decomposed plot for the chosen variable(s). This plot displays, from top to bottom, the trend, seasonal swing, and residuals of the chosen variable.
 
-4. **Recomposed** displays a recomposed plot for the chosen variable(s).This plot displays, from top to bottom, the trend + seasonal, seasonal swing, and residuals of the chosen variable.
+4. **Recomposed** displays a recomposed plot for the chosen variable(s). This plot displays, from top to bottom, the trend + seasonal, seasonal swing, and residuals of the chosen variable.
 
 5. **Forecast** displays a Holt-Winters prediction plot for the variable(s) chosen in the input panel
 

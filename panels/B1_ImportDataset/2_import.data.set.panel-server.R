@@ -14,7 +14,7 @@ observe({
 })
 
 ext_choices <- list(
-  "Comma Seperated Values (.csv)" = "csv",
+  "Comma Separated Values (.csv)" = "csv",
   "Tab-delimited Text Files (.txt, .tsv)" = "tsv",
   "Tab-delimited Text Files (.txt, .tsv)" = "txt",
   "SPSS Files (.sav)" = "sav",
@@ -22,7 +22,7 @@ ext_choices <- list(
   "SAS XPORT Files (.xpt)" = "xpt",
   "97-2003 Excel Files (.xls)" = "xls",
   "2007 Excel Files (.xlsx)" = "xlsx",
-  "SATA Files (.dta)" = "dta",
+  "Stata Files (.dta)" = "dta",
   "JSON (.json)" = "json",
   "R Object (.rds)" = "rds",
   "RData Files (.RData, .rda)" = "RData",
@@ -198,7 +198,7 @@ lite_read <- function(
     })
   } else if (grepl("mark", d$message) && grepl("different", d$message)) {
     preview_data$failed_reason <-
-      "Failed to load data: decimal and thousands seperator must be different"
+      "Failed to load data: decimal and thousands separator must be different"
   }
   preview_data$dec_mark <- dec_mark
   preview_data$big_mark <- big_mark
@@ -261,7 +261,7 @@ show_preview_modal <- function() {
       width = 3,
       selectInput(
         inputId = "preview.bigmark",
-        label = "Thousands Seperator",
+        label = "Thousands Separator",
         selected = names(preview_data$big_mark),
         choices = names(big_mark_choices)
       )
