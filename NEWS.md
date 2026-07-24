@@ -1,20 +1,31 @@
-# Develop
+# 2026.08
 
-- **Status** tab (navbar): crowding-aware instance load view, demand indicator, and reconnect flow; status polling runs only while the tab is open.
-- **Visualize** tab: sliders to adjust plot height and width (viewport-relative sizing).
-- **Categorical variables** — **Reorder levels**: drag-and-drop to set factor level order.
+## New features
+
+- **Local Storage**: remember selected user preferences in the browser (e.g. Visualize plot size).
+- **Data Dictionary** (File): import a data dictionary and apply names, types, units, and factor labels to the loaded dataset.
+- **File** → Import: parse dataset URLs when importing manually (including example URL parameters).
+- **Time Series**: provide time information manually when no suitable time variable is available; improved plot/model range controls.
+- **Visualize**: sliders to adjust plot height and width (viewport-relative sizing).
+- **Visualize** → Add to Plot → Axis features: log transform for axes.
+- **Categorical variables** → Reorder levels: drag-and-drop to set factor level order.
+
+## UI Changes
+
 - **Multivariate** module: show a clear error message when a plot fails.
 - **Multiple Response** module: clearer error messages when an operation fails.
-- add "log" transform to Add to Plot > Axis features
-- **Time Series** module: manual time definition
-- **File** module: parse url when importing manually, add data dict feature
-- **Local Storage** feature to store user preferences
-- Fix typos and grammar in user-facing UI text and help panels
-- Fix Visualize plot probes that passed column vectors into iNZightPlots (could error with messages like `object 'parent' not found` after loading Census at School)
-- Clear stale Visualize variable selections when loading a new dataset (avoids errors like `object 'height' not found` after switching examples)
-- Fix Visualize plot crash when `g2.level` was passed to `inzplot` without a subset-by-2 variable (`Unknown or uninitialised column: g2`)
-- Harden Identify-points handlers against stale column names after a dataset switch
-- Default Variable 1 to the first numeric column, or first categorical within iNZightPlots' `max.levels` barplot limit (avoids "too many levels" plots on load)
+- Default Variable 1 to the first numeric column, or first categorical within iNZightPlots' barplot `max.levels` limit (avoids "too many levels" plots on load).
+- Fix typos and grammar in user-facing UI text and help panels.
+
+## Fixes
+
+- Fix Visualize plot probes that passed column vectors into iNZightPlots (could error with messages like `object 'parent' not found` after loading Census at School).
+- Clear stale Visualize variable selections when loading a new dataset (avoids errors like `object 'height' not found` after switching examples).
+- Fix Visualize plot crash when `g2.level` was passed to `inzplot` without a subset-by-2 variable.
+- Harden Identify-points handlers against stale column names after a dataset switch.
+- Fix URL import handling.
+- Fix Time Series plot range handling.
+
 
 # 2026.05.1
 
