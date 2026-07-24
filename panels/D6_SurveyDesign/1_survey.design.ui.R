@@ -1,6 +1,5 @@
 survey.design.sidebar <- function() {
   list(
-    useShinyalert(),
     useShinyjs(),
     selectInput("svytype",
       label = "Select survey design",

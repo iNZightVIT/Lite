@@ -19,7 +19,6 @@
 
 multivariate.sidebarPanel <- function() {
   sidebarPanelUI <- list(
-    useShinyalert(),
     useShinyjs(),
     fluidRow(
       column(

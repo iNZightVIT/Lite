@@ -16,7 +16,6 @@
 ###  Sidebar Panel ###
 ### ----------------###
 # sidebarPanelUI <- list(
-#   useShinyalert(),
 #   useShinyjs(),
 #   fluidRow(
 #     column(
@@ -45,7 +44,6 @@
 
 MultipleResponse.sidebarPanel <- function() {
   sidebarPanelUI <- list(
-    useShinyalert(),
     useShinyjs(),
     fluidRow(
       column(

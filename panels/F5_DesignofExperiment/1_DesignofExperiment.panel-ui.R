@@ -23,7 +23,6 @@
 ###  Next, we set up the sidebar panel with "exploratory.analysis.panel.ui".
 mixedModel.sidebarPanel <- function() {
   sidebarPanelUI <- list(
-    useShinyalert(),
     withMathJax(),
     tags$script("
         var initMathJax = function() {

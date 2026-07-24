@@ -118,7 +118,6 @@ get.transform.main <- function() {
 
 get.form.class.interval.side <- function(data.set) {
   list(
-    useShinyalert(),
     selectInput(
       inputId = "form.class.interval.column.select",
       label = "Choose variable",
