@@ -1218,155 +1218,155 @@ observe({
 
 output$visualize.plot <- renderPlot({
   with_extra_device_cleanup({
-  isolate({
-    # some of the graphical parameters need
-    # to be reminded what there default
-    # values are
-    if (is.null(graphical.par$cex.dotpt)) {
-      graphical.par$cex.dotpt <- 0.5
-    }
-    if (is.null(graphical.par$alpha)) {
-      graphical.par$alpha <- 1
-    }
-    if (is.null(graphical.par$scatter.grid.bins)) {
-      graphical.par$scatter.grid.bins <- 50
-    }
-  })
-  # plot it
-  dafr <- get.data.set()
-  print("CURRENT PARS")
-  temp <- vis.par()
-  print(str(temp))
-
-  if (!is.null(vis.par())) {
-    if (!is.null(plot.par$x) && !is.null(input$vari1) &&
-      is.numeric(vis.data()[[plot.par$x]]) &&
-      !is.null(plot.par$y) && !is.null(input$vari2) &&
-      is.numeric(vis.data()[[plot.par$y]])) {
-      temp <- vis.par()
-      temp$trend.parallel <- graphical.par$trend.parallel
-      ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
-      new_par <- new_vis_par(vis_par = temp)
-
-      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-          "true") {
-        tryCatch({
-          # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
-      } else {
-        tryCatch({
-          # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
+    isolate({
+      # some of the graphical parameters need
+      # to be reminded what there default
+      # values are
+      if (is.null(graphical.par$cex.dotpt)) {
+        graphical.par$cex.dotpt <- 0.5
       }
-    } else {
-      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-          "true") {
-        tryCatch({
-          # plot.ret.para$parameters <- do.call(
-          #   iNZightPlots:::iNZightPlot, vis.par()
-          # )
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
+      if (is.null(graphical.par$alpha)) {
+        graphical.par$alpha <- 1
+      }
+      if (is.null(graphical.par$scatter.grid.bins)) {
+        graphical.par$scatter.grid.bins <- 50
+      }
+    })
+    # plot it
+    dafr <- get.data.set()
+    print("CURRENT PARS")
+    temp <- vis.par()
+    print(str(temp))
+
+    if (!is.null(vis.par())) {
+      if (!is.null(plot.par$x) && !is.null(input$vari1) &&
+        is.numeric(vis.data()[[plot.par$x]]) &&
+        !is.null(plot.par$y) && !is.null(input$vari2) &&
+        is.numeric(vis.data()[[plot.par$y]])) {
+        temp <- vis.par()
+        temp$trend.parallel <- graphical.par$trend.parallel
+        ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+        new_par <- new_vis_par(vis_par = temp)
+
+        if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+          tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
+          tryCatch({
+            # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+            plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        } else {
+          tryCatch({
+            # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+            plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        }
       } else {
-        tryCatch({
-          # plot.ret.para$parameters <- do.call(
-          #   iNZightPlots:::iNZightPlot, vis.par()
-          # )
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
+        if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+          tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
+          tryCatch({
+            # plot.ret.para$parameters <- do.call(
+            #   iNZightPlots:::iNZightPlot, vis.par()
+            # )
+            plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        } else {
+          tryCatch({
+            # plot.ret.para$parameters <- do.call(
+            #   iNZightPlots:::iNZightPlot, vis.par()
+            # )
+            plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        }
       }
     }
-  }
   })
 })
 
 
 output$mini.plot <- renderPlot({
   with_extra_device_cleanup({
-  isolate({
-    # some of the graphical parameters need
-    # to be reminded what their default
-    # values are
-    if (is.null(graphical.par$cex.dotpt)) {
-      graphical.par$cex.dotpt <- 0.5
-    }
-    if (is.null(graphical.par$alpha)) {
-      graphical.par$alpha <- 1
-    }
-    if (is.null(graphical.par$scatter.grid.bins)) {
-      graphical.par$scatter.grid.bins <- 50
-    }
-  })
-  # plot it
-  if (!is.null(vis.par())) {
-    dafr <- get.data.set()
-    if (!is.null(plot.par$x) && !is.null(input$vari1) &&
-      is.numeric(vis.data()[[plot.par$x]]) &&
-      !is.null(plot.par$y) && !is.null(input$vari2) &&
-      is.numeric(vis.data()[[plot.par$y]])) {
-      temp <- vis.par()
-      temp$trend.parallel <- graphical.par$trend.parallel
-      ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
-      new_par <- new_vis_par(vis_par = temp)
-      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-          "true") {
-        tryCatch({
-          # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
-      } else {
-        # plot.ret.para$parameters <- try(do.call(
-        #   iNZightPlots:::iNZightPlot, temp
-        # ))
-        plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+    isolate({
+      # some of the graphical parameters need
+      # to be reminded what their default
+      # values are
+      if (is.null(graphical.par$cex.dotpt)) {
+        graphical.par$cex.dotpt <- 0.5
       }
-    } else {
-      if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-        tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-          "true") {
-        tryCatch({
-          # plot.ret.para$parameters <- do.call(
+      if (is.null(graphical.par$alpha)) {
+        graphical.par$alpha <- 1
+      }
+      if (is.null(graphical.par$scatter.grid.bins)) {
+        graphical.par$scatter.grid.bins <- 50
+      }
+    })
+    # plot it
+    if (!is.null(vis.par())) {
+      dafr <- get.data.set()
+      if (!is.null(plot.par$x) && !is.null(input$vari1) &&
+        is.numeric(vis.data()[[plot.par$x]]) &&
+        !is.null(plot.par$y) && !is.null(input$vari2) &&
+        is.numeric(vis.data()[[plot.par$y]])) {
+        temp <- vis.par()
+        temp$trend.parallel <- graphical.par$trend.parallel
+        ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+        new_par <- new_vis_par(vis_par = temp)
+        if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+          tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
+          tryCatch({
+            # plot.ret.para$parameters <- do.call(iNZightPlots:::iNZightPlot, temp)
+            plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp))
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        } else {
+          # plot.ret.para$parameters <- try(do.call(
+          #   iNZightPlots:::iNZightPlot, temp
+          # ))
+          plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = temp)))
+        }
+      } else {
+        if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+          tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+            "true") {
+          tryCatch({
+            # plot.ret.para$parameters <- do.call(
+            #   iNZightPlots:::iNZightPlot, vis.par()
+            # )
+            plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
+          }, warning = function(w) {
+            print(w)
+          }, error = function(e) {
+            print(e)
+          }, finally = {})
+        } else {
+          # plot.ret.para$parameters <- try(do.call(
           #   iNZightPlots:::iNZightPlot, vis.par()
-          # )
-          plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
-        }, warning = function(w) {
-          print(w)
-        }, error = function(e) {
-          print(e)
-        }, finally = {})
-      } else {
-        # plot.ret.para$parameters <- try(do.call(
-        #   iNZightPlots:::iNZightPlot, vis.par()
-        # ))
-        plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
+          # ))
+          plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
+        }
       }
     }
-  }
   })
 })
 
@@ -1435,7 +1435,7 @@ observeEvent(input$reset.graphics, {
       updateCheckboxInput(session, "colour.palette.reverse", value = F)
       graphical.par$reverse.palette <- FALSE
 
-      updateCheckboxInput(session, "bar.relative.width", valuse = T)
+      updateCheckboxInput(session, "bar.relative.width", value = T)
       graphical.par$bar.relative.width <- TRUE
 
       updateCheckboxInput(session, "point_size_title", value = F)
@@ -3324,7 +3324,9 @@ observe({
   input$subs2
   isolate({
     # guard: don't manipulate tabs before the UI has rendered
-    if (is.null(input$plot_selector)) return()
+    if (is.null(input$plot_selector)) {
+      return()
+    }
     tryCatch(
       {
         if (!is.null(input$select.plot.type) &&
@@ -6411,57 +6413,57 @@ output$saveplot <- downloadHandler(
         pdf = "pdf"
       )
       with_plot_file_device(file, plot_type, {
-      if (!is.null(vis.par())) {
-        dafr <- get.data.set()
-        if (!is.null(plot.par$x) && !is.null(input$vari1) &&
-          is.numeric(vis.data()[[plot.par$x]]) &&
-          !is.null(plot.par$y) && !is.null(input$vari2) &&
-          is.numeric(vis.data()[[plot.par$y]])) {
-          temp <- vis.par()
-          temp$trend.parallel <- graphical.par$trend.parallel
-          ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
-          new_par <- new_vis_par(vis_par = temp)
-          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-              "true") {
-            tryCatch({
-              # plot.ret.para$parameters <- do.call(
+        if (!is.null(vis.par())) {
+          dafr <- get.data.set()
+          if (!is.null(plot.par$x) && !is.null(input$vari1) &&
+            is.numeric(vis.data()[[plot.par$x]]) &&
+            !is.null(plot.par$y) && !is.null(input$vari2) &&
+            is.numeric(vis.data()[[plot.par$y]])) {
+            temp <- vis.par()
+            temp$trend.parallel <- graphical.par$trend.parallel
+            ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+            new_par <- new_vis_par(vis_par = temp)
+            if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+              tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+                "true") {
+              tryCatch({
+                # plot.ret.para$parameters <- do.call(
+                #   iNZightPlots:::iNZightPlot, temp
+                # )
+                plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
+              }, warning = function(w) {
+                print(w)
+              }, error = function(e) {
+                print(e)
+              }, finally = {})
+            } else {
+              # plot.ret.para$parameters <- try(do.call(
               #   iNZightPlots:::iNZightPlot, temp
-              # )
-              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
-            }, warning = function(w) {
-              print(w)
-            }, error = function(e) {
-              print(e)
-            }, finally = {})
+              # ))
+              plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_par))
+            }
           } else {
-            # plot.ret.para$parameters <- try(do.call(
-            #   iNZightPlots:::iNZightPlot, temp
-            # ))
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_par))
-          }
-        } else {
-          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-              "true") {
-            tryCatch({
-              # plot.ret.para$parameters <- do.call(
+            if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+              tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+                "true") {
+              tryCatch({
+                # plot.ret.para$parameters <- do.call(
+                #   iNZightPlots:::iNZightPlot, vis.par()
+                # )
+                plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
+              }, warning = function(w) {
+                print(w)
+              }, error = function(e) {
+                print(e)
+              }, finally = {})
+            } else {
+              # plot.ret.para$parameters <- try(do.call(
               #   iNZightPlots:::iNZightPlot, vis.par()
-              # )
-              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
-            }, warning = function(w) {
-              print(w)
-            }, error = function(e) {
-              print(e)
-            }, finally = {})
-          } else {
-            # plot.ret.para$parameters <- try(do.call(
-            #   iNZightPlots:::iNZightPlot, vis.par()
-            # ))
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
+              # ))
+              plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
+            }
           }
         }
-      }
       })
     } else if (input$saveplottype == "svg") {
       local.dir <- exportSVG.function(create.html)
@@ -6493,12 +6495,15 @@ exportSVG.function <- function(x, file = "inzightplot.svg",
   on.exit(setwd(curdir), add = TRUE)
 
   pdf("tempfile.pdf", width = width, height = height, onefile = TRUE)
-  on.exit({
-    dev.off()
-    if (file.exists("tempfile.pdf")) {
-      file.remove("tempfile.pdf")
-    }
-  }, add = TRUE)
+  on.exit(
+    {
+      dev.off()
+      if (file.exists("tempfile.pdf")) {
+        file.remove("tempfile.pdf")
+      }
+    },
+    add = TRUE
+  )
 
   obj <- x()
   exportSVG(obj, file)
@@ -7449,66 +7454,66 @@ observe({
   isolate({
     output$visualize.plot <- renderPlot({
       with_extra_device_cleanup({
-      isolate({
-        # some of the graphical parameters need
-        # to be reminded what there default
-        # values are
-        if (is.null(graphical.par$cex.dotpt)) {
-          graphical.par$cex.dotpt <- 0.5
-        }
-        if (is.null(graphical.par$alpha)) {
-          graphical.par$alpha <- 1
-        }
-        if (is.null(graphical.par$scatter.grid.bins)) {
-          graphical.par$scatter.grid.bins <- 50
-        }
-      })
+        isolate({
+          # some of the graphical parameters need
+          # to be reminded what there default
+          # values are
+          if (is.null(graphical.par$cex.dotpt)) {
+            graphical.par$cex.dotpt <- 0.5
+          }
+          if (is.null(graphical.par$alpha)) {
+            graphical.par$alpha <- 1
+          }
+          if (is.null(graphical.par$scatter.grid.bins)) {
+            graphical.par$scatter.grid.bins <- 50
+          }
+        })
 
-      # plot it
-      if (!is.null(vis.par())) {
-        dafr <- get.data.set()
-        if (is.numeric(vis.data()[[plot.par$x]]) &&
-          !is.null(plot.par$y) &&
-          is.numeric(vis.data()[[plot.par$y]]) &&
-          !is.null(plot.par$x)) {
-          temp <- vis.par()
-          temp$trend.parallel <- graphical.par$trend.parallel
-          ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
-          new_par <- new_vis_par(vis_par = temp)
+        # plot it
+        if (!is.null(vis.par())) {
+          dafr <- get.data.set()
+          if (is.numeric(vis.data()[[plot.par$x]]) &&
+            !is.null(plot.par$y) &&
+            is.numeric(vis.data()[[plot.par$y]]) &&
+            !is.null(plot.par$x)) {
+            temp <- vis.par()
+            temp$trend.parallel <- graphical.par$trend.parallel
+            ## NOTE: NOT swapping - want formula as x ~ y (e.g., height ~ armspan)
+            new_par <- new_vis_par(vis_par = temp)
 
-          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-              "true") {
-            tryCatch({
-              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
-            }, warning = function(w) {
-              print(w)
-            }, error = function(e) {
-              print(e)
-            }, finally = {})
-          } else {
-            if (!exists("new_par")) {
-              new_par <- new_vis_par(vis_par = temp)
+            if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+              tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+                "true") {
+              tryCatch({
+                plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_par)
+              }, warning = function(w) {
+                print(w)
+              }, error = function(e) {
+                print(e)
+              }, finally = {})
+            } else {
+              if (!exists("new_par")) {
+                new_par <- new_vis_par(vis_par = temp)
+              }
+              plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_par))
             }
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_par))
-          }
-        } else {
-          if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
-            tolower(parseQueryString(session$clientData$url_search)$debug) %in%
-              "true") {
-            tryCatch({
-              plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
-            }, warning = function(w) {
-              print(w)
-            }, error = function(e) {
-              print(e)
-            }, finally = {})
           } else {
-            # plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
-            plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
+            if (!is.null(parseQueryString(session$clientData$url_search)$debug) &&
+              tolower(parseQueryString(session$clientData$url_search)$debug) %in%
+                "true") {
+              tryCatch({
+                plot.ret.para$parameters <- do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par()))
+              }, warning = function(w) {
+                print(w)
+              }, error = function(e) {
+                print(e)
+              }, finally = {})
+            } else {
+              # plot.ret.para$parameters <- try(do.call(iNZightPlots:::iNZightPlot, vis.par()))
+              plot.ret.para$parameters <- try(do.call(iNZightPlots:::inzplot, new_vis_par(vis_par = vis.par())))
+            }
           }
         }
-      }
       })
     })
   })

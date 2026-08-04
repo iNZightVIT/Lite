@@ -1,3 +1,9 @@
+# 2026.05.2
+
+## Fixes
+
+- Fix "Reset graphics" failing to reset the bar relative width option due to a typo in the checkbox update call.
+
 # 2026.05.1
 
 ## Fixes
