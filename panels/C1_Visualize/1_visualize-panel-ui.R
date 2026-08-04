@@ -85,15 +85,24 @@ vis.sidebarPanel <- function() {
         h5("Subset by:"),
         fixedRow(
           column(8, uiOutput("subs1_panel")),
-          column(2, actionButton("switch3", "",
-            icon = icon("arrow-down", "fa-2x"),
-            style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:60%"
-          ))
+          column(
+            2,
+            conditionalPanel(
+              condition = "input.subs1 && input.subs1 !== 'none'",
+              actionButton("switch3", "",
+                icon = icon("arrow-down", "fa-2x"),
+                style = "color: #337ab7; background-color: #ffffff; border-color: #ffffff; padding:4px; font-size:60%"
+              )
+            )
+          )
         ),
 
-        ##  Select desired subset for the second variable.
-        h5("Subset by:"),
-        fixedRow(column(8, uiOutput("subs2_panel"))),
+        ##  Select desired subset for the second variable (requires first subset).
+        conditionalPanel(
+          condition = "input.subs1 && input.subs1 !== 'none'",
+          h5("Subset by:"),
+          fixedRow(column(8, uiOutput("subs2_panel")))
+        ),
         fixedRow(column(10, hr())),
         actionButton(
           inputId = "reset.graphics",

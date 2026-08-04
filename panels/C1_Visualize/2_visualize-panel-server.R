@@ -30,19 +30,48 @@ new_vis_par <- function(vis_par) {
     return(vis_par)
   }
 
+  # Formula API requires g1 before g2. Passing g2.level without g2 (or g2
+  # without g1) makes iNZightPlots look up a missing g2 column and error.
+  if (is.null(vis_par$g1) && !is.null(vis_par$g2)) {
+    if (is.null(vis_par$g2.level) || identical(vis_par$g2.level, "_ALL")) {
+      # "_ALL" with only g2 is a no-op (same as no second subset)
+      vis_par$g2 <- NULL
+      vis_par$g2.level <- NULL
+      if (!is.null(vis_par$varnames)) {
+        vis_par$varnames$g2 <- NULL
+      }
+    } else {
+      # Promote sole second-subset selection to g1
+      vis_par$g1 <- vis_par$g2
+      vis_par$g1.level <- vis_par$g2.level
+      vis_par$g2 <- NULL
+      vis_par$g2.level <- NULL
+      if (!is.null(vis_par$varnames)) {
+        vis_par$varnames$g1 <- vis_par$varnames$g2
+        vis_par$varnames$g2 <- NULL
+      }
+    }
+  }
+
   # make formula
   f <- if (is.null(vis_par$y)) {
     trim(paste("~", vis_par$x))
   } else {
     trim(paste(vis_par$x, "~", vis_par$y))
   }
-  # # subsets
+  # subsets
   if (!is.null(vis_par$g1)) {
-    g <- vis_par$g1
+    g <- as.character(vis_par$g1)
     if (!is.null(vis_par$g2)) {
-      g <- paste(g, vis_par$g2, sep = " + ")
+      g <- paste(g, as.character(vis_par$g2), sep = " + ")
+    } else {
+      vis_par$g2.level <- NULL
     }
     f <- paste(f, g, sep = " | ")
+  } else {
+    # No subsets in formula — drop orphan levels so they are not passed through
+    vis_par$g1.level <- NULL
+    vis_par$g2.level <- NULL
   }
   f <- as.formula(f)
 
@@ -810,6 +839,13 @@ observe({
         varnames.g1 %in% "none") {
         varnames.g1 <- NULL
         plot.par$g1 <- NULL
+        # g2 requires g1; clear second subset when first is cleared
+        plot.par$g2 <- NULL
+        plot.par$g2.level <- NULL
+        plot.par$varnames$g2 <- NULL
+        if (!is.null(input$subs2) && input$subs2 != "none") {
+          updateSelectInput(session, "subs2", selected = "none")
+        }
       }
       plot.par$varnames$g1 <- varnames.g1
       choices1 <- c(
@@ -1057,6 +1093,7 @@ observe({
 #  Subset variable 2.
 output$subs2_panel <- renderUI({
   get.data.set()
+  input$subs1
   isolate({
     ch <- colnames(vis.data())
     if (!is.null(input$vari1) && input$vari1 %in% ch) {
@@ -1071,6 +1108,10 @@ output$subs2_panel <- renderUI({
     }
 
     sel <- input$subs2
+    g1_ready <- !is.null(input$subs1) && input$subs1 != "none"
+    if (!g1_ready) {
+      sel <- "none"
+    }
     selectInput(
       inputId = "subs2",
       label = NULL,
@@ -1088,12 +1129,23 @@ observe({
   input$subs2
   isolate({
     if (!is.null(input$subs2)) {
+      # Second subset requires a first subset variable
+      if (is.null(input$subs1) || input$subs1 == "none") {
+        plot.par$g2 <- NULL
+        plot.par$g2.level <- NULL
+        plot.par$varnames$g2 <- NULL
+        if (input$subs2 != "none") {
+          updateSelectInput(session, "subs2", selected = "none")
+        }
+        return()
+      }
       plot.par$g2 <- as.name(input$subs2)
       varnames.g2 <- input$subs2
       if (!is.null(varnames.g2) &&
         varnames.g2 %in% "none") {
         varnames.g2 <- NULL
         plot.par$g2 <- NULL
+        plot.par$g2.level <- NULL
       }
       plot.par$varnames$g2 <- varnames.g2
       ch <- colnames(vis.data())
@@ -1174,6 +1226,12 @@ output$subs2_conditional_mini <- renderUI({
 observe({
   g2_level <- input$sub2_level
   if (!is.null(input$subs2)) {
+    # Need g1 before g2 is meaningful
+    if (is.null(input$subs1) || input$subs1 == "none" || input$subs2 == "none") {
+      plot.par$g2.level <- NULL
+      plot.par$g2 <- NULL
+      return()
+    }
     g2 <- as.name(input$subs2)
 
     if ((is.null(g2_level) || g2_level == 0) &&
@@ -1200,6 +1258,11 @@ observe({
 observe({
   g2_level <- input$sub2_level_mini
   if (!is.null(input$subs2)) {
+    if (is.null(input$subs1) || input$subs1 == "none" || input$subs2 == "none") {
+      plot.par$g2.level <- NULL
+      plot.par$g2 <- NULL
+      return()
+    }
     g2 <- as.name(input$subs2)
     if (is.null(g2_level) || g2_level == 0) {
       g2_level <- NULL

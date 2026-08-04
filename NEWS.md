@@ -1,3 +1,9 @@
+# 2026.05.3
+
+## Fixes
+
+- Fix second "Subset by" crashing when used without a first subset variable (orphaned `g2.level`); hide the second subset control until the first is selected.
+
 # 2026.05.2
 
 ## Fixes
