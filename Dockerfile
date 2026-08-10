@@ -1,7 +1,9 @@
-FROM rocker/r-ver:4.2
+# R 4.2.3 is the final 4.2.x release (there is no 4.2.4)
+FROM rocker/r-ver:4.2.3
 
-# install shiny
+# OS package upgrades (openssl, gnupg, libtiff, …) + app deps
 RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
         libcurl4-gnutls-dev \
         libcairo2-dev \
@@ -14,6 +16,7 @@ RUN apt-get update \
         curl \
         ca-certificates \
         gnupg \
+    && apt-get purge -y linux-libc-dev \
     && mkdir -p /etc/apt/keyrings \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
        | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
@@ -23,8 +26,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Traefik
-RUN curl -L https://github.com/traefik/traefik/releases/download/v3.0.0/traefik_v3.0.0_linux_amd64.tar.gz \
+# Install Traefik (3.0.0 has multiple known CVEs; 3.7.10 is current patch)
+RUN curl -L https://github.com/traefik/traefik/releases/download/v3.7.10/traefik_v3.7.10_linux_amd64.tar.gz \
     -o /tmp/traefik.tar.gz \
     && tar -xzf /tmp/traefik.tar.gz -C /usr/local/bin \
     && rm /tmp/traefik.tar.gz \
