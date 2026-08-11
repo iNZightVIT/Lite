@@ -1,22 +1,95 @@
-# R 4.2.3 is the final 4.2.x release (there is no 4.2.4)
-FROM rocker/r-ver:4.2.3
+# Ubuntu 24.04 + R 4.2.3 from source (final 4.2.x; there is no 4.2.4).
+# Newer than rocker/r-ver:4.2.3 (Ubuntu 22.04) so main/universe security
+# updates are available without waiting on a frozen rocker tag.
+FROM ubuntu:24.04
 
-# OS package upgrades (openssl, gnupg, libtiff, …) + app deps
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
+    TZ=Etc/UTC \
+    R_VERSION=4.2.3 \
+    R_HOME=/usr/local/lib/R \
+    CRAN=https://p3m.dev/cran/__linux__/noble/latest
+
+# Locale + toolchain + R runtime libs, then build R from source.
+# Compilers stay installed so pak can compile packages that lack noble binaries.
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
-        libcurl4-gnutls-dev \
+        bash-completion \
+        build-essential \
+        ca-certificates \
+        curl \
+        file \
+        g++ \
+        gfortran \
+        gnupg \
+        libblas-dev \
+        libbz2-dev \
         libcairo2-dev \
-        libxt-dev \
+        libcurl4 \
+        libcurl4-openssl-dev \
+        libicu-dev \
+        libjpeg-dev \
+        liblapack-dev \
+        liblzma-dev \
+        libopenblas-dev \
+        libpangocairo-1.0-0 \
+        libpango1.0-dev \
+        libpcre2-dev \
+        libpng-dev \
+        libreadline-dev \
         libssl-dev \
-        libssh2-1-dev \
-        supervisor \
+        libtiff-dev \
+        libxt-dev \
+        locales \
+        make \
+        tzdata \
+        unzip \
+        wget \
+        zip \
+        zlib1g-dev \
+    && locale-gen en_US.UTF-8 \
+    && update-locale LANG=en_US.UTF-8 \
+    && ARCH="$(uname -m)" \
+    && update-alternatives --set "libblas.so.3-${ARCH}-linux-gnu" \
+        "/usr/lib/${ARCH}-linux-gnu/openblas-pthread/libblas.so.3" \
+    && curl -fsSL "https://cloud.r-project.org/src/base/R-4/R-${R_VERSION}.tar.gz" \
+        -o /tmp/R.tar.gz \
+    && mkdir -p /tmp/R-src \
+    && tar -xzf /tmp/R.tar.gz -C /tmp/R-src --strip-components=1 \
+    && cd /tmp/R-src \
+    && ./configure \
+        --prefix=/usr/local \
+        --enable-R-shlib \
+        --enable-memory-profiling \
+        --with-readline \
+        --with-blas \
+        --with-lapack \
+        --without-tcltk \
+        --with-recommended-packages \
+    && make -j"$(nproc)" \
+    && make install \
+    && mkdir -p "${R_HOME}/site-library" \
+    && echo "R_LIBS=\${R_LIBS-'${R_HOME}/site-library:${R_HOME}/library'}" \
+        >> "${R_HOME}/etc/Renviron.site" \
+    && echo "options(repos = c(CRAN = '${CRAN}'), download.file.method = 'libcurl')" \
+        >> "${R_HOME}/etc/Rprofile.site" \
+    && printf '%s\n' \
+        'options(HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"])))' \
+        >> "${R_HOME}/etc/Rprofile.site" \
+    && cd / \
+    && rm -rf /tmp/R-src /tmp/R.tar.gz \
+    && apt-get purge -y linux-libc-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# App system deps + Node 20 (Ubuntu 24.04 repo Node is older)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
         cmake \
         libpoppler-cpp-dev \
-        curl \
-        ca-certificates \
-        gnupg \
-    && apt-get purge -y linux-libc-dev \
+        libssh2-1-dev \
+        supervisor \
     && mkdir -p /etc/apt/keyrings \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
        | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
