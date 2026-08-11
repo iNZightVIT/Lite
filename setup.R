@@ -25,4 +25,16 @@ pkgs <-
     )
 # pak::pak(pkgs, lib = ".lib")
 
-pak::pak(pkgs, dependencies = TRUE)
+# Keep Suggests (dependencies = TRUE) but drop optional spatial stack.
+# plotly/ggplot2 Suggest sf; that pulls GDAL and is unused in Lite.
+pak::pak(
+    c(
+        pkgs,
+        "sf=?ignore",
+        "lwgeom=?ignore",
+        "rgdal=?ignore",
+        "rgeos=?ignore",
+        "maptools=?ignore"
+    ),
+    dependencies = TRUE
+)

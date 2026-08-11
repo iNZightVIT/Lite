@@ -59,6 +59,7 @@ RUN apt-get update \
     && mkdir -p /tmp/R-src \
     && tar -xzf /tmp/R.tar.gz -C /tmp/R-src --strip-components=1 \
     && cd /tmp/R-src \
+    && perl -0777 -i -pe 's/(#if LIBCURL_VERSION_MAJOR > 7\s+)exit\(1\)/${1}exit(0)/' configure \
     && ./configure \
         --prefix=/usr/local \
         --enable-R-shlib \
@@ -83,13 +84,22 @@ RUN apt-get update \
     && apt-get purge -y linux-libc-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# R 4.2 cannot use current CRAN (e.g. GGally needs R >= 4.3; ggmosaic/waffle
+# are archived). Use the same date snapshot as rocker/r-ver:4.2.3, but
+# source packages — jammy binaries (e.g. stringi) link ICU 70, noble has 74.
+ENV CRAN=https://p3m.dev/cran/2023-04-20
+RUN echo "options(repos = c(CRAN = '${CRAN}'), download.file.method = 'libcurl')" \
+        >> "${R_HOME}/etc/Rprofile.site"
+
 # App system deps + Node 20 (Ubuntu 24.04 repo Node is older)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         cmake \
+        gfortran \
         libpoppler-cpp-dev \
         libssh2-1-dev \
         supervisor \
+    && ln -sfn /usr/bin/gfortran-13 /usr/bin/gfortran \
     && mkdir -p /etc/apt/keyrings \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
        | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
