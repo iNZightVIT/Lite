@@ -88,7 +88,7 @@ observe({
             get.data.set(),
             var = input$select_numeric1,
             op = input$select_operation1,
-            num = input$numeric_input1
+            num = as.numeric(input$numeric_input1)
           )
           if (!is.null(temp)) {
             ## save code

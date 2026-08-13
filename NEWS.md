@@ -26,6 +26,18 @@
 - Fix URL import handling.
 - Fix Time Series plot range handling.
 
+# 2026.05.4
+
+## Fixes
+
+- Fix numeric filter R code quoting the threshold as a string (e.g. `Daily_Steps > "1"`) by coercing the text input to numeric before calling `filter_num`.
+
+## Infrastructure
+
+- Harden the Docker image against ECR vulnerability findings: pin R 4.2.3, apply apt security upgrades, upgrade Traefik from v3.0.0 to v3.7.10, and remove unused `linux-libc-dev`.
+- Build the app image from Ubuntu 24.04 and compile R 4.2.3 from source, instead of `rocker/r-ver:4.2.3` (Ubuntu 22.04), so OS packages can receive current security updates.
+- Drop unused ImageMagick from the app image: ignore the `magick` Suggest and purge `libmagick*` after install (still pulled as a `webshot` sysreq). Ubuntu only ships those CVE fixes via Pro/ESM.
+
 # 2026.05.3
 
 ## Fixes
