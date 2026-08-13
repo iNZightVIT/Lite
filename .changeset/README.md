@@ -77,6 +77,12 @@ This reads pending changesets, bumps the version, prepends `NEWS.md`, syncs `DES
 ### Suggested flow
 
 1. Feature branch / PR — add a changeset with the change
-2. Merge into `dev` — deploy may run at the pre-bump version; Changesets opens/updates the version PR
+2. Merge into `dev` — AWS deploy injects `# Unreleased` into `NEWS.md` from pending changesets (build-time only, not committed) so About → Change Log on preprod shows staged work; Changesets opens/updates the version PR
 3. Merge **Version packages** → `dev` — version + NEWS land; AWS deploys preprod for testing
-4. Promote `dev` → `main` when ready — AWS deploys production (no second version bump)
+4. Promote `dev` → `main` when ready — AWS deploys production (no Unreleased injection, no second version bump)
+
+Preview Unreleased locally:
+
+```bash
+npm run unreleased
+```
