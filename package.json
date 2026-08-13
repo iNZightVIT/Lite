@@ -1,0 +1,13 @@
+{
+  "name": "inzight-lite",
+  "private": true,
+  "version": "2026.05.3",
+  "description": "Version manifest for Changesets (source of truth synced to DESCRIPTION / NEWS.md)",
+  "scripts": {
+    "changeset": "changeset",
+    "version": "node scripts/changeset-version.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.8"
+  }
+}
