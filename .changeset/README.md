@@ -62,8 +62,21 @@ If you omit the heading, the note goes under `## Changes`.
 
 ## Apply changesets (version PR / local dry-run)
 
+On every push to **`dev`**, [`.github/workflows/changesets.yaml`](../.github/workflows/changesets.yaml) runs `changesets/action` and opens or updates a **Version packages** PR into `dev`. Merging that PR bumps `package.json` / `DESCRIPTION`, rewrites `NEWS.md`, and removes the consumed changeset files. Your existing AWS workflow then deploys the versioned build to preprod.
+
+Locally (or to preview):
+
 ```bash
 npm run version
 ```
 
 This reads pending changesets, bumps the version, prepends `NEWS.md`, syncs `DESCRIPTION`, and deletes the consumed changeset files.
+
+**Repo setting:** under *Settings → Actions → General*, enable *Allow GitHub Actions to create and approve pull requests* so the version PR can be opened.
+
+### Suggested flow
+
+1. Feature branch / PR — add a changeset with the change
+2. Merge into `dev` — deploy may run at the pre-bump version; Changesets opens/updates the version PR
+3. Merge **Version packages** → `dev` — version + NEWS land; AWS deploys preprod for testing
+4. Promote `dev` → `main` when ready — AWS deploys production (no second version bump)
