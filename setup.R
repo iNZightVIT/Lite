@@ -25,8 +25,9 @@ pkgs <-
     )
 # pak::pak(pkgs, lib = ".lib")
 
-# Keep Suggests (dependencies = TRUE) but drop optional spatial stack.
-# plotly/ggplot2 Suggest sf; that pulls GDAL and is unused in Lite.
+# Keep Suggests (dependencies = TRUE) but drop unused optional stacks.
+# plotly/ggplot2 Suggest sf (GDAL); knitr/rsvg/etc Suggest magick (ImageMagick).
+# Neither is used by Lite; ImageMagick fixes are Ubuntu Pro/ESM-only.
 pak::pak(
     c(
         pkgs,
@@ -34,7 +35,8 @@ pak::pak(
         "lwgeom=?ignore",
         "rgdal=?ignore",
         "rgeos=?ignore",
-        "maptools=?ignore"
+        "maptools=?ignore",
+        "magick=?ignore"
     ),
     dependencies = TRUE
 )

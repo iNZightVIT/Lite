@@ -121,6 +121,17 @@ COPY setup.R .
 RUN Rscript setup.R
 RUN rm .Renviron
 
+# webshot (hard dep of kableExtra) declares ImageMagick as a system requirement,
+# so pak installs libmagick* even with magick=?ignore. Lite never calls webshot or
+# ImageMagick; Ubuntu only ships the CVE fixes via Pro/ESM — remove the unused libs.
+RUN apt-get purge -y \
+        'libmagick++*' \
+        'libmagickcore*' \
+        'libmagickwand*' \
+        imagemagick-6-common \
+    && apt-get autoremove -y --purge \
+    && rm -rf /var/lib/apt/lists/*
+
 # copy files to app dir and set vars
 COPY . /app
 RUN cp /app/VARS.default /app/VARS \
