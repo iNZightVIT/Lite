@@ -5,11 +5,11 @@
  * 2. Bump package.json version:
  *      major       → {releaseDate:YYYY.MM}     (no .0; fallback to patch if same month)
  *      patch/minor → YYYY.MM.01, .02, …        (two-digit build)
- * 3. Prepend NEWS.md in Lite style
+ * 3. Prepend NEWS.md in Lite style; keep CHANGELOG.md for changesets/action
  * 4. Sync DESCRIPTION Version
  * 5. Delete consumed changeset files
  *
- * Does not create CHANGELOG.md or publish to npm.
+ * Does not publish to npm.
  */
 
 import fs from "node:fs";
@@ -187,6 +187,32 @@ function formatNewsBlock(version, entries) {
   return lines.join("\n");
 }
 
+/** Changesets action reads CHANGELOG.md (## version); NEWS.md stays Lite-canonical (# version). */
+function formatChangelogBlock(version, entries) {
+  const bySection = new Map();
+  for (const entry of entries) {
+    if (!bySection.has(entry.section)) bySection.set(entry.section, []);
+    bySection.get(entry.section).push(entry.note);
+  }
+
+  const ordered = [
+    ...SECTION_ORDER.filter((s) => bySection.has(s)),
+    ...[...bySection.keys()]
+      .filter((s) => !SECTION_ORDER.includes(s))
+      .sort((a, b) => a.localeCompare(b)),
+  ];
+
+  const lines = [`## ${version}`, ""];
+  for (const section of ordered) {
+    lines.push(`### ${section}`, "");
+    for (const note of bySection.get(section)) {
+      lines.push(`- ${note}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n");
+}
+
 function syncDescription(version) {
   const desc = fs.readFileSync(descriptionPath, "utf8");
   if (!/^Version:\s*.+$/m.test(desc)) {
@@ -227,9 +253,35 @@ function main() {
   }
 
   const previous = rest.startsWith("#") ? rest : rest.trimStart();
+  const newsContent = previous ? `${newsBlock}\n${previous}` : newsBlock;
+  fs.writeFileSync(newsPath, newsContent, "utf8");
+
+  // changesets/action always reads CHANGELOG.md after versioning (ENOENT otherwise).
+  const changelogPath = path.join(root, "CHANGELOG.md");
+  const existingChangelog = fs.existsSync(changelogPath)
+    ? fs.readFileSync(changelogPath, "utf8")
+    : "";
+  const changelogHeader = new RegExp(
+    `^##\\s*${next.replace(/\./g, "\\.")}\\s*\\n`
+  );
+  let changelogRest = existingChangelog;
+  if (changelogHeader.test(existingChangelog)) {
+    const nextHeader = existingChangelog.search(/\n##\s+/);
+    changelogRest =
+      nextHeader === -1 ? "" : existingChangelog.slice(nextHeader + 1);
+  } else if (existingChangelog.startsWith("# ")) {
+    // Drop a title-only first line so ## entries stay at top for getChangelogEntry
+    const afterTitle = existingChangelog.indexOf("\n");
+    changelogRest =
+      afterTitle === -1 ? "" : existingChangelog.slice(afterTitle + 1).trimStart();
+  }
+  const changelogBlock = formatChangelogBlock(next, entries);
+  const changelogBody = changelogRest.startsWith("##")
+    ? changelogRest
+    : changelogRest.trimStart();
   fs.writeFileSync(
-    newsPath,
-    previous ? `${newsBlock}\n${previous}` : newsBlock,
+    changelogPath,
+    `# inzight-lite\n\n${changelogBlock}${changelogBody ? `\n${changelogBody}` : ""}`,
     "utf8"
   );
 
@@ -243,11 +295,6 @@ function main() {
 
   for (const entry of entries) {
     fs.unlinkSync(entry.filePath);
-  }
-
-  const changelogPath = path.join(root, "CHANGELOG.md");
-  if (fs.existsSync(changelogPath)) {
-    fs.unlinkSync(changelogPath);
   }
 
   console.log(
