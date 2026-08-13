@@ -42,6 +42,12 @@ jobs:
             echo "TAGNAME=$CLEAN_TAG" >> $GITHUB_ENV
           fi
 
+      # Preprod only: show pending changesets in About → Change Log (NEWS.md).
+      # Does not consume changesets or bump the version; not used on main/prod.
+      - name: Inject Unreleased NEWS from changesets
+        if: github.ref == 'refs/heads/dev'
+        run: node scripts/changeset-unreleased.mjs
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:

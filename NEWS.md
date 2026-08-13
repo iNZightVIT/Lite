@@ -1,43 +1,3 @@
-# 2026.08
-
-## New features
-
-- **Local Storage**: remember selected user preferences in the browser (e.g. Visualize plot size).
-- **Data Dictionary** (File): import a data dictionary and apply names, types, units, and factor labels to the loaded dataset.
-- **File** → Import: parse dataset URLs when importing manually (including example URL parameters).
-- **Time Series**: provide time information manually when no suitable time variable is available; improved plot/model range controls.
-- **Visualize**: sliders to adjust plot height and width (viewport-relative sizing).
-- **Visualize** → Add to Plot → Axis features: log transform for axes.
-- **Categorical variables** → Reorder levels: drag-and-drop to set factor level order.
-
-## UI Changes
-
-- **Multivariate** module: show a clear error message when a plot fails.
-- **Multiple Response** module: clearer error messages when an operation fails.
-- Default Variable 1 to the first numeric column, or first categorical within iNZightPlots' barplot `max.levels` limit (avoids "too many levels" plots on load).
-- Fix typos and grammar in user-facing UI text and help panels.
-
-## Fixes
-
-- Fix Visualize plot probes that passed column vectors into iNZightPlots (could error with messages like `object 'parent' not found` after loading Census at School).
-- Clear stale Visualize variable selections when loading a new dataset (avoids errors like `object 'height' not found` after switching examples).
-- Fix Visualize plot crash when `g2.level` was passed to `inzplot` without a subset-by-2 variable.
-- Harden Identify-points handlers against stale column names after a dataset switch.
-- Fix URL import handling.
-- Fix Time Series plot range handling.
-
-# 2026.05.4
-
-## Fixes
-
-- Fix numeric filter R code quoting the threshold as a string (e.g. `Daily_Steps > "1"`) by coercing the text input to numeric before calling `filter_num`.
-
-## Infrastructure
-
-- Harden the Docker image against ECR vulnerability findings: pin R 4.2.3, apply apt security upgrades, upgrade Traefik from v3.0.0 to v3.7.10, and remove unused `linux-libc-dev`.
-- Build the app image from Ubuntu 24.04 and compile R 4.2.3 from source, instead of `rocker/r-ver:4.2.3` (Ubuntu 22.04), so OS packages can receive current security updates.
-- Drop unused ImageMagick from the app image: ignore the `magick` Suggest and purge `libmagick*` after install (still pulled as a `webshot` sysreq). Ubuntu only ships those CVE fixes via Pro/ESM.
-
 # 2026.05.3
 
 ## Fixes
@@ -55,7 +15,6 @@
 ## Fixes
 
 - Fix graphics devices not always being closed on the main and interactive plot paths, which could eventually trigger a "too many open devices" error when plotting.
-
 
 # 2026.01.3
 
