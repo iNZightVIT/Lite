@@ -4,29 +4,31 @@ This project uses [Changesets](https://github.com/changesets/changesets) to coll
 
 ## Versioning: CalVer continuous releases
 
-Format: **`YYYY.MM.N`** (not semver).
+Format: **`YYYY.MM`** for a new dated series, then **`YYYY.MM.NN`** for builds in that series (not semver).
 
-| Piece | Meaning |
-|-------|---------|
-| `YYYY.MM` | **Series** — calendar month of a dated release line |
-| `N` | **Build** — counter within that series (`0`, `1`, `2`, …) |
+| Form | Meaning |
+|------|---------|
+| `YYYY.MM` | First release of a dated series (major) |
+| `YYYY.MM.NN` | Patches / follow-ups (`01`, `02`, …) |
 
 This is closer to [CalVer](https://calver.org/) + a continuous-delivery counter than to semantic versioning. We ship often; the version tells you *when the series started* and *which build*, not API compatibility.
 
 | Intent | Changeset bump | Version effect |
 |--------|----------------|----------------|
-| Normal ship (fix or feature) | `patch` *(preferred)* or `minor` | `YYYY.MM.N` → `YYYY.MM.(N+1)` |
-| New dated series (milestone / notable drop) | `major` | `{Auckland release month}.0` |
+| New dated series (milestone / notable drop) | `major` | `{Auckland release month}` e.g. `2026.08` |
+| Normal ship (fix or feature) | `patch` *(preferred)* or `minor` | next build: `2026.08` → `2026.08.01` → `2026.08.02` |
 
-Examples (from `2026.05.3`):
+Examples:
 
-- all `patch` / `minor` → `2026.05.4`
-- any `major` in August 2026 → `2026.08.0`
-- `major` while already on `2026.08.*` → `2026.08.(N+1)` (never downgrade)
+- `major` in August 2026 from `2026.05.3` → `2026.08`
+- `patch` on `2026.08` → `2026.08.01`
+- `patch` on `2026.08.01` → `2026.08.02`
+- `patch` on `2026.05.3` → `2026.05.04`
+- `major` while already on `2026.08` / `2026.08.*` → next `.NN` (never downgrade)
 
 Release month uses **Pacific/Auckland**. If several changesets are pending, the highest bump wins (`major` > `patch`/`minor`).
 
-Prefer **`patch`** for day-to-day work. Use **`major`** when you want the public version to move to a new month (e.g. after a cluster of infra/user-facing work you’re calling a dated release). `minor` is accepted as an alias of `patch` because Changesets requires one of the three names.
+Prefer **`patch`** for day-to-day work. Use **`major`** when you want the public version to move to a new month. `minor` is accepted as an alias of `patch` because Changesets requires one of the three names.
 
 ## Add a changeset (on a feature branch / PR)
 

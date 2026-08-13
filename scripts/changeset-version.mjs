@@ -3,8 +3,8 @@
  * Apply pending Changesets for iNZight Lite (CalVer continuous releases):
  * 1. Read .changeset/*.md (bump type, section, notes)
  * 2. Bump package.json version:
- *      patch/minor → YYYY.MM.(N+1)
- *      major       → {releaseDate:YYYY.MM}.0  (fallback to N+1 if same month)
+ *      major       → {releaseDate:YYYY.MM}     (no .0; fallback to patch if same month)
+ *      patch/minor → YYYY.MM.01, .02, …        (two-digit build)
  * 3. Prepend NEWS.md in Lite style
  * 4. Sync DESCRIPTION Version
  * 5. Delete consumed changeset files
@@ -98,19 +98,27 @@ function parseChangeset(filePath) {
   return { filePath, bump, section, note };
 }
 
+function formatSeries(year, month) {
+  return `${year}.${String(month).padStart(2, "0")}`;
+}
+
+/** Build counter: 01, 02, … (two digits). Bare YYYY.MM is the first major of a series. */
+function formatBuild(year, month, n) {
+  return `${formatSeries(year, month)}.${String(n).padStart(2, "0")}`;
+}
+
 function parseVersion(version) {
-  const parts = version.split(".");
-  if (parts.length !== 3 || parts.some((p) => !/^\d+$/.test(p))) {
+  const match = String(version).trim().match(/^(\d{4})\.(\d{1,2})(?:\.(\d+))?$/);
+  if (!match) {
     throw new Error(
-      `Expected YYYY.MM.N version, got "${version}". Set package.json Version first.`
+      `Expected YYYY.MM or YYYY.MM.NN version, got "${version}". Set package.json Version first.`
     );
   }
-  return {
-    year: Number(parts[0]),
-    month: Number(parts[1]),
-    n: Number(parts[2]),
-    series: `${parts[0]}.${parts[1]}`,
-  };
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  // Bare YYYY.MM ⇒ build 0 (series opener); patches start at 01
+  const n = match[3] === undefined ? 0 : Number(match[3]);
+  return { year, month, n, series: formatSeries(year, month) };
 }
 
 /** Release calendar month in Pacific/Auckland (Lite's home timezone). */
@@ -123,11 +131,9 @@ function releaseSeries(date = new Date()) {
   const parts = Object.fromEntries(
     fmt.formatToParts(date).map((p) => [p.type, p.value])
   );
-  return {
-    year: Number(parts.year),
-    month: Number(parts.month),
-    series: `${parts.year}.${parts.month}`,
-  };
+  const year = Number(parts.year);
+  const month = Number(parts.month);
+  return { year, month, series: formatSeries(year, month) };
 }
 
 function highestBump(entries) {
@@ -138,10 +144,10 @@ function highestBump(entries) {
 }
 
 /**
- * CalVer continuous releases (YYYY.MM.N):
- * - patch/minor: next build in the current series → N+1
- * - major: open a dated series → {Auckland YYYY.MM}.0
- *   If that series is already current, fall back to N+1 (no version downgrade).
+ * CalVer continuous releases:
+ * - major: open a dated series → {Auckland YYYY.MM} (no .0)
+ * - patch/minor: next build → .01, .02, … (from bare series or existing NN)
+ *   If major would not advance the calendar series, fall back to patch bump.
  */
 function nextVersion(current, bump) {
   const cur = parseVersion(current);
@@ -150,11 +156,10 @@ function nextVersion(current, bump) {
     const datedKey = dated.year * 100 + dated.month;
     const curKey = cur.year * 100 + cur.month;
     if (datedKey > curKey) {
-      return `${dated.year}.${String(dated.month).padStart(2, "0")}.0`;
+      return formatSeries(dated.year, dated.month);
     }
-    // Same or earlier calendar month than current series → just increment
   }
-  return `${cur.year}.${String(cur.month).padStart(2, "0")}.${cur.n + 1}`;
+  return formatBuild(cur.year, cur.month, cur.n + 1);
 }
 
 function formatNewsBlock(version, entries) {
