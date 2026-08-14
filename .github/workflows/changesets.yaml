@@ -23,9 +23,6 @@ jobs:
         with:
           # Full history helps Changesets compare against baseBranch
           fetch-depth: 0
-          fetch-tags: true
-          # PAT so tag pushes trigger create-release / downstream workflows
-          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -47,21 +44,3 @@ jobs:
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # After Version PR merges, no changesets remain. Tag package.json version
-      # (skip if the tag already exists) so create-release.yaml can publish.
-      # Tag is pushed with RELEASE_TOKEN (checkout credentials) so other workflows run.
-      - name: Tag release version
-        if: steps.changesets.outputs.hasChangesets == 'false'
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          git fetch --tags origin
-          if git rev-parse "refs/tags/$VERSION" >/dev/null 2>&1; then
-            echo "Tag $VERSION already exists; skipping."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$VERSION" -m "Release $VERSION"
-          git push origin "refs/tags/$VERSION"
-          echo "Created and pushed tag $VERSION"
