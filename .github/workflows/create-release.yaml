@@ -35,10 +35,11 @@ jobs:
           writeLines(news, "body.md")
         shell: Rscript {0}
 
+      # RELEASE_TOKEN so the release event is attributed to a real actor (not GITHUB_TOKEN)
       - uses: ncipollo/release-action@v1
         with:
           bodyFile: "body.md"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
 
   sync-dev:
     name: Open main → dev sync PR
@@ -54,10 +55,11 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Open or update sync PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           TAG: ${{ github.ref_name }}
         run: |
           BODY=$(cat <<EOF

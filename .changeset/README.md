@@ -62,7 +62,7 @@ If you omit the heading, the note goes under `## Changes`.
 
 ## Apply changesets (version PR / local dry-run)
 
-On every push to **`main`**, [`.github/workflows/changesets.yaml`](../.github/workflows/changesets.yaml) runs `changesets/action` and opens or updates a **Version packages** PR into `main`. Merging that PR bumps `package.json` / `DESCRIPTION`, rewrites `NEWS.md`, removes the consumed changeset files, and tags the new version. The tag triggers a GitHub Release (from `NEWS.md`) and prod AWS deploy; a **Sync main → dev** PR is opened for a developer to merge.
+On every push to **`main`**, [`.github/workflows/changesets.yaml`](../.github/workflows/changesets.yaml) runs `changesets/action` and opens or updates a **Version packages** PR into `main`. Merging that PR bumps `package.json` / `DESCRIPTION`, rewrites `NEWS.md`, and removes the consumed changeset files. Prod AWS then deploys (only when no changeset files remain). **After a successful prod deploy**, the workflow tags `package.json` version; that tag triggers a GitHub Release (from `NEWS.md`) and a **Sync main → dev** PR.
 
 Locally (or to preview):
 
@@ -72,7 +72,9 @@ npm run version
 
 This reads pending changesets, bumps the version, prepends `NEWS.md`, syncs `DESCRIPTION`, and deletes the consumed changeset files.
 
-**Repo setting:** under *Settings → Actions → General*, enable *Allow GitHub Actions to create and approve pull requests* so the version and sync PRs can be opened.
+**Repo settings:**
+- *Settings → Actions → General*: enable *Allow GitHub Actions to create and approve pull requests* so the version and sync PRs can be opened.
+- Secret **`RELEASE_TOKEN`**: PAT (or GitHub App token) with contents + pull-requests write. Used to push version tags (after successful prod deploy) and create GitHub Releases so those events can trigger `create-release` (sync PR). The default `GITHUB_TOKEN` cannot trigger other workflows.
 
 ### Branch policy
 
@@ -84,9 +86,9 @@ This reads pending changesets, bumps the version, prepends `NEWS.md`, syncs `DES
 
 1. Feature branch / PR → `dev` — add a changeset with the change  
 2. Merge into `dev` — AWS deploys preprod; build injects `# Unreleased` into `NEWS.md` from pending changesets (build-time only, not committed) so About → Change Log shows staged work  
-3. When ready: PR `dev` → `main` — **no** prod deploy yet  
-4. Changesets opens/updates **Version packages** → `main`  
-5. Merge **Version packages** → tag → GitHub Release → **prod** AWS deploy + sync PR `main` → `dev`  
+3. When ready: PR `dev` → `main` — Changesets opens **Version packages**; prod AWS **skips** while changesets are pending (OIDC stays on `refs/heads/main`)  
+4. Merge **Version packages** → no pending changesets → **prod** AWS deploy  
+5. After prod succeeds → version tag → GitHub Release + sync PR `main` → `dev`  
 6. Developer merges the sync PR so `dev` matches the released version / NEWS  
 
 Preview Unreleased locally:
