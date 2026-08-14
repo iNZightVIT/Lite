@@ -24,6 +24,8 @@ jobs:
           # Full history helps Changesets compare against baseBranch
           fetch-depth: 0
           fetch-tags: true
+          # PAT so tag pushes trigger create-release / downstream workflows
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -48,6 +50,7 @@ jobs:
 
       # After Version PR merges, no changesets remain. Tag package.json version
       # (skip if the tag already exists) so create-release.yaml can publish.
+      # Tag is pushed with RELEASE_TOKEN (checkout credentials) so other workflows run.
       - name: Tag release version
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |

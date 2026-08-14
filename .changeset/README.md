@@ -72,7 +72,9 @@ npm run version
 
 This reads pending changesets, bumps the version, prepends `NEWS.md`, syncs `DESCRIPTION`, and deletes the consumed changeset files.
 
-**Repo setting:** under *Settings → Actions → General*, enable *Allow GitHub Actions to create and approve pull requests* so the version and sync PRs can be opened.
+**Repo settings:**
+- *Settings → Actions → General*: enable *Allow GitHub Actions to create and approve pull requests* so the version and sync PRs can be opened.
+- Secret **`RELEASE_TOKEN`**: PAT (or GitHub App token) with contents + pull-requests write. Used to push version tags and create GitHub Releases so those events can trigger downstream workflows (`create-release`, prod `publishAWS`). The default `GITHUB_TOKEN` cannot do that.
 
 ### Branch policy
 
