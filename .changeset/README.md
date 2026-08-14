@@ -1,6 +1,6 @@
 # Changesets
 
-This project uses [Changesets](https://github.com/changesets/changesets) to collect release notes and bump the app version. Docker / AWS deploy on `dev` and `main` is unchanged — Changesets only updates `package.json`, `DESCRIPTION`, and `NEWS.md`.
+This project uses [Changesets](https://github.com/changesets/changesets) to collect release notes and bump the app version. Versioning runs on **`main`**; preprod (`dev`) and prod (GitHub Release) deploys are separate — see below.
 
 ## Versioning: CalVer continuous releases
 
@@ -62,7 +62,7 @@ If you omit the heading, the note goes under `## Changes`.
 
 ## Apply changesets (version PR / local dry-run)
 
-On every push to **`dev`**, [`.github/workflows/changesets.yaml`](../.github/workflows/changesets.yaml) runs `changesets/action` and opens or updates a **Version packages** PR into `dev`. Merging that PR bumps `package.json` / `DESCRIPTION`, rewrites `NEWS.md`, and removes the consumed changeset files. Your existing AWS workflow then deploys the versioned build to preprod.
+On every push to **`main`**, [`.github/workflows/changesets.yaml`](../.github/workflows/changesets.yaml) runs `changesets/action` and opens or updates a **Version packages** PR into `main`. Merging that PR bumps `package.json` / `DESCRIPTION`, rewrites `NEWS.md`, removes the consumed changeset files, and tags the new version. The tag triggers a GitHub Release (from `NEWS.md`) and prod AWS deploy; a **Sync main → dev** PR is opened for a developer to merge.
 
 Locally (or to preview):
 
@@ -72,14 +72,22 @@ npm run version
 
 This reads pending changesets, bumps the version, prepends `NEWS.md`, syncs `DESCRIPTION`, and deletes the consumed changeset files.
 
-**Repo setting:** under *Settings → Actions → General*, enable *Allow GitHub Actions to create and approve pull requests* so the version PR can be opened.
+**Repo setting:** under *Settings → Actions → General*, enable *Allow GitHub Actions to create and approve pull requests* so the version and sync PRs can be opened.
+
+### Branch policy
+
+- Feature work and changesets land on **`dev`** (via feature branches).
+- Into **`main`**: only promote PRs (`dev` → `main`) and the **Version packages** PR.
+- After a release: merge the bot **Sync main → dev** PR so preprod picks up version / NEWS / cleared changesets.
 
 ### Suggested flow
 
-1. Feature branch / PR — add a changeset with the change
-2. Merge into `dev` — AWS deploy injects `# Unreleased` into `NEWS.md` from pending changesets (build-time only, not committed) so About → Change Log on preprod shows staged work; Changesets opens/updates the version PR
-3. Merge **Version packages** → `dev` — version + NEWS land; AWS deploys preprod for testing
-4. Promote `dev` → `main` when ready — AWS deploys production (no Unreleased injection, no second version bump)
+1. Feature branch / PR → `dev` — add a changeset with the change  
+2. Merge into `dev` — AWS deploys preprod; build injects `# Unreleased` into `NEWS.md` from pending changesets (build-time only, not committed) so About → Change Log shows staged work  
+3. When ready: PR `dev` → `main` — **no** prod deploy yet  
+4. Changesets opens/updates **Version packages** → `main`  
+5. Merge **Version packages** → tag → GitHub Release → **prod** AWS deploy + sync PR `main` → `dev`  
+6. Developer merges the sync PR so `dev` matches the released version / NEWS  
 
 Preview Unreleased locally:
 

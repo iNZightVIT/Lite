@@ -3,7 +3,7 @@ name: Changesets
 on:
   push:
     branches:
-      - dev
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +23,7 @@ jobs:
         with:
           # Full history helps Changesets compare against baseBranch
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -34,6 +35,7 @@ jobs:
         run: npm ci
 
       - name: Create release pull request
+        id: changesets
         uses: changesets/action@v1
         with:
           # Custom CalVer bump → DESCRIPTION + NEWS.md (no npm publish)
@@ -43,3 +45,20 @@ jobs:
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # After Version PR merges, no changesets remain. Tag package.json version
+      # (skip if the tag already exists) so create-release.yaml can publish.
+      - name: Tag release version
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git fetch --tags origin
+          if git rev-parse "refs/tags/$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists; skipping."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "refs/tags/$VERSION"
+          echo "Created and pushed tag $VERSION"
