@@ -160,3 +160,6 @@ $RECYCLE.BIN/
 # Status collector (Node.js)
 server/status-collector/node_modules
 server/status-collector/data/
+
+# Changesets (root Node tooling)
+node_modules/

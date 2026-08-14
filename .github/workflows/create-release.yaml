@@ -5,19 +5,26 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  build:
+  release:
+    name: Create GitHub Release
     runs-on: ubuntu-latest
 
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-release-${{ github.ref }}
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
+
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: latest
+
       - name: create_body
         run: |
           news <- readLines('NEWS.md')
@@ -27,7 +34,56 @@ jobs:
           news <- news[trimws(news) != ""]
           writeLines(news, "body.md")
         shell: Rscript {0}
+
       - uses: ncipollo/release-action@v1
         with:
           bodyFile: "body.md"
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  sync-dev:
+    name: Open main → dev sync PR
+    needs: release
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-sync-dev
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Open or update sync PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          BODY=$(cat <<EOF
+          Post-release sync after \`${TAG}\`.
+
+          Brings version, NEWS.md, and cleared changesets from \`main\` back onto \`dev\` (preprod).
+          Merge this PR so preprod stays aligned with the released version.
+          EOF
+          )
+          # Drop the common leading indent from the heredoc lines above
+          BODY=$(printf '%s\n' "$BODY" | sed 's/^[[:space:]]*//')
+
+          EXISTING=$(gh pr list --base dev --head main --state open --json number --jq '.[0].number // empty')
+          if [[ -n "$EXISTING" ]]; then
+            echo "Sync PR #$EXISTING already open; updating title/body."
+            gh pr edit "$EXISTING" --title "Sync main → dev after ${TAG}" --body "$BODY"
+            exit 0
+          fi
+
+          if gh pr create \
+            --base dev \
+            --head main \
+            --title "Sync main → dev after ${TAG}" \
+            --body "$BODY"; then
+            echo "Opened sync PR main → dev."
+          else
+            echo "Could not open sync PR (main may already be merged into dev, or head equals base)."
+            exit 0
+          fi

@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - dev
-      - main
+  release:
+    types: [published]
 
 permissions:
   id-token: write
@@ -15,32 +16,43 @@ jobs:
     runs-on: ubuntu-latest
 
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
       cancel-in-progress: true
 
     env:
-      # Set environment variables from secrets based on branch (main or dev)
-      AWS_ROLE: ${{ github.ref == 'refs/heads/main' && secrets.AWS_ROLE__main || secrets.AWS_ROLE__dev }}
-      AWS_REGION: ${{ github.ref == 'refs/heads/main' && secrets.AWS_REGION__main || secrets.AWS_REGION__dev }}
-      ECR_REPOSITORY: ${{ github.ref == 'refs/heads/main' && secrets.ECR_REPOSITORY__main || secrets.ECR_REPOSITORY__dev }}
-      ECS_CLUSTER: ${{ github.ref == 'refs/heads/main' && secrets.ECS_CLUSTER__main || secrets.ECS_CLUSTER__dev }}
-      ECS_SERVICE: ${{ github.ref == 'refs/heads/main' && secrets.ECS_SERVICE__main || secrets.ECS_SERVICE__dev }}
+      IS_PROD: ${{ github.event_name == 'release' }}
+      # Prod on GitHub Release; preprod on push to dev
+      AWS_ROLE: ${{ github.event_name == 'release' && secrets.AWS_ROLE__main || secrets.AWS_ROLE__dev }}
+      AWS_REGION: ${{ github.event_name == 'release' && secrets.AWS_REGION__main || secrets.AWS_REGION__dev }}
+      ECR_REPOSITORY: ${{ github.event_name == 'release' && secrets.ECR_REPOSITORY__main || secrets.ECR_REPOSITORY__dev }}
+      ECS_CLUSTER: ${{ github.event_name == 'release' && secrets.ECS_CLUSTER__main || secrets.ECS_CLUSTER__dev }}
+      ECS_SERVICE: ${{ github.event_name == 'release' && secrets.ECS_SERVICE__main || secrets.ECS_SERVICE__dev }}
       STATUS_REPORT_TOKEN: ${{ secrets.STATUS_REPORT_TOKEN }}
       STATUS_REPORT_URL: ${{ secrets.STATUS_REPORT_URL }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
 
-      - name: Set image tag
+      - name: Set image tags
         run: |
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          if [[ "$BRANCH" == "main" ]]; then
+          if [[ "$IS_PROD" == "true" ]]; then
             echo "TAGNAME=latest" >> $GITHUB_ENV
+            echo "VERSION_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           else
-            CLEAN_TAG=${BRANCH//\//_}
+            CLEAN_TAG=${GITHUB_REF#refs/heads/}
+            CLEAN_TAG=${CLEAN_TAG//\//_}
             echo "TAGNAME=$CLEAN_TAG" >> $GITHUB_ENV
+            echo "VERSION_TAG=" >> $GITHUB_ENV
           fi
+
+      # Preprod only: show pending changesets in About → Change Log (NEWS.md).
+      # Does not consume changesets or bump the version; not used on prod releases.
+      - name: Inject Unreleased NEWS from changesets
+        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        run: node scripts/changeset-unreleased.mjs
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -69,6 +81,12 @@ jobs:
             -t $ECR_REPOSITORY:$TAGNAME .
           docker tag $ECR_REPOSITORY:$TAGNAME $ECR_URI:$TAGNAME
           docker push $ECR_URI:$TAGNAME
+
+          if [[ -n "$VERSION_TAG" ]]; then
+            echo "Also tagging image as: $VERSION_TAG"
+            docker tag $ECR_REPOSITORY:$TAGNAME $ECR_URI:$VERSION_TAG
+            docker push $ECR_URI:$VERSION_TAG
+          fi
 
       - name: Deploy to ECS
         run: |
