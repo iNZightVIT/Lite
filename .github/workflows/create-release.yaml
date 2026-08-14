@@ -35,7 +35,7 @@ jobs:
           writeLines(news, "body.md")
         shell: Rscript {0}
 
-      # RELEASE_TOKEN so release:published triggers publishAWS (GITHUB_TOKEN would not)
+      # RELEASE_TOKEN so the release event is attributed to a real actor (not GITHUB_TOKEN)
       - uses: ncipollo/release-action@v1
         with:
           bodyFile: "body.md"
