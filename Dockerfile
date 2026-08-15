@@ -1,3 +1,25 @@
+# Rebuild Traefik: official v3.7.10 still vendors golang.org/x/mod v0.37.0
+# (CVE-2026-56864 / CVE-2026-56865). Lite does not use the dashboard, so we
+# skip generate-webui and compile cmd/traefik with x/mod v0.40.0.
+#
+# TODO: drop this builder when an official Traefik release vendors
+# golang.org/x/mod >= 0.40.0, and curl the release binary again.
+ARG TRAEFIK_VERSION=v3.7.10
+FROM golang:1.26.6-bookworm AS traefik
+ARG TRAEFIK_VERSION
+WORKDIR /src
+ENV CGO_ENABLED=0 GOTOOLCHAIN=local GOGC=off
+RUN curl -fsSL "https://github.com/traefik/traefik/archive/refs/tags/${TRAEFIK_VERSION}.tar.gz" \
+        -o /tmp/traefik-src.tar.gz \
+    && tar -xzf /tmp/traefik-src.tar.gz --strip-components=1 \
+    && rm /tmp/traefik-src.tar.gz \
+    && go get golang.org/x/mod@v0.40.0 \
+    && go mod tidy \
+    && go build -trimpath \
+        -ldflags="-s -w -X github.com/traefik/traefik/v3/pkg/version.Version=${TRAEFIK_VERSION}" \
+        -o /out/traefik ./cmd/traefik \
+    && go version -m /out/traefik | grep -E 'golang.org/x/mod[[:space:]]+v0\.40\.'
+
 # Ubuntu 24.04 + R 4.2.3 from source (final 4.2.x; there is no 4.2.4).
 # Newer than rocker/r-ver:4.2.3 (Ubuntu 22.04) so main/universe security
 # updates are available without waiting on a frozen rocker tag.
@@ -109,12 +131,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Traefik (3.0.0 has multiple known CVEs; 3.7.10 is current patch)
-RUN curl -L https://github.com/traefik/traefik/releases/download/v3.7.10/traefik_v3.7.10_linux_amd64.tar.gz \
-    -o /tmp/traefik.tar.gz \
-    && tar -xzf /tmp/traefik.tar.gz -C /usr/local/bin \
-    && rm /tmp/traefik.tar.gz \
-    && chmod +x /usr/local/bin/traefik
+# Traefik binary from the builder stage (x/mod v0.40.0).
+COPY --from=traefik /out/traefik /usr/local/bin/traefik
 
 RUN echo "GITHUB_PAT=${GITHUB_PAT}" >> .Renviron
 COPY setup.R .
