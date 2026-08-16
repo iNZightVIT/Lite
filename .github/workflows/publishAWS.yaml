@@ -8,7 +8,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   # Prod IAM trust is scoped to refs/heads/main. Deploy main only when there are
@@ -19,7 +19,7 @@ jobs:
     outputs:
       deploy: ${{ steps.check.outputs.deploy }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Decide whether to deploy
         id: check
@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Set image tags
         run: |
@@ -143,3 +143,32 @@ jobs:
                 --image-ids imageDigest=$digest
             done
           fi
+
+  # Only after a successful prod deploy: tag so create-release can publish GH Release + sync PR.
+  tag-release:
+    name: Tag release version
+    needs: build-and-push-image
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          # PAT so the tag push triggers create-release.yaml
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Create and push version tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git fetch --tags origin
+          if git rev-parse "refs/tags/$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists; skipping."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "refs/tags/$VERSION"
+          echo "Created and pushed tag $VERSION after successful prod deploy"
