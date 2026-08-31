@@ -19,7 +19,7 @@ pkgs <-
         "iNZightVIT/iNZightTS@legacy",
         "iNZightVIT/iNZightRegression@1.3.3",
         "iNZightVIT/iNZightMR@2.3.1",
-        "iNZightVIT/iNZightPlots@2.16.0",
+        "iNZightVIT/iNZightPlots@2.16.1",
         "iNZightMultivariate",
         pkgs
     )
