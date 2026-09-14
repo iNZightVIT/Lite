@@ -29,6 +29,8 @@ Use Secrets Manager or SSM Parameter Store for the token. Add GitHub secret `STA
 | Endpoint       | Method | Description                                                   |
 | -------------- | ------ | ------------------------------------------------------------- |
 | `/ingest`      | POST   | Accept status JSON (requires `Authorization: Bearer <token>`) |
+| `/api/health`  | GET    | Fleet health for monitors (`ok`, task counts). Cached ~5s. Assert JSON `ok: true`; avoid tight response-time limits (endpoint shares SQLite with the dashboard). |
+| `/healthz`     | GET    | Process liveness (`ok`) — not fleet state |
 | `/api/summary` | GET    | Task count, total connections, latest report time             |
 | `/api/tasks`   | GET    | Per-task breakdown (tasks that reported in the active window) |
 | `/api/history` | GET    | Time-series (`?hours=6`), for charts                          |

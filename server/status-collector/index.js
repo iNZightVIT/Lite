@@ -12,6 +12,33 @@ const DASHBOARD_VISIBLE_MINUTES = Math.max(1, parseInt(process.env.DASHBOARD_VIS
 // Sparkline history window for task table (minutes)
 const SPARKLINE_MINUTES = 30;
 const HOSTNAME_LOOKBACK_HOURS = 48;
+// Fleet health for GET /api/health (matches dashboard healthDot in www/index.html).
+const HEALTH_DEGRADED_SEC = Math.max(
+  1,
+  parseInt(process.env.HEALTH_DEGRADED_SEC, 10) || 90
+);
+const HEALTH_STALE_SEC = Math.max(
+  HEALTH_DEGRADED_SEC + 1,
+  parseInt(process.env.HEALTH_STALE_SEC, 10) || 180
+);
+const HEALTH_WINDOW_MINUTES = Math.max(
+  1,
+  parseInt(process.env.HEALTH_WINDOW_MINUTES, 10) || ACTIVE_WINDOW_MINUTES
+);
+const HEALTH_MIN_HEALTHY_TASKS = Math.max(
+  1,
+  parseInt(process.env.HEALTH_MIN_HEALTHY_TASKS, 10) || 1
+);
+const SHINY_DOWN_FAIL_SEC = Math.max(
+  30,
+  parseInt(process.env.SHINY_DOWN_FAIL_SEC, 10) || 120
+);
+// Cache fleet health briefly so Instatus checks stay fast while SQLite is busy
+// (ingest deletes / history queries block the single Node thread).
+const HEALTH_CACHE_TTL_MS = Math.max(
+  0,
+  parseInt(process.env.HEALTH_CACHE_TTL_MS, 10) || 5000
+);
 const REQUEST_INTERVAL_MS = Math.max(
   1000,
   parseInt(process.env.REQUEST_INTERVAL_MS, 10) || 30000
@@ -29,6 +56,14 @@ try {
 
 const db = new Database(DB_PATH);
 db.pragma("journal_mode = WAL");
+db.pragma("busy_timeout = 5000");
+
+const shinyDownHistoryStmt = db.prepare(
+  `SELECT reported_at, shiny_configured, shiny_running
+   FROM status_reports
+   WHERE task_id = ? AND reported_at >= ?
+   ORDER BY reported_at ASC`
+);
 
 // --- Schema: create table with new columns for fresh installs ---
 db.exec(`
@@ -94,12 +129,22 @@ const insertStmt = db.prepare(`
 `);
 
 const RETENTION_DAYS = 7;
+// At most one retention DELETE every N ms — running on every ingest blocks
+// the event loop and makes /api/health time out for Instatus.
+const TRIM_MIN_INTERVAL_MS = Math.max(
+  60_000,
+  parseInt(process.env.TRIM_MIN_INTERVAL_MS, 10) || 300_000
+);
+let lastTrimAt = 0;
 const deleteOldStmt = db.prepare(`
   DELETE FROM status_reports
   WHERE datetime(reported_at) < datetime('now', ?)
 `);
 
-function trimOldRows() {
+function trimOldRows(force = false) {
+  const now = Date.now();
+  if (!force && now - lastTrimAt < TRIM_MIN_INTERVAL_MS) return;
+  lastTrimAt = now;
   try {
     deleteOldStmt.run(`-${RETENTION_DAYS} days`);
   } catch (e) {}
@@ -218,6 +263,182 @@ function buildHostnameWhere(hostnames) {
   };
 }
 
+/** Latest row per task_id within cutoff. */
+function getLatestTaskRows(cutoffIso, hostnames) {
+  const hostFilter = buildHostnameWhere(hostnames);
+  const latestRows = db
+    .prepare(
+      `SELECT task_id, reported_at, shiny_configured, shiny_running, hostname, version
+       FROM status_reports
+       WHERE reported_at >= ?${hostFilter.sql}
+       ORDER BY task_id, reported_at ASC`
+    )
+    .all(cutoffIso, ...hostFilter.params);
+  const byTask = new Map();
+  for (const r of latestRows) {
+    byTask.set(r.task_id, r);
+  }
+  return Array.from(byTask.values());
+}
+
+function taskLastSeenAgeSec(reportedAt) {
+  if (!reportedAt) return Infinity;
+  const ms = Date.now() - Date.parse(reportedAt);
+  return Number.isFinite(ms) ? Math.max(0, Math.round(ms / 1000)) : Infinity;
+}
+
+function isShinyDownSnapshot(row) {
+  const cfg = row.shiny_configured;
+  const run = row.shiny_running;
+  return typeof cfg === "number" && typeof run === "number" && run < cfg;
+}
+
+/**
+ * True only if the latest snapshot is shiny_down AND it has been continuous
+ * for at least SHINY_DOWN_FAIL_SEC (buffers new tasks during deploy).
+ */
+function shinyDownPersistence(task) {
+  if (!isShinyDownSnapshot(task)) {
+    return { persistent: false, down_since: null, down_for_sec: null };
+  }
+  const lookbackSec = Math.max(SHINY_DOWN_FAIL_SEC, HEALTH_WINDOW_MINUTES * 60);
+  const cutoff = new Date(Date.now() - lookbackSec * 1000).toISOString();
+  const rows = shinyDownHistoryStmt.all(task.task_id, cutoff);
+  let streakStart = null;
+  for (const r of rows) {
+    if (isShinyDownSnapshot(r)) {
+      if (streakStart === null) streakStart = r.reported_at;
+    } else {
+      streakStart = null;
+    }
+  }
+  if (streakStart === null) {
+    return { persistent: false, down_since: null, down_for_sec: null };
+  }
+  const downMs = Date.now() - Date.parse(streakStart);
+  const downForSecFromStart = Number.isFinite(downMs)
+    ? Math.max(0, Math.round(downMs / 1000))
+    : taskLastSeenAgeSec(streakStart);
+  return {
+    persistent: downForSecFromStart >= SHINY_DOWN_FAIL_SEC,
+    down_since: streakStart,
+    down_for_sec: downForSecFromStart,
+  };
+}
+
+/** @returns {"healthy"|"degraded"|"stale"|"shiny_down"} */
+function classifyTaskHealth(task) {
+  const ageSec = taskLastSeenAgeSec(task.reported_at);
+  if (ageSec >= HEALTH_STALE_SEC) return "stale";
+  const down = shinyDownPersistence(task);
+  if (down.persistent) return "shiny_down";
+  if (ageSec >= HEALTH_DEGRADED_SEC) return "degraded";
+  return "healthy";
+}
+
+function buildFleetHealth(hostnames) {
+  const cutoff = new Date(
+    Date.now() - HEALTH_WINDOW_MINUTES * 60 * 1000
+  ).toISOString();
+  const tasks = getLatestTaskRows(cutoff, hostnames);
+  let tasks_healthy = 0;
+  let tasks_degraded = 0;
+  let tasks_stale = 0;
+  let tasks_shiny_down = 0;
+  const issues = [];
+  let reported_at = null;
+  let newest_report_age_sec = null;
+
+  for (const t of tasks) {
+    const status = classifyTaskHealth(t);
+    const last_seen_age_sec = taskLastSeenAgeSec(t.reported_at);
+    const seenMs = Date.parse(t.reported_at);
+    if (
+      reported_at === null ||
+      (Number.isFinite(seenMs) && seenMs > Date.parse(reported_at))
+    ) {
+      reported_at = t.reported_at;
+      newest_report_age_sec = last_seen_age_sec;
+    }
+    if (status === "healthy") {
+      tasks_healthy += 1;
+    } else if (status === "degraded") {
+      tasks_degraded += 1;
+      issues.push({
+        task_id: t.task_id,
+        hostname: t.hostname,
+        reason: "degraded",
+        last_seen_age_sec,
+      });
+    } else if (status === "stale") {
+      tasks_stale += 1;
+      issues.push({
+        task_id: t.task_id,
+        hostname: t.hostname,
+        reason: "stale",
+        last_seen_age_sec,
+      });
+    } else if (status === "shiny_down") {
+      const down = shinyDownPersistence(t);
+      tasks_shiny_down += 1;
+      issues.push({
+        task_id: t.task_id,
+        hostname: t.hostname,
+        reason: "shiny_down",
+        last_seen_age_sec,
+        shiny_running: t.shiny_running,
+        shiny_configured: t.shiny_configured,
+        shiny_down_for_sec: down.down_for_sec,
+      });
+    }
+  }
+
+  const tasks_visible = tasks.length;
+  const ok =
+    tasks_healthy >= HEALTH_MIN_HEALTHY_TASKS && tasks_shiny_down === 0;
+  const status = !ok
+    ? "unhealthy"
+    : tasks_degraded > 0 || tasks_stale > 0
+      ? "degraded"
+      : "healthy";
+
+  return {
+    ok,
+    status,
+    tasks_visible,
+    tasks_healthy,
+    tasks_degraded,
+    tasks_stale,
+    tasks_shiny_down,
+    newest_report_age_sec,
+    reported_at,
+    thresholds: {
+      degraded_sec: HEALTH_DEGRADED_SEC,
+      stale_sec: HEALTH_STALE_SEC,
+      health_window_minutes: HEALTH_WINDOW_MINUTES,
+      min_healthy_tasks: HEALTH_MIN_HEALTHY_TASKS,
+      shiny_down_fail_sec: SHINY_DOWN_FAIL_SEC,
+    },
+    issues,
+  };
+}
+
+const healthCache = new Map(); // key -> { expiresAt, body }
+
+function getCachedFleetHealth(hostnames) {
+  const key = hostnames.slice().sort().join(",") || "*";
+  const now = Date.now();
+  const hit = healthCache.get(key);
+  if (hit && hit.expiresAt > now) {
+    return hit.body;
+  }
+  const body = buildFleetHealth(hostnames);
+  if (HEALTH_CACHE_TTL_MS > 0) {
+    healthCache.set(key, { expiresAt: now + HEALTH_CACHE_TTL_MS, body });
+  }
+  return body;
+}
+
 // POST /ingest — token-protected
 app.post("/ingest", (req, res) => {
   const auth = req.headers.authorization;
@@ -264,6 +485,8 @@ app.post("/ingest", (req, res) => {
       row.request_out_duration_avg_sec,
       row.raw_json
     );
+    // Intentionally leave healthCache: up to HEALTH_CACHE_TTL_MS staleness is fine
+    // for monitors, and clearing on every ingest defeats the latency protection.
     trimOldRows();
   } catch (e) {
     console.error(e);
@@ -272,6 +495,20 @@ app.post("/ingest", (req, res) => {
   }
 
   res.status(204).send();
+});
+
+// GET /api/health — aggregated fleet health for external monitors (e.g. Instatus).
+// Always HTTP 200 so monitors can assert on JSON "ok" (non-2xx = endpoint down).
+app.get("/api/health", (req, res) => {
+  const hostnames = parseHostnames(req.query.hostnames);
+  const body = getCachedFleetHealth(hostnames);
+  res.set("Cache-Control", "no-store");
+  res.status(200).json(body);
+});
+
+// Lightweight liveness for process/Traefik checks (not fleet state).
+app.get("/healthz", (_req, res) => {
+  res.status(200).type("text/plain").send("ok");
 });
 
 // GET /api/summary
